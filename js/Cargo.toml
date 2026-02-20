@@ -1,0 +1,16 @@
+[package]
+name = "nbplay_js"
+version = "0.1.0"
+edition = "2021"
+publish = false
+keywords = ["experimental"]
+include = ["src/**/*", "Cargo.toml", "package.json"]
+
+[lib]
+name = "nbplay"
+path = "src/rust/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+nbplay = { path = "../rust", version = "*" }
+wasm-bindgen = "0.2.108"
