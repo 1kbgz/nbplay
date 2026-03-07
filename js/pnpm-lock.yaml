@@ -29,6 +29,9 @@ importers:
       http-server:
         specifier: ^14.1.1
         version: 14.1.1
+      less:
+        specifier: ^4.5.1
+        version: 4.5.1
       nodemon:
         specifier: ^3.1.10
         version: 3.1.13

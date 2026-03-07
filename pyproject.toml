@@ -32,13 +32,16 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 
-dependencies = []
+dependencies = [
+    "anywidget",
+    "ipywidgets>=8",
+]
 
 [project.optional-dependencies]
 develop = [
     "build",
     "bump-my-version",
-    "check-manifest",
+    "check-dist",
     "cibuildwheel",
     "codespell",
     "hatch-js",
@@ -97,21 +100,6 @@ filename = "rust/Cargo.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
-[tool.check-manifest]
-ignore = [
-    ".copier-answers.yaml",
-    "Cargo.toml",
-    "Cargo.lock",
-    "js/pnpm-lock.yaml",
-    "Makefile",
-    ".vscode/*",
-    "nbplay/extension/**/*",
-    "docs/**/*",
-    "js/**/*",
-    "rust/**/*",
-    "src/**/*",
-]
-
 [tool.cibuildwheel]
 build = "cp310-*"
 test-command = "pytest -vvv {project}/nbplay/tests"
@@ -139,6 +127,7 @@ branch = true
 omit = [
     "nbplay/tests/integration/",
 ]
+
 [tool.coverage.report]
 exclude_also = [
     "raise NotImplementedError",
@@ -158,22 +147,21 @@ targets = [
 
 [tool.hatch.build.hooks.hatch-rs]
 verbose = true
+abi3 = true
 module = "nbplay"
 path = "."
 
 [tool.hatch.build.targets.sdist]
 packages = [
     "nbplay",
-]
-include = [
     "js",
     "rust",
-    "src",
     "Cargo.toml",
     "Cargo.lock",
 ]
 exclude = [
     "js/node_modules",
+    "rust/Makefile",
     "target",
 ]
 
@@ -184,7 +172,6 @@ packages = [
 exclude = [
     "js",
     "rust",
-    "src",
 ]
 
 [tool.pytest.ini_options]

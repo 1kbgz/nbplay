@@ -9,5 +9,11 @@ let's play!
 
 ## Overview
 
+> [!WARNING]
+> This library is in early development and the API is subject to change without deprecation. Feedback and contributions are very welcome!
+
+[![Music composition widgets in a jupyter notebook](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.png)](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.png)
+
+
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).

@@ -1,34 +1,24 @@
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Example {
-    pub stuff: String,
-}
+pub mod audio;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod audio_output;
+pub mod midi;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod midi_input;
+pub mod mixer;
+pub mod oscillator;
+pub mod sampler;
+pub mod sequencer;
 
-impl Example {
-    pub fn new(value: String) -> Self {
-        Example { stuff: value }
-    }
-}
-
-/**********************************/
-#[cfg(test)]
-mod example_tests {
-    use super::*;
-
-    #[test]
-    fn test_new() {
-        let e = Example::new(String::from("test"));
-        assert_eq!(e.stuff, String::from("test"));
-    }
-
-    #[test]
-    fn test_clone_and_eq() {
-        let e = Example::new(String::from("test"));
-        assert_eq!(e, e.clone());
-    }
-
-    #[test]
-    fn test_debug() {
-        let e = Example::new(String::from("test"));
-        assert_eq!(format!("{e:?}"), "Example { stuff: \"test\" }");
-    }
-}
+// Re-export core types at crate root for convenience
+pub use audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
+pub use midi::{
+    ControlNumber, MidiChannel, MidiEvent, MidiMessage, Note, Velocity, hz_to_note, note_to_hz,
+};
+#[cfg(not(target_arch = "wasm32"))]
+pub use midi_input::MidiInput;
+pub use mixer::{Mixer, MixerChannel};
+pub use oscillator::{AudioSource, NoiseSource, SawOscillator, SineOscillator, SquareOscillator};
+pub use sampler::{AudioSample, Envelope, SampleMap, SampleMapping, Sampler};
+pub use sequencer::{
+    EventSequence, NoteEvent, Pattern, Step, StepSequencer, TransportClock, TransportState,
+};

@@ -1,0 +1,249 @@
+@import "_variables";
+@import "_mixins";
+
+/* ── nbplay SynthWidget ─────────────────────────────────────────── */
+/* Self-contained dark-synth theme.  All selectors are scoped under
+   .nbplay-synth so they never leak into the host notebook. */
+
+.nbplay-synth {
+  font-family: @nb-font-sans;
+  background: @nb-bg;
+  color: @nb-text;
+  border-radius: @nb-radius;
+  padding: 20px;
+  max-width: 640px;
+  border: 1px solid @nb-border;
+  box-shadow: @nb-shadow;
+  user-select: none;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+
+.nbplay-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.nbplay-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.nbplay-badge {
+  font-size: 10px;
+  background: linear-gradient(135deg, @nb-purple, @nb-cyan);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Waveform canvas ──────────────────────────────────────────── */
+
+.nbplay-waveform-container {
+  background: #080812;
+  border-radius: @nb-radius-sm;
+  padding: 2px;
+  margin-bottom: 16px;
+  border: 1px solid #1a1a30;
+}
+
+.nbplay-waveform {
+  width: 100%;
+  height: 128px;
+  display: block;
+  border-radius: @nb-radius-xs;
+}
+
+/* ── Oscillator type selector ─────────────────────────────────── */
+
+.nbplay-osc-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nbplay-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: @nb-muted;
+  min-width: 80px;
+}
+
+.nbplay-osc-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.nbplay-osc-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid #2a2a44;
+  background: @nb-surface;
+  color: #8888bb;
+  border-radius: @nb-radius-xs;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.nbplay-osc-btn:hover {
+  border-color: #3a3a66;
+  color: #ccccee;
+}
+
+.nbplay-osc-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.25),
+    rgba(0, 212, 255, 0.25)
+  );
+  border-color: @nb-cyan;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+}
+
+/* ── Parameter rows (frequency / amplitude) ───────────────────── */
+
+.nbplay-params {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nbplay-param {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nbplay-param .nbplay-label {
+  flex-shrink: 0;
+}
+
+.nbplay-param input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1e1e36;
+  border-radius: 2px;
+  outline: none;
+  margin: 0;
+}
+
+.nbplay-param input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: @nb-cyan;
+  border: 2px solid @nb-bg;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  transition: box-shadow 0.15s;
+}
+
+.nbplay-param input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.6);
+}
+
+.nbplay-param input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: @nb-cyan;
+  border: 2px solid @nb-bg;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.nbplay-param input[type="range"]:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.nbplay-value {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #bbbbdd;
+  min-width: 72px;
+  text-align: right;
+}
+
+/* ── Transport bar ────────────────────────────────────────────── */
+
+.nbplay-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #1a1a30;
+}
+
+.nbplay-play-btn {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 22px;
+  border: none;
+  border-radius: @nb-radius-sm;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  background: linear-gradient(135deg, @nb-purple, @nb-cyan);
+  color: #fff;
+}
+
+.nbplay-play-btn:hover {
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.nbplay-play-btn:active {
+  transform: translateY(0);
+}
+
+.nbplay-play-btn.playing {
+  background: linear-gradient(135deg, @nb-red, @nb-orange);
+}
+
+.nbplay-play-btn.playing:hover {
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35);
+}
+
+.nbplay-info {
+  margin-left: auto;
+  font-size: 11px;
+  color: #555570;
+  letter-spacing: 0.3px;
+}
+
+/* ── Inline edit input ────────────────────────────────────────── */
+
+.nbplay-inline-edit {
+  font-family: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: @nb-surface;
+  color: @nb-cyan;
+  border: 1px solid @nb-cyan;
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+  text-align: right;
+  box-sizing: border-box;
+}

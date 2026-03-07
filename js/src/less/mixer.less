@@ -1,0 +1,293 @@
+@import "_variables";
+@import "_mixins";
+
+/* nbplay MixerWidget – dark mixer console theme */
+
+.nbplay-mixer {
+  font-family: @nb-font-mono;
+  background: @nb-mixer-bg;
+  color: #e0e0e0;
+  border: 1px solid @nb-mixer-border;
+  border-radius: 10px;
+  padding: 16px 20px;
+  user-select: none;
+}
+
+/* ── header ─────────────────────────────── */
+.nbplay-mixer .nbplay-mixer-header {
+  .nbplay-header-mixin();
+}
+.nbplay-mixer .nbplay-badge {
+  .nbplay-badge-mixin();
+  letter-spacing: 1px;
+}
+.nbplay-mixer .nbplay-mixer-add-btn {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 11px;
+  background: rgba(192, 132, 252, 0.12);
+  color: @nb-purple-badge;
+  border: 1px solid #3d3d5a;
+  border-radius: @nb-radius-xs;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nbplay-mixer .nbplay-mixer-add-btn:hover {
+  background: rgba(192, 132, 252, 0.25);
+  border-color: @nb-purple-badge;
+}
+
+/* ── console (channel strip container) ──── */
+.nbplay-mixer .nbplay-mixer-console {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+/* ── channel strip ─────────────────────── */
+.nbplay-mixer .nbplay-mixer-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #16162a;
+  border: 1px solid @nb-mixer-border;
+  border-radius: @nb-radius-sm;
+  padding: 10px 8px 8px;
+  min-width: 68px;
+  width: 68px;
+  gap: 6px;
+}
+.nbplay-mixer .nbplay-master-strip {
+  border-color: #c084fc33;
+  min-width: 72px;
+  width: 72px;
+  margin-left: 6px;
+}
+
+/* ── strip name ────────────────────────── */
+.nbplay-mixer .nbplay-strip-name {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #8b8ba7;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nbplay-mixer .nbplay-master-strip .nbplay-strip-name {
+  color: @nb-purple-badge;
+}
+
+/* ── fader section ─────────────────────── */
+.nbplay-mixer .nbplay-strip-fader-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 120px;
+}
+
+/* ── meter ─────────────────────────────── */
+.nbplay-mixer .nbplay-strip-meter {
+  width: 4px;
+  height: 100%;
+  background: #111122;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.nbplay-mixer .nbplay-strip-meter-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  background: linear-gradient(to top, #34d399, #fbbf24 70%, @nb-red 95%);
+  border-radius: 2px;
+  transition: height 0.08s;
+}
+
+/* ── vertical fader (range input) ──────── */
+.nbplay-mixer .nbplay-strip-fader {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+}
+.nbplay-mixer .nbplay-strip-fader::-webkit-slider-runnable-track {
+  width: 4px;
+  height: 100%;
+  background: @nb-mixer-border;
+  border-radius: 2px;
+}
+.nbplay-mixer .nbplay-strip-fader::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 8px;
+  background: #e0e0e0;
+  border: 1px solid #555;
+  border-radius: 2px;
+  margin-left: -8px;
+  cursor: grab;
+}
+.nbplay-mixer .nbplay-strip-fader::-moz-range-track {
+  width: 4px;
+  height: 100%;
+  background: @nb-mixer-border;
+  border-radius: 2px;
+}
+.nbplay-mixer .nbplay-strip-fader::-moz-range-thumb {
+  width: 20px;
+  height: 8px;
+  background: #e0e0e0;
+  border: 1px solid #555;
+  border-radius: 2px;
+  cursor: grab;
+}
+.nbplay-mixer .nbplay-master-strip .nbplay-strip-fader::-webkit-slider-thumb {
+  background: @nb-purple-badge;
+  border-color: #9060d0;
+}
+.nbplay-mixer .nbplay-master-strip .nbplay-strip-fader::-moz-range-thumb {
+  background: @nb-purple-badge;
+  border-color: #9060d0;
+}
+
+/* ── gain label ────────────────────────── */
+.nbplay-mixer .nbplay-strip-gain-label {
+  font-size: 9px;
+  color: #8b8ba7;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* ── pan section ───────────────────────── */
+.nbplay-mixer .nbplay-strip-pan-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2px;
+}
+.nbplay-mixer .nbplay-strip-pan-label {
+  font-size: 9px;
+  color: #5a5a78;
+  letter-spacing: 0.5px;
+}
+.nbplay-mixer .nbplay-strip-pan {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 48px;
+  height: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+.nbplay-mixer .nbplay-strip-pan::-webkit-slider-runnable-track {
+  height: 3px;
+  background: @nb-mixer-border;
+  border-radius: 2px;
+}
+.nbplay-mixer .nbplay-strip-pan::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #8b8ba7;
+  border-radius: 50%;
+  margin-top: -4px;
+  cursor: grab;
+}
+.nbplay-mixer .nbplay-strip-pan::-moz-range-track {
+  height: 3px;
+  background: @nb-mixer-border;
+  border-radius: 2px;
+}
+.nbplay-mixer .nbplay-strip-pan::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: #8b8ba7;
+  border-radius: 50%;
+  border: none;
+  cursor: grab;
+}
+
+/* ── mute/solo buttons ─────────────────── */
+.nbplay-mixer .nbplay-strip-buttons {
+  display: flex;
+  gap: 4px;
+}
+.nbplay-mixer .nbplay-strip-btn {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  width: 24px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #3d3d5a;
+  background: @nb-mixer-bg;
+  color: #5a5a78;
+  cursor: pointer;
+  transition: all 0.12s;
+  padding: 0;
+  line-height: 20px;
+  text-align: center;
+}
+.nbplay-mixer .nbplay-strip-btn:hover {
+  border-color: #8b8ba7;
+  color: #e0e0e0;
+}
+.nbplay-mixer .nbplay-mute-btn.active {
+  background: @nb-red;
+  border-color: @nb-red;
+  color: #fff;
+}
+.nbplay-mixer .nbplay-solo-btn.active {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  color: @nb-mixer-bg;
+}
+
+/* ── remove button ─────────────────────── */
+.nbplay-mixer .nbplay-strip-remove {
+  font-size: 14px;
+  width: 18px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #3d3d5a;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.nbplay-mixer .nbplay-strip-remove:hover {
+  border-color: @nb-red;
+  color: @nb-red;
+}
+
+/* ── inline edit input ─────────────────── */
+.nbplay-mixer-inline-edit {
+  font-family: inherit;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  background: #111122;
+  color: @nb-cyan;
+  border: 1px solid @nb-cyan;
+  border-radius: 3px;
+  padding: 1px 3px;
+  outline: none;
+  text-align: center;
+  box-sizing: border-box;
+}

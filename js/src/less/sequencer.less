@@ -1,0 +1,278 @@
+@import "_variables";
+@import "_mixins";
+
+/* nbplay SequencerWidget – dark-themed step sequencer */
+
+.nbplay-sequencer {
+  font-family: @nb-font-mono;
+  background: @nb-bg;
+  color: @nb-text;
+  border: 1px solid @nb-border;
+  border-radius: @nb-radius;
+  padding: 16px;
+  min-width: 600px;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.nbplay-seq-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nbplay-seq-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.nbplay-sequencer .nbplay-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: @nb-radius-round;
+  background: @nb-purple;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Transport ──────────────────────────────────────────────────── */
+.nbplay-seq-transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.nbplay-seq-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid @nb-border;
+  border-radius: @nb-radius-sm;
+  background: @nb-surface;
+  color: @nb-text;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.nbplay-seq-btn:hover {
+  border-color: @nb-cyan;
+  background: #1a1a3a;
+}
+
+.nbplay-seq-btn.playing {
+  background: @nb-green;
+  color: #000;
+  border-color: @nb-green;
+}
+
+.nbplay-seq-stop:hover {
+  border-color: @nb-red;
+}
+
+.nbplay-seq-bpm-section,
+.nbplay-seq-dur-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nbplay-seq-label {
+  font-size: 10px;
+  color: @nb-dim;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nbplay-seq-bpm-slider {
+  width: 100px;
+  accent-color: @nb-purple;
+}
+
+.nbplay-seq-bpm-val {
+  font-size: 12px;
+  color: @nb-cyan;
+  min-width: 65px;
+}
+
+.nbplay-seq-dur-select {
+  background: @nb-surface;
+  color: @nb-text;
+  border: 1px solid @nb-border;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.nbplay-seq-loop-label {
+  font-size: 11px;
+  color: @nb-dim;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.nbplay-seq-loop-chk {
+  accent-color: @nb-purple;
+}
+
+/* ── Grid ───────────────────────────────────────────────────────── */
+.nbplay-seq-grid-wrap {
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+
+.nbplay-seq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nbplay-seq-row {
+  display: flex;
+  gap: 2px;
+}
+
+.nbplay-seq-label-cell {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: @nb-dim;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nbplay-seq-header-cell {
+  width: 44px;
+  min-width: 44px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: @nb-dim;
+  border-radius: 3px;
+}
+
+.nbplay-seq-header-cell.active-col {
+  background: @nb-cyan;
+  color: #000;
+  font-weight: 700;
+}
+
+/* Step cells */
+.nbplay-seq-cell {
+  width: 44px;
+  min-width: 44px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: @nb-mixer-bg;
+  border: 1px solid @nb-border;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 9px;
+  color: @nb-dim;
+  transition: all 0.1s;
+}
+
+.nbplay-seq-cell:hover {
+  border-color: @nb-purple;
+  background: @nb-border;
+}
+
+.nbplay-seq-cell.active {
+  background: @nb-purple;
+  color: #fff;
+  border-color: @nb-purple;
+  font-weight: 700;
+}
+
+.nbplay-seq-cell.current {
+  box-shadow: 0 0 6px @nb-cyan, inset 0 0 4px @nb-cyan;
+  border-color: @nb-cyan;
+}
+
+.nbplay-seq-cell.active.current {
+  background: @nb-cyan;
+  color: #000;
+}
+
+/* Velocity row */
+.nbplay-seq-vel-row {
+  align-items: flex-end;
+}
+
+.nbplay-seq-vel-cell {
+  width: 44px;
+  min-width: 44px;
+  height: 32px;
+  background: @nb-surface;
+  border: 1px solid @nb-border;
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  cursor: ns-resize;
+}
+
+.nbplay-seq-vel-bar {
+  width: 100%;
+  background: @nb-dim;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.1s;
+  min-height: 2px;
+}
+
+.nbplay-seq-vel-bar.active {
+  background: @nb-purple;
+}
+
+.nbplay-seq-vel-bar.current {
+  background: @nb-cyan;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+.nbplay-seq-footer {
+  margin-top: 4px;
+}
+
+.nbplay-seq-info {
+  font-size: 10px;
+  color: @nb-dim;
+  letter-spacing: 0.5px;
+}
+
+/* ── Inline edit input ────────────────────────────────────────── */
+
+.nbplay-seq-inline-edit {
+  font-family: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: @nb-surface;
+  color: @nb-cyan;
+  border: 1px solid @nb-cyan;
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+  text-align: right;
+  box-sizing: border-box;
+}

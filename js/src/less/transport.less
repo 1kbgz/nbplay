@@ -1,0 +1,206 @@
+@import "_variables";
+@import "_mixins";
+
+/* ── TransportWidget styles ──────────────────────────────────────────
+ *  All rules scoped under .nbplay-transport to avoid collisions.
+ * ──────────────────────────────────────────────────────────────────── */
+
+.nbplay-transport {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #0a0a1a;
+  border: 1px solid #1a1a3a;
+  border-radius: @nb-radius-sm;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 12px;
+  color: #b0b0d0;
+  user-select: none;
+}
+
+/* ── Transport buttons ────────────────────────────────────────────── */
+
+.nbplay-transport-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.nbplay-transport-controls button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #2a2a4a;
+  border-radius: @nb-radius-xs;
+  background: @nb-surface;
+  color: #b0b0d0;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.nbplay-transport-controls button:hover {
+  background: #1e1e3e;
+  border-color: @nb-cyan;
+  color: @nb-cyan;
+}
+
+.nbplay-transport-play.playing {
+  background: #1a2a1a;
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+/* ── BPM / Tempo ──────────────────────────────────────────────────── */
+
+.nbplay-transport-tempo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nbplay-transport-tempo label {
+  color: #606090;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nbplay-transport-bpm-slider {
+  width: 100px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1a1a3a;
+  border-radius: 2px;
+  outline: none;
+}
+
+.nbplay-transport-bpm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: @nb-cyan;
+  cursor: pointer;
+}
+
+.nbplay-transport-bpm-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: @nb-cyan;
+  border: none;
+  cursor: pointer;
+}
+
+.nbplay-transport-bpm-val {
+  color: @nb-cyan;
+  min-width: 56px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Time signature ───────────────────────────────────────────────── */
+
+.nbplay-transport-timesig {
+  padding: 4px 8px;
+  background: @nb-surface;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+}
+
+.nbplay-transport-timesig-val {
+  color: #b0b0d0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Bar : Beat position ──────────────────────────────────────────── */
+
+.nbplay-transport-position {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 4px 12px;
+  background: #0f0f22;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+}
+
+.nbplay-transport-bar {
+  color: #00ff88;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nbplay-transport-sep {
+  color: #606090;
+  font-size: 18px;
+}
+
+.nbplay-transport-beat {
+  color: @nb-cyan;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Loop controls ────────────────────────────────────────────────── */
+
+.nbplay-transport-loop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nbplay-transport-loop-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+  background: @nb-surface;
+  color: #606090;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.nbplay-transport-loop-btn:hover {
+  border-color: @nb-purple-light;
+  color: @nb-purple-light;
+}
+
+.nbplay-transport-loop-btn.active {
+  background: @nb-mixer-bg;
+  border-color: @nb-purple-light;
+  color: @nb-purple-light;
+}
+
+.nbplay-transport-loop-range {
+  color: #806090;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Inline edit ──────────────────────────────────────────────────── */
+
+.nbplay-transport-inline-edit {
+  font-family: inherit;
+  font-size: 12px;
+  background: @nb-surface;
+  color: @nb-cyan;
+  border: 1px solid @nb-cyan;
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
