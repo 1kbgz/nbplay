@@ -146,5 +146,11 @@ target
 outputs/
 multirun/
 
+<<<<<<< before updating
 # Compiled JS
 nbplay/static
+=======
+# AI
+ROADMAP.md
+AGENTS.md
+>>>>>>> after updating
