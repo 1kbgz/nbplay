@@ -38,10 +38,7 @@ impl PyAudioFormat {
     }
 
     fn __str__(&self) -> String {
-        format!(
-            "{}Hz {}ch",
-            self.inner.sample_rate.0, self.inner.channels.0
-        )
+        format!("{}Hz {}ch", self.inner.sample_rate.0, self.inner.channels.0)
     }
 
     fn __eq__(&self, other: &PyAudioFormat) -> bool {

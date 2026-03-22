@@ -47,6 +47,10 @@ jobs:
       with:
         version: 22.x
 
+    - name: Install system dependencies (Linux)
+      run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      if: runner.os == 'Linux'
+
     - name: Install dependencies
       run: make develop
 

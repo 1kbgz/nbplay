@@ -1,8 +1,8 @@
+use js_sys::Array;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
-use js_sys::Array;
 
-use nbplay::midi::{MidiMessage, parse_midi_bytes};
+use nbplay::midi::{parse_midi_bytes, MidiMessage};
 
 /// MIDI access handle backed by the Web MIDI API.
 #[wasm_bindgen]
@@ -59,32 +59,60 @@ pub fn parse_midi_message(data: &[u8]) -> JsValue {
             // Return a plain JS object with the message details
             let obj = js_sys::Object::new();
             match &msg {
-                MidiMessage::NoteOn { channel, note, velocity } => {
+                MidiMessage::NoteOn {
+                    channel,
+                    note,
+                    velocity,
+                } => {
                     js_sys::Reflect::set(&obj, &"type".into(), &"noteOn".into()).ok();
-                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into()).ok();
+                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into())
+                        .ok();
                     js_sys::Reflect::set(&obj, &"note".into(), &(note.value() as u32).into()).ok();
-                    js_sys::Reflect::set(&obj, &"velocity".into(), &(velocity.value() as u32).into()).ok();
+                    js_sys::Reflect::set(
+                        &obj,
+                        &"velocity".into(),
+                        &(velocity.value() as u32).into(),
+                    )
+                    .ok();
                 }
-                MidiMessage::NoteOff { channel, note, velocity } => {
+                MidiMessage::NoteOff {
+                    channel,
+                    note,
+                    velocity,
+                } => {
                     js_sys::Reflect::set(&obj, &"type".into(), &"noteOff".into()).ok();
-                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into()).ok();
+                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into())
+                        .ok();
                     js_sys::Reflect::set(&obj, &"note".into(), &(note.value() as u32).into()).ok();
-                    js_sys::Reflect::set(&obj, &"velocity".into(), &(velocity.value() as u32).into()).ok();
+                    js_sys::Reflect::set(
+                        &obj,
+                        &"velocity".into(),
+                        &(velocity.value() as u32).into(),
+                    )
+                    .ok();
                 }
-                MidiMessage::ControlChange { channel, control, value } => {
+                MidiMessage::ControlChange {
+                    channel,
+                    control,
+                    value,
+                } => {
                     js_sys::Reflect::set(&obj, &"type".into(), &"controlChange".into()).ok();
-                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into()).ok();
-                    js_sys::Reflect::set(&obj, &"control".into(), &(control.value() as u32).into()).ok();
+                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into())
+                        .ok();
+                    js_sys::Reflect::set(&obj, &"control".into(), &(control.value() as u32).into())
+                        .ok();
                     js_sys::Reflect::set(&obj, &"value".into(), &(*value as u32).into()).ok();
                 }
                 MidiMessage::ProgramChange { channel, program } => {
                     js_sys::Reflect::set(&obj, &"type".into(), &"programChange".into()).ok();
-                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into()).ok();
+                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into())
+                        .ok();
                     js_sys::Reflect::set(&obj, &"program".into(), &(*program as u32).into()).ok();
                 }
                 MidiMessage::PitchBend { channel, value } => {
                     js_sys::Reflect::set(&obj, &"type".into(), &"pitchBend".into()).ok();
-                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into()).ok();
+                    js_sys::Reflect::set(&obj, &"channel".into(), &(channel.value() as u32).into())
+                        .ok();
                     js_sys::Reflect::set(&obj, &"value".into(), &(*value as u32).into()).ok();
                 }
                 MidiMessage::Clock => {

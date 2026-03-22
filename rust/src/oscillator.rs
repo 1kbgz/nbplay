@@ -234,7 +234,8 @@ mod tests {
     fn test_square_oscillator_values() {
         let mut osc = SquareOscillator::new(1.0, 1.0, 100);
         // 1 Hz at 100 Hz sample rate = 100 samples per cycle
-        let mut buf = AudioBuffer::silence(100, AudioFormat::new(SampleRate(100), ChannelCount::MONO));
+        let mut buf =
+            AudioBuffer::silence(100, AudioFormat::new(SampleRate(100), ChannelCount::MONO));
         osc.render(&mut buf);
 
         // First half should be +1.0, second half should be -1.0
@@ -271,7 +272,8 @@ mod tests {
     #[test]
     fn test_saw_oscillator_ramps_linearly() {
         let mut osc = SawOscillator::new(1.0, 1.0, 100);
-        let mut buf = AudioBuffer::silence(100, AudioFormat::new(SampleRate(100), ChannelCount::MONO));
+        let mut buf =
+            AudioBuffer::silence(100, AudioFormat::new(SampleRate(100), ChannelCount::MONO));
         osc.render(&mut buf);
 
         // Saw should ramp from -1.0 to nearly +1.0 over one cycle

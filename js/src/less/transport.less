@@ -10,12 +10,12 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  background: #0a0a1a;
-  border: 1px solid #1a1a3a;
+  background: @nb-bg;
+  border: 1px solid @nb-border;
   border-radius: @nb-radius-sm;
-  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  font-family: @nb-font-mono;
   font-size: 12px;
-  color: #b0b0d0;
+  color: @nb-muted;
   user-select: none;
 }
 
@@ -29,10 +29,10 @@
 .nbplay-transport-controls button {
   width: 36px;
   height: 36px;
-  border: 1px solid #2a2a4a;
+  border: 1px solid @nb-border;
   border-radius: @nb-radius-xs;
   background: @nb-surface;
-  color: #b0b0d0;
+  color: @nb-muted;
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -42,15 +42,15 @@
 }
 
 .nbplay-transport-controls button:hover {
-  background: #1e1e3e;
+  background: var(--jp-layout-color2, #1e1e3e);
   border-color: @nb-cyan;
   color: @nb-cyan;
 }
 
 .nbplay-transport-play.playing {
-  background: #1a2a1a;
-  border-color: #00ff88;
-  color: #00ff88;
+  background: color-mix(in srgb, @nb-green 15%, @nb-bg);
+  border-color: @nb-green;
+  color: @nb-green;
 }
 
 /* ── BPM / Tempo ──────────────────────────────────────────────────── */
@@ -62,7 +62,7 @@
 }
 
 .nbplay-transport-tempo label {
-  color: #606090;
+  color: @nb-dim;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -73,7 +73,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: #1a1a3a;
+  background: @nb-border;
   border-radius: 2px;
   outline: none;
 }
@@ -108,12 +108,12 @@
 .nbplay-transport-timesig {
   padding: 4px 8px;
   background: @nb-surface;
-  border: 1px solid #2a2a4a;
+  border: 1px solid @nb-border;
   border-radius: 4px;
 }
 
 .nbplay-transport-timesig-val {
-  color: #b0b0d0;
+  color: @nb-muted;
   font-size: 14px;
   font-weight: 600;
 }
@@ -125,13 +125,13 @@
   align-items: baseline;
   gap: 2px;
   padding: 4px 12px;
-  background: #0f0f22;
-  border: 1px solid #2a2a4a;
+  background: @nb-bg;
+  border: 1px solid @nb-border;
   border-radius: 4px;
 }
 
 .nbplay-transport-bar {
-  color: #00ff88;
+  color: @nb-green;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -139,7 +139,7 @@
 }
 
 .nbplay-transport-sep {
-  color: #606090;
+  color: @nb-dim;
   font-size: 18px;
 }
 
@@ -161,10 +161,10 @@
 .nbplay-transport-loop-btn {
   width: 28px;
   height: 28px;
-  border: 1px solid #2a2a4a;
+  border: 1px solid @nb-border;
   border-radius: 4px;
   background: @nb-surface;
-  color: #606090;
+  color: @nb-dim;
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -185,7 +185,7 @@
 }
 
 .nbplay-transport-loop-range {
-  color: #806090;
+  color: @nb-dim;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }

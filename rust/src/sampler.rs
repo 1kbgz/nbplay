@@ -157,7 +157,8 @@ impl EnvelopeState {
                     self.level = self.params.sustain;
                     self.stage = EnvelopeStage::Sustain;
                 } else {
-                    self.level = 1.0 - (1.0 - self.params.sustain) * (self.stage_time / self.params.decay);
+                    self.level =
+                        1.0 - (1.0 - self.params.sustain) * (self.stage_time / self.params.decay);
                     if self.level <= self.params.sustain {
                         self.level = self.params.sustain;
                         self.stage = EnvelopeStage::Sustain;
@@ -211,7 +212,13 @@ struct SamplerVoice {
 }
 
 impl SamplerVoice {
-    fn new(sample: AudioSample, note: Note, velocity: Velocity, envelope: Envelope, output_sample_rate: u32) -> Self {
+    fn new(
+        sample: AudioSample,
+        note: Note,
+        velocity: Velocity,
+        envelope: Envelope,
+        output_sample_rate: u32,
+    ) -> Self {
         use crate::midi::note_to_hz;
 
         let root_hz = note_to_hz(sample.root_note.value());
@@ -261,10 +268,13 @@ impl SamplerVoice {
         let idx = self.playhead as usize;
         if idx >= self.sample.data.len() {
             // Check for loop
-            if let (Some(loop_start), Some(loop_end)) = (self.sample.loop_start, self.sample.loop_end) {
+            if let (Some(loop_start), Some(loop_end)) =
+                (self.sample.loop_start, self.sample.loop_end)
+            {
                 if loop_end > loop_start && loop_end <= self.sample.data.len() {
                     let loop_len = (loop_end - loop_start) as f64;
-                    self.playhead = loop_start as f64 + ((self.playhead - loop_start as f64) % loop_len);
+                    self.playhead =
+                        loop_start as f64 + ((self.playhead - loop_start as f64) % loop_len);
                 } else {
                     self.active = false;
                     return None;
@@ -331,9 +341,7 @@ impl Sampler {
     /// Process a MIDI message (NoteOn, NoteOff).
     pub fn process_midi(&mut self, message: &MidiMessage) {
         match message {
-            MidiMessage::NoteOn {
-                note, velocity, ..
-            } => {
+            MidiMessage::NoteOn { note, velocity, .. } => {
                 // Voice stealing: if at max, remove the oldest voice
                 if self.voices.len() >= self.max_voices {
                     // Find oldest active voice (first in list)
@@ -621,8 +629,13 @@ mod tests {
         let env = Envelope::new(0.0, 0.0, 1.0, 0.1);
 
         // Play one octave up (A5 = 81)
-        let voice =
-            SamplerVoice::new(sample, Note::new(81).unwrap(), Velocity::new(127).unwrap(), env, 44100);
+        let voice = SamplerVoice::new(
+            sample,
+            Note::new(81).unwrap(),
+            Velocity::new(127).unwrap(),
+            env,
+            44100,
+        );
 
         // Should play at 2x speed
         assert!((voice.rate - 2.0).abs() < 1e-6);
@@ -634,8 +647,13 @@ mod tests {
         let env = Envelope::new(0.0, 0.0, 1.0, 0.1);
 
         // Full velocity
-        let mut voice_loud =
-            SamplerVoice::new(sample.clone(), Note::A4, Velocity::new(127).unwrap(), env.clone(), 44100);
+        let mut voice_loud = SamplerVoice::new(
+            sample.clone(),
+            Note::A4,
+            Velocity::new(127).unwrap(),
+            env.clone(),
+            44100,
+        );
         let s_loud = voice_loud.render_sample(44100).unwrap();
 
         // Half velocity
@@ -729,7 +747,11 @@ mod tests {
         sampler.render(&mut buffer);
 
         // Buffer should have non-zero samples
-        let max = buffer.data.iter().cloned().fold(0.0_f32, |a, b| a.max(b.abs()));
+        let max = buffer
+            .data
+            .iter()
+            .cloned()
+            .fold(0.0_f32, |a, b| a.max(b.abs()));
         assert!(max > 0.01, "Expected non-zero audio, max was {max}");
     }
 
@@ -751,8 +773,15 @@ mod tests {
         let mut buffer = AudioBuffer::silence(512, mono_44100());
         sampler.render(&mut buffer);
 
-        let max = buffer.data.iter().cloned().fold(0.0_f32, |a, b| a.max(b.abs()));
-        assert!(max > 0.01, "Expected non-zero audio from chord, max was {max}");
+        let max = buffer
+            .data
+            .iter()
+            .cloned()
+            .fold(0.0_f32, |a, b| a.max(b.abs()));
+        assert!(
+            max > 0.01,
+            "Expected non-zero audio from chord, max was {max}"
+        );
     }
 
     #[test]

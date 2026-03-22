@@ -2,8 +2,9 @@
 @import "_mixins";
 
 /* ── nbplay SynthWidget ─────────────────────────────────────────── */
-/* Self-contained dark-synth theme.  All selectors are scoped under
-   .nbplay-synth so they never leak into the host notebook. */
+/* All selectors are scoped under .nbplay-synth so they never leak
+   into the host notebook.  Colours inherit from the active Jupyter
+   theme via CSS custom properties (see _variables.less). */
 
 .nbplay-synth {
   font-family: @nb-font-sans;
@@ -30,14 +31,14 @@
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: @nb-text;
   letter-spacing: -0.5px;
 }
 
 .nbplay-badge {
   font-size: 10px;
-  background: linear-gradient(135deg, @nb-purple, @nb-cyan);
-  color: #fff;
+  background: @nb-cyan;
+  color: var(--jp-layout-color0, #000);
   padding: 2px 8px;
   border-radius: 10px;
   font-weight: 700;
@@ -48,11 +49,11 @@
 /* ── Waveform canvas ──────────────────────────────────────────── */
 
 .nbplay-waveform-container {
-  background: #080812;
+  background: @nb-bg;
   border-radius: @nb-radius-sm;
   padding: 2px;
   margin-bottom: 16px;
-  border: 1px solid #1a1a30;
+  border: 1px solid @nb-border;
 }
 
 .nbplay-waveform {
@@ -90,9 +91,9 @@
   font-size: 12px;
   font-weight: 500;
   padding: 6px 14px;
-  border: 1px solid #2a2a44;
+  border: 1px solid @nb-border;
   background: @nb-surface;
-  color: #8888bb;
+  color: @nb-muted;
   border-radius: @nb-radius-xs;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -100,19 +101,15 @@
 }
 
 .nbplay-osc-btn:hover {
-  border-color: #3a3a66;
-  color: #ccccee;
+  border-color: @nb-mixer-border;
+  color: @nb-text;
 }
 
 .nbplay-osc-btn.active {
-  background: linear-gradient(
-    135deg,
-    rgba(124, 58, 237, 0.25),
-    rgba(0, 212, 255, 0.25)
-  );
+  background: color-mix(in srgb, @nb-cyan 20%, @nb-surface);
   border-color: @nb-cyan;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+  color: @nb-text;
+  box-shadow: 0 0 12px color-mix(in srgb, @nb-cyan 15%, transparent);
 }
 
 /* ── Parameter rows (frequency / amplitude) ───────────────────── */
@@ -139,7 +136,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: #1e1e36;
+  background: @nb-border;
   border-radius: 2px;
   outline: none;
   margin: 0;
@@ -153,12 +150,12 @@
   background: @nb-cyan;
   border: 2px solid @nb-bg;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 8px color-mix(in srgb, @nb-cyan 40%, transparent);
   transition: box-shadow 0.15s;
 }
 
 .nbplay-param input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 14px rgba(0, 212, 255, 0.6);
+  box-shadow: 0 0 14px color-mix(in srgb, @nb-cyan 60%, transparent);
 }
 
 .nbplay-param input[type="range"]::-moz-range-thumb {
@@ -168,7 +165,7 @@
   background: @nb-cyan;
   border: 2px solid @nb-bg;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 8px color-mix(in srgb, @nb-cyan 40%, transparent);
 }
 
 .nbplay-param input[type="range"]:disabled {
@@ -179,7 +176,7 @@
 .nbplay-value {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: #bbbbdd;
+  color: @nb-muted;
   min-width: 72px;
   text-align: right;
 }
@@ -191,7 +188,7 @@
   align-items: center;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid #1a1a30;
+  border-top: 1px solid @nb-border;
 }
 
 .nbplay-play-btn {
@@ -205,11 +202,11 @@
   outline: none;
   transition: all 0.15s ease;
   background: linear-gradient(135deg, @nb-purple, @nb-cyan);
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0, #fff);
 }
 
 .nbplay-play-btn:hover {
-  box-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
+  box-shadow: 0 0 18px color-mix(in srgb, @nb-cyan 35%, transparent);
   transform: translateY(-1px);
 }
 
@@ -222,13 +219,13 @@
 }
 
 .nbplay-play-btn.playing:hover {
-  box-shadow: 0 0 18px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 18px color-mix(in srgb, @nb-red 35%, transparent);
 }
 
 .nbplay-info {
   margin-left: auto;
   font-size: 11px;
-  color: #555570;
+  color: @nb-dim;
   letter-spacing: 0.3px;
 }
 

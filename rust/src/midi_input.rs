@@ -1,4 +1,4 @@
-use crate::midi::{MidiEvent, parse_midi_bytes};
+use crate::midi::{parse_midi_bytes, MidiEvent};
 
 /// Wraps midir to enumerate and connect to MIDI input ports.
 pub struct MidiInput {
@@ -10,7 +10,8 @@ pub struct MidiInput {
 impl MidiInput {
     /// Create a new MidiInput instance.
     pub fn new(client_name: &str) -> Result<Self, String> {
-        let inner = midir::MidiInput::new(client_name).map_err(|e| format!("Failed to create MIDI input: {e}"))?;
+        let inner = midir::MidiInput::new(client_name)
+            .map_err(|e| format!("Failed to create MIDI input: {e}"))?;
         Ok(MidiInput {
             inner: Some(inner),
             _connection: None,
@@ -47,9 +48,12 @@ impl MidiInput {
             .take()
             .ok_or_else(|| "MIDI input already connected".to_string())?;
         let ports = inner.ports();
-        let port = ports
-            .get(port_index)
-            .ok_or_else(|| format!("Port index {port_index} out of range (available: {})", ports.len()))?;
+        let port = ports.get(port_index).ok_or_else(|| {
+            format!(
+                "Port index {port_index} out of range (available: {})",
+                ports.len()
+            )
+        })?;
 
         let connection = inner
             .connect(

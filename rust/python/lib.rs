@@ -1,13 +1,13 @@
 use pyo3::prelude::*;
 
 mod audio;
+mod audio_output;
 mod midi;
+mod midi_input;
 mod mixer;
 mod oscillator;
 mod sampler;
 mod sequencer;
-mod audio_output;
-mod midi_input;
 
 #[pymodule]
 fn nbplay(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {

@@ -1,8 +1,8 @@
 use pyo3::prelude::*;
 
 use nbplay::midi::{
-    ControlNumber, MidiChannel, MidiEvent as BaseMidiEvent, MidiMessage as BaseMidiMessage, Note,
-    Velocity, hz_to_note, note_to_hz,
+    hz_to_note, note_to_hz, ControlNumber, MidiChannel, MidiEvent as BaseMidiEvent,
+    MidiMessage as BaseMidiMessage, Note, Velocity,
 };
 
 #[pyclass(name = "MidiChannel", from_py_object)]
@@ -126,11 +126,10 @@ pub struct PyMidiMessage {
 impl PyMidiMessage {
     #[staticmethod]
     fn note_on(channel: u8, note: u8, velocity: u8) -> PyResult<Self> {
-        let ch = MidiChannel::new(channel)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ch =
+            MidiChannel::new(channel).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         let n = Note::new(note).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
-        let v = Velocity::new(velocity)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let v = Velocity::new(velocity).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyMidiMessage {
             inner: BaseMidiMessage::NoteOn {
                 channel: ch,
@@ -142,11 +141,10 @@ impl PyMidiMessage {
 
     #[staticmethod]
     fn note_off(channel: u8, note: u8, velocity: u8) -> PyResult<Self> {
-        let ch = MidiChannel::new(channel)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ch =
+            MidiChannel::new(channel).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         let n = Note::new(note).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
-        let v = Velocity::new(velocity)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let v = Velocity::new(velocity).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyMidiMessage {
             inner: BaseMidiMessage::NoteOff {
                 channel: ch,
@@ -158,10 +156,10 @@ impl PyMidiMessage {
 
     #[staticmethod]
     fn control_change(channel: u8, control: u8, value: u8) -> PyResult<Self> {
-        let ch = MidiChannel::new(channel)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
-        let ctrl = ControlNumber::new(control)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ch =
+            MidiChannel::new(channel).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ctrl =
+            ControlNumber::new(control).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyMidiMessage {
             inner: BaseMidiMessage::ControlChange {
                 channel: ch,
@@ -173,8 +171,8 @@ impl PyMidiMessage {
 
     #[staticmethod]
     fn program_change(channel: u8, program: u8) -> PyResult<Self> {
-        let ch = MidiChannel::new(channel)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ch =
+            MidiChannel::new(channel).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyMidiMessage {
             inner: BaseMidiMessage::ProgramChange {
                 channel: ch,
@@ -185,13 +183,10 @@ impl PyMidiMessage {
 
     #[staticmethod]
     fn pitch_bend(channel: u8, value: u16) -> PyResult<Self> {
-        let ch = MidiChannel::new(channel)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let ch =
+            MidiChannel::new(channel).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyMidiMessage {
-            inner: BaseMidiMessage::PitchBend {
-                channel: ch,
-                value,
-            },
+            inner: BaseMidiMessage::PitchBend { channel: ch, value },
         })
     }
 

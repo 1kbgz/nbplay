@@ -14,7 +14,20 @@ interface NbplayBus {
   channels: { gain: AudioNode }[];
 }
 
-const NOTE_NAMES: string[] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const NOTE_NAMES: string[] = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
 
 function noteName(midi: number): string {
   const octave = Math.floor(midi / 12) - 1;
@@ -31,7 +44,12 @@ interface AudioScheduler {
   destroy(): void;
   scheduler(model: AnyModel): void;
   scheduleStep(model: AnyModel, audioTime: number): void;
-  playOscillator(freq: number, velocity: number, startTime: number, duration: number): void;
+  playOscillator(
+    freq: number,
+    velocity: number,
+    startTime: number,
+    duration: number,
+  ): void;
   isPlaying(): boolean;
 }
 
@@ -50,7 +68,9 @@ function createAudioScheduler(): AudioScheduler {
       const sid = model.get("session_id") as string;
       const idx = model.get("channel_index") as number;
       if (sid && idx >= 0) {
-        const bus = (globalThis as Record<string, unknown>).__nbplay as Record<string, NbplayBus> | undefined;
+        const bus = (globalThis as Record<string, unknown>).__nbplay as
+          | Record<string, NbplayBus>
+          | undefined;
         if (bus && bus[sid] && bus[sid].channels[idx]) {
           audioCtx = bus[sid].audioCtx;
           outputNode = bus[sid].channels[idx].gain;
@@ -138,7 +158,12 @@ function createAudioScheduler(): AudioScheduler {
       }
     },
 
-    playOscillator(freq: number, velocity: number, startTime: number, duration: number): void {
+    playOscillator(
+      freq: number,
+      velocity: number,
+      startTime: number,
+      duration: number,
+    ): void {
       if (!audioCtx) return;
       const attackTime = 0.005;
       const releaseTime = Math.min(0.05, duration * 0.2);
@@ -149,7 +174,10 @@ function createAudioScheduler(): AudioScheduler {
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0, startTime);
         gain.gain.linearRampToValueAtTime(velocity, startTime + attackTime);
-        gain.gain.linearRampToValueAtTime(0, startTime + duration - releaseTime);
+        gain.gain.linearRampToValueAtTime(
+          0,
+          startTime + duration - releaseTime,
+        );
         osc.connect(gain);
         gain.connect(outputNode || audioCtx.destination);
         osc.start(startTime);
@@ -165,7 +193,13 @@ function createAudioScheduler(): AudioScheduler {
   };
 }
 
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => void) {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   const root = document.createElement("div");
   root.className = "nbplay-sequencer";
   root.innerHTML = `
@@ -205,10 +239,16 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => voi
 
   const playBtn = root.querySelector(".nbplay-seq-play")! as HTMLButtonElement;
   const stopBtn = root.querySelector(".nbplay-seq-stop")! as HTMLButtonElement;
-  const bpmSlider = root.querySelector(".nbplay-seq-bpm-slider")! as HTMLInputElement;
+  const bpmSlider = root.querySelector(
+    ".nbplay-seq-bpm-slider",
+  )! as HTMLInputElement;
   const bpmVal = root.querySelector(".nbplay-seq-bpm-val")! as HTMLSpanElement;
-  const durSelect = root.querySelector(".nbplay-seq-dur-select")! as HTMLSelectElement;
-  const loopChk = root.querySelector(".nbplay-seq-loop-chk")! as HTMLInputElement;
+  const durSelect = root.querySelector(
+    ".nbplay-seq-dur-select",
+  )! as HTMLSelectElement;
+  const loopChk = root.querySelector(
+    ".nbplay-seq-loop-chk",
+  )! as HTMLInputElement;
   const grid = root.querySelector(".nbplay-seq-grid")! as HTMLDivElement;
   const info = root.querySelector(".nbplay-seq-info")! as HTMLSpanElement;
 
@@ -287,7 +327,7 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => voi
       velCell.className = "nbplay-seq-vel-cell";
       const velBar = document.createElement("div");
       velBar.className = "nbplay-seq-vel-bar";
-      velBar.style.height = (steps[i].velocity / 127 * 100) + "%";
+      velBar.style.height = (steps[i].velocity / 127) * 100 + "%";
       if (steps[i].active) velBar.classList.add("active");
       if (i === currentStep) velBar.classList.add("current");
       velCell.appendChild(velBar);
@@ -327,13 +367,14 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => voi
       cell.classList.toggle("active", !!steps[i].active);
       cell.classList.toggle("current", i === currentStep);
       cell.textContent = noteName(steps[i].note);
-      (cell as HTMLElement).title = `Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+      (cell as HTMLElement).title =
+        `Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
     });
 
     const velBars = grid.querySelectorAll(".nbplay-seq-vel-bar");
     velBars.forEach((bar: Element, i: number) => {
       if (i >= steps.length) return;
-      (bar as HTMLElement).style.height = (steps[i].velocity / 127 * 100) + "%";
+      (bar as HTMLElement).style.height = (steps[i].velocity / 127) * 100 + "%";
       bar.classList.toggle("active", !!steps[i].active);
       bar.classList.toggle("current", i === currentStep);
     });
@@ -374,7 +415,10 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => voi
       if (isNaN(v)) return null;
       return Math.max(30, Math.min(300, Math.round(v)));
     },
-    apply: (v: unknown) => { model.set("bpm", v); model.save_changes(); },
+    apply: (v: unknown) => {
+      model.set("bpm", v);
+      model.save_changes();
+    },
     sync: syncControls,
   });
 
@@ -426,6 +470,15 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): (() => voi
 
   syncControls();
   buildGrid();
+
+  // Force stopped state on render — prevents stale is_playing=true
+  // from a saved notebook from starting the scheduler immediately.
+  // Only update local model state; do NOT call save_changes() here
+  // because sending comm messages during render can race with other
+  // widgets still being initialised (e.g. Session dlinks).
+  model.set("is_playing", false);
+  model.set("current_step", -1);
+
   onModelChange();
 
   return () => {

@@ -28,4 +28,13 @@ from nbplay.nbplay import (  # noqa: F401, E402
     TransportClock,
     Velocity,
 )
-from nbplay.widget import MixerWidget, SamplerWidget, SequencerWidget, Session, SettingsWidget, SynthWidget, Track, TransportWidget  # noqa: F401, E402
+from nbplay.widget import (  # noqa: F401, E402
+    MixerWidget,
+    SamplerWidget,
+    SequencerWidget,
+    Session,
+    SettingsWidget,
+    SynthWidget,
+    Track,
+    TransportWidget,
+)

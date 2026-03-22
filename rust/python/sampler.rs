@@ -19,8 +19,7 @@ impl PyAudioSample {
     #[new]
     #[pyo3(signature = (data, sample_rate=44100, root_note=69))]
     fn py_new(data: Vec<f32>, sample_rate: u32, root_note: u8) -> PyResult<Self> {
-        let note = Note::new(root_note)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let note = Note::new(root_note).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PyAudioSample {
             inner: BaseAudioSample::new(data, sample_rate, note),
         })
@@ -178,8 +177,8 @@ impl PySampleMapping {
         let nh = Note::new(note_high).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         let vl =
             Velocity::new(velocity_low).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
-        let vh = Velocity::new(velocity_high)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
+        let vh =
+            Velocity::new(velocity_high).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         Ok(PySampleMapping {
             inner: BaseSampleMapping::new(sample.inner.clone(), nl, nh, vl, vh),
         })
@@ -232,9 +231,10 @@ impl PySampleMap {
     fn find_sample(&self, note: u8, velocity: u8) -> PyResult<Option<PyAudioSample>> {
         let n = Note::new(note).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
         let v = Velocity::new(velocity).map_err(|e| pyo3::exceptions::PyValueError::new_err(e))?;
-        Ok(self.inner.find_sample(n, v).map(|s| PyAudioSample {
-            inner: s.clone(),
-        }))
+        Ok(self
+            .inner
+            .find_sample(n, v)
+            .map(|s| PyAudioSample { inner: s.clone() }))
     }
 
     fn mapping_count(&self) -> usize {
@@ -326,10 +326,7 @@ impl PySampler {
         use nbplay::audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
         use nbplay::oscillator::AudioSource;
 
-        let format = AudioFormat::new(
-            SampleRate(self.inner.sample_rate),
-            ChannelCount::MONO,
-        );
+        let format = AudioFormat::new(SampleRate(self.inner.sample_rate), ChannelCount::MONO);
         let mut buffer = AudioBuffer::silence(frames, format);
         self.inner.render(&mut buffer);
         buffer.data
