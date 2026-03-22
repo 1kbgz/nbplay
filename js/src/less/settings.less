@@ -1,12 +1,12 @@
 @import "_variables";
 @import "_mixins";
 
-/* nbplay SettingsWidget – dark theme */
+/* nbplay SettingsWidget – themed to Jupyter environment */
 
 .nbplay-settings {
   font-family: @nb-font-mono;
   background: @nb-mixer-bg;
-  color: #e0e0e0;
+  color: @nb-text;
   border: 1px solid @nb-mixer-border;
   border-radius: 10px;
   padding: 16px 20px;
@@ -20,12 +20,14 @@
 }
 .nbplay-settings .nbplay-badge {
   .nbplay-badge-mixin();
+  background: @nb-orange;
+  color: var(--jp-layout-color0, #000);
   letter-spacing: 1px;
 }
 
 /* ── sections ───────────────────────────── */
 .nbplay-settings .nbplay-section {
-  background: #16162a;
+  background: @nb-surface;
   border: 1px solid @nb-mixer-border;
   border-radius: @nb-radius-sm;
   padding: 12px 14px;
@@ -39,7 +41,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: #8b8ba7;
+  color: @nb-muted;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -47,7 +49,7 @@
 }
 .nbplay-settings .nbplay-section-icon {
   font-size: 14px;
-  color: @nb-purple-badge;
+  color: @nb-purple-light;
 }
 
 /* ── setting rows ───────────────────────── */
@@ -62,13 +64,13 @@
 }
 .nbplay-settings .nbplay-label {
   font-size: 12px;
-  color: #8b8ba7;
+  color: @nb-muted;
   min-width: 80px;
   flex-shrink: 0;
 }
 .nbplay-settings .nbplay-detail {
   font-size: 12px;
-  color: #a0a0b8;
+  color: @nb-muted;
 }
 
 /* ── selects ────────────────────────────── */
@@ -77,8 +79,8 @@
   font-family: inherit;
   font-size: 12px;
   background: @nb-mixer-bg;
-  color: #e0e0e0;
-  border: 1px solid #3d3d5a;
+  color: @nb-text;
+  border: 1px solid @nb-mixer-border;
   border-radius: 5px;
   padding: 5px 8px;
   outline: none;
@@ -90,18 +92,18 @@
 }
 .nbplay-settings .nbplay-select:focus {
   border-color: @nb-purple-badge;
-  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.15);
+  box-shadow: 0 0 0 2px color-mix(in srgb, @nb-purple-badge 15%, transparent);
 }
 .nbplay-settings .nbplay-select option {
   background: @nb-mixer-bg;
-  color: #e0e0e0;
+  color: @nb-text;
 }
 
 /* ── refresh button ────────────────────── */
 .nbplay-settings .nbplay-refresh-btn {
   background: none;
-  border: 1px solid #3d3d5a;
-  color: #8b8ba7;
+  border: 1px solid @nb-mixer-border;
+  color: @nb-muted;
   border-radius: 5px;
   padding: 4px 8px;
   font-size: 14px;
@@ -116,11 +118,11 @@
 
 /* ── MIDI status ───────────────────────── */
 .nbplay-settings .nbplay-midi-status {
-  color: #8b8ba7;
+  color: @nb-muted;
   font-size: 12px;
 }
 .nbplay-settings .nbplay-midi-status.connected {
-  color: #34d399;
+  color: @nb-green;
 }
 
 /* ── MIDI log ──────────────────────────── */
@@ -132,11 +134,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #5a5a78;
+  color: @nb-dim;
   margin-bottom: 6px;
 }
 .nbplay-settings .nbplay-midi-log {
-  background: #111122;
+  background: @nb-bg;
   border: 1px solid @nb-mixer-border;
   border-radius: 5px;
   padding: 6px 8px;
@@ -148,13 +150,13 @@
 }
 .nbplay-settings .nbplay-midi-log:empty::before {
   content: "No MIDI activity";
-  color: #3d3d5a;
+  color: @nb-mixer-border;
   font-style: italic;
 }
 .nbplay-settings .nbplay-midi-log-entry {
-  color: #34d399;
+  color: @nb-green;
   padding: 1px 0;
-  border-bottom: 1px solid #1a1a30;
+  border-bottom: 1px solid @nb-border;
   white-space: nowrap;
 }
 .nbplay-settings .nbplay-midi-log-entry:last-child {

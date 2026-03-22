@@ -197,11 +197,20 @@ impl PyMixer {
     }
 
     fn channel_names(&self) -> Vec<String> {
-        self.inner.channels.iter().map(|ch| ch.name.clone()).collect()
+        self.inner
+            .channels
+            .iter()
+            .map(|ch| ch.name.clone())
+            .collect()
     }
 
     fn __repr__(&self) -> String {
-        let names: Vec<&str> = self.inner.channels.iter().map(|ch| ch.name.as_str()).collect();
+        let names: Vec<&str> = self
+            .inner
+            .channels
+            .iter()
+            .map(|ch| ch.name.as_str())
+            .collect();
         format!(
             "Mixer(master_gain={:.2}, channels=[{}])",
             self.inner.master_gain,

@@ -7,9 +7,7 @@ pub struct MidiChannel(u8);
 impl MidiChannel {
     pub fn new(value: u8) -> Result<Self, String> {
         if value > 15 {
-            Err(format!(
-                "MidiChannel out of range: {value} (must be 0–15)"
-            ))
+            Err(format!("MidiChannel out of range: {value} (must be 0–15)"))
         } else {
             Ok(MidiChannel(value))
         }
@@ -55,9 +53,7 @@ pub struct Velocity(u8);
 impl Velocity {
     pub fn new(value: u8) -> Result<Self, String> {
         if value > 127 {
-            Err(format!(
-                "Velocity out of range: {value} (must be 0–127)"
-            ))
+            Err(format!("Velocity out of range: {value} (must be 0–127)"))
         } else {
             Ok(Velocity(value))
         }
@@ -296,14 +292,8 @@ mod tests {
         let a3 = note_to_hz(57);
         let a4 = note_to_hz(69);
         let a5 = note_to_hz(81);
-        assert!(
-            (a4 / a3 - 2.0).abs() < 1e-10,
-            "A4 should be double A3"
-        );
-        assert!(
-            (a5 / a4 - 2.0).abs() < 1e-10,
-            "A5 should be double A4"
-        );
+        assert!((a4 / a3 - 2.0).abs() < 1e-10, "A4 should be double A3");
+        assert!((a5 / a4 - 2.0).abs() < 1e-10, "A5 should be double A4");
     }
 
     #[test]

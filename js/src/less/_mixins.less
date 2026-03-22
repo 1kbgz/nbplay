@@ -2,7 +2,7 @@
 
 .nbplay-badge-mixin() {
   font-size: 10px;
-  background: rgba(192, 132, 252, 0.15);
+  background: color-mix(in srgb, @nb-purple-badge 15%, transparent);
   color: @nb-purple-badge;
   padding: 2px 8px;
   border-radius: @nb-radius-round;
@@ -21,12 +21,8 @@
     margin: 0;
     font-size: 15px;
     font-weight: 700;
-    color: #fff;
+    color: @nb-text;
     letter-spacing: 0.5px;
-  }
-
-  .nbplay-badge {
-    .nbplay-badge-mixin();
   }
 }
 

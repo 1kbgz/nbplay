@@ -84,13 +84,17 @@ test.describe("SequencerWidget", () => {
 
     await cell1.click();
 
-    const active = await page.evaluate(() => window.__testModel._state.steps[1].active);
+    const active = await page.evaluate(
+      () => window.__testModel._state.steps[1].active,
+    );
     expect(active).toBe(true);
     await expect(cell1).toHaveClass(/active/);
 
     // Click again to deactivate
     await cell1.click();
-    const deactivated = await page.evaluate(() => window.__testModel._state.steps[1].active);
+    const deactivated = await page.evaluate(
+      () => window.__testModel._state.steps[1].active,
+    );
     expect(deactivated).toBe(false);
     await expect(cell1).not.toHaveClass(/active/);
   });
@@ -98,6 +102,11 @@ test.describe("SequencerWidget", () => {
   // 6. Current step highlighted
   test("current step has .current class", async ({ page }) => {
     await renderWidget(page);
+    // Render resets current_step to -1; advance it to 0
+    await page.evaluate(() => {
+      window.__testModel.set("current_step", 0);
+      window.__testModel._trigger("change:current_step");
+    });
     const cells = page.locator(".nbplay-seq-cell");
     await expect(cells.nth(0)).toHaveClass(/current/);
     // Other steps should not have .current
@@ -119,27 +128,37 @@ test.describe("SequencerWidget", () => {
     await expect(btn).toContainText("▶");
 
     await btn.click();
-    const playing = await page.evaluate(() => window.__testModel._state.is_playing);
+    const playing = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
     expect(playing).toBe(true);
 
     // save_changes auto-fires change:is_playing → onModelChange → button becomes ⏸
     await expect(btn).toContainText("⏸");
 
     await btn.click();
-    const stopped = await page.evaluate(() => window.__testModel._state.is_playing);
+    const stopped = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
     expect(stopped).toBe(false);
     await expect(btn).toContainText("▶");
   });
 
   // 9. Stop button resets playback
-  test("stop button stops playback and resets current_step", async ({ page }) => {
+  test("stop button stops playback and resets current_step", async ({
+    page,
+  }) => {
     await renderWidget(page, { is_playing: true });
     const stopBtn = page.locator(".nbplay-seq-stop");
 
     await stopBtn.click();
-    const playing = await page.evaluate(() => window.__testModel._state.is_playing);
+    const playing = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
     expect(playing).toBe(false);
-    const step = await page.evaluate(() => window.__testModel._state.current_step);
+    const step = await page.evaluate(
+      () => window.__testModel._state.current_step,
+    );
     expect(step).toBe(-1);
   });
 
@@ -169,6 +188,11 @@ test.describe("SequencerWidget", () => {
     await renderWidget(page);
     const cells = page.locator(".nbplay-seq-cell");
 
+    // Render resets current_step to -1; advance it to 0 first
+    await page.evaluate(() => {
+      window.__testModel.set("current_step", 0);
+      window.__testModel._trigger("change:current_step");
+    });
     await expect(cells.nth(0)).toHaveClass(/current/);
 
     await page.evaluate(() => {
@@ -181,7 +205,9 @@ test.describe("SequencerWidget", () => {
   });
 
   // 12. BPM double-click edit — type "140", Enter, verify model
-  test("dblclick BPM val, type 140, Enter → model updated", async ({ page }) => {
+  test("dblclick BPM val, type 140, Enter → model updated", async ({
+    page,
+  }) => {
     await renderWidget(page);
     const bpmVal = page.locator(".nbplay-seq-bpm-val");
     await bpmVal.dblclick();
@@ -199,7 +225,9 @@ test.describe("SequencerWidget", () => {
   });
 
   // 13. BPM double-click Escape cancels
-  test("Escape during BPM inline edit cancels without update", async ({ page }) => {
+  test("Escape during BPM inline edit cancels without update", async ({
+    page,
+  }) => {
     await renderWidget(page);
     const bpmVal = page.locator(".nbplay-seq-bpm-val");
     await expect(bpmVal).toHaveText("120 BPM");
@@ -215,7 +243,9 @@ test.describe("SequencerWidget", () => {
   });
 
   // 14. Double-commit guard on BPM
-  test("Enter commit does not crash when blur fires afterwards", async ({ page }) => {
+  test("Enter commit does not crash when blur fires afterwards", async ({
+    page,
+  }) => {
     await renderWidget(page);
     const bpmVal = page.locator(".nbplay-seq-bpm-val");
     await bpmVal.dblclick();
@@ -243,11 +273,15 @@ test.describe("SequencerWidget", () => {
     await expect(loopChk).toBeChecked();
 
     await loopChk.uncheck();
-    const disabled = await page.evaluate(() => window.__testModel._state.loop_enabled);
+    const disabled = await page.evaluate(
+      () => window.__testModel._state.loop_enabled,
+    );
     expect(disabled).toBe(false);
 
     await loopChk.check();
-    const reEnabled = await page.evaluate(() => window.__testModel._state.loop_enabled);
+    const reEnabled = await page.evaluate(
+      () => window.__testModel._state.loop_enabled,
+    );
     expect(reEnabled).toBe(true);
   });
 
@@ -272,13 +306,17 @@ test.describe("SequencerWidget", () => {
   });
 
   // 18. Step duration select updates model
-  test("step duration select updates step_duration in model", async ({ page }) => {
+  test("step duration select updates step_duration in model", async ({
+    page,
+  }) => {
     await renderWidget(page);
     const durSelect = page.locator(".nbplay-seq-dur-select");
     await expect(durSelect).toHaveValue("0.25");
 
     await durSelect.selectOption("0.5");
-    const val = await page.evaluate(() => window.__testModel._state.step_duration);
+    const val = await page.evaluate(
+      () => window.__testModel._state.step_duration,
+    );
     expect(val).toBe(0.5);
   });
 
@@ -295,6 +333,11 @@ test.describe("SequencerWidget", () => {
   // 20. Header row shows step numbers with active-col highlight
   test("header row marks current step column", async ({ page }) => {
     await renderWidget(page);
+    // Render resets current_step to -1; advance it to 0
+    await page.evaluate(() => {
+      window.__testModel.set("current_step", 0);
+      window.__testModel._trigger("change:current_step");
+    });
     const headers = page.locator(".nbplay-seq-header-cell");
     await expect(headers).toHaveCount(8);
     // Step 0 is current_step, so first header cell has active-col

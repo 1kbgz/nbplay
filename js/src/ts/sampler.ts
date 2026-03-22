@@ -2,7 +2,7 @@
 // Sampler panel with waveform display, ADSR envelope, trigger pads,
 // and Web Audio playback with pitch shifting.
 
-import { type AnyModel, makeEditable, toFloat32 } from "./helpers.ts";
+import { type AnyModel, cssVar, makeEditable, toFloat32 } from "./helpers.ts";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -23,16 +23,56 @@ interface Voice {
 
 // ── Note helpers ─────────────────────────────────────────────────
 
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const NOTE_NAMES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
 
 function noteName(midi: number): string {
   const octave = Math.floor(midi / 12) - 1;
   return NOTE_NAMES[midi % 12] + octave;
 }
 
+function parseNote(raw: string): number | null {
+  const t = raw.trim();
+  const num = parseInt(t, 10);
+  if (String(num) === t && num >= 0 && num <= 127) return num;
+  const m = t.match(/^([A-Ga-g])(#|b)?(-?\d+)$/);
+  if (!m) return null;
+  const base: Record<string, number> = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11,
+  };
+  const b = base[m[1].toUpperCase()];
+  if (b === undefined) return null;
+  let semi = b;
+  if (m[2] === "#") semi++;
+  if (m[2] === "b") semi--;
+  const midi = (parseInt(m[3], 10) + 1) * 12 + semi;
+  return midi >= 0 && midi <= 127 ? midi : null;
+}
+
 // ── Waveform renderer ────────────────────────────────────────────
 
-function drawWaveform(canvas: HTMLCanvasElement, samples: Float32Array | null): void {
+function drawWaveform(
+  canvas: HTMLCanvasElement,
+  samples: Float32Array | null,
+): void {
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.clientWidth || 500;
   const h = canvas.clientHeight || 100;
@@ -41,25 +81,30 @@ function drawWaveform(canvas: HTMLCanvasElement, samples: Float32Array | null): 
   const ctx = canvas.getContext("2d")!;
   ctx.scale(dpr, dpr);
 
-  ctx.fillStyle = "#14142a";
+  const bg = cssVar(canvas, "--jp-layout-color1", "#14142a");
+  const brand = cssVar(canvas, "--jp-brand-color1", "#00d4ff");
+  const dim = cssVar(canvas, "--jp-ui-font-color3", "#64648a");
+  const border = cssVar(canvas, "--jp-border-color1", "#1e1e3a");
+
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
   if (!samples || samples.length === 0) {
-    ctx.fillStyle = "#64648a";
+    ctx.fillStyle = dim;
     ctx.font = "12px monospace";
     ctx.textAlign = "center";
     ctx.fillText("No sample loaded", w / 2, h / 2 + 4);
     return;
   }
 
-  ctx.strokeStyle = "#1e1e3a";
+  ctx.strokeStyle = border;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(0, h / 2);
   ctx.lineTo(w, h / 2);
   ctx.stroke();
 
-  ctx.strokeStyle = "#00d4ff";
+  ctx.strokeStyle = brand;
   ctx.lineWidth = 1;
   ctx.beginPath();
   const step = samples.length / w;
@@ -89,7 +134,11 @@ function drawEnvelope(
   const ctx = canvas.getContext("2d")!;
   ctx.scale(dpr, dpr);
 
-  ctx.fillStyle = "#14142a";
+  const bg = cssVar(canvas, "--jp-layout-color1", "#14142a");
+  const accent = cssVar(canvas, "--jp-brand-color0", "#7c3aed");
+  const dim = cssVar(canvas, "--jp-ui-font-color3", "#64648a");
+
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
   const total = a + d + 0.3 + r;
@@ -108,7 +157,8 @@ function drawEnvelope(
   const ex = dx + (r / total) * plotW;
   const ey = pad + plotH;
 
-  ctx.fillStyle = "rgba(124, 58, 237, 0.15)";
+  ctx.fillStyle = accent;
+  ctx.globalAlpha = 0.15;
   ctx.beginPath();
   ctx.moveTo(ax, ay);
   ctx.lineTo(bx, by);
@@ -117,8 +167,9 @@ function drawEnvelope(
   ctx.lineTo(ex, ey);
   ctx.closePath();
   ctx.fill();
+  ctx.globalAlpha = 1;
 
-  ctx.strokeStyle = "#7c3aed";
+  ctx.strokeStyle = accent;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(ax, ay);
@@ -128,7 +179,7 @@ function drawEnvelope(
   ctx.lineTo(ex, ey);
   ctx.stroke();
 
-  ctx.fillStyle = "#64648a";
+  ctx.fillStyle = dim;
   ctx.font = "9px monospace";
   ctx.textAlign = "center";
   ctx.fillText("A", (ax + bx) / 2, h - 1);
@@ -163,7 +214,9 @@ function createSamplerEngine(maxVoices = 8) {
       const idx = model.get("channel_index") as number;
       if (sid && idx >= 0) {
         const g = globalThis as Record<string, unknown>;
-        const nbplay = g.__nbplay as Record<string, Record<string, unknown>> | undefined;
+        const nbplay = g.__nbplay as
+          | Record<string, Record<string, unknown>>
+          | undefined;
         const bus = nbplay?.[sid];
         if (bus) {
           const channels = bus.channels as { gain: GainNode }[];
@@ -192,7 +245,11 @@ function createSamplerEngine(maxVoices = 8) {
       }
     },
 
-    noteOn(noteNum: number, rootNote: number, envelope: Envelope): Voice | undefined {
+    noteOn(
+      noteNum: number,
+      rootNote: number,
+      envelope: Envelope,
+    ): Voice | undefined {
       if (!audioCtx || !ensureBuffer()) return;
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
@@ -306,7 +363,13 @@ function createSamplerEngine(maxVoices = 8) {
 
 // ── Widget render ────────────────────────────────────────────────
 
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   const sampler = createSamplerEngine(model.get("max_voices") as number);
   if (model.get("session_id")) {
     sampler.setSession(model);
@@ -369,26 +432,64 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   `;
   el.appendChild(root);
 
-  const waveCanvas = root.querySelector(".nbplay-samp-waveform") as HTMLCanvasElement;
-  const envCanvas = root.querySelector(".nbplay-samp-env-canvas") as HTMLCanvasElement;
-  const sampleNameEl = root.querySelector(".nbplay-samp-name") as HTMLSpanElement;
-  const infoRate = root.querySelector(".nbplay-samp-info-rate") as HTMLSpanElement;
-  const infoRoot = root.querySelector(".nbplay-samp-info-root") as HTMLSpanElement;
-  const infoLen = root.querySelector(".nbplay-samp-info-len") as HTMLSpanElement;
-  const infoVoices = root.querySelector(".nbplay-samp-info-voices") as HTMLSpanElement;
-  const activeVoicesEl = root.querySelector(".nbplay-samp-active-voices") as HTMLSpanElement;
-  const padsGrid = root.querySelector(".nbplay-samp-pads-grid") as HTMLDivElement;
+  const waveCanvas = root.querySelector(
+    ".nbplay-samp-waveform",
+  ) as HTMLCanvasElement;
+  const envCanvas = root.querySelector(
+    ".nbplay-samp-env-canvas",
+  ) as HTMLCanvasElement;
+  const sampleNameEl = root.querySelector(
+    ".nbplay-samp-name",
+  ) as HTMLSpanElement;
+  const infoRate = root.querySelector(
+    ".nbplay-samp-info-rate",
+  ) as HTMLSpanElement;
+  const infoRoot = root.querySelector(
+    ".nbplay-samp-info-root",
+  ) as HTMLSpanElement;
+  const infoLen = root.querySelector(
+    ".nbplay-samp-info-len",
+  ) as HTMLSpanElement;
+  const infoVoices = root.querySelector(
+    ".nbplay-samp-info-voices",
+  ) as HTMLSpanElement;
+  const activeVoicesEl = root.querySelector(
+    ".nbplay-samp-active-voices",
+  ) as HTMLSpanElement;
+  const padsGrid = root.querySelector(
+    ".nbplay-samp-pads-grid",
+  ) as HTMLDivElement;
 
-  const attackSlider = root.querySelector(".nbplay-samp-attack") as HTMLInputElement;
-  const decaySlider = root.querySelector(".nbplay-samp-decay") as HTMLInputElement;
-  const sustainSlider = root.querySelector(".nbplay-samp-sustain") as HTMLInputElement;
-  const releaseSlider = root.querySelector(".nbplay-samp-release") as HTMLInputElement;
-  const attackVal = root.querySelector(".nbplay-samp-attack-val") as HTMLSpanElement;
-  const decayVal = root.querySelector(".nbplay-samp-decay-val") as HTMLSpanElement;
-  const sustainVal = root.querySelector(".nbplay-samp-sustain-val") as HTMLSpanElement;
-  const releaseVal = root.querySelector(".nbplay-samp-release-val") as HTMLSpanElement;
-  const voicesSlider = root.querySelector(".nbplay-samp-max-voices") as HTMLInputElement;
-  const voicesVal = root.querySelector(".nbplay-samp-voices-val") as HTMLSpanElement;
+  const attackSlider = root.querySelector(
+    ".nbplay-samp-attack",
+  ) as HTMLInputElement;
+  const decaySlider = root.querySelector(
+    ".nbplay-samp-decay",
+  ) as HTMLInputElement;
+  const sustainSlider = root.querySelector(
+    ".nbplay-samp-sustain",
+  ) as HTMLInputElement;
+  const releaseSlider = root.querySelector(
+    ".nbplay-samp-release",
+  ) as HTMLInputElement;
+  const attackVal = root.querySelector(
+    ".nbplay-samp-attack-val",
+  ) as HTMLSpanElement;
+  const decayVal = root.querySelector(
+    ".nbplay-samp-decay-val",
+  ) as HTMLSpanElement;
+  const sustainVal = root.querySelector(
+    ".nbplay-samp-sustain-val",
+  ) as HTMLSpanElement;
+  const releaseVal = root.querySelector(
+    ".nbplay-samp-release-val",
+  ) as HTMLSpanElement;
+  const voicesSlider = root.querySelector(
+    ".nbplay-samp-max-voices",
+  ) as HTMLInputElement;
+  const voicesVal = root.querySelector(
+    ".nbplay-samp-voices-val",
+  ) as HTMLSpanElement;
 
   const voiceCounterInterval = setInterval(() => {
     const count = sampler.getActiveVoiceCount();
@@ -501,18 +602,22 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   function createPads(): void {
     const rootNote = model.get("root_note") as number;
     padsGrid.innerHTML = "";
-    const padNotes: number[] = [];
-    for (let i = 0; i < 8; i++) {
-      padNotes.push(rootNote - 12 + i * 3);
-    }
-    padNotes.forEach((noteNum) => {
+    const padNotes: number[] = (model.get("pad_notes") as number[]).slice();
+    padNotes.forEach((_, idx) => {
       const pad = document.createElement("button");
       pad.className = "nbplay-samp-pad";
-      pad.textContent = noteName(noteNum);
+
+      const noteSpan = document.createElement("span");
+      noteSpan.className = "nbplay-samp-pad-note";
+      noteSpan.textContent = noteName(padNotes[idx]);
+      noteSpan.title = "Double-click to edit note";
+      pad.appendChild(noteSpan);
+
       pad.addEventListener("pointerdown", (e: PointerEvent) => {
+        if ((e.target as HTMLElement).tagName === "INPUT") return;
         e.preventDefault();
         pad.classList.add("active");
-        sampler.noteOn(noteNum, rootNote, {
+        sampler.noteOn(padNotes[idx], rootNote, {
           attack: model.get("attack") as number,
           decay: model.get("decay") as number,
           sustain: model.get("sustain") as number,
@@ -520,15 +625,67 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
         });
       });
       pad.addEventListener("pointerup", (e: PointerEvent) => {
+        if ((e.target as HTMLElement).tagName === "INPUT") return;
         e.preventDefault();
         pad.classList.remove("active");
-        sampler.noteOff(noteNum, { release: model.get("release") as number });
+        sampler.noteOff(padNotes[idx], {
+          release: model.get("release") as number,
+        });
       });
       pad.addEventListener("pointercancel", (e: PointerEvent) => {
+        if ((e.target as HTMLElement).tagName === "INPUT") return;
         e.preventDefault();
         pad.classList.remove("active");
-        sampler.noteOff(noteNum, { release: model.get("release") as number });
+        sampler.noteOff(padNotes[idx], {
+          release: model.get("release") as number,
+        });
       });
+
+      noteSpan.addEventListener("dblclick", (ev: Event) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        let committed = false;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "nbplay-samp-inline-edit";
+        input.value = noteName(padNotes[idx]);
+        noteSpan.replaceWith(input);
+        input.focus();
+        input.select();
+
+        function commit(): void {
+          if (committed) return;
+          committed = true;
+          const parsed = parseNote(input.value);
+          if (parsed !== null) {
+            padNotes[idx] = parsed;
+            noteSpan.textContent = noteName(parsed);
+            model.set("pad_notes", padNotes.slice());
+            model.save_changes();
+          }
+          input.replaceWith(noteSpan);
+        }
+
+        input.addEventListener("pointerdown", (pe: Event) =>
+          pe.stopPropagation(),
+        );
+        input.addEventListener("keydown", (ke: KeyboardEvent) => {
+          ke.stopPropagation();
+          if (ke.key === "Enter") {
+            ke.preventDefault();
+            commit();
+          }
+          if (ke.key === "Escape") {
+            ke.preventDefault();
+            if (!committed) {
+              committed = true;
+              input.replaceWith(noteSpan);
+            }
+          }
+        });
+        input.addEventListener("blur", commit);
+      });
+
       padsGrid.appendChild(pad);
     });
   }
@@ -553,7 +710,8 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
     releaseSlider.value = String(model.get("release"));
     attackVal.textContent = fmtTime(model.get("attack") as number);
     decayVal.textContent = fmtTime(model.get("decay") as number);
-    sustainVal.textContent = ((model.get("sustain") as number) * 100).toFixed(0) + "%";
+    sustainVal.textContent =
+      ((model.get("sustain") as number) * 100).toFixed(0) + "%";
     releaseVal.textContent = fmtTime(model.get("release") as number);
   }
 
@@ -631,6 +789,7 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
     syncInfo();
     createPads();
   });
+  model.on("change:pad_notes", createPads);
   model.on("change:sample_length", syncInfo);
   model.on("change:attack", () => {
     syncEnvelopeControls();

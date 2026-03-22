@@ -19,7 +19,7 @@ requirements-py:  ## install prerequisite python build requirements
 	python -m pip install `python -c 'import toml; c = toml.load("pyproject.toml"); print(" ".join(c["project"]["optional-dependencies"]["develop"]))'`
 
 requirements-js:  ## install prerequisite javascript build requirements
-	cd js; pnpm install && npx playwright install
+	cd js; pnpm install && npx playwright install --with-deps
 
 requirements-rs:  ## install prerequisite rust build requirements
 	make -C rust requirements
@@ -57,8 +57,8 @@ lint-rs:  ## run rust linter
 	make -C rust lint
 
 lint-docs:  ## lint docs with mdformat and codespell
-	python -m mdformat --check README.md 
-	python -m codespell_lib README.md 
+	python -m mdformat --check README.md
+	python -m codespell_lib README.md
 
 lint: lint-rs lint-js lint-py lint-docs  ## run project linters
 
@@ -77,8 +77,8 @@ fix-rs:  ## fix rust formatting
 	make -C rust fix
 
 fix-docs:  ## autoformat docs with mdformat and codespell
-	python -m mdformat README.md 
-	python -m codespell_lib --write README.md 
+	python -m mdformat README.md
+	python -m codespell_lib --write README.md
 
 fix: fix-rs fix-js fix-py fix-docs  ## run project autoformatters
 

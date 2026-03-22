@@ -13,19 +13,22 @@ const DEFAULTS = {
 
 /** Boot the widget inside the harness page and stash the model on window. */
 async function renderWidget(page, overrides = {}) {
-  await page.evaluate(async (opts) => {
-    // Inject widget CSS
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "/dist/css/widget.css";
-    document.head.appendChild(link);
+  await page.evaluate(
+    async (opts) => {
+      // Inject widget CSS
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/widget.css";
+      document.head.appendChild(link);
 
-    const mod = await import("/dist/widgets/widget.js");
-    const el = document.getElementById("root");
-    const model = window.createMockModel({ ...opts });
-    window.__testModel = model;
-    mod.default.render({ model, el });
-  }, { ...DEFAULTS, ...overrides });
+      const mod = await import("/dist/widgets/widget.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({ ...opts });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    },
+    { ...DEFAULTS, ...overrides },
+  );
 }
 
 // ── Tests ────────────────────────────────────────────────────────
@@ -54,15 +57,21 @@ test.describe("SynthWidget", () => {
     const btns = page.locator(".nbplay-osc-btn");
     await expect(btns).toHaveCount(4);
     for (const type of ["sine", "square", "saw", "noise"]) {
-      await expect(page.locator(`.nbplay-osc-btn[data-type="${type}"]`)).toBeVisible();
+      await expect(
+        page.locator(`.nbplay-osc-btn[data-type="${type}"]`),
+      ).toBeVisible();
     }
   });
 
   // 4. Default oscillator highlighted
   test("highlights the default oscillator button", async ({ page }) => {
     await renderWidget(page, { oscillator_type: "square" });
-    await expect(page.locator('.nbplay-osc-btn[data-type="square"]')).toHaveClass(/active/);
-    await expect(page.locator('.nbplay-osc-btn[data-type="sine"]')).not.toHaveClass(/active/);
+    await expect(
+      page.locator('.nbplay-osc-btn[data-type="square"]'),
+    ).toHaveClass(/active/);
+    await expect(
+      page.locator('.nbplay-osc-btn[data-type="sine"]'),
+    ).not.toHaveClass(/active/);
   });
 
   // 5. Click oscillator button updates model
@@ -78,7 +87,9 @@ test.describe("SynthWidget", () => {
     expect(result.saved).toBe(true);
 
     // UI should reflect the change
-    await expect(page.locator('.nbplay-osc-btn[data-type="saw"]')).toHaveClass(/active/);
+    await expect(page.locator('.nbplay-osc-btn[data-type="saw"]')).toHaveClass(
+      /active/,
+    );
   });
 
   // 6. Frequency display
@@ -112,7 +123,9 @@ test.describe("SynthWidget", () => {
     await page.evaluate(() => window.__testModel._trigger("change:is_playing"));
     await expect(btn).toContainText("Stop");
 
-    const playing = await page.evaluate(() => window.__testModel._state.is_playing);
+    const playing = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
     expect(playing).toBe(true);
 
     // Click again → stopped
@@ -120,12 +133,16 @@ test.describe("SynthWidget", () => {
     await page.evaluate(() => window.__testModel._trigger("change:is_playing"));
     await expect(btn).toContainText("Play");
 
-    const stopped = await page.evaluate(() => window.__testModel._state.is_playing);
+    const stopped = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
     expect(stopped).toBe(false);
   });
 
   // 9. Model change updates DOM
-  test("model change:frequency updates the frequency label", async ({ page }) => {
+  test("model change:frequency updates the frequency label", async ({
+    page,
+  }) => {
     await renderWidget(page, { frequency: 440 });
     await expect(page.locator(".nbplay-freq-val")).toHaveText("440.0 Hz");
 
@@ -136,7 +153,9 @@ test.describe("SynthWidget", () => {
     await expect(page.locator(".nbplay-freq-val")).toHaveText("1.50 kHz");
   });
 
-  test("model change:amplitude updates the amplitude label", async ({ page }) => {
+  test("model change:amplitude updates the amplitude label", async ({
+    page,
+  }) => {
     await renderWidget(page, { amplitude: 0.5 });
     await expect(page.locator(".nbplay-amp-val")).toHaveText("0.50");
 
@@ -147,20 +166,30 @@ test.describe("SynthWidget", () => {
     await expect(page.locator(".nbplay-amp-val")).toHaveText("0.82");
   });
 
-  test("model change:oscillator_type updates active button", async ({ page }) => {
+  test("model change:oscillator_type updates active button", async ({
+    page,
+  }) => {
     await renderWidget(page, { oscillator_type: "sine" });
-    await expect(page.locator('.nbplay-osc-btn[data-type="sine"]')).toHaveClass(/active/);
+    await expect(page.locator('.nbplay-osc-btn[data-type="sine"]')).toHaveClass(
+      /active/,
+    );
 
     await page.evaluate(() => {
       window.__testModel.set("oscillator_type", "noise");
       window.__testModel._trigger("change:oscillator_type");
     });
-    await expect(page.locator('.nbplay-osc-btn[data-type="noise"]')).toHaveClass(/active/);
-    await expect(page.locator('.nbplay-osc-btn[data-type="sine"]')).not.toHaveClass(/active/);
+    await expect(
+      page.locator('.nbplay-osc-btn[data-type="noise"]'),
+    ).toHaveClass(/active/);
+    await expect(
+      page.locator('.nbplay-osc-btn[data-type="sine"]'),
+    ).not.toHaveClass(/active/);
   });
 
   // 10. Double-click edit: frequency
-  test("double-click on freq label opens inline editor and commits on Enter", async ({ page }) => {
+  test("double-click on freq label opens inline editor and commits on Enter", async ({
+    page,
+  }) => {
     await renderWidget(page, { frequency: 440 });
 
     const freqVal = page.locator(".nbplay-freq-val");
@@ -198,7 +227,9 @@ test.describe("SynthWidget", () => {
     expect(freq).toBe(2000);
   });
 
-  test("double-click on amplitude label opens editor and commits", async ({ page }) => {
+  test("double-click on amplitude label opens editor and commits", async ({
+    page,
+  }) => {
     await renderWidget(page, { amplitude: 0.5 });
 
     await page.locator(".nbplay-amp-val").dblclick();
@@ -214,7 +245,9 @@ test.describe("SynthWidget", () => {
   });
 
   // 11. Double-click edit: Escape cancels
-  test("pressing Escape cancels inline edit without updating model", async ({ page }) => {
+  test("pressing Escape cancels inline edit without updating model", async ({
+    page,
+  }) => {
     await renderWidget(page, { frequency: 440 });
 
     await page.locator(".nbplay-freq-val").dblclick();
@@ -231,7 +264,9 @@ test.describe("SynthWidget", () => {
   });
 
   // 12. Double-commit guard (Enter + blur race)
-  test("Enter commit does not crash when blur fires afterwards", async ({ page }) => {
+  test("Enter commit does not crash when blur fires afterwards", async ({
+    page,
+  }) => {
     await renderWidget(page, { frequency: 440 });
 
     await page.locator(".nbplay-freq-val").dblclick();
@@ -256,7 +291,9 @@ test.describe("SynthWidget", () => {
 
   // ── Additional edge-case tests ───────────────────────────────
 
-  test("frequency is clamped to valid range via inline edit", async ({ page }) => {
+  test("frequency is clamped to valid range via inline edit", async ({
+    page,
+  }) => {
     await renderWidget(page, { frequency: 440 });
 
     // Try setting below minimum (20)
