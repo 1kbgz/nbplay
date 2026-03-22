@@ -63,24 +63,35 @@ function createMidiEngine() {
       if (!access) return [];
       const ports: MidiPort[] = [];
       access.inputs.forEach((port) => {
-        ports.push({ id: port.id, name: port.name || "(unnamed)", state: port.state });
+        ports.push({
+          id: port.id,
+          name: port.name || "(unnamed)",
+          state: port.state,
+        });
       });
       return ports;
     },
 
-    connectInput(portId: string, cb: (data: Uint8Array, timestamp: number) => void): void {
+    connectInput(
+      portId: string,
+      cb: (data: Uint8Array, timestamp: number) => void,
+    ): void {
       this.disconnectInput();
       if (!access) return;
       const port = access.inputs.get(portId);
       if (!port) return;
-      onMessage = (e: MIDIMessageEvent) => cb(e.data as Uint8Array, e.timeStamp);
+      onMessage = (e: MIDIMessageEvent) =>
+        cb(e.data as Uint8Array, e.timeStamp);
       port.addEventListener("midimessage", onMessage as EventListener);
       activeInput = port;
     },
 
     disconnectInput(): void {
       if (activeInput && onMessage) {
-        activeInput.removeEventListener("midimessage", onMessage as EventListener);
+        activeInput.removeEventListener(
+          "midimessage",
+          onMessage as EventListener,
+        );
       }
       activeInput = null;
       onMessage = null;
@@ -94,7 +105,13 @@ function createMidiEngine() {
 
 // ── Widget render ────────────────────────────────────────────────
 
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   const midi = createMidiEngine();
 
   const root = document.createElement("div");
@@ -166,18 +183,29 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
 
   const srSelect = root.querySelector(".nbplay-sr-select") as HTMLSelectElement;
   const chSelect = root.querySelector(".nbplay-ch-select") as HTMLSelectElement;
-  const bufSelect = root.querySelector(".nbplay-buf-select") as HTMLSelectElement;
-  const audioDevice = root.querySelector(".nbplay-audio-device") as HTMLSpanElement;
-  const midiSelect = root.querySelector(".nbplay-midi-select") as HTMLSelectElement;
-  const refreshBtn = root.querySelector(".nbplay-refresh-btn") as HTMLButtonElement;
-  const midiStatus = root.querySelector(".nbplay-midi-status") as HTMLSpanElement;
+  const bufSelect = root.querySelector(
+    ".nbplay-buf-select",
+  ) as HTMLSelectElement;
+  const audioDevice = root.querySelector(
+    ".nbplay-audio-device",
+  ) as HTMLSpanElement;
+  const midiSelect = root.querySelector(
+    ".nbplay-midi-select",
+  ) as HTMLSelectElement;
+  const refreshBtn = root.querySelector(
+    ".nbplay-refresh-btn",
+  ) as HTMLButtonElement;
+  const midiStatus = root.querySelector(
+    ".nbplay-midi-status",
+  ) as HTMLSpanElement;
   const midiLog = root.querySelector(".nbplay-midi-log") as HTMLDivElement;
 
   function syncAudio(): void {
     srSelect.value = String(model.get("sample_rate"));
     chSelect.value = String(model.get("channels"));
     bufSelect.value = String(model.get("buffer_size"));
-    audioDevice.textContent = (model.get("audio_device") as string) || "Default";
+    audioDevice.textContent =
+      (model.get("audio_device") as string) || "Default";
   }
 
   function syncMidiPort(): void {

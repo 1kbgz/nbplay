@@ -4,7 +4,13 @@
 
 import { type AnyModel, makeEditable } from "./helpers.ts";
 
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   el.innerHTML = `
   <div class="nbplay-transport">
     <div class="nbplay-transport-controls">
@@ -31,15 +37,31 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
     </div>
   </div>`;
 
-  const playBtn = el.querySelector(".nbplay-transport-play") as HTMLButtonElement;
-  const stopBtn = el.querySelector(".nbplay-transport-stop") as HTMLButtonElement;
-  const bpmSl = el.querySelector(".nbplay-transport-bpm-slider") as HTMLInputElement;
-  const bpmVal = el.querySelector(".nbplay-transport-bpm-val") as HTMLSpanElement;
-  const tsVal = el.querySelector(".nbplay-transport-timesig-val") as HTMLSpanElement;
+  const playBtn = el.querySelector(
+    ".nbplay-transport-play",
+  ) as HTMLButtonElement;
+  const stopBtn = el.querySelector(
+    ".nbplay-transport-stop",
+  ) as HTMLButtonElement;
+  const bpmSl = el.querySelector(
+    ".nbplay-transport-bpm-slider",
+  ) as HTMLInputElement;
+  const bpmVal = el.querySelector(
+    ".nbplay-transport-bpm-val",
+  ) as HTMLSpanElement;
+  const tsVal = el.querySelector(
+    ".nbplay-transport-timesig-val",
+  ) as HTMLSpanElement;
   const barDisp = el.querySelector(".nbplay-transport-bar") as HTMLSpanElement;
-  const beatDisp = el.querySelector(".nbplay-transport-beat") as HTMLSpanElement;
-  const loopBtn = el.querySelector(".nbplay-transport-loop-btn") as HTMLButtonElement;
-  const loopRng = el.querySelector(".nbplay-transport-loop-range") as HTMLSpanElement;
+  const beatDisp = el.querySelector(
+    ".nbplay-transport-beat",
+  ) as HTMLSpanElement;
+  const loopBtn = el.querySelector(
+    ".nbplay-transport-loop-btn",
+  ) as HTMLButtonElement;
+  const loopRng = el.querySelector(
+    ".nbplay-transport-loop-range",
+  ) as HTMLSpanElement;
 
   function syncPlay(): void {
     const on = model.get("is_playing") as boolean;
@@ -61,14 +83,17 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   }
 
   function syncPosition(): void {
-    barDisp.textContent = String((model.get("bar_number") as number) + 1).padStart(3, "0");
+    barDisp.textContent = String(
+      (model.get("bar_number") as number) + 1,
+    ).padStart(3, "0");
     beatDisp.textContent = String((model.get("beat_in_bar") as number) + 1);
   }
 
   function syncLoop(): void {
     loopBtn.classList.toggle("active", model.get("loop_enabled") as boolean);
     loopRng.textContent =
-      ((model.get("loop_start_bar") as number) + 1) +
+      (model.get("loop_start_bar") as number) +
+      1 +
       " \u2013 " +
       (model.get("loop_end_bar") as number);
   }
@@ -135,7 +160,8 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   function startClock(): void {
     clockStart = performance.now();
     beatOrigin =
-      (model.get("bar_number") as number) * (model.get("time_signature_num") as number) +
+      (model.get("bar_number") as number) *
+        (model.get("time_signature_num") as number) +
       (model.get("beat_in_bar") as number);
     clockTimer = setInterval(tickClock, 50);
   }
@@ -149,7 +175,8 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
 
   function tickClock(): void {
     const elapsed = (performance.now() - clockStart) / 1000;
-    const totalBeat = beatOrigin + Math.floor((elapsed * (model.get("bpm") as number)) / 60);
+    const totalBeat =
+      beatOrigin + Math.floor((elapsed * (model.get("bpm") as number)) / 60);
     const bpb = model.get("time_signature_num") as number;
 
     let bar = Math.floor(totalBeat / bpb);
@@ -166,7 +193,10 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       }
     }
 
-    if (bar !== (model.get("bar_number") as number) || beat !== (model.get("beat_in_bar") as number)) {
+    if (
+      bar !== (model.get("bar_number") as number) ||
+      beat !== (model.get("beat_in_bar") as number)
+    ) {
       model.set("bar_number", bar);
       model.set("beat_in_bar", beat);
       model.save_changes();
@@ -186,6 +216,15 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   });
 
   // ── Initial state ──
+  // Force stopped state on render — prevents stale is_playing=true
+  // from a saved notebook from starting the clock in an undefined state.
+  // Only update local model state; do NOT call save_changes() here
+  // because sending comm messages during render can race with other
+  // widgets still being initialised (e.g. Session dlinks).
+  model.set("is_playing", false);
+  model.set("bar_number", 0);
+  model.set("beat_in_bar", 0);
+
   syncPlay();
   syncBpm();
   syncTimeSig();

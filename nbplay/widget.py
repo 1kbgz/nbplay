@@ -229,10 +229,7 @@ class SequencerWidget(anywidget.AnyWidget):
 
     def _init_steps(self):
         """Initialise empty step grid."""
-        self.steps = [
-            {"note": 60, "velocity": 100, "duration_ticks": 1, "active": False}
-            for _ in range(self.length)
-        ]
+        self.steps = [{"note": 60, "velocity": 100, "duration_ticks": 1, "active": False} for _ in range(self.length)]
 
     def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True):
         """Set a step at the given index."""
@@ -304,6 +301,12 @@ class SamplerWidget(anywidget.AnyWidget):
     decay = traitlets.Float(0.1).tag(sync=True)
     sustain = traitlets.Float(0.8).tag(sync=True)
     release = traitlets.Float(0.1).tag(sync=True)
+
+    # Trigger pad notes (MIDI note numbers)
+    pad_notes = traitlets.List(
+        trait=traitlets.Int(),
+        default_value=[48, 52, 55, 59, 60, 64, 67, 71],
+    ).tag(sync=True)
 
     # Polyphony
     max_voices = traitlets.Int(8).tag(sync=True)
@@ -395,14 +398,8 @@ class Track:
         propagate ``is_playing=False`` back to the transport and stop
         every other sequencer.
         """
-        self._links.append(
-            traitlets.link((transport, "bpm"), (self.sequencer, "bpm"))
-        )
-        self._links.append(
-            traitlets.dlink(
-                (transport, "is_playing"), (self.sequencer, "is_playing")
-            )
-        )
+        self._links.append(traitlets.link((transport, "bpm"), (self.sequencer, "bpm")))
+        self._links.append(traitlets.dlink((transport, "is_playing"), (self.sequencer, "is_playing")))
 
     def _unlink(self):
         """Remove all traitlets links."""
@@ -462,8 +459,4 @@ class Session:
                     t.sequencer.channel_index -= 1
 
     def __repr__(self):
-        return (
-            f"Session(bpm={self.transport.bpm}, "
-            f"tracks={len(self.tracks)}, "
-            f"channels={len(self.mixer.channels)})"
-        )
+        return f"Session(bpm={self.transport.bpm}, tracks={len(self.tracks)}, channels={len(self.mixer.channels)})"

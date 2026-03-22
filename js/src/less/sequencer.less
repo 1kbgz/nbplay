@@ -1,7 +1,7 @@
 @import "_variables";
 @import "_mixins";
 
-/* nbplay SequencerWidget – dark-themed step sequencer */
+/* nbplay SequencerWidget – step sequencer themed to Jupyter environment */
 
 .nbplay-sequencer {
   font-family: @nb-font-mono;
@@ -27,7 +27,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #fff;
+  color: @nb-text;
   letter-spacing: 0.5px;
 }
 
@@ -36,7 +36,7 @@
   padding: 2px 8px;
   border-radius: @nb-radius-round;
   background: @nb-purple;
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0, #fff);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -68,12 +68,12 @@
 
 .nbplay-seq-btn:hover {
   border-color: @nb-cyan;
-  background: #1a1a3a;
+  background: var(--jp-layout-color2, #1a1a3a);
 }
 
 .nbplay-seq-btn.playing {
   background: @nb-green;
-  color: #000;
+  color: var(--jp-layout-color0, #000);
   border-color: @nb-green;
 }
 
@@ -173,7 +173,7 @@
 
 .nbplay-seq-header-cell.active-col {
   background: @nb-cyan;
-  color: #000;
+  color: var(--jp-layout-color0, #000);
   font-weight: 700;
 }
 
@@ -201,19 +201,21 @@
 
 .nbplay-seq-cell.active {
   background: @nb-purple;
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0, #fff);
   border-color: @nb-purple;
   font-weight: 700;
 }
 
 .nbplay-seq-cell.current {
-  box-shadow: 0 0 6px @nb-cyan, inset 0 0 4px @nb-cyan;
+  box-shadow:
+    0 0 6px @nb-cyan,
+    inset 0 0 4px @nb-cyan;
   border-color: @nb-cyan;
 }
 
 .nbplay-seq-cell.active.current {
   background: @nb-cyan;
-  color: #000;
+  color: var(--jp-layout-color0, #000);
 }
 
 /* Velocity row */

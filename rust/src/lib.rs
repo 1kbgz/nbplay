@@ -12,7 +12,7 @@ pub mod sequencer;
 // Re-export core types at crate root for convenience
 pub use audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
 pub use midi::{
-    ControlNumber, MidiChannel, MidiEvent, MidiMessage, Note, Velocity, hz_to_note, note_to_hz,
+    hz_to_note, note_to_hz, ControlNumber, MidiChannel, MidiEvent, MidiMessage, Note, Velocity,
 };
 #[cfg(not(target_arch = "wasm32"))]
 pub use midi_input::MidiInput;

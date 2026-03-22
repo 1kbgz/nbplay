@@ -38,7 +38,6 @@ from nbplay import (
     Velocity,
 )
 
-
 # ── Audio types ─────────────────────────────────────────────
 
 
@@ -297,12 +296,7 @@ class TestSineOscillator:
     def test_render_zero_crossings(self):
         osc = SineOscillator(440.0, 1.0, 44100)
         samples = osc.render_to_buffer(44100)
-        crossings = sum(
-            1
-            for i in range(1, len(samples))
-            if (samples[i - 1] >= 0 and samples[i] < 0)
-            or (samples[i - 1] < 0 and samples[i] >= 0)
-        )
+        crossings = sum(1 for i in range(1, len(samples)) if (samples[i - 1] >= 0 and samples[i] < 0) or (samples[i - 1] < 0 and samples[i] >= 0))
         # 440 Hz → 880 zero crossings per second (±2 tolerance)
         assert 878 <= crossings <= 882
 
@@ -532,17 +526,17 @@ class TestMixerChannel:
     def test_process_sample_muted(self):
         ch = MixerChannel("m")
         ch.mute = True
-        l, r = ch.process_sample(1.0)
-        assert l == 0.0
-        assert r == 0.0
+        left, right = ch.process_sample(1.0)
+        assert left == 0.0
+        assert right == 0.0
 
     def test_process_sample_center(self):
         ch = MixerChannel("c")
         ch.gain = 1.0
         ch.pan = 0.0
-        l, r = ch.process_sample(1.0)
+        left, right = ch.process_sample(1.0)
         # Center: L and R should be equal
-        assert abs(l - r) < 1e-5
+        assert abs(left - right) < 1e-5
 
     def test_repr(self):
         ch = MixerChannel("bass")
@@ -1204,11 +1198,7 @@ class TestSampleMap:
 class TestSampler:
     def _make_sample(self):
         """1 second 440 Hz sine at 44100 Hz."""
-        import math
-        data = [
-            math.sin(2 * math.pi * 440.0 * i / 44100)
-            for i in range(44100)
-        ]
+        data = [math.sin(2 * math.pi * 440.0 * i / 44100) for i in range(44100)]
         return AudioSample(data, 44100, 69)
 
     def test_construction(self):
@@ -1375,6 +1365,7 @@ class TestSamplerWidget:
         assert w.root_note == 69
         assert w.sample_length == 0
         assert w.waveform == b""
+        assert w.pad_notes == [48, 52, 55, 59, 60, 64, 67, 71]
         assert w.max_voices == 8
         assert w.session_id == ""
         assert w.channel_index == -1

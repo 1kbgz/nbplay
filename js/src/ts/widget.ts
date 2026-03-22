@@ -6,7 +6,7 @@
 //   • amplitude slider
 //   • play/stop via Web Audio API
 
-import { type AnyModel, makeEditable, toFloat32 } from "./helpers.ts";
+import { type AnyModel, cssVar, makeEditable, toFloat32 } from "./helpers.ts";
 
 // ── Frequency helpers (logarithmic mapping) ──────────────────────
 const MIN_FREQ = 20;
@@ -14,7 +14,9 @@ const MAX_FREQ = 8000;
 const LN_RATIO = Math.log(MAX_FREQ / MIN_FREQ);
 
 function freqToPos(freq: number): number {
-  return Math.log(Math.max(MIN_FREQ, Math.min(MAX_FREQ, freq)) / MIN_FREQ) / LN_RATIO;
+  return (
+    Math.log(Math.max(MIN_FREQ, Math.min(MAX_FREQ, freq)) / MIN_FREQ) / LN_RATIO
+  );
 }
 function posToFreq(pos: number): number {
   return MIN_FREQ * Math.exp(LN_RATIO * Math.max(0, Math.min(1, pos)));
@@ -24,7 +26,10 @@ function fmtFreq(hz: number): string {
 }
 
 // ── Waveform renderer ────────────────────────────────────────────
-function drawWaveform(canvas: HTMLCanvasElement, samples: Float32Array | null): void {
+function drawWaveform(
+  canvas: HTMLCanvasElement,
+  samples: Float32Array | null,
+): void {
   const dpr = window.devicePixelRatio || 1;
   const w = canvas.clientWidth || 600;
   const h = canvas.clientHeight || 128;
@@ -35,12 +40,18 @@ function drawWaveform(canvas: HTMLCanvasElement, samples: Float32Array | null): 
   const ctx = canvas.getContext("2d")!;
   ctx.scale(dpr, dpr);
 
+  // Read theme colours from CSS custom properties (with dark fallbacks)
+  const bg = cssVar(canvas, "--jp-layout-color0", "#080812");
+  const brand = cssVar(canvas, "--jp-brand-color1", "#00d4ff");
+  const grid = cssVar(canvas, "--jp-ui-font-color3", "#64648a");
+
   // Background
-  ctx.fillStyle = "#080812";
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
   // Grid – center line
-  ctx.strokeStyle = "rgba(100, 150, 220, 0.15)";
+  ctx.strokeStyle = grid;
+  ctx.globalAlpha = 0.35;
   ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
   ctx.beginPath();
@@ -50,36 +61,43 @@ function drawWaveform(canvas: HTMLCanvasElement, samples: Float32Array | null): 
   ctx.setLineDash([]);
 
   // Grid – quarter lines
-  ctx.strokeStyle = "rgba(100, 150, 220, 0.06)";
+  ctx.globalAlpha = 0.15;
   ctx.beginPath();
   ctx.moveTo(0, h * 0.25);
   ctx.lineTo(w, h * 0.25);
   ctx.moveTo(0, h * 0.75);
   ctx.lineTo(w, h * 0.75);
   ctx.stroke();
+  ctx.globalAlpha = 1;
 
   if (!samples || samples.length === 0) return;
 
   const step = samples.length / w;
 
   // Glow pass
-  ctx.strokeStyle = "rgba(0, 212, 255, 0.25)";
+  ctx.strokeStyle = brand;
+  ctx.globalAlpha = 0.25;
   ctx.lineWidth = 6;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
   for (let i = 0; i < w; i++) {
-    const y = (1 - samples[Math.min(Math.floor(i * step), samples.length - 1)]) * h / 2;
+    const y =
+      ((1 - samples[Math.min(Math.floor(i * step), samples.length - 1)]) * h) /
+      2;
     i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
   }
   ctx.stroke();
 
   // Main stroke
-  ctx.strokeStyle = "#00d4ff";
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = brand;
   ctx.lineWidth = 2;
   ctx.beginPath();
   for (let i = 0; i < w; i++) {
-    const y = (1 - samples[Math.min(Math.floor(i * step), samples.length - 1)]) * h / 2;
+    const y =
+      ((1 - samples[Math.min(Math.floor(i * step), samples.length - 1)]) * h) /
+      2;
     i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
   }
   ctx.stroke();
@@ -128,17 +146,31 @@ function createAudioEngine(): AudioEngine {
 
     stop(): void {
       if (srcNode) {
-        try { srcNode.stop(); } catch (_) { /* already stopped */ }
+        try {
+          srcNode.stop();
+        } catch (_) {
+          /* already stopped */
+        }
         srcNode.disconnect();
         srcNode = null;
       }
-      if (gainNode) { gainNode.disconnect(); gainNode = null; }
-      if (audioCtx) { audioCtx.close(); audioCtx = null; }
+      if (gainNode) {
+        gainNode.disconnect();
+        gainNode = null;
+      }
+      if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+      }
     },
 
     setFrequency(f: number): void {
       if (srcNode && (srcNode as OscillatorNode).frequency && audioCtx) {
-        (srcNode as OscillatorNode).frequency.setTargetAtTime(f, audioCtx.currentTime, 0.01);
+        (srcNode as OscillatorNode).frequency.setTargetAtTime(
+          f,
+          audioCtx.currentTime,
+          0.01,
+        );
       }
     },
 
@@ -151,7 +183,13 @@ function createAudioEngine(): AudioEngine {
 }
 
 // ── Widget render ────────────────────────────────────────────────
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   const audio = createAudioEngine();
 
   // ── DOM ──
@@ -198,19 +236,23 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   el.appendChild(root);
 
   // refs
-  const canvas   = root.querySelector(".nbplay-waveform") as HTMLCanvasElement;
-  const oscBtns  = root.querySelectorAll(".nbplay-osc-btn") as NodeListOf<HTMLButtonElement>;
-  const freqSl   = root.querySelector(".nbplay-freq") as HTMLInputElement;
-  const freqVal  = root.querySelector(".nbplay-freq-val") as HTMLSpanElement;
-  const ampSl    = root.querySelector(".nbplay-amp") as HTMLInputElement;
-  const ampVal   = root.querySelector(".nbplay-amp-val") as HTMLSpanElement;
-  const playBtn  = root.querySelector(".nbplay-play-btn") as HTMLButtonElement;
+  const canvas = root.querySelector(".nbplay-waveform") as HTMLCanvasElement;
+  const oscBtns = root.querySelectorAll(
+    ".nbplay-osc-btn",
+  ) as NodeListOf<HTMLButtonElement>;
+  const freqSl = root.querySelector(".nbplay-freq") as HTMLInputElement;
+  const freqVal = root.querySelector(".nbplay-freq-val") as HTMLSpanElement;
+  const ampSl = root.querySelector(".nbplay-amp") as HTMLInputElement;
+  const ampVal = root.querySelector(".nbplay-amp-val") as HTMLSpanElement;
+  const playBtn = root.querySelector(".nbplay-play-btn") as HTMLButtonElement;
   const infoSpan = root.querySelector(".nbplay-info") as HTMLSpanElement;
 
   // ── UI sync helpers ──
   function syncOsc(): void {
     const cur = model.get("oscillator_type") as string;
-    oscBtns.forEach((b) => b.classList.toggle("active", b.dataset.type === cur));
+    oscBtns.forEach((b) =>
+      b.classList.toggle("active", b.dataset.type === cur),
+    );
     const isNoise = cur === "noise";
     freqSl.disabled = isNoise;
   }
@@ -242,7 +284,11 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       if (raw.toLowerCase().includes("k")) v *= 1000;
       return Math.max(20, Math.min(8000, Math.round(v * 10) / 10));
     },
-    apply: (v) => { model.set("frequency", v); model.save_changes(); audio.setFrequency(v as number); },
+    apply: (v) => {
+      model.set("frequency", v);
+      model.save_changes();
+      audio.setFrequency(v as number);
+    },
     sync: syncFreq,
   });
 
@@ -253,7 +299,11 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       if (isNaN(v)) return null;
       return Math.max(0, Math.min(1, Math.round(v * 100) / 100));
     },
-    apply: (v) => { model.set("amplitude", v); model.save_changes(); audio.setAmplitude(v as number); },
+    apply: (v) => {
+      model.set("amplitude", v);
+      model.save_changes();
+      audio.setAmplitude(v as number);
+    },
     sync: syncAmp,
   });
 
@@ -303,8 +353,8 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
 
   // ── Model → UI observers ──
   model.on("change:oscillator_type", syncOsc);
-  model.on("change:frequency",       syncFreq);
-  model.on("change:amplitude",       syncAmp);
+  model.on("change:frequency", syncFreq);
+  model.on("change:amplitude", syncAmp);
   model.on("change:is_playing", () => {
     syncPlay();
     if (model.get("is_playing") as boolean) {
@@ -319,9 +369,16 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
     }
   });
   model.on("change:sample_rate", syncInfo);
-  model.on("change:waveform",    syncWaveform);
+  model.on("change:waveform", syncWaveform);
 
   // ── Initial state ──
+  // Force stopped state on render — prevents stale is_playing=true
+  // from a saved notebook from launching audio in an undefined state.
+  // Only update local model state; do NOT call save_changes() here
+  // because sending comm messages during render can race with other
+  // widgets still being initialised (e.g. Session dlinks).
+  model.set("is_playing", false);
+
   syncOsc();
   syncFreq();
   syncAmp();

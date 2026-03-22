@@ -1,7 +1,7 @@
 @import "_variables";
 @import "_mixins";
 
-/* nbplay SamplerWidget – dark-themed sampler panel */
+/* nbplay SamplerWidget – sampler panel themed to Jupyter environment */
 
 .nbplay-sampler {
   font-family: @nb-font-mono;
@@ -27,7 +27,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #fff;
+  color: @nb-text;
   letter-spacing: 0.5px;
 }
 
@@ -36,7 +36,7 @@
   padding: 2px 8px;
   border-radius: @nb-radius-round;
   background: @nb-green;
-  color: #000;
+  color: var(--jp-layout-color0, #000);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -183,17 +183,17 @@
 }
 
 .nbplay-samp-pad:hover {
-  background: #1a1a30;
+  background: var(--jp-layout-color2, #1a1a30);
   border-color: @nb-cyan;
 }
 
 .nbplay-samp-pad:active,
 .nbplay-samp-pad.active {
   background: @nb-cyan;
-  color: @nb-bg;
+  color: var(--jp-layout-color0, @nb-bg);
   border-color: @nb-cyan;
   transform: scale(0.95);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 12px color-mix(in srgb, @nb-cyan 40%, transparent);
 }
 
 .nbplay-samp-active-voices {
@@ -219,4 +219,11 @@
   outline: none;
   text-align: right;
   box-sizing: border-box;
+}
+
+.nbplay-samp-pad .nbplay-samp-inline-edit {
+  width: 100%;
+  font-size: 12px;
+  text-align: center;
+  padding: 0;
 }

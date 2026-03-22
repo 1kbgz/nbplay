@@ -454,12 +454,18 @@ impl PyStepSequencer {
         events
             .into_iter()
             .map(|e| match &e.message {
-                nbplay::MidiMessage::NoteOn {
-                    note, velocity, ..
-                } => ("note_on".to_string(), note.value(), velocity.value(), e.timestamp_us),
-                nbplay::MidiMessage::NoteOff {
-                    note, velocity, ..
-                } => ("note_off".to_string(), note.value(), velocity.value(), e.timestamp_us),
+                nbplay::MidiMessage::NoteOn { note, velocity, .. } => (
+                    "note_on".to_string(),
+                    note.value(),
+                    velocity.value(),
+                    e.timestamp_us,
+                ),
+                nbplay::MidiMessage::NoteOff { note, velocity, .. } => (
+                    "note_off".to_string(),
+                    note.value(),
+                    velocity.value(),
+                    e.timestamp_us,
+                ),
                 _ => ("other".to_string(), 0, 0, e.timestamp_us),
             })
             .collect()

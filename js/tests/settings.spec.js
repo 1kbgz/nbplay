@@ -71,7 +71,9 @@ test.describe("SettingsWidget", () => {
     await renderWidget(page);
     await page.locator(".nbplay-sr-select").selectOption("22050");
 
-    const val = await page.evaluate(() => window.__testModel._state.sample_rate);
+    const val = await page.evaluate(
+      () => window.__testModel._state.sample_rate,
+    );
     expect(val).toBe(22050);
   });
 
@@ -88,7 +90,9 @@ test.describe("SettingsWidget", () => {
   test("MIDI section is present", async ({ page }) => {
     await renderWidget(page);
     // The MIDI section is the second .nbplay-section; verify via its title text
-    const midiTitle = page.locator(".nbplay-section-title", { hasText: "MIDI Input" });
+    const midiTitle = page.locator(".nbplay-section-title", {
+      hasText: "MIDI Input",
+    });
     await expect(midiTitle).toBeVisible();
     await expect(page.locator(".nbplay-midi-select")).toBeVisible();
     await expect(page.locator(".nbplay-refresh-btn")).toBeVisible();
@@ -97,7 +101,9 @@ test.describe("SettingsWidget", () => {
   });
 
   // 9. Model change:sample_rate updates dropdown
-  test("model change:sample_rate updates sample rate dropdown", async ({ page }) => {
+  test("model change:sample_rate updates sample rate dropdown", async ({
+    page,
+  }) => {
     await renderWidget(page);
 
     await page.evaluate(() => {
@@ -148,14 +154,18 @@ test.describe("SettingsWidget", () => {
     await renderWidget(page);
     await page.locator(".nbplay-buf-select").selectOption("1024");
 
-    const val = await page.evaluate(() => window.__testModel._state.buffer_size);
+    const val = await page.evaluate(
+      () => window.__testModel._state.buffer_size,
+    );
     expect(val).toBe(1024);
   });
 
   // 15. Audio device shows device name from model
   test("audio device displays model value", async ({ page }) => {
     await renderWidget(page, { audio_device: "Built-in Speaker" });
-    await expect(page.locator(".nbplay-audio-device")).toHaveText("Built-in Speaker");
+    await expect(page.locator(".nbplay-audio-device")).toHaveText(
+      "Built-in Speaker",
+    );
   });
 
   // 16. Audio device shows Default when empty
@@ -165,7 +175,9 @@ test.describe("SettingsWidget", () => {
   });
 
   // 17. Model change:buffer_size updates dropdown
-  test("model change:buffer_size updates buffer size dropdown", async ({ page }) => {
+  test("model change:buffer_size updates buffer size dropdown", async ({
+    page,
+  }) => {
     await renderWidget(page);
 
     await page.evaluate(() => {

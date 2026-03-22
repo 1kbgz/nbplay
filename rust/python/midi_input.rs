@@ -14,9 +14,7 @@ impl PyMidiInput {
     fn py_new(client_name: &str) -> PyResult<Self> {
         let input = BaseMidiInput::new(client_name)
             .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e))?;
-        Ok(PyMidiInput {
-            inner: Some(input),
-        })
+        Ok(PyMidiInput { inner: Some(input) })
     }
 
     fn list_ports(&self) -> Vec<String> {

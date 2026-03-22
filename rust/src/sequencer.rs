@@ -353,9 +353,8 @@ impl StepSequencer {
                     ));
 
                     // NoteOff after duration
-                    let off_us =
-                        ((beat + step.duration_ticks as f64 * self.step_duration) * 1_000_000.0)
-                            as u64;
+                    let off_us = ((beat + step.duration_ticks as f64 * self.step_duration)
+                        * 1_000_000.0) as u64;
                     events.push(MidiEvent::new(
                         MidiMessage::NoteOff {
                             channel: self.channel,
@@ -689,14 +688,8 @@ mod tests {
     #[test]
     fn test_step_sequencer_triggers_active_steps() {
         let mut pattern = Pattern::new(4);
-        pattern.set_step(
-            0,
-            Step::new(Note::C4, Velocity::new(100).unwrap(), 1),
-        );
-        pattern.set_step(
-            2,
-            Step::new(Note::E4, Velocity::new(80).unwrap(), 1),
-        );
+        pattern.set_step(0, Step::new(Note::C4, Velocity::new(100).unwrap(), 1));
+        pattern.set_step(2, Step::new(Note::E4, Velocity::new(80).unwrap(), 1));
 
         let mut seq = StepSequencer::new(pattern, MidiChannel::new(0).unwrap());
         seq.step_duration = 0.25; // sixteenth notes
@@ -742,10 +735,7 @@ mod tests {
         let mut pattern = Pattern::new(4);
         // Activate all 4 steps
         for i in 0..4 {
-            pattern.set_step(
-                i,
-                Step::new(Note::C4, Velocity::new(100).unwrap(), 1),
-            );
+            pattern.set_step(i, Step::new(Note::C4, Velocity::new(100).unwrap(), 1));
         }
 
         let mut seq = StepSequencer::new(pattern, MidiChannel::new(0).unwrap());

@@ -147,7 +147,13 @@ function buildMasterStrip(gain: number): HTMLDivElement {
 
 // ── Widget render ───────────────────────────────────────────────
 
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
+function render({
+  model,
+  el,
+}: {
+  model: AnyModel;
+  el: HTMLElement;
+}): () => void {
   const root = document.createElement("div");
   root.className = "nbplay-mixer";
   root.innerHTML = `
@@ -160,8 +166,12 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   `;
   el.appendChild(root);
 
-  const console_ = root.querySelector(".nbplay-mixer-console") as HTMLDivElement;
-  const addBtn = root.querySelector(".nbplay-mixer-add-btn") as HTMLButtonElement;
+  const console_ = root.querySelector(
+    ".nbplay-mixer-console",
+  ) as HTMLDivElement;
+  const addBtn = root.querySelector(
+    ".nbplay-mixer-add-btn",
+  ) as HTMLButtonElement;
 
   // ── Audio bus for session routing ──
   const audioBus = createAudioBus();
@@ -191,41 +201,56 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       if (i >= channels.length) return;
       const ch = channels[i];
 
-      const fader = strip.querySelector(".nbplay-strip-fader") as HTMLInputElement;
+      const fader = strip.querySelector(
+        ".nbplay-strip-fader",
+      ) as HTMLInputElement;
       if (fader && document.activeElement !== fader) {
         fader.value = String(ch.gain);
       }
-      const gainLabel = strip.querySelector(".nbplay-strip-gain-label") as HTMLDivElement;
+      const gainLabel = strip.querySelector(
+        ".nbplay-strip-gain-label",
+      ) as HTMLDivElement;
       if (gainLabel) gainLabel.textContent = fmtGain(ch.gain);
 
       const pan = strip.querySelector(".nbplay-strip-pan") as HTMLInputElement;
       if (pan && document.activeElement !== pan) {
         pan.value = String(ch.pan);
       }
-      const panLabel = strip.querySelector(".nbplay-strip-pan-label") as HTMLSpanElement;
+      const panLabel = strip.querySelector(
+        ".nbplay-strip-pan-label",
+      ) as HTMLSpanElement;
       if (panLabel) panLabel.textContent = fmtPan(ch.pan);
 
-      const muteBtn = strip.querySelector(".nbplay-mute-btn") as HTMLButtonElement;
+      const muteBtn = strip.querySelector(
+        ".nbplay-mute-btn",
+      ) as HTMLButtonElement;
       if (muteBtn) muteBtn.classList.toggle("active", !!ch.mute);
 
-      const soloBtn = strip.querySelector(".nbplay-solo-btn") as HTMLButtonElement;
+      const soloBtn = strip.querySelector(
+        ".nbplay-solo-btn",
+      ) as HTMLButtonElement;
       if (soloBtn) soloBtn.classList.toggle("active", !!ch.solo);
 
-      const nameEl = strip.querySelector(".nbplay-strip-name") as HTMLDivElement;
+      const nameEl = strip.querySelector(
+        ".nbplay-strip-name",
+      ) as HTMLDivElement;
       if (nameEl) {
         nameEl.textContent = ch.name;
         nameEl.title = ch.name;
       }
     });
 
-    const masterFader = console_.querySelector(".nbplay-master-fader") as HTMLInputElement | null;
+    const masterFader = console_.querySelector(
+      ".nbplay-master-fader",
+    ) as HTMLInputElement | null;
     if (masterFader && document.activeElement !== masterFader) {
       masterFader.value = String(model.get("master_gain"));
     }
     const masterLabel = console_.querySelector(
       ".nbplay-master-strip .nbplay-strip-gain-label",
     ) as HTMLDivElement | null;
-    if (masterLabel) masterLabel.textContent = fmtGain(model.get("master_gain") as number);
+    if (masterLabel)
+      masterLabel.textContent = fmtGain(model.get("master_gain") as number);
   }
 
   // ── Full rebuild ──────────────────────────────────────────────
@@ -244,8 +269,12 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       const strip = buildChannelStrip(ch, i);
       console_.appendChild(strip);
 
-      const fader = strip.querySelector(".nbplay-strip-fader") as HTMLInputElement;
-      const gainLabel = strip.querySelector(".nbplay-strip-gain-label") as HTMLDivElement;
+      const fader = strip.querySelector(
+        ".nbplay-strip-fader",
+      ) as HTMLInputElement;
+      const gainLabel = strip.querySelector(
+        ".nbplay-strip-gain-label",
+      ) as HTMLDivElement;
       fader.addEventListener("pointerdown", () => {
         dragging = true;
       });
@@ -278,7 +307,9 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
 
       // Pan
       const pan = strip.querySelector(".nbplay-strip-pan") as HTMLInputElement;
-      const panLabel = strip.querySelector(".nbplay-strip-pan-label") as HTMLSpanElement;
+      const panLabel = strip.querySelector(
+        ".nbplay-strip-pan-label",
+      ) as HTMLSpanElement;
       pan.addEventListener("pointerdown", () => {
         dragging = true;
       });
@@ -311,21 +342,27 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
       });
 
       // Mute
-      const muteBtn = strip.querySelector(".nbplay-mute-btn") as HTMLButtonElement;
+      const muteBtn = strip.querySelector(
+        ".nbplay-mute-btn",
+      ) as HTMLButtonElement;
       muteBtn.addEventListener("click", () => {
         const cur = ((model.get("channels") as Channel[]) || [])[i];
         if (cur) updateChannel(i, "mute", !cur.mute);
       });
 
       // Solo
-      const soloBtn = strip.querySelector(".nbplay-solo-btn") as HTMLButtonElement;
+      const soloBtn = strip.querySelector(
+        ".nbplay-solo-btn",
+      ) as HTMLButtonElement;
       soloBtn.addEventListener("click", () => {
         const cur = ((model.get("channels") as Channel[]) || [])[i];
         if (cur) updateChannel(i, "solo", !cur.solo);
       });
 
       // Remove
-      const removeBtn = strip.querySelector(".nbplay-strip-remove") as HTMLButtonElement;
+      const removeBtn = strip.querySelector(
+        ".nbplay-strip-remove",
+      ) as HTMLButtonElement;
       removeBtn.addEventListener("click", () => {
         const chs = [...((model.get("channels") as Channel[]) || [])];
         chs.splice(i, 1);
@@ -338,8 +375,12 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
     const masterStrip = buildMasterStrip(model.get("master_gain") as number);
     console_.appendChild(masterStrip);
 
-    const masterFader = masterStrip.querySelector(".nbplay-master-fader") as HTMLInputElement;
-    const masterLabel = masterStrip.querySelector(".nbplay-strip-gain-label") as HTMLDivElement;
+    const masterFader = masterStrip.querySelector(
+      ".nbplay-master-fader",
+    ) as HTMLInputElement;
+    const masterLabel = masterStrip.querySelector(
+      ".nbplay-strip-gain-label",
+    ) as HTMLDivElement;
     masterFader.addEventListener("pointerdown", () => {
       dragging = true;
     });
@@ -407,7 +448,13 @@ function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void
   addBtn.addEventListener("click", () => {
     const chs = [...((model.get("channels") as Channel[]) || [])];
     const n = chs.length + 1;
-    chs.push({ name: "Ch " + n, gain: 0.8, pan: 0.0, mute: false, solo: false });
+    chs.push({
+      name: "Ch " + n,
+      gain: 0.8,
+      pan: 0.0,
+      mute: false,
+      solo: false,
+    });
     model.set("channels", chs);
     model.save_changes();
   });

@@ -1,8 +1,6 @@
 use pyo3::prelude::*;
 
-use nbplay::audio_output::{
-    AudioOutput as BaseAudioOutput, AudioOutputConfig, list_audio_devices,
-};
+use nbplay::audio_output::{list_audio_devices, AudioOutput as BaseAudioOutput, AudioOutputConfig};
 
 #[pyclass(name = "AudioOutput", unsendable)]
 pub struct PyAudioOutput {
@@ -41,10 +39,7 @@ impl PyAudioOutput {
     }
 
     fn is_playing(&self) -> bool {
-        self.inner
-            .as_ref()
-            .map(|o| o.is_playing())
-            .unwrap_or(false)
+        self.inner.as_ref().map(|o| o.is_playing()).unwrap_or(false)
     }
 
     fn stop(&mut self) {

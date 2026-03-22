@@ -1,37 +1,38 @@
 // ── nbplay shared Less variables ─────────────────────────────────
-// Common colours, fonts, and radii used across all widget styles.
+// Maps to JupyterLab CSS custom properties so widgets automatically
+// adapt to the user's chosen Jupyter theme.  Fallback values provide
+// a dark default when rendered outside JupyterLab.
 
-// Base palette
-@nb-bg:       #0f0f1a;
-@nb-surface:  #14142a;
-@nb-border:   #1e1e3a;
-@nb-text:     #e0e4f0;
-@nb-muted:    #8888aa;
-@nb-dim:      #64648a;
+// Base palette — JupyterLab layout / border / text hierarchy
+@nb-bg: var(--jp-layout-color0, #0f0f1a);
+@nb-surface: var(--jp-layout-color1, #14142a);
+@nb-border: var(--jp-border-color1, #1e1e3a);
+@nb-text: var(--jp-ui-font-color0, #e0e4f0);
+@nb-muted: var(--jp-ui-font-color2, #8888aa);
+@nb-dim: var(--jp-ui-font-color3, #64648a);
 
-// Accent colours
-@nb-cyan:     #00d4ff;
-@nb-purple:   #7c3aed;
-@nb-purple-light: #a855f7;
-@nb-purple-badge: #c084fc;
-@nb-red:      #ef4444;
-@nb-orange:   #f97316;
-@nb-green:    #22c55e;
+// Accent colours — JupyterLab brand / state palette
+@nb-cyan: var(--jp-brand-color1, #00d4ff);
+@nb-purple: var(--jp-brand-color0, #7c3aed);
+@nb-purple-light: var(--jp-brand-color2, #a855f7);
+@nb-purple-badge: var(--jp-brand-color3, #c084fc);
+@nb-red: var(--jp-error-color1, #ef4444);
+@nb-orange: var(--jp-warn-color1, #f97316);
+@nb-green: var(--jp-success-color1, #22c55e);
 
-// Fonts
-@nb-font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", Consolas, monospace;
-@nb-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               Helvetica, Arial, sans-serif;
+// Fonts — inherit from JupyterLab
+@nb-font-mono: var(--jp-code-font-family, monospace);
+@nb-font-sans: var(--jp-ui-font-family, sans-serif);
 
-// Dimensions
-@nb-radius:       12px;
-@nb-radius-sm:    8px;
-@nb-radius-xs:    6px;
+// Dimensions (geometric; independent of colour theme)
+@nb-radius: 12px;
+@nb-radius-sm: 8px;
+@nb-radius-xs: 6px;
 @nb-radius-round: 999px;
 
 // Shadows
-@nb-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+@nb-shadow: var(--jp-elevation-z4, 0 4px 24px rgba(0, 0, 0, 0.5));
 
-// Mixer-specific darker palette
-@nb-mixer-bg:     #1a1a2e;
-@nb-mixer-border: #2d2d4a;
+// Mixer-specific
+@nb-mixer-bg: var(--jp-layout-color1, #1a1a2e);
+@nb-mixer-border: var(--jp-border-color0, #2d2d4a);

@@ -8,6 +8,15 @@ export interface AnyModel {
   on(event: string, callback: (...args: unknown[]) => void): void;
 }
 
+/**
+ * Read a CSS custom property from the element (or its nearest ancestor).
+ * Falls back to `fallback` if the property is not set.
+ */
+export function cssVar(el: Element, name: string, fallback: string): string {
+  const v = getComputedStyle(el).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
 /** Options for makeEditable. */
 export interface EditableOpts {
   className?: string;
