@@ -100,6 +100,11 @@ filename = "rust/Cargo.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
+[[tool.bumpversion.files]]
+filename = "binder/requirements.txt"
+search = "jupyterlab_templates=={current_version}"
+replace = "jupyterlab_templates=={new_version}"
+
 [tool.cibuildwheel]
 build = "cp310-*"
 test-command = "pytest -vvv {project}/nbplay/tests"
