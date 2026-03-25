@@ -1,4 +1,6 @@
+import json
 import math
+import pathlib
 import struct
 
 import pytest
@@ -1692,3 +1694,37 @@ class TestSession:
         assert "140.0" in r
         assert "tracks=1" in r
         assert "channels=1" in r
+
+
+class TestDemoNotebook:
+    def test_demo_notebook_indexes_prefixed_examples(self):
+        examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"
+        demo_path = examples_dir / "demo.ipynb"
+        demo = json.loads(demo_path.read_text())
+
+        markdown_text = "\n".join("\n".join(cell.get("source", [])) for cell in demo["cells"] if cell.get("cell_type") == "markdown")
+
+        assert "# nbplay Example Notebooks" in markdown_text
+        for notebook_name in [
+            "01_quick_start.ipynb",
+            "02_settings.ipynb",
+            "03_synth.ipynb",
+            "04_sampler.ipynb",
+            "05_sequencer.ipynb",
+            "06_transport.ipynb",
+            "07_mixer.ipynb",
+            "08_session_walkthrough.ipynb",
+            "09_rust_bridge.ipynb",
+        ]:
+            assert notebook_name in markdown_text
+            assert (examples_dir / notebook_name).exists()
+
+    def test_prefixed_example_notebooks_have_language_metadata(self):
+        examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"
+        for notebook_path in sorted(examples_dir.glob("[0-9][0-9]_*.ipynb")):
+            notebook = json.loads(notebook_path.read_text())
+            assert notebook.get("cells")
+            for cell in notebook["cells"]:
+                assert "metadata" in cell
+                assert "language" in cell["metadata"]
+                assert "id" in cell["metadata"]
