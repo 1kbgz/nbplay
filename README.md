@@ -6,6 +6,7 @@ let's play!
 [![codecov](https://codecov.io/gh/1kbgz/nbplay/branch/main/graph/badge.svg)](https://codecov.io/gh/1kbgz/nbplay)
 [![License](https://img.shields.io/github/license/1kbgz/nbplay)](https://github.com/1kbgz/nbplay)
 [![PyPI](https://img.shields.io/pypi/v/nbplay.svg)](https://pypi.python.org/pypi/nbplay)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/1kbgz/nbplay/main?urlpath=lab)
 
 ## Overview
 

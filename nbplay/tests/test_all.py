@@ -1,4 +1,6 @@
+import json
 import math
+import pathlib
 import struct
 
 import pytest
@@ -1692,3 +1694,15 @@ class TestSession:
         assert "140.0" in r
         assert "tracks=1" in r
         assert "channels=1" in r
+
+
+class TestDemoNotebook:
+    def test_prefixed_example_notebooks_have_language_metadata(self):
+        examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"
+        for notebook_path in sorted(examples_dir.glob("[0-9][0-9]_*.ipynb")):
+            notebook = json.loads(notebook_path.read_text())
+            assert notebook.get("cells")
+            for cell in notebook["cells"]:
+                assert "metadata" in cell
+                assert "language" in cell["metadata"]
+                assert "id" in cell["metadata"]
