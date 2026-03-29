@@ -15,6 +15,7 @@ jobs:
       - uses: actions-ext/python/setup@main
       - uses: actions-ext/rust/setup@main
       - uses: actions-ext/node/setup@main
+      - run: sudo apt-get update && sudo apt-get install -y libasound2-dev
       - run: make develop
       - run: uv pip install .
       - run: uv pip install yardang
