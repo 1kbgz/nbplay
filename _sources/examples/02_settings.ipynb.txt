@@ -1,0 +1,40 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0",
+   "metadata": {
+    "id": "settings-title",
+    "language": "markdown"
+   },
+   "source": [
+    "# 02 SettingsWidget TutorialConfigure sample rate, channels, buffer size, and MIDI port selection."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1",
+   "metadata": {
+    "id": "settings-code",
+    "language": "python"
+   },
+   "outputs": [],
+   "source": [
+    "from nbplay import SettingsWidgetsettings = SettingsWidget(    sample_rate=44100,    channels=2,    buffer_size=512,)settings"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

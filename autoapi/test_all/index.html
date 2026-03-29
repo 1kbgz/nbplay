@@ -9,7 +9,7 @@
         <title>test_all - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
@@ -235,12 +235,108 @@
         <article role="main" id="furo-main-content">
           <section id="module-test_all">
 <span id="test-all"></span><h1>test_all<a class="headerlink" href="#module-test_all" title="Link to this heading">¶</a></h1>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.test_all" title="test_all.test_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_all</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestAudioFormat" title="test_all.TestAudioFormat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestAudioFormat</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestAudioBuffer" title="test_all.TestAudioBuffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestAudioBuffer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestMidiChannel" title="test_all.TestMidiChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiChannel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestNote" title="test_all.TestNote"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestNote</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestVelocity" title="test_all.TestVelocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestVelocity</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMidiMessage" title="test_all.TestMidiMessage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiMessage</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestMidiEvent" title="test_all.TestMidiEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiEvent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSineOscillator" title="test_all.TestSineOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSineOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSquareOscillator" title="test_all.TestSquareOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSquareOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSawOscillator" title="test_all.TestSawOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSawOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestNoiseSource" title="test_all.TestNoiseSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestNoiseSource</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSynthWidget" title="test_all.TestSynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSynthWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSettingsWidget" title="test_all.TestSettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSettingsWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMixerChannel" title="test_all.TestMixerChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMixerChannel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestMixer" title="test_all.TestMixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMixer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMixerWidget" title="test_all.TestMixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMixerWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestStep" title="test_all.TestStep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestStep</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestPattern" title="test_all.TestPattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPattern</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestNoteEvent" title="test_all.TestNoteEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestNoteEvent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestEventSequence" title="test_all.TestEventSequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestEventSequence</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTransportClock" title="test_all.TestTransportClock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportClock</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestStepSequencer" title="test_all.TestStepSequencer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestStepSequencer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestAudioSample" title="test_all.TestAudioSample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestAudioSample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestEnvelope" title="test_all.TestEnvelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestEnvelope</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSampleMapping" title="test_all.TestSampleMapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSampleMapping</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSampleMap" title="test_all.TestSampleMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSampleMap</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSampler" title="test_all.TestSampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSampler</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSequencerWidget" title="test_all.TestSequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSequencerWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSamplerWidget" title="test_all.TestSamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSamplerWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestTransportWidget" title="test_all.TestTransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSession" title="test_all.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestDemoNotebook" title="test_all.TestDemoNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -249,10 +345,1307 @@
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="test_all.test_all">
-<span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">test_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.test_all" title="Link to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestAudioFormat</span></span><a class="headerlink" href="#test_all.TestAudioFormat" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioFormat.test_construction" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioFormat.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioFormat.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat.test_str">
+<span class="sig-name descname"><span class="pre">test_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioFormat.test_str" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioFormat.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioFormat.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestAudioBuffer</span></span><a class="headerlink" href="#test_all.TestAudioBuffer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_stereo">
+<span class="sig-name descname"><span class="pre">test_stereo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_stereo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_sample_at_and_set_sample">
+<span class="sig-name descname"><span class="pre">test_sample_at_and_set_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_sample_at_and_set_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_clear">
+<span class="sig-name descname"><span class="pre">test_clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_to_list">
+<span class="sig-name descname"><span class="pre">test_to_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_to_list" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_format_property">
+<span class="sig-name descname"><span class="pre">test_format_property</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_format_property" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioBuffer.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioBuffer.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiChannel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiChannel</span></span><a class="headerlink" href="#test_all.TestMidiChannel" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiChannel.test_valid_range">
+<span class="sig-name descname"><span class="pre">test_valid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiChannel.test_valid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiChannel.test_invalid_range">
+<span class="sig-name descname"><span class="pre">test_invalid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiChannel.test_invalid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiChannel.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiChannel.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiChannel.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiChannel.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestNote">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestNote</span></span><a class="headerlink" href="#test_all.TestNote" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_valid_range">
+<span class="sig-name descname"><span class="pre">test_valid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_valid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_invalid_range">
+<span class="sig-name descname"><span class="pre">test_invalid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_invalid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_to_hz_a4">
+<span class="sig-name descname"><span class="pre">test_to_hz_a4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_to_hz_a4" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_to_hz_c4">
+<span class="sig-name descname"><span class="pre">test_to_hz_c4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_to_hz_c4" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_to_hz_octave">
+<span class="sig-name descname"><span class="pre">test_to_hz_octave</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_to_hz_octave" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_from_hz">
+<span class="sig-name descname"><span class="pre">test_from_hz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_from_hz" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNote.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNote.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestVelocity">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestVelocity</span></span><a class="headerlink" href="#test_all.TestVelocity" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestVelocity.test_valid_range">
+<span class="sig-name descname"><span class="pre">test_valid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestVelocity.test_valid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestVelocity.test_invalid_range">
+<span class="sig-name descname"><span class="pre">test_invalid_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestVelocity.test_invalid_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestVelocity.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestVelocity.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiMessage</span></span><a class="headerlink" href="#test_all.TestMidiMessage" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_note_on">
+<span class="sig-name descname"><span class="pre">test_note_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_note_on" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_note_off">
+<span class="sig-name descname"><span class="pre">test_note_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_note_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_control_change">
+<span class="sig-name descname"><span class="pre">test_control_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_control_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_program_change">
+<span class="sig-name descname"><span class="pre">test_program_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_program_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_pitch_bend">
+<span class="sig-name descname"><span class="pre">test_pitch_bend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_pitch_bend" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_clock">
+<span class="sig-name descname"><span class="pre">test_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_clock" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_start">
+<span class="sig-name descname"><span class="pre">test_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_stop">
+<span class="sig-name descname"><span class="pre">test_stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_invalid_channel">
+<span class="sig-name descname"><span class="pre">test_invalid_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_invalid_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_invalid_note">
+<span class="sig-name descname"><span class="pre">test_invalid_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_invalid_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiMessage.test_invalid_velocity">
+<span class="sig-name descname"><span class="pre">test_invalid_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiMessage.test_invalid_velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiEvent</span></span><a class="headerlink" href="#test_all.TestMidiEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiEvent.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiEvent.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiEvent.test_message_roundtrip">
+<span class="sig-name descname"><span class="pre">test_message_roundtrip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiEvent.test_message_roundtrip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiEvent.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiEvent.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSineOscillator</span></span><a class="headerlink" href="#test_all.TestSineOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_render_length">
+<span class="sig-name descname"><span class="pre">test_render_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_render_length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_render_peak_amplitude">
+<span class="sig-name descname"><span class="pre">test_render_peak_amplitude</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_render_peak_amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_render_custom_amplitude">
+<span class="sig-name descname"><span class="pre">test_render_custom_amplitude</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_render_custom_amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_render_zero_crossings">
+<span class="sig-name descname"><span class="pre">test_render_zero_crossings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_render_zero_crossings" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSineOscillator.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSineOscillator.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSquareOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSquareOscillator</span></span><a class="headerlink" href="#test_all.TestSquareOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSquareOscillator.test_render_values">
+<span class="sig-name descname"><span class="pre">test_render_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSquareOscillator.test_render_values" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSquareOscillator.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSquareOscillator.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSawOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSawOscillator</span></span><a class="headerlink" href="#test_all.TestSawOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSawOscillator.test_render_ramps">
+<span class="sig-name descname"><span class="pre">test_render_ramps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSawOscillator.test_render_ramps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSawOscillator.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSawOscillator.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestNoiseSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestNoiseSource</span></span><a class="headerlink" href="#test_all.TestNoiseSource" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoiseSource.test_render_range">
+<span class="sig-name descname"><span class="pre">test_render_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoiseSource.test_render_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoiseSource.test_render_nonconstant">
+<span class="sig-name descname"><span class="pre">test_render_nonconstant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoiseSource.test_render_nonconstant" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoiseSource.test_deterministic">
+<span class="sig-name descname"><span class="pre">test_deterministic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoiseSource.test_deterministic" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoiseSource.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoiseSource.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSynthWidget</span></span><a class="headerlink" href="#test_all.TestSynthWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_waveform_generated_on_init">
+<span class="sig-name descname"><span class="pre">test_waveform_generated_on_init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_waveform_generated_on_init" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_waveform_is_binary_float32">
+<span class="sig-name descname"><span class="pre">test_waveform_is_binary_float32</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_waveform_is_binary_float32" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_waveform_updates_on_type_change">
+<span class="sig-name descname"><span class="pre">test_waveform_updates_on_type_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_waveform_updates_on_type_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_waveform_updates_on_frequency_change">
+<span class="sig-name descname"><span class="pre">test_waveform_updates_on_frequency_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_waveform_updates_on_frequency_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_waveform_updates_on_amplitude_change">
+<span class="sig-name descname"><span class="pre">test_waveform_updates_on_amplitude_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_waveform_updates_on_amplitude_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_noise_waveform">
+<span class="sig-name descname"><span class="pre">test_noise_waveform</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_noise_waveform" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_custom_init">
+<span class="sig-name descname"><span class="pre">test_custom_init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_custom_init" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSettingsWidget</span></span><a class="headerlink" href="#test_all.TestSettingsWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_custom_init">
+<span class="sig-name descname"><span class="pre">test_custom_init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_custom_init" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_set_sample_rate">
+<span class="sig-name descname"><span class="pre">test_set_sample_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_set_sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_set_channels">
+<span class="sig-name descname"><span class="pre">test_set_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_set_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_set_buffer_size">
+<span class="sig-name descname"><span class="pre">test_set_buffer_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_set_buffer_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_set_midi_port">
+<span class="sig-name descname"><span class="pre">test_set_midi_port</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_set_midi_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_set_available_midi_ports">
+<span class="sig-name descname"><span class="pre">test_set_available_midi_ports</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_set_available_midi_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSettingsWidget.test_midi_event_bytes">
+<span class="sig-name descname"><span class="pre">test_midi_event_bytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSettingsWidget.test_midi_event_bytes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMixerChannel</span></span><a class="headerlink" href="#test_all.TestMixerChannel" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_setters">
+<span class="sig-name descname"><span class="pre">test_setters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_setters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_gain_clamped">
+<span class="sig-name descname"><span class="pre">test_gain_clamped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_gain_clamped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_pan_clamped">
+<span class="sig-name descname"><span class="pre">test_pan_clamped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_pan_clamped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_process_sample_muted">
+<span class="sig-name descname"><span class="pre">test_process_sample_muted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_process_sample_muted" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_process_sample_center">
+<span class="sig-name descname"><span class="pre">test_process_sample_center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_process_sample_center" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerChannel.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerChannel.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMixer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMixer</span></span><a class="headerlink" href="#test_all.TestMixer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_empty">
+<span class="sig-name descname"><span class="pre">test_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_empty" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_add_channels">
+<span class="sig-name descname"><span class="pre">test_add_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_add_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_remove_channel">
+<span class="sig-name descname"><span class="pre">test_remove_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_remove_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_remove_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_remove_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_remove_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_get_channel">
+<span class="sig-name descname"><span class="pre">test_get_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_get_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_get_channel_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_get_channel_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_get_channel_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_set_channel_gain">
+<span class="sig-name descname"><span class="pre">test_set_channel_gain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_set_channel_gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_set_channel_pan">
+<span class="sig-name descname"><span class="pre">test_set_channel_pan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_set_channel_pan" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_set_channel_mute">
+<span class="sig-name descname"><span class="pre">test_set_channel_mute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_set_channel_mute" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_set_channel_solo">
+<span class="sig-name descname"><span class="pre">test_set_channel_solo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_set_channel_solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_master_gain_clamped">
+<span class="sig-name descname"><span class="pre">test_master_gain_clamped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_master_gain_clamped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_mix_down_single">
+<span class="sig-name descname"><span class="pre">test_mix_down_single</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_mix_down_single" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_mix_down_muted">
+<span class="sig-name descname"><span class="pre">test_mix_down_muted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_mix_down_muted" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_mix_down_wrong_count">
+<span class="sig-name descname"><span class="pre">test_mix_down_wrong_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_mix_down_wrong_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixer.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixer.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMixerWidget</span></span><a class="headerlink" href="#test_all.TestMixerWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_add_channel">
+<span class="sig-name descname"><span class="pre">test_add_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_add_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_add_multiple_channels">
+<span class="sig-name descname"><span class="pre">test_add_multiple_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_add_multiple_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_remove_channel">
+<span class="sig-name descname"><span class="pre">test_remove_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_remove_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_remove_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_remove_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_remove_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_gain">
+<span class="sig-name descname"><span class="pre">test_set_channel_gain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_gain_clamped">
+<span class="sig-name descname"><span class="pre">test_set_channel_gain_clamped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_gain_clamped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_pan">
+<span class="sig-name descname"><span class="pre">test_set_channel_pan</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_pan" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_mute">
+<span class="sig-name descname"><span class="pre">test_set_channel_mute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_mute" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_solo">
+<span class="sig-name descname"><span class="pre">test_set_channel_solo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_to_mixer">
+<span class="sig-name descname"><span class="pre">test_to_mixer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_to_mixer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_to_mixer_mix_down">
+<span class="sig-name descname"><span class="pre">test_to_mixer_mix_down</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_to_mixer_mix_down" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestStep">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestStep</span></span><a class="headerlink" href="#test_all.TestStep" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_setters">
+<span class="sig-name descname"><span class="pre">test_setters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_setters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_invalid_note">
+<span class="sig-name descname"><span class="pre">test_invalid_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_invalid_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_invalid_velocity">
+<span class="sig-name descname"><span class="pre">test_invalid_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_invalid_velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStep.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStep.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestPattern">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestPattern</span></span><a class="headerlink" href="#test_all.TestPattern" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_default_length">
+<span class="sig-name descname"><span class="pre">test_default_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_default_length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_set_step">
+<span class="sig-name descname"><span class="pre">test_set_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_set_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_set_step_out_of_range">
+<span class="sig-name descname"><span class="pre">test_set_step_out_of_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_set_step_out_of_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_toggle_step">
+<span class="sig-name descname"><span class="pre">test_toggle_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_toggle_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_get_step_out_of_range">
+<span class="sig-name descname"><span class="pre">test_get_step_out_of_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_get_step_out_of_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_clear">
+<span class="sig-name descname"><span class="pre">test_clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestPattern.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestPattern.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestNoteEvent</span></span><a class="headerlink" href="#test_all.TestNoteEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_end_position">
+<span class="sig-name descname"><span class="pre">test_end_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_end_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_setters">
+<span class="sig-name descname"><span class="pre">test_setters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_setters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_invalid_note">
+<span class="sig-name descname"><span class="pre">test_invalid_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_invalid_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestNoteEvent.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestNoteEvent.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestEventSequence">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestEventSequence</span></span><a class="headerlink" href="#test_all.TestEventSequence" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_empty">
+<span class="sig-name descname"><span class="pre">test_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_empty" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_add_events_sorted">
+<span class="sig-name descname"><span class="pre">test_add_events_sorted</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_add_events_sorted" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_remove_event">
+<span class="sig-name descname"><span class="pre">test_remove_event</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_remove_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_events_in_range">
+<span class="sig-name descname"><span class="pre">test_events_in_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_events_in_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_events_starting_in_range">
+<span class="sig-name descname"><span class="pre">test_events_starting_in_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_events_starting_in_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_duration">
+<span class="sig-name descname"><span class="pre">test_duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_clear">
+<span class="sig-name descname"><span class="pre">test_clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEventSequence.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEventSequence.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestTransportClock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTransportClock</span></span><a class="headerlink" href="#test_all.TestTransportClock" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_play_stop">
+<span class="sig-name descname"><span class="pre">test_play_stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_play_stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_pause">
+<span class="sig-name descname"><span class="pre">test_pause</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_pause" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_seek">
+<span class="sig-name descname"><span class="pre">test_seek</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_seek" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_advance">
+<span class="sig-name descname"><span class="pre">test_advance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_advance" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_advance_stopped">
+<span class="sig-name descname"><span class="pre">test_advance_stopped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_advance_stopped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_beat_time_conversion">
+<span class="sig-name descname"><span class="pre">test_beat_time_conversion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_beat_time_conversion" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_tick_conversion">
+<span class="sig-name descname"><span class="pre">test_tick_conversion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_tick_conversion" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_set_bpm">
+<span class="sig-name descname"><span class="pre">test_set_bpm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_set_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportClock.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportClock.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestStepSequencer</span></span><a class="headerlink" href="#test_all.TestStepSequencer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStepSequencer.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer.test_process_empty">
+<span class="sig-name descname"><span class="pre">test_process_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStepSequencer.test_process_empty" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer.test_process_active_steps">
+<span class="sig-name descname"><span class="pre">test_process_active_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStepSequencer.test_process_active_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer.test_reset">
+<span class="sig-name descname"><span class="pre">test_reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStepSequencer.test_reset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestStepSequencer.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestStepSequencer.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestAudioSample">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestAudioSample</span></span><a class="headerlink" href="#test_all.TestAudioSample" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_duration">
+<span class="sig-name descname"><span class="pre">test_duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_loop_points">
+<span class="sig-name descname"><span class="pre">test_loop_points</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_loop_points" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_data">
+<span class="sig-name descname"><span class="pre">test_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_invalid_root_note">
+<span class="sig-name descname"><span class="pre">test_invalid_root_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_invalid_root_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestAudioSample.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestAudioSample.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestEnvelope">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestEnvelope</span></span><a class="headerlink" href="#test_all.TestEnvelope" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_custom">
+<span class="sig-name descname"><span class="pre">test_custom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_custom" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_setters">
+<span class="sig-name descname"><span class="pre">test_setters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_setters" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_sustain_clamped">
+<span class="sig-name descname"><span class="pre">test_sustain_clamped</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_sustain_clamped" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestEnvelope.test_eq">
+<span class="sig-name descname"><span class="pre">test_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestEnvelope.test_eq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSampleMapping">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSampleMapping</span></span><a class="headerlink" href="#test_all.TestSampleMapping" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMapping.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMapping.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMapping.test_matches_range">
+<span class="sig-name descname"><span class="pre">test_matches_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMapping.test_matches_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMapping.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMapping.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSampleMap">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSampleMap</span></span><a class="headerlink" href="#test_all.TestSampleMap" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMap.test_empty">
+<span class="sig-name descname"><span class="pre">test_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMap.test_empty" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMap.test_single_sample">
+<span class="sig-name descname"><span class="pre">test_single_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMap.test_single_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMap.test_multi_sample">
+<span class="sig-name descname"><span class="pre">test_multi_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMap.test_multi_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampleMap.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampleMap.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSampler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSampler</span></span><a class="headerlink" href="#test_all.TestSampler" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler._make_sample">
+<span class="sig-name descname"><span class="pre">_make_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler._make_sample" title="Link to this definition">¶</a></dt>
+<dd><p>1 second 440 Hz sine at 44100 Hz.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_construction">
+<span class="sig-name descname"><span class="pre">test_construction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_construction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_note_on">
+<span class="sig-name descname"><span class="pre">test_note_on</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_note_on" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_note_on_multiple">
+<span class="sig-name descname"><span class="pre">test_note_on_multiple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_note_on_multiple" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_note_off">
+<span class="sig-name descname"><span class="pre">test_note_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_note_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_voice_stealing">
+<span class="sig-name descname"><span class="pre">test_voice_stealing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_voice_stealing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_render">
+<span class="sig-name descname"><span class="pre">test_render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_render" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_panic">
+<span class="sig-name descname"><span class="pre">test_panic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_panic" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_all_notes_off">
+<span class="sig-name descname"><span class="pre">test_all_notes_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_all_notes_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSampler.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSampler.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSequencerWidget</span></span><a class="headerlink" href="#test_all.TestSequencerWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_steps_initialised">
+<span class="sig-name descname"><span class="pre">test_steps_initialised</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_steps_initialised" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_custom_length">
+<span class="sig-name descname"><span class="pre">test_custom_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_custom_length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_set_step">
+<span class="sig-name descname"><span class="pre">test_set_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_set_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_set_step_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_set_step_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_set_step_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_toggle_step">
+<span class="sig-name descname"><span class="pre">test_toggle_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_toggle_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_toggle_step_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_toggle_step_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_toggle_step_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_clear">
+<span class="sig-name descname"><span class="pre">test_clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_to_pattern">
+<span class="sig-name descname"><span class="pre">test_to_pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_to_pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_to_step_sequencer">
+<span class="sig-name descname"><span class="pre">test_to_step_sequencer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_to_step_sequencer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_bpm_change">
+<span class="sig-name descname"><span class="pre">test_bpm_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_bpm_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSequencerWidget.test_transport">
+<span class="sig-name descname"><span class="pre">test_transport</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSequencerWidget.test_transport" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSamplerWidget</span></span><a class="headerlink" href="#test_all.TestSamplerWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_envelope_defaults">
+<span class="sig-name descname"><span class="pre">test_envelope_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_envelope_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_load_sample">
+<span class="sig-name descname"><span class="pre">test_load_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_load_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_load_sample_decimation">
+<span class="sig-name descname"><span class="pre">test_load_sample_decimation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_load_sample_decimation" title="Link to this definition">¶</a></dt>
+<dd><p>Large samples should be decimated to max 2048 points.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_load_sample_small">
+<span class="sig-name descname"><span class="pre">test_load_sample_small</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_load_sample_small" title="Link to this definition">¶</a></dt>
+<dd><p>Small samples are not decimated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_envelope_change">
+<span class="sig-name descname"><span class="pre">test_envelope_change</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_envelope_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_max_voices">
+<span class="sig-name descname"><span class="pre">test_max_voices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_max_voices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_custom_init">
+<span class="sig-name descname"><span class="pre">test_custom_init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_custom_init" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSamplerWidget.test_to_sampler">
+<span class="sig-name descname"><span class="pre">test_to_sampler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSamplerWidget.test_to_sampler" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTransportWidget</span></span><a class="headerlink" href="#test_all.TestTransportWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_custom_bpm">
+<span class="sig-name descname"><span class="pre">test_custom_bpm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_custom_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_set_bpm">
+<span class="sig-name descname"><span class="pre">test_set_bpm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_set_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_time_signature">
+<span class="sig-name descname"><span class="pre">test_time_signature</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_time_signature" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_play_state">
+<span class="sig-name descname"><span class="pre">test_play_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_play_state" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_position">
+<span class="sig-name descname"><span class="pre">test_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_loop">
+<span class="sig-name descname"><span class="pre">test_loop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_loop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestTrack">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTrack</span></span><a class="headerlink" href="#test_all.TestTrack" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTrack.test_creation">
+<span class="sig-name descname"><span class="pre">test_creation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTrack.test_creation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTrack.test_link_transport">
+<span class="sig-name descname"><span class="pre">test_link_transport</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTrack.test_link_transport" title="Link to this definition">¶</a></dt>
+<dd><p>BPM and is_playing sync from transport to sequencer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTrack.test_unlink">
+<span class="sig-name descname"><span class="pre">test_unlink</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTrack.test_unlink" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTrack.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTrack.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTrack.test_sampler_source">
+<span class="sig-name descname"><span class="pre">test_sampler_source</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTrack.test_sampler_source" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestSession">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSession</span></span><a class="headerlink" href="#test_all.TestSession" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_custom_bpm">
+<span class="sig-name descname"><span class="pre">test_custom_bpm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_custom_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_custom_time_signature">
+<span class="sig-name descname"><span class="pre">test_custom_time_signature</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_custom_time_signature" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_add_track">
+<span class="sig-name descname"><span class="pre">test_add_track</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_add_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_add_multiple_tracks">
+<span class="sig-name descname"><span class="pre">test_add_multiple_tracks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_add_multiple_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_bpm_sync">
+<span class="sig-name descname"><span class="pre">test_bpm_sync</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_bpm_sync" title="Link to this definition">¶</a></dt>
+<dd><p>Transport BPM propagates to all sequencers via traitlets.link.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_play_sync">
+<span class="sig-name descname"><span class="pre">test_play_sync</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_play_sync" title="Link to this definition">¶</a></dt>
+<dd><p>Transport play state propagates to all sequencers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_remove_track">
+<span class="sig-name descname"><span class="pre">test_remove_track</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_remove_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_remove_track_unlinks">
+<span class="sig-name descname"><span class="pre">test_remove_track_unlinks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_remove_track_unlinks" title="Link to this definition">¶</a></dt>
+<dd><p>Removed track no longer syncs with transport.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_remove_track_out_of_bounds">
+<span class="sig-name descname"><span class="pre">test_remove_track_out_of_bounds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_remove_track_out_of_bounds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_repr">
+<span class="sig-name descname"><span class="pre">test_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_repr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestDemoNotebook">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestDemoNotebook</span></span><a class="headerlink" href="#test_all.TestDemoNotebook" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestDemoNotebook.test_prefixed_example_notebooks_have_language_metadata">
+<span class="sig-name descname"><span class="pre">test_prefixed_example_notebooks_have_language_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestDemoNotebook.test_prefixed_example_notebooks_have_language_metadata" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 </section>
 </section>
@@ -295,9 +1688,333 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">test_all</a><ul>
-<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#test_all.test_all"><code class="docutils literal notranslate"><span class="pre">test_all()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioFormat"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestAudioFormat.test_construction"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioFormat.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioFormat.test_repr"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioFormat.test_str"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat.test_str()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioFormat.test_eq"><code class="docutils literal notranslate"><span class="pre">TestAudioFormat.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_construction"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_stereo"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_stereo()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_sample_at_and_set_sample"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_sample_at_and_set_sample()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_clear"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_clear()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_to_list"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_to_list()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_format_property"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_format_property()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioBuffer.test_repr"><code class="docutils literal notranslate"><span class="pre">TestAudioBuffer.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiChannel"><code class="docutils literal notranslate"><span class="pre">TestMidiChannel</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiChannel.test_valid_range"><code class="docutils literal notranslate"><span class="pre">TestMidiChannel.test_valid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiChannel.test_invalid_range"><code class="docutils literal notranslate"><span class="pre">TestMidiChannel.test_invalid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiChannel.test_repr"><code class="docutils literal notranslate"><span class="pre">TestMidiChannel.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiChannel.test_eq"><code class="docutils literal notranslate"><span class="pre">TestMidiChannel.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestNote"><code class="docutils literal notranslate"><span class="pre">TestNote</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestNote.test_valid_range"><code class="docutils literal notranslate"><span class="pre">TestNote.test_valid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_invalid_range"><code class="docutils literal notranslate"><span class="pre">TestNote.test_invalid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_to_hz_a4"><code class="docutils literal notranslate"><span class="pre">TestNote.test_to_hz_a4()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_to_hz_c4"><code class="docutils literal notranslate"><span class="pre">TestNote.test_to_hz_c4()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_to_hz_octave"><code class="docutils literal notranslate"><span class="pre">TestNote.test_to_hz_octave()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_from_hz"><code class="docutils literal notranslate"><span class="pre">TestNote.test_from_hz()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNote.test_repr"><code class="docutils literal notranslate"><span class="pre">TestNote.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestVelocity"><code class="docutils literal notranslate"><span class="pre">TestVelocity</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestVelocity.test_valid_range"><code class="docutils literal notranslate"><span class="pre">TestVelocity.test_valid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestVelocity.test_invalid_range"><code class="docutils literal notranslate"><span class="pre">TestVelocity.test_invalid_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestVelocity.test_repr"><code class="docutils literal notranslate"><span class="pre">TestVelocity.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_note_on"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_note_on()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_note_off"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_note_off()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_control_change"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_control_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_program_change"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_program_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_pitch_bend"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_pitch_bend()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_clock"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_clock()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_start"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_start()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_stop"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_stop()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_eq"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_eq()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_invalid_channel"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_invalid_channel()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_invalid_note"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_invalid_note()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiMessage.test_invalid_velocity"><code class="docutils literal notranslate"><span class="pre">TestMidiMessage.test_invalid_velocity()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiEvent"><code class="docutils literal notranslate"><span class="pre">TestMidiEvent</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiEvent.test_construction"><code class="docutils literal notranslate"><span class="pre">TestMidiEvent.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiEvent.test_message_roundtrip"><code class="docutils literal notranslate"><span class="pre">TestMidiEvent.test_message_roundtrip()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiEvent.test_repr"><code class="docutils literal notranslate"><span class="pre">TestMidiEvent.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_construction"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_render_length"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_render_length()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_render_peak_amplitude"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_render_peak_amplitude()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_render_custom_amplitude"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_render_custom_amplitude()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_render_zero_crossings"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_render_zero_crossings()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSineOscillator.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSineOscillator.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSquareOscillator"><code class="docutils literal notranslate"><span class="pre">TestSquareOscillator</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSquareOscillator.test_render_values"><code class="docutils literal notranslate"><span class="pre">TestSquareOscillator.test_render_values()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSquareOscillator.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSquareOscillator.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSawOscillator"><code class="docutils literal notranslate"><span class="pre">TestSawOscillator</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSawOscillator.test_render_ramps"><code class="docutils literal notranslate"><span class="pre">TestSawOscillator.test_render_ramps()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSawOscillator.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSawOscillator.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestNoiseSource"><code class="docutils literal notranslate"><span class="pre">TestNoiseSource</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestNoiseSource.test_render_range"><code class="docutils literal notranslate"><span class="pre">TestNoiseSource.test_render_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoiseSource.test_render_nonconstant"><code class="docutils literal notranslate"><span class="pre">TestNoiseSource.test_render_nonconstant()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoiseSource.test_deterministic"><code class="docutils literal notranslate"><span class="pre">TestNoiseSource.test_deterministic()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoiseSource.test_repr"><code class="docutils literal notranslate"><span class="pre">TestNoiseSource.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_generated_on_init"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_generated_on_init()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_is_binary_float32"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_is_binary_float32()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_updates_on_type_change"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_updates_on_type_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_updates_on_frequency_change"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_updates_on_frequency_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_updates_on_amplitude_change"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_updates_on_amplitude_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_noise_waveform"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_noise_waveform()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_custom_init"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_custom_init()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_custom_init"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_custom_init()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_set_sample_rate"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_set_sample_rate()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_set_channels"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_set_channels()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_set_buffer_size"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_set_buffer_size()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_set_midi_port"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_set_midi_port()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_set_available_midi_ports"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_set_available_midi_ports()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSettingsWidget.test_midi_event_bytes"><code class="docutils literal notranslate"><span class="pre">TestSettingsWidget.test_midi_event_bytes()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_setters"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_setters()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_gain_clamped"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_gain_clamped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_pan_clamped"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_pan_clamped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_process_sample_muted"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_process_sample_muted()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_process_sample_center"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_process_sample_center()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_repr"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerChannel.test_eq"><code class="docutils literal notranslate"><span class="pre">TestMixerChannel.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMixer"><code class="docutils literal notranslate"><span class="pre">TestMixer</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMixer.test_empty"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_empty()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_add_channels"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_add_channels()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_remove_channel"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_remove_channel()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_remove_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_remove_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_get_channel"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_get_channel()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_get_channel_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_get_channel_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_set_channel_gain"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_set_channel_gain()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_set_channel_pan"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_set_channel_pan()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_set_channel_mute"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_set_channel_mute()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_set_channel_solo"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_set_channel_solo()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_master_gain_clamped"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_master_gain_clamped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_mix_down_single"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_mix_down_single()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_mix_down_muted"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_mix_down_muted()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_mix_down_wrong_count"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_mix_down_wrong_count()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixer.test_repr"><code class="docutils literal notranslate"><span class="pre">TestMixer.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_add_channel"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_add_channel()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_add_multiple_channels"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_add_multiple_channels()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_remove_channel"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_remove_channel()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_remove_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_remove_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_gain"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_gain()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_gain_clamped"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_gain_clamped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_pan"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_pan()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_mute"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_mute()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_solo"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_solo()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_to_mixer"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_to_mixer()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_to_mixer_mix_down"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_to_mixer_mix_down()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestStep"><code class="docutils literal notranslate"><span class="pre">TestStep</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestStep.test_construction"><code class="docutils literal notranslate"><span class="pre">TestStep.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestStep.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_setters"><code class="docutils literal notranslate"><span class="pre">TestStep.test_setters()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_invalid_note"><code class="docutils literal notranslate"><span class="pre">TestStep.test_invalid_note()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_invalid_velocity"><code class="docutils literal notranslate"><span class="pre">TestStep.test_invalid_velocity()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_repr"><code class="docutils literal notranslate"><span class="pre">TestStep.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStep.test_eq"><code class="docutils literal notranslate"><span class="pre">TestStep.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestPattern"><code class="docutils literal notranslate"><span class="pre">TestPattern</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestPattern.test_construction"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_default_length"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_default_length()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_set_step"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_set_step()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_set_step_out_of_range"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_set_step_out_of_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_toggle_step"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_toggle_step()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_get_step_out_of_range"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_get_step_out_of_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_clear"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_clear()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestPattern.test_repr"><code class="docutils literal notranslate"><span class="pre">TestPattern.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_construction"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_end_position"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_end_position()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_setters"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_setters()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_invalid_note"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_invalid_note()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_repr"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestNoteEvent.test_eq"><code class="docutils literal notranslate"><span class="pre">TestNoteEvent.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestEventSequence"><code class="docutils literal notranslate"><span class="pre">TestEventSequence</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_empty"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_empty()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_add_events_sorted"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_add_events_sorted()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_remove_event"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_remove_event()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_events_in_range"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_events_in_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_events_starting_in_range"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_events_starting_in_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_duration"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_duration()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_clear"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_clear()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEventSequence.test_repr"><code class="docutils literal notranslate"><span class="pre">TestEventSequence.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestTransportClock"><code class="docutils literal notranslate"><span class="pre">TestTransportClock</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_play_stop"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_play_stop()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_pause"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_pause()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_seek"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_seek()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_advance"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_advance()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_advance_stopped"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_advance_stopped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_beat_time_conversion"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_beat_time_conversion()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_tick_conversion"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_tick_conversion()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_set_bpm"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_set_bpm()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportClock.test_repr"><code class="docutils literal notranslate"><span class="pre">TestTransportClock.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestStepSequencer"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestStepSequencer.test_construction"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStepSequencer.test_process_empty"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer.test_process_empty()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStepSequencer.test_process_active_steps"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer.test_process_active_steps()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStepSequencer.test_reset"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer.test_reset()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestStepSequencer.test_repr"><code class="docutils literal notranslate"><span class="pre">TestStepSequencer.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestAudioSample"><code class="docutils literal notranslate"><span class="pre">TestAudioSample</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_construction"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_duration"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_duration()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_loop_points"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_loop_points()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_data"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_data()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_invalid_root_note"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_invalid_root_note()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestAudioSample.test_repr"><code class="docutils literal notranslate"><span class="pre">TestAudioSample.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestEnvelope"><code class="docutils literal notranslate"><span class="pre">TestEnvelope</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_custom"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_custom()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_setters"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_setters()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_sustain_clamped"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_sustain_clamped()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_repr"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestEnvelope.test_eq"><code class="docutils literal notranslate"><span class="pre">TestEnvelope.test_eq()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSampleMapping"><code class="docutils literal notranslate"><span class="pre">TestSampleMapping</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSampleMapping.test_construction"><code class="docutils literal notranslate"><span class="pre">TestSampleMapping.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampleMapping.test_matches_range"><code class="docutils literal notranslate"><span class="pre">TestSampleMapping.test_matches_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampleMapping.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSampleMapping.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSampleMap"><code class="docutils literal notranslate"><span class="pre">TestSampleMap</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSampleMap.test_empty"><code class="docutils literal notranslate"><span class="pre">TestSampleMap.test_empty()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampleMap.test_single_sample"><code class="docutils literal notranslate"><span class="pre">TestSampleMap.test_single_sample()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampleMap.test_multi_sample"><code class="docutils literal notranslate"><span class="pre">TestSampleMap.test_multi_sample()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampleMap.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSampleMap.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSampler"><code class="docutils literal notranslate"><span class="pre">TestSampler</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSampler._make_sample"><code class="docutils literal notranslate"><span class="pre">TestSampler._make_sample()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_construction"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_construction()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_note_on"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_note_on()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_note_on_multiple"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_note_on_multiple()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_note_off"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_note_off()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_voice_stealing"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_voice_stealing()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_render"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_render()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_panic"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_panic()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_all_notes_off"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_all_notes_off()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSampler.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSampler.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_steps_initialised"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_steps_initialised()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_custom_length"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_custom_length()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_set_step"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_set_step()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_set_step_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_set_step_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_toggle_step"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_toggle_step()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_toggle_step_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_toggle_step_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_clear"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_clear()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_to_pattern"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_to_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_to_step_sequencer"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_to_step_sequencer()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_bpm_change"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_bpm_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSequencerWidget.test_transport"><code class="docutils literal notranslate"><span class="pre">TestSequencerWidget.test_transport()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_envelope_defaults"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_envelope_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_load_sample"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_load_sample()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_load_sample_decimation"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_load_sample_decimation()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_load_sample_small"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_load_sample_small()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_envelope_change"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_envelope_change()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_max_voices"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_max_voices()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_custom_init"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_custom_init()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSamplerWidget.test_to_sampler"><code class="docutils literal notranslate"><span class="pre">TestSamplerWidget.test_to_sampler()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_custom_bpm"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_custom_bpm()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_set_bpm"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_set_bpm()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_time_signature"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_time_signature()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_play_state"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_play_state()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_position"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_position()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_loop"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_loop()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestTrack"><code class="docutils literal notranslate"><span class="pre">TestTrack</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTrack.test_creation"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_creation()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTrack.test_link_transport"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_link_transport()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTrack.test_unlink"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_unlink()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTrack.test_repr"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_repr()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTrack.test_sampler_source"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_sampler_source()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestSession"><code class="docutils literal notranslate"><span class="pre">TestSession</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSession.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSession.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_custom_bpm"><code class="docutils literal notranslate"><span class="pre">TestSession.test_custom_bpm()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_custom_time_signature"><code class="docutils literal notranslate"><span class="pre">TestSession.test_custom_time_signature()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_add_track"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_track()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_add_multiple_tracks"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_multiple_tracks()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_bpm_sync"><code class="docutils literal notranslate"><span class="pre">TestSession.test_bpm_sync()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_play_sync"><code class="docutils literal notranslate"><span class="pre">TestSession.test_play_sync()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_remove_track"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_remove_track_unlinks"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_unlinks()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_remove_track_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_out_of_bounds()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSession.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestDemoNotebook"><code class="docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestDemoNotebook.test_prefixed_example_notebooks_have_language_metadata"><code class="docutils literal notranslate"><span class="pre">TestDemoNotebook.test_prefixed_example_notebooks_have_language_metadata()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

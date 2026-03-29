@@ -4,16 +4,811 @@ test_all
 .. py:module:: test_all
 
 
-Functions
----------
+Classes
+-------
 
 .. autoapisummary::
 
-   test_all.test_all
+   test_all.TestAudioFormat
+   test_all.TestAudioBuffer
+   test_all.TestMidiChannel
+   test_all.TestNote
+   test_all.TestVelocity
+   test_all.TestMidiMessage
+   test_all.TestMidiEvent
+   test_all.TestSineOscillator
+   test_all.TestSquareOscillator
+   test_all.TestSawOscillator
+   test_all.TestNoiseSource
+   test_all.TestSynthWidget
+   test_all.TestSettingsWidget
+   test_all.TestMixerChannel
+   test_all.TestMixer
+   test_all.TestMixerWidget
+   test_all.TestStep
+   test_all.TestPattern
+   test_all.TestNoteEvent
+   test_all.TestEventSequence
+   test_all.TestTransportClock
+   test_all.TestStepSequencer
+   test_all.TestAudioSample
+   test_all.TestEnvelope
+   test_all.TestSampleMapping
+   test_all.TestSampleMap
+   test_all.TestSampler
+   test_all.TestSequencerWidget
+   test_all.TestSamplerWidget
+   test_all.TestTransportWidget
+   test_all.TestTrack
+   test_all.TestSession
+   test_all.TestDemoNotebook
 
 
 Module Contents
 ---------------
 
-.. py:function:: test_all()
+.. py:class:: TestAudioFormat
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_str()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestAudioBuffer
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_stereo()
+
+
+   .. py:method:: test_sample_at_and_set_sample()
+
+
+   .. py:method:: test_out_of_bounds()
+
+
+   .. py:method:: test_clear()
+
+
+   .. py:method:: test_to_list()
+
+
+   .. py:method:: test_format_property()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestMidiChannel
+
+   .. py:method:: test_valid_range()
+
+
+   .. py:method:: test_invalid_range()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestNote
+
+   .. py:method:: test_valid_range()
+
+
+   .. py:method:: test_invalid_range()
+
+
+   .. py:method:: test_to_hz_a4()
+
+
+   .. py:method:: test_to_hz_c4()
+
+
+   .. py:method:: test_to_hz_octave()
+
+
+   .. py:method:: test_from_hz()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestVelocity
+
+   .. py:method:: test_valid_range()
+
+
+   .. py:method:: test_invalid_range()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestMidiMessage
+
+   .. py:method:: test_note_on()
+
+
+   .. py:method:: test_note_off()
+
+
+   .. py:method:: test_control_change()
+
+
+   .. py:method:: test_program_change()
+
+
+   .. py:method:: test_pitch_bend()
+
+
+   .. py:method:: test_clock()
+
+
+   .. py:method:: test_start()
+
+
+   .. py:method:: test_stop()
+
+
+   .. py:method:: test_eq()
+
+
+   .. py:method:: test_invalid_channel()
+
+
+   .. py:method:: test_invalid_note()
+
+
+   .. py:method:: test_invalid_velocity()
+
+
+.. py:class:: TestMidiEvent
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_message_roundtrip()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSineOscillator
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_render_length()
+
+
+   .. py:method:: test_render_peak_amplitude()
+
+
+   .. py:method:: test_render_custom_amplitude()
+
+
+   .. py:method:: test_render_zero_crossings()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSquareOscillator
+
+   .. py:method:: test_render_values()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSawOscillator
+
+   .. py:method:: test_render_ramps()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestNoiseSource
+
+   .. py:method:: test_render_range()
+
+
+   .. py:method:: test_render_nonconstant()
+
+
+   .. py:method:: test_deterministic()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSynthWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_waveform_generated_on_init()
+
+
+   .. py:method:: test_waveform_is_binary_float32()
+
+
+   .. py:method:: test_waveform_updates_on_type_change()
+
+
+   .. py:method:: test_waveform_updates_on_frequency_change()
+
+
+   .. py:method:: test_waveform_updates_on_amplitude_change()
+
+
+   .. py:method:: test_noise_waveform()
+
+
+   .. py:method:: test_custom_init()
+
+
+.. py:class:: TestSettingsWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom_init()
+
+
+   .. py:method:: test_set_sample_rate()
+
+
+   .. py:method:: test_set_channels()
+
+
+   .. py:method:: test_set_buffer_size()
+
+
+   .. py:method:: test_set_midi_port()
+
+
+   .. py:method:: test_set_available_midi_ports()
+
+
+   .. py:method:: test_midi_event_bytes()
+
+
+.. py:class:: TestMixerChannel
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_setters()
+
+
+   .. py:method:: test_gain_clamped()
+
+
+   .. py:method:: test_pan_clamped()
+
+
+   .. py:method:: test_process_sample_muted()
+
+
+   .. py:method:: test_process_sample_center()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestMixer
+
+   .. py:method:: test_empty()
+
+
+   .. py:method:: test_add_channels()
+
+
+   .. py:method:: test_remove_channel()
+
+
+   .. py:method:: test_remove_out_of_bounds()
+
+
+   .. py:method:: test_get_channel()
+
+
+   .. py:method:: test_get_channel_out_of_bounds()
+
+
+   .. py:method:: test_set_channel_gain()
+
+
+   .. py:method:: test_set_channel_pan()
+
+
+   .. py:method:: test_set_channel_mute()
+
+
+   .. py:method:: test_set_channel_solo()
+
+
+   .. py:method:: test_master_gain_clamped()
+
+
+   .. py:method:: test_mix_down_single()
+
+
+   .. py:method:: test_mix_down_muted()
+
+
+   .. py:method:: test_mix_down_wrong_count()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestMixerWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_add_channel()
+
+
+   .. py:method:: test_add_multiple_channels()
+
+
+   .. py:method:: test_remove_channel()
+
+
+   .. py:method:: test_remove_out_of_bounds()
+
+
+   .. py:method:: test_set_channel_gain()
+
+
+   .. py:method:: test_set_channel_gain_clamped()
+
+
+   .. py:method:: test_set_channel_pan()
+
+
+   .. py:method:: test_set_channel_mute()
+
+
+   .. py:method:: test_set_channel_solo()
+
+
+   .. py:method:: test_to_mixer()
+
+
+   .. py:method:: test_to_mixer_mix_down()
+
+
+.. py:class:: TestStep
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_setters()
+
+
+   .. py:method:: test_invalid_note()
+
+
+   .. py:method:: test_invalid_velocity()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestPattern
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_default_length()
+
+
+   .. py:method:: test_set_step()
+
+
+   .. py:method:: test_set_step_out_of_range()
+
+
+   .. py:method:: test_toggle_step()
+
+
+   .. py:method:: test_get_step_out_of_range()
+
+
+   .. py:method:: test_clear()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestNoteEvent
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_end_position()
+
+
+   .. py:method:: test_setters()
+
+
+   .. py:method:: test_invalid_note()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestEventSequence
+
+   .. py:method:: test_empty()
+
+
+   .. py:method:: test_add_events_sorted()
+
+
+   .. py:method:: test_remove_event()
+
+
+   .. py:method:: test_events_in_range()
+
+
+   .. py:method:: test_events_starting_in_range()
+
+
+   .. py:method:: test_duration()
+
+
+   .. py:method:: test_clear()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestTransportClock
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_play_stop()
+
+
+   .. py:method:: test_pause()
+
+
+   .. py:method:: test_seek()
+
+
+   .. py:method:: test_advance()
+
+
+   .. py:method:: test_advance_stopped()
+
+
+   .. py:method:: test_beat_time_conversion()
+
+
+   .. py:method:: test_tick_conversion()
+
+
+   .. py:method:: test_set_bpm()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestStepSequencer
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_process_empty()
+
+
+   .. py:method:: test_process_active_steps()
+
+
+   .. py:method:: test_reset()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestAudioSample
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_duration()
+
+
+   .. py:method:: test_loop_points()
+
+
+   .. py:method:: test_data()
+
+
+   .. py:method:: test_invalid_root_note()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestEnvelope
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom()
+
+
+   .. py:method:: test_setters()
+
+
+   .. py:method:: test_sustain_clamped()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_eq()
+
+
+.. py:class:: TestSampleMapping
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_matches_range()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSampleMap
+
+   .. py:method:: test_empty()
+
+
+   .. py:method:: test_single_sample()
+
+
+   .. py:method:: test_multi_sample()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSampler
+
+   .. py:method:: _make_sample()
+
+      1 second 440 Hz sine at 44100 Hz.
+
+
+
+   .. py:method:: test_construction()
+
+
+   .. py:method:: test_note_on()
+
+
+   .. py:method:: test_note_on_multiple()
+
+
+   .. py:method:: test_note_off()
+
+
+   .. py:method:: test_voice_stealing()
+
+
+   .. py:method:: test_render()
+
+
+   .. py:method:: test_panic()
+
+
+   .. py:method:: test_all_notes_off()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSequencerWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_steps_initialised()
+
+
+   .. py:method:: test_custom_length()
+
+
+   .. py:method:: test_set_step()
+
+
+   .. py:method:: test_set_step_out_of_bounds()
+
+
+   .. py:method:: test_toggle_step()
+
+
+   .. py:method:: test_toggle_step_out_of_bounds()
+
+
+   .. py:method:: test_clear()
+
+
+   .. py:method:: test_to_pattern()
+
+
+   .. py:method:: test_to_step_sequencer()
+
+
+   .. py:method:: test_bpm_change()
+
+
+   .. py:method:: test_transport()
+
+
+.. py:class:: TestSamplerWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_envelope_defaults()
+
+
+   .. py:method:: test_load_sample()
+
+
+   .. py:method:: test_load_sample_decimation()
+
+      Large samples should be decimated to max 2048 points.
+
+
+
+   .. py:method:: test_load_sample_small()
+
+      Small samples are not decimated.
+
+
+
+   .. py:method:: test_envelope_change()
+
+
+   .. py:method:: test_max_voices()
+
+
+   .. py:method:: test_custom_init()
+
+
+   .. py:method:: test_to_sampler()
+
+
+.. py:class:: TestTransportWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom_bpm()
+
+
+   .. py:method:: test_set_bpm()
+
+
+   .. py:method:: test_time_signature()
+
+
+   .. py:method:: test_play_state()
+
+
+   .. py:method:: test_position()
+
+
+   .. py:method:: test_loop()
+
+
+.. py:class:: TestTrack
+
+   .. py:method:: test_creation()
+
+
+   .. py:method:: test_link_transport()
+
+      BPM and is_playing sync from transport to sequencer.
+
+
+
+   .. py:method:: test_unlink()
+
+
+   .. py:method:: test_repr()
+
+
+   .. py:method:: test_sampler_source()
+
+
+.. py:class:: TestSession
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom_bpm()
+
+
+   .. py:method:: test_custom_time_signature()
+
+
+   .. py:method:: test_add_track()
+
+
+   .. py:method:: test_add_multiple_tracks()
+
+
+   .. py:method:: test_bpm_sync()
+
+      Transport BPM propagates to all sequencers via traitlets.link.
+
+
+
+   .. py:method:: test_play_sync()
+
+      Transport play state propagates to all sequencers.
+
+
+
+   .. py:method:: test_remove_track()
+
+
+   .. py:method:: test_remove_track_unlinks()
+
+      Removed track no longer syncs with transport.
+
+
+
+   .. py:method:: test_remove_track_out_of_bounds()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestDemoNotebook
+
+   .. py:method:: test_prefixed_example_notebooks_have_language_metadata()
+
 
