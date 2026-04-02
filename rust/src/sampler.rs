@@ -1,4 +1,4 @@
-use crate::audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
+use crate::audio::AudioBuffer;
 use crate::midi::{MidiMessage, Note, Velocity};
 use crate::oscillator::AudioSource;
 
@@ -188,6 +188,7 @@ impl EnvelopeState {
         Some(self.level)
     }
 
+    #[cfg(test)]
     fn is_done(&self) -> bool {
         self.stage == EnvelopeStage::Done
     }

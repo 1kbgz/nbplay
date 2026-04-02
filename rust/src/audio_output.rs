@@ -21,13 +21,29 @@ impl Default for AudioOutputConfig {
     }
 }
 
+fn build_stream_config(config: &AudioOutputConfig) -> StreamConfig {
+    StreamConfig {
+        channels: config.channels,
+        sample_rate: config.sample_rate,
+        buffer_size: cpal::BufferSize::Fixed(config.buffer_size),
+    }
+}
+
+fn device_name_from_description(device: &Device) -> String {
+    device
+        .description()
+        .map(|description| description.name().to_string())
+        .unwrap_or_else(|_| "Unknown".to_string())
+}
+
 /// Lists available audio output device names.
 pub fn list_audio_devices() -> Vec<String> {
     let host = cpal::default_host();
     host.output_devices()
         .map(|devices| {
             devices
-                .filter_map(|d| d.name().ok())
+                .filter_map(|device| device.description().ok())
+                .map(|description| description.name().to_string())
                 .collect::<Vec<String>>()
         })
         .unwrap_or_default()
@@ -63,7 +79,7 @@ impl AudioOutput {
 
     /// Get the name of the output device.
     pub fn device_name(&self) -> String {
-        self.device.name().unwrap_or_else(|_| "Unknown".to_string())
+        device_name_from_description(&self.device)
     }
 
     /// Start playing audio using the provided render callback.
@@ -76,11 +92,7 @@ impl AudioOutput {
             return Err("Already playing".to_string());
         }
 
-        let stream_config = StreamConfig {
-            channels: self.config.channels,
-            sample_rate: cpal::SampleRate(self.config.sample_rate),
-            buffer_size: cpal::BufferSize::Fixed(self.config.buffer_size),
-        };
+        let stream_config = build_stream_config(&self.config);
 
         let playing = self.playing.clone();
 
@@ -129,6 +141,21 @@ mod tests {
         assert_eq!(config.sample_rate, 44100);
         assert_eq!(config.channels, 2);
         assert_eq!(config.buffer_size, 512);
+    }
+
+    #[test]
+    fn test_build_stream_config_uses_plain_sample_rate() {
+        let config = AudioOutputConfig {
+            sample_rate: 48_000,
+            channels: 1,
+            buffer_size: 256,
+        };
+
+        let stream_config = build_stream_config(&config);
+
+        assert_eq!(stream_config.channels, 1);
+        assert_eq!(stream_config.sample_rate, 48_000);
+        assert_eq!(stream_config.buffer_size, cpal::BufferSize::Fixed(256));
     }
 
     #[test]
