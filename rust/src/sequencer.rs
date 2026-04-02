@@ -619,7 +619,6 @@ mod tests {
         // Advance a bit
         clock.advance_by_frames(44100, 44100); // 1 second
         assert!(clock.position() > 0.0);
-        let pos = clock.position();
         clock.stop();
         assert_eq!(clock.state(), TransportState::Stopped);
         assert!((clock.position() - 0.0).abs() < 1e-10);
