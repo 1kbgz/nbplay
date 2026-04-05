@@ -1,43 +1,35 @@
-@import "_variables";
-@import "_mixins";
-
 /* ── nbplay SynthWidget ─────────────────────────────────────────── */
 /* All selectors are scoped under .nbplay-synth so they never leak
    into the host notebook.  Colours inherit from the active Jupyter
    theme via CSS custom properties (see _variables.less). */
-
 .nbplay-synth {
-  font-family: @nb-font-sans;
-  background: @nb-bg;
-  color: @nb-text;
-  border-radius: @nb-radius;
+  font-family: var(--jp-ui-font-family, sans-serif);
+  background: var(--jp-layout-color0, #0f0f1a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border-radius: 12px;
   padding: 20px;
   max-width: 640px;
-  border: 1px solid @nb-border;
-  box-shadow: @nb-shadow;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  box-shadow: var(--jp-elevation-z4, 0 4px 24px rgba(0, 0, 0, 0.5));
   user-select: none;
 }
-
 /* ── Header ───────────────────────────────────────────────────── */
-
 .nbplay-header {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
 }
-
 .nbplay-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: @nb-text;
+  color: var(--jp-ui-font-color0, #e0e4f0);
   letter-spacing: -0.5px;
 }
-
 .nbplay-badge {
   font-size: 10px;
-  background: @nb-cyan;
+  background: var(--jp-brand-color1, #00d4ff);
   color: var(--jp-layout-color0, #000);
   padding: 2px 8px;
   border-radius: 10px;
@@ -45,199 +37,187 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 /* ── Waveform canvas ──────────────────────────────────────────── */
-
 .nbplay-waveform-container {
-  background: @nb-bg;
-  border-radius: @nb-radius-sm;
+  background: var(--jp-layout-color0, #0f0f1a);
+  border-radius: 8px;
   padding: 2px;
   margin-bottom: 16px;
-  border: 1px solid @nb-border;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
 }
-
 .nbplay-waveform {
   width: 100%;
   height: 128px;
   display: block;
-  border-radius: @nb-radius-xs;
+  border-radius: 6px;
 }
-
 /* ── Oscillator type selector ─────────────────────────────────── */
-
 .nbplay-osc-selector {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
 }
-
 .nbplay-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: @nb-muted;
+  color: var(--jp-ui-font-color2, #8888aa);
   min-width: 80px;
 }
-
 .nbplay-osc-buttons {
   display: flex;
   gap: 4px;
 }
-
 .nbplay-osc-btn {
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   padding: 6px 14px;
-  border: 1px solid @nb-border;
-  background: @nb-surface;
-  color: @nb-muted;
-  border-radius: @nb-radius-xs;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-ui-font-color2, #8888aa);
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
   outline: none;
 }
-
 .nbplay-osc-btn:hover {
-  border-color: @nb-mixer-border;
-  color: @nb-text;
+  border-color: var(--jp-border-color0, #2d2d4a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
 }
-
 .nbplay-osc-btn.active {
-  background: color-mix(in srgb, @nb-cyan 20%, @nb-surface);
-  border-color: @nb-cyan;
-  color: @nb-text;
-  box-shadow: 0 0 12px color-mix(in srgb, @nb-cyan 15%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #00d4ff) 20%,
+    var(--jp-layout-color1, #14142a)
+  );
+  border-color: var(--jp-brand-color1, #00d4ff);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  box-shadow: 0 0 12px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 15%, transparent);
 }
-
 /* ── Parameter rows (frequency / amplitude) ───────────────────── */
-
 .nbplay-params {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
 }
-
 .nbplay-param {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .nbplay-param .nbplay-label {
   flex-shrink: 0;
 }
-
 .nbplay-param input[type="range"] {
   flex: 1;
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: @nb-border;
+  background: var(--jp-border-color1, #1e1e3a);
   border-radius: 2px;
   outline: none;
   margin: 0;
 }
-
 .nbplay-param input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: @nb-cyan;
-  border: 2px solid @nb-bg;
+  background: var(--jp-brand-color1, #00d4ff);
+  border: 2px solid var(--jp-layout-color0, #0f0f1a);
   cursor: pointer;
-  box-shadow: 0 0 8px color-mix(in srgb, @nb-cyan 40%, transparent);
+  box-shadow: 0 0 8px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 40%, transparent);
   transition: box-shadow 0.15s;
 }
-
 .nbplay-param input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 14px color-mix(in srgb, @nb-cyan 60%, transparent);
+  box-shadow: 0 0 14px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 60%, transparent);
 }
-
 .nbplay-param input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: @nb-cyan;
-  border: 2px solid @nb-bg;
+  background: var(--jp-brand-color1, #00d4ff);
+  border: 2px solid var(--jp-layout-color0, #0f0f1a);
   cursor: pointer;
-  box-shadow: 0 0 8px color-mix(in srgb, @nb-cyan 40%, transparent);
+  box-shadow: 0 0 8px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 40%, transparent);
 }
-
 .nbplay-param input[type="range"]:disabled {
   opacity: 0.3;
   cursor: default;
 }
-
 .nbplay-value {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: @nb-muted;
+  color: var(--jp-ui-font-color2, #8888aa);
   min-width: 72px;
   text-align: right;
 }
-
 /* ── Transport bar ────────────────────────────────────────────── */
-
 .nbplay-transport {
   display: flex;
   align-items: center;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid @nb-border;
+  border-top: 1px solid var(--jp-border-color1, #1e1e3a);
 }
-
 .nbplay-play-btn {
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   padding: 8px 22px;
   border: none;
-  border-radius: @nb-radius-sm;
+  border-radius: 8px;
   cursor: pointer;
   outline: none;
   transition: all 0.15s ease;
-  background: linear-gradient(135deg, @nb-purple, @nb-cyan);
+  background: linear-gradient(
+    135deg,
+    var(--jp-brand-color0, #7c3aed),
+    var(--jp-brand-color1, #00d4ff)
+  );
   color: var(--jp-ui-inverse-font-color0, #fff);
 }
-
 .nbplay-play-btn:hover {
-  box-shadow: 0 0 18px color-mix(in srgb, @nb-cyan 35%, transparent);
+  box-shadow: 0 0 18px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 35%, transparent);
   transform: translateY(-1px);
 }
-
 .nbplay-play-btn:active {
   transform: translateY(0);
 }
-
 .nbplay-play-btn.playing {
-  background: linear-gradient(135deg, @nb-red, @nb-orange);
+  background: linear-gradient(
+    135deg,
+    var(--jp-error-color1, #ef4444),
+    var(--jp-warn-color1, #f97316)
+  );
 }
-
 .nbplay-play-btn.playing:hover {
-  box-shadow: 0 0 18px color-mix(in srgb, @nb-red 35%, transparent);
+  box-shadow: 0 0 18px
+    color-mix(in srgb, var(--jp-error-color1, #ef4444) 35%, transparent);
 }
-
 .nbplay-info {
   margin-left: auto;
   font-size: 11px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   letter-spacing: 0.3px;
 }
-
 /* ── Inline edit input ────────────────────────────────────────── */
-
 .nbplay-inline-edit {
   font-family: inherit;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  background: @nb-surface;
-  color: @nb-cyan;
-  border: 1px solid @nb-cyan;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-brand-color1, #00d4ff);
+  border: 1px solid var(--jp-brand-color1, #00d4ff);
   border-radius: 4px;
   padding: 1px 4px;
   outline: none;

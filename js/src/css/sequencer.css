@@ -1,20 +1,15 @@
-@import "_variables";
-@import "_mixins";
-
 /* nbplay SequencerWidget – step sequencer themed to Jupyter environment */
-
 .nbplay-sequencer {
-  font-family: @nb-font-mono;
-  background: @nb-bg;
-  color: @nb-text;
-  border: 1px solid @nb-border;
-  border-radius: @nb-radius;
+  font-family: var(--jp-code-font-family, monospace);
+  background: var(--jp-layout-color0, #0f0f1a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 12px;
   padding: 16px;
   min-width: 600px;
   user-select: none;
   box-sizing: border-box;
 }
-
 /* ── Header ─────────────────────────────────────────────────────── */
 .nbplay-seq-header {
   display: flex;
@@ -22,26 +17,23 @@
   gap: 10px;
   margin-bottom: 12px;
 }
-
 .nbplay-seq-header h3 {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: @nb-text;
+  color: var(--jp-ui-font-color0, #e0e4f0);
   letter-spacing: 0.5px;
 }
-
 .nbplay-sequencer .nbplay-badge {
   font-size: 10px;
   padding: 2px 8px;
-  border-radius: @nb-radius-round;
-  background: @nb-purple;
+  border-radius: 999px;
+  background: var(--jp-brand-color0, #7c3aed);
   color: var(--jp-ui-inverse-font-color0, #fff);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 /* ── Transport ──────────────────────────────────────────────────── */
 .nbplay-seq-transport {
   display: flex;
@@ -50,14 +42,13 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
-
 .nbplay-seq-btn {
   width: 36px;
   height: 36px;
-  border: 1px solid @nb-border;
-  border-radius: @nb-radius-sm;
-  background: @nb-surface;
-  color: @nb-text;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 8px;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -65,87 +56,73 @@
   justify-content: center;
   transition: all 0.15s;
 }
-
 .nbplay-seq-btn:hover {
-  border-color: @nb-cyan;
+  border-color: var(--jp-brand-color1, #00d4ff);
   background: var(--jp-layout-color2, #1a1a3a);
 }
-
 .nbplay-seq-btn.playing {
-  background: @nb-green;
+  background: var(--jp-success-color1, #22c55e);
   color: var(--jp-layout-color0, #000);
-  border-color: @nb-green;
+  border-color: var(--jp-success-color1, #22c55e);
 }
-
 .nbplay-seq-stop:hover {
-  border-color: @nb-red;
+  border-color: var(--jp-error-color1, #ef4444);
 }
-
 .nbplay-seq-bpm-section,
 .nbplay-seq-dur-section {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-
 .nbplay-seq-label {
   font-size: 10px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .nbplay-seq-bpm-slider {
   width: 100px;
-  accent-color: @nb-purple;
+  accent-color: var(--jp-brand-color0, #7c3aed);
 }
-
 .nbplay-seq-bpm-val {
   font-size: 12px;
-  color: @nb-cyan;
+  color: var(--jp-brand-color1, #00d4ff);
   min-width: 65px;
 }
-
 .nbplay-seq-dur-select {
-  background: @nb-surface;
-  color: @nb-text;
-  border: 1px solid @nb-border;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 11px;
   font-family: inherit;
 }
-
 .nbplay-seq-loop-label {
   font-size: 11px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   display: flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
 }
-
 .nbplay-seq-loop-chk {
-  accent-color: @nb-purple;
+  accent-color: var(--jp-brand-color0, #7c3aed);
 }
-
 /* ── Grid ───────────────────────────────────────────────────────── */
 .nbplay-seq-grid-wrap {
   overflow-x: auto;
   margin-bottom: 8px;
 }
-
 .nbplay-seq-grid {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .nbplay-seq-row {
   display: flex;
   gap: 2px;
 }
-
 .nbplay-seq-label-cell {
   width: 36px;
   min-width: 36px;
@@ -154,11 +131,10 @@
   align-items: center;
   justify-content: center;
   font-size: 9px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .nbplay-seq-header-cell {
   width: 44px;
   min-width: 44px;
@@ -167,16 +143,14 @@
   align-items: center;
   justify-content: center;
   font-size: 9px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   border-radius: 3px;
 }
-
 .nbplay-seq-header-cell.active-col {
-  background: @nb-cyan;
+  background: var(--jp-brand-color1, #00d4ff);
   color: var(--jp-layout-color0, #000);
   font-weight: 700;
 }
-
 /* Step cells */
 .nbplay-seq-cell {
   width: 44px;
@@ -185,93 +159,80 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: @nb-mixer-bg;
-  border: 1px solid @nb-border;
+  background: var(--jp-layout-color1, #1a1a2e);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
   border-radius: 4px;
   cursor: pointer;
   font-size: 9px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   transition: all 0.1s;
 }
-
 .nbplay-seq-cell:hover {
-  border-color: @nb-purple;
-  background: @nb-border;
+  border-color: var(--jp-brand-color0, #7c3aed);
+  background: var(--jp-border-color1, #1e1e3a);
 }
-
 .nbplay-seq-cell.active {
-  background: @nb-purple;
+  background: var(--jp-brand-color0, #7c3aed);
   color: var(--jp-ui-inverse-font-color0, #fff);
-  border-color: @nb-purple;
+  border-color: var(--jp-brand-color0, #7c3aed);
   font-weight: 700;
 }
-
 .nbplay-seq-cell.current {
   box-shadow:
-    0 0 6px @nb-cyan,
-    inset 0 0 4px @nb-cyan;
-  border-color: @nb-cyan;
+    0 0 6px var(--jp-brand-color1, #00d4ff),
+    inset 0 0 4px var(--jp-brand-color1, #00d4ff);
+  border-color: var(--jp-brand-color1, #00d4ff);
 }
-
 .nbplay-seq-cell.active.current {
-  background: @nb-cyan;
+  background: var(--jp-brand-color1, #00d4ff);
   color: var(--jp-layout-color0, #000);
 }
-
 /* Velocity row */
 .nbplay-seq-vel-row {
   align-items: flex-end;
 }
-
 .nbplay-seq-vel-cell {
   width: 44px;
   min-width: 44px;
   height: 32px;
-  background: @nb-surface;
-  border: 1px solid @nb-border;
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
   border-radius: 3px;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
   cursor: ns-resize;
 }
-
 .nbplay-seq-vel-bar {
   width: 100%;
-  background: @nb-dim;
+  background: var(--jp-ui-font-color3, #64648a);
   border-radius: 2px 2px 0 0;
   transition: height 0.1s;
   min-height: 2px;
 }
-
 .nbplay-seq-vel-bar.active {
-  background: @nb-purple;
+  background: var(--jp-brand-color0, #7c3aed);
 }
-
 .nbplay-seq-vel-bar.current {
-  background: @nb-cyan;
+  background: var(--jp-brand-color1, #00d4ff);
 }
-
 /* ── Footer ─────────────────────────────────────────────────────── */
 .nbplay-seq-footer {
   margin-top: 4px;
 }
-
 .nbplay-seq-info {
   font-size: 10px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   letter-spacing: 0.5px;
 }
-
 /* ── Inline edit input ────────────────────────────────────────── */
-
 .nbplay-seq-inline-edit {
   font-family: inherit;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  background: @nb-surface;
-  color: @nb-cyan;
-  border: 1px solid @nb-cyan;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-brand-color1, #00d4ff);
+  border: 1px solid var(--jp-brand-color1, #00d4ff);
   border-radius: 4px;
   padding: 1px 4px;
   outline: none;

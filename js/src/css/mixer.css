@@ -1,25 +1,41 @@
-@import "_variables";
-@import "_mixins";
-
 /* nbplay MixerWidget – mixer console themed to Jupyter environment */
-
 .nbplay-mixer {
-  font-family: @nb-font-mono;
-  background: @nb-mixer-bg;
-  color: @nb-text;
-  border: 1px solid @nb-mixer-border;
+  font-family: var(--jp-code-font-family, monospace);
+  background: var(--jp-layout-color1, #1a1a2e);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
   border-radius: 10px;
   padding: 16px 20px;
   user-select: none;
 }
-
 /* ── header ─────────────────────────────── */
 .nbplay-mixer .nbplay-mixer-header {
-  .nbplay-header-mixin();
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.nbplay-mixer .nbplay-mixer-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  letter-spacing: 0.5px;
 }
 .nbplay-mixer .nbplay-badge {
-  .nbplay-badge-mixin();
-  background: @nb-red;
+  font-size: 10px;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color3, #c084fc) 15%,
+    transparent
+  );
+  color: var(--jp-brand-color3, #c084fc);
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: var(--jp-error-color1, #ef4444);
   color: var(--jp-ui-inverse-font-color0, #fff);
   letter-spacing: 1px;
 }
@@ -27,19 +43,26 @@
   margin-left: auto;
   font-family: inherit;
   font-size: 11px;
-  background: color-mix(in srgb, @nb-purple-light 12%, transparent);
-  color: @nb-purple-light;
-  border: 1px solid @nb-mixer-border;
-  border-radius: @nb-radius-xs;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color2, #a855f7) 12%,
+    transparent
+  );
+  color: var(--jp-brand-color2, #a855f7);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  border-radius: 6px;
   padding: 4px 12px;
   cursor: pointer;
   transition: all 0.15s;
 }
 .nbplay-mixer .nbplay-mixer-add-btn:hover {
-  background: color-mix(in srgb, @nb-purple-light 25%, transparent);
-  border-color: @nb-purple-light;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color2, #a855f7) 25%,
+    transparent
+  );
+  border-color: var(--jp-brand-color2, #a855f7);
 }
-
 /* ── console (channel strip container) ──── */
 .nbplay-mixer .nbplay-mixer-console {
   display: flex;
@@ -47,34 +70,36 @@
   overflow-x: auto;
   padding-bottom: 4px;
 }
-
 /* ── channel strip ─────────────────────── */
 .nbplay-mixer .nbplay-mixer-strip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: @nb-surface;
-  border: 1px solid @nb-mixer-border;
-  border-radius: @nb-radius-sm;
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  border-radius: 8px;
   padding: 10px 8px 8px;
   min-width: 68px;
   width: 68px;
   gap: 6px;
 }
 .nbplay-mixer .nbplay-master-strip {
-  border-color: color-mix(in srgb, @nb-purple-badge 20%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--jp-brand-color3, #c084fc) 20%,
+    transparent
+  );
   min-width: 72px;
   width: 72px;
   margin-left: 6px;
 }
-
 /* ── strip name ────────────────────────── */
 .nbplay-mixer .nbplay-strip-name {
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: @nb-muted;
+  color: var(--jp-ui-font-color2, #8888aa);
   text-align: center;
   width: 100%;
   overflow: hidden;
@@ -82,9 +107,8 @@
   white-space: nowrap;
 }
 .nbplay-mixer .nbplay-master-strip .nbplay-strip-name {
-  color: @nb-purple-light;
+  color: var(--jp-brand-color2, #a855f7);
 }
-
 /* ── fader section ─────────────────────── */
 .nbplay-mixer .nbplay-strip-fader-section {
   display: flex;
@@ -92,12 +116,11 @@
   gap: 4px;
   height: 120px;
 }
-
 /* ── meter ─────────────────────────────── */
 .nbplay-mixer .nbplay-strip-meter {
   width: 4px;
   height: 100%;
-  background: @nb-bg;
+  background: var(--jp-layout-color0, #0f0f1a);
   border-radius: 2px;
   overflow: hidden;
   position: relative;
@@ -108,11 +131,15 @@
   left: 0;
   right: 0;
   height: 0%;
-  background: linear-gradient(to top, @nb-green, @nb-orange 70%, @nb-red 95%);
+  background: linear-gradient(
+    to top,
+    var(--jp-success-color1, #22c55e),
+    var(--jp-warn-color1, #f97316) 70%,
+    var(--jp-error-color1, #ef4444) 95%
+  );
   border-radius: 2px;
   transition: height 0.08s;
 }
-
 /* ── vertical fader (range input) ──────── */
 .nbplay-mixer .nbplay-strip-fader {
   writing-mode: vertical-lr;
@@ -127,7 +154,7 @@
 .nbplay-mixer .nbplay-strip-fader::-webkit-slider-runnable-track {
   width: 4px;
   height: 100%;
-  background: @nb-mixer-border;
+  background: var(--jp-border-color0, #2d2d4a);
   border-radius: 2px;
 }
 .nbplay-mixer .nbplay-strip-fader::-webkit-slider-thumb {
@@ -135,8 +162,8 @@
   appearance: none;
   width: 20px;
   height: 8px;
-  background: @nb-text;
-  border: 1px solid @nb-muted;
+  background: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-ui-font-color2, #8888aa);
   border-radius: 2px;
   margin-left: -8px;
   cursor: grab;
@@ -144,35 +171,33 @@
 .nbplay-mixer .nbplay-strip-fader::-moz-range-track {
   width: 4px;
   height: 100%;
-  background: @nb-mixer-border;
+  background: var(--jp-border-color0, #2d2d4a);
   border-radius: 2px;
 }
 .nbplay-mixer .nbplay-strip-fader::-moz-range-thumb {
   width: 20px;
   height: 8px;
-  background: @nb-text;
-  border: 1px solid @nb-muted;
+  background: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-ui-font-color2, #8888aa);
   border-radius: 2px;
   cursor: grab;
 }
 .nbplay-mixer .nbplay-master-strip .nbplay-strip-fader::-webkit-slider-thumb {
-  background: @nb-purple-badge;
-  border-color: @nb-purple-light;
+  background: var(--jp-brand-color3, #c084fc);
+  border-color: var(--jp-brand-color2, #a855f7);
 }
 .nbplay-mixer .nbplay-master-strip .nbplay-strip-fader::-moz-range-thumb {
-  background: @nb-purple-badge;
-  border-color: @nb-purple-light;
+  background: var(--jp-brand-color3, #c084fc);
+  border-color: var(--jp-brand-color2, #a855f7);
 }
-
 /* ── gain label ────────────────────────── */
 .nbplay-mixer .nbplay-strip-gain-label {
   font-size: 9px;
-  color: @nb-muted;
+  color: var(--jp-ui-font-color2, #8888aa);
   text-align: center;
   width: 100%;
   white-space: nowrap;
 }
-
 /* ── pan section ───────────────────────── */
 .nbplay-mixer .nbplay-strip-pan-section {
   display: flex;
@@ -183,7 +208,7 @@
 }
 .nbplay-mixer .nbplay-strip-pan-label {
   font-size: 9px;
-  color: @nb-dim;
+  color: var(--jp-ui-font-color3, #64648a);
   letter-spacing: 0.5px;
 }
 .nbplay-mixer .nbplay-strip-pan {
@@ -196,7 +221,7 @@
 }
 .nbplay-mixer .nbplay-strip-pan::-webkit-slider-runnable-track {
   height: 3px;
-  background: @nb-mixer-border;
+  background: var(--jp-border-color0, #2d2d4a);
   border-radius: 2px;
 }
 .nbplay-mixer .nbplay-strip-pan::-webkit-slider-thumb {
@@ -204,25 +229,24 @@
   appearance: none;
   width: 10px;
   height: 10px;
-  background: @nb-muted;
+  background: var(--jp-ui-font-color2, #8888aa);
   border-radius: 50%;
   margin-top: -4px;
   cursor: grab;
 }
 .nbplay-mixer .nbplay-strip-pan::-moz-range-track {
   height: 3px;
-  background: @nb-mixer-border;
+  background: var(--jp-border-color0, #2d2d4a);
   border-radius: 2px;
 }
 .nbplay-mixer .nbplay-strip-pan::-moz-range-thumb {
   width: 10px;
   height: 10px;
-  background: @nb-muted;
+  background: var(--jp-ui-font-color2, #8888aa);
   border-radius: 50%;
   border: none;
   cursor: grab;
 }
-
 /* ── mute/solo buttons ─────────────────── */
 .nbplay-mixer .nbplay-strip-buttons {
   display: flex;
@@ -235,9 +259,9 @@
   width: 24px;
   height: 20px;
   border-radius: 4px;
-  border: 1px solid @nb-mixer-border;
-  background: @nb-mixer-bg;
-  color: @nb-dim;
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  background: var(--jp-layout-color1, #1a1a2e);
+  color: var(--jp-ui-font-color3, #64648a);
   cursor: pointer;
   transition: all 0.12s;
   padding: 0;
@@ -245,20 +269,19 @@
   text-align: center;
 }
 .nbplay-mixer .nbplay-strip-btn:hover {
-  border-color: @nb-muted;
-  color: @nb-text;
+  border-color: var(--jp-ui-font-color2, #8888aa);
+  color: var(--jp-ui-font-color0, #e0e4f0);
 }
 .nbplay-mixer .nbplay-mute-btn.active {
-  background: @nb-red;
-  border-color: @nb-red;
+  background: var(--jp-error-color1, #ef4444);
+  border-color: var(--jp-error-color1, #ef4444);
   color: var(--jp-ui-inverse-font-color0, #fff);
 }
 .nbplay-mixer .nbplay-solo-btn.active {
-  background: @nb-orange;
-  border-color: @nb-orange;
-  color: var(--jp-layout-color0, @nb-mixer-bg);
+  background: var(--jp-warn-color1, #f97316);
+  border-color: var(--jp-warn-color1, #f97316);
+  color: var(--jp-layout-color0, var(--jp-layout-color1, #1a1a2e));
 }
-
 /* ── remove button ─────────────────────── */
 .nbplay-mixer .nbplay-strip-remove {
   font-size: 14px;
@@ -270,23 +293,22 @@
   background: none;
   border: 1px solid transparent;
   border-radius: 4px;
-  color: @nb-mixer-border;
+  color: var(--jp-border-color0, #2d2d4a);
   cursor: pointer;
   transition: all 0.12s;
 }
 .nbplay-mixer .nbplay-strip-remove:hover {
-  border-color: @nb-red;
-  color: @nb-red;
+  border-color: var(--jp-error-color1, #ef4444);
+  color: var(--jp-error-color1, #ef4444);
 }
-
 /* ── inline edit input ─────────────────── */
 .nbplay-mixer-inline-edit {
   font-family: inherit;
   font-size: 9px;
   font-variant-numeric: tabular-nums;
-  background: @nb-bg;
-  color: @nb-cyan;
-  border: 1px solid @nb-cyan;
+  background: var(--jp-layout-color0, #0f0f1a);
+  color: var(--jp-brand-color1, #00d4ff);
+  border: 1px solid var(--jp-brand-color1, #00d4ff);
   border-radius: 3px;
   padding: 1px 3px;
   outline: none;
