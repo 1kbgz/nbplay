@@ -13,8 +13,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 nbplay = { path = "../rust", version = "*" }
-<<<<<<< before updating
-wasm-bindgen = "0.2.114"
+wasm-bindgen = "=0.2.115"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 
@@ -41,6 +40,3 @@ features = [
     "Window",
     "console",
 ]
-=======
-wasm-bindgen = "=0.2.115"
->>>>>>> after updating

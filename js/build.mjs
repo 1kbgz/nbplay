@@ -1,11 +1,6 @@
 import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
 import { build } from "@finos/perspective-esbuild-plugin/build.js";
-<<<<<<< before updating
-import { BuildCss } from "@prospective.co/procss/target/cjs/procss.js";
-import less from "less";
-=======
 import { transform } from "lightningcss";
->>>>>>> after updating
 import { getarg } from "./tools/getarg.mjs";
 import fs from "fs";
 import cpy from "cpy";
@@ -67,59 +62,50 @@ const WIDGET_BUILD = WIDGET_NAMES.map((name) => ({
 }));
 
 async function compile_css() {
-<<<<<<< before updating
-  // Use procss for the original index.less (if non-empty)
-  const indexLess = path_mod.join("src/less", "index.less");
-  const indexContent = fs.readFileSync(indexLess).toString().trim();
   fs.mkdirSync("dist/css", { recursive: true });
-  if (indexContent) {
-    const builder = new BuildCss("");
-    builder.add(indexLess, indexContent);
-    fs.writeFileSync("dist/css/index.css", builder.compile().get("index.css"));
-  }
 
-  // Use the less package for widget Less files (supports variables, mixins, @import)
+  // Copy widget CSS files for each widget using WIDGET_NAMES
+  // These were pre-compiled from LESS to CSS
   for (const name of WIDGET_NAMES) {
-    const lessFile = path_mod.join("src/less", `${name}.less`);
-    if (!fs.existsSync(lessFile)) continue;
-    const content = fs.readFileSync(lessFile).toString();
-    const result = await less.render(content, {
-      filename: lessFile,
-      paths: ["src/less"],
+    const cssFile = `src/css/${name}.css`;
+    if (!fs.existsSync(cssFile)) continue;
+    const source = fs.readFileSync(cssFile);
+    const { code } = transform({
+      filename: cssFile,
+      code: source,
+      minify: !DEBUG,
+      sourceMap: false,
     });
-    fs.writeFileSync(`dist/css/${name}.css`, result.css);
+    fs.writeFileSync(`dist/css/${name}.css`, code);
   }
 
-  // Copy any raw CSS files from src/css
-  if (fs.existsSync("src/css")) {
-    cpy("src/css/*", "dist/css/");
-  }
-=======
+  // Process raw CSS files from src/css
   const process_path = (path) => {
     const outpath = path.replace("src/css", "dist/css");
     fs.mkdirSync(outpath, { recursive: true });
 
-    fs.readdirSync(path, { withFileTypes: true }).forEach((entry) => {
-      const input = `${path}/${entry.name}`;
-      const output = `${outpath}/${entry.name}`;
+    if (fs.existsSync(path)) {
+      fs.readdirSync(path, { withFileTypes: true }).forEach((entry) => {
+        const input = `${path}/${entry.name}`;
+        const output = `${outpath}/${entry.name}`;
 
-      if (entry.isDirectory()) {
-        process_path(input);
-      } else if (entry.isFile() && entry.name.endsWith(".css")) {
-        const source = fs.readFileSync(input);
-        const { code } = transform({
-          filename: entry.name,
-          code: source,
-          minify: !DEBUG,
-          sourceMap: false,
-        });
-        fs.writeFileSync(output, code);
-      }
-    });
+        if (entry.isDirectory()) {
+          process_path(input);
+        } else if (entry.isFile() && entry.name.endsWith(".css")) {
+          const source = fs.readFileSync(input);
+          const { code } = transform({
+            filename: entry.name,
+            code: source,
+            minify: !DEBUG,
+            sourceMap: false,
+          });
+          fs.writeFileSync(output, code);
+        }
+      });
+    }
   };
 
   process_path("src/css");
->>>>>>> after updating
 }
 
 async function copy_html() {
