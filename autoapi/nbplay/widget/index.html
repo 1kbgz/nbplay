@@ -271,19 +271,22 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MixerWidget" title="nbplay.widget.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
 <td><p>Mixer console widget with per-channel faders, pan, mute/solo,</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.NoteComposer" title="nbplay.widget.NoteComposer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteComposer</span></code></a></p></td>
+<td><p>A single voice's per-step note/velocity/duration assignments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
 <td><p>Step sequencer widget with a grid-based pattern editor,</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
 <td><p>Sampler widget showing loaded sample info, envelope controls,</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.TransportWidget" title="nbplay.widget.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.TransportWidget" title="nbplay.widget.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>Global transport controls — play/stop, BPM, time signature, bar/beat counter.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>Binds a sequencer to a sound source and a mixer channel.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>A collection of tracks with a shared transport and mixer.</p></td>
 </tr>
 </tbody>
@@ -509,13 +512,70 @@ via <code class="docutils literal notranslate"><span class="pre">mix_down()</spa
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">NoteComposer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">traitlets.HasTraits</span></code></p>
+<p>A single voice’s per-step note/velocity/duration assignments.</p>
+<p>This is a lightweight traitlets object (not a rendered widget).
+A monophonic sequencer has one NoteComposer; a polyphonic sequencer
+has N NoteComposers sharing the same step clock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>int</em>) – Number of steps.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#nbplay.widget.NoteComposer.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer._length">
+<span class="sig-name descname"><span class="pre">_length</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#nbplay.widget.NoteComposer._length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.set_step">
+<span class="sig-name descname"><span class="pre">set_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_ticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer.set_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer.set_step" title="Link to this definition">¶</a></dt>
+<dd><p>Set a step at the given index.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.toggle_step">
+<span class="sig-name descname"><span class="pre">toggle_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer.toggle_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer.toggle_step" title="Link to this definition">¶</a></dt>
+<dd><p>Toggle the active state of a step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer.clear" title="Link to this definition">¶</a></dt>
+<dd><p>Deactivate all steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.to_pattern">
+<span class="sig-name descname"><span class="pre">to_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop_enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer.to_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer.to_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Create a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> instance from the current state.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.NoteComposer.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#NoteComposer.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.NoteComposer.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SequencerWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Step sequencer widget with a grid-based pattern editor,
 transport controls, and BPM setting.</p>
-<p>The pattern is synced as a JSON list of step dicts. Each dict has keys:
-<code class="docutils literal notranslate"><span class="pre">note</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">duration_ticks</span></code>, <code class="docutils literal notranslate"><span class="pre">active</span></code>.</p>
+<p>Supports monophonic (default, <code class="docutils literal notranslate"><span class="pre">num_voices=1</span></code>) and polyphonic
+(<code class="docutils literal notranslate"><span class="pre">num_voices=N</span></code>) modes.  In monophonic mode, the API is fully
+backward-compatible with the original single-voice sequencer.</p>
+<p>Internally, each voice is a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> instance.  The <code class="docutils literal notranslate"><span class="pre">steps</span></code>
+property is a convenience alias for <code class="docutils literal notranslate"><span class="pre">voices[0].steps</span></code>.</p>
 <p>Public constructor</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._esm">
@@ -525,11 +585,6 @@ transport controls, and BPM setting.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._css">
 <span class="sig-name descname"><span class="pre">_css</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget._css" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.steps">
-<span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.steps" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -563,6 +618,11 @@ transport controls, and BPM setting.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.num_voices">
+<span class="sig-name descname"><span class="pre">num_voices</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.num_voices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.session_id">
 <span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.session_id" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -572,40 +632,85 @@ transport controls, and BPM setting.</p>
 <span class="sig-name descname"><span class="pre">channel_index</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.channel_index" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.voices_data">
+<span class="sig-name descname"><span class="pre">voices_data</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.voices_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._composers">
+<span class="sig-name descname"><span class="pre">_composers</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget._composers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._syncing">
+<span class="sig-name descname"><span class="pre">_syncing</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.widget.SequencerWidget._syncing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._init_steps">
-<span class="sig-name descname"><span class="pre">_init_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget._init_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget._init_steps" title="Link to this definition">¶</a></dt>
-<dd><p>Initialise empty step grid.</p>
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._on_composer_change">
+<span class="sig-name descname"><span class="pre">_on_composer_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget._on_composer_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget._on_composer_change" title="Link to this definition">¶</a></dt>
+<dd><p>Keep voices_data in sync when any composer’s steps change.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._on_voices_data_change">
+<span class="sig-name descname"><span class="pre">_on_voices_data_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget._on_voices_data_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget._on_voices_data_change" title="Link to this definition">¶</a></dt>
+<dd><p>When voices_data is set from the browser, update composers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget._sync_voices_data">
+<span class="sig-name descname"><span class="pre">_sync_voices_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget._sync_voices_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget._sync_voices_data" title="Link to this definition">¶</a></dt>
+<dd><p>Push all composer step-lists into the synced voices_data trait.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.composers">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">composers</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.composers" title="Link to this definition">¶</a></dt>
+<dd><p>List of <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> objects, one per voice.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.voices">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">voices</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.voices" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for <code class="docutils literal notranslate"><span class="pre">composers</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.steps">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.steps" title="Link to this definition">¶</a></dt>
+<dd><p>Steps for voice 0 (backward-compatible with monophonic API).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.set_step">
-<span class="sig-name descname"><span class="pre">set_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_ticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.set_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.set_step" title="Link to this definition">¶</a></dt>
-<dd><p>Set a step at the given index.</p>
+<span class="sig-name descname"><span class="pre">set_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_ticks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.set_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.set_step" title="Link to this definition">¶</a></dt>
+<dd><p>Set a step at the given index on the given voice.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.toggle_step">
-<span class="sig-name descname"><span class="pre">toggle_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.toggle_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.toggle_step" title="Link to this definition">¶</a></dt>
-<dd><p>Toggle the active state of a step.</p>
+<span class="sig-name descname"><span class="pre">toggle_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.toggle_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.toggle_step" title="Link to this definition">¶</a></dt>
+<dd><p>Toggle the active state of a step on the given voice.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.clear">
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.clear" title="Link to this definition">¶</a></dt>
-<dd><p>Deactivate all steps.</p>
+<dd><p>Deactivate all steps across all voices.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.to_pattern">
-<span class="sig-name descname"><span class="pre">to_pattern</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_pattern" title="Link to this definition">¶</a></dt>
-<dd><p>Create a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> instance from the current state.</p>
+<span class="sig-name descname"><span class="pre">to_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Create a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> instance from the given voice.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.to_step_sequencer">
-<span class="sig-name descname"><span class="pre">to_step_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_step_sequencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_step_sequencer" title="Link to this definition">¶</a></dt>
-<dd><p>Create a Rust <code class="docutils literal notranslate"><span class="pre">StepSequencer</span></code> from the current widget state.</p>
+<span class="sig-name descname"><span class="pre">to_step_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_step_sequencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_step_sequencer" title="Link to this definition">¶</a></dt>
+<dd><p>Create a Rust <code class="docutils literal notranslate"><span class="pre">StepSequencer</span></code> from the given voice.</p>
 </dd></dl>
 
 </dd></dl>
@@ -961,19 +1066,37 @@ track sequencers, and assigns mixer channels for audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.to_mixer"><code class="docutils literal notranslate"><span class="pre">MixerWidget.to_mixer()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer"><code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.steps"><code class="docutils literal notranslate"><span class="pre">NoteComposer.steps</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer._length"><code class="docutils literal notranslate"><span class="pre">NoteComposer._length</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.set_step"><code class="docutils literal notranslate"><span class="pre">NoteComposer.set_step()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.toggle_step"><code class="docutils literal notranslate"><span class="pre">NoteComposer.toggle_step()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.clear"><code class="docutils literal notranslate"><span class="pre">NoteComposer.clear()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.to_pattern"><code class="docutils literal notranslate"><span class="pre">NoteComposer.to_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.NoteComposer.__repr__"><code class="docutils literal notranslate"><span class="pre">NoteComposer.__repr__()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget"><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a><ul>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget._esm"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._esm</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget._css"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._css</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.steps"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.steps</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.length"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.length</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.bpm"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.bpm</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.step_duration"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.step_duration</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.is_playing"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.is_playing</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.current_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.current_step</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.loop_enabled"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.loop_enabled</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.num_voices"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.num_voices</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.session_id"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.channel_index</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._init_steps"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._init_steps()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.voices_data"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.voices_data</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._composers"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._composers</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._syncing"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._syncing</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._on_composer_change"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._on_composer_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._on_voices_data_change"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._on_voices_data_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget._sync_voices_data"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._sync_voices_data()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.composers"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.composers</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.voices"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.voices</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.steps"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.steps</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.set_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.set_step()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.toggle_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.toggle_step()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.clear"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.clear()</span></code></a></li>

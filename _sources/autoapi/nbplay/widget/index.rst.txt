@@ -34,6 +34,7 @@ Classes
    nbplay.widget.SynthWidget
    nbplay.widget.SettingsWidget
    nbplay.widget.MixerWidget
+   nbplay.widget.NoteComposer
    nbplay.widget.SequencerWidget
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
@@ -207,56 +208,26 @@ Module Contents
 
 
 
-.. py:class:: SequencerWidget(**kwargs)
+.. py:class:: NoteComposer(length=16, **kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
-
-
-   Step sequencer widget with a grid-based pattern editor,
-   transport controls, and BPM setting.
-
-   The pattern is synced as a JSON list of step dicts. Each dict has keys:
-   ``note``, ``velocity``, ``duration_ticks``, ``active``.
-
-   Public constructor
+   Bases: :py:obj:`traitlets.HasTraits`
 
 
-   .. py:attribute:: _esm
+   A single voice's per-step note/velocity/duration assignments.
 
+   This is a lightweight traitlets object (not a rendered widget).
+   A monophonic sequencer has one NoteComposer; a polyphonic sequencer
+   has N NoteComposers sharing the same step clock.
 
-   .. py:attribute:: _css
+   :param length: Number of steps.
+   :type length: int
 
 
    .. py:attribute:: steps
 
 
-   .. py:attribute:: length
-
-
-   .. py:attribute:: bpm
-
-
-   .. py:attribute:: step_duration
-
-
-   .. py:attribute:: is_playing
-
-
-   .. py:attribute:: current_step
-
-
-   .. py:attribute:: loop_enabled
-
-
-   .. py:attribute:: session_id
-
-
-   .. py:attribute:: channel_index
-
-
-   .. py:method:: _init_steps()
-
-      Initialise empty step grid.
+   .. py:attribute:: _length
+      :value: 16
 
 
 
@@ -278,15 +249,137 @@ Module Contents
 
 
 
-   .. py:method:: to_pattern()
+   .. py:method:: to_pattern(loop_enabled=True)
 
       Create a Rust ``Pattern`` instance from the current state.
 
 
 
-   .. py:method:: to_step_sequencer(channel=0)
+   .. py:method:: __repr__()
 
-      Create a Rust ``StepSequencer`` from the current widget state.
+
+.. py:class:: SequencerWidget(**kwargs)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   Step sequencer widget with a grid-based pattern editor,
+   transport controls, and BPM setting.
+
+   Supports monophonic (default, ``num_voices=1``) and polyphonic
+   (``num_voices=N``) modes.  In monophonic mode, the API is fully
+   backward-compatible with the original single-voice sequencer.
+
+   Internally, each voice is a ``NoteComposer`` instance.  The ``steps``
+   property is a convenience alias for ``voices[0].steps``.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: length
+
+
+   .. py:attribute:: bpm
+
+
+   .. py:attribute:: step_duration
+
+
+   .. py:attribute:: is_playing
+
+
+   .. py:attribute:: current_step
+
+
+   .. py:attribute:: loop_enabled
+
+
+   .. py:attribute:: num_voices
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: voices_data
+
+
+   .. py:attribute:: _composers
+
+
+   .. py:attribute:: _syncing
+      :value: False
+
+
+
+   .. py:method:: _on_composer_change(change)
+
+      Keep voices_data in sync when any composer's steps change.
+
+
+
+   .. py:method:: _on_voices_data_change(change)
+
+      When voices_data is set from the browser, update composers.
+
+
+
+   .. py:method:: _sync_voices_data()
+
+      Push all composer step-lists into the synced voices_data trait.
+
+
+
+   .. py:property:: composers
+
+      List of ``NoteComposer`` objects, one per voice.
+
+
+   .. py:property:: voices
+
+      Alias for ``composers``.
+
+
+   .. py:property:: steps
+
+      Steps for voice 0 (backward-compatible with monophonic API).
+
+
+   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0)
+
+      Set a step at the given index on the given voice.
+
+
+
+   .. py:method:: toggle_step(index, voice=0)
+
+      Toggle the active state of a step on the given voice.
+
+
+
+   .. py:method:: clear()
+
+      Deactivate all steps across all voices.
+
+
+
+   .. py:method:: to_pattern(voice=0)
+
+      Create a Rust ``Pattern`` instance from the given voice.
+
+
+
+   .. py:method:: to_step_sequencer(channel=0, voice=0)
+
+      Create a Rust ``StepSequencer`` from the given voice.
 
 
 

@@ -4,25 +4,34 @@
    "cell_type": "markdown",
    "id": "0",
    "metadata": {
-    "id": "settings-title",
-    "language": "markdown"
+    "language": "markdown",
+    "id": "st-0"
    },
    "source": [
-    "# 02 SettingsWidget TutorialConfigure sample rate, channels, buffer size, and MIDI port selection."
+    "# 02 SettingsWidget Tutorial\n",
+    "\n",
+    "Configure sample rate, channels, buffer size, and MIDI port selection."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
    "id": "1",
    "metadata": {
-    "id": "settings-code",
-    "language": "python"
+    "language": "python",
+    "id": "st-1"
    },
-   "outputs": [],
    "source": [
-    "from nbplay import SettingsWidgetsettings = SettingsWidget(    sample_rate=44100,    channels=2,    buffer_size=512,)settings"
-   ]
+    "from nbplay import SettingsWidget\n",
+    "\n",
+    "settings = SettingsWidget(\n",
+    "    sample_rate=44100,\n",
+    "    channels=2,\n",
+    "    buffer_size=512,\n",
+    ")\n",
+    "settings"
+   ],
+   "execution_count": null,
+   "outputs": []
   }
  ],
  "metadata": {

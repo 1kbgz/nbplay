@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>07 MixerWidget TutorialCreate three channels and set gain/pan on each strip. - nbplay v0.1.0</title>
+        <title>07 MixerWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,26 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="mixerwidget-tutorialcreate-three-channels-and-set-gain-pan-on-each-strip">
-<h1>07 MixerWidget TutorialCreate three channels and set gain/pan on each strip.<a class="headerlink" href="#mixerwidget-tutorialcreate-three-channels-and-set-gain-pan-on-each-strip" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="mixerwidget-tutorial">
+<h1>07 MixerWidget Tutorial<a class="headerlink" href="#mixerwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Create three channels and set gain/pan on each strip.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixerWidgetmixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.78</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">)</span><span class="n">mixer</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span><span class="n">mixer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixerWidget</span>
+
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">)</span>
+
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.78</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span>
+
+<span class="n">mixer</span>
 </pre></div>
 </div>
 </div>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>02 SettingsWidget TutorialConfigure sample rate, channels, buffer size, and MIDI port selection. - nbplay v0.1.0</title>
+        <title>02 SettingsWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,19 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="settingswidget-tutorialconfigure-sample-rate-channels-buffer-size-and-midi-port-selection">
-<h1>02 SettingsWidget TutorialConfigure sample rate, channels, buffer size, and MIDI port selection.<a class="headerlink" href="#settingswidget-tutorialconfigure-sample-rate-channels-buffer-size-and-midi-port-selection" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="settingswidget-tutorial">
+<h1>02 SettingsWidget Tutorial<a class="headerlink" href="#settingswidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Configure sample rate, channels, buffer size, and MIDI port selection.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsWidgetsettings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">(</span>    <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span>    <span class="n">channels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>    <span class="n">buffer_size</span><span class="o">=</span><span class="mi">512</span><span class="p">,)</span><span class="n">settings</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SettingsWidget</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">(</span>
+    <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span>
+    <span class="n">channels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">buffer_size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">settings</span>
 </pre></div>
 </div>
 </div>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>04 SamplerWidget TutorialLoad a generated sample and inspect ADSR behavior. - nbplay v0.1.0</title>
+        <title>04 SamplerWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,33 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="samplerwidget-tutorialload-a-generated-sample-and-inspect-adsr-behavior">
-<h1>04 SamplerWidget TutorialLoad a generated sample and inspect ADSR behavior.<a class="headerlink" href="#samplerwidget-tutorialload-a-generated-sample-and-inspect-adsr-behavior" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="samplerwidget-tutorial">
+<h1>04 SamplerWidget Tutorial<a class="headerlink" href="#samplerwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Load a generated sample and inspect ADSR behavior.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mathfrom</span> <span class="n">nbplay</span> <span class="kn">import</span><span class="w"> </span><span class="nn">SamplerWidgetsampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">attack</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">sustain</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">max_voices</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span><span class="n">duration_seconds</span> <span class="o">=</span> <span class="mf">0.18</span><span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="n">duration_seconds</span><span class="p">)</span><span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span>    <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">880</span> <span class="o">*</span> <span class="n">index</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">index</span> <span class="o">/</span> <span class="n">frame_count</span><span class="p">)</span>    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frame_count</span><span class="p">)]</span><span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">sample_data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Notebook Blip&quot;</span><span class="p">)</span><span class="n">sampler</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span>
+
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span>
+    <span class="n">attack</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span>
+    <span class="n">sustain</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+    <span class="n">release</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+    <span class="n">max_voices</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span>
+<span class="n">duration_seconds</span> <span class="o">=</span> <span class="mf">0.18</span>
+<span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="n">duration_seconds</span><span class="p">)</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">880</span> <span class="o">*</span> <span class="n">index</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">index</span> <span class="o">/</span> <span class="n">frame_count</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frame_count</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">sample_data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Notebook Blip&quot;</span><span class="p">)</span>
+<span class="n">sampler</span>
 </pre></div>
 </div>
 </div>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>06 TransportWidget TutorialConfigure BPM, time signature, and loop range. - nbplay v0.1.0</title>
+        <title>06 TransportWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,22 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="transportwidget-tutorialconfigure-bpm-time-signature-and-loop-range">
-<h1>06 TransportWidget TutorialConfigure BPM, time signature, and loop range.<a class="headerlink" href="#transportwidget-tutorialconfigure-bpm-time-signature-and-loop-range" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="transportwidget-tutorial">
+<h1>06 TransportWidget Tutorial<a class="headerlink" href="#transportwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Configure BPM, time signature, and loop range.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportWidgettransport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span>    <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">,</span>    <span class="n">time_signature_num</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>    <span class="n">time_signature_den</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>    <span class="n">loop_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>    <span class="n">loop_start_bar</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>    <span class="n">loop_end_bar</span><span class="o">=</span><span class="mi">2</span><span class="p">,)</span><span class="n">transport</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransportWidget</span>
+
+<span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span>
+    <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">,</span>
+    <span class="n">time_signature_num</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">time_signature_den</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">loop_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">loop_start_bar</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">loop_end_bar</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">transport</span>
 </pre></div>
 </div>
 </div>

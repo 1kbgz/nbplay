@@ -36,6 +36,7 @@ Classes
    test_all.TestSampleMapping
    test_all.TestSampleMap
    test_all.TestSampler
+   test_all.TestNoteComposer
    test_all.TestSequencerWidget
    test_all.TestSamplerWidget
    test_all.TestTransportWidget
@@ -647,12 +648,9 @@ Module Contents
    .. py:method:: test_repr()
 
 
-.. py:class:: TestSequencerWidget
+.. py:class:: TestNoteComposer
 
    .. py:method:: test_defaults()
-
-
-   .. py:method:: test_steps_initialised()
 
 
    .. py:method:: test_custom_length()
@@ -671,6 +669,80 @@ Module Contents
 
 
    .. py:method:: test_clear()
+
+
+   .. py:method:: test_to_pattern()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestSequencerWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_steps_initialised()
+
+
+   .. py:method:: test_voices_initialised()
+
+      Default monophonic sequencer has one voice whose steps match .steps.
+
+
+
+   .. py:method:: test_polyphonic_voices()
+
+      Polyphonic sequencer with N voices.
+
+
+
+   .. py:method:: test_steps_is_voice_zero()
+
+      The .steps property is an alias for voices[0].steps.
+
+
+
+   .. py:method:: test_voices_trait_synced()
+
+      The voices_data trait contains step lists for all voices.
+
+
+
+   .. py:method:: test_custom_length()
+
+
+   .. py:method:: test_set_step()
+
+
+   .. py:method:: test_set_step_voice()
+
+      set_step with voice kwarg targets a specific voice.
+
+
+
+   .. py:method:: test_set_step_out_of_bounds()
+
+
+   .. py:method:: test_toggle_step()
+
+
+   .. py:method:: test_toggle_step_voice()
+
+      toggle_step with voice kwarg targets a specific voice.
+
+
+
+   .. py:method:: test_toggle_step_out_of_bounds()
+
+
+   .. py:method:: test_clear()
+
+
+   .. py:method:: test_clear_all_voices()
+
+      clear() deactivates all steps across all voices.
+
 
 
    .. py:method:: test_to_pattern()

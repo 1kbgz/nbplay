@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>05 SequencerWidget TutorialCreate and edit three 8-step patterns for lead, bass, and drums. - nbplay v0.1.0</title>
+        <title>05 SequencerWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -228,20 +228,216 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="sequencerwidget-tutorialcreate-and-edit-three-8-step-patterns-for-lead-bass-and-drums">
-<h1>05 SequencerWidget TutorialCreate and edit three 8-step patterns for lead, bass, and drums.<a class="headerlink" href="#sequencerwidget-tutorialcreate-and-edit-three-8-step-patterns-for-lead-bass-and-drums" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="sequencerwidget-tutorial">
+<h1>05 SequencerWidget Tutorial<a class="headerlink" href="#sequencerwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Monophonic and polyphonic step sequencers using <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>.</p>
+<section id="monophonic-sequencer">
+<h2>Monophonic Sequencer<a class="headerlink" href="#monophonic-sequencer" title="Link to this heading">¶</a></h2>
+<p>A single-voice sequencer is the simplest case: one <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> (voice 0) holds all the steps.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgetsfrom</span> <span class="n">nbplay</span> <span class="kn">import</span><span class="w"> </span><span class="nn">SequencerWidgetlead_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span><span class="k">for</span> <span class="n">step_index</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">72</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">71</span><span class="p">]):</span>    <span class="n">lead_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">102</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="n">bass_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span><span class="k">for</span> <span class="n">step_index</span><span class="p">,</span> <span class="n">velocity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">118</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">64</span><span class="p">]):</span>    <span class="n">bass_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="n">drum_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span><span class="k">for</span> <span class="n">step_index</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>    <span class="n">drum_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">112</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">lead_seq</span><span class="p">,</span> <span class="n">bass_seq</span><span class="p">,</span> <span class="n">drum_seq</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;16px&quot;</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
+
+<span class="c1"># A monophonic sequencer with 8 steps (num_voices defaults to 1)</span>
+<span class="n">mono</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">)</span>
+
+<span class="c1"># Program an ascending arpeggio on voice 0 (the default)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">60</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">55</span><span class="p">]):</span>
+    <span class="n">mono</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">mono</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3549f1869feb4a5eadf5d07151dbde7b", "version_major": 2, "version_minor": 1}</script></div>
+</div>
+</section>
+<section id="reading-steps-back">
+<h2>Reading Steps Back<a class="headerlink" href="#reading-steps-back" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">steps</span></code> is a shortcut for <code class="docutils literal notranslate"><span class="pre">voices[0].steps</span></code> — both return the same list of step dicts.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># steps property aliases voice 0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;step 0 via .steps:&quot;</span><span class="p">,</span> <span class="n">mono</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;step 0 via .voices:&quot;</span><span class="p">,</span> <span class="n">mono</span><span class="o">.</span><span class="n">voices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">assert</span> <span class="n">mono</span><span class="o">.</span><span class="n">steps</span> <span class="o">==</span> <span class="n">mono</span><span class="o">.</span><span class="n">voices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>step 0 via .steps: {&#39;note&#39;: 60, &#39;velocity&#39;: 100, &#39;duration_ticks&#39;: 1, &#39;active&#39;: True}
+step 0 via .voices: {&#39;note&#39;: 60, &#39;velocity&#39;: 100, &#39;duration_ticks&#39;: 1, &#39;active&#39;: True}
 </pre></div>
 </div>
 </div>
 </div>
+</section>
+<section id="polyphonic-sequencer">
+<h2>Polyphonic Sequencer<a class="headerlink" href="#polyphonic-sequencer" title="Link to this heading">¶</a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">num_voices</span></code> to create multiple independent voices. Each voice is a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>
+that holds its own set of steps. The browser-side scheduler plays <strong>all active voices</strong>
+simultaneously on each step.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
+
+<span class="c1"># Three-voice polyphonic sequencer: root, third, fifth</span>
+<span class="n">poly</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">,</span> <span class="n">num_voices</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Voice 0 — root notes (C)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">]):</span>
+    <span class="n">poly</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Voice 1 — major thirds (E)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">]):</span>
+    <span class="n">poly</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">85</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Voice 2 — fifths (G), only on beats 0, 2, 4, 6</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
+    <span class="n">poly</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">67</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">poly</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7e3e965679a6413a8db116cb2e1318fe", "version_major": 2, "version_minor": 1}</script></div>
+</div>
+</section>
+<section id="working-with-notecomposer-objects">
+<h2>Working with NoteComposer Objects<a class="headerlink" href="#working-with-notecomposer-objects" title="Link to this heading">¶</a></h2>
+<p>Each voice is a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> instance accessible via the <code class="docutils literal notranslate"><span class="pre">composers</span></code> or <code class="docutils literal notranslate"><span class="pre">voices</span></code> property.
+You can manipulate them directly and the widget stays in sync.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoteComposer</span>
+
+<span class="c1"># Access the three composers</span>
+<span class="n">root_voice</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">composers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">third_voice</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">composers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">fifth_voice</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">composers</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of voices: </span><span class="si">{</span><span class="n">poly</span><span class="o">.</span><span class="n">num_voices</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Root voice active steps:  </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">root_voice</span><span class="o">.</span><span class="n">steps</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;active&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Third voice active steps: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">third_voice</span><span class="o">.</span><span class="n">steps</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;active&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fifth voice active steps: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">fifth_voice</span><span class="o">.</span><span class="n">steps</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;active&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Toggle a step off on voice 1 (the third)</span>
+<span class="n">third_voice</span><span class="o">.</span><span class="n">toggle_step</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">After toggling step 3 on third voice:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  step 3 active = </span><span class="si">{</span><span class="n">third_voice</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="s1">&#39;active&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Number of voices: 3
+Root voice active steps:  8
+Third voice active steps: 8
+Fifth voice active steps: 4
+
+After toggling step 3 on third voice:
+  step 3 active = False
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="standalone-notecomposer">
+<h2>Standalone NoteComposer<a class="headerlink" href="#standalone-notecomposer" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> can be used outside a widget — useful for building patterns programmatically
+before attaching them to a sequencer.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoteComposer</span>
+
+<span class="c1"># Build a bass pattern</span>
+<span class="n">bass_line</span> <span class="o">=</span> <span class="n">NoteComposer</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">note</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span>
+    <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span> <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="mi">38</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span> <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">41</span><span class="p">,</span> <span class="mi">110</span><span class="p">),</span> <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="mi">43</span><span class="p">,</span> <span class="mi">95</span><span class="p">),</span> <span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span>
+<span class="p">]):</span>
+    <span class="n">bass_line</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">vel</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Convert to a Rust Pattern object</span>
+<span class="n">pattern</span> <span class="o">=</span> <span class="n">bass_line</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bass_line</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NoteComposer(length=8, active=8)
+Pattern(length=8, active_steps=8, loop=true)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="multiple-monophonic-sequencers">
+<h2>Multiple Monophonic Sequencers<a class="headerlink" href="#multiple-monophonic-sequencers" title="Link to this heading">¶</a></h2>
+<p>For independent instrument parts (lead, bass, drums), use separate monophonic sequencers
+— each routes to its own mixer channel in a Session.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
+
+<span class="n">lead_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">72</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">71</span><span class="p">]):</span>
+    <span class="n">lead_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">102</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">bass_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">velocity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">118</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">64</span><span class="p">]):</span>
+    <span class="n">bass_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">drum_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>
+    <span class="n">drum_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">112</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">lead_seq</span><span class="p">,</span> <span class="n">bass_seq</span><span class="p">,</span> <span class="n">drum_seq</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;16px&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e64da79fdc204a54a313bf7f2a79e548", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+<section id="converting-to-rust-patterns">
+<h2>Converting to Rust Patterns<a class="headerlink" href="#converting-to-rust-patterns" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">to_pattern()</span></code> on a sequencer converts voice 0 into a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> object.
+Each <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> also has its own <code class="docutils literal notranslate"><span class="pre">to_pattern()</span></code> method.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># From the polyphonic sequencer — each voice converts independently</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">composer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">composers</span><span class="p">):</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">composer</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Voice </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">pattern</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># From a monophonic sequencer (uses voice 0)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Lead: </span><span class="si">{</span><span class="n">lead_seq</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Voice 0: Pattern(length=8, active_steps=8, loop=true)
+Voice 1: Pattern(length=8, active_steps=7, loop=true)
+Voice 2: Pattern(length=8, active_steps=4, loop=true)
+
+Lead: Pattern(length=8, active_steps=8, loop=true)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -269,8 +465,33 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">05 SequencerWidget Tutorial</a><ul>
+<li><a class="reference internal" href="#monophonic-sequencer">Monophonic Sequencer</a></li>
+<li><a class="reference internal" href="#reading-steps-back">Reading Steps Back</a></li>
+<li><a class="reference internal" href="#polyphonic-sequencer">Polyphonic Sequencer</a></li>
+<li><a class="reference internal" href="#working-with-notecomposer-objects">Working with NoteComposer Objects</a></li>
+<li><a class="reference internal" href="#standalone-notecomposer">Standalone NoteComposer</a></li>
+<li><a class="reference internal" href="#multiple-monophonic-sequencers">Multiple Monophonic Sequencers</a></li>
+<li><a class="reference internal" href="#converting-to-rust-patterns">Converting to Rust Patterns</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

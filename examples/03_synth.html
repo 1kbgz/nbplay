@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>03 SynthWidget TutorialUse multiple oscillator types and compare waveform behavior. - nbplay v0.1.0</title>
+        <title>03 SynthWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,20 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="synthwidget-tutorialuse-multiple-oscillator-types-and-compare-waveform-behavior">
-<h1>03 SynthWidget TutorialUse multiple oscillator types and compare waveform behavior.<a class="headerlink" href="#synthwidget-tutorialuse-multiple-oscillator-types-and-compare-waveform-behavior" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="synthwidget-tutorial">
+<h1>03 SynthWidget Tutorial<a class="headerlink" href="#synthwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Use multiple oscillator types and compare waveform behavior.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgetsfrom</span> <span class="n">nbplay</span> <span class="kn">import</span><span class="w"> </span><span class="nn">SynthWidgetlead</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;saw&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">660.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.55</span><span class="p">)</span><span class="n">bass</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">110.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.65</span><span class="p">)</span><span class="n">texture</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;noise&quot;</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.18</span><span class="p">)</span><span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">lead</span><span class="p">,</span> <span class="n">bass</span><span class="p">,</span> <span class="n">texture</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;16px&quot;</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SynthWidget</span>
+
+<span class="n">lead</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;saw&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">660.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.55</span><span class="p">)</span>
+<span class="n">bass</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">110.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.65</span><span class="p">)</span>
+<span class="n">texture</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;noise&quot;</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.18</span><span class="p">)</span>
+
+<span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="n">lead</span><span class="p">,</span> <span class="n">bass</span><span class="p">,</span> <span class="n">texture</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;16px&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>

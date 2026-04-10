@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>01 Quick StartCreate and display one widget of each major type to validate your host setup. - nbplay v0.1.0</title>
+        <title>01 Quick Start - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -233,11 +233,31 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="quick-startcreate-and-display-one-widget-of-each-major-type-to-validate-your-host-setup">
-<h1>01 Quick StartCreate and display one widget of each major type to validate your host setup.<a class="headerlink" href="#quick-startcreate-and-display-one-widget-of-each-major-type-to-validate-your-host-setup" title="Link to this heading">¶</a></h1>
+          <section class="tex2jax_ignore mathjax_ignore" id="quick-start">
+<h1>01 Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h1>
+<p>Create and display one widget of each major type to validate your host setup.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mathimport</span> <span class="n">ipywidgets</span> <span class="k">as</span> <span class="n">widgetsfrom</span> <span class="n">nbplay</span> <span class="kn">import</span><span class="w"> </span><span class="p">(</span>    <span class="n">MixerWidget</span><span class="p">,</span>    <span class="n">SamplerWidget</span><span class="p">,</span>    <span class="n">SequencerWidget</span><span class="p">,</span>    <span class="n">SettingsWidget</span><span class="p">,</span>    <span class="n">SynthWidget</span><span class="p">,</span>    <span class="n">TransportWidget</span><span class="p">,)</span><span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">()</span><span class="n">synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">()</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">()</span><span class="n">seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">()</span><span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Channel 1&quot;</span><span class="p">)</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">mixer</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MixerWidget</span><span class="p">,</span>
+    <span class="n">SamplerWidget</span><span class="p">,</span>
+    <span class="n">SequencerWidget</span><span class="p">,</span>
+    <span class="n">SettingsWidget</span><span class="p">,</span>
+    <span class="n">SynthWidget</span><span class="p">,</span>
+    <span class="n">TransportWidget</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">()</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">()</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">()</span>
+<span class="n">seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">()</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Channel 1&quot;</span><span class="p">)</span>
+
+<span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">mixer</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>

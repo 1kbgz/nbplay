@@ -4,25 +4,37 @@
    "cell_type": "markdown",
    "id": "0",
    "metadata": {
-    "id": "transport-title",
-    "language": "markdown"
+    "language": "markdown",
+    "id": "tr-0"
    },
    "source": [
-    "# 06 TransportWidget TutorialConfigure BPM, time signature, and loop range."
+    "# 06 TransportWidget Tutorial\n",
+    "\n",
+    "Configure BPM, time signature, and loop range."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
    "id": "1",
    "metadata": {
-    "id": "transport-code",
-    "language": "python"
+    "language": "python",
+    "id": "tr-1"
    },
-   "outputs": [],
    "source": [
-    "from nbplay import TransportWidgettransport = TransportWidget(    bpm=118.0,    time_signature_num=4,    time_signature_den=4,    loop_enabled=True,    loop_start_bar=0,    loop_end_bar=2,)transport"
-   ]
+    "from nbplay import TransportWidget\n",
+    "\n",
+    "transport = TransportWidget(\n",
+    "    bpm=118.0,\n",
+    "    time_signature_num=4,\n",
+    "    time_signature_den=4,\n",
+    "    loop_enabled=True,\n",
+    "    loop_start_bar=0,\n",
+    "    loop_end_bar=2,\n",
+    ")\n",
+    "transport"
+   ],
+   "execution_count": null,
+   "outputs": []
   }
  ],
  "metadata": {
