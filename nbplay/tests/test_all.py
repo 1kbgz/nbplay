@@ -19,6 +19,7 @@ from nbplay import (
     MixerWidget,
     NoiseSource,
     Note,
+    NoteComposer,
     NoteEvent,
     Pattern,
     SampleMap,
@@ -1266,6 +1267,72 @@ class TestSampler:
         assert "Sampler" in r
 
 
+# ── NoteComposer ────────────────────────────────────────────
+
+
+class TestNoteComposer:
+    def test_defaults(self):
+        nc = NoteComposer(length=16)
+        assert len(nc.steps) == 16
+        for s in nc.steps:
+            assert s["active"] is False
+            assert s["note"] == 60
+            assert s["velocity"] == 100
+            assert s["duration_ticks"] == 1
+
+    def test_custom_length(self):
+        nc = NoteComposer(length=8)
+        assert len(nc.steps) == 8
+
+    def test_set_step(self):
+        nc = NoteComposer(length=16)
+        nc.set_step(0, note=72, velocity=80, active=True)
+        assert nc.steps[0]["note"] == 72
+        assert nc.steps[0]["velocity"] == 80
+        assert nc.steps[0]["active"] is True
+
+    def test_set_step_out_of_bounds(self):
+        nc = NoteComposer(length=16)
+        nc.set_step(999, note=60)  # should not raise
+
+    def test_toggle_step(self):
+        nc = NoteComposer(length=16)
+        assert nc.steps[3]["active"] is False
+        nc.toggle_step(3)
+        assert nc.steps[3]["active"] is True
+        nc.toggle_step(3)
+        assert nc.steps[3]["active"] is False
+
+    def test_toggle_step_out_of_bounds(self):
+        nc = NoteComposer(length=16)
+        nc.toggle_step(999)  # should not raise
+
+    def test_clear(self):
+        nc = NoteComposer(length=16)
+        nc.set_step(0, active=True)
+        nc.set_step(5, active=True)
+        nc.clear()
+        assert all(s["active"] is False for s in nc.steps)
+
+    def test_to_pattern(self):
+        nc = NoteComposer(length=16)
+        nc.set_step(0, note=60, velocity=100, active=True)
+        nc.set_step(4, note=64, velocity=90, active=True)
+        p = nc.to_pattern()
+        assert len(p) == 16
+        s0 = p.get_step(0)
+        assert s0.note == 60
+        assert s0.active is True
+        s4 = p.get_step(4)
+        assert s4.note == 64
+
+    def test_repr(self):
+        nc = NoteComposer(length=8)
+        r = repr(nc)
+        assert "NoteComposer" in r
+        assert "8" in r
+
+
 # ── SequencerWidget ─────────────────────────────────────────
 
 
@@ -1280,6 +1347,7 @@ class TestSequencerWidget:
         assert w.loop_enabled is True
         assert w.session_id == ""
         assert w.channel_index == -1
+        assert w.num_voices == 1
 
     def test_steps_initialised(self):
         w = SequencerWidget()
@@ -1289,6 +1357,37 @@ class TestSequencerWidget:
             assert s["note"] == 60
             assert s["velocity"] == 100
             assert s["duration_ticks"] == 1
+
+    def test_voices_initialised(self):
+        """Default monophonic sequencer has one voice whose steps match .steps."""
+        w = SequencerWidget()
+        assert len(w.voices) == 1
+        assert w.voices[0] is w.composers[0]
+        assert w.voices[0].steps == w.steps
+
+    def test_polyphonic_voices(self):
+        """Polyphonic sequencer with N voices."""
+        w = SequencerWidget(num_voices=4, length=8)
+        assert len(w.voices) == 4
+        assert len(w.composers) == 4
+        for v in w.voices:
+            assert isinstance(v, NoteComposer)
+            assert len(v.steps) == 8
+
+    def test_steps_is_voice_zero(self):
+        """The .steps property is an alias for voices[0].steps."""
+        w = SequencerWidget()
+        w.set_step(0, note=72, active=True)
+        assert w.voices[0].steps[0]["note"] == 72
+        assert w.voices[0].steps[0]["active"] is True
+
+    def test_voices_trait_synced(self):
+        """The voices_data trait contains step lists for all voices."""
+        w = SequencerWidget(num_voices=2, length=4)
+        vd = w.voices_data
+        assert len(vd) == 2
+        assert len(vd[0]) == 4
+        assert len(vd[1]) == 4
 
     def test_custom_length(self):
         w = SequencerWidget(length=8)
@@ -1302,6 +1401,15 @@ class TestSequencerWidget:
         assert w.steps[0]["velocity"] == 80
         assert w.steps[0]["active"] is True
 
+    def test_set_step_voice(self):
+        """set_step with voice kwarg targets a specific voice."""
+        w = SequencerWidget(num_voices=3, length=8)
+        w.set_step(0, note=64, active=True, voice=1)
+        assert w.voices[1].steps[0]["note"] == 64
+        assert w.voices[1].steps[0]["active"] is True
+        # Voice 0 unchanged
+        assert w.voices[0].steps[0]["active"] is False
+
     def test_set_step_out_of_bounds(self):
         w = SequencerWidget()
         w.set_step(999, note=60)  # should not raise
@@ -1314,6 +1422,13 @@ class TestSequencerWidget:
         w.toggle_step(3)
         assert w.steps[3]["active"] is False
 
+    def test_toggle_step_voice(self):
+        """toggle_step with voice kwarg targets a specific voice."""
+        w = SequencerWidget(num_voices=2, length=8)
+        w.toggle_step(2, voice=1)
+        assert w.voices[1].steps[2]["active"] is True
+        assert w.voices[0].steps[2]["active"] is False
+
     def test_toggle_step_out_of_bounds(self):
         w = SequencerWidget()
         w.toggle_step(999)  # should not raise
@@ -1324,6 +1439,15 @@ class TestSequencerWidget:
         w.set_step(5, active=True)
         w.clear()
         assert all(s["active"] is False for s in w.steps)
+
+    def test_clear_all_voices(self):
+        """clear() deactivates all steps across all voices."""
+        w = SequencerWidget(num_voices=2, length=8)
+        w.set_step(0, active=True, voice=0)
+        w.set_step(3, active=True, voice=1)
+        w.clear()
+        for v in w.voices:
+            assert all(s["active"] is False for s in v.steps)
 
     def test_to_pattern(self):
         w = SequencerWidget()

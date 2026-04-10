@@ -5,11 +5,14 @@ import { test, expect } from "@playwright/test";
 const DEFAULTS = {
   session_id: "",
   channel_index: -1,
-  steps: Array.from({ length: 8 }, (_, i) => ({
-    active: i % 2 === 0,
-    note: 60,
-    velocity: 100,
-  })),
+  voices_data: [
+    Array.from({ length: 8 }, (_, i) => ({
+      active: i % 2 === 0,
+      note: 60,
+      velocity: 100,
+    })),
+  ],
+  num_voices: 1,
   current_step: 0,
   bpm: 120,
   step_duration: 0.25,
@@ -20,7 +23,7 @@ const DEFAULTS = {
 /** Boot the sequencer widget inside the harness page. */
 async function renderWidget(page, overrides = {}) {
   const opts = { ...DEFAULTS, ...overrides };
-  if (overrides.steps) opts.steps = overrides.steps;
+  if (overrides.voices_data) opts.voices_data = overrides.voices_data;
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -85,7 +88,7 @@ test.describe("SequencerWidget", () => {
     await cell1.click();
 
     const active = await page.evaluate(
-      () => window.__testModel._state.steps[1].active,
+      () => window.__testModel._state.voices_data[0][1].active,
     );
     expect(active).toBe(true);
     await expect(cell1).toHaveClass(/active/);
@@ -93,7 +96,7 @@ test.describe("SequencerWidget", () => {
     // Click again to deactivate
     await cell1.click();
     const deactivated = await page.evaluate(
-      () => window.__testModel._state.steps[1].active,
+      () => window.__testModel._state.voices_data[0][1].active,
     );
     expect(deactivated).toBe(false);
     await expect(cell1).not.toHaveClass(/active/);
@@ -162,8 +165,8 @@ test.describe("SequencerWidget", () => {
     expect(step).toBe(-1);
   });
 
-  // 10. Model change:steps updates step display
-  test("model change:steps updates step display", async ({ page }) => {
+  // 10. Model change:voices_data updates step display
+  test("model change:voices_data updates step display", async ({ page }) => {
     await renderWidget(page);
 
     await page.evaluate(() => {
@@ -172,8 +175,8 @@ test.describe("SequencerWidget", () => {
         note: 60,
         velocity: 100,
       }));
-      window.__testModel.set("steps", newSteps);
-      window.__testModel._trigger("change:steps");
+      window.__testModel.set("voices_data", [newSteps]);
+      window.__testModel._trigger("change:voices_data");
     });
 
     await expect(page.locator(".nbplay-seq-cell")).toHaveCount(4);
@@ -377,5 +380,52 @@ test.describe("SequencerWidget", () => {
       window.__testModel._trigger("change:step_duration");
     });
     await expect(durSelect).toHaveValue("0.5");
+  });
+
+  // 24. Multi-voice grid renders rows for each voice
+  test("multi-voice grid renders step and vel rows per voice", async ({
+    page,
+  }) => {
+    const voice0 = Array.from({ length: 4 }, () => ({
+      active: true,
+      note: 60,
+      velocity: 100,
+    }));
+    const voice1 = Array.from({ length: 4 }, () => ({
+      active: false,
+      note: 72,
+      velocity: 80,
+    }));
+    await renderWidget(page, {
+      voices_data: [voice0, voice1],
+      num_voices: 2,
+    });
+
+    // 2 voices × 4 steps = 8 step cells total
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    // 2 velocity rows × 4 bars = 8 vel bars
+    await expect(page.locator(".nbplay-seq-vel-bar")).toHaveCount(8);
+
+    // Voice 0 cells show C4, voice 1 cells show C5
+    const cells = page.locator(".nbplay-seq-cell");
+    await expect(cells.nth(0)).toHaveText("C4");
+    await expect(cells.nth(4)).toHaveText("C5");
+
+    // Voice 0 cells are active, voice 1 cells are not
+    await expect(cells.nth(0)).toHaveClass(/active/);
+    await expect(cells.nth(4)).not.toHaveClass(/active/);
+
+    // Click voice 1 step 0 to toggle
+    await cells.nth(4).click();
+    const active = await page.evaluate(
+      () => window.__testModel._state.voices_data[1][0].active,
+    );
+    expect(active).toBe(true);
+    await expect(cells.nth(4)).toHaveClass(/active/);
+
+    // Info shows combined count
+    const info = page.locator(".nbplay-seq-info");
+    await expect(info).toContainText("5/8 steps active");
+    await expect(info).toContainText("2 voices");
   });
 });

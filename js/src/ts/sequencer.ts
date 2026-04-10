@@ -127,7 +127,9 @@ function createAudioScheduler(): AudioScheduler {
 
     scheduleStep(model: AnyModel, audioTime: number): void {
       if (!audioCtx) return;
-      const steps = (model.get("steps") as StepData[]) || [];
+      const voicesData = (model.get("voices_data") as StepData[][]) || [];
+      if (voicesData.length === 0) return;
+      const steps = voicesData[0] || [];
       if (steps.length === 0) return;
 
       const bpm = (model.get("bpm") as number) || 120;
@@ -150,11 +152,14 @@ function createAudioScheduler(): AudioScheduler {
       // messages on every step tick.
       model.set("current_step", nextStepIndex);
 
-      const step = steps[nextStepIndex];
-      if (step.active) {
-        const freq = midiToHz(step.note);
-        const velocity = (step.velocity || 100) / 127;
-        this.playOscillator(freq, velocity, audioTime, stepTimeInSeconds);
+      // Play a note for each voice that has an active step
+      for (const voice of voicesData) {
+        const step = voice[nextStepIndex];
+        if (step && step.active) {
+          const freq = midiToHz(step.note);
+          const velocity = (step.velocity || 100) / 127;
+          this.playOscillator(freq, velocity, audioTime, stepTimeInSeconds);
+        }
       }
     },
 
@@ -254,18 +259,25 @@ function render({
 
   const audioScheduler = createAudioScheduler();
 
+  function getVoices(): StepData[][] {
+    return (model.get("voices_data") as StepData[][]) || [];
+  }
+
   function buildGrid(): void {
     grid.innerHTML = "";
-    const steps = (model.get("steps") as StepData[]) || [];
+    const voices = getVoices();
+    if (voices.length === 0) return;
+    const numSteps = voices[0].length;
     const currentStep = model.get("current_step") as number;
 
+    // Header row with step numbers
     const headerRow = document.createElement("div");
     headerRow.className = "nbplay-seq-row nbplay-seq-header-row";
     const cornerCell = document.createElement("div");
     cornerCell.className = "nbplay-seq-label-cell";
     cornerCell.textContent = "#";
     headerRow.appendChild(cornerCell);
-    for (let i = 0; i < steps.length; i++) {
+    for (let i = 0; i < numSteps; i++) {
       const hcell = document.createElement("div");
       hcell.className = "nbplay-seq-header-cell";
       hcell.textContent = String(i + 1);
@@ -274,86 +286,103 @@ function render({
     }
     grid.appendChild(headerRow);
 
-    const stepRow = document.createElement("div");
-    stepRow.className = "nbplay-seq-row";
-    const stepLabel = document.createElement("div");
-    stepLabel.className = "nbplay-seq-label-cell";
-    stepLabel.textContent = "ON";
-    stepRow.appendChild(stepLabel);
+    // For each voice: a step row + a velocity row
+    for (let v = 0; v < voices.length; v++) {
+      const steps = voices[v];
+      const voiceLabel = String(v + 1);
 
-    for (let i = 0; i < steps.length; i++) {
-      const cell = document.createElement("div");
-      cell.className = "nbplay-seq-cell";
-      cell.dataset.step = String(i);
-      if (steps[i].active) cell.classList.add("active");
-      if (i === currentStep) cell.classList.add("current");
-      cell.textContent = noteName(steps[i].note);
-      cell.title = `Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+      // Step row
+      const stepRow = document.createElement("div");
+      stepRow.className = "nbplay-seq-row";
+      stepRow.dataset.voice = String(v);
+      const stepLbl = document.createElement("div");
+      stepLbl.className = "nbplay-seq-label-cell";
+      stepLbl.textContent = voiceLabel;
+      stepRow.appendChild(stepLbl);
 
-      cell.addEventListener("click", () => {
-        const s = [...((model.get("steps") as StepData[]) || [])];
-        if (i < s.length) {
-          s[i] = { ...s[i], active: !s[i].active };
-          model.set("steps", s);
-          model.save_changes();
-        }
-      });
+      for (let i = 0; i < steps.length; i++) {
+        const cell = document.createElement("div");
+        cell.className = "nbplay-seq-cell";
+        cell.dataset.step = String(i);
+        cell.dataset.voice = String(v);
+        if (steps[i].active) cell.classList.add("active");
+        if (i === currentStep) cell.classList.add("current");
+        cell.textContent = noteName(steps[i].note);
+        cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
 
-      cell.addEventListener("wheel", (e: WheelEvent) => {
-        e.preventDefault();
-        const s = [...((model.get("steps") as StepData[]) || [])];
-        if (i < s.length) {
-          const delta = e.deltaY < 0 ? 1 : -1;
-          const newNote = Math.max(0, Math.min(127, s[i].note + delta));
-          s[i] = { ...s[i], note: newNote };
-          model.set("steps", s);
-          model.save_changes();
-        }
-      });
+        cell.addEventListener("click", () => {
+          const vd = [...((model.get("voices_data") as StepData[][]) || [])];
+          const s = [...(vd[v] || [])];
+          if (i < s.length) {
+            s[i] = { ...s[i], active: !s[i].active };
+            vd[v] = s;
+            model.set("voices_data", vd);
+            model.save_changes();
+          }
+        });
 
-      stepRow.appendChild(cell);
+        cell.addEventListener("wheel", (e: WheelEvent) => {
+          e.preventDefault();
+          const vd = [...((model.get("voices_data") as StepData[][]) || [])];
+          const s = [...(vd[v] || [])];
+          if (i < s.length) {
+            const delta = e.deltaY < 0 ? 1 : -1;
+            const newNote = Math.max(0, Math.min(127, s[i].note + delta));
+            s[i] = { ...s[i], note: newNote };
+            vd[v] = s;
+            model.set("voices_data", vd);
+            model.save_changes();
+          }
+        });
+
+        stepRow.appendChild(cell);
+      }
+      grid.appendChild(stepRow);
+
+      // Velocity row
+      const velRow = document.createElement("div");
+      velRow.className = "nbplay-seq-row nbplay-seq-vel-row";
+      velRow.dataset.voice = String(v);
+      const velLbl = document.createElement("div");
+      velLbl.className = "nbplay-seq-label-cell";
+      velLbl.textContent = "VEL" + (voices.length > 1 ? voiceLabel : "");
+      velRow.appendChild(velLbl);
+
+      for (let i = 0; i < steps.length; i++) {
+        const velCell = document.createElement("div");
+        velCell.className = "nbplay-seq-vel-cell";
+        const velBar = document.createElement("div");
+        velBar.className = "nbplay-seq-vel-bar";
+        velBar.style.height = (steps[i].velocity / 127) * 100 + "%";
+        if (steps[i].active) velBar.classList.add("active");
+        if (i === currentStep) velBar.classList.add("current");
+        velCell.appendChild(velBar);
+
+        velCell.addEventListener("wheel", (e: WheelEvent) => {
+          e.preventDefault();
+          const vd = [...((model.get("voices_data") as StepData[][]) || [])];
+          const s = [...(vd[v] || [])];
+          if (i < s.length) {
+            const delta = e.deltaY < 0 ? 5 : -5;
+            const newVel = Math.max(0, Math.min(127, s[i].velocity + delta));
+            s[i] = { ...s[i], velocity: newVel };
+            vd[v] = s;
+            model.set("voices_data", vd);
+            model.save_changes();
+          }
+        });
+
+        velRow.appendChild(velCell);
+      }
+      grid.appendChild(velRow);
     }
-    grid.appendChild(stepRow);
-
-    const velRow = document.createElement("div");
-    velRow.className = "nbplay-seq-row nbplay-seq-vel-row";
-    const velLabel = document.createElement("div");
-    velLabel.className = "nbplay-seq-label-cell";
-    velLabel.textContent = "VEL";
-    velRow.appendChild(velLabel);
-
-    for (let i = 0; i < steps.length; i++) {
-      const velCell = document.createElement("div");
-      velCell.className = "nbplay-seq-vel-cell";
-      const velBar = document.createElement("div");
-      velBar.className = "nbplay-seq-vel-bar";
-      velBar.style.height = (steps[i].velocity / 127) * 100 + "%";
-      if (steps[i].active) velBar.classList.add("active");
-      if (i === currentStep) velBar.classList.add("current");
-      velCell.appendChild(velBar);
-
-      velCell.addEventListener("wheel", (e: WheelEvent) => {
-        e.preventDefault();
-        const s = [...((model.get("steps") as StepData[]) || [])];
-        if (i < s.length) {
-          const delta = e.deltaY < 0 ? 5 : -5;
-          const newVel = Math.max(0, Math.min(127, s[i].velocity + delta));
-          s[i] = { ...s[i], velocity: newVel };
-          model.set("steps", s);
-          model.save_changes();
-        }
-      });
-
-      velCell.appendChild(velBar);
-      velRow.appendChild(velCell);
-    }
-    grid.appendChild(velRow);
 
     updateInfo();
   }
 
   function syncGrid(): void {
-    const steps = (model.get("steps") as StepData[]) || [];
+    const voices = getVoices();
+    if (voices.length === 0) return;
     const currentStep = model.get("current_step") as number;
 
     const headerCells = grid.querySelectorAll(".nbplay-seq-header-cell");
@@ -362,17 +391,24 @@ function render({
     });
 
     const cells = grid.querySelectorAll(".nbplay-seq-cell");
-    cells.forEach((cell: Element, i: number) => {
+    cells.forEach((cell: Element) => {
+      const el = cell as HTMLElement;
+      const v = parseInt(el.dataset.voice || "0", 10);
+      const i = parseInt(el.dataset.step || "0", 10);
+      const steps = voices[v] || [];
       if (i >= steps.length) return;
       cell.classList.toggle("active", !!steps[i].active);
       cell.classList.toggle("current", i === currentStep);
       cell.textContent = noteName(steps[i].note);
-      (cell as HTMLElement).title =
-        `Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+      el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
     });
 
     const velBars = grid.querySelectorAll(".nbplay-seq-vel-bar");
-    velBars.forEach((bar: Element, i: number) => {
+    const numSteps = voices[0].length;
+    velBars.forEach((bar: Element, flatIdx: number) => {
+      const v = Math.floor(flatIdx / numSteps);
+      const i = flatIdx % numSteps;
+      const steps = voices[v] || [];
       if (i >= steps.length) return;
       (bar as HTMLElement).style.height = (steps[i].velocity / 127) * 100 + "%";
       bar.classList.toggle("active", !!steps[i].active);
@@ -383,9 +419,15 @@ function render({
   }
 
   function updateInfo(): void {
-    const steps = (model.get("steps") as StepData[]) || [];
-    const active = steps.filter((s: StepData) => s.active).length;
-    info.textContent = `${active}/${steps.length} steps active · ${model.get("bpm")} BPM`;
+    const voices = getVoices();
+    const numSteps = voices[0]?.length || 0;
+    let totalActive = 0;
+    for (const steps of voices) {
+      totalActive += steps.filter((s: StepData) => s.active).length;
+    }
+    const voiceCount = voices.length;
+    const voiceInfo = voiceCount > 1 ? ` · ${voiceCount} voices` : "";
+    info.textContent = `${totalActive}/${numSteps * voiceCount} steps active${voiceInfo} · ${model.get("bpm")} BPM`;
   }
 
   playBtn.addEventListener("click", () => {
@@ -433,11 +475,15 @@ function render({
   });
 
   let prevLength: number = -1;
+  let prevVoiceCount: number = -1;
 
   function onModelChange(): void {
-    const steps = (model.get("steps") as StepData[]) || [];
-    if (steps.length !== prevLength) {
-      prevLength = steps.length;
+    const voices = getVoices();
+    const numSteps = voices[0]?.length || 0;
+    const numVoices = voices.length;
+    if (numSteps !== prevLength || numVoices !== prevVoiceCount) {
+      prevLength = numSteps;
+      prevVoiceCount = numVoices;
       buildGrid();
     } else {
       syncGrid();
@@ -461,7 +507,7 @@ function render({
     loopChk.checked = model.get("loop_enabled") as boolean;
   }
 
-  model.on("change:steps", onModelChange);
+  model.on("change:voices_data", onModelChange);
   model.on("change:current_step", onModelChange);
   model.on("change:is_playing", onModelChange);
   model.on("change:bpm", syncControls);

@@ -191,6 +191,12 @@
 .nbplay-seq-vel-row {
   align-items: flex-end;
 }
+/* Voice separator — add gap before each voice group after the first */
+.nbplay-seq-row[data-voice]:not([data-voice="0"]):not(.nbplay-seq-vel-row) {
+  margin-top: 6px;
+  border-top: 1px solid var(--jp-border-color1, #1e1e3a);
+  padding-top: 4px;
+}
 .nbplay-seq-vel-cell {
   width: 44px;
   min-width: 44px;
