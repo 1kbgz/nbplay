@@ -47,7 +47,6 @@ class SynthWidget(anywidget.AnyWidget):
     _esm = _STATIC / "widget.js"
     _css = _STATIC / "widget.css"
 
-    # --- synced traits ---------------------------------------------------
     oscillator_type = traitlets.Unicode("sine").tag(sync=True)
     frequency = traitlets.Float(440.0).tag(sync=True)
     amplitude = traitlets.Float(0.8).tag(sync=True)
@@ -65,8 +64,6 @@ class SynthWidget(anywidget.AnyWidget):
             self._on_param_change,
             names=["oscillator_type", "frequency", "amplitude", "sample_rate"],
         )
-
-    # --- internals -------------------------------------------------------
 
     def _on_param_change(self, change):
         self._update_waveform()
@@ -111,13 +108,11 @@ class SettingsWidget(anywidget.AnyWidget):
     _esm = _STATIC / "settings.js"
     _css = _STATIC / "settings.css"
 
-    # --- audio settings ---------------------------------------------------
     sample_rate = traitlets.Int(44100).tag(sync=True)
     channels = traitlets.Int(1).tag(sync=True)
     buffer_size = traitlets.Int(512).tag(sync=True)
     audio_device = traitlets.Unicode("").tag(sync=True)
 
-    # --- MIDI settings ----------------------------------------------------
     midi_port = traitlets.Unicode("").tag(sync=True)
     available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
 
@@ -198,38 +193,26 @@ class MixerWidget(anywidget.AnyWidget):
         return m
 
 
-class SequencerWidget(anywidget.AnyWidget):
-    """Step sequencer widget with a grid-based pattern editor,
-    transport controls, and BPM setting.
+class NoteComposer(traitlets.HasTraits):
+    """A single voice's per-step note/velocity/duration assignments.
 
-    The pattern is synced as a JSON list of step dicts. Each dict has keys:
-    ``note``, ``velocity``, ``duration_ticks``, ``active``.
+    This is a lightweight traitlets object (not a rendered widget).
+    A monophonic sequencer has one NoteComposer; a polyphonic sequencer
+    has N NoteComposers sharing the same step clock.
+
+    Parameters
+    ----------
+    length : int
+        Number of steps.
     """
 
-    _esm = _STATIC / "sequencer.js"
-    _css = _STATIC / "sequencer.css"
-
-    # Pattern steps: list of dicts {note, velocity, duration_ticks, active}
     steps = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    length = traitlets.Int(16).tag(sync=True)
-    bpm = traitlets.Float(120.0).tag(sync=True)
-    step_duration = traitlets.Float(0.25).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-    current_step = traitlets.Int(-1).tag(sync=True)
-    loop_enabled = traitlets.Bool(True).tag(sync=True)
 
-    # Session routing (set by Session to route audio through mixer)
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
-
-    def __init__(self, **kwargs):
+    def __init__(self, length=16, **kwargs):
         super().__init__(**kwargs)
+        self._length = length
         if not self.steps:
-            self._init_steps()
-
-    def _init_steps(self):
-        """Initialise empty step grid."""
-        self.steps = [{"note": 60, "velocity": 100, "duration_ticks": 1, "active": False} for _ in range(self.length)]
+            self.steps = [{"note": 60, "velocity": 100, "duration_ticks": 1, "active": False} for _ in range(length)]
 
     def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True):
         """Set a step at the given index."""
@@ -254,23 +237,146 @@ class SequencerWidget(anywidget.AnyWidget):
         """Deactivate all steps."""
         self.steps = [{**s, "active": False} for s in self.steps]
 
-    def to_pattern(self):
+    def to_pattern(self, loop_enabled=True):
         """Create a Rust ``Pattern`` instance from the current state."""
         from nbplay import Pattern as RustPattern, Step as RustStep
 
-        p = RustPattern(self.length)
+        p = RustPattern(len(self.steps))
         for i, s in enumerate(self.steps):
             step = RustStep(s["note"], s["velocity"], s["duration_ticks"])
             step.active = s["active"]
             p.set_step(i, step)
-        p.loop_enabled = self.loop_enabled
+        p.loop_enabled = loop_enabled
         return p
 
-    def to_step_sequencer(self, channel=0):
-        """Create a Rust ``StepSequencer`` from the current widget state."""
+    def __repr__(self):
+        active = sum(1 for s in self.steps if s["active"])
+        return f"NoteComposer(length={len(self.steps)}, active={active})"
+
+
+class SequencerWidget(anywidget.AnyWidget):
+    """Step sequencer widget with a grid-based pattern editor,
+    transport controls, and BPM setting.
+
+    Supports monophonic (default, ``num_voices=1``) and polyphonic
+    (``num_voices=N``) modes.  In monophonic mode, the API is fully
+    backward-compatible with the original single-voice sequencer.
+
+    Internally, each voice is a ``NoteComposer`` instance.  The ``steps``
+    property is a convenience alias for ``voices[0].steps``.
+    """
+
+    _esm = _STATIC / "sequencer.js"
+    _css = _STATIC / "sequencer.css"
+
+    # Timing / transport (the "SequencerBase" concerns)
+    length = traitlets.Int(16).tag(sync=True)
+    bpm = traitlets.Float(120.0).tag(sync=True)
+    step_duration = traitlets.Float(0.25).tag(sync=True)
+    is_playing = traitlets.Bool(False).tag(sync=True)
+    current_step = traitlets.Int(-1).tag(sync=True)
+    loop_enabled = traitlets.Bool(True).tag(sync=True)
+    num_voices = traitlets.Int(1).tag(sync=True)
+
+    # Session routing (set by Session to route audio through mixer)
+    session_id = traitlets.Unicode("").tag(sync=True)
+    channel_index = traitlets.Int(-1).tag(sync=True)
+
+    # All voices' step data, synced to browser as list-of-lists.
+    # voices_data[i] == composers[i].steps
+    voices_data = traitlets.List(
+        trait=traitlets.List(trait=traitlets.Dict()),
+        default_value=[],
+    ).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        num_voices = kwargs.pop("num_voices", 1)
+        length = kwargs.get("length", 16)
+        super().__init__(num_voices=num_voices, **kwargs)
+        self._composers = [NoteComposer(length=length) for _ in range(num_voices)]
+        self._syncing = False
+        for i, c in enumerate(self._composers):
+            c.observe(self._on_composer_change, names=["steps"])
+        self.observe(self._on_voices_data_change, names=["voices_data"])
+        self._sync_voices_data()
+
+    def _on_composer_change(self, change):
+        """Keep voices_data in sync when any composer's steps change."""
+        if not self._syncing:
+            self._syncing = True
+            try:
+                self._sync_voices_data()
+            finally:
+                self._syncing = False
+
+    def _on_voices_data_change(self, change):
+        """When voices_data is set from the browser, update composers."""
+        if not self._syncing:
+            self._syncing = True
+            try:
+                for i, c in enumerate(self._composers):
+                    if i < len(self.voices_data):
+                        c.steps = list(self.voices_data[i])
+            finally:
+                self._syncing = False
+
+    def _sync_voices_data(self):
+        """Push all composer step-lists into the synced voices_data trait."""
+        self.voices_data = [list(c.steps) for c in self._composers]
+
+    # ── Voice accessors ───────────────────────────────────────
+
+    @property
+    def composers(self):
+        """List of ``NoteComposer`` objects, one per voice."""
+        return list(self._composers)
+
+    @property
+    def voices(self):
+        """Alias for ``composers``."""
+        return self.composers
+
+    # ── Backward-compatible steps property (voice 0) ──────────
+
+    @property
+    def steps(self):
+        """Steps for voice 0 (backward-compatible with monophonic API)."""
+        return self._composers[0].steps
+
+    @steps.setter
+    def steps(self, value):
+        self._composers[0].steps = value
+
+    # ── Step manipulation (voice-aware) ───────────────────────
+
+    def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0):
+        """Set a step at the given index on the given voice."""
+        if 0 <= voice < len(self._composers):
+            self._composers[voice].set_step(index, note, velocity, duration_ticks, active)
+
+    def toggle_step(self, index, voice=0):
+        """Toggle the active state of a step on the given voice."""
+        if 0 <= voice < len(self._composers):
+            self._composers[voice].toggle_step(index)
+
+    def clear(self):
+        """Deactivate all steps across all voices."""
+        for c in self._composers:
+            c.clear()
+
+    def to_pattern(self, voice=0):
+        """Create a Rust ``Pattern`` instance from the given voice."""
+        if 0 <= voice < len(self._composers):
+            return self._composers[voice].to_pattern(loop_enabled=self.loop_enabled)
+        return None
+
+    def to_step_sequencer(self, channel=0, voice=0):
+        """Create a Rust ``StepSequencer`` from the given voice."""
         from nbplay import StepSequencer as RustStepSequencer
 
-        pattern = self.to_pattern()
+        pattern = self.to_pattern(voice=voice)
+        if pattern is None:
+            return None
         seq = RustStepSequencer(pattern, channel)
         seq.step_duration = self.step_duration
         return seq
