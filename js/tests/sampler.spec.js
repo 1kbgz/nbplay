@@ -474,4 +474,209 @@ test.describe("SamplerWidget", () => {
     // Second pad updated
     await expect(secondNote).toHaveText("G5");
   });
+
+  // ── Double-click pad trigger guard ────────────────────────────
+
+  test("double-click pad note does not add .active class to pad", async ({
+    page,
+  }) => {
+    await renderWidget(page, { root_note: 60 });
+    const pad = page.locator(".nbplay-samp-pad").first();
+    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+
+    // Double-click the note text
+    await noteSpan.dblclick();
+
+    // Pad should NOT have .active (no noteOn triggered on second click)
+    await expect(pad).not.toHaveClass(/\bactive\b/);
+
+    // Inline edit should still open
+    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    await expect(input).toBeVisible();
+  });
+
+  // ── Bus-ready event re-registration ───────────────────────────
+
+  test("sampler registers on session bus when nbplay-bus-ready fires", async ({
+    page,
+  }) => {
+    // Render a sampler with session routing but NO bus yet
+    await renderWidget(page, { session_id: "test-sess", channel_index: 0 });
+
+    // Bus does not exist, so sampler should not be registered
+    let registered = await page.evaluate(() => {
+      const g = globalThis;
+      return !!g.__nbplay?.["test-sess"]?.samplers?.[0];
+    });
+    expect(registered).toBe(false);
+
+    // Now simulate the mixer creating the bus and firing the event
+    await page.evaluate(() => {
+      const g = globalThis;
+      if (!g.__nbplay) g.__nbplay = {};
+      g.__nbplay["test-sess"] = { audioCtx: null, channels: [] };
+      document.dispatchEvent(
+        new CustomEvent("nbplay-bus-ready", {
+          detail: { sessionId: "test-sess" },
+        }),
+      );
+    });
+
+    registered = await page.evaluate(() => {
+      const g = globalThis;
+      const s = g.__nbplay?.["test-sess"]?.samplers?.[0];
+      return typeof s?.triggerNote === "function";
+    });
+    expect(registered).toBe(true);
+  });
+
+  // R5.2 — Sampler with session routing but no bus does NOT register
+  test("sampler with session_id but no bus does not register", async ({
+    page,
+  }) => {
+    await renderWidget(page, { session_id: "no-bus", channel_index: 0 });
+
+    const registered = await page.evaluate(() => {
+      const g = globalThis;
+      return !!g.__nbplay?.["no-bus"]?.samplers?.[0];
+    });
+    expect(registered).toBe(false);
+  });
+
+  // R5.4 — bus-ready with wrong sessionId does NOT register
+  test("bus-ready with wrong sessionId does not register sampler", async ({
+    page,
+  }) => {
+    await renderWidget(page, { session_id: "my-sess", channel_index: 0 });
+
+    // Create bus for a DIFFERENT session and fire event
+    await page.evaluate(() => {
+      const g = globalThis;
+      if (!g.__nbplay) g.__nbplay = {};
+      g.__nbplay["other-sess"] = { audioCtx: null, channels: [] };
+      document.dispatchEvent(
+        new CustomEvent("nbplay-bus-ready", {
+          detail: { sessionId: "other-sess" },
+        }),
+      );
+    });
+
+    // Sampler should still NOT be registered (no bus for "my-sess")
+    const registered = await page.evaluate(() => {
+      const g = globalThis;
+      return !!g.__nbplay?.["my-sess"]?.samplers?.[0];
+    });
+    expect(registered).toBe(false);
+  });
+
+  // R5.5 — change:channel_index re-registers sampler at new index
+  test("change:channel_index re-registers sampler with new index", async ({
+    page,
+  }) => {
+    // Create bus first
+    await page.evaluate(() => {
+      const g = globalThis;
+      if (!g.__nbplay) g.__nbplay = {};
+      g.__nbplay["reindex-sess"] = { audioCtx: null, channels: [] };
+    });
+
+    await renderWidget(page, {
+      session_id: "reindex-sess",
+      channel_index: 0,
+    });
+
+    // Should be registered at index 0
+    let at0 = await page.evaluate(() => {
+      const g = globalThis;
+      return (
+        typeof g.__nbplay?.["reindex-sess"]?.samplers?.[0]?.triggerNote ===
+        "function"
+      );
+    });
+    expect(at0).toBe(true);
+
+    // Change channel_index to 2
+    await page.evaluate(() => {
+      window.__testModel.set("channel_index", 2);
+      window.__testModel._trigger("change:channel_index");
+    });
+
+    // Should now be registered at index 2
+    const at2 = await page.evaluate(() => {
+      const g = globalThis;
+      return (
+        typeof g.__nbplay?.["reindex-sess"]?.samplers?.[2]?.triggerNote ===
+        "function"
+      );
+    });
+    expect(at2).toBe(true);
+  });
+
+  // R5.6 — On widget destroy, sampler is removed from bus
+  test("sampler removed from bus on widget destroy", async ({ page }) => {
+    // Create bus first
+    await page.evaluate(() => {
+      const g = globalThis;
+      if (!g.__nbplay) g.__nbplay = {};
+      g.__nbplay["cleanup-sess"] = { audioCtx: null, channels: [] };
+    });
+
+    const cleanup = await page.evaluate(async () => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/sampler.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/sampler.js");
+      const el = document.createElement("div");
+      document.getElementById("root").appendChild(el);
+      const model = window.createMockModel({
+        max_voices: 4,
+        session_id: "cleanup-sess",
+        channel_index: 0,
+        root_note: 60,
+        sample_name: "Click",
+        sample_rate: 44100,
+        sample_length: 4410,
+        attack: 0.01,
+        decay: 0.1,
+        sustain: 0.7,
+        release: 0.3,
+        waveform: null,
+        pad_notes: [48, 52, 55, 59, 60, 64, 67, 71],
+        keyboard_connected: false,
+      });
+      window.__testModel = model;
+      const destroyFn = mod.default.render({ model, el });
+      // Store destroy function on window for later
+      window.__destroySampler = destroyFn;
+      return true;
+    });
+    expect(cleanup).toBe(true);
+
+    // Verify sampler IS registered
+    let registered = await page.evaluate(() => {
+      const g = globalThis;
+      return (
+        typeof g.__nbplay?.["cleanup-sess"]?.samplers?.[0]?.triggerNote ===
+        "function"
+      );
+    });
+    expect(registered).toBe(true);
+
+    // Now destroy the widget
+    await page.evaluate(() => {
+      if (typeof window.__destroySampler === "function") {
+        window.__destroySampler();
+      }
+    });
+
+    // Sampler should be removed from bus
+    const afterDestroy = await page.evaluate(() => {
+      const g = globalThis;
+      const s = g.__nbplay?.["cleanup-sess"]?.samplers?.[0];
+      return s == null || typeof s.triggerNote !== "function";
+    });
+    expect(afterDestroy).toBe(true);
+  });
 });

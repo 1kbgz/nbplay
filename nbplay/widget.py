@@ -282,6 +282,9 @@ class SequencerWidget(anywidget.AnyWidget):
     session_id = traitlets.Unicode("").tag(sync=True)
     channel_index = traitlets.Int(-1).tag(sync=True)
 
+    # Keyboard integration — set by KeyboardWidget.connect_sequencer()
+    keyboard_connected = traitlets.Bool(False).tag(sync=True)
+
     # All voices' step data, synced to browser as list-of-lists.
     # voices_data[i] == composers[i].steps
     voices_data = traitlets.List(
@@ -421,6 +424,9 @@ class SamplerWidget(anywidget.AnyWidget):
     session_id = traitlets.Unicode("").tag(sync=True)
     channel_index = traitlets.Int(-1).tag(sync=True)
 
+    # Keyboard integration — set by KeyboardWidget.connect_sampler()
+    keyboard_connected = traitlets.Bool(False).tag(sync=True)
+
     def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
         """Load sample PCM data (list of floats) into the widget."""
         self.sample_name = name
@@ -479,6 +485,91 @@ class TransportWidget(anywidget.AnyWidget):
     loop_enabled = traitlets.Bool(False).tag(sync=True)
     loop_start_bar = traitlets.Int(0).tag(sync=True)
     loop_end_bar = traitlets.Int(4).tag(sync=True)
+
+
+class KeyboardWidget(anywidget.AnyWidget):
+    """Musical typing keyboard widget (Logic Pro style).
+
+    4-row QWERTY layout across two independent octave halves.
+    Triggers audio via Web Audio, emits note events for sequencer
+    recording and sampler triggering.
+
+    Key mapping:
+        Upper: 2 3 _ 5 6 7 _ 9 0 (sharps) / Q W E R T Y U I O P (naturals)
+        Lower: A S _ F G H _ K L (sharps) / Z X C V B N M , . (naturals)
+        [ ] octave shift upper, ; ' octave shift lower
+        - = velocity down/up (hold to accelerate)
+        ` sustain upper, / sustain lower, Space global sustain
+    """
+
+    _esm = _STATIC / "keyboard.js"
+    _css = _STATIC / "keyboard.css"
+
+    upper_octave = traitlets.Int(3).tag(sync=True)
+    lower_octave = traitlets.Int(4).tag(sync=True)
+    velocity = traitlets.Int(100).tag(sync=True)
+    active_notes = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
+    sustain_upper = traitlets.Bool(False).tag(sync=True)
+    sustain_lower = traitlets.Bool(False).tag(sync=True)
+    sustain_global = traitlets.Bool(False).tag(sync=True)
+    last_note_event = traitlets.Dict(default_value={}).tag(sync=True)
+
+    # Session routing
+    session_id = traitlets.Unicode("").tag(sync=True)
+    channel_index = traitlets.Int(-1).tag(sync=True)
+
+    # Sampler routing: list of {channel_index, zone} dicts
+    sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+
+    # Internal references (not synced)
+    _connected_sequencers = []
+    _connected_samplers = []
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._connected_sequencers = []
+        self._connected_samplers = []
+
+    def connect_sequencer(self, sequencer):
+        """Link this keyboard to a sequencer for recording and note input."""
+        if sequencer not in self._connected_sequencers:
+            self._connected_sequencers.append(sequencer)
+            sequencer.keyboard_connected = True
+
+    def disconnect_sequencer(self, sequencer):
+        """Unlink this keyboard from a sequencer."""
+        if sequencer in self._connected_sequencers:
+            self._connected_sequencers.remove(sequencer)
+            sequencer.keyboard_connected = False
+
+    def connect_sampler(self, sampler, zone="all"):
+        """Connect a sampler to the keyboard.
+
+        Parameters
+        ----------
+        sampler : SamplerWidget
+            The sampler to connect.
+        zone : str
+            ``"all"`` (whole keyboard), ``"upper"`` (QWERTY rows),
+            or ``"lower"`` (ZXCV rows).
+        """
+        if sampler not in self._connected_samplers:
+            self._connected_samplers.append(sampler)
+            sampler.keyboard_connected = True
+        routing = list(self.sampler_routing)
+        entry = {"channel_index": sampler.channel_index, "zone": zone}
+        # Avoid duplicate entries for the same channel
+        routing = [r for r in routing if r.get("channel_index") != sampler.channel_index]
+        routing.append(entry)
+        self.sampler_routing = routing
+
+    def disconnect_sampler(self, sampler):
+        """Disconnect a sampler from the keyboard."""
+        if sampler in self._connected_samplers:
+            self._connected_samplers.remove(sampler)
+            sampler.keyboard_connected = False
+            routing = [r for r in self.sampler_routing if r.get("channel_index") != sampler.channel_index]
+            self.sampler_routing = routing
 
 
 class Track:
@@ -546,6 +637,12 @@ class Session:
         # Set audio routing metadata so JS can route through mixer
         sequencer.session_id = self._session_id
         sequencer.channel_index = channel_idx
+        # Also set routing on sound source (e.g. SamplerWidget) so it
+        # can register on the session bus for keyboard integration.
+        if hasattr(sound_source, "session_id"):
+            sound_source.session_id = self._session_id
+        if hasattr(sound_source, "channel_index"):
+            sound_source.channel_index = channel_idx
         self.tracks.append(track)
         return track
 
@@ -557,12 +654,18 @@ class Session:
             # Clear routing metadata
             track.sequencer.session_id = ""
             track.sequencer.channel_index = -1
+            if hasattr(track.sound_source, "session_id"):
+                track.sound_source.session_id = ""
+            if hasattr(track.sound_source, "channel_index"):
+                track.sound_source.channel_index = -1
             self.mixer.remove_channel(track.mixer_channel)
             # Adjust mixer_channel indices for remaining tracks
             for t in self.tracks:
                 if t.mixer_channel > track.mixer_channel:
                     t.mixer_channel -= 1
                     t.sequencer.channel_index -= 1
+                    if hasattr(t.sound_source, "channel_index"):
+                        t.sound_source.channel_index -= 1
 
     def __repr__(self):
         return f"Session(bpm={self.transport.bpm}, tracks={len(self.tracks)}, channels={len(self.mixer.channels)})"

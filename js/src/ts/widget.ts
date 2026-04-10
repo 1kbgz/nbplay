@@ -6,7 +6,13 @@
 //   • amplitude slider
 //   • play/stop via Web Audio API
 
-import { type AnyModel, cssVar, makeEditable, toFloat32 } from "./helpers.ts";
+import {
+  type AnyModel,
+  cssVar,
+  makeEditable,
+  onKernelDisconnect,
+  toFloat32,
+} from "./helpers.ts";
 
 // ── Frequency helpers (logarithmic mapping) ──────────────────────
 const MIN_FREQ = 20;
@@ -387,7 +393,16 @@ function render({
   requestAnimationFrame(syncWaveform);
 
   // ── Cleanup ──
-  return () => audio.stop();
+  const cancelDisconnect = onKernelDisconnect(model, () => {
+    model.set("is_playing", false);
+    audio.stop();
+    syncPlay();
+  });
+
+  return () => {
+    cancelDisconnect();
+    audio.stop();
+  };
 }
 
 export default { render };

@@ -1,0 +1,234 @@
+/* ── nbplay KeyboardWidget ───────────────────────────────────── */
+/* All selectors scoped under .nbplay-keyboard.
+   Colours inherit from the active Jupyter theme via --jp-* vars. */
+.nbplay-keyboard {
+  font-family: var(--jp-ui-font-family, sans-serif);
+  background: var(--jp-layout-color0, #0f0f1a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 700px;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  box-shadow: var(--jp-elevation-z4, 0 4px 24px rgba(0, 0, 0, 0.5));
+  user-select: none;
+  outline: none;
+}
+.nbplay-keyboard:focus {
+  border-color: var(--jp-brand-color1, #00d4ff);
+  box-shadow:
+    var(--jp-elevation-z4, 0 4px 24px rgba(0, 0, 0, 0.5)),
+    0 0 0 2px
+      color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 30%, transparent);
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.nbplay-kb-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.nbplay-kb-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  letter-spacing: -0.5px;
+}
+.nbplay-keyboard .nbplay-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--jp-info-color1, #3b82f6);
+  color: var(--jp-ui-inverse-font-color0, #fff);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Info bar ────────────────────────────────────────────────── */
+.nbplay-kb-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--jp-ui-font-color2, #aab0c4);
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  background: var(--jp-layout-color1, #1a1a2e);
+  border-radius: 6px;
+}
+
+/* ── Velocity bar ────────────────────────────────────────────── */
+.nbplay-kb-vel-bar-wrap {
+  height: 4px;
+  background: var(--jp-layout-color2, #252540);
+  border-radius: 2px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.nbplay-kb-vel-bar {
+  height: 100%;
+  width: 78%;
+  background: var(--jp-brand-color1, #00d4ff);
+  border-radius: 2px;
+  transition: width 0.05s ease;
+}
+
+/* ── Sustain row ─────────────────────────────────────────────── */
+.nbplay-kb-sustain-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.nbplay-kb-sustain-upper,
+.nbplay-kb-sustain-lower,
+.nbplay-kb-sustain-global {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--jp-layout-color2, #252540);
+  color: var(--jp-ui-font-color3, #666);
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.nbplay-kb-sustain-upper.active,
+.nbplay-kb-sustain-lower.active,
+.nbplay-kb-sustain-global.active {
+  background: color-mix(
+    in srgb,
+    var(--jp-warn-color1, #ffaa00) 40%,
+    transparent
+  );
+  color: var(--jp-warn-color1, #ffaa00);
+}
+
+/* ── Keyboard sections ───────────────────────────────────────── */
+.nbplay-kb-section {
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--jp-layout-color1, #1a1a2e);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+}
+.nbplay-kb-section-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--jp-ui-font-color2, #aab0c4);
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+.nbplay-kb-oct-ctrl {
+  color: var(--jp-ui-font-color3, #666);
+  font-family: var(--jp-code-font-family, monospace);
+}
+
+/* ── Key rows ────────────────────────────────────────────────── */
+.nbplay-kb-row {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+.nbplay-kb-row-sharp {
+  padding-left: 18px;
+}
+
+/* ── Individual keys ─────────────────────────────────────────── */
+.nbplay-kb-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.06s,
+    transform 0.06s;
+  position: relative;
+  font-size: 12px;
+  font-weight: 600;
+}
+.nbplay-kb-key:active,
+.nbplay-kb-key.pressed {
+  transform: scale(0.94);
+}
+.nbplay-kb-key-gap {
+  min-width: 38px;
+  height: 38px;
+}
+
+/* White keys */
+.nbplay-kb-white {
+  background: var(--jp-layout-color2, #252540);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+}
+.nbplay-kb-white:hover {
+  background: var(--jp-layout-color3, #353560);
+}
+.nbplay-kb-white.pressed {
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #00d4ff) 40%,
+    transparent
+  );
+  border-color: var(--jp-brand-color1, #00d4ff);
+}
+
+/* Black keys */
+.nbplay-kb-black {
+  background: var(--jp-inverse-layout-color4, #444);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color2, #333);
+  min-width: 34px;
+  height: 34px;
+  font-size: 11px;
+}
+.nbplay-kb-black:hover {
+  background: var(--jp-inverse-layout-color3, #555);
+}
+.nbplay-kb-black.pressed {
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #00d4ff) 50%,
+    transparent
+  );
+  border-color: var(--jp-brand-color1, #00d4ff);
+}
+
+/* Key sub-labels */
+.nbplay-kb-key-label {
+  font-family: var(--jp-code-font-family, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.nbplay-kb-key-note {
+  font-size: 8px;
+  opacity: 0.55;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* ── Controls hint ───────────────────────────────────────────── */
+.nbplay-kb-controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--jp-ui-font-color3, #666);
+  font-family: var(--jp-code-font-family, monospace);
+}

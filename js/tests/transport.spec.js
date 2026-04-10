@@ -452,4 +452,53 @@ test.describe("TransportWidget", () => {
       "120 BPM",
     );
   });
+
+  // 23. Kernel disconnect stops playback
+  test("kernel disconnect stops transport after delay", async ({ page }) => {
+    await page.evaluate(async () => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/transport.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/transport.js");
+      const el = document.getElementById("root");
+      const defaults = {
+        bpm: 120,
+        is_playing: false,
+        time_signature_num: 4,
+        time_signature_den: 4,
+        bar_number: 0,
+        beat_in_bar: 0,
+        loop_enabled: false,
+        loop_start_bar: 0,
+        loop_end_bar: 4,
+      };
+      const model = window.createMockModel(defaults);
+      model.comm = {};
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    // Start playing
+    await page.evaluate(() => {
+      window.__testModel.set("is_playing", true);
+      window.__testModel._trigger("change:is_playing");
+    });
+
+    // Simulate disconnect
+    await page.evaluate(() => {
+      window.__testModel.comm = null;
+    });
+
+    // Poll + 5s delay
+    await page.waitForFunction(
+      () => window.__testModel._state.is_playing === false,
+      { timeout: 10000 },
+    );
+    const stopped = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
+    expect(stopped).toBe(false);
+  });
 });

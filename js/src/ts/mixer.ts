@@ -74,6 +74,10 @@ function createAudioBus() {
         masterGain,
         channels: channelNodes,
       };
+      // Notify widgets (e.g. samplers) that the bus is now available
+      document.dispatchEvent(
+        new CustomEvent("nbplay-bus-ready", { detail: { sessionId } }),
+      );
     },
 
     destroy(sessionId: string): void {
