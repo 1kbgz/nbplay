@@ -254,8 +254,6 @@
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3549f1869feb4a5eadf5d07151dbde7b", "version_major": 2, "version_minor": 1}</script></div>
 </div>
 </section>
 <section id="reading-steps-back">
@@ -267,12 +265,6 @@
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;step 0 via .steps:&quot;</span><span class="p">,</span> <span class="n">mono</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;step 0 via .voices:&quot;</span><span class="p">,</span> <span class="n">mono</span><span class="o">.</span><span class="n">voices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="k">assert</span> <span class="n">mono</span><span class="o">.</span><span class="n">steps</span> <span class="o">==</span> <span class="n">mono</span><span class="o">.</span><span class="n">voices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>step 0 via .steps: {&#39;note&#39;: 60, &#39;velocity&#39;: 100, &#39;duration_ticks&#39;: 1, &#39;active&#39;: True}
-step 0 via .voices: {&#39;note&#39;: 60, &#39;velocity&#39;: 100, &#39;duration_ticks&#39;: 1, &#39;active&#39;: True}
 </pre></div>
 </div>
 </div>
@@ -308,8 +300,6 @@ simultaneously on each step.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7e3e965679a6413a8db116cb2e1318fe", "version_major": 2, "version_minor": 1}</script></div>
 </div>
 </section>
 <section id="working-with-notecomposer-objects">
@@ -337,17 +327,6 @@ You can manipulate them directly and the widget stays in sync.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Number of voices: 3
-Root voice active steps:  8
-Third voice active steps: 8
-Fifth voice active steps: 4
-
-After toggling step 3 on third voice:
-  step 3 active = False
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="standalone-notecomposer">
@@ -370,12 +349,6 @@ before attaching them to a sequencer.</p>
 <span class="n">pattern</span> <span class="o">=</span> <span class="n">bass_line</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">bass_line</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NoteComposer(length=8, active=8)
-Pattern(length=8, active_steps=8, loop=true)
 </pre></div>
 </div>
 </div>
@@ -407,8 +380,6 @@ Pattern(length=8, active_steps=8, loop=true)
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e64da79fdc204a54a313bf7f2a79e548", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 </section>
 <section id="converting-to-rust-patterns">
@@ -424,15 +395,6 @@ Each <code class="docutils literal notranslate"><span class="pre">NoteComposer</
 
 <span class="c1"># From a monophonic sequencer (uses voice 0)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Lead: </span><span class="si">{</span><span class="n">lead_seq</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Voice 0: Pattern(length=8, active_steps=8, loop=true)
-Voice 1: Pattern(length=8, active_steps=7, loop=true)
-Voice 2: Pattern(length=8, active_steps=4, loop=true)
-
-Lead: Pattern(length=8, active_steps=8, loop=true)
 </pre></div>
 </div>
 </div>

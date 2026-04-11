@@ -570,6 +570,9 @@
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">channel_index</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="c1"># Keyboard integration — set by KeyboardWidget.connect_sequencer()</span>
+    <span class="n">keyboard_connected</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="c1"># All voices&#39; step data, synced to browser as list-of-lists.</span>
     <span class="c1"># voices_data[i] == composers[i].steps</span>
     <span class="n">voices_data</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
@@ -736,6 +739,9 @@
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">channel_index</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="c1"># Keyboard integration — set by KeyboardWidget.connect_sampler()</span>
+    <span class="n">keyboard_connected</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <div class="viewcode-block" id="SamplerWidget.load_sample">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sample&quot;</span><span class="p">):</span>
@@ -803,6 +809,106 @@
     <span class="n">loop_enabled</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">loop_start_bar</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">loop_end_bar</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="KeyboardWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KeyboardWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Musical typing keyboard widget (Logic Pro style).</span>
+
+<span class="sd">    4-row QWERTY layout across two independent octave halves.</span>
+<span class="sd">    Triggers audio via Web Audio, emits note events for sequencer</span>
+<span class="sd">    recording and sampler triggering.</span>
+
+<span class="sd">    Key mapping:</span>
+<span class="sd">        Upper: 2 3 _ 5 6 7 _ 9 0 (sharps) / Q W E R T Y U I O P (naturals)</span>
+<span class="sd">        Lower: A S _ F G H _ K L (sharps) / Z X C V B N M , . (naturals)</span>
+<span class="sd">        [ ] octave shift upper, ; &#39; octave shift lower</span>
+<span class="sd">        - = velocity down/up (hold to accelerate)</span>
+<span class="sd">        ` sustain upper, / sustain lower, Space global sustain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">&quot;keyboard.js&quot;</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">&quot;keyboard.css&quot;</span>
+
+    <span class="n">upper_octave</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">lower_octave</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">velocity</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">active_notes</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(),</span> <span class="n">default_value</span><span class="o">=</span><span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sustain_upper</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sustain_lower</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sustain_global</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">last_note_event</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="p">{})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Session routing</span>
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">channel_index</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Sampler routing: list of {channel_index, zone} dicts</span>
+    <span class="n">sampler_routing</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(),</span> <span class="n">default_value</span><span class="o">=</span><span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Internal references (not synced)</span>
+    <span class="n">_connected_sequencers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_connected_samplers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="KeyboardWidget.connect_sequencer">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.connect_sequencer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Link this keyboard to a sequencer for recording and note input.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sequencer</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sequencer</span><span class="p">)</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">keyboard_connected</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="KeyboardWidget.disconnect_sequencer">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.disconnect_sequencer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unlink this keyboard from a sequencer.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sequencer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">sequencer</span><span class="p">)</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">keyboard_connected</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="KeyboardWidget.connect_sampler">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.connect_sampler">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect a sampler to the keyboard.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sampler : SamplerWidget</span>
+<span class="sd">            The sampler to connect.</span>
+<span class="sd">        zone : str</span>
+<span class="sd">            ``&quot;all&quot;`` (whole keyboard), ``&quot;upper&quot;`` (QWERTY rows),</span>
+<span class="sd">            or ``&quot;lower&quot;`` (ZXCV rows).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sampler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">keyboard_connected</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">routing</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;channel_index&quot;</span><span class="p">:</span> <span class="n">sampler</span><span class="o">.</span><span class="n">channel_index</span><span class="p">,</span> <span class="s2">&quot;zone&quot;</span><span class="p">:</span> <span class="n">zone</span><span class="p">}</span>
+        <span class="c1"># Avoid duplicate entries for the same channel</span>
+        <span class="n">routing</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routing</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;channel_index&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">channel_index</span><span class="p">]</span>
+        <span class="n">routing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler_routing</span> <span class="o">=</span> <span class="n">routing</span></div>
+
+
+<div class="viewcode-block" id="KeyboardWidget.disconnect_sampler">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.disconnect_sampler">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampler</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Disconnect a sampler from the keyboard.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">keyboard_connected</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">routing</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler_routing</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;channel_index&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">channel_index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampler_routing</span> <span class="o">=</span> <span class="n">routing</span></div>
+</div>
 
 
 
@@ -887,6 +993,12 @@
         <span class="c1"># Set audio routing metadata so JS can route through mixer</span>
         <span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
         <span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
+        <span class="c1"># Also set routing on sound source (e.g. SamplerWidget) so it</span>
+        <span class="c1"># can register on the session bus for keyboard integration.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">&quot;session_id&quot;</span><span class="p">):</span>
+            <span class="n">sound_source</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">&quot;channel_index&quot;</span><span class="p">):</span>
+            <span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">track</span></div>
 
@@ -901,12 +1013,18 @@
             <span class="c1"># Clear routing metadata</span>
             <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">&quot;session_id&quot;</span><span class="p">):</span>
+                <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">&quot;channel_index&quot;</span><span class="p">):</span>
+                <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">remove_channel</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">)</span>
             <span class="c1"># Adjust mixer_channel indices for remaining tracks</span>
             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">&gt;</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">:</span>
                     <span class="n">t</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">-=</span> <span class="mi">1</span>
-                    <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span></div>
+                    <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">&quot;channel_index&quot;</span><span class="p">):</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="Session.__repr__">

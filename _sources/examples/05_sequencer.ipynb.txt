@@ -28,29 +28,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": null,
    "id": "2",
    "metadata": {
     "id": "sq-2",
     "language": "python"
    },
-   "outputs": [
-    {
-     "data": {
-      "application/vnd.jupyter.widget-view+json": {
-       "model_id": "3549f1869feb4a5eadf5d07151dbde7b",
-       "version_major": 2,
-       "version_minor": 1
-      },
-      "text/plain": [
-       "<nbplay.widget.SequencerWidget object at 0x7fcd68302ba0>"
-      ]
-     },
-     "execution_count": 1,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "from nbplay import SequencerWidget\n",
     "\n",
@@ -74,27 +58,18 @@
    "source": [
     "## Reading Steps Back\n",
     "\n",
-    "`steps` is a shortcut for `voices[0].steps` \u2014 both return the same list of step dicts."
+    "`steps` is a shortcut for `voices[0].steps` — both return the same list of step dicts."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": null,
    "id": "4",
    "metadata": {
     "id": "sq-4",
     "language": "python"
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "step 0 via .steps: {'note': 60, 'velocity': 100, 'duration_ticks': 1, 'active': True}\n",
-      "step 0 via .voices: {'note': 60, 'velocity': 100, 'duration_ticks': 1, 'active': True}\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# steps property aliases voice 0\n",
     "print(\"step 0 via .steps:\", mono.steps[0])\n",
@@ -119,29 +94,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": null,
    "id": "6",
    "metadata": {
     "id": "sq-6",
     "language": "python"
    },
-   "outputs": [
-    {
-     "data": {
-      "application/vnd.jupyter.widget-view+json": {
-       "model_id": "7e3e965679a6413a8db116cb2e1318fe",
-       "version_major": 2,
-       "version_minor": 1
-      },
-      "text/plain": [
-       "<nbplay.widget.SequencerWidget object at 0x7fcd583d4980>"
-      ]
-     },
-     "execution_count": 3,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "import ipywidgets as widgets\n",
     "\n",
@@ -150,15 +109,15 @@
     "# Three-voice polyphonic sequencer: root, third, fifth\n",
     "poly = SequencerWidget(length=8, bpm=118.0, num_voices=3)\n",
     "\n",
-    "# Voice 0 \u2014 root notes (C)\n",
+    "# Voice 0 — root notes (C)\n",
     "for step, note in enumerate([60, 60, 60, 60, 60, 60, 60, 60]):\n",
     "    poly.set_step(step, note=note, velocity=100, active=True, voice=0)\n",
     "\n",
-    "# Voice 1 \u2014 major thirds (E)\n",
+    "# Voice 1 — major thirds (E)\n",
     "for step, note in enumerate([64, 64, 64, 64, 64, 64, 64, 64]):\n",
     "    poly.set_step(step, note=note, velocity=85, active=True, voice=1)\n",
     "\n",
-    "# Voice 2 \u2014 fifths (G), only on beats 0, 2, 4, 6\n",
+    "# Voice 2 — fifths (G), only on beats 0, 2, 4, 6\n",
     "for step in [0, 2, 4, 6]:\n",
     "    poly.set_step(step, note=67, velocity=90, active=True, voice=2)\n",
     "\n",
@@ -181,27 +140,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": null,
    "id": "8",
    "metadata": {
     "id": "sq-8",
     "language": "python"
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Number of voices: 3\n",
-      "Root voice active steps:  8\n",
-      "Third voice active steps: 8\n",
-      "Fifth voice active steps: 4\n",
-      "\n",
-      "After toggling step 3 on third voice:\n",
-      "  step 3 active = False\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "from nbplay import NoteComposer\n",
     "\n",
@@ -231,28 +176,19 @@
    "source": [
     "## Standalone NoteComposer\n",
     "\n",
-    "`NoteComposer` can be used outside a widget \u2014 useful for building patterns programmatically\n",
+    "`NoteComposer` can be used outside a widget — useful for building patterns programmatically\n",
     "before attaching them to a sequencer."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": null,
    "id": "10",
    "metadata": {
     "id": "sq-10",
     "language": "python"
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "NoteComposer(length=8, active=8)\n",
-      "Pattern(length=8, active_steps=8, loop=true)\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "from nbplay import NoteComposer\n",
     "\n",
@@ -281,34 +217,18 @@
     "## Multiple Monophonic Sequencers\n",
     "\n",
     "For independent instrument parts (lead, bass, drums), use separate monophonic sequencers\n",
-    "\u2014 each routes to its own mixer channel in a Session."
+    "— each routes to its own mixer channel in a Session."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": null,
    "id": "12",
    "metadata": {
     "id": "sq-12",
     "language": "python"
    },
-   "outputs": [
-    {
-     "data": {
-      "application/vnd.jupyter.widget-view+json": {
-       "model_id": "e64da79fdc204a54a313bf7f2a79e548",
-       "version_major": 2,
-       "version_minor": 0
-      },
-      "text/plain": [
-       "HBox(children=(<nbplay.widget.SequencerWidget object at 0x7fcd586b7fe0>, <nbplay.widget.SequencerWidget object\u2026"
-      ]
-     },
-     "execution_count": 6,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "import ipywidgets as widgets\n",
     "\n",
@@ -345,27 +265,15 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": null,
    "id": "14",
    "metadata": {
     "id": "sq-14",
     "language": "python"
    },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Voice 0: Pattern(length=8, active_steps=8, loop=true)\n",
-      "Voice 1: Pattern(length=8, active_steps=7, loop=true)\n",
-      "Voice 2: Pattern(length=8, active_steps=4, loop=true)\n",
-      "\n",
-      "Lead: Pattern(length=8, active_steps=8, loop=true)\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
-    "# From the polyphonic sequencer \u2014 each voice converts independently\n",
+    "# From the polyphonic sequencer — each voice converts independently\n",
     "for i, composer in enumerate(poly.composers):\n",
     "    pattern = composer.to_pattern()\n",
     "    print(f\"Voice {i}: {pattern}\")\n",

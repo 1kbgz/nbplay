@@ -283,10 +283,13 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.TransportWidget" title="nbplay.widget.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>Global transport controls — play/stop, BPM, time signature, bar/beat counter.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.KeyboardWidget" title="nbplay.widget.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
+<td><p>Musical typing keyboard widget (Logic Pro style).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>Binds a sequencer to a sound source and a mixer channel.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>A collection of tracks with a shared transport and mixer.</p></td>
 </tr>
 </tbody>
@@ -633,6 +636,11 @@ property is a convenience alias for <code class="docutils literal notranslate"><
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.keyboard_connected">
+<span class="sig-name descname"><span class="pre">keyboard_connected</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.keyboard_connected" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.voices_data">
 <span class="sig-name descname"><span class="pre">voices_data</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.voices_data" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -799,6 +807,11 @@ visualisation. Envelope parameters are synced as individual traits.</p>
 <span class="sig-name descname"><span class="pre">channel_index</span></span><a class="headerlink" href="#nbplay.widget.SamplerWidget.channel_index" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.keyboard_connected">
+<span class="sig-name descname"><span class="pre">keyboard_connected</span></span><a class="headerlink" href="#nbplay.widget.SamplerWidget.keyboard_connected" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.load_sample">
 <span class="sig-name descname"><span class="pre">load_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">69</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Sample'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.load_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.load_sample" title="Link to this definition">¶</a></dt>
@@ -875,6 +888,133 @@ sync their BPM and play state to this transport via <code class="docutils litera
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget.loop_end_bar">
 <span class="sig-name descname"><span class="pre">loop_end_bar</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.loop_end_bar" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">KeyboardWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<p>Musical typing keyboard widget (Logic Pro style).</p>
+<p>4-row QWERTY layout across two independent octave halves.
+Triggers audio via Web Audio, emits note events for sequencer
+recording and sampler triggering.</p>
+<dl class="simple">
+<dt>Key mapping:</dt><dd><p>Upper: 2 3 _ 5 6 7 _ 9 0 (sharps) / Q W E R T Y U I O P (naturals)
+Lower: A S _ F G H _ K L (sharps) / Z X C V B N M , . (naturals)
+[ ] octave shift upper, ; ‘ octave shift lower
+- = velocity down/up (hold to accelerate)
+` sustain upper, / sustain lower, Space global sustain</p>
+</dd>
+</dl>
+<p>Public constructor</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget._esm">
+<span class="sig-name descname"><span class="pre">_esm</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget._esm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget._css">
+<span class="sig-name descname"><span class="pre">_css</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget._css" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.upper_octave">
+<span class="sig-name descname"><span class="pre">upper_octave</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.upper_octave" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.lower_octave">
+<span class="sig-name descname"><span class="pre">lower_octave</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.lower_octave" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.active_notes">
+<span class="sig-name descname"><span class="pre">active_notes</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.active_notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.sustain_upper">
+<span class="sig-name descname"><span class="pre">sustain_upper</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.sustain_upper" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.sustain_lower">
+<span class="sig-name descname"><span class="pre">sustain_lower</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.sustain_lower" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.sustain_global">
+<span class="sig-name descname"><span class="pre">sustain_global</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.sustain_global" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.last_note_event">
+<span class="sig-name descname"><span class="pre">last_note_event</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.last_note_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.sampler_routing">
+<span class="sig-name descname"><span class="pre">sampler_routing</span></span><a class="headerlink" href="#nbplay.widget.KeyboardWidget.sampler_routing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget._connected_sequencers">
+<span class="sig-name descname"><span class="pre">_connected_sequencers</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.widget.KeyboardWidget._connected_sequencers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget._connected_samplers">
+<span class="sig-name descname"><span class="pre">_connected_samplers</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.widget.KeyboardWidget._connected_samplers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.connect_sequencer">
+<span class="sig-name descname"><span class="pre">connect_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget.connect_sequencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget.connect_sequencer" title="Link to this definition">¶</a></dt>
+<dd><p>Link this keyboard to a sequencer for recording and note input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.disconnect_sequencer">
+<span class="sig-name descname"><span class="pre">disconnect_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget.disconnect_sequencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget.disconnect_sequencer" title="Link to this definition">¶</a></dt>
+<dd><p>Unlink this keyboard from a sequencer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.connect_sampler">
+<span class="sig-name descname"><span class="pre">connect_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget.connect_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget.connect_sampler" title="Link to this definition">¶</a></dt>
+<dd><p>Connect a sampler to the keyboard.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampler</strong> (<a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><em>SamplerWidget</em></a>) – The sampler to connect.</p></li>
+<li><p><strong>zone</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code> (whole keyboard), <code class="docutils literal notranslate"><span class="pre">&quot;upper&quot;</span></code> (QWERTY rows),
+or <code class="docutils literal notranslate"><span class="pre">&quot;lower&quot;</span></code> (ZXCV rows).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget.disconnect_sampler">
+<span class="sig-name descname"><span class="pre">disconnect_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget.disconnect_sampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget.disconnect_sampler" title="Link to this definition">¶</a></dt>
+<dd><p>Disconnect a sampler from the keyboard.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1088,6 +1228,7 @@ track sequencers, and assigns mixer channels for audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.num_voices"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.num_voices</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.session_id"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.channel_index</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.keyboard_connected"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.keyboard_connected</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.voices_data"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.voices_data</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget._composers"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._composers</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget._syncing"><code class="docutils literal notranslate"><span class="pre">SequencerWidget._syncing</span></code></a></li>
@@ -1120,6 +1261,7 @@ track sequencers, and assigns mixer channels for audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.max_voices"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.max_voices</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.session_id"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.channel_index</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.keyboard_connected"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.keyboard_connected</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.load_sample"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.load_sample()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.to_sampler"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.to_sampler()</span></code></a></li>
 </ul>
@@ -1136,6 +1278,28 @@ track sequencers, and assigns mixer channels for audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_enabled"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_enabled</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_start_bar"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_start_bar</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_end_bar"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_end_bar</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget._esm"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget._esm</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget._css"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget._css</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.upper_octave"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.upper_octave</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.lower_octave"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.lower_octave</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.velocity"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.velocity</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.active_notes"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.active_notes</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.sustain_upper"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.sustain_upper</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.sustain_lower"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.sustain_lower</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.sustain_global"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.sustain_global</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.last_note_event"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.last_note_event</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.session_id"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.session_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.channel_index</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.sampler_routing"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.sampler_routing</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget._connected_sequencers"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget._connected_sequencers</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget._connected_samplers"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget._connected_samplers</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.connect_sequencer"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.connect_sequencer()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.disconnect_sequencer"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.disconnect_sequencer()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.connect_sampler"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.connect_sampler()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.KeyboardWidget.disconnect_sampler"><code class="docutils literal notranslate"><span class="pre">KeyboardWidget.disconnect_sampler()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nbplay.widget.Track"><code class="docutils literal notranslate"><span class="pre">Track</span></code></a><ul>

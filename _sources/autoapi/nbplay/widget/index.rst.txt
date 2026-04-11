@@ -38,6 +38,7 @@ Classes
    nbplay.widget.SequencerWidget
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
+   nbplay.widget.KeyboardWidget
    nbplay.widget.Track
    nbplay.widget.Session
 
@@ -309,6 +310,9 @@ Module Contents
    .. py:attribute:: channel_index
 
 
+   .. py:attribute:: keyboard_connected
+
+
    .. py:attribute:: voices_data
 
 
@@ -442,6 +446,9 @@ Module Contents
    .. py:attribute:: channel_index
 
 
+   .. py:attribute:: keyboard_connected
+
+
    .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
 
       Load sample PCM data (list of floats) into the widget.
@@ -498,6 +505,106 @@ Module Contents
 
 
    .. py:attribute:: loop_end_bar
+
+
+.. py:class:: KeyboardWidget(**kwargs)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   Musical typing keyboard widget (Logic Pro style).
+
+   4-row QWERTY layout across two independent octave halves.
+   Triggers audio via Web Audio, emits note events for sequencer
+   recording and sampler triggering.
+
+   Key mapping:
+       Upper: 2 3 _ 5 6 7 _ 9 0 (sharps) / Q W E R T Y U I O P (naturals)
+       Lower: A S _ F G H _ K L (sharps) / Z X C V B N M , . (naturals)
+       [ ] octave shift upper, ; ' octave shift lower
+       - = velocity down/up (hold to accelerate)
+       ` sustain upper, / sustain lower, Space global sustain
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: upper_octave
+
+
+   .. py:attribute:: lower_octave
+
+
+   .. py:attribute:: velocity
+
+
+   .. py:attribute:: active_notes
+
+
+   .. py:attribute:: sustain_upper
+
+
+   .. py:attribute:: sustain_lower
+
+
+   .. py:attribute:: sustain_global
+
+
+   .. py:attribute:: last_note_event
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: sampler_routing
+
+
+   .. py:attribute:: _connected_sequencers
+      :value: []
+
+
+
+   .. py:attribute:: _connected_samplers
+      :value: []
+
+
+
+   .. py:method:: connect_sequencer(sequencer)
+
+      Link this keyboard to a sequencer for recording and note input.
+
+
+
+   .. py:method:: disconnect_sequencer(sequencer)
+
+      Unlink this keyboard from a sequencer.
+
+
+
+   .. py:method:: connect_sampler(sampler, zone='all')
+
+      Connect a sampler to the keyboard.
+
+      :param sampler: The sampler to connect.
+      :type sampler: SamplerWidget
+      :param zone: ``"all"`` (whole keyboard), ``"upper"`` (QWERTY rows),
+                   or ``"lower"`` (ZXCV rows).
+      :type zone: str
+
+
+
+   .. py:method:: disconnect_sampler(sampler)
+
+      Disconnect a sampler from the keyboard.
+
 
 
 .. py:class:: Track(name, sequencer, sound_source, mixer_channel)

@@ -40,6 +40,7 @@ Classes
    test_all.TestSequencerWidget
    test_all.TestSamplerWidget
    test_all.TestTransportWidget
+   test_all.TestKeyboardWidget
    test_all.TestTrack
    test_all.TestSession
    test_all.TestDemoNotebook
@@ -815,6 +816,44 @@ Module Contents
    .. py:method:: test_loop()
 
 
+.. py:class:: TestKeyboardWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom_octaves()
+
+
+   .. py:method:: test_set_velocity()
+
+
+   .. py:method:: test_sustain()
+
+
+   .. py:method:: test_connect_sequencer()
+
+
+   .. py:method:: test_disconnect_sequencer()
+
+
+   .. py:method:: test_connect_sampler_all()
+
+
+   .. py:method:: test_connect_sampler_split()
+
+
+   .. py:method:: test_disconnect_sampler()
+
+
+   .. py:method:: test_connect_sampler_replaces_same_channel()
+
+      Re-connecting the same sampler updates zone, doesn't duplicate.
+
+
+
+   .. py:method:: test_session_routing()
+
+
 .. py:class:: TestTrack
 
    .. py:method:: test_creation()
@@ -849,6 +888,12 @@ Module Contents
    .. py:method:: test_add_track()
 
 
+   .. py:method:: test_add_track_sets_sound_source_routing()
+
+      add_track sets session_id and channel_index on the sound source.
+
+
+
    .. py:method:: test_add_multiple_tracks()
 
 
@@ -867,6 +912,24 @@ Module Contents
    .. py:method:: test_remove_track()
 
 
+   .. py:method:: test_remove_track_clears_sound_source_routing()
+
+      remove_track clears session_id/channel_index on the sound source.
+
+
+
+   .. py:method:: test_remove_middle_track_adjusts_sound_source_indices()
+
+      remove_track adjusts channel_index on remaining sound sources.
+
+
+
+   .. py:method:: test_add_track_non_sampler_sound_source_no_error()
+
+      add_track with SynthWidget (no session_id attr) does not error.
+
+
+
    .. py:method:: test_remove_track_unlinks()
 
       Removed track no longer syncs with transport.
@@ -882,5 +945,11 @@ Module Contents
 .. py:class:: TestDemoNotebook
 
    .. py:method:: test_prefixed_example_notebooks_have_language_metadata()
+
+
+   .. py:method:: test_notebook_code_cells_run(notebook_path)
+
+      Execute every code cell top-to-bottom in an isolated namespace.
+
 
 
