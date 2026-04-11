@@ -68,6 +68,55 @@
 .nbplay-seq-stop:hover {
   border-color: var(--jp-error-color1, #ef4444);
 }
+.nbplay-seq-rec {
+  color: var(--jp-error-color1, #ef4444);
+}
+.nbplay-seq-rec:hover {
+  border-color: var(--jp-error-color1, #ef4444);
+}
+.nbplay-seq-rec.recording {
+  background: var(--jp-error-color1, #ef4444);
+  color: var(--jp-layout-color0, #fff);
+  border-color: var(--jp-error-color1, #ef4444);
+  animation: nbplay-rec-pulse 1s ease-in-out infinite;
+}
+@keyframes nbplay-rec-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+/* Per-voice REC dot in label cell */
+.nbplay-seq-voice-rec {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--jp-error-color1, #ef4444);
+  font-size: 8px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.15s;
+  margin-left: 2px;
+  line-height: 1;
+}
+.nbplay-seq-voice-rec:hover {
+  opacity: 1;
+}
+.nbplay-seq-voice-rec.recording {
+  background: var(--jp-error-color1, #ef4444);
+  color: var(--jp-layout-color0, #fff);
+  opacity: 1;
+  animation: nbplay-rec-pulse 1s ease-in-out infinite;
+}
 .nbplay-seq-bpm-section,
 .nbplay-seq-dur-section {
   display: flex;
@@ -124,8 +173,8 @@
   gap: 2px;
 }
 .nbplay-seq-label-cell {
-  width: 36px;
-  min-width: 36px;
+  width: 52px;
+  min-width: 52px;
   height: 36px;
   display: flex;
   align-items: center;
@@ -134,6 +183,7 @@
   color: var(--jp-ui-font-color3, #64648a);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  gap: 2px;
 }
 .nbplay-seq-header-cell {
   width: 44px;

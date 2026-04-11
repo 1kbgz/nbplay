@@ -11,6 +11,7 @@ from nbplay import (
     AudioSample,
     Envelope,
     EventSequence,
+    KeyboardWidget,
     MidiChannel,
     MidiEvent,
     MidiMessage,
@@ -1622,6 +1623,105 @@ class TestTransportWidget:
         assert t.loop_end_bar == 8
 
 
+# ── KeyboardWidget ──────────────────────────────────────────
+
+
+class TestKeyboardWidget:
+    def test_defaults(self):
+        kb = KeyboardWidget()
+        assert kb.upper_octave == 3
+        assert kb.lower_octave == 4
+        assert kb.velocity == 100
+        assert kb.active_notes == []
+        assert kb.sustain_upper is False
+        assert kb.sustain_lower is False
+        assert kb.sustain_global is False
+        assert kb.last_note_event == {}
+        assert kb.session_id == ""
+        assert kb.channel_index == -1
+        assert kb.sampler_routing == []
+
+    def test_custom_octaves(self):
+        kb = KeyboardWidget(upper_octave=5, lower_octave=6)
+        assert kb.upper_octave == 5
+        assert kb.lower_octave == 6
+
+    def test_set_velocity(self):
+        kb = KeyboardWidget()
+        kb.velocity = 80
+        assert kb.velocity == 80
+
+    def test_sustain(self):
+        kb = KeyboardWidget()
+        kb.sustain_upper = True
+        assert kb.sustain_upper is True
+        kb.sustain_global = True
+        assert kb.sustain_global is True
+        kb.sustain_lower = True
+        assert kb.sustain_lower is True
+
+    def test_connect_sequencer(self):
+        kb = KeyboardWidget()
+        seq = SequencerWidget()
+        assert seq.keyboard_connected is False
+        kb.connect_sequencer(seq)
+        assert seq.keyboard_connected is True
+        # Duplicate connect is idempotent
+        kb.connect_sequencer(seq)
+        assert len(kb._connected_sequencers) == 1
+
+    def test_disconnect_sequencer(self):
+        kb = KeyboardWidget()
+        seq = SequencerWidget()
+        kb.connect_sequencer(seq)
+        assert seq.keyboard_connected is True
+        kb.disconnect_sequencer(seq)
+        assert seq.keyboard_connected is False
+        assert len(kb._connected_sequencers) == 0
+
+    def test_connect_sampler_all(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, zone="all")
+        assert samp.keyboard_connected is True
+        assert len(kb.sampler_routing) == 1
+        assert kb.sampler_routing[0]["zone"] == "all"
+        assert kb.sampler_routing[0]["channel_index"] == 0
+
+    def test_connect_sampler_split(self):
+        kb = KeyboardWidget()
+        upper = SamplerWidget(channel_index=0)
+        lower = SamplerWidget(channel_index=1)
+        kb.connect_sampler(upper, zone="upper")
+        kb.connect_sampler(lower, zone="lower")
+        assert len(kb.sampler_routing) == 2
+        zones = {r["zone"] for r in kb.sampler_routing}
+        assert zones == {"upper", "lower"}
+
+    def test_disconnect_sampler(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=2)
+        kb.connect_sampler(samp)
+        assert len(kb.sampler_routing) == 1
+        kb.disconnect_sampler(samp)
+        assert samp.keyboard_connected is False
+        assert len(kb.sampler_routing) == 0
+
+    def test_connect_sampler_replaces_same_channel(self):
+        """Re-connecting the same sampler updates zone, doesn't duplicate."""
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, zone="upper")
+        kb.connect_sampler(samp, zone="all")
+        assert len(kb.sampler_routing) == 1
+        assert kb.sampler_routing[0]["zone"] == "all"
+
+    def test_session_routing(self):
+        kb = KeyboardWidget(session_id="test-session", channel_index=3)
+        assert kb.session_id == "test-session"
+        assert kb.channel_index == 3
+
+
 # ── Track ───────────────────────────────────────────────────
 
 
@@ -1729,6 +1829,14 @@ class TestSession:
         assert seq.session_id == s._session_id
         assert seq.channel_index == 0
 
+    def test_add_track_sets_sound_source_routing(self):
+        """add_track sets session_id and channel_index on the sound source."""
+        s = Session()
+        sampler = SamplerWidget()
+        s.add_track("Drums", SequencerWidget(), sampler)
+        assert sampler.session_id == s._session_id
+        assert sampler.channel_index == 0
+
     def test_add_multiple_tracks(self):
         s = Session()
         s.add_track("Lead", SequencerWidget(), SynthWidget())
@@ -1790,6 +1898,45 @@ class TestSession:
         # Remaining track's sequencer has adjusted channel_index
         assert seq_c.channel_index == 1
 
+    def test_remove_track_clears_sound_source_routing(self):
+        """remove_track clears session_id/channel_index on the sound source."""
+        s = Session()
+        sampler = SamplerWidget()
+        s.add_track("A", SequencerWidget(), sampler)
+        assert sampler.session_id == s._session_id
+        s.remove_track(0)
+        assert sampler.session_id == ""
+        assert sampler.channel_index == -1
+
+    def test_remove_middle_track_adjusts_sound_source_indices(self):
+        """remove_track adjusts channel_index on remaining sound sources."""
+        s = Session()
+        samp0 = SamplerWidget()
+        samp1 = SamplerWidget()
+        samp2 = SamplerWidget()
+        s.add_track("A", SequencerWidget(), samp0)
+        s.add_track("B", SequencerWidget(), samp1)
+        s.add_track("C", SequencerWidget(), samp2)
+        assert samp0.channel_index == 0
+        assert samp1.channel_index == 1
+        assert samp2.channel_index == 2
+
+        s.remove_track(1)  # remove B
+        assert samp1.session_id == ""
+        assert samp1.channel_index == -1
+        # Remaining: A stays 0, C adjusts from 2 to 1
+        assert samp0.channel_index == 0
+        assert samp2.channel_index == 1
+
+    def test_add_track_non_sampler_sound_source_no_error(self):
+        """add_track with SynthWidget (no session_id attr) does not error."""
+        s = Session()
+        synth = SynthWidget()
+        track = s.add_track("Lead", SequencerWidget(), synth)
+        assert track.name == "Lead"
+        assert not hasattr(synth, "session_id")
+        assert not hasattr(synth, "channel_index")
+
     def test_remove_track_unlinks(self):
         """Removed track no longer syncs with transport."""
         s = Session()
@@ -1830,3 +1977,22 @@ class TestDemoNotebook:
                 assert "metadata" in cell
                 assert "language" in cell["metadata"]
                 assert "id" in cell["metadata"]
+
+    @pytest.mark.parametrize(
+        "notebook_path",
+        sorted((pathlib.Path(__file__).resolve().parents[2] / "examples").glob("[0-9][0-9]_*.ipynb")),
+        ids=lambda p: p.stem,
+    )
+    def test_notebook_code_cells_run(self, notebook_path):
+        """Execute every code cell top-to-bottom in an isolated namespace."""
+        notebook = json.loads(notebook_path.read_text())
+        ns: dict = {}
+        for i, cell in enumerate(notebook["cells"]):
+            if cell["cell_type"] != "code":
+                continue
+            src = "".join(cell["source"])
+            try:
+                code = compile(src, f"{notebook_path.name}[{i}]", "exec")
+                exec(code, ns)  # noqa: S102
+            except Exception as exc:
+                pytest.fail(f"{notebook_path.name} cell {i} failed:\n{src}\n\n{exc}")

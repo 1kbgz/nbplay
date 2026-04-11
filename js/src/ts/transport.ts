@@ -2,7 +2,7 @@
 // Global transport bar: play/stop, BPM, time signature, bar:beat
 // position counter, and loop controls.
 
-import { type AnyModel, makeEditable } from "./helpers.ts";
+import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
 
 function render({
   model,
@@ -231,8 +231,19 @@ function render({
   syncPosition();
   syncLoop();
 
+  // ── Stop playback on kernel disconnect ────────────────────────
+  const cancelDisconnect = onKernelDisconnect(model, () => {
+    model.set("is_playing", false);
+    model.set("bar_number", 0);
+    model.set("beat_in_bar", 0);
+    stopClock();
+    syncPlay();
+    syncPosition();
+  });
+
   return () => {
     stopClock();
+    cancelDisconnect();
   };
 }
 

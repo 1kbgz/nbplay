@@ -1,7 +1,7 @@
 // nbplay SequencerWidget – anywidget ESM frontend
 // Step sequencer grid with Web Audio lookahead scheduler
 
-import { type AnyModel, makeEditable } from "./helpers.ts";
+import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
 
 interface StepData {
   active: boolean;
@@ -12,6 +12,9 @@ interface StepData {
 interface NbplayBus {
   audioCtx: AudioContext;
   channels: { gain: AudioNode }[];
+  noteListeners?: Array<
+    (evt: { note: number; velocity: number; type: string }) => void
+  >;
 }
 
 const NOTE_NAMES: string[] = [
@@ -157,7 +160,7 @@ function createAudioScheduler(): AudioScheduler {
         const step = voice[nextStepIndex];
         if (step && step.active) {
           const freq = midiToHz(step.note);
-          const velocity = (step.velocity || 100) / 127;
+          const velocity = (step.velocity ?? 100) / 127;
           this.playOscillator(freq, velocity, audioTime, stepTimeInSeconds);
         }
       }
@@ -215,6 +218,7 @@ function render({
     <div class="nbplay-seq-transport">
       <button class="nbplay-seq-btn nbplay-seq-play" title="Play/Stop">▶</button>
       <button class="nbplay-seq-btn nbplay-seq-stop" title="Stop">■</button>
+      <button class="nbplay-seq-btn nbplay-seq-rec" title="Record from keyboard" style="display:none">⏺</button>
       <div class="nbplay-seq-bpm-section">
         <label class="nbplay-seq-label">BPM</label>
         <input type="range" class="nbplay-seq-bpm-slider" min="30" max="300" step="1" />
@@ -244,6 +248,7 @@ function render({
 
   const playBtn = root.querySelector(".nbplay-seq-play")! as HTMLButtonElement;
   const stopBtn = root.querySelector(".nbplay-seq-stop")! as HTMLButtonElement;
+  const recBtn = root.querySelector(".nbplay-seq-rec")! as HTMLButtonElement;
   const bpmSlider = root.querySelector(
     ".nbplay-seq-bpm-slider",
   )! as HTMLInputElement;
@@ -258,6 +263,152 @@ function render({
   const info = root.querySelector(".nbplay-seq-info")! as HTMLSpanElement;
 
   const audioScheduler = createAudioScheduler();
+
+  // ── Recording state ────────────────────────────────────────────
+  const armedVoices: Set<number> = new Set();
+
+  function updateRecVisibility(): void {
+    const kbConnected = model.get("keyboard_connected") as boolean;
+    recBtn.style.display = kbConnected ? "" : "none";
+    // Per-voice REC dots
+    root.querySelectorAll(".nbplay-seq-voice-rec").forEach((dot) => {
+      (dot as HTMLElement).style.display = kbConnected ? "" : "none";
+    });
+  }
+
+  function syncRecState(): void {
+    recBtn.classList.toggle("recording", armedVoices.size > 0);
+    root.querySelectorAll(".nbplay-seq-voice-rec").forEach((dot) => {
+      const v = parseInt((dot as HTMLElement).dataset.voice || "0", 10);
+      dot.classList.toggle("recording", armedVoices.has(v));
+    });
+    if (armedVoices.size > 0) {
+      document.addEventListener("nbplay-note", onDocumentNote);
+    } else {
+      document.removeEventListener("nbplay-note", onDocumentNote);
+    }
+  }
+
+  function onNoteEvent(evt: {
+    note: number;
+    velocity: number;
+    type: string;
+  }): void {
+    if (armedVoices.size === 0 || evt.type !== "on") return;
+    const playing = model.get("is_playing") as boolean;
+    if (!playing) return;
+    const currentStep = model.get("current_step") as number;
+    if (currentStep < 0) return;
+    const vd = [...((model.get("voices_data") as StepData[][]) || [])];
+    if (vd.length === 0) return;
+    let changed = false;
+    for (const v of armedVoices) {
+      if (v < vd.length) {
+        const s = [...(vd[v] || [])];
+        if (currentStep < s.length) {
+          s[currentStep] = {
+            ...s[currentStep],
+            note: evt.note,
+            velocity: evt.velocity,
+            active: true,
+          };
+          vd[v] = s;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      model.set("voices_data", vd);
+      model.save_changes();
+    }
+  }
+
+  // Listen for keyboard note events via document CustomEvent.
+  // This works without a session bus — any KeyboardWidget on the page
+  // dispatches "nbplay-note" events on document.
+  function onDocumentNote(e: Event): void {
+    const detail = (e as CustomEvent).detail as
+      | { note: number; velocity: number; type: string }
+      | undefined;
+    if (detail) onNoteEvent(detail);
+  }
+
+  // ── Step editing with keyboard ─────────────────────────────────
+
+  let pendingKeyEditCell: { voice: number; step: number } | null = null;
+  let pendingKeyEditHandler: ((e: Event) => void) | null = null;
+
+  function cancelPendingKeyEdit(): void {
+    if (pendingKeyEditHandler) {
+      document.removeEventListener("nbplay-note", pendingKeyEditHandler);
+      pendingKeyEditHandler = null;
+    }
+    if (pendingKeyEditCell) {
+      // Restore cell text
+      const voices = getVoices();
+      const v = pendingKeyEditCell.voice;
+      const s = pendingKeyEditCell.step;
+      const steps = voices[v] || [];
+      const cell = grid.querySelector(
+        `.nbplay-seq-cell[data-voice="${v}"][data-step="${s}"]`,
+      ) as HTMLElement | null;
+      if (cell && s < steps.length) {
+        cell.textContent = noteName(steps[s].note);
+        cell.classList.remove("nbplay-seq-key-wait");
+      }
+      pendingKeyEditCell = null;
+    }
+  }
+
+  function waitForKeyboardNote(
+    voice: number,
+    step: number,
+    cell: HTMLElement,
+  ): void {
+    const kbConnected = model.get("keyboard_connected") as boolean;
+    if (!kbConnected) return;
+
+    // Cancel any previous pending edit
+    cancelPendingKeyEdit();
+
+    pendingKeyEditCell = { voice, step };
+    cell.textContent = "♪?";
+    cell.classList.add("nbplay-seq-key-wait");
+
+    // Focus the sequencer root so keystrokes don't go to Jupyter
+    root.focus();
+
+    // Listen for the next note via document CustomEvent
+    const handler = (e: Event) => {
+      const evt = (e as CustomEvent).detail as {
+        note: number;
+        velocity: number;
+        type: string;
+      };
+      if (evt.type !== "on" || !pendingKeyEditCell) return;
+      const v = pendingKeyEditCell.voice;
+      const s = pendingKeyEditCell.step;
+      pendingKeyEditCell = null;
+      pendingKeyEditHandler = null;
+      document.removeEventListener("nbplay-note", handler);
+
+      const vd = [...((model.get("voices_data") as StepData[][]) || [])];
+      const steps = [...(vd[v] || [])];
+      if (s < steps.length) {
+        steps[s] = {
+          ...steps[s],
+          note: evt.note,
+          velocity: evt.velocity,
+          active: true,
+        };
+        vd[v] = steps;
+        model.set("voices_data", vd);
+        model.save_changes();
+      }
+    };
+    pendingKeyEditHandler = handler;
+    document.addEventListener("nbplay-note", handler);
+  }
 
   function getVoices(): StepData[][] {
     return (model.get("voices_data") as StepData[][]) || [];
@@ -297,7 +448,27 @@ function render({
       stepRow.dataset.voice = String(v);
       const stepLbl = document.createElement("div");
       stepLbl.className = "nbplay-seq-label-cell";
-      stepLbl.textContent = voiceLabel;
+      const voiceNum = document.createElement("span");
+      voiceNum.textContent = voiceLabel;
+      stepLbl.appendChild(voiceNum);
+      const voiceRec = document.createElement("button");
+      voiceRec.className = "nbplay-seq-voice-rec";
+      voiceRec.dataset.voice = String(v);
+      voiceRec.textContent = "\u23FA";
+      voiceRec.title = `Toggle recording for voice ${v + 1}`;
+      const kbConnected = model.get("keyboard_connected") as boolean;
+      voiceRec.style.display = kbConnected ? "" : "none";
+      if (armedVoices.has(v)) voiceRec.classList.add("recording");
+      voiceRec.addEventListener("click", (e: Event) => {
+        e.stopPropagation();
+        if (armedVoices.has(v)) {
+          armedVoices.delete(v);
+        } else {
+          armedVoices.add(v);
+        }
+        syncRecState();
+      });
+      stepLbl.appendChild(voiceRec);
       stepRow.appendChild(stepLbl);
 
       for (let i = 0; i < steps.length; i++) {
@@ -311,6 +482,10 @@ function render({
         cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
 
         cell.addEventListener("click", () => {
+          // Toggle immediately.  In a dblclick sequence the browser fires
+          // click twice (detail 1 then 2) so two toggles cancel out,
+          // leaving the step in its original state before dblclick opens
+          // the ♪? editor.  This avoids timing-dependent deferred toggles.
           const vd = [...((model.get("voices_data") as StepData[][]) || [])];
           const s = [...(vd[v] || [])];
           if (i < s.length) {
@@ -332,6 +507,14 @@ function render({
             vd[v] = s;
             model.set("voices_data", vd);
             model.save_changes();
+          }
+        });
+
+        cell.addEventListener("dblclick", (ev: Event) => {
+          ev.stopPropagation();
+          const kbConnected = model.get("keyboard_connected") as boolean;
+          if (kbConnected) {
+            waitForKeyboardNote(v, i, cell);
           }
         });
 
@@ -474,6 +657,18 @@ function render({
     model.save_changes();
   });
 
+  recBtn.addEventListener("click", () => {
+    const voices = getVoices();
+    if (armedVoices.size > 0) {
+      // Disarm all
+      armedVoices.clear();
+    } else {
+      // Arm all voices
+      for (let v = 0; v < voices.length; v++) armedVoices.add(v);
+    }
+    syncRecState();
+  });
+
   let prevLength: number = -1;
   let prevVoiceCount: number = -1;
 
@@ -513,8 +708,10 @@ function render({
   model.on("change:bpm", syncControls);
   model.on("change:step_duration", syncControls);
   model.on("change:loop_enabled", syncControls);
+  model.on("change:keyboard_connected", updateRecVisibility);
 
   syncControls();
+  updateRecVisibility();
   buildGrid();
 
   // Force stopped state on render — prevents stale is_playing=true
@@ -527,7 +724,29 @@ function render({
 
   onModelChange();
 
+  // ── Focus capture for keyboard note input ─────────────────────
+  // The KeyboardWidget intercepts keys at window capture level, so no
+  // keydown handler is needed here.  Escape cancellation is dispatched
+  // by the keyboard via a synthetic CustomEvent.
+  root.tabIndex = 0;
+  root.addEventListener("nbplay-cancel-edit", () => {
+    cancelPendingKeyEdit();
+  });
+
+  // ── Stop playback on kernel disconnect ────────────────────────
+  const cancelDisconnect = onKernelDisconnect(model, () => {
+    model.set("is_playing", false);
+    model.set("current_step", -1);
+    audioScheduler.stop();
+    armedVoices.clear();
+    syncRecState();
+    onModelChange();
+  });
+
   return () => {
+    document.removeEventListener("nbplay-note", onDocumentNote);
+    cancelPendingKeyEdit();
+    cancelDisconnect();
     audioScheduler.destroy();
   };
 }

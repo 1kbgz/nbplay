@@ -111,6 +111,10 @@ test-py:  ## run python tests
 # alias
 tests-py: test-py
 
+.PHONY: test-notebooks
+test-notebooks:  ## run only notebook regression tests (quick validation during notebook editing)
+	python -m pytest -v nbplay/tests/test_all.py -k "TestDemoNotebook"
+
 coverage-py:  ## run python tests and collect test coverage
 	python -m pytest -v nbplay/tests --cov=nbplay --cov-report term-missing --cov-report xml
 

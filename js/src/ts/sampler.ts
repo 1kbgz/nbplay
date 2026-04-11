@@ -2,7 +2,13 @@
 // Sampler panel with waveform display, ADSR envelope, trigger pads,
 // and Web Audio playback with pitch shifting.
 
-import { type AnyModel, cssVar, makeEditable, toFloat32 } from "./helpers.ts";
+import {
+  type AnyModel,
+  cssVar,
+  makeEditable,
+  onKernelDisconnect,
+  toFloat32,
+} from "./helpers.ts";
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -615,6 +621,7 @@ function render({
 
       pad.addEventListener("pointerdown", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (e.detail >= 2) return; // Skip trigger on double-click
         e.preventDefault();
         pad.classList.add("active");
         sampler.noteOn(padNotes[idx], rootNote, {
@@ -626,6 +633,7 @@ function render({
       });
       pad.addEventListener("pointerup", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (e.detail >= 2) return; // Skip on double-click
         e.preventDefault();
         pad.classList.remove("active");
         sampler.noteOff(padNotes[idx], {
@@ -634,6 +642,7 @@ function render({
       });
       pad.addEventListener("pointercancel", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (e.detail >= 2) return; // Skip on double-click
         e.preventDefault();
         pad.classList.remove("active");
         sampler.noteOff(padNotes[idx], {
@@ -650,8 +659,12 @@ function render({
         input.className = "nbplay-samp-inline-edit";
         input.value = noteName(padNotes[idx]);
         noteSpan.replaceWith(input);
-        input.focus();
-        input.select();
+        // Defer focus to next tick so the browser has committed the DOM change
+        // and previous pointer events (which may call preventDefault) are done.
+        setTimeout(() => {
+          input.focus();
+          input.select();
+        }, 0);
 
         function commit(): void {
           if (committed) return;
@@ -810,7 +823,53 @@ function render({
   model.on("change:max_voices", syncVoices);
   model.on("change:session_id", () => {
     sampler.setSession(model);
+    registerOnSessionBus();
   });
+  model.on("change:channel_index", registerOnSessionBus);
+
+  // ── Session bus registration (for keyboard widget) ─────────────
+
+  function registerOnSessionBus(): void {
+    const sid = model.get("session_id") as string;
+    const idx = model.get("channel_index") as number;
+    if (!sid || idx < 0) return;
+    const g = globalThis as Record<string, unknown>;
+    const nbplay =
+      (g.__nbplay as Record<string, Record<string, unknown>>) || {};
+    g.__nbplay = nbplay;
+    if (!nbplay[sid]) return; // bus not ready yet — will retry on nbplay-bus-ready
+    const bus = nbplay[sid];
+    const samplers = (bus.samplers as Record<number, unknown>) || {};
+    bus.samplers = samplers;
+    samplers[idx] = {
+      triggerNote(note: number, velocity: number): void {
+        const rootNote = model.get("root_note") as number;
+        sampler.noteOn(note, rootNote, {
+          attack: model.get("attack") as number,
+          decay: model.get("decay") as number,
+          sustain: model.get("sustain") as number,
+          release: model.get("release") as number,
+        });
+      },
+      releaseNote(note: number): void {
+        sampler.noteOff(note, {
+          release: model.get("release") as number,
+        });
+      },
+    };
+  }
+
+  // Re-register when the session bus becomes available (mixer may
+  // render after this sampler, so the bus might not exist yet).
+  function onBusReady(e: Event): void {
+    const detail = (e as CustomEvent).detail;
+    if (detail?.sessionId === model.get("session_id")) {
+      registerOnSessionBus();
+    }
+  }
+  document.addEventListener("nbplay-bus-ready", onBusReady);
+
+  registerOnSessionBus();
 
   // ── Initial render ─────────────────────────────────────────────
 
@@ -822,9 +881,27 @@ function render({
   createPads();
 
   // ── Cleanup ────────────────────────────────────────────────────
+  const cancelDisconnect = onKernelDisconnect(model, () => {
+    sampler.stopAll();
+  });
 
   return () => {
+    cancelDisconnect();
     clearInterval(voiceCounterInterval);
+    document.removeEventListener("nbplay-bus-ready", onBusReady);
+    // Unregister from session bus
+    const sid = model.get("session_id") as string;
+    const idx = model.get("channel_index") as number;
+    const g = globalThis as Record<string, unknown>;
+    const nbplay = g.__nbplay as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    if (nbplay?.[sid]) {
+      const samplers = nbplay[sid].samplers as
+        | Record<number, unknown>
+        | undefined;
+      if (samplers) delete samplers[idx];
+    }
     sampler.destroy();
   };
 }

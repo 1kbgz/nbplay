@@ -46,6 +46,7 @@ const WIDGET_NAMES = [
   "sequencer",
   "transport",
   "settings",
+  "keyboard",
 ];
 
 const WIDGET_BUILD = WIDGET_NAMES.map((name) => ({

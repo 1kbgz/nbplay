@@ -29,6 +29,7 @@ from nbplay.nbplay import (  # noqa: F401, E402
     Velocity,
 )
 from nbplay.widget import (  # noqa: F401, E402
+    KeyboardWidget,
     MixerWidget,
     NoteComposer,
     SamplerWidget,
