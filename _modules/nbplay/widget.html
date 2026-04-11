@@ -624,7 +624,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">]</span></div>
 
 
-    <span class="c1"># ── Voice accessors ───────────────────────────────────────</span>
+    <span class="c1">#  Voice accessors</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">composers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -636,7 +636,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Alias for ``composers``.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">composers</span>
 
-    <span class="c1"># ── Backward-compatible steps property (voice 0) ──────────</span>
+    <span class="c1">#  Backward-compatible steps property (voice 0)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -647,7 +647,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="c1"># ── Step manipulation (voice-aware) ───────────────────────</span>
+    <span class="c1">#  Step manipulation (voice-aware)</span>
 
 <div class="viewcode-block" id="SequencerWidget.set_step">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.set_step">[docs]</a>
