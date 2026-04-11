@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   max_voices: 4,
@@ -37,7 +37,7 @@ async function renderWidget(page, overrides = {}) {
   );
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("SamplerWidget", () => {
   test.beforeEach(async ({ page }) => {
@@ -255,7 +255,7 @@ test.describe("SamplerWidget", () => {
     await expect(page.locator(".nbplay-samp-info-root")).toHaveText("A4");
   });
 
-  // ── Additional edge-case tests ────────────────────────────────
+  // Additional edge-case tests
 
   test("attack=0.001 stored as-is in model (not clamped to 0.005)", async ({
     page,
@@ -343,7 +343,7 @@ test.describe("SamplerWidget", () => {
     );
   });
 
-  // ── Pad note inline editing ───────────────────────────────────
+  // Pad note inline editing
 
   test("pad note text is inside a span", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
@@ -475,7 +475,7 @@ test.describe("SamplerWidget", () => {
     await expect(secondNote).toHaveText("G5");
   });
 
-  // ── Double-click pad trigger guard ────────────────────────────
+  // Double-click pad trigger guard
 
   test("double-click pad note does not add .active class to pad", async ({
     page,
@@ -495,7 +495,7 @@ test.describe("SamplerWidget", () => {
     await expect(input).toBeVisible();
   });
 
-  // ── Bus-ready event re-registration ───────────────────────────
+  // Bus-ready event re-registration
 
   test("sampler registers on session bus when nbplay-bus-ready fires", async ({
     page,

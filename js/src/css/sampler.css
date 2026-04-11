@@ -10,7 +10,7 @@
   user-select: none;
   box-sizing: border-box;
 }
-/* ── Header ─────────────────────────────────────────────────────── */
+/* Header */
 .nbplay-samp-header {
   display: flex;
   align-items: center;
@@ -43,7 +43,7 @@
   white-space: nowrap;
   max-width: 200px;
 }
-/* ── Waveform ───────────────────────────────────────────────────── */
+/* Waveform */
 .nbplay-samp-waveform-wrap {
   margin-bottom: 10px;
   border: 1px solid var(--jp-border-color1, #1e1e3a);
@@ -55,7 +55,7 @@
   height: 100px;
   display: block;
 }
-/* ── Info bar ───────────────────────────────────────────────────── */
+/* Info bar */
 .nbplay-samp-info {
   display: flex;
   gap: 16px;
@@ -65,7 +65,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-/* ── Envelope section ───────────────────────────────────────────── */
+/* Envelope section */
 .nbplay-samp-envelope {
   display: flex;
   gap: 16px;
@@ -110,7 +110,7 @@
   font-size: 10px;
   color: var(--jp-brand-color1, #00d4ff);
 }
-/* ── Voices ─────────────────────────────────────────────────────── */
+/* Voices */
 .nbplay-samp-voices-section {
   display: flex;
   align-items: center;
@@ -131,7 +131,7 @@
   color: var(--jp-brand-color1, #00d4ff);
   min-width: 24px;
 }
-/* ── Pads section ───────────────────────────────────────────────── */
+/* Pads section  */
 .nbplay-samp-pads-section {
   margin-top: 16px;
 }
@@ -176,7 +176,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
 }
-/* ── Inline edit input ────────────────────────────────────────── */
+/* Inline edit input */
 .nbplay-samp-inline-edit {
   font-family: inherit;
   font-size: 10px;

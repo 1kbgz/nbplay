@@ -98,7 +98,7 @@ function render({
       (model.get("loop_end_bar") as number);
   }
 
-  // ── Play / Stop ──
+  // Play / Stop
   playBtn.addEventListener("click", () => {
     model.set("is_playing", !model.get("is_playing"));
     model.save_changes();
@@ -111,7 +111,7 @@ function render({
     model.save_changes();
   });
 
-  // ── BPM slider ──
+  // BPM slider
   bpmSl.addEventListener("input", () => {
     const v = parseFloat(bpmSl.value);
     bpmVal.textContent = Math.round(v) + " BPM";
@@ -119,13 +119,13 @@ function render({
     model.save_changes();
   });
 
-  // ── Loop toggle ──
+  // Loop toggle
   loopBtn.addEventListener("click", () => {
     model.set("loop_enabled", !model.get("loop_enabled"));
     model.save_changes();
   });
 
-  // ── Double-click to edit BPM (uses shared makeEditable with committed guard) ──
+  // Double-click to edit BPM (uses shared makeEditable with committed guard)
   makeEditable(bpmVal, {
     className: "nbplay-transport-inline-edit",
     getValue: () => String(Math.round(model.get("bpm") as number)),
@@ -141,7 +141,7 @@ function render({
     sync: syncBpm,
   });
 
-  // ── Model observers ──
+  // Model observers
   model.on("change:is_playing", syncPlay);
   model.on("change:bpm", syncBpm);
   model.on("change:time_signature_num", syncTimeSig);
@@ -152,7 +152,7 @@ function render({
   model.on("change:loop_start_bar", syncLoop);
   model.on("change:loop_end_bar", syncLoop);
 
-  // ── Browser-side position clock ──
+  // Browser-side position clock
   let clockTimer: ReturnType<typeof setInterval> | null = null;
   let clockStart = 0;
   let beatOrigin = 0;
@@ -215,7 +215,7 @@ function render({
     }
   });
 
-  // ── Initial state ──
+  // Initial state
   // Force stopped state on render — prevents stale is_playing=true
   // from a saved notebook from starting the clock in an undefined state.
   // Only update local model state; do NOT call save_changes() here
@@ -231,7 +231,7 @@ function render({
   syncPosition();
   syncLoop();
 
-  // ── Stop playback on kernel disconnect ────────────────────────
+  // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
     model.set("is_playing", false);
     model.set("bar_number", 0);

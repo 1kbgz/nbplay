@@ -264,7 +264,7 @@ function render({
 
   const audioScheduler = createAudioScheduler();
 
-  // ── Recording state ────────────────────────────────────────────
+  // Recording state
   const armedVoices: Set<number> = new Set();
 
   function updateRecVisibility(): void {
@@ -333,7 +333,7 @@ function render({
     if (detail) onNoteEvent(detail);
   }
 
-  // ── Step editing with keyboard ─────────────────────────────────
+  // Step editing with keyboard
 
   let pendingKeyEditCell: { voice: number; step: number } | null = null;
   let pendingKeyEditHandler: ((e: Event) => void) | null = null;
@@ -724,7 +724,7 @@ function render({
 
   onModelChange();
 
-  // ── Focus capture for keyboard note input ─────────────────────
+  // Focus capture for keyboard note input
   // The KeyboardWidget intercepts keys at window capture level, so no
   // keydown handler is needed here.  Escape cancellation is dispatched
   // by the keyboard via a synthetic CustomEvent.
@@ -733,7 +733,7 @@ function render({
     cancelPendingKeyEdit();
   });
 
-  // ── Stop playback on kernel disconnect ────────────────────────
+  // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
     model.set("is_playing", false);
     model.set("current_step", -1);

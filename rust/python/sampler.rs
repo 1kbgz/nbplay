@@ -6,7 +6,7 @@ use nbplay::sampler::{
     SampleMapping as BaseSampleMapping, Sampler as BaseSampler,
 };
 
-// ── AudioSample ──────────────────────────────────────────────────
+// AudioSample
 
 #[pyclass(name = "AudioSample")]
 #[derive(Clone)]
@@ -85,7 +85,7 @@ impl PyAudioSample {
     }
 }
 
-// ── Envelope ─────────────────────────────────────────────────────
+// Envelope
 
 #[pyclass(name = "Envelope")]
 #[derive(Clone)]
@@ -155,7 +155,7 @@ impl PyEnvelope {
     }
 }
 
-// ── SampleMapping ────────────────────────────────────────────────
+// SampleMapping
 
 #[pyclass(name = "SampleMapping")]
 #[derive(Clone)]
@@ -201,7 +201,7 @@ impl PySampleMapping {
     }
 }
 
-// ── SampleMap ────────────────────────────────────────────────────
+// SampleMap
 
 #[pyclass(name = "SampleMap")]
 pub struct PySampleMap {
@@ -250,7 +250,7 @@ impl PySampleMap {
     }
 }
 
-// ── Sampler ──────────────────────────────────────────────────────
+// Sampler
 
 #[pyclass(name = "Sampler")]
 pub struct PySampler {

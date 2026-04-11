@@ -10,7 +10,7 @@ import {
   toFloat32,
 } from "./helpers.ts";
 
-// ── Types ────────────────────────────────────────────────────────
+// Types
 
 interface Envelope {
   attack: number;
@@ -27,7 +27,7 @@ interface Voice {
   releaseTime: number | null;
 }
 
-// ── Note helpers ─────────────────────────────────────────────────
+// Note helpers
 
 const NOTE_NAMES = [
   "C",
@@ -73,7 +73,7 @@ function parseNote(raw: string): number | null {
   return midi >= 0 && midi <= 127 ? midi : null;
 }
 
-// ── Waveform renderer ────────────────────────────────────────────
+// Waveform renderer
 
 function drawWaveform(
   canvas: HTMLCanvasElement,
@@ -123,7 +123,7 @@ function drawWaveform(
   ctx.stroke();
 }
 
-// ── ADSR envelope visualisation ──────────────────────────────────
+// ADSR envelope visualisation
 
 function drawEnvelope(
   canvas: HTMLCanvasElement,
@@ -194,7 +194,7 @@ function drawEnvelope(
   ctx.fillText("R", (dx + ex) / 2, h - 1);
 }
 
-// ── Web Audio Sampler Engine ────────────────────────────────────
+// Web Audio Sampler Engine
 
 function createSamplerEngine(maxVoices = 8) {
   let audioCtx: AudioContext | null = null;
@@ -367,7 +367,7 @@ function createSamplerEngine(maxVoices = 8) {
   };
 }
 
-// ── Widget render ────────────────────────────────────────────────
+// Widget render
 
 function render({
   model,
@@ -502,7 +502,7 @@ function render({
     activeVoicesEl.textContent = count + " active";
   }, 50);
 
-  // ── Double-click to edit values (uses shared makeEditable with committed guard) ──
+  // Double-click to edit values (uses shared makeEditable with committed guard)
 
   makeEditable(attackVal, {
     className: "nbplay-samp-inline-edit",
@@ -703,7 +703,7 @@ function render({
     });
   }
 
-  // ── Sync UI from model ─────────────────────────────────────────
+  // Sync UI from model
 
   function syncInfo(): void {
     sampleNameEl.textContent = model.get("sample_name") as string;
@@ -752,7 +752,7 @@ function render({
     );
   }
 
-  // ── Event listeners ────────────────────────────────────────────
+  // Event listeners
 
   attackSlider.addEventListener("input", () => {
     const v = parseFloat(attackSlider.value);
@@ -793,7 +793,7 @@ function render({
     model.save_changes();
   });
 
-  // ── Model observers ────────────────────────────────────────────
+  // Model observers
 
   model.on("change:waveform", redrawWaveform);
   model.on("change:sample_name", syncInfo);
@@ -827,7 +827,7 @@ function render({
   });
   model.on("change:channel_index", registerOnSessionBus);
 
-  // ── Session bus registration (for keyboard widget) ─────────────
+  // Session bus registration (for keyboard widget)
 
   function registerOnSessionBus(): void {
     const sid = model.get("session_id") as string;
@@ -871,7 +871,7 @@ function render({
 
   registerOnSessionBus();
 
-  // ── Initial render ─────────────────────────────────────────────
+  // Initial render
 
   syncInfo();
   syncEnvelopeControls();
@@ -880,7 +880,7 @@ function render({
   redrawEnvelope();
   createPads();
 
-  // ── Cleanup ────────────────────────────────────────────────────
+  // Cleanup
   const cancelDisconnect = onKernelDisconnect(model, () => {
     sampler.stopAll();
   });

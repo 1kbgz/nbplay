@@ -10,7 +10,7 @@
   user-select: none;
   box-sizing: border-box;
 }
-/* ── Header ─────────────────────────────────────────────────────── */
+/* Header */
 .nbplay-seq-header {
   display: flex;
   align-items: center;
@@ -34,7 +34,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-/* ── Transport ──────────────────────────────────────────────────── */
+/* Transport */
 .nbplay-seq-transport {
   display: flex;
   align-items: center;
@@ -158,7 +158,7 @@
 .nbplay-seq-loop-chk {
   accent-color: var(--jp-brand-color0, #7c3aed);
 }
-/* ── Grid ───────────────────────────────────────────────────────── */
+/* Grid */
 .nbplay-seq-grid-wrap {
   overflow-x: auto;
   margin-bottom: 8px;
@@ -272,7 +272,7 @@
 .nbplay-seq-vel-bar.current {
   background: var(--jp-brand-color1, #00d4ff);
 }
-/* ── Footer ─────────────────────────────────────────────────────── */
+/* Footer */
 .nbplay-seq-footer {
   margin-top: 4px;
 }
@@ -281,7 +281,7 @@
   color: var(--jp-ui-font-color3, #64648a);
   letter-spacing: 0.5px;
 }
-/* ── Inline edit input ────────────────────────────────────────── */
+/* Inline edit input */
 .nbplay-seq-inline-edit {
   font-family: inherit;
   font-size: 12px;

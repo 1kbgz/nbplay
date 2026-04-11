@@ -327,7 +327,7 @@ class SequencerWidget(anywidget.AnyWidget):
         """Push all composer step-lists into the synced voices_data trait."""
         self.voices_data = [list(c.steps) for c in self._composers]
 
-    # ── Voice accessors ───────────────────────────────────────
+    #  Voice accessors
 
     @property
     def composers(self):
@@ -339,7 +339,7 @@ class SequencerWidget(anywidget.AnyWidget):
         """Alias for ``composers``."""
         return self.composers
 
-    # ── Backward-compatible steps property (voice 0) ──────────
+    #  Backward-compatible steps property (voice 0)
 
     @property
     def steps(self):
@@ -350,7 +350,7 @@ class SequencerWidget(anywidget.AnyWidget):
     def steps(self, value):
         self._composers[0].steps = value
 
-    # ── Step manipulation (voice-aware) ───────────────────────
+    #  Step manipulation (voice-aware)
 
     def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0):
         """Set a step at the given index on the given voice."""

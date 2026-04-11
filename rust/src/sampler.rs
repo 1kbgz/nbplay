@@ -52,7 +52,7 @@ impl AudioSample {
     }
 }
 
-// ── ADSR Envelope ────────────────────────────────────────────────
+// ADSR Envelope
 
 /// ADSR envelope parameters (all times in seconds).
 #[derive(Clone, Debug, PartialEq)]
@@ -194,7 +194,7 @@ impl EnvelopeState {
     }
 }
 
-// ── Sampler Voice ────────────────────────────────────────────────
+// Sampler Voice
 
 /// A single voice rendering one instance of a sample with pitch shifting and envelope.
 #[derive(Clone, Debug)]
@@ -311,7 +311,7 @@ impl SamplerVoice {
     }
 }
 
-// ── Sampler (polyphonic) ─────────────────────────────────────────
+// Sampler (polyphonic)
 
 /// A polyphonic sampler that manages voices, responds to MIDI events,
 /// and implements AudioSource.
@@ -415,7 +415,7 @@ impl AudioSource for Sampler {
     }
 }
 
-// ── Sample Map (multi-sample support) ────────────────────────────
+// Sample Map (multi-sample support)
 
 /// Maps a note range and velocity range to a sample.
 #[derive(Clone, Debug)]
@@ -529,7 +529,7 @@ mod tests {
         AudioFormat::new(SampleRate::SR_44100, ChannelCount::MONO)
     }
 
-    // ── AudioSample tests ────────────────────────────────────────
+    // AudioSample tests
 
     #[test]
     fn test_audio_sample_new() {
@@ -553,7 +553,7 @@ mod tests {
         assert_eq!(sample.loop_end, Some(2000));
     }
 
-    // ── Envelope tests ───────────────────────────────────────────
+    // Envelope tests
 
     #[test]
     fn test_envelope_default() {
@@ -608,7 +608,7 @@ mod tests {
         assert!(state.is_done());
     }
 
-    // ── Sampler Voice tests ──────────────────────────────────────
+    // Sampler Voice tests
 
     #[test]
     fn test_sampler_voice_plays_sample() {
@@ -690,7 +690,7 @@ mod tests {
         assert!(!voice.is_active());
     }
 
-    // ── Sampler tests ────────────────────────────────────────────
+    // Sampler tests
 
     #[test]
     fn test_sampler_note_on_off() {
@@ -819,7 +819,7 @@ mod tests {
         assert_eq!(sampler.active_voice_count(), 0);
     }
 
-    // ── SampleMap tests ──────────────────────────────────────────
+    // SampleMap tests
 
     #[test]
     fn test_sample_map_single() {

@@ -3,7 +3,7 @@
 
 import { type AnyModel } from "./helpers.ts";
 
-// ── MIDI event monitor ───────────────────────────────────────────
+// MIDI event monitor
 
 const MAX_LOG = 8;
 
@@ -34,7 +34,7 @@ function fmtMidiMsg(data: Uint8Array): string {
     .join(" ")}]`;
 }
 
-// ── Web MIDI helper ──────────────────────────────────────────────
+// Web MIDI helper
 
 interface MidiPort {
   id: string;
@@ -103,7 +103,7 @@ function createMidiEngine() {
   };
 }
 
-// ── Widget render ────────────────────────────────────────────────
+// Widget render
 
 function render({
   model,
@@ -243,7 +243,7 @@ function render({
     syncMidiPort();
   }
 
-  // ── Audio events ──
+  // Audio events
   srSelect.addEventListener("change", () => {
     model.set("sample_rate", parseInt(srSelect.value, 10));
     model.save_changes();
@@ -257,7 +257,7 @@ function render({
     model.save_changes();
   });
 
-  // ── MIDI events ──
+  // MIDI events
   refreshBtn.addEventListener("click", () => {
     refreshMidiPorts();
   });
@@ -285,14 +285,14 @@ function render({
     model.save_changes();
   });
 
-  // ── Model observers ──
+  // Model observers
   model.on("change:sample_rate", syncAudio);
   model.on("change:channels", syncAudio);
   model.on("change:buffer_size", syncAudio);
   model.on("change:audio_device", syncAudio);
   model.on("change:midi_port", syncMidiPort);
 
-  // ── Initial state ──
+  // Initial state
   syncAudio();
   refreshMidiPorts();
 
