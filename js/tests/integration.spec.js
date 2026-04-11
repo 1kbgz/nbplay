@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults ──────────────────────────────────────────────
+// Shared defaults
 
 const SESSION_ID = "integ-test-session";
 
@@ -62,7 +62,7 @@ const SEQUENCER_DEFAULTS = {
   ],
 };
 
-// ── Helpers ──────────────────────────────────────────────────────
+// Helpers
 
 /** Render mixer, creating the session bus. */
 async function renderMixer(page, overrides = {}) {
@@ -143,7 +143,7 @@ async function renderSequencer(page, overrides = {}) {
   );
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("Integration: Keyboard + Sampler via Session", () => {
   test.beforeEach(async ({ page }) => {

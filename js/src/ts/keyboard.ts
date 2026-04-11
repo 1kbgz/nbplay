@@ -3,7 +3,7 @@
 
 import { type AnyModel, cssVar, onKernelDisconnect } from "./helpers.ts";
 
-// ── Key mapping ──────────────────────────────────────────────────
+// Key mapping
 
 // Semitone offsets from the base note (C of the octave)
 const UPPER_NATURAL: Record<string, number> = {
@@ -105,7 +105,7 @@ function isNoteKey(key: string): boolean {
   );
 }
 
-// ── Session bus helpers ──────────────────────────────────────────
+// Session bus helpers
 
 interface NbplayBus {
   audioCtx: AudioContext;
@@ -142,7 +142,7 @@ function broadcastNote(sessionId: string, evt: NoteEvent): void {
   document.dispatchEvent(new CustomEvent("nbplay-note", { detail: evt }));
 }
 
-// ── Audio engine ─────────────────────────────────────────────────
+// Audio engine
 
 function createKeyboardAudio() {
   let audioCtx: AudioContext | null = null;
@@ -233,7 +233,7 @@ function createKeyboardAudio() {
   };
 }
 
-// ── Key layout data for rendering ────────────────────────────────
+// Key layout data for rendering
 
 interface KeyDef {
   key: string;
@@ -290,7 +290,7 @@ const LOWER_ROW_4: KeyDef[] = [
   { key: ".", semitone: 14, isBlack: false },
 ];
 
-// ── Widget render ────────────────────────────────────────────────
+// Widget render
 
 function render({
   model,
@@ -379,7 +379,7 @@ function render({
     audio.setSession(sid, chIdx);
   }
 
-  // ── Build keyboard rows ────────────────────────────────────────
+  // Build keyboard rows
 
   const keyElements: Map<string, HTMLDivElement> = new Map();
 
@@ -437,7 +437,7 @@ function render({
     buildRow(lowerNatRow, LOWER_ROW_4, "lower");
   }
 
-  // ── Note handling ──────────────────────────────────────────────
+  // Note handling
 
   const heldNotes: Set<number> = new Set();
   const sustainedNotes: Map<number, Zone> = new Map(); // notes held by sustain
@@ -572,7 +572,7 @@ function render({
     }
   }
 
-  // ── Visual feedback ────────────────────────────────────────────
+  // Visual feedback
 
   function highlightKeys(): void {
     keyElements.forEach((el, key) => {
@@ -613,7 +613,7 @@ function render({
     );
   }
 
-  // ── Velocity acceleration ──────────────────────────────────────
+  // Velocity acceleration
 
   let velRepeatTimer: ReturnType<typeof setInterval> | null = null;
   let velRepeatCount = 0;
@@ -640,7 +640,7 @@ function render({
     }
   }
 
-  // ── Keyboard event handling ────────────────────────────────────
+  // Keyboard event handling
 
   const pressedKeys: Map<string, { midi: number; zone: Zone }> = new Map();
 
@@ -916,7 +916,7 @@ function render({
   syncInfo();
   rebuildKeys();
 
-  // ── Stop on kernel disconnect ───────────────────────────────
+  // Stop on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
     audio.destroy();
   });

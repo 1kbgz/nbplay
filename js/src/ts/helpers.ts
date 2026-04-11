@@ -1,4 +1,4 @@
-// ── Shared helpers for nbplay anywidget ESM frontends ────────────
+// Shared helpers for nbplay anywidget ESM frontends
 
 /** Minimal interface for the anywidget model object. */
 export interface AnyModel {
@@ -139,7 +139,7 @@ export function makeEditable(el: HTMLElement, opts: EditableOpts): void {
   });
 }
 
-// ── Binary buffer helpers ────────────────────────────────────────
+// Binary buffer helpers
 
 /** Convert an anywidget binary buffer to a Float32Array. */
 export function toFloat32(data: unknown): Float32Array | null {
@@ -163,7 +163,7 @@ export function toFloat32(data: unknown): Float32Array | null {
   return null;
 }
 
-// ── dB conversion helpers ────────────────────────────────────────
+// dB conversion helpers
 
 /** Convert linear gain (0–2) to dB. */
 export function linearToDb(g: number): number {

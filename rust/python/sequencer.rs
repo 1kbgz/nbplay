@@ -7,7 +7,7 @@ use nbplay::sequencer::{
     TransportState,
 };
 
-// ── Step ─────────────────────────────────────────────────────────
+// Step
 
 #[pyclass(name = "Step")]
 #[derive(Clone)]
@@ -86,7 +86,7 @@ impl PyStep {
     }
 }
 
-// ── Pattern ──────────────────────────────────────────────────────
+// Pattern
 
 #[pyclass(name = "Pattern")]
 #[derive(Clone)]
@@ -156,7 +156,7 @@ impl PyPattern {
     }
 }
 
-// ── NoteEvent ────────────────────────────────────────────────────
+// NoteEvent
 
 #[pyclass(name = "NoteEvent")]
 #[derive(Clone)]
@@ -238,7 +238,7 @@ impl PyNoteEvent {
     }
 }
 
-// ── EventSequence ────────────────────────────────────────────────
+// EventSequence
 
 #[pyclass(name = "EventSequence")]
 pub struct PyEventSequence {
@@ -309,7 +309,7 @@ impl PyEventSequence {
     }
 }
 
-// ── TransportClock ───────────────────────────────────────────────
+// TransportClock
 
 #[pyclass(name = "TransportClock")]
 pub struct PyTransportClock {
@@ -406,7 +406,7 @@ impl PyTransportClock {
     }
 }
 
-// ── StepSequencer ────────────────────────────────────────────────
+// StepSequencer
 
 #[pyclass(name = "StepSequencer")]
 pub struct PyStepSequencer {

@@ -42,7 +42,7 @@ from nbplay import (
     Velocity,
 )
 
-# ── Audio types ─────────────────────────────────────────────
+#  Audio types
 
 
 class TestAudioFormat:
@@ -120,7 +120,7 @@ class TestAudioBuffer:
         assert "44100" in r
 
 
-# ── MIDI types ──────────────────────────────────────────────
+#  MIDI types
 
 
 class TestMidiChannel:
@@ -262,7 +262,7 @@ class TestMidiEvent:
         assert "NoteOn" in r
 
 
-# ── Oscillators ─────────────────────────────────────────────
+#  Oscillators
 
 
 class TestSineOscillator:
@@ -366,7 +366,7 @@ class TestNoiseSource:
         assert "NoiseSource" in repr(noise)
 
 
-# ── SynthWidget ─────────────────────────────────────────────
+#  SynthWidget
 
 
 class TestSynthWidget:
@@ -431,7 +431,7 @@ class TestSynthWidget:
         assert len(w.waveform) > 0
 
 
-# ── SettingsWidget ──────────────────────────────────────────
+#  SettingsWidget
 
 
 class TestSettingsWidget:
@@ -488,7 +488,7 @@ class TestSettingsWidget:
         assert len(w.midi_event) == 11
 
 
-# ── MixerChannel (Rust) ────────────────────────────────────
+#  MixerChannel (Rust)
 
 
 class TestMixerChannel:
@@ -556,7 +556,7 @@ class TestMixerChannel:
         assert a != b
 
 
-# ── Mixer (Rust) ────────────────────────────────────────────
+#  Mixer (Rust)
 
 
 class TestMixer:
@@ -658,7 +658,7 @@ class TestMixer:
         assert "lead" in r
 
 
-# ── MixerWidget ─────────────────────────────────────────────
+#  MixerWidget
 
 
 class TestMixerWidget:
@@ -750,7 +750,7 @@ class TestMixerWidget:
         assert len(out) == 4  # 2 frames * stereo
 
 
-# ── Sequencer: Step ─────────────────────────────────────────
+#  Sequencer: Step
 
 
 class TestStep:
@@ -795,7 +795,7 @@ class TestStep:
         assert Step(60, 100) != Step(61, 100)
 
 
-# ── Sequencer: Pattern ──────────────────────────────────────
+#  Sequencer: Pattern
 
 
 class TestPattern:
@@ -847,7 +847,7 @@ class TestPattern:
         assert "8" in r
 
 
-# ── Sequencer: NoteEvent ────────────────────────────────────
+#  Sequencer: NoteEvent
 
 
 class TestNoteEvent:
@@ -888,7 +888,7 @@ class TestNoteEvent:
         assert a == b
 
 
-# ── Sequencer: EventSequence ───────────────────────────────
+#  Sequencer: EventSequence
 
 
 class TestEventSequence:
@@ -953,7 +953,7 @@ class TestEventSequence:
         assert "EventSequence" in r
 
 
-# ── Sequencer: TransportClock ───────────────────────────────
+#  Sequencer: TransportClock
 
 
 class TestTransportClock:
@@ -1020,7 +1020,7 @@ class TestTransportClock:
         assert "140" in r
 
 
-# ── Sequencer: StepSequencer ───────────────────────────────
+#  Sequencer: StepSequencer
 
 
 class TestStepSequencer:
@@ -1062,7 +1062,7 @@ class TestStepSequencer:
         assert "StepSequencer" in r
 
 
-# ── Sampler: AudioSample ───────────────────────────────────
+#  Sampler: AudioSample
 
 
 class TestAudioSample:
@@ -1101,7 +1101,7 @@ class TestAudioSample:
         assert "44100" in r
 
 
-# ── Sampler: Envelope ───────────────────────────────────────
+#  Sampler: Envelope
 
 
 class TestEnvelope:
@@ -1146,7 +1146,7 @@ class TestEnvelope:
         assert a == b
 
 
-# ── Sampler: SampleMapping & SampleMap ──────────────────────
+#  Sampler: SampleMapping & SampleMap
 
 
 class TestSampleMapping:
@@ -1196,7 +1196,7 @@ class TestSampleMap:
         assert "SampleMap" in r
 
 
-# ── Sampler ─────────────────────────────────────────────────
+#  Sampler
 
 
 class TestSampler:
@@ -1268,7 +1268,7 @@ class TestSampler:
         assert "Sampler" in r
 
 
-# ── NoteComposer ────────────────────────────────────────────
+#  NoteComposer
 
 
 class TestNoteComposer:
@@ -1334,7 +1334,7 @@ class TestNoteComposer:
         assert "8" in r
 
 
-# ── SequencerWidget ─────────────────────────────────────────
+#  SequencerWidget
 
 
 class TestSequencerWidget:
@@ -1481,7 +1481,7 @@ class TestSequencerWidget:
         assert w.current_step == 3
 
 
-# ── SamplerWidget ───────────────────────────────────────────
+#  SamplerWidget
 
 
 class TestSamplerWidget:
@@ -1569,7 +1569,7 @@ class TestSamplerWidget:
         assert s is not None
 
 
-# ── TransportWidget ─────────────────────────────────────────
+#  TransportWidget
 
 
 class TestTransportWidget:
@@ -1623,7 +1623,7 @@ class TestTransportWidget:
         assert t.loop_end_bar == 8
 
 
-# ── KeyboardWidget ──────────────────────────────────────────
+#  KeyboardWidget
 
 
 class TestKeyboardWidget:
@@ -1722,7 +1722,7 @@ class TestKeyboardWidget:
         assert kb.channel_index == 3
 
 
-# ── Track ───────────────────────────────────────────────────
+#  Track
 
 
 class TestTrack:
@@ -1792,7 +1792,7 @@ class TestTrack:
         assert "SamplerWidget" in r
 
 
-# ── Session ─────────────────────────────────────────────────
+#  Session
 
 
 class TestSession:

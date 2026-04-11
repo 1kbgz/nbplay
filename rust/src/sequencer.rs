@@ -1,6 +1,6 @@
 use crate::midi::{MidiChannel, MidiEvent, MidiMessage, Note, Velocity};
 
-// ── Step Sequencer Types ─────────────────────────────────────────
+// Step Sequencer Types
 
 /// A single step in a step sequencer pattern.
 #[derive(Clone, Debug, PartialEq)]
@@ -83,7 +83,7 @@ impl Pattern {
     }
 }
 
-// ── Piano Roll / Event Sequence ──────────────────────────────────
+// Piano Roll / Event Sequence
 
 /// A note event positioned in musical time (beats).
 #[derive(Clone, Debug, PartialEq)]
@@ -189,7 +189,7 @@ impl Default for EventSequence {
     }
 }
 
-// ── Transport Clock ──────────────────────────────────────────────
+// Transport Clock
 
 /// Transport state.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -283,7 +283,7 @@ impl TransportClock {
     }
 }
 
-// ── Step Sequencer Engine ────────────────────────────────────────
+// Step Sequencer Engine
 
 /// A step sequencer that triggers MIDI events from a pattern.
 pub struct StepSequencer {
@@ -384,7 +384,7 @@ mod tests {
     use super::*;
     use crate::midi::{MidiChannel, Note, Velocity};
 
-    // ── Step tests ───────────────────────────────────────────────
+    // Step tests
 
     #[test]
     fn test_step_new() {
@@ -402,7 +402,7 @@ mod tests {
         assert!(!step.active);
     }
 
-    // ── Pattern tests ────────────────────────────────────────────
+    // Pattern tests
 
     #[test]
     fn test_pattern_new() {
@@ -447,7 +447,7 @@ mod tests {
         }
     }
 
-    // ── NoteEvent tests ──────────────────────────────────────────
+    // NoteEvent tests
 
     #[test]
     fn test_note_event_end_position() {
@@ -455,7 +455,7 @@ mod tests {
         assert!((event.end_position() - 1.5).abs() < 1e-10);
     }
 
-    // ── EventSequence tests ──────────────────────────────────────
+    // EventSequence tests
 
     #[test]
     fn test_event_sequence_add_sorted() {
@@ -598,7 +598,7 @@ mod tests {
         assert!(seq.is_empty());
     }
 
-    // ── TransportClock tests ─────────────────────────────────────
+    // TransportClock tests
 
     #[test]
     fn test_transport_clock_new() {
@@ -666,7 +666,7 @@ mod tests {
         assert!((clock.bpm - 1.0).abs() < 1e-10);
     }
 
-    // ── StepSequencer tests ──────────────────────────────────────
+    // StepSequencer tests
 
     #[test]
     fn test_step_sequencer_empty_pattern() {

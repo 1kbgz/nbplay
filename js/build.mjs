@@ -37,7 +37,6 @@ const BUILD = [
   },
 ];
 
-// ── Widget ESM builds ────────────────────────────────────────────
 // Each widget TypeScript file → standalone ESM module in ../nbplay/static/
 const WIDGET_NAMES = [
   "widget",

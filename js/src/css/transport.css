@@ -1,6 +1,6 @@
-/* ── TransportWidget styles ──────────────────────────────────────────
+/* TransportWidget styles
  *  All rules scoped under .nbplay-transport to avoid collisions.
- * ──────────────────────────────────────────────────────────────────── */
+ * */
 .nbplay-transport {
   display: flex;
   align-items: center;
@@ -14,7 +14,7 @@
   color: var(--jp-ui-font-color2, #8888aa);
   user-select: none;
 }
-/* ── Transport buttons ────────────────────────────────────────────── */
+/* Transport buttons */
 .nbplay-transport-controls {
   display: flex;
   gap: 4px;
@@ -47,7 +47,7 @@
   border-color: var(--jp-success-color1, #22c55e);
   color: var(--jp-success-color1, #22c55e);
 }
-/* ── BPM / Tempo ──────────────────────────────────────────────────── */
+/* BPM / Tempo */
 .nbplay-transport-tempo {
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-/* ── Time signature ───────────────────────────────────────────────── */
+/* Time signature  */
 .nbplay-transport-timesig {
   padding: 4px 8px;
   background: var(--jp-layout-color1, #14142a);
@@ -102,7 +102,7 @@
   font-size: 14px;
   font-weight: 600;
 }
-/* ── Bar : Beat position ──────────────────────────────────────────── */
+/* Bar : Beat position */
 .nbplay-transport-position {
   display: flex;
   align-items: baseline;
@@ -129,7 +129,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-/* ── Loop controls ────────────────────────────────────────────────── */
+/* Loop controls */
 .nbplay-transport-loop {
   display: flex;
   align-items: center;
@@ -163,7 +163,7 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
-/* ── Inline edit ──────────────────────────────────────────────────── */
+/* Inline edit */
 .nbplay-transport-inline-edit {
   font-family: inherit;
   font-size: 12px;

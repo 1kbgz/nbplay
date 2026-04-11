@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   session_id: "test-session",
@@ -32,7 +32,7 @@ async function renderWidget(page, overrides = {}) {
 /** Selector for channel strips (excludes master). */
 const STRIP = ".nbplay-mixer-strip:not(.nbplay-master-strip)";
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("MixerWidget", () => {
   test.beforeEach(async ({ page }) => {
@@ -403,7 +403,7 @@ test.describe("MixerWidget", () => {
     await expect(page.locator(".nbplay-master-strip")).toBeVisible();
   });
 
-  // ── Additional edge cases ─────────────────────────────────────
+  // Additional edge cases
 
   test("adding a channel via model triggers DOM rebuild", async ({ page }) => {
     await renderWidget(page);

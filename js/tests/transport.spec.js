@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   is_playing: false,
@@ -33,7 +33,7 @@ async function renderWidget(page, overrides = {}) {
   );
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("TransportWidget", () => {
   test.beforeEach(async ({ page }) => {

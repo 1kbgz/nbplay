@@ -14,7 +14,7 @@ import {
   toFloat32,
 } from "./helpers.ts";
 
-// ── Frequency helpers (logarithmic mapping) ──────────────────────
+// Frequency helpers (logarithmic mapping)
 const MIN_FREQ = 20;
 const MAX_FREQ = 8000;
 const LN_RATIO = Math.log(MAX_FREQ / MIN_FREQ);
@@ -31,7 +31,7 @@ function fmtFreq(hz: number): string {
   return hz >= 1000 ? (hz / 1000).toFixed(2) + " kHz" : hz.toFixed(1) + " Hz";
 }
 
-// ── Waveform renderer ────────────────────────────────────────────
+// Waveform renderer
 function drawWaveform(
   canvas: HTMLCanvasElement,
   samples: Float32Array | null,
@@ -109,7 +109,7 @@ function drawWaveform(
   ctx.stroke();
 }
 
-// ── Web Audio engine ─────────────────────────────────────────────
+// Web Audio engine
 interface AudioEngine {
   start(type: string, freq: number, amp: number, sr: number): void;
   stop(): void;
@@ -188,7 +188,7 @@ function createAudioEngine(): AudioEngine {
   };
 }
 
-// ── Widget render ────────────────────────────────────────────────
+// Widget render
 function render({
   model,
   el,
@@ -198,7 +198,7 @@ function render({
 }): () => void {
   const audio = createAudioEngine();
 
-  // ── DOM ──
+  // DOM
   const root = document.createElement("div");
   root.className = "nbplay-synth";
   root.innerHTML = `
@@ -253,7 +253,7 @@ function render({
   const playBtn = root.querySelector(".nbplay-play-btn") as HTMLButtonElement;
   const infoSpan = root.querySelector(".nbplay-info") as HTMLSpanElement;
 
-  // ── UI sync helpers ──
+  // UI sync helpers
   function syncOsc(): void {
     const cur = model.get("oscillator_type") as string;
     oscBtns.forEach((b) =>
@@ -281,7 +281,7 @@ function render({
     playBtn.classList.toggle("playing", on);
   }
 
-  // ── Double-click to edit values ──
+  // Double-click to edit values
   makeEditable(freqVal, {
     getValue: () => String(model.get("frequency")),
     parse: (raw: string) => {
@@ -322,7 +322,7 @@ function render({
     drawWaveform(canvas, toFloat32(raw));
   }
 
-  // ── Event handlers (UI → model) ──
+  // Event handlers (UI → model)
   oscBtns.forEach((btn) =>
     btn.addEventListener("click", () => {
       model.set("oscillator_type", btn.dataset.type!);
@@ -357,7 +357,7 @@ function render({
     model.save_changes();
   });
 
-  // ── Model → UI observers ──
+  // Model → UI observers
   model.on("change:oscillator_type", syncOsc);
   model.on("change:frequency", syncFreq);
   model.on("change:amplitude", syncAmp);
@@ -377,7 +377,7 @@ function render({
   model.on("change:sample_rate", syncInfo);
   model.on("change:waveform", syncWaveform);
 
-  // ── Initial state ──
+  // Initial state
   // Force stopped state on render — prevents stale is_playing=true
   // from a saved notebook from launching audio in an undefined state.
   // Only update local model state; do NOT call save_changes() here
@@ -392,7 +392,7 @@ function render({
   syncInfo();
   requestAnimationFrame(syncWaveform);
 
-  // ── Cleanup ──
+  // Cleanup
   const cancelDisconnect = onKernelDisconnect(model, () => {
     model.set("is_playing", false);
     audio.stop();

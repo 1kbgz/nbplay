@@ -8,7 +8,7 @@
   padding: 16px 20px;
   user-select: none;
 }
-/* ── header ─────────────────────────────── */
+/* header */
 .nbplay-mixer .nbplay-mixer-header {
   display: flex;
   align-items: center;
@@ -63,14 +63,14 @@
   );
   border-color: var(--jp-brand-color2, #a855f7);
 }
-/* ── console (channel strip container) ──── */
+/* console (channel strip container) */
 .nbplay-mixer .nbplay-mixer-console {
   display: flex;
   gap: 2px;
   overflow-x: auto;
   padding-bottom: 4px;
 }
-/* ── channel strip ─────────────────────── */
+/* channel strip */
 .nbplay-mixer .nbplay-mixer-strip {
   display: flex;
   flex-direction: column;
@@ -93,7 +93,7 @@
   width: 72px;
   margin-left: 6px;
 }
-/* ── strip name ────────────────────────── */
+/* strip name */
 .nbplay-mixer .nbplay-strip-name {
   font-size: 10px;
   font-weight: 600;
@@ -109,14 +109,14 @@
 .nbplay-mixer .nbplay-master-strip .nbplay-strip-name {
   color: var(--jp-brand-color2, #a855f7);
 }
-/* ── fader section ─────────────────────── */
+/* fader section */
 .nbplay-mixer .nbplay-strip-fader-section {
   display: flex;
   align-items: center;
   gap: 4px;
   height: 120px;
 }
-/* ── meter ─────────────────────────────── */
+/* meter */
 .nbplay-mixer .nbplay-strip-meter {
   width: 4px;
   height: 100%;
@@ -140,7 +140,7 @@
   border-radius: 2px;
   transition: height 0.08s;
 }
-/* ── vertical fader (range input) ──────── */
+/* vertical fader (range input) */
 .nbplay-mixer .nbplay-strip-fader {
   writing-mode: vertical-lr;
   direction: rtl;
@@ -190,7 +190,7 @@
   background: var(--jp-brand-color3, #c084fc);
   border-color: var(--jp-brand-color2, #a855f7);
 }
-/* ── gain label ────────────────────────── */
+/* gain label */
 .nbplay-mixer .nbplay-strip-gain-label {
   font-size: 9px;
   color: var(--jp-ui-font-color2, #8888aa);
@@ -198,7 +198,7 @@
   width: 100%;
   white-space: nowrap;
 }
-/* ── pan section ───────────────────────── */
+/* pan section  */
 .nbplay-mixer .nbplay-strip-pan-section {
   display: flex;
   flex-direction: column;
@@ -247,7 +247,7 @@
   border: none;
   cursor: grab;
 }
-/* ── mute/solo buttons ─────────────────── */
+/* mute/solo buttons */
 .nbplay-mixer .nbplay-strip-buttons {
   display: flex;
   gap: 4px;
@@ -282,7 +282,7 @@
   border-color: var(--jp-warn-color1, #f97316);
   color: var(--jp-layout-color0, var(--jp-layout-color1, #1a1a2e));
 }
-/* ── remove button ─────────────────────── */
+/* remove button */
 .nbplay-mixer .nbplay-strip-remove {
   font-size: 14px;
   width: 18px;
@@ -301,7 +301,7 @@
   border-color: var(--jp-error-color1, #ef4444);
   color: var(--jp-error-color1, #ef4444);
 }
-/* ── inline edit input ─────────────────── */
+/* inline edit input */
 .nbplay-mixer-inline-edit {
   font-family: inherit;
   font-size: 9px;

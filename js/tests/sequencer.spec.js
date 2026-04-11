@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   session_id: "",
@@ -39,7 +39,7 @@ async function renderWidget(page, overrides = {}) {
   }, opts);
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("SequencerWidget", () => {
   test.beforeEach(async ({ page }) => {

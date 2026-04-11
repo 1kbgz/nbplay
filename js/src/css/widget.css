@@ -1,4 +1,4 @@
-/* ── nbplay SynthWidget ─────────────────────────────────────────── */
+/* nbplay SynthWidget */
 /* All selectors are scoped under .nbplay-synth so they never leak
    into the host notebook.  Colours inherit from the active Jupyter
    theme via CSS custom properties (see _variables.less). */
@@ -13,7 +13,7 @@
   box-shadow: var(--jp-elevation-z4, 0 4px 24px rgba(0, 0, 0, 0.5));
   user-select: none;
 }
-/* ── Header ───────────────────────────────────────────────────── */
+/* Header */
 .nbplay-header {
   display: flex;
   align-items: center;
@@ -37,7 +37,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-/* ── Waveform canvas ──────────────────────────────────────────── */
+/* Waveform canvas */
 .nbplay-waveform-container {
   background: var(--jp-layout-color0, #0f0f1a);
   border-radius: 8px;
@@ -51,7 +51,7 @@
   display: block;
   border-radius: 6px;
 }
-/* ── Oscillator type selector ─────────────────────────────────── */
+/* Oscillator type selector */
 .nbplay-osc-selector {
   display: flex;
   align-items: center;
@@ -98,7 +98,7 @@
   box-shadow: 0 0 12px
     color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 15%, transparent);
 }
-/* ── Parameter rows (frequency / amplitude) ───────────────────── */
+/* Parameter rows (frequency / amplitude) */
 .nbplay-params {
   display: flex;
   flex-direction: column;
@@ -160,7 +160,7 @@
   min-width: 72px;
   text-align: right;
 }
-/* ── Transport bar ────────────────────────────────────────────── */
+/* Transport bar */
 .nbplay-transport {
   display: flex;
   align-items: center;
@@ -210,7 +210,7 @@
   color: var(--jp-ui-font-color3, #64648a);
   letter-spacing: 0.3px;
 }
-/* ── Inline edit input ────────────────────────────────────────── */
+/* Inline edit input */
 .nbplay-inline-edit {
   font-family: inherit;
   font-size: 12px;

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   oscillator_type: "sine",
@@ -31,7 +31,7 @@ async function renderWidget(page, overrides = {}) {
   );
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("SynthWidget", () => {
   test.beforeEach(async ({ page }) => {
@@ -289,7 +289,7 @@ test.describe("SynthWidget", () => {
     expect(freq).toBe(800);
   });
 
-  // ── Additional edge-case tests ───────────────────────────────
+  // Additional edge-case tests
 
   test("frequency is clamped to valid range via inline edit", async ({
     page,

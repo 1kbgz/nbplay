@@ -11,7 +11,7 @@ import {
   parseDbInput,
 } from "./helpers.ts";
 
-// ── Types ────────────────────────────────────────────────────────
+// Types
 
 interface Channel {
   name: string;
@@ -26,7 +26,7 @@ interface ChannelNode {
   pan: StereoPannerNode;
 }
 
-// ── Shared Audio Bus ────────────────────────────────────────────
+// Shared Audio Bus
 
 function createAudioBus() {
   let audioCtx: AudioContext | null = null;
@@ -96,7 +96,7 @@ function createAudioBus() {
   };
 }
 
-// ── Channel strip builder ───────────────────────────────────────
+// Channel strip builder
 
 function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
   const strip = document.createElement("div");
@@ -128,7 +128,7 @@ function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
   return strip;
 }
 
-// ── Master strip builder ────────────────────────────────────────
+// Master strip builder
 
 function buildMasterStrip(gain: number): HTMLDivElement {
   const strip = document.createElement("div");
@@ -149,7 +149,7 @@ function buildMasterStrip(gain: number): HTMLDivElement {
   return strip;
 }
 
-// ── Widget render ───────────────────────────────────────────────
+// Widget render
 
 function render({
   model,
@@ -177,7 +177,7 @@ function render({
     ".nbplay-mixer-add-btn",
   ) as HTMLButtonElement;
 
-  // ── Audio bus for session routing ──
+  // Audio bus for session routing
   const audioBus = createAudioBus();
   const sessionId = model.get("session_id") as string;
   if (sessionId) {
@@ -193,7 +193,7 @@ function render({
   let dragging = false;
   let pendingRebuild = false;
 
-  // ── In-place sync ─────────────────────────────────────────────
+  // In-place sync
 
   function syncStrips(): void {
     const channels = (model.get("channels") as Channel[]) || [];
@@ -257,7 +257,7 @@ function render({
       masterLabel.textContent = fmtGain(model.get("master_gain") as number);
   }
 
-  // ── Full rebuild ──────────────────────────────────────────────
+  // Full rebuild
 
   function rebuild(): void {
     if (dragging) {
@@ -448,7 +448,7 @@ function render({
     }
   }
 
-  // ── Add channel ──
+  // Add channel
   addBtn.addEventListener("click", () => {
     const chs = [...((model.get("channels") as Channel[]) || [])];
     const n = chs.length + 1;
@@ -463,14 +463,14 @@ function render({
     model.save_changes();
   });
 
-  // ── Model observers ──
+  // Model observers
   model.on("change:channels", onModelChange);
   model.on("change:master_gain", onModelChange);
 
-  // ── Initial render ──
+  // Initial render
   rebuild();
 
-  // ── Cleanup ──
+  // Cleanup
   return () => {
     const sid = model.get("session_id") as string;
     if (sid) audioBus.destroy(sid);

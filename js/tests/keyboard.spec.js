@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// ── Shared defaults & setup ──────────────────────────────────────
+// Shared defaults & setup
 
 const DEFAULTS = {
   upper_octave: 3,
@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}) {
   );
 }
 
-// ── Tests ────────────────────────────────────────────────────────
+// Tests
 
 test.describe("KeyboardWidget", () => {
   test.beforeEach(async ({ page }) => {
