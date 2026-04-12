@@ -1,43 +1,22 @@
-import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
-import { build } from "@finos/perspective-esbuild-plugin/build.js";
-import { transform } from "lightningcss";
-import { getarg } from "./tools/getarg.mjs";
+import { bundle } from "./tools/bundle.mjs";
+import { bundle_css } from "./tools/css.mjs";
+import { node_modules_external } from "./tools/externals.mjs";
+
 import fs from "fs";
 import cpy from "cpy";
 
-const DEBUG = getarg("--debug");
-
-const COMMON_DEFINE = {
-  global: "window",
-  "process.env.DEBUG": `${DEBUG}`,
-};
-
-const BUILD = [
+const BUNDLES = [
   {
-    define: COMMON_DEFINE,
     entryPoints: ["src/ts/index.ts"],
-    plugins: [NodeModulesExternal()],
-    format: "esm",
-    loader: {
-      ".css": "text",
-      ".html": "text",
-    },
+    plugins: [node_modules_external()],
     outfile: "dist/esm/index.js",
   },
   {
-    define: COMMON_DEFINE,
     entryPoints: ["src/ts/index.ts"],
-    plugins: [],
-    format: "esm",
-    loader: {
-      ".css": "text",
-      ".html": "text",
-    },
     outfile: "dist/cdn/index.js",
   },
 ];
 
-// Each widget TypeScript file → standalone ESM module in ../nbplay/static/
 const WIDGET_NAMES = [
   "widget",
   "mixer",
@@ -48,88 +27,15 @@ const WIDGET_NAMES = [
   "keyboard",
 ];
 
-const WIDGET_BUILD = WIDGET_NAMES.map((name) => ({
-  define: COMMON_DEFINE,
+const WIDGET_BUNDLES = WIDGET_NAMES.map((name) => ({
   entryPoints: [`src/ts/${name}.ts`],
-  plugins: [],
-  format: "esm",
-  loader: {
-    ".css": "text",
-    ".html": "text",
-  },
   outfile: `dist/widgets/${name}.js`,
-  bundle: true,
 }));
-
-async function compile_css() {
-  fs.mkdirSync("dist/css", { recursive: true });
-
-  // Copy widget CSS files for each widget using WIDGET_NAMES
-  // These were pre-compiled from LESS to CSS
-  for (const name of WIDGET_NAMES) {
-    const cssFile = `src/css/${name}.css`;
-    if (!fs.existsSync(cssFile)) continue;
-    const source = fs.readFileSync(cssFile);
-    const { code } = transform({
-      filename: cssFile,
-      code: source,
-      minify: !DEBUG,
-      sourceMap: false,
-    });
-    fs.writeFileSync(`dist/css/${name}.css`, code);
-  }
-
-  // Process raw CSS files from src/css
-  const process_path = (path) => {
-    const outpath = path.replace("src/css", "dist/css");
-    fs.mkdirSync(outpath, { recursive: true });
-
-    if (fs.existsSync(path)) {
-      fs.readdirSync(path, { withFileTypes: true }).forEach((entry) => {
-        const input = `${path}/${entry.name}`;
-        const output = `${outpath}/${entry.name}`;
-
-        if (entry.isDirectory()) {
-          process_path(input);
-        } else if (entry.isFile() && entry.name.endsWith(".css")) {
-          const source = fs.readFileSync(input);
-          const { code } = transform({
-            filename: entry.name,
-            code: source,
-            minify: !DEBUG,
-            sourceMap: false,
-          });
-          fs.writeFileSync(output, code);
-        }
-      });
-    }
-  };
-
-  process_path("src/css");
-}
-
-async function copy_html() {
-  fs.mkdirSync("dist/html", { recursive: true });
-  cpy("src/html/*", "dist/html");
-  // also copy to top level
-  cpy("src/html/*", "dist/");
-}
-
-async function copy_img() {
-  fs.mkdirSync("dist/img", { recursive: true });
-  cpy("src/img/*", "dist/img");
-}
-
-async function copy_to_python() {
-  fs.mkdirSync("../nbplay/extension", { recursive: true });
-  cpy("dist/**/*", "../nbplay/extension");
-}
 
 async function copy_widgets_to_python() {
   fs.mkdirSync("../nbplay/static", { recursive: true });
-  // Copy compiled widget JS
   await cpy("dist/widgets/*.js", "../nbplay/static");
-  // Copy compiled widget CSS
+
   for (const name of WIDGET_NAMES) {
     const cssPath = `dist/css/${name}.css`;
     if (fs.existsSync(cssPath)) {
@@ -138,15 +44,28 @@ async function copy_widgets_to_python() {
   }
 }
 
-async function build_all() {
-  await compile_css();
-  await copy_html();
-  await copy_img();
-  await Promise.all([...BUILD, ...WIDGET_BUILD].map(build)).catch(() =>
+async function copy_extension_assets() {
+  // Copy servable assets to python extension (exclude esm/)
+  fs.mkdirSync("../nbplay/extension", { recursive: true });
+  await cpy("dist/**/*", "../nbplay/extension", {
+    filter: (file) => !file.relativePath.startsWith("esm"),
+  });
+}
+
+async function build() {
+  await bundle_css("src/css");
+  await cpy("src/html/*", "dist/");
+
+  if (fs.existsSync("src/img")) {
+    fs.mkdirSync("dist/img", { recursive: true });
+    await cpy("src/img/*", "dist/img");
+  }
+
+  await Promise.all([...BUNDLES, ...WIDGET_BUNDLES].map(bundle)).catch(() =>
     process.exit(1),
   );
-  await copy_to_python();
+  await copy_extension_assets();
   await copy_widgets_to_python();
 }
 
-build_all();
+build();

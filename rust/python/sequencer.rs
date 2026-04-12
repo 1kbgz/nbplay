@@ -9,7 +9,7 @@ use nbplay::sequencer::{
 
 // Step
 
-#[pyclass(name = "Step")]
+#[pyclass(name = "Step", from_py_object)]
 #[derive(Clone)]
 pub struct PyStep {
     pub inner: BaseStep,
@@ -88,7 +88,7 @@ impl PyStep {
 
 // Pattern
 
-#[pyclass(name = "Pattern")]
+#[pyclass(name = "Pattern", from_py_object)]
 #[derive(Clone)]
 pub struct PyPattern {
     pub inner: BasePattern,
@@ -158,7 +158,7 @@ impl PyPattern {
 
 // NoteEvent
 
-#[pyclass(name = "NoteEvent")]
+#[pyclass(name = "NoteEvent", from_py_object)]
 #[derive(Clone)]
 pub struct PyNoteEvent {
     pub inner: BaseNoteEvent,

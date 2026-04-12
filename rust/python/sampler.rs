@@ -8,7 +8,7 @@ use nbplay::sampler::{
 
 // AudioSample
 
-#[pyclass(name = "AudioSample")]
+#[pyclass(name = "AudioSample", from_py_object)]
 #[derive(Clone)]
 pub struct PyAudioSample {
     pub inner: BaseAudioSample,
@@ -87,7 +87,7 @@ impl PyAudioSample {
 
 // Envelope
 
-#[pyclass(name = "Envelope")]
+#[pyclass(name = "Envelope", from_py_object)]
 #[derive(Clone)]
 pub struct PyEnvelope {
     pub inner: BaseEnvelope,
@@ -157,7 +157,7 @@ impl PyEnvelope {
 
 // SampleMapping
 
-#[pyclass(name = "SampleMapping")]
+#[pyclass(name = "SampleMapping", from_py_object)]
 #[derive(Clone)]
 pub struct PySampleMapping {
     pub inner: BaseSampleMapping,
