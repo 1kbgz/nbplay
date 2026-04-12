@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 
 use nbplay::mixer::{Mixer as BaseMixer, MixerChannel as BaseMixerChannel};
 
-#[pyclass(name = "MixerChannel")]
+#[pyclass(name = "MixerChannel", from_py_object)]
 #[derive(Clone)]
 pub struct PyMixerChannel {
     pub inner: BaseMixerChannel,
