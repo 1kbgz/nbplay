@@ -1,42 +1,25 @@
-import { NodeModulesExternal } from "@finos/perspective-esbuild-plugin/external.js";
-import { build } from "@finos/perspective-esbuild-plugin/build.js";
-import { transform } from "lightningcss";
+import { bundle } from "./tools/bundle.mjs";
+import { bundle_css } from "./tools/css.mjs";
+import { node_modules_external } from "./tools/externals.mjs";
 import { getarg } from "./tools/getarg.mjs";
+
+import { transform } from "lightningcss";
 import fs from "fs";
 import cpy from "cpy";
 
-const DEBUG = getarg("--debug");
-
-const COMMON_DEFINE = {
-  global: "window",
-  "process.env.DEBUG": `${DEBUG}`,
-};
-
-const BUILD = [
+const BUNDLES = [
   {
-    define: COMMON_DEFINE,
     entryPoints: ["src/ts/index.ts"],
-    plugins: [NodeModulesExternal()],
-    format: "esm",
-    loader: {
-      ".css": "text",
-      ".html": "text",
-    },
+    plugins: [node_modules_external()],
     outfile: "dist/esm/index.js",
   },
   {
-    define: COMMON_DEFINE,
     entryPoints: ["src/ts/index.ts"],
-    plugins: [],
-    format: "esm",
-    loader: {
-      ".css": "text",
-      ".html": "text",
-    },
     outfile: "dist/cdn/index.js",
   },
 ];
 
+<<<<<<< before updating
 // Each widget TypeScript file → standalone ESM module in ../nbplay/static/
 const WIDGET_NAMES = [
   "widget",
@@ -104,27 +87,29 @@ async function compile_css() {
       });
     }
   };
+=======
+async function build() {
+  // Bundle css
+  await bundle_css();
+>>>>>>> after updating
 
-  process_path("src/css");
-}
-
-async function copy_html() {
+  // Copy HTML
   fs.mkdirSync("dist/html", { recursive: true });
   cpy("src/html/*", "dist/html");
-  // also copy to top level
   cpy("src/html/*", "dist/");
-}
 
-async function copy_img() {
+  // Copy images
   fs.mkdirSync("dist/img", { recursive: true });
   cpy("src/img/*", "dist/img");
-}
 
-async function copy_to_python() {
+  await Promise.all(BUNDLES.map(bundle)).catch(() => process.exit(1));
+
+  // Copy from dist to python
   fs.mkdirSync("../nbplay/extension", { recursive: true });
   cpy("dist/**/*", "../nbplay/extension");
 }
 
+<<<<<<< before updating
 async function copy_widgets_to_python() {
   fs.mkdirSync("../nbplay/static", { recursive: true });
   // Copy compiled widget JS
@@ -150,3 +135,6 @@ async function build_all() {
 }
 
 build_all();
+=======
+build();
+>>>>>>> after updating
