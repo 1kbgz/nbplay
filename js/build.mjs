@@ -25,6 +25,7 @@ const WIDGET_NAMES = [
   "transport",
   "settings",
   "keyboard",
+  "midi_keyboard",
 ];
 
 const WIDGET_BUNDLES = WIDGET_NAMES.map((name) => ({

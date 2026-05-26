@@ -6,6 +6,10 @@ const DEFAULTS = {
   session_id: "",
   channel_index: -1,
   keyboard_connected: false,
+  length: 8,
+  measures: 1,
+  time_signature_num: 4,
+  time_signature_den: 4,
   voices_data: [
     Array.from({ length: 8 }, (_, i) => ({
       active: i % 2 === 0,
@@ -16,7 +20,7 @@ const DEFAULTS = {
   num_voices: 1,
   current_step: 0,
   bpm: 120,
-  step_duration: 0.25,
+  step_duration: 0.5,
   loop_enabled: true,
   is_playing: false,
 };
@@ -62,6 +66,35 @@ test.describe("SequencerWidget", () => {
   test("renders correct number of step cells", async ({ page }) => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+  });
+
+  test("explicit 8-step model displays matching bar and step controls", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      length: 8,
+      measures: 1,
+      step_duration: 0.25,
+      voices_data: [
+        Array.from({ length: 8 }, () => ({
+          active: false,
+          note: 60,
+          velocity: 100,
+        })),
+      ],
+    });
+
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    await expect(page.locator(".nbplay-seq-dur-select")).toHaveValue("0.5");
+    await expect(page.locator(".nbplay-seq-length-val")).toHaveText("8 steps");
+    await expect(page.locator(".nbplay-seq-info")).toContainText(
+      "1 measure · 8 steps",
+    );
+    const state = await page.evaluate(() => ({
+      length: window.__testModel._state.length,
+      stepDuration: window.__testModel._state.step_duration,
+    }));
+    expect(state).toEqual({ length: 8, stepDuration: 0.5 });
   });
 
   // 4. Active steps have .active class
@@ -315,13 +348,126 @@ test.describe("SequencerWidget", () => {
   }) => {
     await renderWidget(page);
     const durSelect = page.locator(".nbplay-seq-dur-select");
-    await expect(durSelect).toHaveValue("0.25");
+    await expect(durSelect).toHaveValue("0.5");
 
-    await durSelect.selectOption("0.5");
+    await durSelect.selectOption("0.25");
     const val = await page.evaluate(
       () => window.__testModel._state.step_duration,
     );
-    expect(val).toBe(0.5);
+    expect(val).toBe(0.25);
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(16);
+  });
+
+  test("measure and step controls configure one measure of eighth notes", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      length: 16,
+      measures: 1,
+      step_duration: 0.25,
+      voices_data: [
+        Array.from({ length: 16 }, (_, i) => ({
+          active: i === 0,
+          note: i === 0 ? 72 : 60,
+          velocity: i === 0 ? 88 : 100,
+        })),
+      ],
+    });
+
+    const measuresInput = page.locator(".nbplay-seq-measures-input");
+    await expect(measuresInput).toHaveValue("1");
+
+    await page.locator(".nbplay-seq-dur-select").selectOption("0.5");
+
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    const state = await page.evaluate(() => ({
+      length: window.__testModel._state.length,
+      measures: window.__testModel._state.measures,
+      stepDuration: window.__testModel._state.step_duration,
+      voiceLengths: window.__testModel._state.voices_data.map(
+        (voice) => voice.length,
+      ),
+      firstStep: window.__testModel._state.voices_data[0][0],
+    }));
+
+    expect(state.length).toBe(8);
+    expect(state.measures).toBe(1);
+    expect(state.stepDuration).toBe(0.5);
+    expect(state.voiceLengths).toEqual([8]);
+    expect(state.firstStep.note).toBe(72);
+    expect(state.firstStep.velocity).toBe(88);
+    expect(state.firstStep.active).toBe(true);
+    await expect(page.locator(".nbplay-seq-info")).toContainText("1 measure");
+    await expect(page.locator(".nbplay-seq-info")).toContainText("8 steps");
+  });
+
+  test("measure control expands to four measures of sixteenth notes", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      length: 16,
+      measures: 1,
+      step_duration: 0.25,
+      voices_data: [
+        Array.from({ length: 16 }, (_, i) => ({
+          active: i === 15,
+          note: 60,
+          velocity: 100,
+        })),
+      ],
+    });
+
+    await page.locator(".nbplay-seq-measures-input").fill("4");
+
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(64);
+    const state = await page.evaluate(() => ({
+      length: window.__testModel._state.length,
+      measures: window.__testModel._state.measures,
+      voiceLengths: window.__testModel._state.voices_data.map(
+        (voice) => voice.length,
+      ),
+      preservedStep: window.__testModel._state.voices_data[0][15],
+    }));
+    expect(state.length).toBe(64);
+    expect(state.measures).toBe(4);
+    expect(state.voiceLengths).toEqual([64]);
+    expect(state.preservedStep.active).toBe(true);
+    await expect(page.locator(".nbplay-seq-info")).toContainText("4 measures");
+    await expect(page.locator(".nbplay-seq-info")).toContainText("64 steps");
+  });
+
+  test("time signature model changes resize configured measure grid", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      length: 8,
+      measures: 1,
+      step_duration: 0.5,
+      time_signature_num: 4,
+      time_signature_den: 4,
+      voices_data: [
+        Array.from({ length: 8 }, () => ({
+          active: false,
+          note: 60,
+          velocity: 100,
+        })),
+      ],
+    });
+
+    await page.evaluate(() => {
+      window.__testModel.set("time_signature_num", 3);
+      window.__testModel._trigger("change:time_signature_num");
+    });
+
+    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(6);
+    const state = await page.evaluate(() => ({
+      length: window.__testModel._state.length,
+      voiceLengths: window.__testModel._state.voices_data.map(
+        (voice) => voice.length,
+      ),
+    }));
+    expect(state.length).toBe(6);
+    expect(state.voiceLengths).toEqual([6]);
   });
 
   // 19. Step cells display note names
@@ -354,7 +500,8 @@ test.describe("SequencerWidget", () => {
     await renderWidget(page);
     const info = page.locator(".nbplay-seq-info");
     // 4 active steps out of 8 (even indices), 120 BPM
-    await expect(info).toHaveText("4/8 steps active · 120 BPM");
+    await expect(info).toContainText("4/8 steps active");
+    await expect(info).toContainText("120 BPM");
   });
 
   // 22. Model change:loop_enabled syncs checkbox
@@ -374,13 +521,13 @@ test.describe("SequencerWidget", () => {
   test("model change:step_duration syncs select", async ({ page }) => {
     await renderWidget(page);
     const durSelect = page.locator(".nbplay-seq-dur-select");
-    await expect(durSelect).toHaveValue("0.25");
+    await expect(durSelect).toHaveValue("0.5");
 
     await page.evaluate(() => {
-      window.__testModel.set("step_duration", 0.5);
+      window.__testModel.set("step_duration", 0.25);
       window.__testModel._trigger("change:step_duration");
     });
-    await expect(durSelect).toHaveValue("0.5");
+    await expect(durSelect).toHaveValue("0.25");
   });
 
   // 24. Multi-voice grid renders rows for each voice

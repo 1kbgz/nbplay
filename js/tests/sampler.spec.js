@@ -15,6 +15,7 @@ const DEFAULTS = {
   sustain: 0.7,
   release: 0.3,
   waveform: null,
+  pad_count: 8,
   pad_notes: [48, 52, 55, 59, 60, 64, 67, 71],
 };
 
@@ -103,6 +104,24 @@ test.describe("SamplerWidget", () => {
   test("renders 8 trigger pads", async ({ page }) => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-samp-pad")).toHaveCount(8);
+  });
+
+  test("pad count control resizes trigger pads and preserves notes", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    const padCount = page.locator(".nbplay-samp-pad-count");
+    await expect(padCount).toHaveValue("8");
+
+    await padCount.fill("4");
+
+    await expect(page.locator(".nbplay-samp-pad")).toHaveCount(4);
+    const state = await page.evaluate(() => ({
+      padCount: window.__testModel._state.pad_count,
+      padNotes: window.__testModel._state.pad_notes,
+    }));
+    expect(state.padCount).toBe(4);
+    expect(state.padNotes).toEqual([48, 52, 55, 59]);
   });
 
   // 9. Max voices display
@@ -644,6 +663,7 @@ test.describe("SamplerWidget", () => {
         release: 0.3,
         waveform: null,
         pad_notes: [48, 52, 55, 59, 60, 64, 67, 71],
+        pad_count: 8,
         keyboard_connected: false,
       });
       window.__testModel = model;

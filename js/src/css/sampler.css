@@ -135,6 +135,31 @@
 .nbplay-samp-pads-section {
   margin-top: 16px;
 }
+.nbplay-samp-pads-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nbplay-samp-pad-count {
+  width: 56px;
+  font-family: var(--jp-code-font-family, monospace);
+  font-size: 12px;
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 4px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+.nbplay-samp-pad-count:focus {
+  border-color: var(--jp-brand-color1, #00d4ff);
+  outline: none;
+}
+.nbplay-samp-pad-count-val {
+  min-width: 24px;
+  font-size: 12px;
+  color: var(--jp-brand-color1, #00d4ff);
+}
 .nbplay-samp-pads-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(60px, 1fr));

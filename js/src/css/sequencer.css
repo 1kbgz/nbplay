@@ -118,7 +118,8 @@
   animation: nbplay-rec-pulse 1s ease-in-out infinite;
 }
 .nbplay-seq-bpm-section,
-.nbplay-seq-dur-section {
+.nbplay-seq-dur-section,
+.nbplay-seq-measures-section {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -146,6 +147,22 @@
   padding: 2px 6px;
   font-size: 11px;
   font-family: inherit;
+}
+.nbplay-seq-measures-input {
+  width: 54px;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.nbplay-seq-length-val {
+  min-width: 58px;
+  font-size: 10px;
+  color: var(--jp-ui-font-color3, #64648a);
 }
 .nbplay-seq-loop-label {
   font-size: 11px;
