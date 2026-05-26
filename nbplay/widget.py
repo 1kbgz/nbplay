@@ -29,6 +29,37 @@ _STATIC = pathlib.Path(__file__).parent / "static"
 _PREVIEW_MAX_FRAMES = 2048
 
 
+def _default_step():
+    return {"note": 60, "velocity": 100, "duration_ticks": 1, "active": False}
+
+
+def _default_steps(length):
+    return [_default_step() for _ in range(length)]
+
+
+_DEFAULT_PAD_NOTES = [48, 52, 55, 59, 60, 64, 67, 71]
+
+
+def _measure_beats(time_signature_num, time_signature_den):
+    return max(0.0, time_signature_num * (4.0 / max(1, time_signature_den)))
+
+
+def _step_duration_for_length(length, measures=1, time_signature_num=4, time_signature_den=4):
+    length = max(1, int(length))
+    measures = max(1, int(measures))
+    return max(0.001, (measures * _measure_beats(time_signature_num, time_signature_den)) / length)
+
+
+def _resize_pad_notes(notes, pad_count):
+    pad_count = max(1, int(pad_count))
+    resized = [max(0, min(127, int(note))) for note in list(notes)[:pad_count]]
+    next_note = resized[-1] + 1 if resized else _DEFAULT_PAD_NOTES[0]
+    while len(resized) < pad_count:
+        resized.append(max(0, min(127, next_note)))
+        next_note += 1
+    return resized
+
+
 class SynthWidget(anywidget.AnyWidget):
     """Interactive synthesizer widget for Jupyter environments.
 
@@ -212,7 +243,18 @@ class NoteComposer(traitlets.HasTraits):
         super().__init__(**kwargs)
         self._length = length
         if not self.steps:
-            self.steps = [{"note": 60, "velocity": 100, "duration_ticks": 1, "active": False} for _ in range(length)]
+            self.steps = _default_steps(length)
+
+    def resize(self, length):
+        """Resize the step list, preserving existing steps where possible."""
+        length = max(1, int(length))
+        current = [dict(step) for step in self.steps]
+        if len(current) < length:
+            current.extend(_default_steps(length - len(current)))
+        else:
+            current = current[:length]
+        self._length = length
+        self.steps = current
 
     def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True):
         """Set a step at the given index."""
@@ -271,6 +313,9 @@ class SequencerWidget(anywidget.AnyWidget):
 
     # Timing / transport (the "SequencerBase" concerns)
     length = traitlets.Int(16).tag(sync=True)
+    measures = traitlets.Int(1).tag(sync=True)
+    time_signature_num = traitlets.Int(4).tag(sync=True)
+    time_signature_den = traitlets.Int(4).tag(sync=True)
     bpm = traitlets.Float(120.0).tag(sync=True)
     step_duration = traitlets.Float(0.25).tag(sync=True)
     is_playing = traitlets.Bool(False).tag(sync=True)
@@ -294,13 +339,28 @@ class SequencerWidget(anywidget.AnyWidget):
 
     def __init__(self, **kwargs):
         num_voices = kwargs.pop("num_voices", 1)
+        explicit_length = "length" in kwargs
+        explicit_step_duration = "step_duration" in kwargs
         length = kwargs.get("length", 16)
+        if explicit_length and not explicit_step_duration:
+            kwargs["step_duration"] = _step_duration_for_length(
+                length,
+                kwargs.get("measures", 1),
+                kwargs.get("time_signature_num", 4),
+                kwargs.get("time_signature_den", 4),
+            )
         super().__init__(num_voices=num_voices, **kwargs)
         self._composers = [NoteComposer(length=length) for _ in range(num_voices)]
         self._syncing = False
+        self._configuring_grid = False
         for i, c in enumerate(self._composers):
             c.observe(self._on_composer_change, names=["steps"])
         self.observe(self._on_voices_data_change, names=["voices_data"])
+        self.observe(self._on_length_change, names=["length"])
+        self.observe(
+            self._on_grid_config_change,
+            names=["measures", "step_duration", "time_signature_num", "time_signature_den"],
+        )
         self._sync_voices_data()
 
     def _on_composer_change(self, change):
@@ -320,12 +380,60 @@ class SequencerWidget(anywidget.AnyWidget):
                 for i, c in enumerate(self._composers):
                     if i < len(self.voices_data):
                         c.steps = list(self.voices_data[i])
+                if self.voices_data and len(self.voices_data[0]) != self.length:
+                    self.length = len(self.voices_data[0])
             finally:
                 self._syncing = False
 
     def _sync_voices_data(self):
         """Push all composer step-lists into the synced voices_data trait."""
         self.voices_data = [list(c.steps) for c in self._composers]
+
+    def _measure_beats(self):
+        return _measure_beats(self.time_signature_num, self.time_signature_den)
+
+    def _configured_length(self):
+        step_duration = max(0.001, float(self.step_duration))
+        measures = max(1, int(self.measures))
+        return max(1, int(round((measures * self._measure_beats()) / step_duration)))
+
+    def _resize_composers(self, length):
+        for composer in self._composers:
+            composer.resize(length)
+        self._sync_voices_data()
+
+    def _on_length_change(self, change):
+        length = max(1, int(change["new"]))
+        if length != change["new"]:
+            self.length = length
+            return
+        self._resize_composers(length)
+
+    def _on_grid_config_change(self, change):
+        if self._configuring_grid:
+            return
+        self.configure_grid()
+
+    def configure_grid(self, measures=None, step_duration=None):
+        """Configure pattern length from measure count and musical step duration.
+
+        ``step_duration`` is measured in quarter-note beats. In 4/4, ``0.5``
+        produces eighth-note steps and ``0.25`` produces sixteenth-note steps.
+        """
+        self._configuring_grid = True
+        try:
+            if measures is not None:
+                self.measures = max(1, int(measures))
+            if step_duration is not None:
+                self.step_duration = max(0.001, float(step_duration))
+        finally:
+            self._configuring_grid = False
+
+        length = self._configured_length()
+        if self.length != length:
+            self.length = length
+        else:
+            self._resize_composers(length)
 
     #  Voice accessors
 
@@ -414,8 +522,9 @@ class SamplerWidget(anywidget.AnyWidget):
     # Trigger pad notes (MIDI note numbers)
     pad_notes = traitlets.List(
         trait=traitlets.Int(),
-        default_value=[48, 52, 55, 59, 60, 64, 67, 71],
+        default_value=_DEFAULT_PAD_NOTES,
     ).tag(sync=True)
+    pad_count = traitlets.Int(8).tag(sync=True)
 
     # Polyphony
     max_voices = traitlets.Int(8).tag(sync=True)
@@ -426,6 +535,52 @@ class SamplerWidget(anywidget.AnyWidget):
 
     # Keyboard integration — set by KeyboardWidget.connect_sampler()
     keyboard_connected = traitlets.Bool(False).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        explicit_pad_notes = "pad_notes" in kwargs
+        explicit_pad_count = "pad_count" in kwargs
+        if explicit_pad_notes and not explicit_pad_count:
+            kwargs["pad_count"] = max(1, len(kwargs["pad_notes"]))
+        super().__init__(**kwargs)
+        self._syncing_pads = False
+        self.pad_notes = _resize_pad_notes(self.pad_notes, self.pad_count)
+        self.observe(self._on_pad_count_change, names=["pad_count"])
+        self.observe(self._on_pad_notes_change, names=["pad_notes"])
+
+    def _on_pad_count_change(self, change):
+        if self._syncing_pads:
+            return
+        pad_count = max(1, int(change["new"]))
+        if pad_count != change["new"]:
+            self.pad_count = pad_count
+            return
+        self._syncing_pads = True
+        try:
+            self.pad_notes = _resize_pad_notes(self.pad_notes, pad_count)
+        finally:
+            self._syncing_pads = False
+
+    def _on_pad_notes_change(self, change):
+        if self._syncing_pads:
+            return
+        notes = _resize_pad_notes(change["new"], max(1, len(change["new"])))
+        self._syncing_pads = True
+        try:
+            if notes != self.pad_notes:
+                self.pad_notes = notes
+            self.pad_count = len(notes)
+        finally:
+            self._syncing_pads = False
+
+    def configure_pads(self, pad_count=None, pad_notes=None):
+        """Configure the number of sampler trigger pads, preserving notes."""
+        if pad_notes is not None:
+            notes = _resize_pad_notes(pad_notes, max(1, len(pad_notes)))
+            self.pad_notes = notes
+            if pad_count is None:
+                self.pad_count = len(notes)
+        if pad_count is not None:
+            self.pad_count = max(1, int(pad_count))
 
     def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
         """Load sample PCM data (list of floats) into the widget."""
@@ -572,6 +727,20 @@ class KeyboardWidget(anywidget.AnyWidget):
             self.sampler_routing = routing
 
 
+class MidiKeyboardWidget(KeyboardWidget):
+    """Browser Web MIDI keyboard input widget.
+
+    Uses the same sequencer and sampler connection API as ``KeyboardWidget``,
+    but receives note events from a selected browser MIDI input device.
+    """
+
+    _esm = _STATIC / "midi_keyboard.js"
+    _css = _STATIC / "midi_keyboard.css"
+
+    midi_port = traitlets.Unicode("").tag(sync=True)
+    available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
+
+
 class Track:
     """Binds a sequencer to a sound source and a mixer channel.
 
@@ -596,6 +765,8 @@ class Track:
         every other sequencer.
         """
         self._links.append(traitlets.link((transport, "bpm"), (self.sequencer, "bpm")))
+        self._links.append(traitlets.link((transport, "time_signature_num"), (self.sequencer, "time_signature_num")))
+        self._links.append(traitlets.link((transport, "time_signature_den"), (self.sequencer, "time_signature_den")))
         self._links.append(traitlets.dlink((transport, "is_playing"), (self.sequencer, "is_playing")))
 
     def _unlink(self):

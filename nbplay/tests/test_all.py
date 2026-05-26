@@ -14,6 +14,7 @@ from nbplay import (
     KeyboardWidget,
     MidiChannel,
     MidiEvent,
+    MidiKeyboardWidget,
     MidiMessage,
     Mixer,
     MixerChannel,
@@ -1341,6 +1342,9 @@ class TestSequencerWidget:
     def test_defaults(self):
         w = SequencerWidget()
         assert w.length == 16
+        assert w.measures == 1
+        assert w.time_signature_num == 4
+        assert w.time_signature_den == 4
         assert w.bpm == 120.0
         assert w.step_duration == 0.25
         assert w.is_playing is False
@@ -1394,6 +1398,52 @@ class TestSequencerWidget:
         w = SequencerWidget(length=8)
         assert w.length == 8
         assert len(w.steps) == 8
+
+    def test_custom_length_derives_matching_step_duration(self):
+        w = SequencerWidget(length=8)
+        assert w.measures == 1
+        assert w.step_duration == pytest.approx(0.5)
+        assert w.length == 8
+        assert len(w.steps) == 8
+
+    def test_configure_grid_one_measure_of_eighth_notes(self):
+        w = SequencerWidget()
+        w.set_step(0, note=72, velocity=88, active=True)
+
+        w.configure_grid(measures=1, step_duration=0.5)
+
+        assert w.measures == 1
+        assert w.step_duration == pytest.approx(0.5)
+        assert w.length == 8
+        assert len(w.steps) == 8
+        assert w.steps[0]["note"] == 72
+        assert w.steps[0]["velocity"] == 88
+        assert w.steps[0]["active"] is True
+
+    def test_configure_grid_four_measures_of_sixteenth_notes_for_all_voices(self):
+        w = SequencerWidget(num_voices=2, length=16)
+        w.set_step(15, note=67, velocity=110, active=True, voice=1)
+
+        w.configure_grid(measures=4, step_duration=0.25)
+
+        assert w.measures == 4
+        assert w.step_duration == pytest.approx(0.25)
+        assert w.length == 64
+        assert len(w.voices_data) == 2
+        assert [len(voice) for voice in w.voices_data] == [64, 64]
+        assert w.voices[1].steps[15]["note"] == 67
+        assert w.voices[1].steps[15]["active"] is True
+
+    def test_length_assignment_resizes_all_voices(self):
+        w = SequencerWidget(num_voices=2, length=16)
+        w.set_step(0, note=64, active=True, voice=0)
+        w.set_step(1, note=72, active=True, voice=1)
+
+        w.length = 8
+
+        assert [len(voice.steps) for voice in w.voices] == [8, 8]
+        assert w.voices[0].steps[0]["note"] == 64
+        assert w.voices[1].steps[1]["note"] == 72
 
     def test_set_step(self):
         w = SequencerWidget()
@@ -1547,6 +1597,22 @@ class TestSamplerWidget:
         w = SamplerWidget()
         w.max_voices = 16
         assert w.max_voices == 16
+
+    def test_pad_count_resizes_pad_notes(self):
+        w = SamplerWidget(pad_count=4)
+        assert w.pad_count == 4
+        assert w.pad_notes == [48, 52, 55, 59]
+
+        w.configure_pads(10)
+
+        assert w.pad_count == 10
+        assert len(w.pad_notes) == 10
+        assert w.pad_notes[:4] == [48, 52, 55, 59]
+
+    def test_pad_notes_assignment_updates_pad_count(self):
+        w = SamplerWidget()
+        w.pad_notes = [36, 38, 42]
+        assert w.pad_count == 3
 
     def test_custom_init(self):
         w = SamplerWidget(
@@ -1722,6 +1788,31 @@ class TestKeyboardWidget:
         assert kb.channel_index == 3
 
 
+class TestMidiKeyboardWidget:
+    def test_defaults(self):
+        kb = MidiKeyboardWidget()
+        assert kb.midi_port == ""
+        assert kb.available_midi_ports == []
+        assert kb.active_notes == []
+        assert kb.last_note_event == {}
+        assert kb.session_id == ""
+        assert kb.channel_index == -1
+        assert kb.sampler_routing == []
+
+    def test_connect_sequencer(self):
+        kb = MidiKeyboardWidget()
+        seq = SequencerWidget()
+        kb.connect_sequencer(seq)
+        assert seq.keyboard_connected is True
+
+    def test_connect_sampler(self):
+        kb = MidiKeyboardWidget()
+        sampler = SamplerWidget(channel_index=1)
+        kb.connect_sampler(sampler, zone="upper")
+        assert sampler.keyboard_connected is True
+        assert kb.sampler_routing == [{"channel_index": 1, "zone": "upper"}]
+
+
 #  Track
 
 
@@ -1736,16 +1827,25 @@ class TestTrack:
         assert track.mixer_channel == 0
 
     def test_link_transport(self):
-        """BPM and is_playing sync from transport to sequencer."""
-        transport = TransportWidget(bpm=140.0)
+        """Transport config syncs to sequencer."""
+        transport = TransportWidget(bpm=140.0, time_signature_num=3, time_signature_den=8)
         seq = SequencerWidget()
         synth = SynthWidget()
         track = Track("Test", seq, synth, 0)
         track._link_transport(transport)
 
+        assert seq.time_signature_num == 3
+        assert seq.time_signature_den == 8
+
         # BPM propagates
         transport.bpm = 100.0
         assert seq.bpm == pytest.approx(100.0)
+
+        # Time signature propagates
+        transport.time_signature_num = 5
+        transport.time_signature_den = 4
+        assert seq.time_signature_num == 5
+        assert seq.time_signature_den == 4
 
         # Play state propagates
         transport.is_playing = True
@@ -1754,6 +1854,8 @@ class TestTrack:
         # Bi-directional: sequencer → transport
         seq.bpm = 80.0
         assert transport.bpm == pytest.approx(80.0)
+        seq.time_signature_num = 7
+        assert transport.time_signature_num == 7
 
     def test_unlink(self):
         transport = TransportWidget(bpm=120.0)
@@ -1814,6 +1916,19 @@ class TestSession:
         s = Session(time_signature=(3, 8))
         assert s.transport.time_signature_num == 3
         assert s.transport.time_signature_den == 8
+
+    def test_add_track_syncs_transport_time_signature(self):
+        s = Session(time_signature=(3, 8))
+        seq = SequencerWidget()
+        s.add_track("Lead", seq, SynthWidget())
+
+        assert seq.time_signature_num == 3
+        assert seq.time_signature_den == 8
+
+        s.transport.time_signature_num = 6
+        s.transport.time_signature_den = 8
+        assert seq.time_signature_num == 6
+        assert seq.time_signature_den == 8
 
     def test_add_track(self):
         s = Session()

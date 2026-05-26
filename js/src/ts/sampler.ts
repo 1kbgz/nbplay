@@ -73,6 +73,19 @@ function parseNote(raw: string): number | null {
   return midi >= 0 && midi <= 127 ? midi : null;
 }
 
+function resizePadNotes(notes: number[], padCount: number): number[] {
+  const count = Math.max(1, Math.min(32, Math.round(padCount || 1)));
+  const resized = notes
+    .slice(0, count)
+    .map((note) => Math.max(0, Math.min(127, Math.round(note))));
+  let nextNote = resized.length > 0 ? resized[resized.length - 1] + 1 : 48;
+  while (resized.length < count) {
+    resized.push(Math.max(0, Math.min(127, nextNote)));
+    nextNote += 1;
+  }
+  return resized;
+}
+
 // Waveform renderer
 
 function drawWaveform(
@@ -432,7 +445,11 @@ function render({
       <span class="nbplay-samp-voices-val"></span>
     </div>
     <div class="nbplay-samp-pads-section">
-      <label class="nbplay-samp-label">Trigger Pads</label>
+      <div class="nbplay-samp-pads-controls">
+        <label class="nbplay-samp-label">Trigger Pads</label>
+        <input type="number" class="nbplay-samp-pad-count" min="1" max="32" step="1" />
+        <span class="nbplay-samp-pad-count-val"></span>
+      </div>
       <div class="nbplay-samp-pads-grid"></div>
     </div>
   `;
@@ -465,6 +482,12 @@ function render({
   const padsGrid = root.querySelector(
     ".nbplay-samp-pads-grid",
   ) as HTMLDivElement;
+  const padCountInput = root.querySelector(
+    ".nbplay-samp-pad-count",
+  ) as HTMLInputElement;
+  const padCountVal = root.querySelector(
+    ".nbplay-samp-pad-count-val",
+  ) as HTMLSpanElement;
 
   const attackSlider = root.querySelector(
     ".nbplay-samp-attack",
@@ -608,7 +631,19 @@ function render({
   function createPads(): void {
     const rootNote = model.get("root_note") as number;
     padsGrid.innerHTML = "";
-    const padNotes: number[] = (model.get("pad_notes") as number[]).slice();
+    const padCount = Math.max(
+      1,
+      Math.min(32, Number(model.get("pad_count") || 8)),
+    );
+    const padNotes: number[] = resizePadNotes(
+      ((model.get("pad_notes") as number[]) || []).slice(),
+      padCount,
+    );
+    if (
+      padNotes.length !== ((model.get("pad_notes") as number[]) || []).length
+    ) {
+      model.set("pad_notes", padNotes.slice());
+    }
     padNotes.forEach((_, idx) => {
       const pad = document.createElement("button");
       pad.className = "nbplay-samp-pad";
@@ -733,6 +768,29 @@ function render({
     voicesVal.textContent = String(model.get("max_voices"));
   }
 
+  function syncPadCount(): void {
+    const count = Math.max(
+      1,
+      Math.min(32, Number(model.get("pad_count") || 8)),
+    );
+    padCountInput.value = String(count);
+    padCountVal.textContent = `${count}`;
+  }
+
+  function applyPadCount(rawCount: number): void {
+    if (Number.isNaN(rawCount)) return;
+    const count = Math.max(1, Math.min(32, Math.round(rawCount)));
+    const notes = resizePadNotes(
+      ((model.get("pad_notes") as number[]) || []).slice(),
+      count,
+    );
+    model.set("pad_count", count);
+    model.set("pad_notes", notes);
+    model.save_changes();
+    syncPadCount();
+    createPads();
+  }
+
   function redrawWaveform(): void {
     const raw = model.get("waveform");
     const samples = toFloat32(raw);
@@ -793,6 +851,10 @@ function render({
     model.save_changes();
   });
 
+  padCountInput.addEventListener("input", () => {
+    applyPadCount(parseInt(padCountInput.value, 10));
+  });
+
   // Model observers
 
   model.on("change:waveform", redrawWaveform);
@@ -802,7 +864,18 @@ function render({
     syncInfo();
     createPads();
   });
-  model.on("change:pad_notes", createPads);
+  model.on("change:pad_notes", () => {
+    const notes = ((model.get("pad_notes") as number[]) || []).slice();
+    if (notes.length > 0 && notes.length !== model.get("pad_count")) {
+      model.set("pad_count", notes.length);
+    }
+    syncPadCount();
+    createPads();
+  });
+  model.on("change:pad_count", () => {
+    syncPadCount();
+    createPads();
+  });
   model.on("change:sample_length", syncInfo);
   model.on("change:attack", () => {
     syncEnvelopeControls();
@@ -876,6 +949,7 @@ function render({
   syncInfo();
   syncEnvelopeControls();
   syncVoices();
+  syncPadCount();
   redrawWaveform();
   redrawEnvelope();
   createPads();

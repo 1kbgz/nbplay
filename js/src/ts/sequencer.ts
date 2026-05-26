@@ -7,6 +7,7 @@ interface StepData {
   active: boolean;
   note: number;
   velocity: number;
+  duration_ticks?: number;
 }
 
 interface NbplayBus {
@@ -31,6 +32,7 @@ const NOTE_NAMES: string[] = [
   "A#",
   "B",
 ];
+const STEP_DURATION_OPTIONS = [1, 0.5, 0.25, 0.125];
 
 function noteName(midi: number): string {
   const octave = Math.floor(midi / 12) - 1;
@@ -39,6 +41,65 @@ function noteName(midi: number): string {
 
 function midiToHz(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12);
+}
+
+function defaultStep(): StepData {
+  return { active: false, note: 60, velocity: 100, duration_ticks: 1 };
+}
+
+function measureBeatCount(
+  timeSignatureNum: number,
+  timeSignatureDen: number,
+): number {
+  return Math.max(0, timeSignatureNum * (4 / Math.max(1, timeSignatureDen)));
+}
+
+function configuredStepCount(
+  measures: number,
+  stepDuration: number,
+  timeSignatureNum: number,
+  timeSignatureDen: number,
+): number {
+  const safeMeasures = Math.max(1, Math.round(measures || 1));
+  const safeStepDuration = Math.max(0.001, stepDuration || 0.25);
+  return Math.max(
+    1,
+    Math.round(
+      (safeMeasures * measureBeatCount(timeSignatureNum, timeSignatureDen)) /
+        safeStepDuration,
+    ),
+  );
+}
+
+function resizeSteps(steps: StepData[], length: number): StepData[] {
+  const next = steps.slice(0, length).map((step) => ({ ...step }));
+  while (next.length < length) next.push(defaultStep());
+  return next;
+}
+
+function resizeVoicesData(
+  voicesData: StepData[][],
+  length: number,
+  voiceCount: number,
+): StepData[][] {
+  const count = Math.max(1, voicesData.length || voiceCount || 1);
+  return Array.from({ length: count }, (_, index) =>
+    resizeSteps(voicesData[index] || [], length),
+  );
+}
+
+function voicesFromModel(model: AnyModel): StepData[][] {
+  return (model.get("voices_data") as StepData[][]) || [];
+}
+
+function stepTimeInSeconds(model: AnyModel): number {
+  const bpm = (model.get("bpm") as number) || 120;
+  const stepDuration = (model.get("step_duration") as number) || 0.25;
+  return stepDuration / (bpm / 60);
+}
+
+function nextStepIndex(currentStep: number, stepCount: number): number {
+  return (currentStep + 1) % stepCount;
 }
 
 interface AudioScheduler {
@@ -121,47 +182,49 @@ function createAudioScheduler(): AudioScheduler {
       const currentTime = audioCtx.currentTime;
       while (nextScheduleTime < currentTime + scheduleAheadTime) {
         this.scheduleStep(model, nextScheduleTime);
-        const bpm = (model.get("bpm") as number) || 120;
-        const stepDuration = (model.get("step_duration") as number) || 0.25;
-        const stepTimeInSeconds = stepDuration / (bpm / 60);
-        nextScheduleTime += stepTimeInSeconds;
+        nextScheduleTime += stepTimeInSeconds(model);
       }
     },
 
     scheduleStep(model: AnyModel, audioTime: number): void {
       if (!audioCtx) return;
-      const voicesData = (model.get("voices_data") as StepData[][]) || [];
+      const voicesData = voicesFromModel(model);
       if (voicesData.length === 0) return;
       const steps = voicesData[0] || [];
       if (steps.length === 0) return;
 
-      const bpm = (model.get("bpm") as number) || 120;
-      const stepDuration = (model.get("step_duration") as number) || 0.25;
-      const stepTimeInSeconds = stepDuration / (bpm / 60);
+      const stepSeconds = stepTimeInSeconds(model);
 
       // Advance the internal scheduler step counter
-      const nextStepIndex = (currentSchedulerStep + 1) % steps.length;
+      const scheduledStepIndex = nextStepIndex(
+        currentSchedulerStep,
+        steps.length,
+      );
 
       const loopEnabled = model.get("loop_enabled") as boolean;
-      if (nextStepIndex === 0 && currentSchedulerStep >= 0 && !loopEnabled) {
+      if (
+        scheduledStepIndex === 0 &&
+        currentSchedulerStep >= 0 &&
+        !loopEnabled
+      ) {
         model.set("is_playing", false);
         model.save_changes();
         return;
       }
 
-      currentSchedulerStep = nextStepIndex;
+      currentSchedulerStep = scheduledStepIndex;
       // Update the model for visual highlighting — do NOT call
       // save_changes() here to avoid flooding the kernel with
       // messages on every step tick.
-      model.set("current_step", nextStepIndex);
+      model.set("current_step", scheduledStepIndex);
 
       // Play a note for each voice that has an active step
       for (const voice of voicesData) {
-        const step = voice[nextStepIndex];
+        const step = voice[scheduledStepIndex];
         if (step && step.active) {
           const freq = midiToHz(step.note);
           const velocity = (step.velocity ?? 100) / 127;
-          this.playOscillator(freq, velocity, audioTime, stepTimeInSeconds);
+          this.playOscillator(freq, velocity, audioTime, stepSeconds);
         }
       }
     },
@@ -227,11 +290,16 @@ function render({
       <div class="nbplay-seq-dur-section">
         <label class="nbplay-seq-label">Step</label>
         <select class="nbplay-seq-dur-select">
-          <option value="1">1 beat</option>
-          <option value="0.5">1/2 beat</option>
-          <option value="0.25">1/4 beat</option>
-          <option value="0.125">1/8 beat</option>
+          <option value="1">1/4</option>
+          <option value="0.5">1/8</option>
+          <option value="0.25">1/16</option>
+          <option value="0.125">1/32</option>
         </select>
+      </div>
+      <div class="nbplay-seq-measures-section">
+        <label class="nbplay-seq-label">Bars</label>
+        <input type="number" class="nbplay-seq-measures-input" min="1" max="64" step="1" />
+        <span class="nbplay-seq-length-val"></span>
       </div>
       <label class="nbplay-seq-loop-label">
         <input type="checkbox" class="nbplay-seq-loop-chk" /> Loop
@@ -256,6 +324,12 @@ function render({
   const durSelect = root.querySelector(
     ".nbplay-seq-dur-select",
   )! as HTMLSelectElement;
+  const measuresInput = root.querySelector(
+    ".nbplay-seq-measures-input",
+  )! as HTMLInputElement;
+  const lengthVal = root.querySelector(
+    ".nbplay-seq-length-val",
+  )! as HTMLSpanElement;
   const loopChk = root.querySelector(
     ".nbplay-seq-loop-chk",
   )! as HTMLInputElement;
@@ -266,6 +340,7 @@ function render({
 
   // Recording state
   const armedVoices: Set<number> = new Set();
+  let applyingGridConfiguration = false;
 
   function updateRecVisibility(): void {
     const kbConnected = model.get("keyboard_connected") as boolean;
@@ -411,7 +486,93 @@ function render({
   }
 
   function getVoices(): StepData[][] {
-    return (model.get("voices_data") as StepData[][]) || [];
+    return voicesFromModel(model);
+  }
+
+  function actualGridLength(): number {
+    const voices = getVoices();
+    return voices[0]?.length || Number(model.get("length") || 0) || 1;
+  }
+
+  function gridLengthFromControls(): number {
+    return configuredStepCount(
+      Number(model.get("measures") || 1),
+      Number(model.get("step_duration") || 0.25),
+      Number(model.get("time_signature_num") || 4),
+      Number(model.get("time_signature_den") || 4),
+    );
+  }
+
+  function inferStepDurationForLength(length: number): number {
+    const measures = Math.max(1, Number(model.get("measures") || 1));
+    const beats =
+      measures *
+      measureBeatCount(
+        Number(model.get("time_signature_num") || 4),
+        Number(model.get("time_signature_den") || 4),
+      );
+    const inferred = Math.max(0.001, beats / Math.max(1, length));
+    const matched = STEP_DURATION_OPTIONS.find(
+      (option) => Math.abs(option - inferred) < 0.0001,
+    );
+    return matched ?? inferred;
+  }
+
+  function reconcileGridConfigurationWithActualLength(): void {
+    if (applyingGridConfiguration) return;
+    const actualLength = actualGridLength();
+    if (actualLength === gridLengthFromControls()) return;
+    model.set("length", actualLength);
+    model.set("step_duration", inferStepDurationForLength(actualLength));
+  }
+
+  function formatMeasureCount(): string {
+    const measures = Math.max(1, Number(model.get("measures") || 1));
+    return measures === 1 ? "1 measure" : `${measures} measures`;
+  }
+
+  function formatGridLength(): string {
+    return `${formatMeasureCount()} · ${actualGridLength()} steps`;
+  }
+
+  function applyGridConfiguration(updates: {
+    measures?: number;
+    stepDuration?: number;
+  }): void {
+    if (applyingGridConfiguration) return;
+    applyingGridConfiguration = true;
+    try {
+      const nextMeasures = Math.max(
+        1,
+        Math.min(
+          64,
+          Math.round(updates.measures ?? Number(model.get("measures") || 1)),
+        ),
+      );
+      const nextStepDuration = Math.max(
+        0.001,
+        updates.stepDuration ?? Number(model.get("step_duration") || 0.25),
+      );
+      const nextLength = configuredStepCount(
+        nextMeasures,
+        nextStepDuration,
+        Number(model.get("time_signature_num") || 4),
+        Number(model.get("time_signature_den") || 4),
+      );
+      const voicesData = resizeVoicesData(
+        getVoices(),
+        nextLength,
+        Number(model.get("num_voices") || 1),
+      );
+      model.set("measures", nextMeasures);
+      model.set("step_duration", nextStepDuration);
+      model.set("length", nextLength);
+      model.set("voices_data", voicesData);
+      model.save_changes();
+    } finally {
+      applyingGridConfiguration = false;
+    }
+    syncControls();
   }
 
   function buildGrid(): void {
@@ -610,7 +771,7 @@ function render({
     }
     const voiceCount = voices.length;
     const voiceInfo = voiceCount > 1 ? ` · ${voiceCount} voices` : "";
-    info.textContent = `${totalActive}/${numSteps * voiceCount} steps active${voiceInfo} · ${model.get("bpm")} BPM`;
+    info.textContent = `${totalActive}/${numSteps * voiceCount} steps active${voiceInfo} · ${model.get("bpm")} BPM · ${formatGridLength()}`;
   }
 
   playBtn.addEventListener("click", () => {
@@ -648,8 +809,12 @@ function render({
   });
 
   durSelect.addEventListener("change", () => {
-    model.set("step_duration", parseFloat(durSelect.value));
-    model.save_changes();
+    applyGridConfiguration({ stepDuration: parseFloat(durSelect.value) });
+  });
+
+  measuresInput.addEventListener("input", () => {
+    const parsed = parseInt(measuresInput.value, 10);
+    if (!Number.isNaN(parsed)) applyGridConfiguration({ measures: parsed });
   });
 
   loopChk.addEventListener("change", () => {
@@ -699,17 +864,28 @@ function render({
     bpmSlider.value = String(model.get("bpm"));
     bpmVal.textContent = model.get("bpm") + " BPM";
     durSelect.value = String(model.get("step_duration"));
+    measuresInput.value = String(model.get("measures") || 1);
+    lengthVal.textContent = actualGridLength() + " steps";
     loopChk.checked = model.get("loop_enabled") as boolean;
+  }
+
+  function onGridConfigModelChange(): void {
+    syncControls();
+    if (!applyingGridConfiguration) applyGridConfiguration({});
   }
 
   model.on("change:voices_data", onModelChange);
   model.on("change:current_step", onModelChange);
   model.on("change:is_playing", onModelChange);
   model.on("change:bpm", syncControls);
-  model.on("change:step_duration", syncControls);
+  model.on("change:measures", onGridConfigModelChange);
+  model.on("change:step_duration", onGridConfigModelChange);
+  model.on("change:time_signature_num", onGridConfigModelChange);
+  model.on("change:time_signature_den", onGridConfigModelChange);
   model.on("change:loop_enabled", syncControls);
   model.on("change:keyboard_connected", updateRecVisibility);
 
+  reconcileGridConfigurationWithActualLength();
   syncControls();
   updateRecVisibility();
   buildGrid();
