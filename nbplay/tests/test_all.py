@@ -2093,6 +2093,17 @@ class TestDemoNotebook:
                 assert "language" in cell["metadata"]
                 assert "id" in cell["metadata"]
 
+    def test_prefixed_example_notebooks_have_code_cell_output_fields(self):
+        examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"
+        for notebook_path in sorted(examples_dir.glob("[0-9][0-9]_*.ipynb")):
+            notebook = json.loads(notebook_path.read_text())
+            for index, cell in enumerate(notebook["cells"], start=1):
+                if cell["cell_type"] != "code":
+                    continue
+                assert "execution_count" in cell, f"{notebook_path.name} cell {index} missing execution_count"
+                assert "outputs" in cell, f"{notebook_path.name} cell {index} missing outputs"
+                assert isinstance(cell["outputs"], list), f"{notebook_path.name} cell {index} outputs must be a list"
+
     @pytest.mark.parametrize(
         "notebook_path",
         sorted((pathlib.Path(__file__).resolve().parents[2] / "examples").glob("[0-9][0-9]_*.ipynb")),
