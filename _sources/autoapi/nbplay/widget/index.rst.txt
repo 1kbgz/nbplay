@@ -24,6 +24,7 @@ Attributes
 
    nbplay.widget._STATIC
    nbplay.widget._PREVIEW_MAX_FRAMES
+   nbplay.widget._DEFAULT_PAD_NOTES
 
 
 Classes
@@ -39,8 +40,21 @@ Classes
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
    nbplay.widget.KeyboardWidget
+   nbplay.widget.MidiKeyboardWidget
    nbplay.widget.Track
    nbplay.widget.Session
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.widget._default_step
+   nbplay.widget._default_steps
+   nbplay.widget._measure_beats
+   nbplay.widget._step_duration_for_length
+   nbplay.widget._resize_pad_notes
 
 
 Module Contents
@@ -51,6 +65,20 @@ Module Contents
 .. py:data:: _PREVIEW_MAX_FRAMES
    :value: 2048
 
+
+.. py:function:: _default_step()
+
+.. py:function:: _default_steps(length)
+
+.. py:data:: _DEFAULT_PAD_NOTES
+   :value: [48, 52, 55, 59, 60, 64, 67, 71]
+
+
+.. py:function:: _measure_beats(time_signature_num, time_signature_den)
+
+.. py:function:: _step_duration_for_length(length, measures=1, time_signature_num=4, time_signature_den=4)
+
+.. py:function:: _resize_pad_notes(notes, pad_count)
 
 .. py:class:: SynthWidget(**kwargs)
 
@@ -232,6 +260,12 @@ Module Contents
 
 
 
+   .. py:method:: resize(length)
+
+      Resize the step list, preserving existing steps where possible.
+
+
+
    .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True)
 
       Set a step at the given index.
@@ -286,6 +320,15 @@ Module Contents
    .. py:attribute:: length
 
 
+   .. py:attribute:: measures
+
+
+   .. py:attribute:: time_signature_num
+
+
+   .. py:attribute:: time_signature_den
+
+
    .. py:attribute:: bpm
 
 
@@ -324,6 +367,11 @@ Module Contents
 
 
 
+   .. py:attribute:: _configuring_grid
+      :value: False
+
+
+
    .. py:method:: _on_composer_change(change)
 
       Keep voices_data in sync when any composer's steps change.
@@ -339,6 +387,30 @@ Module Contents
    .. py:method:: _sync_voices_data()
 
       Push all composer step-lists into the synced voices_data trait.
+
+
+
+   .. py:method:: _measure_beats()
+
+
+   .. py:method:: _configured_length()
+
+
+   .. py:method:: _resize_composers(length)
+
+
+   .. py:method:: _on_length_change(change)
+
+
+   .. py:method:: _on_grid_config_change(change)
+
+
+   .. py:method:: configure_grid(measures=None, step_duration=None)
+
+      Configure pattern length from measure count and musical step duration.
+
+      ``step_duration`` is measured in quarter-note beats. In 4/4, ``0.5``
+      produces eighth-note steps and ``0.25`` produces sixteenth-note steps.
 
 
 
@@ -387,7 +459,7 @@ Module Contents
 
 
 
-.. py:class:: SamplerWidget(*args: object, **kwargs: object)
+.. py:class:: SamplerWidget(**kwargs)
 
    Bases: :py:obj:`anywidget.AnyWidget`
 
@@ -437,6 +509,9 @@ Module Contents
    .. py:attribute:: pad_notes
 
 
+   .. py:attribute:: pad_count
+
+
    .. py:attribute:: max_voices
 
 
@@ -447,6 +522,23 @@ Module Contents
 
 
    .. py:attribute:: keyboard_connected
+
+
+   .. py:attribute:: _syncing_pads
+      :value: False
+
+
+
+   .. py:method:: _on_pad_count_change(change)
+
+
+   .. py:method:: _on_pad_notes_change(change)
+
+
+   .. py:method:: configure_pads(pad_count=None, pad_notes=None)
+
+      Configure the number of sampler trigger pads, preserving notes.
+
 
 
    .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
@@ -605,6 +697,31 @@ Module Contents
 
       Disconnect a sampler from the keyboard.
 
+
+
+.. py:class:: MidiKeyboardWidget(**kwargs)
+
+   Bases: :py:obj:`KeyboardWidget`
+
+
+   Browser Web MIDI keyboard input widget.
+
+   Uses the same sequencer and sampler connection API as ``KeyboardWidget``,
+   but receives note events from a selected browser MIDI input device.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: midi_port
+
+
+   .. py:attribute:: available_midi_ports
 
 
 .. py:class:: Track(name, sequencer, sound_source, mixer_channel)

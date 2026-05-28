@@ -41,6 +41,7 @@ Classes
    test_all.TestSamplerWidget
    test_all.TestTransportWidget
    test_all.TestKeyboardWidget
+   test_all.TestMidiKeyboardWidget
    test_all.TestTrack
    test_all.TestSession
    test_all.TestDemoNotebook
@@ -713,6 +714,18 @@ Module Contents
    .. py:method:: test_custom_length()
 
 
+   .. py:method:: test_custom_length_derives_matching_step_duration()
+
+
+   .. py:method:: test_configure_grid_one_measure_of_eighth_notes()
+
+
+   .. py:method:: test_configure_grid_four_measures_of_sixteenth_notes_for_all_voices()
+
+
+   .. py:method:: test_length_assignment_resizes_all_voices()
+
+
    .. py:method:: test_set_step()
 
 
@@ -787,6 +800,12 @@ Module Contents
    .. py:method:: test_max_voices()
 
 
+   .. py:method:: test_pad_count_resizes_pad_notes()
+
+
+   .. py:method:: test_pad_notes_assignment_updates_pad_count()
+
+
    .. py:method:: test_custom_init()
 
 
@@ -854,6 +873,17 @@ Module Contents
    .. py:method:: test_session_routing()
 
 
+.. py:class:: TestMidiKeyboardWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_connect_sequencer()
+
+
+   .. py:method:: test_connect_sampler()
+
+
 .. py:class:: TestTrack
 
    .. py:method:: test_creation()
@@ -861,7 +891,7 @@ Module Contents
 
    .. py:method:: test_link_transport()
 
-      BPM and is_playing sync from transport to sequencer.
+      Transport config syncs to sequencer.
 
 
 
@@ -883,6 +913,9 @@ Module Contents
 
 
    .. py:method:: test_custom_time_signature()
+
+
+   .. py:method:: test_add_track_syncs_transport_time_signature()
 
 
    .. py:method:: test_add_track()
@@ -945,6 +978,9 @@ Module Contents
 .. py:class:: TestDemoNotebook
 
    .. py:method:: test_prefixed_example_notebooks_have_language_metadata()
+
+
+   .. py:method:: test_prefixed_example_notebooks_have_code_cell_output_fields()
 
 
    .. py:method:: test_notebook_code_cells_run(notebook_path)

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>07 MixerWidget Tutorial - nbplay v0.1.0</title>
+        <title>07 MidiKeyboardWidget Tutorial - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -215,7 +215,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/examples/08_mixer.ipynb.txt" title="View this page">
+  <a class="muted-link" href="../_sources/examples/07_midi_keyboard.ipynb.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -228,35 +228,87 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="mixerwidget-tutorial">
-<h1>07 MixerWidget Tutorial<a class="headerlink" href="#mixerwidget-tutorial" title="Link to this heading">¶</a></h1>
-<p>Create three channels and set gain/pan on each strip.</p>
+          <section class="tex2jax_ignore mathjax_ignore" id="midikeyboardwidget-tutorial">
+<h1>07 MidiKeyboardWidget Tutorial<a class="headerlink" href="#midikeyboardwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Use a browser-connected MIDI keyboard as a note input source for sequencers and samplers.</p>
+<section id="connect-a-midi-device">
+<h2>Connect a MIDI Device<a class="headerlink" href="#connect-a-midi-device" title="Link to this heading">¶</a></h2>
+<p>Render the widget, choose a MIDI input port in the browser, then play notes. Velocity is preserved in <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code> and broadcast to other widgets.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixerWidget</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiKeyboardWidget</span>
 
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">)</span>
-
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.78</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span>
-
-<span class="n">mixer</span>
+<span class="n">midi_keyboard</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">()</span>
+<span class="n">midi_keyboard</span>
 </pre></div>
 </div>
 </div>
 </div>
+</section>
+<section id="record-into-a-sequencer">
+<h2>Record into a Sequencer<a class="headerlink" href="#record-into-a-sequencer" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">connect_sequencer()</span></code> enables the sequencer recording controls and lets MIDI note events fill steps while the sequencer is playing.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
+
+<span class="n">record_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">112.0</span><span class="p">)</span>
+<span class="n">midi_keyboard</span><span class="o">.</span><span class="n">connect_sequencer</span><span class="p">(</span><span class="n">record_seq</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">record_seq</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="p">)</span>
+<span class="n">record_seq</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="play-a-sampler">
+<h2>Play a Sampler<a class="headerlink" href="#play-a-sampler" title="Link to this heading">¶</a></h2>
+<p>Connect the MIDI widget to a sampler track in a session to route incoming notes through the same browser audio bus as the typing keyboard.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">Session</span>
+
+<span class="n">sampler_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">112.0</span><span class="p">)</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">pad_count</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">],</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Tiny wave&#39;</span><span class="p">)</span>
+<span class="n">sampler_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">sampler_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">&#39;MIDI Sampler&#39;</span><span class="p">,</span> <span class="n">sampler_seq</span><span class="p">,</span> <span class="n">sampler</span><span class="p">)</span>
+
+<span class="n">midi_keyboard</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">session_id</span>
+<span class="n">midi_keyboard</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">midi_keyboard</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
+<span class="n">sampler</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="split-samplers-by-register">
+<h2>Split Samplers by Register<a class="headerlink" href="#split-samplers-by-register" title="Link to this heading">¶</a></h2>
+<p>Multiple samplers can share one MIDI keyboard. Use upper/lower zones to create a simple octave-style split.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">split_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">96.0</span><span class="p">)</span>
+<span class="n">lower_sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s1">&#39;Lower sampler&#39;</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">upper_sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s1">&#39;Upper sampler&#39;</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">split_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">&#39;Lower&#39;</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">lower_sampler</span><span class="p">)</span>
+<span class="n">split_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">&#39;Upper&#39;</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">upper_sampler</span><span class="p">)</span>
+
+<span class="n">midi_split</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">split_session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+<span class="n">midi_split</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">lower_sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">)</span>
+<span class="n">midi_split</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">upper_sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">midi_split</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
+<span class="n">midi_split</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -284,8 +336,30 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">07 MidiKeyboardWidget Tutorial</a><ul>
+<li><a class="reference internal" href="#connect-a-midi-device">Connect a MIDI Device</a></li>
+<li><a class="reference internal" href="#record-into-a-sequencer">Record into a Sequencer</a></li>
+<li><a class="reference internal" href="#play-a-sampler">Play a Sampler</a></li>
+<li><a class="reference internal" href="#split-samplers-by-register">Split Samplers by Register</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

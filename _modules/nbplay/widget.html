@@ -258,8 +258,54 @@
 <span class="n">_PREVIEW_MAX_FRAMES</span> <span class="o">=</span> <span class="mi">2048</span>
 
 
+<div class="viewcode-block" id="_default_step">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._default_step">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_step</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;duration_ticks&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="_default_steps">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._default_steps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_default_steps</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">_default_step</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]</span></div>
+
+
+
+<span class="n">_DEFAULT_PAD_NOTES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">71</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="_measure_beats">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._measure_beats">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_measure_beats</span><span class="p">(</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="n">time_signature_den</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">time_signature_num</span> <span class="o">*</span> <span class="p">(</span><span class="mf">4.0</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">time_signature_den</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="_step_duration_for_length">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._step_duration_for_length">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_step_duration_for_length</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">measures</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">time_signature_num</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">time_signature_den</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+    <span class="n">measures</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">measures</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="p">(</span><span class="n">measures</span> <span class="o">*</span> <span class="n">_measure_beats</span><span class="p">(</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="n">time_signature_den</span><span class="p">))</span> <span class="o">/</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_resize_pad_notes">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._resize_pad_notes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_resize_pad_notes</span><span class="p">(</span><span class="n">notes</span><span class="p">,</span> <span class="n">pad_count</span><span class="p">):</span>
+    <span class="n">pad_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad_count</span><span class="p">))</span>
+    <span class="n">resized</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">note</span><span class="p">)))</span> <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">notes</span><span class="p">)[:</span><span class="n">pad_count</span><span class="p">]]</span>
+    <span class="n">next_note</span> <span class="o">=</span> <span class="n">resized</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">resized</span> <span class="k">else</span> <span class="n">_DEFAULT_PAD_NOTES</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">resized</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">pad_count</span><span class="p">:</span>
+        <span class="n">resized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="n">next_note</span><span class="p">)))</span>
+        <span class="n">next_note</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">resized</span></div>
+
+
+
 <div class="viewcode-block" id="SynthWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SynthWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interactive synthesizer widget for Jupyter environments.</span>
 
@@ -297,13 +343,13 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="SynthWidget._on_param_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget._on_param_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget._on_param_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_param_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_waveform</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="SynthWidget._make_oscillator">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget._make_oscillator">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget._make_oscillator">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_oscillator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oscillator_type</span>
         <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;square&quot;</span><span class="p">:</span>
@@ -316,7 +362,7 @@
 
 
 <div class="viewcode-block" id="SynthWidget._update_waveform">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget._update_waveform">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget._update_waveform">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_waveform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Re-render the waveform preview via the Rust oscillator and push</span>
 <span class="sd">        the result as a binary Float32Array to the frontend.&quot;&quot;&quot;</span>
@@ -340,7 +386,7 @@
 
 
 <div class="viewcode-block" id="SettingsWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SettingsWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SettingsWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Audio / MIDI configuration widget for Jupyter environments.</span>
 
@@ -365,7 +411,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixer console widget with per-channel faders, pan, mute/solo,</span>
 <span class="sd">    and a master output fader.</span>
@@ -388,7 +434,7 @@
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MixerWidget.add_channel">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_channel">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Channel&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new channel strip and return its index.&quot;&quot;&quot;</span>
         <span class="n">ch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;gain&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;pan&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;mute&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;solo&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
@@ -397,7 +443,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.remove_channel">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.remove_channel">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a channel by index.&quot;&quot;&quot;</span>
         <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
@@ -407,7 +453,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_gain">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_gain">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_gain">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
         <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
@@ -416,7 +462,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_pan">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_pan">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_pan">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_pan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">pan</span><span class="p">):</span>
         <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
@@ -425,7 +471,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_mute">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_mute">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_mute">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_mute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">mute</span><span class="p">):</span>
         <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
@@ -434,7 +480,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_solo">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_solo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_solo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_solo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">solo</span><span class="p">):</span>
         <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
@@ -443,7 +489,7 @@
 
 
 <div class="viewcode-block" id="MixerWidget.to_mixer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.to_mixer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.to_mixer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_mixer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Rust ``Mixer`` instance matching the current widget state.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixer</span> <span class="k">as</span> <span class="n">RustMixer</span>
@@ -462,7 +508,7 @@
 
 
 <div class="viewcode-block" id="NoteComposer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NoteComposer</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">HasTraits</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A single voice&#39;s per-step note/velocity/duration assignments.</span>
 
@@ -482,10 +528,24 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;duration_ticks&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">_default_steps</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NoteComposer.resize">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.resize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize the step list, preserving existing steps where possible.&quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">current</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_default_steps</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">current</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">current</span></div>
+
 
 <div class="viewcode-block" id="NoteComposer.set_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer.set_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.set_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">duration_ticks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set a step at the given index.&quot;&quot;&quot;</span>
         <span class="n">steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
@@ -500,7 +560,7 @@
 
 
 <div class="viewcode-block" id="NoteComposer.toggle_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer.toggle_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.toggle_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">toggle_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle the active state of a step.&quot;&quot;&quot;</span>
         <span class="n">steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
@@ -510,14 +570,14 @@
 
 
 <div class="viewcode-block" id="NoteComposer.clear">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer.clear">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.clear">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deactivate all steps.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="NoteComposer.to_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer.to_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.to_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Rust ``Pattern`` instance from the current state.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pattern</span> <span class="k">as</span> <span class="n">RustPattern</span><span class="p">,</span> <span class="n">Step</span> <span class="k">as</span> <span class="n">RustStep</span>
@@ -532,7 +592,7 @@
 
 
 <div class="viewcode-block" id="NoteComposer.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.NoteComposer.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">active</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;active&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;NoteComposer(length=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span><span class="si">}</span><span class="s2">, active=</span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">)&quot;</span></div>
@@ -541,7 +601,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SequencerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Step sequencer widget with a grid-based pattern editor,</span>
 <span class="sd">    transport controls, and BPM setting.</span>
@@ -559,6 +619,9 @@
 
     <span class="c1"># Timing / transport (the &quot;SequencerBase&quot; concerns)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">measures</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">time_signature_num</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">time_signature_den</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">bpm</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">120.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">step_duration</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">is_playing</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -582,17 +645,32 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">num_voices</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;num_voices&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">explicit_length</span> <span class="o">=</span> <span class="s2">&quot;length&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="n">explicit_step_duration</span> <span class="o">=</span> <span class="s2">&quot;step_duration&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
         <span class="n">length</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">explicit_length</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">explicit_step_duration</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;step_duration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_step_duration_for_length</span><span class="p">(</span>
+                <span class="n">length</span><span class="p">,</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;measures&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_signature_num&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;time_signature_den&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_voices</span><span class="o">=</span><span class="n">num_voices</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span> <span class="o">=</span> <span class="p">[</span><span class="n">NoteComposer</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_voices</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_syncing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuring_grid</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_composer_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;steps&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_voices_data_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;voices_data&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_length_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_on_grid_config_change</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;measures&quot;</span><span class="p">,</span> <span class="s2">&quot;step_duration&quot;</span><span class="p">,</span> <span class="s2">&quot;time_signature_num&quot;</span><span class="p">,</span> <span class="s2">&quot;time_signature_den&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sync_voices_data</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SequencerWidget._on_composer_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget._on_composer_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_composer_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_composer_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Keep voices_data in sync when any composer&#39;s steps change.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syncing</span><span class="p">:</span>
@@ -604,7 +682,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget._on_voices_data_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget._on_voices_data_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_voices_data_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_voices_data_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When voices_data is set from the browser, update composers.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syncing</span><span class="p">:</span>
@@ -613,15 +691,81 @@
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span><span class="p">):</span>
                         <span class="n">c</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_syncing</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="SequencerWidget._sync_voices_data">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget._sync_voices_data">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._sync_voices_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_sync_voices_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Push all composer step-lists into the synced voices_data trait.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._measure_beats">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._measure_beats">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_measure_beats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_measure_beats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_signature_den</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._configured_length">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._configured_length">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_configured_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">step_duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_duration</span><span class="p">))</span>
+        <span class="n">measures</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measures</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">measures</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measure_beats</span><span class="p">())</span> <span class="o">/</span> <span class="n">step_duration</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._resize_composers">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._resize_composers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resize_composers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">composer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">:</span>
+            <span class="n">composer</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_voices_data</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._on_length_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_length_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_length_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">!=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resize_composers</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._on_grid_config_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_grid_config_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_grid_config_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configuring_grid</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configure_grid</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget.configure_grid">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.configure_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure pattern length from measure count and musical step duration.</span>
+
+<span class="sd">        ``step_duration`` is measured in quarter-note beats. In 4/4, ``0.5``</span>
+<span class="sd">        produces eighth-note steps and ``0.25`` produces sixteenth-note steps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configuring_grid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">measures</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measures</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">measures</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">step_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step_duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">step_duration</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_configuring_grid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configured_length</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="n">length</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_resize_composers</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
 
 
     <span class="c1">#  Voice accessors</span>
@@ -650,7 +794,7 @@
     <span class="c1">#  Step manipulation (voice-aware)</span>
 
 <div class="viewcode-block" id="SequencerWidget.set_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.set_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.set_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">duration_ticks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set a step at the given index on the given voice.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">voice</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
@@ -658,7 +802,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget.toggle_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.toggle_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.toggle_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">toggle_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle the active state of a step on the given voice.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">voice</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
@@ -666,7 +810,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget.clear">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.clear">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.clear">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deactivate all steps across all voices.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">:</span>
@@ -674,7 +818,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget.to_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.to_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Rust ``Pattern`` instance from the given voice.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">voice</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
@@ -683,7 +827,7 @@
 
 
 <div class="viewcode-block" id="SequencerWidget.to_step_sequencer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.to_step_sequencer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_step_sequencer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_step_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Rust ``StepSequencer`` from the given voice.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepSequencer</span> <span class="k">as</span> <span class="n">RustStepSequencer</span>
@@ -699,7 +843,7 @@
 
 
 <div class="viewcode-block" id="SamplerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SamplerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sampler widget showing loaded sample info, envelope controls,</span>
 <span class="sd">    and a waveform display.</span>
@@ -729,8 +873,9 @@
     <span class="c1"># Trigger pad notes (MIDI note numbers)</span>
     <span class="n">pad_notes</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
         <span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(),</span>
-        <span class="n">default_value</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">71</span><span class="p">],</span>
+        <span class="n">default_value</span><span class="o">=</span><span class="n">_DEFAULT_PAD_NOTES</span><span class="p">,</span>
     <span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pad_count</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Polyphony</span>
     <span class="n">max_voices</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -742,8 +887,63 @@
     <span class="c1"># Keyboard integration — set by KeyboardWidget.connect_sampler()</span>
     <span class="n">keyboard_connected</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">explicit_pad_notes</span> <span class="o">=</span> <span class="s2">&quot;pad_notes&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="n">explicit_pad_count</span> <span class="o">=</span> <span class="s2">&quot;pad_count&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="k">if</span> <span class="n">explicit_pad_notes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">explicit_pad_count</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pad_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pad_notes&quot;</span><span class="p">]))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span> <span class="o">=</span> <span class="n">_resize_pad_notes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_count</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_pad_count_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pad_count&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_pad_notes_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pad_notes&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SamplerWidget._on_pad_count_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._on_pad_count_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_pad_count_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">pad_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">pad_count</span> <span class="o">!=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_count</span> <span class="o">=</span> <span class="n">pad_count</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span> <span class="o">=</span> <span class="n">_resize_pad_notes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span><span class="p">,</span> <span class="n">pad_count</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="SamplerWidget._on_pad_notes_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._on_pad_notes_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_pad_notes_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">notes</span> <span class="o">=</span> <span class="n">_resize_pad_notes</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">],</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">])))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">notes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span> <span class="o">=</span> <span class="n">notes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_syncing_pads</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="SamplerWidget.configure_pads">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.configure_pads">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_notes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure the number of sampler trigger pads, preserving notes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pad_notes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">notes</span> <span class="o">=</span> <span class="n">_resize_pad_notes</span><span class="p">(</span><span class="n">pad_notes</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad_notes</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span> <span class="o">=</span> <span class="n">notes</span>
+            <span class="k">if</span> <span class="n">pad_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pad_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad_count</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="SamplerWidget.load_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.load_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sample&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load sample PCM data (list of floats) into the widget.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_name</span> <span class="o">=</span> <span class="n">name</span>
@@ -764,7 +964,7 @@
 
 
 <div class="viewcode-block" id="SamplerWidget.to_sampler">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.to_sampler">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.to_sampler">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Rust ``Sampler`` from the current widget state.&quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">AudioSample</span><span class="p">,</span> <span class="n">Envelope</span><span class="p">,</span> <span class="n">Sampler</span>
@@ -782,7 +982,7 @@
 
 
 <div class="viewcode-block" id="TransportWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransportWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Global transport controls — play/stop, BPM, time signature, bar/beat counter.</span>
 
@@ -813,7 +1013,7 @@
 
 
 <div class="viewcode-block" id="KeyboardWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KeyboardWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Musical typing keyboard widget (Logic Pro style).</span>
 
@@ -858,7 +1058,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="KeyboardWidget.connect_sequencer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.connect_sequencer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.connect_sequencer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">connect_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Link this keyboard to a sequencer for recording and note input.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sequencer</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="p">:</span>
@@ -867,7 +1067,7 @@
 
 
 <div class="viewcode-block" id="KeyboardWidget.disconnect_sequencer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.disconnect_sequencer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.disconnect_sequencer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unlink this keyboard from a sequencer.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sequencer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_sequencers</span><span class="p">:</span>
@@ -876,7 +1076,7 @@
 
 
 <div class="viewcode-block" id="KeyboardWidget.connect_sampler">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.connect_sampler">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.connect_sampler">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">connect_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect a sampler to the keyboard.</span>
 
@@ -900,7 +1100,7 @@
 
 
 <div class="viewcode-block" id="KeyboardWidget.disconnect_sampler">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.disconnect_sampler">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.disconnect_sampler">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampler</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Disconnect a sampler from the keyboard.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_samplers</span><span class="p">:</span>
@@ -912,8 +1112,25 @@
 
 
 
+<div class="viewcode-block" id="MidiKeyboardWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiKeyboardWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiKeyboardWidget</span><span class="p">(</span><span class="n">KeyboardWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Browser Web MIDI keyboard input widget.</span>
+
+<span class="sd">    Uses the same sequencer and sampler connection API as ``KeyboardWidget``,</span>
+<span class="sd">    but receives note events from a selected browser MIDI input device.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">&quot;midi_keyboard.js&quot;</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">&quot;midi_keyboard.css&quot;</span>
+
+    <span class="n">midi_port</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="Track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Track</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Binds a sequencer to a sound source and a mixer channel.</span>
 
@@ -929,7 +1146,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="Track._link_transport">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track._link_transport">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track._link_transport">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_link_transport</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Link this track&#39;s sequencer BPM and play state to the transport.</span>
 
@@ -940,11 +1157,13 @@
 <span class="sd">        every other sequencer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;bpm&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">&quot;bpm&quot;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;time_signature_num&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">&quot;time_signature_num&quot;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;time_signature_den&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">&quot;time_signature_den&quot;</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;is_playing&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">&quot;is_playing&quot;</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="Track._unlink">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track._unlink">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track._unlink">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all traitlets links.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">lnk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">:</span>
@@ -953,7 +1172,7 @@
 
 
 <div class="viewcode-block" id="Track.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">src_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Track(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">, ch=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mixer_channel</span><span class="si">}</span><span class="s2">, source=</span><span class="si">{</span><span class="n">src_type</span><span class="si">}</span><span class="s2">)&quot;</span></div>
@@ -962,7 +1181,7 @@
 
 
 <div class="viewcode-block" id="Session">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Session</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A collection of tracks with a shared transport and mixer.</span>
 
@@ -981,7 +1200,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="Session.add_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.add_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.add_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a track, create a mixer channel, and link transport state.</span>
 
@@ -1004,7 +1223,7 @@
 
 
 <div class="viewcode-block" id="Session.remove_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.remove_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a track by index, unlinking transport and removing mixer channel.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
@@ -1028,7 +1247,7 @@
 
 
 <div class="viewcode-block" id="Session.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Session(bpm=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span><span class="si">}</span><span class="s2">, tracks=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span><span class="si">}</span><span class="s2">, channels=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 </div>
