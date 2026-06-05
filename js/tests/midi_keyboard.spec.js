@@ -156,7 +156,7 @@ test.describe("MidiKeyboardWidget", () => {
 
     await renderWidget(page, {
       session_id: "test-session",
-      sampler_routing: [{ channel_index: 0, zone: "all" }],
+      sampler_routing: [{ channel_index: 0, match: "all" }],
     });
     await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
 

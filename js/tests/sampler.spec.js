@@ -15,8 +15,17 @@ const DEFAULTS = {
   sustain: 0.7,
   release: 0.3,
   waveform: null,
+  sample_data: null,
   pad_count: 8,
   pad_notes: [48, 52, 55, 59, 60, 64, 67, 71],
+  pad_velocities: Array.from({ length: 8 }, () => 100),
+  pad_actions: [],
+  sample_slices: [],
+  velocity: 100,
+  velocity_sensitive: true,
+  active_pads: [],
+  last_note_event: {},
+  last_pad_event: {},
 };
 
 /** Boot the sampler widget inside the harness page. */
@@ -122,6 +131,30 @@ test.describe("SamplerWidget", () => {
     }));
     expect(state.padCount).toBe(4);
     expect(state.padNotes).toEqual([48, 52, 55, 59]);
+  });
+
+  test("browser file input decodes audio into sample traits", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+
+    await page.locator(".nbplay-samp-file").setInputFiles({
+      name: "drop.wav",
+      mimeType: "audio/wav",
+      buffer: Buffer.from([0, 1, 2, 3]),
+    });
+
+    await expect(page.locator(".nbplay-samp-name")).toHaveText("drop.wav");
+    const state = await page.evaluate(() => ({
+      sampleRate: window.__testModel._state.sample_rate,
+      sampleLength: window.__testModel._state.sample_length,
+      sampleDataBytes: window.__testModel._state.sample_data.byteLength,
+      waveformBytes: window.__testModel._state.waveform.byteLength,
+    }));
+    expect(state.sampleRate).toBe(44100);
+    expect(state.sampleLength).toBe(1024);
+    expect(state.sampleDataBytes).toBe(4096);
+    expect(state.waveformBytes).toBe(4096);
   });
 
   // 9. Max voices display
@@ -370,6 +403,61 @@ test.describe("SamplerWidget", () => {
     await expect(noteSpan).toBeVisible();
     // First pad_note = 48 → C3
     await expect(noteSpan).toHaveText("C3");
+  });
+
+  test("sample slices label pads and trigger their mapped note", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      pad_count: 2,
+      pad_notes: [36, 37],
+      pad_velocities: [90, 100],
+      pad_actions: [
+        { type: "note", note: 36, velocity: 90, slice: 0, label: "S1" },
+        { type: "note", note: 37, velocity: 100, slice: 1, label: "S2" },
+      ],
+      sample_slices: [
+        { index: 0, note: 36, start: 0, end: 100, label: "S1" },
+        { index: 1, note: 37, start: 100, end: 200, label: "S2" },
+      ],
+    });
+
+    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
+      "S1",
+    );
+    await page
+      .locator(".nbplay-samp-pad")
+      .first()
+      .click({ position: { x: 4, y: 4 } });
+    const event = await page.evaluate(
+      () => window.__testModel._state.last_note_event,
+    );
+    expect(event.note).toBe(36);
+  });
+
+  test("trait pad action updates sampler trait", async ({ page }) => {
+    await renderWidget(page, {
+      pad_count: 1,
+      pad_notes: [60],
+      pad_velocities: [100],
+      pad_actions: [
+        { type: "trait", trait: "velocity", value: 72, label: "Vel" },
+      ],
+    });
+
+    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
+      "Vel",
+    );
+    await page
+      .locator(".nbplay-samp-pad")
+      .first()
+      .click({ position: { x: 4, y: 4 } });
+    const state = await page.evaluate(() => ({
+      velocity: window.__testModel._state.velocity,
+      event: window.__testModel._state.last_pad_event,
+    }));
+    expect(state.velocity).toBe(72);
+    expect(state.event.action.type).toBe("trait");
   });
 
   test("dblclick pad note opens inline edit with current note", async ({

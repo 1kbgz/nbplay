@@ -30,7 +30,13 @@ function noteName(midi: number): string {
 }
 
 function defaultStep(): StepData {
-  return { active: false, note: 60, velocity: 100, duration_ticks: 1 };
+  return {
+    active: false,
+    note: 60,
+    velocity: 100,
+    duration_ticks: 1,
+    probability: 100,
+  };
 }
 
 function measureBeatCount(
@@ -450,7 +456,7 @@ function render({
         if (steps[i].active) cell.classList.add("active");
         if (i === currentStep) cell.classList.add("current");
         cell.textContent = noteName(steps[i].note);
-        cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+        cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity} prob=${steps[i].probability ?? 100}%`;
 
         cell.addEventListener("click", () => {
           // Toggle immediately.  In a dblclick sequence the browser fires
@@ -554,7 +560,7 @@ function render({
       cell.classList.toggle("active", !!steps[i].active);
       cell.classList.toggle("current", i === currentStep);
       cell.textContent = noteName(steps[i].note);
-      el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+      el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity} prob=${steps[i].probability ?? 100}%`;
     });
 
     const velBars = grid.querySelectorAll(".nbplay-seq-vel-bar");

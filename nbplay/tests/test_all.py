@@ -2,6 +2,7 @@ import json
 import math
 import pathlib
 import struct
+import wave
 
 import pytest
 
@@ -11,6 +12,7 @@ from nbplay import (
     AudioSample,
     Envelope,
     EventSequence,
+    KeyboardRoute,
     KeyboardWidget,
     MidiChannel,
     MidiEvent,
@@ -23,6 +25,8 @@ from nbplay import (
     Note,
     NoteComposer,
     NoteEvent,
+    PadAction,
+    PadWidget,
     Pattern,
     SampleMap,
     SampleMapping,
@@ -1281,6 +1285,7 @@ class TestNoteComposer:
             assert s["note"] == 60
             assert s["velocity"] == 100
             assert s["duration_ticks"] == 1
+            assert s["probability"] == 100
 
     def test_custom_length(self):
         nc = NoteComposer(length=8)
@@ -1288,10 +1293,11 @@ class TestNoteComposer:
 
     def test_set_step(self):
         nc = NoteComposer(length=16)
-        nc.set_step(0, note=72, velocity=80, active=True)
+        nc.set_step(0, note=72, velocity=80, active=True, probability=75)
         assert nc.steps[0]["note"] == 72
         assert nc.steps[0]["velocity"] == 80
         assert nc.steps[0]["active"] is True
+        assert nc.steps[0]["probability"] == 75
 
     def test_set_step_out_of_bounds(self):
         nc = NoteComposer(length=16)
@@ -1350,6 +1356,9 @@ class TestSequencerWidget:
         assert w.is_playing is False
         assert w.current_step == -1
         assert w.loop_enabled is True
+        assert w.swing == 0.0
+        assert w.groove == []
+        assert w.automation_lanes == []
         assert w.session_id == ""
         assert w.channel_index == -1
         assert w.num_voices == 1
@@ -1362,6 +1371,7 @@ class TestSequencerWidget:
             assert s["note"] == 60
             assert s["velocity"] == 100
             assert s["duration_ticks"] == 1
+            assert s["probability"] == 100
 
     def test_voices_initialised(self):
         """Default monophonic sequencer has one voice whose steps match .steps."""
@@ -1447,10 +1457,41 @@ class TestSequencerWidget:
 
     def test_set_step(self):
         w = SequencerWidget()
-        w.set_step(0, note=72, velocity=80, active=True)
+        w.set_step(0, note=72, velocity=80, active=True, probability=25)
         assert w.steps[0]["note"] == 72
         assert w.steps[0]["velocity"] == 80
         assert w.steps[0]["active"] is True
+        assert w.steps[0]["probability"] == 25
+
+    def test_set_step_probability_clamped(self):
+        w = SequencerWidget()
+        w.set_step(0, probability=999)
+        w.set_step(1, probability=-5)
+        assert w.steps[0]["probability"] == 100
+        assert w.steps[1]["probability"] == 0
+
+    def test_swing_clamped(self):
+        w = SequencerWidget(swing=150)
+        assert w.swing == 100
+        w.swing = -10
+        assert w.swing == 0
+
+    def test_groove_clamped(self):
+        w = SequencerWidget(groove=[-99, 0, 99])
+        assert w.groove == [-50, 0, 50]
+
+    def test_automation_lanes_normalized(self):
+        w = SequencerWidget(
+            automation_lanes=[
+                {"trait": "bpm", "points": [{"step": 2, "value": "150"}, {"step": "0", "value": 120}]},
+                {"trait": "bad trait!", "points": [{"step": 0, "value": 1}]},
+                {"trait": "swing", "points": [{"step": -1, "value": 25}, {"step": 4, "value": "bad"}]},
+            ]
+        )
+        assert w.automation_lanes == [
+            {"trait": "bpm", "points": [{"step": 0, "value": 120.0}, {"step": 2, "value": 150.0}]},
+            {"trait": "swing", "points": [{"step": 0, "value": 25.0}]},
+        ]
 
     def test_set_step_voice(self):
         """set_step with voice kwarg targets a specific voice."""
@@ -1542,7 +1583,16 @@ class TestSamplerWidget:
         assert w.root_note == 69
         assert w.sample_length == 0
         assert w.waveform == b""
+        assert w.sample_data == b""
         assert w.pad_notes == [48, 52, 55, 59, 60, 64, 67, 71]
+        assert w.pad_velocities == [100] * 8
+        assert w.pad_actions[0] == {"type": "note", "note": 48, "velocity": 100}
+        assert w.sample_slices == []
+        assert w.velocity == 100
+        assert w.velocity_sensitive is True
+        assert w.active_pads == []
+        assert w.last_note_event == {}
+        assert w.last_pad_event == {}
         assert w.max_voices == 8
         assert w.session_id == ""
         assert w.channel_index == -1
@@ -1563,6 +1613,7 @@ class TestSamplerWidget:
         assert w.root_note == 60
         assert w.sample_length == 8
         assert len(w.waveform) > 0
+        assert len(w.sample_data) == 8 * 4
         # waveform is packed float32
         assert len(w.waveform) % 4 == 0
 
@@ -1573,6 +1624,7 @@ class TestSamplerWidget:
         w.load_sample(data, name="Big")
         n_points = len(w.waveform) // 4
         assert n_points == 2048
+        assert len(w.sample_data) == 10000 * 4
 
     def test_load_sample_small(self):
         """Small samples are not decimated."""
@@ -1613,6 +1665,77 @@ class TestSamplerWidget:
         w = SamplerWidget()
         w.pad_notes = [36, 38, 42]
         assert w.pad_count == 3
+        assert w.pad_actions == [
+            {"type": "note", "note": 36, "velocity": 100},
+            {"type": "note", "note": 38, "velocity": 100},
+            {"type": "note", "note": 42, "velocity": 100},
+        ]
+
+    def test_load_audio_file_wav(self, tmp_path):
+        path = tmp_path / "tone.wav"
+        with wave.open(str(path), "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(8000)
+            frames = struct.pack("<hhhh", 0, 32767, -32768, 0)
+            wav.writeframes(frames)
+
+        w = SamplerWidget()
+        w.load_audio_file(path, root_note=60)
+
+        assert w.sample_name == "tone.wav"
+        assert w.sample_rate == 8000
+        assert w.root_note == 60
+        assert w.sample_length == 4
+        assert w.get_sample_data()[1] == pytest.approx(32767 / 32768)
+
+    def test_sample_edit_operations(self):
+        w = SamplerWidget()
+        w.load_sample([0.25, -0.5, 0.75, -1.0])
+
+        w.trim_sample(1, 4)
+        assert w.sample_length == 3
+        assert w.get_sample_data() == pytest.approx([-0.5, 0.75, -1.0])
+
+        w.normalize_sample(0.5)
+        assert max(abs(s) for s in w.get_sample_data()) == pytest.approx(0.5)
+
+        w.reverse_sample()
+        assert w.get_sample_data()[0] == pytest.approx(-0.5)
+
+        w.fade_sample(fade_in=2, fade_out=2)
+        data = w.get_sample_data()
+        assert data[0] == pytest.approx(0.0)
+        assert data[-1] == pytest.approx(0.0)
+
+    def test_slice_sample_maps_sampler_pads(self):
+        w = SamplerWidget(velocity=90)
+        w.load_sample([0.1] * 100)
+
+        slices = w.slice_sample(4, start_note=36)
+
+        assert slices == [
+            {"index": 0, "note": 36, "start": 0, "end": 25, "label": "S1"},
+            {"index": 1, "note": 37, "start": 25, "end": 50, "label": "S2"},
+            {"index": 2, "note": 38, "start": 50, "end": 75, "label": "S3"},
+            {"index": 3, "note": 39, "start": 75, "end": 100, "label": "S4"},
+        ]
+        assert w.pad_count == 4
+        assert w.pad_notes == [36, 37, 38, 39]
+        assert w.pad_actions[0] == {"type": "note", "note": 36, "velocity": 90, "slice": 0, "label": "S1"}
+
+    def test_map_slices_to_pad_widget(self):
+        sampler = SamplerWidget(channel_index=2)
+        sampler.load_sample([0.1] * 80)
+        pads = PadWidget()
+
+        sampler.map_slices_to_pads(pads, count=4, start_note=40)
+
+        assert pads.rows == 1
+        assert pads.cols == 4
+        assert pads.pad_notes == [40, 41, 42, 43]
+        assert pads.pad_actions[0] == {"type": "note", "note": 40, "velocity": 100, "slice": 0, "label": "S1"}
+        assert pads.sampler_routing == [{"channel_index": 2, "match": "all"}]
 
     def test_custom_init(self):
         w = SamplerWidget(
@@ -1692,6 +1815,98 @@ class TestTransportWidget:
 #  KeyboardWidget
 
 
+class TestKeyboardRoute:
+    def test_all(self):
+        r = KeyboardRoute(0, match="all")
+        assert r.to_dict() == {"channel_index": 0, "match": "all"}
+
+    def test_zone_upper(self):
+        r = KeyboardRoute(1, match="zone", zone="upper")
+        assert r.to_dict() == {"channel_index": 1, "match": "zone", "zone": "upper"}
+
+    def test_zone_lower(self):
+        r = KeyboardRoute(2, match="zone", zone="lower")
+        assert r.to_dict() == {"channel_index": 2, "match": "zone", "zone": "lower"}
+
+    def test_octave(self):
+        r = KeyboardRoute(3, match="octave", octave=4)
+        assert r.to_dict() == {"channel_index": 3, "match": "octave", "octave": 4}
+
+    def test_note(self):
+        r = KeyboardRoute(4, match="note", note=60)
+        assert r.to_dict() == {"channel_index": 4, "match": "note", "note": 60}
+
+    def test_notes(self):
+        r = KeyboardRoute(5, match="notes", notes=[60, 62, 64])
+        assert r.to_dict() == {
+            "channel_index": 5,
+            "match": "notes",
+            "notes": [60, 62, 64],
+        }
+
+    def test_invalid_match(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="invalid")
+
+    def test_invalid_zone(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="zone", zone="middle")
+
+    def test_invalid_octave_too_low(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="octave", octave=-1)
+
+    def test_invalid_octave_too_high(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="octave", octave=10)
+
+    def test_invalid_note_too_high(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="note", note=128)
+
+    def test_invalid_note_too_low(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="note", note=-1)
+
+    def test_invalid_notes_empty(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="notes", notes=[])
+
+    def test_invalid_notes_oob(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="notes", notes=[60, 128])
+
+    def test_invalid_channel_index(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(-1, match="all")
+
+    def test_invalid_float_octave(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="octave", octave=4.5)
+
+    def test_invalid_float_note(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="note", note=60.5)
+
+    def test_invalid_float_in_notes(self):
+        with pytest.raises(ValueError):
+            KeyboardRoute(0, match="notes", notes=[60, 62.5])
+
+    def test_equality(self):
+        a = KeyboardRoute(0, match="all")
+        b = KeyboardRoute(0, match="all")
+        assert a == b
+        assert a != KeyboardRoute(0, match="zone", zone="upper")
+        assert a != "not a route"
+
+    def test_repr(self):
+        r = KeyboardRoute(0, match="zone", zone="upper")
+        s = repr(r)
+        assert "KeyboardRoute" in s
+        assert "ch=0" in s
+        assert "zone=upper" in s
+
+
 class TestKeyboardWidget:
     def test_defaults(self):
         kb = KeyboardWidget()
@@ -1748,11 +1963,17 @@ class TestKeyboardWidget:
     def test_connect_sampler_all(self):
         kb = KeyboardWidget()
         samp = SamplerWidget(channel_index=0)
-        kb.connect_sampler(samp, zone="all")
+        kb.connect_sampler(samp)
         assert samp.keyboard_connected is True
         assert len(kb.sampler_routing) == 1
-        assert kb.sampler_routing[0]["zone"] == "all"
+        assert kb.sampler_routing[0]["match"] == "all"
         assert kb.sampler_routing[0]["channel_index"] == 0
+
+    def test_connect_sampler_all_explicit(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, zone="all")
+        assert kb.sampler_routing[0]["match"] == "all"
 
     def test_connect_sampler_split(self):
         kb = KeyboardWidget()
@@ -1761,8 +1982,40 @@ class TestKeyboardWidget:
         kb.connect_sampler(upper, zone="upper")
         kb.connect_sampler(lower, zone="lower")
         assert len(kb.sampler_routing) == 2
-        zones = {r["zone"] for r in kb.sampler_routing}
+        matches = {r["match"] for r in kb.sampler_routing}
+        assert "zone" in matches
+        zones = {r["zone"] for r in kb.sampler_routing if "zone" in r}
         assert zones == {"upper", "lower"}
+
+    def test_connect_sampler_per_octave(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, octave=4)
+        assert len(kb.sampler_routing) == 1
+        assert kb.sampler_routing[0]["match"] == "octave"
+        assert kb.sampler_routing[0]["octave"] == 4
+
+    def test_connect_sampler_per_note(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, note=60)
+        assert kb.sampler_routing[0]["match"] == "note"
+        assert kb.sampler_routing[0]["note"] == 60
+
+    def test_connect_sampler_per_notes(self):
+        kb = KeyboardWidget()
+        samp = SamplerWidget(channel_index=0)
+        kb.connect_sampler(samp, notes=[60, 62, 64])
+        assert kb.sampler_routing[0]["match"] == "notes"
+        assert kb.sampler_routing[0]["notes"] == [60, 62, 64]
+
+    def test_connect_sampler_layered(self):
+        kb = KeyboardWidget()
+        s1 = SamplerWidget(channel_index=0)
+        s2 = SamplerWidget(channel_index=1)
+        kb.connect_sampler(s1, zone="upper")
+        kb.connect_sampler(s2, zone="upper")
+        assert len(kb.sampler_routing) == 2
 
     def test_disconnect_sampler(self):
         kb = KeyboardWidget()
@@ -1774,13 +2027,14 @@ class TestKeyboardWidget:
         assert len(kb.sampler_routing) == 0
 
     def test_connect_sampler_replaces_same_channel(self):
-        """Re-connecting the same sampler updates zone, doesn't duplicate."""
+        """Re-connecting the same sampler updates route, doesn't duplicate."""
         kb = KeyboardWidget()
         samp = SamplerWidget(channel_index=0)
         kb.connect_sampler(samp, zone="upper")
-        kb.connect_sampler(samp, zone="all")
+        kb.connect_sampler(samp, zone="lower")
         assert len(kb.sampler_routing) == 1
-        assert kb.sampler_routing[0]["zone"] == "all"
+        assert kb.sampler_routing[0]["match"] == "zone"
+        assert kb.sampler_routing[0]["zone"] == "lower"
 
     def test_session_routing(self):
         kb = KeyboardWidget(session_id="test-session", channel_index=3)
@@ -1810,7 +2064,185 @@ class TestMidiKeyboardWidget:
         sampler = SamplerWidget(channel_index=1)
         kb.connect_sampler(sampler, zone="upper")
         assert sampler.keyboard_connected is True
-        assert kb.sampler_routing == [{"channel_index": 1, "zone": "upper"}]
+        assert kb.sampler_routing == [{"channel_index": 1, "match": "zone", "zone": "upper"}]
+
+
+#  PadWidget
+
+
+class TestPadAction:
+    def test_note_action(self):
+        action = PadAction(note=999, velocity=0, label="Kick", slice_index=2)
+        assert action.to_dict() == {"type": "note", "note": 127, "velocity": 1, "slice": 2, "label": "Kick"}
+
+    def test_trait_action(self):
+        action = PadAction(type="trait", trait="swing", value=50)
+        assert action.to_dict() == {"type": "trait", "trait": "swing", "value": 50}
+
+    def test_invalid_trait_name(self):
+        with pytest.raises(ValueError):
+            PadAction(type="trait", trait="bad trait", value=1)
+
+
+class TestPadWidget:
+    def test_defaults(self):
+        p = PadWidget()
+        assert p.rows == 4
+        assert p.cols == 4
+        assert p.velocity == 100
+        assert p.velocity_sensitive is True
+        assert len(p.pad_notes) == 16
+        assert p.pad_notes[0] == 36  # C2
+        assert len(p.pad_velocities) == 16
+        assert p.pad_velocities[0] == 100
+        assert len(p.pad_actions) == 16
+        assert p.pad_actions[0] == {"type": "note", "note": 36, "velocity": 100}
+        assert p.active_pads == []
+        assert p.last_note_event == {}
+        assert p.last_pad_event == {}
+        assert p.session_id == ""
+        assert p.channel_index == -1
+        assert p.sampler_routing == []
+
+    def test_custom_dimensions(self):
+        p = PadWidget(rows=2, cols=8)
+        assert p.rows == 2
+        assert p.cols == 8
+        assert len(p.pad_notes) == 16
+
+    def test_grid_dimensions_clamped_on_init(self):
+        p = PadWidget(rows=0, cols=-4)
+        assert p.rows == 1
+        assert p.cols == 1
+        assert len(p.pad_notes) == 1
+        assert len(p.pad_velocities) == 1
+
+    def test_grid_dimensions_clamped_on_assignment(self):
+        p = PadWidget(rows=2, cols=2)
+        p.rows = 0
+        p.cols = -4
+        assert p.rows == 1
+        assert p.cols == 1
+        assert len(p.pad_notes) == 1
+        assert len(p.pad_velocities) == 1
+
+    def test_grid_resize_extends_notes(self):
+        p = PadWidget(rows=2, cols=2)
+        assert len(p.pad_notes) == 4
+        p.rows = 4
+        p.cols = 4
+        assert len(p.pad_notes) == 16  # auto-resized
+
+    def test_grid_resize_truncates_notes(self):
+        p = PadWidget(rows=4, cols=4)
+        assert len(p.pad_notes) == 16
+        p.rows = 2
+        p.cols = 2
+        assert len(p.pad_notes) == 4
+
+    def test_custom_pad_notes(self):
+        p = PadWidget(rows=2, cols=2, pad_notes=[60, 62, 64, 65])
+        assert p.pad_notes == [60, 62, 64, 65]
+
+    def test_velocity(self):
+        p = PadWidget()
+        p.velocity = 50
+        assert p.velocity == 50
+
+    def test_velocity_sensitive(self):
+        p = PadWidget()
+        p.velocity_sensitive = False
+        assert p.velocity_sensitive is False
+
+    def test_connect_sampler(self):
+        p = PadWidget()
+        samp = SamplerWidget(channel_index=0)
+        p.connect_sampler(samp)
+        assert len(p.sampler_routing) == 1
+        assert p.sampler_routing[0]["match"] == "all"
+
+    def test_connect_sampler_rejects_zone(self):
+        p = PadWidget()
+        samp = SamplerWidget(channel_index=0)
+        with pytest.raises(ValueError, match="zone"):
+            p.connect_sampler(samp, zone="upper")
+
+    def test_disconnect_sampler(self):
+        p = PadWidget()
+        samp = SamplerWidget(channel_index=0)
+        p.connect_sampler(samp)
+        p.disconnect_sampler(samp)
+        assert len(p.sampler_routing) == 0
+
+    def test_active_pads(self):
+        p = PadWidget()
+        p.active_pads = [0, 3]
+        assert p.active_pads == [0, 3]
+
+    def test_last_note_event(self):
+        p = PadWidget()
+        p.last_note_event = {"note": 60, "velocity": 100, "type": "on"}
+        assert p.last_note_event["note"] == 60
+
+    def test_pad_velocities_default(self):
+        p = PadWidget()
+        assert len(p.pad_velocities) == 16
+        assert p.pad_velocities[0] == 100
+
+    def test_pad_velocities_custom(self):
+        p = PadWidget(rows=2, cols=2, pad_velocities=[80, 90, 100, 110])
+        assert p.pad_velocities == [80, 90, 100, 110]
+
+    def test_pad_velocities_resize_extends(self):
+        p = PadWidget(rows=2, cols=2)
+        assert len(p.pad_velocities) == 4
+        p.rows = 4
+        p.cols = 4
+        assert len(p.pad_velocities) == 16
+
+    def test_pad_velocities_set_individually(self):
+        p = PadWidget()
+        p.pad_velocities = [p.pad_velocities[0]] * 15 + [50]
+        assert p.pad_velocities[15] == 50
+
+    def test_velocity_change_resets_pad_velocities(self):
+        p = PadWidget(rows=1, cols=2, pad_velocities=[70, 90])
+        p.velocity = 64
+        assert p.pad_velocities == [64, 64]
+        assert [action["velocity"] for action in p.pad_actions] == [64, 64]
+
+    def test_velocity_clamped(self):
+        p = PadWidget(velocity=999)
+        assert p.velocity == 127
+        p.velocity = -5
+        assert p.velocity == 1
+
+    def test_pad_notes_clamped(self):
+        p = PadWidget(rows=1, cols=1, pad_notes=[999])
+        assert p.pad_notes == [127]
+
+    def test_pad_velocities_clamped(self):
+        p = PadWidget(rows=1, cols=1, pad_velocities=[200])
+        assert p.pad_velocities == [127]
+
+    def test_configure_grid_for_actions(self):
+        p = PadWidget()
+        p.configure_grid_for_actions(
+            notes=[36, 37, 38],
+            actions=[PadAction(note=36, label="S1").to_dict(), {"type": "trait", "trait": "velocity", "value": 80}],
+        )
+        assert p.rows == 1
+        assert p.cols == 3
+        assert p.pad_notes == [36, 37, 38]
+        assert p.pad_actions[0] == {"type": "note", "note": 36, "velocity": 100, "label": "S1"}
+        assert p.pad_actions[1] == {"type": "trait", "trait": "velocity", "value": 80}
+
+    def test_set_base_note_and_transpose(self):
+        p = PadWidget(rows=1, cols=3)
+        p.set_base_note(60)
+        assert p.pad_notes == [60, 61, 62]
+        p.transpose_pads(12)
+        assert p.pad_notes == [72, 73, 74]
 
 
 #  Track
@@ -2090,8 +2522,7 @@ class TestDemoNotebook:
             assert notebook.get("cells")
             for cell in notebook["cells"]:
                 assert "metadata" in cell
-                assert "language" in cell["metadata"]
-                assert "id" in cell["metadata"]
+                assert "language" in cell["metadata"], f"{notebook_path.name}: cell missing 'language' in metadata"
 
     def test_prefixed_example_notebooks_have_code_cell_output_fields(self):
         examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"

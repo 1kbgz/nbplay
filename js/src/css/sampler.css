@@ -43,12 +43,23 @@
   white-space: nowrap;
   max-width: 200px;
 }
+.nbplay-samp-file {
+  max-width: 160px;
+  font-family: var(--jp-code-font-family, monospace);
+  font-size: 10px;
+  color: var(--jp-ui-font-color2, #a0a0b8);
+}
 /* Waveform */
 .nbplay-samp-waveform-wrap {
   margin-bottom: 10px;
   border: 1px solid var(--jp-border-color1, #1e1e3a);
   border-radius: 8px;
   overflow: hidden;
+}
+.nbplay-samp-waveform-wrap.drag-over {
+  border-color: var(--jp-brand-color1, #00d4ff);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--jp-brand-color1, #00d4ff) 25%, transparent);
 }
 .nbplay-samp-waveform {
   width: 100%;
@@ -138,6 +149,7 @@
 .nbplay-samp-pads-controls {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 .nbplay-samp-pad-count {
@@ -160,6 +172,22 @@
   font-size: 12px;
   color: var(--jp-brand-color1, #00d4ff);
 }
+.nbplay-samp-velocity {
+  width: 88px;
+  accent-color: var(--jp-brand-color0, #7c3aed);
+}
+.nbplay-samp-velocity-val {
+  min-width: 28px;
+  font-size: 12px;
+  color: var(--jp-brand-color1, #00d4ff);
+}
+.nbplay-samp-vel-sense-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--jp-ui-font-color3, #64648a);
+}
 .nbplay-samp-pads-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(60px, 1fr));
@@ -167,6 +195,7 @@
   margin-top: 8px;
 }
 .nbplay-samp-pad {
+  position: relative;
   padding: 12px 8px;
   border: 1px solid var(--jp-border-color1, #1e1e3a);
   border-radius: 6px;
@@ -179,6 +208,24 @@
   transition: all 0.05s ease-out;
   user-select: none;
   touch-action: none;
+  overflow: hidden;
+}
+.nbplay-samp-pad-vel-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 2px;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #00d4ff) 16%,
+    transparent
+  );
+  z-index: 0;
+}
+.nbplay-samp-pad-note {
+  position: relative;
+  z-index: 1;
 }
 .nbplay-samp-pad:hover {
   background: var(--jp-layout-color2, #1a1a30);

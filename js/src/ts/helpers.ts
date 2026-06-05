@@ -28,7 +28,7 @@ export function onKernelDisconnect(
   callback: () => void,
   delay: number = 5000,
 ): () => void {
-  const m = model as Record<string, unknown>;
+  const m = model as unknown as Record<string, unknown>;
   let pollTimer: ReturnType<typeof setInterval> | null = null;
   let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
   let fired = false;

@@ -2,6 +2,12 @@
 // External MIDI keyboard input with sampler routing and velocity.
 
 import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
+import {
+  routeNoteOn,
+  routeNoteOff,
+  type KeyboardRoute,
+  type SamplerBus,
+} from "./routing.ts";
 
 const NOTE_NAMES: string[] = [
   "C",
@@ -37,11 +43,6 @@ interface NoteEvent {
   note: number;
   velocity: number;
   type: "on" | "off";
-}
-
-interface SamplerBus {
-  triggerNote: (note: number, velocity: number) => void;
-  releaseNote: (note: number) => void;
 }
 
 interface NbplayBus {
@@ -276,52 +277,16 @@ function render({
     model.get("channel_index") as number,
   );
 
-  function routeNoteOn(note: number, velocity: number): boolean {
+  function handleNoteRoutes(note: number, velocity: number): boolean {
+    const routes = (model.get("sampler_routing") as KeyboardRoute[]) || [];
     const sessionId = model.get("session_id") as string;
-    const samplerRouting =
-      (model.get("sampler_routing") as Array<{
-        channel_index: number;
-        zone: string;
-      }>) || [];
-    const zone = zoneForNote(note);
-    const bus = getSessionBus(sessionId);
-    let usedSampler = false;
-    if (bus?.samplers) {
-      for (const route of samplerRouting) {
-        if (route.zone === "all" || route.zone === zone) {
-          const sampler = bus.samplers[route.channel_index];
-          if (sampler) {
-            sampler.triggerNote(note, velocity);
-            usedSampler = true;
-          }
-        }
-      }
-    }
-    return usedSampler;
+    return routeNoteOn(sessionId, routes, note, zoneForNote(note), velocity);
   }
 
-  function routeNoteOff(note: number): boolean {
+  function handleNoteOffRoutes(note: number): boolean {
+    const routes = (model.get("sampler_routing") as KeyboardRoute[]) || [];
     const sessionId = model.get("session_id") as string;
-    const samplerRouting =
-      (model.get("sampler_routing") as Array<{
-        channel_index: number;
-        zone: string;
-      }>) || [];
-    const zone = zoneForNote(note);
-    const bus = getSessionBus(sessionId);
-    let usedSampler = false;
-    if (bus?.samplers) {
-      for (const route of samplerRouting) {
-        if (route.zone === "all" || route.zone === zone) {
-          const sampler = bus.samplers[route.channel_index];
-          if (sampler) {
-            sampler.releaseNote(note);
-            usedSampler = true;
-          }
-        }
-      }
-    }
-    return usedSampler;
+    return routeNoteOff(sessionId, routes, note, zoneForNote(note));
   }
 
   function syncMonitor(): void {
@@ -346,7 +311,7 @@ function render({
     if (note < 0 || note > 127) return;
     heldNotes.add(note);
     const sessionId = model.get("session_id") as string;
-    if (!routeNoteOn(note, velocity)) {
+    if (!handleNoteRoutes(note, velocity)) {
       audio.noteOn(note, velocity);
     }
     const evt: NoteEvent = { note, velocity, type: "on" };
@@ -361,7 +326,7 @@ function render({
     if (note < 0 || note > 127) return;
     heldNotes.delete(note);
     const sessionId = model.get("session_id") as string;
-    if (!routeNoteOff(note)) {
+    if (!handleNoteOffRoutes(note)) {
       audio.noteOff(note);
     }
     const evt: NoteEvent = { note, velocity: 0, type: "off" };

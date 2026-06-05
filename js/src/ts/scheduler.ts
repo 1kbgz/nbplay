@@ -1,17 +1,24 @@
-// nbplay Sequencer Scheduler – pure scheduling engine
-// Timing, step advancement, voice iteration, oscillator triggering.
-// No DOM, no model sync apart from the minimum needed to read state
-// and notify stop.
+// nbplay Sequencer Scheduler - timing, step advancement, voice iteration,
+// oscillator triggering, probability, groove, and automation.
 
 import { type AnyModel } from "./helpers.ts";
-
-// ---- Types ---------------------------------------------------------------
 
 export interface StepData {
   active: boolean;
   note: number;
   velocity: number;
   duration_ticks?: number;
+  probability?: number;
+}
+
+export interface AutomationPoint {
+  step: number;
+  value: number;
+}
+
+export interface AutomationLane {
+  trait: string;
+  points: AutomationPoint[];
 }
 
 interface NbplayBus {
@@ -26,57 +33,137 @@ export interface AudioScheduler {
   isPlaying(): boolean;
 }
 
-// ---- Pure helpers --------------------------------------------------------
-
-/** Seconds per step from BPM and step-duration (beat fraction). */
-export function computeStepTime(bpm: number, stepDuration: number): number {
-  return stepDuration / (bpm / 60);
+interface AudioSchedulerOptions {
+  random?: () => number;
 }
 
-/** MIDI note number → frequency in Hz (A4 = 69 = 440 Hz). */
+const RESERVED_AUTOMATION_TRAITS = new Set([
+  "automation_lanes",
+  "current_step",
+  "is_playing",
+  "voices_data",
+]);
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function numberOr(value: unknown, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function readStepSeconds(model: AnyModel): number {
+  return computeStepTime(
+    numberOr(model.get("bpm"), 120),
+    numberOr(model.get("step_duration"), 0.25),
+  );
+}
+
+export function computeStepTime(bpm: number, stepDuration: number): number {
+  return Math.max(0.001, stepDuration) / (Math.max(1, bpm) / 60);
+}
+
+export function computeStepOffsetSeconds(
+  stepIndex: number,
+  stepSeconds: number,
+  swing: number,
+  groove: number[] = [],
+): number {
+  const swingOffset =
+    stepIndex % 2 === 1 ? stepSeconds * 0.5 * (clamp(swing, 0, 100) / 100) : 0;
+  const grooveOffset =
+    groove.length > 0
+      ? stepSeconds *
+        (clamp(numberOr(groove[stepIndex % groove.length], 0), -50, 50) / 100)
+      : 0;
+  return clamp(
+    swingOffset + grooveOffset,
+    stepSeconds * -0.5,
+    stepSeconds * 0.75,
+  );
+}
+
 export function midiToHz(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12);
 }
 
-/**
- * Advance the step counter and detect whether we should stop.
- * Returns `nextStep` = -1 when stopping so callers can guard.
- */
 export function advanceStep(
   currentStep: number,
   stepCount: number,
   loopEnabled: boolean,
 ): { nextStep: number; shouldStop: boolean } {
-  const next = (currentStep + 1) % stepCount;
+  const safeStepCount = Math.max(1, stepCount);
+  const next = (currentStep + 1) % safeStepCount;
   const shouldStop = next === 0 && currentStep >= 0 && !loopEnabled;
   return { nextStep: shouldStop ? -1 : next, shouldStop };
 }
 
-/**
- * Yield { freq, velocity, duration } for every active voice at a given
- * step index.  Velocity is normalised 0–1.
- */
+export function shouldPlayStep(
+  step: StepData,
+  random: () => number = Math.random,
+): boolean {
+  if (!step.active) return false;
+  const probability = clamp(numberOr(step.probability, 100), 0, 100);
+  if (probability <= 0) return false;
+  if (probability >= 100) return true;
+  return random() * 100 < probability;
+}
+
 export function* iterateActiveVoices(
   voicesData: StepData[][],
   stepIndex: number,
+  random: () => number = Math.random,
 ): Generator<{ freq: number; velocity: number; durationTicks: number }> {
   for (const voice of voicesData) {
     const step = voice[stepIndex];
-    if (step && step.active) {
-      yield {
-        freq: midiToHz(step.note),
-        velocity: (step.velocity ?? 100) / 127,
-        durationTicks: step.duration_ticks ?? 1,
-      };
+    if (!step || !shouldPlayStep(step, random)) continue;
+    yield {
+      freq: midiToHz(numberOr(step.note, 60)),
+      velocity: clamp(numberOr(step.velocity, 100), 0, 127) / 127,
+      durationTicks: Math.max(0.001, numberOr(step.duration_ticks, 1)),
+    };
+  }
+}
+
+export function automationValueForStep(
+  lane: AutomationLane,
+  stepIndex: number,
+): number | null {
+  const points = (lane.points || [])
+    .filter(
+      (point) =>
+        Number.isFinite(point.step) &&
+        Number.isFinite(point.value) &&
+        point.step >= 0,
+    )
+    .sort((a, b) => a.step - b.step);
+  if (points.length === 0) return null;
+
+  let selected: AutomationPoint | null = null;
+  for (const point of points) {
+    if (point.step <= stepIndex) {
+      selected = point;
+    } else {
+      break;
+    }
+  }
+  return (selected || points[points.length - 1]).value;
+}
+
+export function applyAutomationLanes(model: AnyModel, stepIndex: number): void {
+  const lanes = (model.get("automation_lanes") as AutomationLane[]) || [];
+  for (const lane of lanes) {
+    const trait = typeof lane?.trait === "string" ? lane.trait : "";
+    if (!trait || RESERVED_AUTOMATION_TRAITS.has(trait)) continue;
+    const value = automationValueForStep(lane, stepIndex);
+    if (value === null) continue;
+    if (numberOr(model.get(trait), NaN) !== value) {
+      model.set(trait, value);
     }
   }
 }
 
-/**
- * Schedule a sine oscillator with a quick attack (5 ms) and a
- * proportional release (20 % of duration) through *output* (or
- * ctx.destination if output is null).
- */
 export function scheduleOscillator(
   ctx: AudioContext,
   output: AudioNode | null,
@@ -100,21 +187,17 @@ export function scheduleOscillator(
     osc.start(startTime);
     osc.stop(startTime + duration);
   } catch (_) {
-    // Ignore if timing is in the past
+    // Ignore if timing is in the past.
   }
 }
 
-/**
- * Resolve the AudioContext + output node from the session bus, or
- * create a standalone AudioContext as fallback.
- */
 export function resolveAudioOutput(model: AnyModel): {
   ctx: AudioContext;
   output: AudioNode | null;
   ownCtx: boolean;
 } {
   const sid = model.get("session_id") as string;
-  const idx = model.get("channel_index") as number;
+  const idx = numberOr(model.get("channel_index"), -1);
   if (sid && idx >= 0) {
     const bus = (globalThis as Record<string, unknown>).__nbplay as
       | Record<string, NbplayBus>
@@ -130,14 +213,13 @@ export function resolveAudioOutput(model: AnyModel): {
   return { ctx: new AudioContext(), output: null, ownCtx: true };
 }
 
-/** Read voices_data from the model. */
 export function voicesFromModel(model: AnyModel): StepData[][] {
   return (model.get("voices_data") as StepData[][]) || [];
 }
 
-// ---- Scheduler factory ---------------------------------------------------
-
-export function createAudioScheduler(): AudioScheduler {
+export function createAudioScheduler(
+  options: AudioSchedulerOptions = {},
+): AudioScheduler {
   let audioCtx: AudioContext | null = null;
   let outputNode: AudioNode | null = null;
   let ownAudioCtx = true;
@@ -146,6 +228,7 @@ export function createAudioScheduler(): AudioScheduler {
   const scheduleAheadTime = 0.1;
   const lookAheadTime = 0.025;
   let currentSchedulerStep = -1;
+  const random = options.random || Math.random;
 
   const self: AudioScheduler = {
     start(model: AnyModel): void {
@@ -193,25 +276,16 @@ export function createAudioScheduler(): AudioScheduler {
     if (!audioCtx) return;
     const currentTime = audioCtx.currentTime;
     while (nextScheduleTime < currentTime + scheduleAheadTime) {
-      scheduleStep(model, nextScheduleTime);
-      nextScheduleTime += computeStepTime(
-        (model.get("bpm") as number) || 120,
-        (model.get("step_duration") as number) || 0.25,
-      );
+      const stepSeconds = scheduleStep(model, nextScheduleTime);
+      nextScheduleTime += stepSeconds;
     }
   }
 
-  function scheduleStep(model: AnyModel, audioTime: number): void {
-    if (!audioCtx) return;
+  function scheduleStep(model: AnyModel, audioTime: number): number {
+    if (!audioCtx) return readStepSeconds(model);
     const vd = voicesFromModel(model);
-    if (vd.length === 0) return;
     const steps = vd[0] || [];
-    if (steps.length === 0) return;
-
-    const stepSeconds = computeStepTime(
-      (model.get("bpm") as number) || 120,
-      (model.get("step_duration") as number) || 0.25,
-    );
+    if (vd.length === 0 || steps.length === 0) return readStepSeconds(model);
 
     const loopEnabled = model.get("loop_enabled") as boolean;
     const { nextStep, shouldStop } = advanceStep(
@@ -222,26 +296,41 @@ export function createAudioScheduler(): AudioScheduler {
 
     if (shouldStop) {
       model.set("is_playing", false);
+      model.set("current_step", -1);
       model.save_changes();
-      return;
+      self.stop();
+      return readStepSeconds(model);
     }
 
     currentSchedulerStep = nextStep;
-    // Update the model for visual highlighting — do NOT call
-    // save_changes() here to avoid flooding the kernel with
-    // messages on every step tick.
     model.set("current_step", nextStep);
+    applyAutomationLanes(model, nextStep);
 
-    for (const { freq, velocity } of iterateActiveVoices(vd, nextStep)) {
+    const stepSeconds = readStepSeconds(model);
+    const offset = computeStepOffsetSeconds(
+      nextStep,
+      stepSeconds,
+      numberOr(model.get("swing"), 0),
+      (model.get("groove") as number[]) || [],
+    );
+    const scheduledTime = Math.max(audioCtx.currentTime, audioTime + offset);
+
+    for (const { freq, velocity, durationTicks } of iterateActiveVoices(
+      vd,
+      nextStep,
+      random,
+    )) {
       scheduleOscillator(
-        audioCtx!,
+        audioCtx,
         outputNode,
         freq,
         velocity,
-        audioTime,
-        stepSeconds,
+        scheduledTime,
+        stepSeconds * durationTicks,
       );
     }
+
+    return stepSeconds;
   }
 
   return self;

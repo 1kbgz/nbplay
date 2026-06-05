@@ -227,6 +227,36 @@ test.describe("KeyboardWidget", () => {
     expect(noteEvent.type).toBe("on");
   });
 
+  test("releasing pointer outside a clicked key stops the note", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    const firstKey = page
+      .locator('[data-zone="upper-natural"] .nbplay-kb-key')
+      .first();
+    const box = await firstKey.boundingBox();
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+
+    let notes = await page.evaluate(
+      () => window.__testModel._state.active_notes,
+    );
+    expect(notes).toContain(48);
+
+    await page.mouse.move(box.x + box.width + 100, box.y + box.height + 100);
+    await page.mouse.up();
+
+    notes = await page.evaluate(() => window.__testModel._state.active_notes);
+    const noteEvent = await page.evaluate(
+      () => window.__testModel._state.last_note_event,
+    );
+    expect(notes).toEqual([]);
+    expect(noteEvent).toMatchObject({ note: 48, type: "off" });
+  });
+
   // 17. Model change updates display
   test("model velocity change updates info", async ({ page }) => {
     await renderWidget(page);
@@ -378,5 +408,282 @@ test.describe("KeyboardWidget", () => {
       () => window.__testModel._state.active_notes,
     );
     expect(notes).toEqual([]);
+  });
+
+  // 25. Routing via sampler_routing trait triggers correct sampler
+  test("sampler_routing triggers registered sampler", async ({ page }) => {
+    await page.evaluate(async () => {
+      // Create mock session bus with a sampler
+      const mockSampler = {
+        triggeredNotes: [],
+        triggerNote(note, velocity) {
+          this.triggeredNotes.push({ note, velocity });
+        },
+        releaseNote(note) {
+          this.triggeredNotes.push({ note, velocity: 0 });
+        },
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new (window.AudioContext || window.webkitAudioContext)(),
+          channels: [{ gain: { connect() {} } }],
+          samplers: { 0: mockSampler },
+        },
+      };
+      window.__mockSampler = mockSampler;
+    });
+
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [{ channel_index: 0, match: "all" }],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+    await kb.dispatchEvent("keydown", { key: "q" });
+
+    const triggered = await page.evaluate(
+      () => window.__mockSampler.triggeredNotes,
+    );
+    expect(triggered.length).toBeGreaterThanOrEqual(1);
+    expect(triggered[0].note).toBe(48);
+    expect(triggered[0].velocity).toBe(100);
+  });
+
+  // 27. Routing: match "zone" upper matches upper keys only
+  test('match "zone" upper routes only upper keys', async ({ page }) => {
+    await page.evaluate(async () => {
+      const mockSampler = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ note: n, velocity: v });
+        },
+        releaseNote(n) {
+          this.triggeredNotes.push({ note: n, velocity: 0 });
+        },
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new AudioContext(),
+          channels: [{ gain: { connect() {} } }],
+          samplers: { 0: mockSampler },
+        },
+      };
+      window.__mockSampler = mockSampler;
+    });
+
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [{ channel_index: 0, match: "zone", zone: "upper" }],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+
+    // Upper key Q → C3 = 48 → should trigger
+    await kb.dispatchEvent("keydown", { key: "q" });
+    let triggered = await page.evaluate(
+      () => window.__mockSampler.triggeredNotes,
+    );
+    expect(triggered.length).toBeGreaterThanOrEqual(1);
+
+    // Reset
+    await page.evaluate(() => {
+      window.__mockSampler.triggeredNotes = [];
+    });
+
+    // Lower key Z → C4 = 60 → should NOT trigger (zone="upper")
+    await kb.dispatchEvent("keydown", { key: "z" });
+    triggered = await page.evaluate(() => window.__mockSampler.triggeredNotes);
+    // Z is lower zone but zone filter is "upper"
+    expect(triggered.length).toBe(0);
+  });
+
+  // 28. Routing: match "octave" matches correct octave
+  test('match "octave" routes matching octave notes', async ({ page }) => {
+    await page.evaluate(async () => {
+      const mockSampler = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ note: n, velocity: v });
+        },
+        releaseNote() {},
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new AudioContext(),
+          channels: [{ gain: { connect() {} } }],
+          samplers: { 0: mockSampler },
+        },
+      };
+      window.__mockSampler = mockSampler;
+    });
+
+    // Octave 4 = MIDI 60-71
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [{ channel_index: 0, match: "octave", octave: 4 }],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+
+    // Lower key Z → C4 = 60 → octave 4 → should trigger
+    await kb.dispatchEvent("keydown", { key: "z" });
+    let triggered = await page.evaluate(
+      () => window.__mockSampler.triggeredNotes,
+    );
+    expect(triggered.length).toBeGreaterThanOrEqual(1);
+    expect(triggered[0].note).toBe(60);
+
+    // Reset
+    await page.evaluate(() => {
+      window.__mockSampler.triggeredNotes = [];
+    });
+
+    // Upper key Q → C3 = 48 → octave 3 → should NOT trigger
+    await kb.dispatchEvent("keydown", { key: "q" });
+    triggered = await page.evaluate(() => window.__mockSampler.triggeredNotes);
+    expect(triggered.length).toBe(0);
+  });
+
+  // 29. Routing: match "note" matches exact note
+  test('match "note" routes exact MIDI note', async ({ page }) => {
+    await page.evaluate(async () => {
+      const mockSampler = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ note: n, velocity: v });
+        },
+        releaseNote() {},
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new AudioContext(),
+          channels: [{ gain: { connect() {} } }],
+          samplers: { 0: mockSampler },
+        },
+      };
+      window.__mockSampler = mockSampler;
+    });
+
+    // Only match MIDI 60 (C4 = Z key)
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [{ channel_index: 0, match: "note", note: 60 }],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+
+    // Z key → 60 → should trigger
+    await kb.dispatchEvent("keydown", { key: "z" });
+    let triggered = await page.evaluate(
+      () => window.__mockSampler.triggeredNotes,
+    );
+    expect(triggered.length).toBeGreaterThanOrEqual(1);
+
+    // Reset
+    await page.evaluate(() => {
+      window.__mockSampler.triggeredNotes = [];
+    });
+
+    // X key → 62 → should NOT trigger
+    await kb.dispatchEvent("keydown", { key: "x" });
+    triggered = await page.evaluate(() => window.__mockSampler.triggeredNotes);
+    expect(triggered.length).toBe(0);
+  });
+
+  // 30. Routing: match "notes" matches listed notes
+  test('match "notes" routes listed MIDI notes', async ({ page }) => {
+    await page.evaluate(async () => {
+      const mockSampler = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ note: n, velocity: v });
+        },
+        releaseNote() {},
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new AudioContext(),
+          channels: [{ gain: { connect() {} } }],
+          samplers: { 0: mockSampler },
+        },
+      };
+      window.__mockSampler = mockSampler;
+    });
+
+    // Match Z(60) and C(64)
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [{ channel_index: 0, match: "notes", notes: [60, 64] }],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+
+    // Z key → 60 → should trigger
+    await kb.dispatchEvent("keydown", { key: "z" });
+    let triggered = await page.evaluate(
+      () => window.__mockSampler.triggeredNotes,
+    );
+    expect(triggered.length).toBeGreaterThanOrEqual(1);
+
+    // Reset
+    await page.evaluate(() => {
+      window.__mockSampler.triggeredNotes = [];
+    });
+
+    // V key → 67 → should NOT trigger (not in [60, 64])
+    await kb.dispatchEvent("keydown", { key: "v" });
+    triggered = await page.evaluate(() => window.__mockSampler.triggeredNotes);
+    expect(triggered.length).toBe(0);
+  });
+
+  // 31. Layered: multiple routes all fire for same note
+  test("layered routing triggers multiple samplers", async ({ page }) => {
+    await page.evaluate(async () => {
+      const s0 = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ sampler: 0, note: n, velocity: v });
+        },
+        releaseNote() {},
+      };
+      const s1 = {
+        triggeredNotes: [],
+        triggerNote(n, v) {
+          this.triggeredNotes.push({ sampler: 1, note: n, velocity: v });
+        },
+        releaseNote() {},
+      };
+      globalThis.__nbplay = {
+        "test-session": {
+          audioCtx: new AudioContext(),
+          channels: [{ gain: { connect() {} } }, { gain: { connect() {} } }],
+          samplers: { 0: s0, 1: s1 },
+        },
+      };
+      window.__mockSampler0 = s0;
+      window.__mockSampler1 = s1;
+    });
+
+    await renderWidget(page, {
+      session_id: "test-session",
+      sampler_routing: [
+        { channel_index: 0, match: "all" },
+        { channel_index: 1, match: "all" },
+      ],
+    });
+
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+    await kb.dispatchEvent("keydown", { key: "z" });
+
+    const t0 = await page.evaluate(() => window.__mockSampler0.triggeredNotes);
+    const t1 = await page.evaluate(() => window.__mockSampler1.triggeredNotes);
+    expect(t0.length).toBeGreaterThanOrEqual(1);
+    expect(t1.length).toBeGreaterThanOrEqual(1);
   });
 });

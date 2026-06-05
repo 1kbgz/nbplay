@@ -29,10 +29,13 @@ from nbplay.nbplay import (  # noqa: F401, E402
     Velocity,
 )
 from nbplay.widget import (  # noqa: F401, E402
+    KeyboardRoute,
     KeyboardWidget,
     MidiKeyboardWidget,
     MixerWidget,
     NoteComposer,
+    PadAction,
+    PadWidget,
     SamplerWidget,
     SequencerWidget,
     Session,
