@@ -1,7 +1,13 @@
 // nbplay KeyboardWidget – anywidget ESM frontend
 // 4-row musical typing keyboard (Logic Pro style) with Web Audio playback
 
-import { type AnyModel, cssVar, onKernelDisconnect } from "./helpers.ts";
+import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
+import {
+  routeNoteOn,
+  routeNoteOff,
+  type KeyboardRoute,
+  type SamplerBus,
+} from "./routing.ts";
 
 // Key mapping
 
@@ -95,16 +101,6 @@ function keyToNote(
   return null;
 }
 
-function isNoteKey(key: string): boolean {
-  const k = key.toLowerCase();
-  return (
-    k in UPPER_NATURAL ||
-    k in UPPER_SHARP ||
-    k in LOWER_NATURAL ||
-    k in LOWER_SHARP
-  );
-}
-
 // Session bus helpers
 
 interface NbplayBus {
@@ -112,11 +108,6 @@ interface NbplayBus {
   channels: { gain: AudioNode }[];
   noteListeners?: Array<(evt: NoteEvent) => void>;
   samplers?: Record<number, SamplerBus>;
-}
-
-interface SamplerBus {
-  triggerNote: (note: number, velocity: number) => void;
-  releaseNote: (note: number) => void;
 }
 
 interface NoteEvent {
@@ -382,6 +373,33 @@ function render({
   // Build keyboard rows
 
   const keyElements: Map<string, HTMLDivElement> = new Map();
+  const activePointerNotes: Map<number, { midi: number; zone: Zone }> =
+    new Map();
+
+  function releasePointerNote(pointerId: number): void {
+    const active = activePointerNotes.get(pointerId);
+    if (!active) return;
+    activePointerNotes.delete(pointerId);
+    handleNoteOff(active.midi, active.zone);
+  }
+
+  function releasePointerCapture(el: HTMLElement, pointerId: number): void {
+    try {
+      if (el.hasPointerCapture(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+    } catch (_) {
+      /* pointer capture may already be gone */
+    }
+  }
+
+  function capturePointer(el: HTMLElement, pointerId: number): void {
+    try {
+      el.setPointerCapture(pointerId);
+    } catch (_) {
+      /* synthetic tests may not have a capturable pointer */
+    }
+  }
 
   function buildRow(
     container: HTMLDivElement,
@@ -416,12 +434,26 @@ function render({
       keyEl.appendChild(label);
       keyEl.appendChild(note);
 
-      keyEl.addEventListener("pointerdown", () => {
+      keyEl.addEventListener("pointerdown", (e: PointerEvent) => {
+        e.preventDefault();
         root.focus();
+        if (activePointerNotes.has(e.pointerId)) {
+          releasePointerNote(e.pointerId);
+        }
+        activePointerNotes.set(e.pointerId, { midi, zone });
+        capturePointer(keyEl, e.pointerId);
         handleNoteOn(midi, zone);
       });
-      keyEl.addEventListener("pointerup", () => {
-        handleNoteOff(midi, zone);
+      keyEl.addEventListener("pointerup", (e: PointerEvent) => {
+        releasePointerNote(e.pointerId);
+        releasePointerCapture(keyEl, e.pointerId);
+      });
+      keyEl.addEventListener("pointercancel", (e: PointerEvent) => {
+        releasePointerNote(e.pointerId);
+        releasePointerCapture(keyEl, e.pointerId);
+      });
+      keyEl.addEventListener("lostpointercapture", (e: PointerEvent) => {
+        releasePointerNote(e.pointerId);
       });
 
       container.appendChild(keyEl);
@@ -448,28 +480,9 @@ function render({
     heldNotes.add(midi);
 
     // Play audio — check samplers first, fall back to built-in oscillator
-    const samplerRouting =
-      (model.get("sampler_routing") as Array<{
-        channel_index: number;
-        zone: string;
-      }>) || [];
+    const routes = (model.get("sampler_routing") as KeyboardRoute[]) || [];
     const sessionId = model.get("session_id") as string;
-    let usedSampler = false;
-
-    if (sessionId && samplerRouting.length > 0) {
-      const bus = getSessionBus(sessionId);
-      if (bus?.samplers) {
-        for (const route of samplerRouting) {
-          if (route.zone === "all" || route.zone === zone) {
-            const sampler = bus.samplers[route.channel_index];
-            if (sampler) {
-              sampler.triggerNote(midi, vel);
-              usedSampler = true;
-            }
-          }
-        }
-      }
-    }
+    const usedSampler = routeNoteOn(sessionId, routes, midi, zone, vel);
 
     if (!usedSampler) {
       audio.noteOn(midi, vel);
@@ -508,28 +521,9 @@ function render({
   }
 
   function releaseNote(midi: number, zone: Zone): void {
+    const routes = (model.get("sampler_routing") as KeyboardRoute[]) || [];
     const sessionId = model.get("session_id") as string;
-    const samplerRouting =
-      (model.get("sampler_routing") as Array<{
-        channel_index: number;
-        zone: string;
-      }>) || [];
-    let usedSampler = false;
-
-    if (sessionId && samplerRouting.length > 0) {
-      const bus = getSessionBus(sessionId);
-      if (bus?.samplers) {
-        for (const route of samplerRouting) {
-          if (route.zone === "all" || route.zone === zone) {
-            const sampler = bus.samplers[route.channel_index];
-            if (sampler) {
-              sampler.releaseNote(midi);
-              usedSampler = true;
-            }
-          }
-        }
-      }
-    }
+    const usedSampler = routeNoteOff(sessionId, routes, midi, zone);
 
     if (!usedSampler) {
       audio.noteOff(midi);
@@ -898,7 +892,7 @@ function render({
   // when the user clicks away or another element gains focus.
   root.addEventListener("blur", () => {
     // Release all held notes
-    for (const [key, { midi, zone }] of pressedKeys) {
+    for (const { midi, zone } of pressedKeys.values()) {
       handleNoteOff(midi, zone);
     }
     pressedKeys.clear();

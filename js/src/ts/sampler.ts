@@ -9,6 +9,16 @@ import {
   onKernelDisconnect,
   toFloat32,
 } from "./helpers.ts";
+import {
+  clampVelocity,
+  normalizePadActions,
+  noteName,
+  padActionLabel,
+  parseNoteName,
+  resizePadNotes,
+  resizePadVelocities,
+  type PadAction,
+} from "./pads.ts";
 
 // Types
 
@@ -27,63 +37,12 @@ interface Voice {
   releaseTime: number | null;
 }
 
-// Note helpers
-
-const NOTE_NAMES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
-
-function noteName(midi: number): string {
-  const octave = Math.floor(midi / 12) - 1;
-  return NOTE_NAMES[midi % 12] + octave;
-}
-
-function parseNote(raw: string): number | null {
-  const t = raw.trim();
-  const num = parseInt(t, 10);
-  if (String(num) === t && num >= 0 && num <= 127) return num;
-  const m = t.match(/^([A-Ga-g])(#|b)?(-?\d+)$/);
-  if (!m) return null;
-  const base: Record<string, number> = {
-    C: 0,
-    D: 2,
-    E: 4,
-    F: 5,
-    G: 7,
-    A: 9,
-    B: 11,
-  };
-  const b = base[m[1].toUpperCase()];
-  if (b === undefined) return null;
-  let semi = b;
-  if (m[2] === "#") semi++;
-  if (m[2] === "b") semi--;
-  const midi = (parseInt(m[3], 10) + 1) * 12 + semi;
-  return midi >= 0 && midi <= 127 ? midi : null;
-}
-
-function resizePadNotes(notes: number[], padCount: number): number[] {
-  const count = Math.max(1, Math.min(32, Math.round(padCount || 1)));
-  const resized = notes
-    .slice(0, count)
-    .map((note) => Math.max(0, Math.min(127, Math.round(note))));
-  let nextNote = resized.length > 0 ? resized[resized.length - 1] + 1 : 48;
-  while (resized.length < count) {
-    resized.push(Math.max(0, Math.min(127, nextNote)));
-    nextNote += 1;
-  }
-  return resized;
+interface SampleSlice {
+  index: number;
+  note: number;
+  start: number;
+  end: number;
+  label?: string;
 }
 
 // Waveform renderer
@@ -207,6 +166,40 @@ function drawEnvelope(
   ctx.fillText("R", (dx + ex) / 2, h - 1);
 }
 
+function decimateSamples(
+  samples: Float32Array,
+  maxPoints = 2048,
+): Float32Array {
+  if (samples.length <= maxPoints) return samples.slice();
+  const out = new Float32Array(maxPoints);
+  const step = samples.length / maxPoints;
+  for (let i = 0; i < maxPoints; i++) {
+    out[i] = samples[Math.floor(i * step)];
+  }
+  return out;
+}
+
+function float32ToDataView(samples: Float32Array): DataView {
+  const buffer = new ArrayBuffer(samples.length * 4);
+  const view = new DataView(buffer);
+  for (let i = 0; i < samples.length; i++) {
+    view.setFloat32(i * 4, samples[i], true);
+  }
+  return view;
+}
+
+function mixToMono(buffer: AudioBuffer): Float32Array {
+  const samples = new Float32Array(buffer.length);
+  const channels = Math.max(1, buffer.numberOfChannels);
+  for (let ch = 0; ch < channels; ch++) {
+    const channel = buffer.getChannelData(ch);
+    for (let i = 0; i < samples.length; i++) {
+      samples[i] += channel[i] / channels;
+    }
+  }
+  return samples;
+}
+
 // Web Audio Sampler Engine
 
 function createSamplerEngine(maxVoices = 8) {
@@ -268,6 +261,8 @@ function createSamplerEngine(maxVoices = 8) {
       noteNum: number,
       rootNote: number,
       envelope: Envelope,
+      velocity = 127,
+      slice?: { start: number; end: number },
     ): Voice | undefined {
       if (!audioCtx || !ensureBuffer()) return;
       if (audioCtx.state === "suspended") {
@@ -280,10 +275,12 @@ function createSamplerEngine(maxVoices = 8) {
       const sourceNode = audioCtx.createBufferSource();
       sourceNode.buffer = waveformBuffer;
       sourceNode.playbackRate.value = playbackRate;
-      // Loop the buffer so the sample sustains through the full
-      // ADSR envelope — without this a slow attack causes the buffer
-      // to end before the gain ramp reaches peak.
-      sourceNode.loop = true;
+      const hasSlice =
+        slice !== undefined &&
+        slice.end > slice.start &&
+        slice.start >= 0 &&
+        slice.end <= rawSamples!.length;
+      sourceNode.loop = !hasSlice;
 
       const gainNode = audioCtx.createGain();
       gainNode.connect(outputNode || audioCtx.destination);
@@ -291,14 +288,21 @@ function createSamplerEngine(maxVoices = 8) {
 
       const now = audioCtx.currentTime;
       const safeAttack = Math.max(envelope.attack, 0.005);
+      const peak = clampVelocity(velocity, 127) / 127;
       gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(1.0, now + safeAttack);
+      gainNode.gain.linearRampToValueAtTime(peak, now + safeAttack);
       gainNode.gain.linearRampToValueAtTime(
-        envelope.sustain,
+        envelope.sustain * peak,
         now + safeAttack + envelope.decay,
       );
 
-      sourceNode.start(now);
+      if (hasSlice && slice) {
+        const offset = slice.start / rawSampleRate;
+        const duration = (slice.end - slice.start) / rawSampleRate;
+        sourceNode.start(now, offset, duration);
+      } else {
+        sourceNode.start(now);
+      }
 
       const voice: Voice = {
         gainNode,
@@ -400,6 +404,7 @@ function render({
     <div class="nbplay-samp-header">
       <h3>nbplay</h3>
       <span class="nbplay-badge">sampler</span>
+      <input type="file" class="nbplay-samp-file" accept="audio/*" />
       <span class="nbplay-samp-name"></span>
     </div>
     <div class="nbplay-samp-waveform-wrap">
@@ -449,6 +454,12 @@ function render({
         <label class="nbplay-samp-label">Trigger Pads</label>
         <input type="number" class="nbplay-samp-pad-count" min="1" max="32" step="1" />
         <span class="nbplay-samp-pad-count-val"></span>
+        <label class="nbplay-samp-label">Velocity</label>
+        <input type="range" class="nbplay-samp-velocity" min="1" max="127" step="1" />
+        <span class="nbplay-samp-velocity-val"></span>
+        <label class="nbplay-samp-vel-sense-label">
+          <input type="checkbox" class="nbplay-samp-vel-sense" checked /> Vel-Sensitive
+        </label>
       </div>
       <div class="nbplay-samp-pads-grid"></div>
     </div>
@@ -458,6 +469,10 @@ function render({
   const waveCanvas = root.querySelector(
     ".nbplay-samp-waveform",
   ) as HTMLCanvasElement;
+  const waveWrap = root.querySelector(
+    ".nbplay-samp-waveform-wrap",
+  ) as HTMLDivElement;
+  const fileInput = root.querySelector(".nbplay-samp-file") as HTMLInputElement;
   const envCanvas = root.querySelector(
     ".nbplay-samp-env-canvas",
   ) as HTMLCanvasElement;
@@ -488,6 +503,15 @@ function render({
   const padCountVal = root.querySelector(
     ".nbplay-samp-pad-count-val",
   ) as HTMLSpanElement;
+  const velocitySlider = root.querySelector(
+    ".nbplay-samp-velocity",
+  ) as HTMLInputElement;
+  const velocityVal = root.querySelector(
+    ".nbplay-samp-velocity-val",
+  ) as HTMLSpanElement;
+  const velocitySensitiveInput = root.querySelector(
+    ".nbplay-samp-vel-sense",
+  ) as HTMLInputElement;
 
   const attackSlider = root.querySelector(
     ".nbplay-samp-attack",
@@ -628,71 +652,238 @@ function render({
     return sec.toFixed(2) + " s";
   }
 
-  function createPads(): void {
-    const rootNote = model.get("root_note") as number;
-    padsGrid.innerHTML = "";
-    const padCount = Math.max(
-      1,
-      Math.min(32, Number(model.get("pad_count") || 8)),
-    );
-    const padNotes: number[] = resizePadNotes(
+  const heldPads: Set<number> = new Set();
+  const heldNotes: Map<number, number> = new Map();
+
+  function getPadCount(): number {
+    return Math.max(1, Math.min(32, Number(model.get("pad_count") || 8)));
+  }
+
+  function getPadNotes(): number[] {
+    return resizePadNotes(
       ((model.get("pad_notes") as number[]) || []).slice(),
-      padCount,
+      getPadCount(),
     );
+  }
+
+  function getPadVelocities(): number[] {
+    return resizePadVelocities(
+      ((model.get("pad_velocities") as number[]) || []).slice(),
+      getPadCount(),
+      model.get("velocity") as number,
+    );
+  }
+
+  function getPadActions(): PadAction[] {
+    return normalizePadActions(
+      model.get("pad_actions"),
+      getPadNotes(),
+      getPadVelocities(),
+      getPadCount(),
+    );
+  }
+
+  function getSampleSlices(): SampleSlice[] {
+    const raw = (model.get("sample_slices") as Record<string, unknown>[]) || [];
+    return raw
+      .map((s, index) => ({
+        index: Number(s.index ?? index),
+        note: Number(s.note),
+        start: Math.max(0, Math.floor(Number(s.start) || 0)),
+        end: Math.max(0, Math.floor(Number(s.end) || 0)),
+        label: typeof s.label === "string" ? s.label : undefined,
+      }))
+      .filter((s) => Number.isFinite(s.note) && s.end > s.start);
+  }
+
+  function sliceForAction(action: PadAction): SampleSlice | undefined {
+    if (action.type !== "note") return undefined;
+    const slices = getSampleSlices();
+    if (action.slice !== undefined) {
+      return slices.find((s) => s.index === action.slice);
+    }
+    return slices.find((s) => s.note === action.note);
+  }
+
+  function currentEnvelope(): Envelope {
+    return {
+      attack: model.get("attack") as number,
+      decay: model.get("decay") as number,
+      sustain: model.get("sustain") as number,
+      release: model.get("release") as number,
+    };
+  }
+
+  function setLastPadEvent(
+    index: number,
+    action: PadAction,
+    eventType: "on" | "off" | "trigger",
+    velocity: number,
+  ): void {
+    model.set("last_pad_event", {
+      pad: index,
+      event: eventType,
+      velocity,
+      action,
+    });
+  }
+
+  function computePadVelocity(
+    index: number,
+    clientY: number,
+    rect: DOMRect,
+  ): number {
+    const padVelocities = getPadVelocities();
+    const maxVelocity =
+      padVelocities[index] ?? (model.get("velocity") as number);
+    if (!(model.get("velocity_sensitive") as boolean)) {
+      return clampVelocity(maxVelocity);
+    }
+    const fraction = (clientY - rect.top) / rect.height;
+    const raw = Math.round(20 + fraction * (maxVelocity - 20));
+    return clampVelocity(raw);
+  }
+
+  function syncActivePads(): void {
+    const pads = padsGrid.querySelectorAll(".nbplay-samp-pad");
+    pads.forEach((pad) => {
+      const index = Number((pad as HTMLElement).dataset.index || 0);
+      pad.classList.toggle("active", heldPads.has(index));
+    });
+  }
+
+  function isPadEditTarget(target: EventTarget | null): boolean {
+    return (
+      target instanceof HTMLElement &&
+      Boolean(target.closest(".nbplay-samp-pad-note, .nbplay-samp-inline-edit"))
+    );
+  }
+
+  function triggerPad(index: number, velocity: number): void {
+    const action = getPadActions()[index];
+    if (!action) return;
+    heldPads.add(index);
+
+    if (action.type === "note") {
+      heldNotes.set(index, action.note);
+      const slice = sliceForAction(action);
+      sampler.noteOn(
+        action.note,
+        model.get("root_note") as number,
+        currentEnvelope(),
+        velocity,
+        slice,
+      );
+      model.set("last_note_event", {
+        note: action.note,
+        velocity,
+        type: "on",
+      });
+      setLastPadEvent(index, action, "on", velocity);
+    } else {
+      if (action.type === "trait") {
+        model.set(action.trait, action.value);
+      }
+      setLastPadEvent(index, action, "trigger", velocity);
+    }
+
+    model.set("active_pads", Array.from(heldPads));
+    model.save_changes();
+    syncActivePads();
+  }
+
+  function releasePad(index: number): void {
+    if (!heldPads.has(index)) return;
+    heldPads.delete(index);
+    const note = heldNotes.get(index);
+    const action = getPadActions()[index];
+    heldNotes.delete(index);
+
+    if (note !== undefined) {
+      sampler.noteOff(note, {
+        release: model.get("release") as number,
+      });
+      model.set("last_note_event", { note, velocity: 0, type: "off" });
+      if (action) setLastPadEvent(index, action, "off", 0);
+    }
+
+    model.set("active_pads", Array.from(heldPads));
+    model.save_changes();
+    syncActivePads();
+  }
+
+  function createPads(): void {
+    padsGrid.innerHTML = "";
+    const padNotes = getPadNotes();
+    const padVelocities = getPadVelocities();
+    const padActions = getPadActions();
     if (
       padNotes.length !== ((model.get("pad_notes") as number[]) || []).length
     ) {
       model.set("pad_notes", padNotes.slice());
     }
-    padNotes.forEach((_, idx) => {
+    if (
+      padVelocities.length !==
+      ((model.get("pad_velocities") as number[]) || []).length
+    ) {
+      model.set("pad_velocities", padVelocities.slice());
+    }
+    padActions.forEach((action, idx) => {
       const pad = document.createElement("button");
       pad.className = "nbplay-samp-pad";
+      pad.dataset.index = String(idx);
+
+      const velocityBar = document.createElement("div");
+      velocityBar.className = "nbplay-samp-pad-vel-bar";
+      velocityBar.style.height =
+        Math.max(2, Math.round(((padVelocities[idx] ?? 100) / 127) * 100)) +
+        "%";
+      pad.appendChild(velocityBar);
 
       const noteSpan = document.createElement("span");
       noteSpan.className = "nbplay-samp-pad-note";
-      noteSpan.textContent = noteName(padNotes[idx]);
+      const slice = sliceForAction(action);
+      noteSpan.textContent = slice?.label || padActionLabel(action);
       noteSpan.title = "Double-click to edit note";
       pad.appendChild(noteSpan);
 
       pad.addEventListener("pointerdown", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (isPadEditTarget(e.target)) return;
         if (e.detail >= 2) return; // Skip trigger on double-click
         e.preventDefault();
-        pad.classList.add("active");
-        sampler.noteOn(padNotes[idx], rootNote, {
-          attack: model.get("attack") as number,
-          decay: model.get("decay") as number,
-          sustain: model.get("sustain") as number,
-          release: model.get("release") as number,
-        });
+        pad.setPointerCapture(e.pointerId);
+        const velocity = computePadVelocity(
+          idx,
+          e.clientY,
+          pad.getBoundingClientRect(),
+        );
+        triggerPad(idx, velocity);
       });
       pad.addEventListener("pointerup", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (isPadEditTarget(e.target)) return;
         if (e.detail >= 2) return; // Skip on double-click
         e.preventDefault();
-        pad.classList.remove("active");
-        sampler.noteOff(padNotes[idx], {
-          release: model.get("release") as number,
-        });
+        releasePad(idx);
       });
       pad.addEventListener("pointercancel", (e: PointerEvent) => {
         if ((e.target as HTMLElement).tagName === "INPUT") return;
+        if (isPadEditTarget(e.target)) return;
         if (e.detail >= 2) return; // Skip on double-click
         e.preventDefault();
-        pad.classList.remove("active");
-        sampler.noteOff(padNotes[idx], {
-          release: model.get("release") as number,
-        });
+        releasePad(idx);
       });
 
       noteSpan.addEventListener("dblclick", (ev: Event) => {
         ev.stopPropagation();
         ev.preventDefault();
+        if (action.type !== "note") return;
         let committed = false;
         const input = document.createElement("input");
         input.type = "text";
         input.className = "nbplay-samp-inline-edit";
-        input.value = noteName(padNotes[idx]);
+        input.value = noteName(action.note);
         noteSpan.replaceWith(input);
         // Defer focus to next tick so the browser has committed the DOM change
         // and previous pointer events (which may call preventDefault) are done.
@@ -704,10 +895,15 @@ function render({
         function commit(): void {
           if (committed) return;
           committed = true;
-          const parsed = parseNote(input.value);
+          const parsed = parseNoteName(input.value);
           if (parsed !== null) {
             padNotes[idx] = parsed;
             noteSpan.textContent = noteName(parsed);
+            const actions = getPadActions();
+            if (actions[idx]?.type === "note") {
+              actions[idx] = { ...actions[idx], note: parsed };
+              model.set("pad_actions", actions);
+            }
             model.set("pad_notes", padNotes.slice());
             model.save_changes();
           }
@@ -769,12 +965,16 @@ function render({
   }
 
   function syncPadCount(): void {
-    const count = Math.max(
-      1,
-      Math.min(32, Number(model.get("pad_count") || 8)),
-    );
+    const count = getPadCount();
     padCountInput.value = String(count);
     padCountVal.textContent = `${count}`;
+  }
+
+  function syncVelocityControls(): void {
+    const velocity = clampVelocity(model.get("velocity"));
+    velocitySlider.value = String(velocity);
+    velocityVal.textContent = String(velocity);
+    velocitySensitiveInput.checked = model.get("velocity_sensitive") as boolean;
   }
 
   function applyPadCount(rawCount: number): void {
@@ -784,19 +984,35 @@ function render({
       ((model.get("pad_notes") as number[]) || []).slice(),
       count,
     );
+    const velocities = resizePadVelocities(
+      ((model.get("pad_velocities") as number[]) || []).slice(),
+      count,
+      model.get("velocity") as number,
+    );
+    const actions = normalizePadActions(
+      model.get("pad_actions"),
+      notes,
+      velocities,
+      count,
+    );
     model.set("pad_count", count);
     model.set("pad_notes", notes);
+    model.set("pad_velocities", velocities);
+    model.set("pad_actions", actions);
     model.save_changes();
     syncPadCount();
     createPads();
   }
 
   function redrawWaveform(): void {
-    const raw = model.get("waveform");
-    const samples = toFloat32(raw);
-    drawWaveform(waveCanvas, samples);
-    if (samples) {
-      sampler.setWaveformData(samples, model.get("sample_rate") as number);
+    const displaySamples = toFloat32(model.get("waveform"));
+    const sampleData = toFloat32(model.get("sample_data"));
+    drawWaveform(waveCanvas, displaySamples || sampleData);
+    if (sampleData || displaySamples) {
+      sampler.setWaveformData(
+        sampleData || displaySamples!,
+        model.get("sample_rate") as number,
+      );
     }
   }
 
@@ -808,6 +1024,31 @@ function render({
       model.get("sustain") as number,
       model.get("release") as number,
     );
+  }
+
+  async function loadBrowserAudio(file: File): Promise<void> {
+    const AudioCtor =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    const decodeCtx = new AudioCtor();
+    const audioBuffer = await decodeCtx.decodeAudioData(
+      await file.arrayBuffer(),
+    );
+    const samples = mixToMono(audioBuffer);
+    const displaySamples = decimateSamples(samples);
+    model.set("sample_name", file.name);
+    model.set("sample_rate", audioBuffer.sampleRate);
+    model.set("sample_length", samples.length);
+    model.set("sample_data", float32ToDataView(samples));
+    model.set("waveform", float32ToDataView(displaySamples));
+    model.save_changes();
+    sampler.setWaveformData(samples, audioBuffer.sampleRate);
+    syncInfo();
+    redrawWaveform();
+    if (decodeCtx.state !== "closed") {
+      decodeCtx.close();
+    }
   }
 
   // Event listeners
@@ -855,9 +1096,52 @@ function render({
     applyPadCount(parseInt(padCountInput.value, 10));
   });
 
+  velocitySlider.addEventListener("input", () => {
+    const velocity = clampVelocity(velocitySlider.value);
+    model.set("velocity", velocity);
+    model.set(
+      "pad_velocities",
+      resizePadVelocities(getPadVelocities(), getPadCount(), velocity),
+    );
+    model.save_changes();
+    syncVelocityControls();
+    createPads();
+  });
+
+  velocitySensitiveInput.addEventListener("change", () => {
+    model.set("velocity_sensitive", velocitySensitiveInput.checked);
+    model.save_changes();
+  });
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+    if (file) {
+      loadBrowserAudio(file);
+    }
+  });
+
+  waveWrap.addEventListener("dragover", (e: DragEvent) => {
+    e.preventDefault();
+    waveWrap.classList.add("drag-over");
+  });
+
+  waveWrap.addEventListener("dragleave", () => {
+    waveWrap.classList.remove("drag-over");
+  });
+
+  waveWrap.addEventListener("drop", (e: DragEvent) => {
+    e.preventDefault();
+    waveWrap.classList.remove("drag-over");
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      loadBrowserAudio(file);
+    }
+  });
+
   // Model observers
 
   model.on("change:waveform", redrawWaveform);
+  model.on("change:sample_data", redrawWaveform);
   model.on("change:sample_name", syncInfo);
   model.on("change:sample_rate", syncInfo);
   model.on("change:root_note", () => {
@@ -872,10 +1156,18 @@ function render({
     syncPadCount();
     createPads();
   });
+  model.on("change:pad_velocities", createPads);
+  model.on("change:pad_actions", createPads);
+  model.on("change:sample_slices", createPads);
   model.on("change:pad_count", () => {
     syncPadCount();
     createPads();
   });
+  model.on("change:velocity", () => {
+    syncVelocityControls();
+    createPads();
+  });
+  model.on("change:velocity_sensitive", syncVelocityControls);
   model.on("change:sample_length", syncInfo);
   model.on("change:attack", () => {
     syncEnvelopeControls();
@@ -917,12 +1209,7 @@ function render({
     samplers[idx] = {
       triggerNote(note: number, velocity: number): void {
         const rootNote = model.get("root_note") as number;
-        sampler.noteOn(note, rootNote, {
-          attack: model.get("attack") as number,
-          decay: model.get("decay") as number,
-          sustain: model.get("sustain") as number,
-          release: model.get("release") as number,
-        });
+        sampler.noteOn(note, rootNote, currentEnvelope(), velocity);
       },
       releaseNote(note: number): void {
         sampler.noteOff(note, {
@@ -950,6 +1237,7 @@ function render({
   syncEnvelopeControls();
   syncVoices();
   syncPadCount();
+  syncVelocityControls();
   redrawWaveform();
   redrawEnvelope();
   createPads();

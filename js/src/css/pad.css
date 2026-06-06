@@ -1,0 +1,196 @@
+/* nbplay PadWidget styles */
+
+.nbplay-pad {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--jp-layout-color1, #fff);
+  border: 1px solid var(--jp-border-color2, #e0e0e0);
+  border-radius: 8px;
+  font-family: var(--jp-ui-font-family, sans-serif);
+  user-select: none;
+}
+
+/* Header */
+.nbplay-pad-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nbplay-pad-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--jp-ui-font-color0, #333);
+}
+
+/* Controls */
+.nbplay-pad-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--jp-border-color2, #e0e0e0);
+}
+
+.nbplay-pad-vel-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nbplay-pad-label {
+  font-size: 11px;
+  color: var(--jp-ui-font-color2, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nbplay-pad-vel-slider {
+  width: 80px;
+}
+
+.nbplay-pad-vel-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--jp-ui-font-color0, #333);
+  min-width: 28px;
+}
+
+.nbplay-pad-vel-sense-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--jp-ui-font-color2, #888);
+}
+
+/* Grid */
+.nbplay-pad-grid {
+  display: grid;
+  gap: 6px;
+  padding: 4px;
+}
+
+.nbplay-pad-cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--jp-layout-color2, #f5f5f5);
+  border: 2px solid var(--jp-border-color2, #ccc);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.08s,
+    transform 0.08s,
+    border-color 0.08s;
+  min-width: 48px;
+  min-height: 48px;
+  overflow: hidden;
+}
+
+/* Velocity bar — full-height fill behind label, like sequencer vel bars.
+   Very low opacity so the note label remains readable. */
+.nbplay-pad-vel-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #1976d2) 12%,
+    transparent
+  );
+  border-radius: 0 0 4px 4px;
+  transition:
+    height 0.15s ease,
+    background 0.1s;
+  z-index: 0;
+  min-height: 2px;
+}
+
+.nbplay-pad-cell:hover .nbplay-pad-vel-bar {
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #1976d2) 20%,
+    transparent
+  );
+}
+
+.nbplay-pad-cell.active .nbplay-pad-vel-bar {
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #1976d2) 35%,
+    transparent
+  );
+}
+
+.nbplay-pad-cell:hover {
+  background: var(--jp-layout-color3, #e8e8e8);
+}
+
+.nbplay-pad-cell:active,
+.nbplay-pad-cell.active {
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color1, #1976d2) 40%,
+    transparent
+  );
+  border-color: var(--jp-brand-color1, #1976d2);
+  transform: scale(0.95);
+}
+
+/* Flash animation on trigger */
+@keyframes nbplay-pad-flash {
+  0% {
+    background: color-mix(
+      in srgb,
+      var(--jp-brand-color1, #1976d2) 60%,
+      transparent
+    );
+  }
+  100% {
+    background: var(--jp-layout-color2, #f5f5f5);
+  }
+}
+
+.nbplay-pad-cell.flash {
+  animation: nbplay-pad-flash 0.2s ease-out;
+}
+
+.nbplay-pad-cell .nbplay-pad-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--jp-ui-font-color0, #333);
+  text-transform: none;
+  letter-spacing: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Footer */
+.nbplay-pad-footer {
+  font-size: 11px;
+  color: var(--jp-ui-font-color2, #888);
+}
+
+/* Inline edit */
+.nbplay-pad-inline-edit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 2px solid var(--jp-brand-color1, #1976d2);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--jp-ui-font-family, sans-serif);
+  background: var(--jp-layout-color0, #fff);
+  color: var(--jp-ui-font-color0, #333);
+  z-index: 2;
+}

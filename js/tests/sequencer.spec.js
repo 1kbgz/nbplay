@@ -23,6 +23,9 @@ const DEFAULTS = {
   step_duration: 0.5,
   loop_enabled: true,
   is_playing: false,
+  swing: 0,
+  groove: [],
+  automation_lanes: [],
 };
 
 /** Boot the sequencer widget inside the harness page. */
@@ -41,6 +44,31 @@ async function renderWidget(page, overrides = {}) {
     window.__testModel = model;
     mod.default.render({ model, el });
   }, opts);
+}
+
+async function installAudioRecorder(page) {
+  await page.evaluate(() => {
+    const BaseAudioContext = window.AudioContext;
+    window.__oscStarts = [];
+    window.__lastAudioContext = null;
+    class RecordingAudioContext extends BaseAudioContext {
+      constructor(opts) {
+        super(opts);
+        window.__lastAudioContext = this;
+      }
+      createOscillator() {
+        const osc = super.createOscillator();
+        const start = osc.start.bind(osc);
+        osc.start = (time) => {
+          window.__oscStarts.push(time);
+          start(time);
+        };
+        return osc;
+      }
+    }
+    window.AudioContext = RecordingAudioContext;
+    window.webkitAudioContext = RecordingAudioContext;
+  });
 }
 
 // Tests
@@ -953,6 +981,102 @@ test.describe("SequencerWidget", () => {
     expect(s0.active).toBe(true);
     expect(s1.note).toBe(67);
     expect(s1.active).toBe(true);
+  });
+
+  test("step probability 0 skips oscillator scheduling", async ({ page }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, {
+      voices_data: [
+        [
+          {
+            active: true,
+            note: 60,
+            velocity: 100,
+            duration_ticks: 1,
+            probability: 0,
+          },
+        ],
+      ],
+      length: 1,
+      step_duration: 0.25,
+      bpm: 120,
+    });
+
+    await page.locator(".nbplay-seq-play").click();
+    await page.waitForFunction(
+      () => window.__testModel._state.current_step === 0,
+    );
+    await page.waitForTimeout(80);
+
+    const starts = await page.evaluate(() => window.__oscStarts);
+    expect(starts).toEqual([]);
+  });
+
+  test("swing and groove delay odd step scheduling", async ({ page }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, {
+      voices_data: [
+        Array.from({ length: 8 }, (_, i) => ({
+          active: i < 2,
+          note: i === 1 ? 64 : 60,
+          velocity: 100,
+          duration_ticks: 1,
+          probability: 100,
+        })),
+      ],
+      length: 8,
+      step_duration: 0.5,
+      bpm: 120,
+      swing: 100,
+      groove: [0, 10],
+    });
+
+    await page.locator(".nbplay-seq-play").click();
+    await page.waitForFunction(() => window.__oscStarts.length >= 1);
+    await page.evaluate(() => {
+      window.__lastAudioContext.currentTime = 0.16;
+    });
+    await page.waitForFunction(() => window.__oscStarts.length >= 2);
+
+    const starts = await page.evaluate(() => window.__oscStarts);
+    expect(starts[0]).toBeCloseTo(0, 3);
+    expect(starts[1]).toBeGreaterThan(0.39);
+  });
+
+  test("automation lanes apply numeric trait values on scheduled steps", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, {
+      voices_data: [
+        [
+          {
+            active: false,
+            note: 60,
+            velocity: 100,
+            duration_ticks: 1,
+            probability: 100,
+          },
+        ],
+      ],
+      length: 1,
+      bpm: 120,
+      automation_lanes: [
+        {
+          trait: "bpm",
+          points: [{ step: 0, value: 180 }],
+        },
+      ],
+    });
+
+    await page.locator(".nbplay-seq-play").click();
+    await page.waitForFunction(() => window.__testModel._state.bpm === 180);
+
+    const state = await page.evaluate(() => ({
+      bpm: window.__testModel._state.bpm,
+      currentStep: window.__testModel._state.current_step,
+    }));
+    expect(state).toEqual({ bpm: 180, currentStep: 0 });
   });
 
   // 33. Kernel disconnect stops playback

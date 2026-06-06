@@ -2,21 +2,11 @@
 // Step sequencer grid with Web Audio lookahead scheduler
 
 import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
-
-interface StepData {
-  active: boolean;
-  note: number;
-  velocity: number;
-  duration_ticks?: number;
-}
-
-interface NbplayBus {
-  audioCtx: AudioContext;
-  channels: { gain: AudioNode }[];
-  noteListeners?: Array<
-    (evt: { note: number; velocity: number; type: string }) => void
-  >;
-}
+import {
+  createAudioScheduler,
+  type StepData,
+  voicesFromModel,
+} from "./scheduler.ts";
 
 const NOTE_NAMES: string[] = [
   "C",
@@ -39,12 +29,14 @@ function noteName(midi: number): string {
   return NOTE_NAMES[midi % 12] + octave;
 }
 
-function midiToHz(note: number): number {
-  return 440 * Math.pow(2, (note - 69) / 12);
-}
-
 function defaultStep(): StepData {
-  return { active: false, note: 60, velocity: 100, duration_ticks: 1 };
+  return {
+    active: false,
+    note: 60,
+    velocity: 100,
+    duration_ticks: 1,
+    probability: 100,
+  };
 }
 
 function measureBeatCount(
@@ -86,182 +78,6 @@ function resizeVoicesData(
   return Array.from({ length: count }, (_, index) =>
     resizeSteps(voicesData[index] || [], length),
   );
-}
-
-function voicesFromModel(model: AnyModel): StepData[][] {
-  return (model.get("voices_data") as StepData[][]) || [];
-}
-
-function stepTimeInSeconds(model: AnyModel): number {
-  const bpm = (model.get("bpm") as number) || 120;
-  const stepDuration = (model.get("step_duration") as number) || 0.25;
-  return stepDuration / (bpm / 60);
-}
-
-function nextStepIndex(currentStep: number, stepCount: number): number {
-  return (currentStep + 1) % stepCount;
-}
-
-interface AudioScheduler {
-  start(model: AnyModel): void;
-  stop(): void;
-  destroy(): void;
-  scheduler(model: AnyModel): void;
-  scheduleStep(model: AnyModel, audioTime: number): void;
-  playOscillator(
-    freq: number,
-    velocity: number,
-    startTime: number,
-    duration: number,
-  ): void;
-  isPlaying(): boolean;
-}
-
-function createAudioScheduler(): AudioScheduler {
-  let audioCtx: AudioContext | null = null;
-  let outputNode: AudioNode | null = null;
-  let ownAudioCtx: boolean = true;
-  let schedulerTimer: ReturnType<typeof setInterval> | null = null;
-  let nextScheduleTime: number = 0;
-  const scheduleAheadTime: number = 0.1;
-  const lookAheadTime: number = 0.025;
-  let currentSchedulerStep: number = -1;
-
-  return {
-    start(model: AnyModel): void {
-      const sid = model.get("session_id") as string;
-      const idx = model.get("channel_index") as number;
-      if (sid && idx >= 0) {
-        const bus = (globalThis as Record<string, unknown>).__nbplay as
-          | Record<string, NbplayBus>
-          | undefined;
-        if (bus && bus[sid] && bus[sid].channels[idx]) {
-          audioCtx = bus[sid].audioCtx;
-          outputNode = bus[sid].channels[idx].gain;
-          ownAudioCtx = false;
-        }
-      }
-      if (!audioCtx) {
-        audioCtx = new AudioContext();
-        outputNode = null;
-        ownAudioCtx = true;
-      }
-      if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
-      if (!schedulerTimer) {
-        // Reset step counter so the first scheduled step is step 0
-        currentSchedulerStep = -1;
-        nextScheduleTime = audioCtx.currentTime;
-        schedulerTimer = setInterval(() => {
-          this.scheduler(model);
-        }, lookAheadTime * 1000);
-      }
-    },
-
-    stop(): void {
-      if (schedulerTimer) {
-        clearInterval(schedulerTimer);
-        schedulerTimer = null;
-      }
-      currentSchedulerStep = -1;
-    },
-
-    destroy(): void {
-      this.stop();
-      if (ownAudioCtx && audioCtx && audioCtx.state !== "closed") {
-        audioCtx.close();
-      }
-      audioCtx = null;
-      outputNode = null;
-      ownAudioCtx = true;
-    },
-
-    scheduler(model: AnyModel): void {
-      if (!audioCtx) return;
-      const currentTime = audioCtx.currentTime;
-      while (nextScheduleTime < currentTime + scheduleAheadTime) {
-        this.scheduleStep(model, nextScheduleTime);
-        nextScheduleTime += stepTimeInSeconds(model);
-      }
-    },
-
-    scheduleStep(model: AnyModel, audioTime: number): void {
-      if (!audioCtx) return;
-      const voicesData = voicesFromModel(model);
-      if (voicesData.length === 0) return;
-      const steps = voicesData[0] || [];
-      if (steps.length === 0) return;
-
-      const stepSeconds = stepTimeInSeconds(model);
-
-      // Advance the internal scheduler step counter
-      const scheduledStepIndex = nextStepIndex(
-        currentSchedulerStep,
-        steps.length,
-      );
-
-      const loopEnabled = model.get("loop_enabled") as boolean;
-      if (
-        scheduledStepIndex === 0 &&
-        currentSchedulerStep >= 0 &&
-        !loopEnabled
-      ) {
-        model.set("is_playing", false);
-        model.save_changes();
-        return;
-      }
-
-      currentSchedulerStep = scheduledStepIndex;
-      // Update the model for visual highlighting — do NOT call
-      // save_changes() here to avoid flooding the kernel with
-      // messages on every step tick.
-      model.set("current_step", scheduledStepIndex);
-
-      // Play a note for each voice that has an active step
-      for (const voice of voicesData) {
-        const step = voice[scheduledStepIndex];
-        if (step && step.active) {
-          const freq = midiToHz(step.note);
-          const velocity = (step.velocity ?? 100) / 127;
-          this.playOscillator(freq, velocity, audioTime, stepSeconds);
-        }
-      }
-    },
-
-    playOscillator(
-      freq: number,
-      velocity: number,
-      startTime: number,
-      duration: number,
-    ): void {
-      if (!audioCtx) return;
-      const attackTime = 0.005;
-      const releaseTime = Math.min(0.05, duration * 0.2);
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0, startTime);
-        gain.gain.linearRampToValueAtTime(velocity, startTime + attackTime);
-        gain.gain.linearRampToValueAtTime(
-          0,
-          startTime + duration - releaseTime,
-        );
-        osc.connect(gain);
-        gain.connect(outputNode || audioCtx.destination);
-        osc.start(startTime);
-        osc.stop(startTime + duration);
-      } catch (_) {
-        // Ignore if timing is in the past
-      }
-    },
-
-    isPlaying(): boolean {
-      return schedulerTimer !== null;
-    },
-  };
 }
 
 function render({
@@ -640,7 +456,7 @@ function render({
         if (steps[i].active) cell.classList.add("active");
         if (i === currentStep) cell.classList.add("current");
         cell.textContent = noteName(steps[i].note);
-        cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+        cell.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity} prob=${steps[i].probability ?? 100}%`;
 
         cell.addEventListener("click", () => {
           // Toggle immediately.  In a dblclick sequence the browser fires
@@ -744,7 +560,7 @@ function render({
       cell.classList.toggle("active", !!steps[i].active);
       cell.classList.toggle("current", i === currentStep);
       cell.textContent = noteName(steps[i].note);
-      el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity}`;
+      el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity} prob=${steps[i].probability ?? 100}%`;
     });
 
     const velBars = grid.querySelectorAll(".nbplay-seq-vel-bar");

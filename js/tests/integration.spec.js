@@ -38,7 +38,7 @@ const KEYBOARD_DEFAULTS = {
   last_note_event: {},
   session_id: SESSION_ID,
   channel_index: 0,
-  sampler_routing: [{ channel_index: 0, zone: "all" }],
+  sampler_routing: [{ channel_index: 0, match: "all" }],
 };
 
 const SEQUENCER_DEFAULTS = {
@@ -399,8 +399,8 @@ test.describe("Integration: Multiple Samplers (Split Keyboard)", () => {
     // Keyboard with upper→channel 0, lower→channel 1
     await renderKeyboard(page, {
       sampler_routing: [
-        { channel_index: 0, zone: "upper" },
-        { channel_index: 1, zone: "lower" },
+        { channel_index: 0, match: "zone", zone: "upper" },
+        { channel_index: 1, match: "zone", zone: "lower" },
       ],
     });
 
