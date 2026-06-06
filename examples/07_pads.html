@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>11 Bridge to Rust Objects - nbplay v0.1.0</title>
+        <title>PadWidget — Trigger Pads - nbplay v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -215,7 +215,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/examples/11_rust_bridge.ipynb.txt" title="View this page">
+  <a class="muted-link" href="../_sources/examples/07_pads.ipynb.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -228,70 +228,115 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="bridge-to-rust-objects">
-<h1>11 Bridge to Rust Objects<a class="headerlink" href="#bridge-to-rust-objects" title="Link to this heading">¶</a></h1>
-<p>Convert widget/session state into Rust-backed objects.</p>
+          <section class="tex2jax_ignore mathjax_ignore" id="padwidget-trigger-pads">
+<h1>PadWidget — Trigger Pads<a class="headerlink" href="#padwidget-trigger-pads" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code> is an MPC-style grid of velocity-sensitive trigger pads.
+Each pad sends a MIDI note through the session bus — connect it to a
+sampler and you’ve got an instant drum machine in a notebook cell.</p>
+<ul class="simple">
+<li><p><strong>Velocity-sensitive</strong> — click near the top of a pad for soft hits,
+near the bottom for hard hits</p></li>
+<li><p><strong>Assignable notes</strong> — double-click a pad’s label to type a new note
+name (e.g. <code class="docutils literal notranslate"><span class="pre">C#4</span></code>) or MIDI number; scroll to nudge ±1 semitone</p></li>
+<li><p><strong>Session routing</strong> — uses the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> as the
+<code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> so one sampler can serve both</p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">PadWidget</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">,</span> <span class="n">Session</span><span class="p">,</span> <span class="n">SynthWidget</span>
-
-<span class="c1"># ── set up sound sources ────────────────────────────────────────────────</span>
-<span class="n">lead</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;saw&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">660.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.55</span><span class="p">)</span>
-<span class="n">bass</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">110.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.65</span><span class="p">)</span>
-
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span>
-    <span class="n">attack</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">sustain</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">max_voices</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span>
-<span class="n">frame_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="mf">0.18</span><span class="p">)</span>
-<span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">880</span> <span class="o">*</span> <span class="n">index</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">index</span> <span class="o">/</span> <span class="n">frame_count</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frame_count</span><span class="p">)</span>
-<span class="p">]</span>
-<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">sample_data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Notebook Blip&quot;</span><span class="p">)</span>
-
-<span class="c1"># ── sequencers ──────────────────────────────────────────────────────────</span>
-<span class="n">lead_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">step_index</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">72</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">71</span><span class="p">]):</span>
-    <span class="n">lead_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">102</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">bass_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">step_index</span><span class="p">,</span> <span class="n">velocity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">118</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">64</span><span class="p">]):</span>
-    <span class="n">bass_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="n">velocity</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">drum_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">step_index</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>
-    <span class="n">drum_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step_index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">112</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># ── session ─────────────────────────────────────────────────────────────</span>
-<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">118.0</span><span class="p">,</span> <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">,</span> <span class="n">lead_seq</span><span class="p">,</span> <span class="n">lead</span><span class="p">)</span>
-<span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">,</span> <span class="n">bass_seq</span><span class="p">,</span> <span class="n">bass</span><span class="p">)</span>
-<span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">,</span> <span class="n">drum_seq</span><span class="p">,</span> <span class="n">sampler</span><span class="p">)</span>
-
-<span class="c1"># ── convert to Rust types ──────────────────────────────────────────────</span>
-<span class="n">rust_mixer</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">to_mixer</span><span class="p">()</span>
-<span class="n">lead_pattern</span> <span class="o">=</span> <span class="n">lead_seq</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
-<span class="n">bass_pattern</span> <span class="o">=</span> <span class="n">bass_seq</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
-<span class="n">drum_pattern</span> <span class="o">=</span> <span class="n">drum_seq</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">()</span>
-<span class="n">rust_sampler</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">to_sampler</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mixer channels: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rust_mixer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lead pattern length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lead_pattern</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bass pattern length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bass_pattern</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Drum pattern length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">drum_pattern</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sampler active voices: </span><span class="si">{</span><span class="n">rust_sampler</span><span class="o">.</span><span class="n">active_voice_count</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># Create a 4×4 pad grid — defaults to MIDI notes 36–51 (C2–D#3)</span>
+<span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">pads</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>Click any pad to hear a sine tone. The pad flashes on impact.</p>
+<ul class="simple">
+<li><p><strong>Velocity-sensitive by default</strong> — click near the top for a quiet hit
+(≈vel 20) and near the bottom for a loud one (up to the slider value).</p></li>
+<li><p><strong>Hold pads</strong> — multiple pads can be held simultaneously for chords
+or layered drum hits.</p></li>
+<li><p><strong>Scroll wheel</strong> on a pad adjusts its note ±1 semitone.</p></li>
+<li><p><strong>Double-click</strong> a pad’s note label to type a new note name.</p></li>
+</ul>
+<section id="custom-layout">
+<h2>Custom Layout<a class="headerlink" href="#custom-layout" title="Link to this heading">¶</a></h2>
+<p>Any rectangular grid works — here’s a 2×8 layout with a
+<strong>minor pentatonic scale</strong> mapped across the pads.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2 rows × 8 columns with a minor pentatonic scale starting at C2</span>
+<span class="n">pentatonic</span> <span class="o">=</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span>
+              <span class="mi">55</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">72</span><span class="p">]</span>
+
+<span class="n">pads_custom</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span>
+    <span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">cols</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">pad_notes</span><span class="o">=</span><span class="n">pentatonic</span><span class="p">,</span>
+    <span class="n">velocity</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pads_custom</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="pads-sampler-via-session">
+<h2>Pads + Sampler via Session<a class="headerlink" href="#pads-sampler-via-session" title="Link to this heading">¶</a></h2>
+<p>Connect the pads to a sampler through the session bus — the same
+pattern used by <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">PadWidget</span>
+
+<span class="c1"># Create a simple sine-wave &quot;sample&quot; for the sampler to play</span>
+<span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">freq</span> <span class="o">=</span> <span class="mf">440.0</span>
+<span class="n">frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="n">duration</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.6</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames</span><span class="p">)]</span>
+
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span>
+    <span class="n">channel_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">attack</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">sustain</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">release</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">max_voices</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sine&quot;</span><span class="p">)</span>
+
+<span class="c1"># 4×4 drum-style pads connected to the sampler</span>
+<span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
+<span class="n">pads</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
+
+<span class="n">sampler</span><span class="p">,</span> <span class="n">pads</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="what-s-next">
+<h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Double-click</strong> any pad label to change its note — type <code class="docutils literal notranslate"><span class="pre">C#4</span></code> or <code class="docutils literal notranslate"><span class="pre">60</span></code>.</p></li>
+<li><p><strong>Scroll</strong> on a pad to nudge its note up or down one semitone.</p></li>
+<li><p><strong>Drag</strong> the velocity slider to set the maximum velocity; with
+<em>Vel-Sensitive</em> checked, click position within the pad determines
+actual velocity (top = soft, bottom = hard).</p></li>
+<li><p>Combine <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code>, and <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> in one
+<code class="docutils literal notranslate"><span class="pre">Session</span></code> for a full multi-instrument setup.</p></li>
+</ul>
+</section>
 </section>
 
         </article>
@@ -319,8 +364,29 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">PadWidget — Trigger Pads</a><ul>
+<li><a class="reference internal" href="#custom-layout">Custom Layout</a></li>
+<li><a class="reference internal" href="#pads-sampler-via-session">Pads + Sampler via Session</a></li>
+<li><a class="reference internal" href="#what-s-next">What’s Next</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

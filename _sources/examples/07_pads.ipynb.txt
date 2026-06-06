@@ -1,0 +1,190 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0",
+   "metadata": {
+    "id": "0",
+    "language": "markdown"
+   },
+   "source": [
+    "# PadWidget — Trigger Pads\n",
+    "\n",
+    "The `PadWidget` is an MPC-style grid of velocity-sensitive trigger pads.\n",
+    "Each pad sends a MIDI note through the session bus — connect it to a\n",
+    "sampler and you've got an instant drum machine in a notebook cell.\n",
+    "\n",
+    "- **Velocity-sensitive** — click near the top of a pad for soft hits,\n",
+    "  near the bottom for hard hits\n",
+    "- **Assignable notes** — double-click a pad's label to type a new note\n",
+    "  name (e.g. `C#4`) or MIDI number; scroll to nudge ±1 semitone\n",
+    "- **Session routing** — uses the same `sampler_routing` as the\n",
+    "  `KeyboardWidget` so one sampler can serve both"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1",
+   "metadata": {
+    "id": "1",
+    "language": "python"
+   },
+   "outputs": [],
+   "source": [
+    "from nbplay import PadWidget\n",
+    "\n",
+    "# Create a 4×4 pad grid — defaults to MIDI notes 36–51 (C2–D#3)\n",
+    "pads = PadWidget(rows=4, cols=4)\n",
+    "pads\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2",
+   "metadata": {
+    "id": "2",
+    "language": "markdown"
+   },
+   "source": [
+    "Click any pad to hear a sine tone. The pad flashes on impact.\n",
+    "\n",
+    "- **Velocity-sensitive by default** — click near the top for a quiet hit\n",
+    "  (≈vel 20) and near the bottom for a loud one (up to the slider value).\n",
+    "- **Hold pads** — multiple pads can be held simultaneously for chords\n",
+    "  or layered drum hits.\n",
+    "- **Scroll wheel** on a pad adjusts its note ±1 semitone.\n",
+    "- **Double-click** a pad's note label to type a new note name."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3",
+   "metadata": {
+    "id": "3",
+    "language": "markdown"
+   },
+   "source": [
+    "## Custom Layout\n",
+    "\n",
+    "Any rectangular grid works — here's a 2×8 layout with a\n",
+    "**minor pentatonic scale** mapped across the pads."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4",
+   "metadata": {
+    "id": "4",
+    "language": "python"
+   },
+   "outputs": [],
+   "source": [
+    "# 2 rows × 8 columns with a minor pentatonic scale starting at C2\n",
+    "pentatonic = [36, 38, 40, 43, 45, 48, 50, 52,\n",
+    "              55, 57, 60, 62, 64, 67, 69, 72]\n",
+    "\n",
+    "pads_custom = PadWidget(\n",
+    "    rows=2,\n",
+    "    cols=8,\n",
+    "    pad_notes=pentatonic,\n",
+    "    velocity=80,\n",
+    ")\n",
+    "pads_custom\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5",
+   "metadata": {
+    "id": "5",
+    "language": "markdown"
+   },
+   "source": [
+    "## Pads + Sampler via Session\n",
+    "\n",
+    "Connect the pads to a sampler through the session bus — the same\n",
+    "pattern used by `KeyboardWidget` and `MidiKeyboardWidget`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6",
+   "metadata": {
+    "id": "6",
+    "language": "python"
+   },
+   "outputs": [],
+   "source": [
+    "import math\n",
+    "from nbplay import SamplerWidget, PadWidget\n",
+    "\n",
+    "# Create a simple sine-wave \"sample\" for the sampler to play\n",
+    "sample_rate = 44100\n",
+    "duration = 0.5\n",
+    "freq = 440.0\n",
+    "frames = int(sample_rate * duration)\n",
+    "samples = [math.sin(2 * math.pi * freq * i / sample_rate) * 0.6 for i in range(frames)]\n",
+    "\n",
+    "sampler = SamplerWidget(\n",
+    "    channel_index=0,\n",
+    "    root_note=60,\n",
+    "    attack=0.001,\n",
+    "    decay=0.05,\n",
+    "    sustain=0.8,\n",
+    "    release=0.1,\n",
+    "    max_voices=8,\n",
+    ")\n",
+    "sampler.load_sample(samples, sample_rate=sample_rate, root_note=60, name=\"Sine\")\n",
+    "\n",
+    "# 4×4 drum-style pads connected to the sampler\n",
+    "pads = PadWidget(rows=4, cols=4, velocity=110)\n",
+    "pads.connect_sampler(sampler)\n",
+    "\n",
+    "sampler, pads\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7",
+   "metadata": {
+    "id": "7",
+    "language": "markdown"
+   },
+   "source": [
+    "## What's Next\n",
+    "\n",
+    "- **Double-click** any pad label to change its note — type `C#4` or `60`.\n",
+    "- **Scroll** on a pad to nudge its note up or down one semitone.\n",
+    "- **Drag** the velocity slider to set the maximum velocity; with\n",
+    "  *Vel-Sensitive* checked, click position within the pad determines\n",
+    "  actual velocity (top = soft, bottom = hard).\n",
+    "- Combine `PadWidget`, `KeyboardWidget`, and `SequencerWidget` in one\n",
+    "  `Session` for a full multi-instrument setup."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,1262 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>nbplay Developer Guide - nbplay v0.1.0</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/custom.css?v=890fd012" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../_sources/docs/src/DEVELOPER.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="nbplay-developer-guide">
+<h1>nbplay Developer Guide<a class="headerlink" href="#nbplay-developer-guide" title="Link to this heading">¶</a></h1>
+<p>This guide is the top-to-bottom map for nbplay contributors. It explains how the
+Python package, Rust core, PyO3 extension, WebAssembly bindings, TypeScript
+widgets, browser audio/MIDI runtime, tests, docs, and distribution pipeline fit
+together. It is meant to be detailed enough that a developer can add a feature
+to any component without first reverse-engineering the whole repository.</p>
+<p>nbplay is a notebook-native digital audio workstation. Users instantiate Python
+objects in a Jupyter kernel; anywidget syncs trait state to browser-side
+TypeScript renderers; the browser uses Web Audio and Web MIDI for low-latency
+interaction; Rust provides reusable DSP/data types and compiles both to a native
+Python extension and to browser WebAssembly.</p>
+<section id="mental-model">
+<h2>Mental model<a class="headerlink" href="#mental-model" title="Link to this heading">¶</a></h2>
+<p>The runtime has three cooperating layers:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Jupyter notebook / Lab / VS Code / Colab
+  Python kernel
+    nbplay/widget.py anywidget classes
+    nbplay.nbplay native extension from Rust/PyO3
+      | traitlets sync over Jupyter comms
+  Browser output area
+    js/src/ts/*.ts anywidget ESM renderers
+    Web Audio API and Web MIDI API
+    optional wasm-bindgen bindings from js/src/rust
+      | shared Rust source compiled for native and wasm targets
+  Rust core
+    rust/src audio, MIDI, oscillators, mixer, sampler, sequencer
+    native-only cpal audio output and midir MIDI input
+</pre></div>
+</div>
+<p>The important design choice is that notebook state lives in Python traits, while
+real-time interaction lives in the browser. Rust supports both sides: the Python
+package uses PyO3 wrappers for ergonomic Python classes, and the JavaScript
+package builds WebAssembly bindings for browser-facing Rust helpers.</p>
+</section>
+<section id="repository-map">
+<h2>Repository map<a class="headerlink" href="#repository-map" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Path</p></th>
+<th class="head"><p>Responsibility</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code></p></td>
+<td><p>Python anywidget classes, session orchestration, and notebook-facing helper APIs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code></p></td>
+<td><p>Public Python exports for Rust/PyO3 types and widget classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rust/src/</span></code></p></td>
+<td><p>Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rust/python/</span></code></p></td>
+<td><p>PyO3 wrapper classes exposed as the <code class="docutils literal notranslate"><span class="pre">nbplay.nbplay</span></code> native extension.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code></p></td>
+<td><p>Browser anywidget renderers, one standalone ESM entry per widget.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/css/</span></code></p></td>
+<td><p>One scoped stylesheet per widget, processed by lightningcss.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/rust/</span></code></p></td>
+<td><p>wasm-bindgen browser bindings around selected Rust functionality.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/tests/</span></code></p></td>
+<td><p>Playwright browser tests using a mock anywidget model and mock Web Audio context.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code></p></td>
+<td><p>Python, Rust-extension, widget, session, and example-notebook regression tests.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">examples/</span></code></p></td>
+<td><p>Executable tutorial notebooks used by users and docs builds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/</span></code></p></td>
+<td><p>CI for build/test/dist and docs publishing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code></p></td>
+<td><p>Python, Rust, and JavaScript package/build configuration.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Generated assets are copied into <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code> by the
+JavaScript build. These folders are ignored in Git but included in built wheels
+through Hatch artifact configuration.</p>
+</section>
+<section id="runtime-data-flow">
+<h2>Runtime data flow<a class="headerlink" href="#runtime-data-flow" title="Link to this heading">¶</a></h2>
+<section id="python-to-browser">
+<h3>Python to browser<a class="headerlink" href="#python-to-browser" title="Link to this heading">¶</a></h3>
+<p>Each rendered widget is an <code class="docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code> subclass in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code>.
+Traits are declared with <code class="docutils literal notranslate"><span class="pre">traitlets.*.tag(sync=True)</span></code>. When Python code sets a
+trait, the value is serialized through the Jupyter comm protocol to the browser
+model. Browser code reads and writes the same state through the anywidget model
+interface:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;trait_name&quot;</span><span class="p">);</span>
+<span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s2">&quot;trait_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">nextValue</span><span class="p">);</span>
+<span class="nx">model</span><span class="p">.</span><span class="nx">save_changes</span><span class="p">();</span>
+<span class="nx">model</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;change:trait_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>User-initiated changes call <code class="docutils literal notranslate"><span class="pre">model.save_changes()</span></code> so the kernel receives them.
+Render-time resets and very frequent visual updates generally use <code class="docutils literal notranslate"><span class="pre">model.set()</span></code>
+without saving to avoid racing other widget initialization or flooding comms.
+For example, SynthWidget, SequencerWidget, and TransportWidget force playback to
+stopped during render with local <code class="docutils literal notranslate"><span class="pre">model.set()</span></code> calls only.</p>
+</section>
+<section id="rust-to-python">
+<h3>Rust to Python<a class="headerlink" href="#rust-to-python" title="Link to this heading">¶</a></h3>
+<p>The root Cargo package builds the PyO3 extension from <code class="docutils literal notranslate"><span class="pre">rust/python/lib.rs</span></code> as
+the Python module <code class="docutils literal notranslate"><span class="pre">nbplay.nbplay</span></code>. Wrapper types are named <code class="docutils literal notranslate"><span class="pre">Py*</span></code> in Rust but are
+exposed to Python without that prefix, for example <code class="docutils literal notranslate"><span class="pre">PyMixer</span></code> becomes <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>.
+<code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code> re-exports those classes at the package top level.</p>
+<p>The wrapper layer converts Rust validation errors into Python exceptions, adds
+Python conveniences such as properties and <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>, and exposes offline
+rendering methods such as oscillator <code class="docutils literal notranslate"><span class="pre">render_to_buffer()</span></code> and mixer <code class="docutils literal notranslate"><span class="pre">mix_down()</span></code>.</p>
+</section>
+<section id="rust-to-browser">
+<h3>Rust to browser<a class="headerlink" href="#rust-to-browser" title="Link to this heading">¶</a></h3>
+<p>The JavaScript Cargo package builds <code class="docutils literal notranslate"><span class="pre">js/src/rust/lib.rs</span></code> as a wasm-bindgen
+crate. The TypeScript entry <code class="docutils literal notranslate"><span class="pre">js/src/ts/index.ts</span></code> re-exports the generated
+bindings from <code class="docutils literal notranslate"><span class="pre">js/dist/pkg/nbplay</span></code>. Browser-facing Rust currently provides:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">WasmAudioOutput</span></code>, a simple oscillator-to-Web-Audio looped-buffer helper.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WasmMidiAccess</span></code>, MIDI input port enumeration through Web MIDI.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">request_midi_access()</span></code>, <code class="docutils literal notranslate"><span class="pre">list_midi_ports()</span></code>, <code class="docutils literal notranslate"><span class="pre">default_sample_rate()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">parse_midi_message()</span></code> convenience functions.</p></li>
+</ul>
+<p>Most widget audio behavior is currently implemented directly in TypeScript using
+Web Audio. The WASM layer exists for shared Rust functionality that should run in
+the browser.</p>
+</section>
+</section>
+<section id="runtime-libraries-and-toolchain">
+<h2>Runtime libraries and toolchain<a class="headerlink" href="#runtime-libraries-and-toolchain" title="Link to this heading">¶</a></h2>
+<section id="python-runtime">
+<h3>Python runtime<a class="headerlink" href="#python-runtime" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">anywidget</span></code>: provides the notebook widget transport and ESM frontend loading.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ipywidgets&gt;=8</span></code>: widget runtime foundation used by anywidget.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">traitlets</span></code>: declared indirectly through the widget stack and used directly in
+<code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> for synced state and links.</p></li>
+</ul>
+</section>
+<section id="rust-runtime">
+<h3>Rust runtime<a class="headerlink" href="#rust-runtime" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">serde</span></code>: serialization derives for several core value types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyo3</span></code>: native Python extension bindings, configured with <code class="docutils literal notranslate"><span class="pre">abi3</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cpal</span></code>: native audio output for non-wasm targets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">midir</span></code>: native MIDI input for non-wasm targets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wasm-bindgen</span></code>, <code class="docutils literal notranslate"><span class="pre">wasm-bindgen-futures</span></code>, <code class="docutils literal notranslate"><span class="pre">js-sys</span></code>, <code class="docutils literal notranslate"><span class="pre">web-sys</span></code>: browser
+bindings for WASM output.</p></li>
+</ul>
+</section>
+<section id="javascript-and-frontend-build">
+<h3>JavaScript and frontend build<a class="headerlink" href="#javascript-and-frontend-build" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>TypeScript with strict checking and ES modules.</p></li>
+<li><p>esbuild for widget and package bundling.</p></li>
+<li><p>lightningcss for CSS bundling and modern CSS processing.</p></li>
+<li><p>cpy for copying built assets into Python package folders.</p></li>
+<li><p>Playwright for browser tests.</p></li>
+<li><p>http-server for the local browser test server.</p></li>
+<li><p>nodemon for watch-mode rebuilds.</p></li>
+<li><p>prettier for JS/TS/CSS formatting.</p></li>
+</ul>
+</section>
+<section id="python-build-qa-and-release">
+<h3>Python build, QA, and release<a class="headerlink" href="#python-build-qa-and-release" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>hatchling, hatch-js, and hatch-rs build Python wheels that include JS assets
+and the Rust extension.</p></li>
+<li><p>uv is the preferred local installer.</p></li>
+<li><p>pytest and pytest-cov run Python and extension tests.</p></li>
+<li><p>ruff formats and lints Python.</p></li>
+<li><p>ty checks Python types.</p></li>
+<li><p>cibuildwheel builds platform wheels.</p></li>
+<li><p>twine and check-dist validate distributions.</p></li>
+<li><p>bump-my-version keeps versions synchronized across package manifests.</p></li>
+<li><p>mdformat and codespell check top-level docs.</p></li>
+<li><p>yardang builds published documentation.</p></li>
+</ul>
+</section>
+</section>
+<section id="python-widget-layer">
+<h2>Python widget layer<a class="headerlink" href="#python-widget-layer" title="Link to this heading">¶</a></h2>
+<p>All Python widget classes live in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code>. The <code class="docutils literal notranslate"><span class="pre">_esm</span></code> and <code class="docutils literal notranslate"><span class="pre">_css</span></code>
+attributes point to built files under <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code>. The JavaScript build must
+run before a source checkout can render widgets from Python because those static
+files are generated.</p>
+<section id="shared-python-helpers">
+<h3>Shared Python helpers<a class="headerlink" href="#shared-python-helpers" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">_default_step()</span></code> and <code class="docutils literal notranslate"><span class="pre">_default_steps(length)</span></code> build the sequencer’s default
+inactive step dictionaries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_measure_beats(time_signature_num,</span> <span class="pre">time_signature_den)</span></code> converts a time
+signature into quarter-note beats per measure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_step_duration_for_length(length,</span> <span class="pre">measures,</span> <span class="pre">time_signature_num,</span> <span class="pre">time_signature_den)</span></code> infers the musical step duration for an explicit step
+count.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_resize_pad_notes(notes,</span> <span class="pre">pad_count)</span></code> clamps MIDI pad notes to 0-127 and
+preserves or extends the list when sampler pad count changes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PadAction</span></code> and <code class="docutils literal notranslate"><span class="pre">_normalize_pad_actions()</span></code> define the shared pad action shape
+used by sampler pads and PadWidget. Note actions are live today; trait/event
+actions provide a stable controller-pad path for future automation and MIDI
+learn work.</p></li>
+</ul>
+</section>
+<section id="widget-trait-summary">
+<h3>Widget trait summary<a class="headerlink" href="#widget-trait-summary" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Python class</p></th>
+<th class="head"><p>Browser entry</p></th>
+<th class="head"><p>CSS entry</p></th>
+<th class="head"><p>Key synced traits</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">widget.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">widget.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oscillator_type</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SettingsWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">settings.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">settings.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code>, <code class="docutils literal notranslate"><span class="pre">audio_device</span></code>, <code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">midi_event</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mixer.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mixer.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sequencer.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sequencer.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">measures</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">groove</span></code>, <code class="docutils literal notranslate"><span class="pre">automation_lanes</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">num_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code>, <code class="docutils literal notranslate"><span class="pre">voices_data</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sampler.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sampler.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sample_name</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">root_note</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_length</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_data</span></code>, ADSR traits, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_slices</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_count</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">transport.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">transport.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">keyboard.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">keyboard.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">upper_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, sustain traits, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">midi_keyboard.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">midi_keyboard.css</span></code></p></td>
+<td><p>Keyboard traits plus <code class="docutils literal notranslate"><span class="pre">midi_port</span></code> and <code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pad.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pad.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>, <code class="docutils literal notranslate"><span class="pre">cols</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="non-rendered-python-orchestration-types">
+<h3>Non-rendered Python orchestration types<a class="headerlink" href="#non-rendered-python-orchestration-types" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> is a traitlets object that owns one voice of sequencer step data.
+It is not rendered directly. A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> owns one composer per voice and
+syncs all composers into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code>, a list of step lists. The <code class="docutils literal notranslate"><span class="pre">steps</span></code>
+property remains a backward-compatible alias for voice 0.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Track</span></code> binds a sequencer, a sound source, and a mixer channel. It links BPM and
+time signature bidirectionally between a session transport and the sequencer,
+and dlinks <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> from transport to sequencer so a non-looping sequencer
+cannot stop every track.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Session</span></code> creates a shared <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, a <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>, and a
+<code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>. <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> creates a mixer channel, links transport
+state, and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound
+source. Browser widgets use those fields to route audio through the shared
+mixer bus.</p>
+</section>
+</section>
+<section id="rust-core">
+<h2>Rust core<a class="headerlink" href="#rust-core" title="Link to this heading">¶</a></h2>
+<p>The reusable Rust library is in <code class="docutils literal notranslate"><span class="pre">rust/src/</span></code>. It is compiled as an <code class="docutils literal notranslate"><span class="pre">rlib</span></code> and is
+used by both the PyO3 extension and the WASM crate. Native-only device modules
+are gated out for wasm builds.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Module</p></th>
+<th class="head"><p>Key types and behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">audio.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SampleRate</span></code>, <code class="docutils literal notranslate"><span class="pre">ChannelCount</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioFormat</span></code>, and interleaved <code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code>. Buffers support silence allocation, frame count, checked sample get/set, add-mixing, and clearing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">midi.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MidiChannel</span></code>, <code class="docutils literal notranslate"><span class="pre">Note</span></code>, <code class="docutils literal notranslate"><span class="pre">Velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">ControlNumber</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiMessage</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiEvent</span></code>, <code class="docutils literal notranslate"><span class="pre">note_to_hz()</span></code>, <code class="docutils literal notranslate"><span class="pre">hz_to_note()</span></code>, and <code class="docutils literal notranslate"><span class="pre">parse_midi_bytes()</span></code>. Channel range is 0-15; notes, velocity, and controls are 0-127. Note-on with velocity 0 parses as note-off.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oscillator.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AudioSource</span></code> trait and sine, square, saw, and deterministic-noise sources. Oscillators render into an <code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code> and wrap phase into [0, 1) to avoid drift.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mixer.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MixerChannel</span></code> and <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>. Channels apply gain, mute, solo, and constant-power pan. <code class="docutils literal notranslate"><span class="pre">Mixer::mix_down()</span></code> combines mono channel buffers into interleaved stereo output.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sampler.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AudioSample</span></code>, <code class="docutils literal notranslate"><span class="pre">Envelope</span></code>, polyphonic <code class="docutils literal notranslate"><span class="pre">Sampler</span></code>, <code class="docutils literal notranslate"><span class="pre">SampleMapping</span></code>, and <code class="docutils literal notranslate"><span class="pre">SampleMap</span></code>. The sampler handles pitch ratio, sample-rate ratio, linear interpolation, ADSR, looping, soft clipping, voice stealing, note-off release, and panic/all-notes-off.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sequencer.rs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Step</span></code>, <code class="docutils literal notranslate"><span class="pre">Pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code>, <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>, <code class="docutils literal notranslate"><span class="pre">TransportClock</span></code>, <code class="docutils literal notranslate"><span class="pre">TransportState</span></code>, and <code class="docutils literal notranslate"><span class="pre">StepSequencer</span></code>. These model fixed step patterns, piano-roll events, beat clocks, and MIDI event generation over beat ranges.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">audio_output.rs</span></code></p></td>
+<td><p>Native <code class="docutils literal notranslate"><span class="pre">AudioOutput</span></code> via cpal. Builds a fixed-buffer output stream and fills it through a render callback. Not compiled for wasm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">midi_input.rs</span></code></p></td>
+<td><p>Native <code class="docutils literal notranslate"><span class="pre">MidiInput</span></code> via midir. Lists ports and connects callbacks that receive parsed <code class="docutils literal notranslate"><span class="pre">MidiEvent</span></code> values. Not compiled for wasm.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="rust-invariants">
+<h3>Rust invariants<a class="headerlink" href="#rust-invariants" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code> stores interleaved <code class="docutils literal notranslate"><span class="pre">f32</span></code> samples. Frame count is sample count
+divided by channel count.</p></li>
+<li><p>MIDI wrappers validate ranges at construction time. Python wrappers surface
+invalid values as <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p>Mixer <code class="docutils literal notranslate"><span class="pre">gain</span></code> is clamped by Python setters and UI controls to 0.0-2.0. Pan is
+clamped to -1.0 through 1.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Envelope::new()</span></code> clamps attack, decay, and release to non-negative values and
+sustain to 0.0-1.0.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">StepSequencer::process_beat_range(start,</span> <span class="pre">end)</span></code> returns timestamped note-on
+and note-off MIDI events for active steps whose beat positions fall in the
+range.</p></li>
+<li><p>Native device tests tolerate missing audio/MIDI hardware because CI may be
+headless.</p></li>
+</ul>
+</section>
+</section>
+<section id="pyo3-binding-layer">
+<h2>PyO3 binding layer<a class="headerlink" href="#pyo3-binding-layer" title="Link to this heading">¶</a></h2>
+<p>PyO3 wrappers live in <code class="docutils literal notranslate"><span class="pre">rust/python/</span></code>. The module registration is centralized in
+<code class="docutils literal notranslate"><span class="pre">rust/python/lib.rs</span></code>. Wrapper conventions:</p>
+<ul class="simple">
+<li><p>Internal structs use a <code class="docutils literal notranslate"><span class="pre">Py</span></code> prefix and <code class="docutils literal notranslate"><span class="pre">#[pyclass(name</span> <span class="pre">=</span> <span class="pre">&quot;PythonName&quot;)]</span></code>.</p></li>
+<li><p>Each wrapper owns or clones an inner Rust type.</p></li>
+<li><p>Constructors convert invalid Rust values into <code class="docutils literal notranslate"><span class="pre">PyValueError</span></code>, <code class="docutils literal notranslate"><span class="pre">PyIndexError</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">PyRuntimeError</span></code> as appropriate.</p></li>
+<li><p>Python properties use <code class="docutils literal notranslate"><span class="pre">#[getter]</span></code> and <code class="docutils literal notranslate"><span class="pre">#[setter]</span></code>.</p></li>
+<li><p>Debuggability comes from <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>, <code class="docutils literal notranslate"><span class="pre">__str__</span></code>, <code class="docutils literal notranslate"><span class="pre">__eq__</span></code>, and <code class="docutils literal notranslate"><span class="pre">__len__</span></code> where
+useful.</p></li>
+<li><p>Device wrappers that hold non-Send platform handles are marked <code class="docutils literal notranslate"><span class="pre">unsendable</span></code>.</p></li>
+</ul>
+<p>The PyO3 classes exposed through <code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code> are:</p>
+<ul class="simple">
+<li><p>Audio: <code class="docutils literal notranslate"><span class="pre">AudioFormat</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioOutput</span></code>.</p></li>
+<li><p>MIDI: <code class="docutils literal notranslate"><span class="pre">MidiChannel</span></code>, <code class="docutils literal notranslate"><span class="pre">Note</span></code>, <code class="docutils literal notranslate"><span class="pre">Velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiMessage</span></code>, <code class="docutils literal notranslate"><span class="pre">MidiEvent</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MidiInput</span></code>.</p></li>
+<li><p>Oscillators: <code class="docutils literal notranslate"><span class="pre">SineOscillator</span></code>, <code class="docutils literal notranslate"><span class="pre">SquareOscillator</span></code>, <code class="docutils literal notranslate"><span class="pre">SawOscillator</span></code>,
+<code class="docutils literal notranslate"><span class="pre">NoiseSource</span></code>.</p></li>
+<li><p>Mixer: <code class="docutils literal notranslate"><span class="pre">MixerChannel</span></code>, <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>.</p></li>
+<li><p>Sequencer: <code class="docutils literal notranslate"><span class="pre">Step</span></code>, <code class="docutils literal notranslate"><span class="pre">Pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code>, <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TransportClock</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSequencer</span></code>.</p></li>
+<li><p>Sampler: <code class="docutils literal notranslate"><span class="pre">AudioSample</span></code>, <code class="docutils literal notranslate"><span class="pre">Envelope</span></code>, <code class="docutils literal notranslate"><span class="pre">SampleMapping</span></code>, <code class="docutils literal notranslate"><span class="pre">SampleMap</span></code>, <code class="docutils literal notranslate"><span class="pre">Sampler</span></code>.</p></li>
+</ul>
+</section>
+<section id="wasm-binding-layer">
+<h2>WASM binding layer<a class="headerlink" href="#wasm-binding-layer" title="Link to this heading">¶</a></h2>
+<p>The WASM crate is configured by <code class="docutils literal notranslate"><span class="pre">js/Cargo.toml</span></code>. It depends on the shared Rust
+core and pins <code class="docutils literal notranslate"><span class="pre">wasm-bindgen</span> <span class="pre">=</span> <span class="pre">0.2.121</span></code>, which must match the installed
+<code class="docutils literal notranslate"><span class="pre">wasm-bindgen-cli</span></code> used by <code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:wasm-bindgen</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">js/src/rust/web_audio.rs</span></code> exposes <code class="docutils literal notranslate"><span class="pre">WasmAudioOutput</span></code>. It creates a browser
+<code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, renders a looped buffer for a selected oscillator type, connects
+through a <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and exposes <code class="docutils literal notranslate"><span class="pre">start()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_gain()</span></code>, and <code class="docutils literal notranslate"><span class="pre">sample_rate()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">js/src/rust/web_midi.rs</span></code> exposes <code class="docutils literal notranslate"><span class="pre">WasmMidiAccess</span></code> and <code class="docutils literal notranslate"><span class="pre">parse_midi_message()</span></code>.
+It calls <code class="docutils literal notranslate"><span class="pre">navigator.requestMIDIAccess()</span></code>, lists MIDI input names, and converts
+parsed Rust <code class="docutils literal notranslate"><span class="pre">MidiMessage</span></code> values into plain JavaScript objects.</p>
+<p>The generated WASM package is emitted into <code class="docutils literal notranslate"><span class="pre">js/dist/pkg/</span></code>. TypeScript imports it
+from <code class="docutils literal notranslate"><span class="pre">js/src/ts/index.ts</span></code> and re-exports the important bindings for consumers.</p>
+</section>
+<section id="typescript-widget-architecture">
+<h2>TypeScript widget architecture<a class="headerlink" href="#typescript-widget-architecture" title="Link to this heading">¶</a></h2>
+<p>Every browser widget file in <code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code> exports the anywidget shape:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">render</span><span class="p">({</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">el</span><span class="w"> </span><span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">AnyModel</span><span class="p">;</span><span class="w"> </span><span class="nx">el</span><span class="o">:</span><span class="w"> </span><span class="kt">HTMLElement</span><span class="w"> </span><span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// build DOM, attach event listeners, sync model state</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// cleanup audio, timers, global listeners, and bus registrations</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">render</span><span class="w"> </span><span class="p">};</span>
+</pre></div>
+</div>
+<p>The shared <code class="docutils literal notranslate"><span class="pre">AnyModel</span></code> type and helpers are in <code class="docutils literal notranslate"><span class="pre">js/src/ts/helpers.ts</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">onKernelDisconnect()</span></code> polls the widget model for comm loss and calls a
+cleanup callback after a delay. Widgets use it to stop audio when the kernel
+restarts or shuts down.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cssVar()</span></code> reads Jupyter CSS custom properties for canvas drawing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">makeEditable()</span></code> implements double-click inline editing with an Enter/blur
+commit guard.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> converts anywidget binary buffers into <code class="docutils literal notranslate"><span class="pre">Float32Array</span></code>.</p></li>
+<li><p>Gain/pan helpers convert and format linear gain, dB, and pan values.</p></li>
+</ul>
+<section id="browser-apis-used">
+<h3>Browser APIs used<a class="headerlink" href="#browser-apis-used" title="Link to this heading">¶</a></h3>
+<p>nbplay uses browser capabilities directly rather than relying on a web audio
+framework:</p>
+<ul class="simple">
+<li><p>Web Audio API: <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, <code class="docutils literal notranslate"><span class="pre">OscillatorNode</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">AudioBufferSourceNode</span></code>, <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, <code class="docutils literal notranslate"><span class="pre">StereoPannerNode</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>,
+<code class="docutils literal notranslate"><span class="pre">currentTime</span></code>, scheduled starts/stops, ramps, and context <code class="docutils literal notranslate"><span class="pre">resume()</span></code>/<code class="docutils literal notranslate"><span class="pre">close()</span></code>.</p></li>
+<li><p>Web MIDI API: <code class="docutils literal notranslate"><span class="pre">navigator.requestMIDIAccess({</span> <span class="pre">sysex:</span> <span class="pre">false</span> <span class="pre">})</span></code>, <code class="docutils literal notranslate"><span class="pre">MIDIAccess</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MIDIInput</span></code>, <code class="docutils literal notranslate"><span class="pre">midimessage</span></code>, port IDs, port names, and hot refresh.</p></li>
+<li><p>Canvas 2D: high-DPI waveform and envelope drawing using <code class="docutils literal notranslate"><span class="pre">devicePixelRatio</span></code>.</p></li>
+<li><p>DOM events: <code class="docutils literal notranslate"><span class="pre">click</span></code>, <code class="docutils literal notranslate"><span class="pre">input</span></code>, <code class="docutils literal notranslate"><span class="pre">change</span></code>, <code class="docutils literal notranslate"><span class="pre">dblclick</span></code>, <code class="docutils literal notranslate"><span class="pre">pointerdown</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pointerup</span></code>, <code class="docutils literal notranslate"><span class="pre">pointercancel</span></code>, <code class="docutils literal notranslate"><span class="pre">wheel</span></code>, <code class="docutils literal notranslate"><span class="pre">keydown</span></code>, <code class="docutils literal notranslate"><span class="pre">keyup</span></code>, <code class="docutils literal notranslate"><span class="pre">blur</span></code>, and custom
+events.</p></li>
+<li><p>CustomEvent: <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code>, <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code>, and <code class="docutils literal notranslate"><span class="pre">nbplay-cancel-edit</span></code>.</p></li>
+<li><p>Timers: <code class="docutils literal notranslate"><span class="pre">setInterval()</span></code> for sequencer lookahead scheduling, transport clock
+ticks, velocity key repeat, and sampler active-voice display.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">performance.now()</span></code> for transport position and MIDI fallback timestamps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code> as a notebook-page-local session bus registry.</p></li>
+<li><p>CSS custom properties from JupyterLab, especially <code class="docutils literal notranslate"><span class="pre">--jp-*</span></code> theme variables.</p></li>
+</ul>
+</section>
+<section id="session-bus-shape">
+<h3>Session bus shape<a class="headerlink" href="#session-bus-shape" title="Link to this heading">¶</a></h3>
+<p>When a <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code> has a <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, it registers a bus at:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nb">globalThis</span><span class="p">.</span><span class="nx">__nbplay</span><span class="p">[</span><span class="nx">sessionId</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">audioCtx</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">masterGain</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">gain</span><span class="p">,</span><span class="w"> </span><span class="nx">pan</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">...],</span>
+<span class="w">  </span><span class="nx">samplers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">channelIndex</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">triggerNote</span><span class="p">,</span><span class="w"> </span><span class="nx">releaseNote</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">noteListeners</span><span class="o">:</span><span class="w"> </span><span class="p">[(</span><span class="nx">evt</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">]</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The exact properties are created lazily by participating widgets. The mixer owns
+<code class="docutils literal notranslate"><span class="pre">audioCtx</span></code>, <code class="docutils literal notranslate"><span class="pre">masterGain</span></code>, and <code class="docutils literal notranslate"><span class="pre">channels</span></code>. Samplers add <code class="docutils literal notranslate"><span class="pre">samplers[channelIndex]</span></code>
+so KeyboardWidget and MidiKeyboardWidget can trigger them. Keyboard widgets also
+broadcast <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>, which lets sequencers record notes even
+without a shared mixer bus.</p>
+<p>Render order can vary in notebooks. SamplerWidget handles this by listening for
+<code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer creates the bus.</p>
+</section>
+</section>
+<section id="widget-deep-dives">
+<h2>Widget deep dives<a class="headerlink" href="#widget-deep-dives" title="Link to this heading">¶</a></h2>
+<section id="synthwidget">
+<h3>SynthWidget<a class="headerlink" href="#synthwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/widget.ts</span></code>. CSS file:
+<code class="docutils literal notranslate"><span class="pre">js/src/css/widget.css</span></code>.</p>
+<p>SynthWidget exposes oscillator type, frequency, amplitude, sample rate, play
+state, and a binary waveform preview. Python renders the preview through the
+Rust oscillator classes and stores little-endian float32 bytes in the <code class="docutils literal notranslate"><span class="pre">waveform</span></code>
+trait. Browser code converts those bytes with <code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> and draws a high-DPI
+canvas waveform.</p>
+<p>Browser playback is independent from the Rust preview. The TypeScript engine
+creates an <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, connects either an <code class="docutils literal notranslate"><span class="pre">OscillatorNode</span></code> or a looped noise
+<code class="docutils literal notranslate"><span class="pre">AudioBufferSourceNode</span></code> into a <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and updates frequency/amplitude with
+smoothed <code class="docutils literal notranslate"><span class="pre">AudioParam.setTargetAtTime()</span></code> calls. The frequency slider uses a log
+mapping from 20 Hz to 8000 Hz. Frequency and amplitude values are editable by
+double-clicking their readouts.</p>
+<p>When extending SynthWidget, update both the Python oscillator/preview path and
+the TypeScript playback path if the feature should affect both the picture and
+the sound. Add tests in Python for preview/backend behavior and Playwright tests
+for DOM and model sync.</p>
+</section>
+<section id="settingswidget">
+<h3>SettingsWidget<a class="headerlink" href="#settingswidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">SettingsWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/settings.ts</span></code>. CSS
+file: <code class="docutils literal notranslate"><span class="pre">js/src/css/settings.css</span></code>.</p>
+<p>SettingsWidget is a browser configuration panel for sample rate, channel count,
+buffer size, audio device label, MIDI port, available MIDI ports, and raw MIDI
+events. The audio controls are plain synced selects. The MIDI section requests
+Web MIDI access, enumerates input ports, connects to a selected port by ID, and
+stores the selected port name in <code class="docutils literal notranslate"><span class="pre">midi_port</span></code>.</p>
+<p>Incoming MIDI messages are formatted for a small activity log and packed into
+<code class="docutils literal notranslate"><span class="pre">midi_event</span></code> as eight little-endian timestamp bytes followed by raw MIDI data.
+The browser uses <code class="docutils literal notranslate"><span class="pre">DataView</span></code> for that binary payload. SettingsWidget does not
+currently control the output device for other widgets; it is the state and
+monitoring surface for user configuration.</p>
+</section>
+<section id="mixerwidget">
+<h3>MixerWidget<a class="headerlink" href="#mixerwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/mixer.ts</span></code>. CSS file:
+<code class="docutils literal notranslate"><span class="pre">js/src/css/mixer.css</span></code>.</p>
+<p>MixerWidget owns a list of channel dictionaries with <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">pan</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mute</span></code>, and <code class="docutils literal notranslate"><span class="pre">solo</span></code>, plus a <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>. Python provides convenience methods
+for adding/removing channels and setting channel properties, and <code class="docutils literal notranslate"><span class="pre">to_mixer()</span></code>
+creates a Rust <code class="docutils literal notranslate"><span class="pre">Mixer</span></code> for offline mixdown.</p>
+<p>Browser code builds one channel strip per channel and a master strip. Faders
+show dB labels, pan shows center/left/right labels, and name/gain/pan are
+inline editable. Gain input accepts dB strings and converts to linear gain.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">session_id</span></code> is set, the browser creates the shared <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, one
+<code class="docutils literal notranslate"><span class="pre">GainNode</span></code> plus <code class="docutils literal notranslate"><span class="pre">StereoPannerNode</span></code> per channel, and a master <code class="docutils literal notranslate"><span class="pre">GainNode</span></code> connected
+to destination. Mute/solo affects the channel gain nodes. The bus is registered
+on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code> and removed on cleanup.</p>
+</section>
+<section id="sequencerwidget">
+<h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/sequencer.ts</span></code>. CSS
+file: <code class="docutils literal notranslate"><span class="pre">js/src/css/sequencer.css</span></code>.</p>
+<p>SequencerWidget models a pattern grid. Python owns one <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code> per voice
+and syncs them as <code class="docutils literal notranslate"><span class="pre">voices_data</span></code>. The grid can be configured by absolute length
+or musically by <code class="docutils literal notranslate"><span class="pre">measures</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, and time signature. In 4/4, a
+<code class="docutils literal notranslate"><span class="pre">step_duration</span></code> of 0.5 is eighth notes, 0.25 is sixteenth notes, and 0.125 is
+thirty-second notes. <code class="docutils literal notranslate"><span class="pre">configure_grid()</span></code> on the Python side and the frontend grid
+controls both resize the underlying <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> while preserving existing
+steps where possible.</p>
+<p>Browser playback uses <code class="docutils literal notranslate"><span class="pre">js/src/ts/scheduler.ts</span></code> as a DOM-free lookahead
+scheduler. A timer runs every 25 ms and schedules notes up to 100 ms ahead using
+<code class="docutils literal notranslate"><span class="pre">AudioContext.currentTime</span></code>. Each active step plays a simple sine oscillator
+through either the session mixer channel or a standalone audio context.
+<code class="docutils literal notranslate"><span class="pre">current_step</span></code> is updated locally for visual highlighting without saving every
+tick.</p>
+<p>The scheduler owns timing helpers for step advancement, voice iteration,
+oscillator scheduling, duration ticks, swing/groove offsets, per-step
+<code class="docutils literal notranslate"><span class="pre">probability</span></code>, and step-quantized <code class="docutils literal notranslate"><span class="pre">automation_lanes</span></code>. <code class="docutils literal notranslate"><span class="pre">swing</span></code> is a 0-100 percent
+delay applied to odd steps. <code class="docutils literal notranslate"><span class="pre">groove</span></code> is a repeating list of -50 to 50 percent
+step-duration offsets. Automation lanes are dictionaries of <code class="docutils literal notranslate"><span class="pre">{trait,</span> <span class="pre">points}</span></code>,
+where each point has <code class="docutils literal notranslate"><span class="pre">{step,</span> <span class="pre">value}</span></code>; scheduled steps update numeric traits with
+<code class="docutils literal notranslate"><span class="pre">model.set()</span></code> only, avoiding comm traffic on every tick.</p>
+<p>The UI includes play, stop, record, BPM, step duration, measure count, loop, a
+header row, step rows, and velocity rows. Clicking a cell toggles active state.
+Mouse wheel over a step changes note. Mouse wheel over a velocity cell changes
+velocity. If a keyboard is connected, double-clicking a cell waits for the next
+<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> event and writes that note into the cell. Recording arms all voices
+or individual voice dots and writes live note-on events into the current step
+while playing.</p>
+<p>Important extension points are the grid reconciliation helpers, scheduler helper
+functions, and the CustomEvent note input path. If you change timing semantics,
+update Python <code class="docutils literal notranslate"><span class="pre">_step_duration_for_length()</span></code>, frontend <code class="docutils literal notranslate"><span class="pre">configuredStepCount()</span></code>,
+tests for explicit lengths, scheduler behavior tests, and session transport sync
+tests.</p>
+</section>
+<section id="samplerwidget">
+<h3>SamplerWidget<a class="headerlink" href="#samplerwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/sampler.ts</span></code>. CSS file:
+<code class="docutils literal notranslate"><span class="pre">js/src/css/sampler.css</span></code>.</p>
+<p>SamplerWidget displays sample metadata, waveform bytes, ADSR controls, max
+voices, pad count, and per-pad MIDI notes/velocities/actions. Raw mono PCM is
+stored in <code class="docutils literal notranslate"><span class="pre">sample_data</span></code>; the decimated canvas preview is stored in <code class="docutils literal notranslate"><span class="pre">waveform</span></code>.
+Python <code class="docutils literal notranslate"><span class="pre">load_sample()</span></code> populates both traits. <code class="docutils literal notranslate"><span class="pre">load_audio_file()</span></code> loads WAV via
+stdlib <code class="docutils literal notranslate"><span class="pre">wave</span></code> and MP3/OGG/other formats through optional <code class="docutils literal notranslate"><span class="pre">soundfile</span></code>.</p>
+<p>Browser code can load audio from a file input or by dropping audio onto the
+waveform. It decodes with Web Audio, mixes to mono, writes <code class="docutils literal notranslate"><span class="pre">sample_data</span></code> and the
+decimated <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, and uses raw <code class="docutils literal notranslate"><span class="pre">sample_data</span></code> for playback. Each note creates
+an <code class="docutils literal notranslate"><span class="pre">AudioBufferSourceNode</span></code>, sets <code class="docutils literal notranslate"><span class="pre">playbackRate</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">**</span> <span class="pre">((note</span> <span class="pre">-</span> <span class="pre">root_note)</span> <span class="pre">/</span> <span class="pre">12)</span></code>,
+scales gain by velocity, and envelopes it through a <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>. Full samples loop
+for sustain; mapped slices use one-shot start/duration windows.</p>
+<p>Python sample edits live on SamplerWidget: <code class="docutils literal notranslate"><span class="pre">trim_sample()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">normalize_sample()</span></code>, <code class="docutils literal notranslate"><span class="pre">reverse_sample()</span></code>, and <code class="docutils literal notranslate"><span class="pre">fade_sample()</span></code>. <code class="docutils literal notranslate"><span class="pre">slice_sample()</span></code>
+creates equal <code class="docutils literal notranslate"><span class="pre">sample_slices</span></code> and maps them to sampler pads. <code class="docutils literal notranslate"><span class="pre">map_slices_to_pads()</span></code>
+configures a PadWidget with matching notes/actions and connects sampler routing
+when the sampler has a channel index.</p>
+<p>Sampler pads and PadWidget both use <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>. <code class="docutils literal notranslate"><span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;note&quot;}</span></code> actions
+trigger notes and optional sample slices. <code class="docutils literal notranslate"><span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;trait&quot;}</span></code> actions set a
+trait on the current widget, and <code class="docutils literal notranslate"><span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;event&quot;}</span></code> actions update
+<code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>. This keeps pad input source-agnostic for future browser MIDI
+controller discovery, MIDI learn, and automation control.</p>
+<p>When the sampler has a session and channel index, it registers <code class="docutils literal notranslate"><span class="pre">triggerNote()</span></code>
+and <code class="docutils literal notranslate"><span class="pre">releaseNote()</span></code> on the session bus so keyboard widgets, MIDI keyboard input,
+sequencers, and PadWidget routes can drive the same sampler/slice map by note.</p>
+</section>
+<section id="transportwidget">
+<h3>TransportWidget<a class="headerlink" href="#transportwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/transport.ts</span></code>. CSS
+file: <code class="docutils literal notranslate"><span class="pre">js/src/css/transport.css</span></code>.</p>
+<p>TransportWidget is the global play/stop and tempo surface. It syncs BPM, play
+state, time signature, bar/beat position, and loop range. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, tracks
+link their sequencers to transport BPM and time signature, and dlink transport
+play state into sequencers.</p>
+<p>The browser UI has stop/play buttons, a BPM slider and inline edit, a time
+signature display, a bar:beat display, and a loop toggle/range. Its position
+clock uses <code class="docutils literal notranslate"><span class="pre">performance.now()</span></code> and a 50 ms interval to compute elapsed beats.
+When the displayed bar or beat changes, it updates and saves <code class="docutils literal notranslate"><span class="pre">bar_number</span></code> and
+<code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>. Looping wraps the displayed position between <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code> and
+<code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code> when enabled.</p>
+</section>
+<section id="keyboardwidget">
+<h3>KeyboardWidget<a class="headerlink" href="#keyboardwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/keyboard.ts</span></code>. CSS
+file: <code class="docutils literal notranslate"><span class="pre">js/src/css/keyboard.css</span></code>.</p>
+<p>KeyboardWidget is a four-row musical typing keyboard. The upper zone maps number
+row sharps and QWERTY-row naturals; the lower zone maps ASDF-row sharps and
+ZXCV-row naturals. Upper and lower octaves are independent. Velocity ranges from
+0 to 127 and can be adjusted from the keyboard with repeat acceleration.</p>
+<p>Browser code listens at window capture phase so notebook shortcuts do not fire
+while the widget or a keyboard-aware sequencer edit has focus. It intentionally
+does not capture keys when an input, textarea, or content-editable element is
+focused. It uses Web Audio sine oscillators as a fallback sound source, routes
+through the session mixer if available, and routes to registered samplers when
+<code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> matches the note zone.</p>
+<p>Every note-on and note-off updates <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, and
+dispatches <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>. This is the loose coupling that lets the
+sequencer record without direct Python links. Sustain can be upper-zone,
+lower-zone, or global. Blur releases held and sustained notes to prevent stuck
+notes.</p>
+<p>Python <code class="docutils literal notranslate"><span class="pre">connect_sequencer()</span></code> marks a sequencer as keyboard-connected. Python
+<code class="docutils literal notranslate"><span class="pre">connect_sampler()</span></code> builds a validated <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> entry for whole-keyboard,
+upper/lower zone, octave, single-note, or note-list routing, then syncs its
+dictionary form through <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>.</p>
+</section>
+<section id="midikeyboardwidget">
+<h3>MidiKeyboardWidget<a class="headerlink" href="#midikeyboardwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/midi_keyboard.ts</span></code>.
+CSS file: <code class="docutils literal notranslate"><span class="pre">js/src/css/midi_keyboard.css</span></code>.</p>
+<p>MidiKeyboardWidget subclasses KeyboardWidget on the Python side so it shares the
+sequencer and sampler connection API. Its browser implementation is separate
+and receives notes from an external MIDI input device through Web MIDI.</p>
+<p>The browser requests MIDI access with sysex disabled, refreshes input ports,
+connects to a selected port by ID, and stores the selected port name in
+<code class="docutils literal notranslate"><span class="pre">midi_port</span></code>. It handles note-on, note-off, and note-on with velocity zero as
+note-off. MIDI velocity is preserved in <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, the
+<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> CustomEvent, sampler routing, and fallback oscillator gain.</p>
+<p>Zone routing for external MIDI is based on note number: notes below MIDI 60 are
+<code class="docutils literal notranslate"><span class="pre">lower</span></code>, and notes 60 or above are <code class="docutils literal notranslate"><span class="pre">upper</span></code>. This lets one MIDI keyboard drive
+multiple samplers split by range through the same <code class="docutils literal notranslate"><span class="pre">connect_sampler()</span></code> API.</p>
+</section>
+<section id="padwidget">
+<h3>PadWidget<a class="headerlink" href="#padwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/pad.ts</span></code>.
+CSS file: <code class="docutils literal notranslate"><span class="pre">js/src/css/pad.css</span></code>.</p>
+<p>PadWidget renders an on-screen trigger grid with per-pad MIDI notes, velocities,
+and shared <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>. It uses the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> and <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code>
+model as KeyboardWidget, but rejects upper/lower zone routes because pads have no
+keyboard halves. Pad routes can target all pads, an octave, one note, or a note
+list. When no sampler route matches, note pads use the browser fallback
+oscillator. Trait/event pads update <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code> without producing a note.</p>
+<p>Python helpers <code class="docutils literal notranslate"><span class="pre">configure_grid_for_actions()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_base_note()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">transpose_pads()</span></code> provide global note/action setup for sampler slicing and
+future external controller layouts.</p>
+</section>
+</section>
+<section id="styling-system">
+<h2>Styling system<a class="headerlink" href="#styling-system" title="Link to this heading">¶</a></h2>
+<p>The visual conventions are described in <code class="docutils literal notranslate"><span class="pre">DESIGN.md</span></code>. Implementation lives in
+<code class="docutils literal notranslate"><span class="pre">js/src/css/</span></code> with one stylesheet per widget plus <code class="docutils literal notranslate"><span class="pre">index.css</span></code>. CSS rules are
+scoped under widget root classes such as <code class="docutils literal notranslate"><span class="pre">.nbplay-synth</span></code>, <code class="docutils literal notranslate"><span class="pre">.nbplay-mixer</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">.nbplay-midi-keyboard</span></code> to avoid leaking into the notebook.</p>
+<p>Colors should come from JupyterLab CSS custom properties, usually <code class="docutils literal notranslate"><span class="pre">--jp-*</span></code>, with
+fallbacks. CSS uses <code class="docutils literal notranslate"><span class="pre">var(--jp-*,</span> <span class="pre">fallback)</span></code>. Canvas drawing reads theme values
+at runtime through <code class="docutils literal notranslate"><span class="pre">cssVar()</span></code>. Semi-transparent colors should use <code class="docutils literal notranslate"><span class="pre">color-mix()</span></code>
+instead of hard-coded <code class="docutils literal notranslate"><span class="pre">rgba()</span></code> values when editing CSS.</p>
+<p>The JS build runs <code class="docutils literal notranslate"><span class="pre">bundle_css(&quot;src/css&quot;)</span></code>, writes bundled CSS into
+<code class="docutils literal notranslate"><span class="pre">js/dist/css/</span></code>, and copies per-widget CSS files into <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> for the
+Python package.</p>
+</section>
+<section id="build-pipeline">
+<h2>Build pipeline<a class="headerlink" href="#build-pipeline" title="Link to this heading">¶</a></h2>
+<p>Top-level commands are in <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>develop<span class="w">       </span><span class="c1"># Rust tools, JS deps/browser install, Python editable install</span>
+make<span class="w"> </span>build<span class="w">         </span><span class="c1"># Rust core/native build, JS WASM/widgets, Python wheel build</span>
+make<span class="w"> </span><span class="nb">test</span><span class="w">          </span><span class="c1"># Python, Playwright, and Rust tests</span>
+make<span class="w"> </span>coverage<span class="w">      </span><span class="c1"># Coverage variants of the test suites</span>
+make<span class="w"> </span>lint<span class="w">          </span><span class="c1"># Rust clippy/fmt, JS prettier, Python ruff, README docs checks</span>
+make<span class="w"> </span>fix<span class="w">           </span><span class="c1"># Format/fix Rust, JS, Python, and README docs</span>
+make<span class="w"> </span>test-notebooks<span class="w"> </span><span class="c1"># Notebook regression tests only</span>
+make<span class="w"> </span>dist<span class="w">          </span><span class="c1"># Full distribution build and checks</span>
+</pre></div>
+</div>
+<p>The JavaScript build in <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code> is ordered as:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:rust</span></code>: compile the WASM crate for <code class="docutils literal notranslate"><span class="pre">wasm32-unknown-unknown</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:wasm-bindgen</span></code>: generate JS glue and <code class="docutils literal notranslate"><span class="pre">.wasm</span></code> under
+<code class="docutils literal notranslate"><span class="pre">js/dist/pkg/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:prod</span></code>: run <code class="docutils literal notranslate"><span class="pre">js/build.mjs</span></code>, which bundles TypeScript entries,
+processes CSS, copies extension assets, and copies widget JS/CSS into
+<code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code>.</p></li>
+</ol>
+<p>The Python build uses Hatch hooks:</p>
+<ul class="simple">
+<li><p>hatch-js runs the JavaScript build from <code class="docutils literal notranslate"><span class="pre">js/</span></code> and expects
+<code class="docutils literal notranslate"><span class="pre">nbplay/extension/cdn/index.js</span></code>.</p></li>
+<li><p>hatch-rs builds the PyO3 extension from the root Cargo package.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nbplay/static</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension</span></code> are declared build artifacts so wheels
+include generated assets even though they are ignored in Git.</p></li>
+</ul>
+</section>
+<section id="testing-strategy">
+<h2>Testing strategy<a class="headerlink" href="#testing-strategy" title="Link to this heading">¶</a></h2>
+<section id="python-tests">
+<h3>Python tests<a class="headerlink" href="#python-tests" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code> covers Rust/PyO3 types, Python widget classes,
+session behavior, and example notebooks. Tests check construction, defaults,
+validation, repr/equality, oscillator output, mixer mixdown, sampler rendering,
+sequencer conversion, widget trait defaults, <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code>, keyboard and
+sampler connections, MIDI keyboard traits, and notebook metadata/execution.</p>
+<p>Run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;TestDemoNotebook&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="javascript-tests">
+<h3>JavaScript tests<a class="headerlink" href="#javascript-tests" title="Link to this heading">¶</a></h3>
+<p>Playwright tests live in <code class="docutils literal notranslate"><span class="pre">js/tests/</span></code>. The harness at
+<code class="docutils literal notranslate"><span class="pre">js/tests/fixtures/harness.html</span></code> provides a mock <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code> and
+<code class="docutils literal notranslate"><span class="pre">createMockModel()</span></code> implementation with <code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">set</span></code>, <code class="docutils literal notranslate"><span class="pre">save_changes</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>, and
+manual trigger helpers. Tests cover DOM rendering, synced model state, user
+interactions, inline editing, keyboard capture, MIDI input, scheduler state, and
+session integration.</p>
+<p>Run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>js
+pnpm<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+</div>
+</section>
+<section id="rust-tests">
+<h3>Rust tests<a class="headerlink" href="#rust-tests" title="Link to this heading">¶</a></h3>
+<p>Rust unit tests live beside the implementation modules under <code class="docutils literal notranslate"><span class="pre">rust/src/</span></code> and in
+the JS crate where relevant. They validate core DSP/data behavior and tolerate
+missing native devices where CI is headless.</p>
+<p>Run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-C<span class="w"> </span>rust<span class="w"> </span><span class="nb">test</span>
+make<span class="w"> </span>-C<span class="w"> </span>rust<span class="w"> </span>coverage
+</pre></div>
+</div>
+</section>
+<section id="docs-and-notebooks">
+<h3>Docs and notebooks<a class="headerlink" href="#docs-and-notebooks" title="Link to this heading">¶</a></h3>
+<p>Example notebooks are part of the docs surface. Prefixed notebooks under
+<code class="docutils literal notranslate"><span class="pre">examples/</span></code> must be valid JSON and every cell must have <code class="docutils literal notranslate"><span class="pre">metadata.language</span></code> and
+<code class="docutils literal notranslate"><span class="pre">metadata.id</span></code>. Code cells must include <code class="docutils literal notranslate"><span class="pre">execution_count</span></code> and an <code class="docutils literal notranslate"><span class="pre">outputs</span></code> list,
+even if empty. The docs workflow validates these fields before <code class="docutils literal notranslate"><span class="pre">yardang</span> <span class="pre">build</span></code>.</p>
+<p>Run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>test-notebooks
+yardang<span class="w"> </span>build
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ci-and-publishing">
+<h2>CI and publishing<a class="headerlink" href="#ci-and-publishing" title="Link to this heading">¶</a></h2>
+<p>The build workflow runs on Ubuntu, macOS, and Windows with Python 3.11 and Node
+22. It installs Rust, Node, and Python dependencies, installs Linux ALSA headers,
+runs lint/checks on Ubuntu, builds the project, runs coverage, uploads JUnit XML,
+uploads coverage to Codecov, builds distribution artifacts, and smoke-tests the
+wheel/sdist on Ubuntu.</p>
+<p>The docs workflow runs after a successful build on main or by manual dispatch.
+It installs from the built wheel for workflow-run builds or from source for
+manual builds, validates example notebooks, runs <code class="docutils literal notranslate"><span class="pre">yardang</span> <span class="pre">build</span></code>, and publishes
+<code class="docutils literal notranslate"><span class="pre">docs/html</span></code> to <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code>.</p>
+<p>Version bumps use <code class="docutils literal notranslate"><span class="pre">bump-my-version</span></code> and update Python, JavaScript, Rust, and
+Binder version references in one commit/tag:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>show-version
+make<span class="w"> </span>patch
+make<span class="w"> </span>minor
+make<span class="w"> </span>major
+</pre></div>
+</div>
+</section>
+<section id="adding-or-changing-features">
+<h2>Adding or changing features<a class="headerlink" href="#adding-or-changing-features" title="Link to this heading">¶</a></h2>
+<section id="add-a-new-rust-core-type-exposed-to-python">
+<h3>Add a new Rust core type exposed to Python<a class="headerlink" href="#add-a-new-rust-core-type-exposed-to-python" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Implement the type in <code class="docutils literal notranslate"><span class="pre">rust/src/&lt;module&gt;.rs</span></code>. Keep validation in constructors
+or setters and add Rust unit tests near the implementation.</p></li>
+<li><p>Re-export the type from <code class="docutils literal notranslate"><span class="pre">rust/src/lib.rs</span></code> if it should be public.</p></li>
+<li><p>Add a PyO3 wrapper in <code class="docutils literal notranslate"><span class="pre">rust/python/&lt;module&gt;.rs</span></code> using the existing <code class="docutils literal notranslate"><span class="pre">Py*</span></code>
+naming pattern.</p></li>
+<li><p>Register the class in <code class="docutils literal notranslate"><span class="pre">rust/python/lib.rs</span></code> with <code class="docutils literal notranslate"><span class="pre">m.add_class::&lt;...&gt;()?</span></code>.</p></li>
+<li><p>Re-export it from <code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code>.</p></li>
+<li><p>Add Python tests in <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code> for construction, validation,
+repr/equality, and behavior.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">build-rs</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">build-py</span></code>, and focused tests.</p></li>
+</ol>
+</section>
+<section id="add-a-rust-feature-exposed-to-the-browser">
+<h3>Add a Rust feature exposed to the browser<a class="headerlink" href="#add-a-rust-feature-exposed-to-the-browser" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Implement reusable logic in <code class="docutils literal notranslate"><span class="pre">rust/src/</span></code> when possible.</p></li>
+<li><p>Add wasm-bindgen wrappers in <code class="docutils literal notranslate"><span class="pre">js/src/rust/</span></code>.</p></li>
+<li><p>Re-export from <code class="docutils literal notranslate"><span class="pre">js/src/rust/lib.rs</span></code> and <code class="docutils literal notranslate"><span class="pre">js/src/ts/index.ts</span></code> if the binding
+should be public to JS consumers.</p></li>
+<li><p>Ensure required <code class="docutils literal notranslate"><span class="pre">web-sys</span></code> features are listed in <code class="docutils literal notranslate"><span class="pre">js/Cargo.toml</span></code>.</p></li>
+<li><p>Rebuild with <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">js</span> <span class="pre">&amp;&amp;</span> <span class="pre">pnpm</span> <span class="pre">build</span></code> and add Playwright coverage if a widget
+uses the new binding.</p></li>
+</ol>
+</section>
+<section id="add-a-new-widget">
+<h3>Add a new widget<a class="headerlink" href="#add-a-new-widget" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Add a Python class in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> extending <code class="docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code>.</p></li>
+<li><p>Give it <code class="docutils literal notranslate"><span class="pre">_esm</span> <span class="pre">=</span> <span class="pre">_STATIC</span> <span class="pre">/</span> <span class="pre">&quot;&lt;name&gt;.js&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">_css</span> <span class="pre">=</span> <span class="pre">_STATIC</span> <span class="pre">/</span> <span class="pre">&quot;&lt;name&gt;.css&quot;</span></code>.</p></li>
+<li><p>Define synced traits with <code class="docutils literal notranslate"><span class="pre">.tag(sync=True)</span></code> and keep defaults valid.</p></li>
+<li><p>Create <code class="docutils literal notranslate"><span class="pre">js/src/ts/&lt;name&gt;.ts</span></code> exporting <code class="docutils literal notranslate"><span class="pre">default</span> <span class="pre">{</span> <span class="pre">render</span> <span class="pre">}</span></code>.</p></li>
+<li><p>Create <code class="docutils literal notranslate"><span class="pre">js/src/css/&lt;name&gt;.css</span></code> scoped under a unique <code class="docutils literal notranslate"><span class="pre">.nbplay-*</span></code> root class.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> to <code class="docutils literal notranslate"><span class="pre">WIDGET_NAMES</span></code> in <code class="docutils literal notranslate"><span class="pre">js/build.mjs</span></code>.</p></li>
+<li><p>Re-export the widget from <code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code>.</p></li>
+<li><p>Add Python widget tests and Playwright tests.</p></li>
+<li><p>Add or update an example notebook when the widget is user-facing.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">js</span> <span class="pre">&amp;&amp;</span> <span class="pre">pnpm</span> <span class="pre">build</span></code>, then focused Python and JS tests.</p></li>
+</ol>
+</section>
+<section id="modify-an-existing-widget-trait">
+<h3>Modify an existing widget trait<a class="headerlink" href="#modify-an-existing-widget-trait" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Update the Python trait default and validation/coercion logic.</p></li>
+<li><p>Update the TypeScript model reads, writes, and <code class="docutils literal notranslate"><span class="pre">change:&lt;trait&gt;</span></code> listeners.</p></li>
+<li><p>Update CSS if the trait changes layout or visible state.</p></li>
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">nbplay/static</span></code> by rebuilding JS before testing Python rendering from
+source.</p></li>
+<li><p>Add Python tests for the trait default/API and Playwright tests for browser
+interaction.</p></li>
+<li><p>Update examples and this guide when the feature changes developer workflow.</p></li>
+</ol>
+</section>
+<section id="modify-audio-routing">
+<h3>Modify audio routing<a class="headerlink" href="#modify-audio-routing" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Check whether the feature should use a standalone <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code> fallback, a
+session mixer bus, or both.</p></li>
+<li><p>Preserve render-order tolerance. If a widget depends on the mixer bus, listen
+for <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> or retry registration when <code class="docutils literal notranslate"><span class="pre">session_id</span></code> changes.</p></li>
+<li><p>Clean up every node, timer, event listener, and bus entry in the render
+cleanup function.</p></li>
+<li><p>Avoid creating multiple owned <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code> instances when routing through a
+session bus.</p></li>
+<li><p>Add integration tests under <code class="docutils literal notranslate"><span class="pre">js/tests/integration.spec.js</span></code> when multiple
+widgets are involved.</p></li>
+</ol>
+</section>
+<section id="modify-keyboard-or-midi-behavior">
+<h3>Modify keyboard or MIDI behavior<a class="headerlink" href="#modify-keyboard-or-midi-behavior" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code> shape as <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">note,</span> <span class="pre">velocity,</span> <span class="pre">type</span> <span class="pre">}</span></code> unless every
+consumer is updated.</p></li>
+<li><p>Preserve <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> CustomEvent dispatch for sequencer recording.</p></li>
+<li><p>Preserve sampler routing semantics: <code class="docutils literal notranslate"><span class="pre">all</span></code>, <code class="docutils literal notranslate"><span class="pre">upper</span></code>, and <code class="docutils literal notranslate"><span class="pre">lower</span></code> zones.</p></li>
+<li><p>MIDI note-on with velocity zero should remain equivalent to note-off.</p></li>
+<li><p>Add tests for active notes, velocity, note-off, sampler routing, and event
+dispatch.</p></li>
+</ol>
+</section>
+</section>
+<section id="common-pitfalls-and-invariants">
+<h2>Common pitfalls and invariants<a class="headerlink" href="#common-pitfalls-and-invariants" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Do not call <code class="docutils literal notranslate"><span class="pre">save_changes()</span></code> during initial render resets. It can race with
+Session trait links while multiple widgets are being initialized.</p></li>
+<li><p>Always return a cleanup function from a widget renderer. Stop audio, clear
+intervals, remove global event listeners, disconnect MIDI ports, and unregister
+session bus entries.</p></li>
+<li><p>Treat <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code> as generated outputs. Rebuild
+them when testing widget rendering, but do not hand-edit them.</p></li>
+<li><p>Keep CSS scoped under a widget root class. Notebook pages are shared DOMs.</p></li>
+<li><p>Use Jupyter theme variables for colors. Canvas code should read CSS variables
+through <code class="docutils literal notranslate"><span class="pre">cssVar()</span></code>.</p></li>
+<li><p>Binary waveform traits are little-endian float32 bytes. Python writes them
+with <code class="docutils literal notranslate"><span class="pre">array.array(&quot;f&quot;).tobytes()</span></code> and TypeScript reads them with <code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code>.</p></li>
+<li><p>If a feature depends on notebook examples, validate notebook JSON and required
+cell fields before committing.</p></li>
+<li><p>Browser MIDI requires user/browser permission and may be unavailable. UI code
+should handle missing <code class="docutils literal notranslate"><span class="pre">navigator.requestMIDIAccess</span></code> gracefully.</p></li>
+<li><p>Native audio/MIDI devices may be unavailable in CI. Tests should accept that
+when testing device enumeration or construction.</p></li>
+<li><p>Keep Python, Rust, TypeScript, CSS, tests, examples, and docs in sync. Widget
+features almost always cross at least two layers.</p></li>
+</ul>
+</section>
+<section id="release-checklist-for-a-feature">
+<h2>Release checklist for a feature<a class="headerlink" href="#release-checklist-for-a-feature" title="Link to this heading">¶</a></h2>
+<p>Use the smallest focused verification first, then broaden before release:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python/widget API</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;&lt;focused pattern&gt;&quot;</span>
+
+<span class="c1"># Browser widget behavior</span>
+<span class="nb">cd</span><span class="w"> </span>js
+pnpm<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--<span class="w"> </span>&lt;focused<span class="w"> </span>spec&gt;
+
+<span class="c1"># Rust core changes</span>
+make<span class="w"> </span>-C<span class="w"> </span>rust<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Notebook edits</span>
+make<span class="w"> </span>test-notebooks
+
+<span class="c1"># Full local confidence pass</span>
+make<span class="w"> </span>lint
+make<span class="w"> </span><span class="nb">test</span>
+make<span class="w"> </span>build
+</pre></div>
+</div>
+<p>For release work, also run distribution checks:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>dist-check
+python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </span>check<span class="w"> </span>dist/*
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; the nbplay authors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">nbplay Developer Guide</a><ul>
+<li><a class="reference internal" href="#mental-model">Mental model</a></li>
+<li><a class="reference internal" href="#repository-map">Repository map</a></li>
+<li><a class="reference internal" href="#runtime-data-flow">Runtime data flow</a><ul>
+<li><a class="reference internal" href="#python-to-browser">Python to browser</a></li>
+<li><a class="reference internal" href="#rust-to-python">Rust to Python</a></li>
+<li><a class="reference internal" href="#rust-to-browser">Rust to browser</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#runtime-libraries-and-toolchain">Runtime libraries and toolchain</a><ul>
+<li><a class="reference internal" href="#python-runtime">Python runtime</a></li>
+<li><a class="reference internal" href="#rust-runtime">Rust runtime</a></li>
+<li><a class="reference internal" href="#javascript-and-frontend-build">JavaScript and frontend build</a></li>
+<li><a class="reference internal" href="#python-build-qa-and-release">Python build, QA, and release</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#python-widget-layer">Python widget layer</a><ul>
+<li><a class="reference internal" href="#shared-python-helpers">Shared Python helpers</a></li>
+<li><a class="reference internal" href="#widget-trait-summary">Widget trait summary</a></li>
+<li><a class="reference internal" href="#non-rendered-python-orchestration-types">Non-rendered Python orchestration types</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rust-core">Rust core</a><ul>
+<li><a class="reference internal" href="#rust-invariants">Rust invariants</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pyo3-binding-layer">PyO3 binding layer</a></li>
+<li><a class="reference internal" href="#wasm-binding-layer">WASM binding layer</a></li>
+<li><a class="reference internal" href="#typescript-widget-architecture">TypeScript widget architecture</a><ul>
+<li><a class="reference internal" href="#browser-apis-used">Browser APIs used</a></li>
+<li><a class="reference internal" href="#session-bus-shape">Session bus shape</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#widget-deep-dives">Widget deep dives</a><ul>
+<li><a class="reference internal" href="#synthwidget">SynthWidget</a></li>
+<li><a class="reference internal" href="#settingswidget">SettingsWidget</a></li>
+<li><a class="reference internal" href="#mixerwidget">MixerWidget</a></li>
+<li><a class="reference internal" href="#sequencerwidget">SequencerWidget</a></li>
+<li><a class="reference internal" href="#samplerwidget">SamplerWidget</a></li>
+<li><a class="reference internal" href="#transportwidget">TransportWidget</a></li>
+<li><a class="reference internal" href="#keyboardwidget">KeyboardWidget</a></li>
+<li><a class="reference internal" href="#midikeyboardwidget">MidiKeyboardWidget</a></li>
+<li><a class="reference internal" href="#padwidget">PadWidget</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#styling-system">Styling system</a></li>
+<li><a class="reference internal" href="#build-pipeline">Build pipeline</a></li>
+<li><a class="reference internal" href="#testing-strategy">Testing strategy</a><ul>
+<li><a class="reference internal" href="#python-tests">Python tests</a></li>
+<li><a class="reference internal" href="#javascript-tests">JavaScript tests</a></li>
+<li><a class="reference internal" href="#rust-tests">Rust tests</a></li>
+<li><a class="reference internal" href="#docs-and-notebooks">Docs and notebooks</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ci-and-publishing">CI and publishing</a></li>
+<li><a class="reference internal" href="#adding-or-changing-features">Adding or changing features</a><ul>
+<li><a class="reference internal" href="#add-a-new-rust-core-type-exposed-to-python">Add a new Rust core type exposed to Python</a></li>
+<li><a class="reference internal" href="#add-a-rust-feature-exposed-to-the-browser">Add a Rust feature exposed to the browser</a></li>
+<li><a class="reference internal" href="#add-a-new-widget">Add a new widget</a></li>
+<li><a class="reference internal" href="#modify-an-existing-widget-trait">Modify an existing widget trait</a></li>
+<li><a class="reference internal" href="#modify-audio-routing">Modify audio routing</a></li>
+<li><a class="reference internal" href="#modify-keyboard-or-midi-behavior">Modify keyboard or MIDI behavior</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-pitfalls-and-invariants">Common pitfalls and invariants</a></li>
+<li><a class="reference internal" href="#release-checklist-for-a-feature">Release checklist for a feature</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/custom.js?v=956e5d78"></script>
+    </body>
+</html>

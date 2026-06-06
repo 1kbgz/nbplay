@@ -25,6 +25,7 @@ Attributes
    nbplay.widget._STATIC
    nbplay.widget._PREVIEW_MAX_FRAMES
    nbplay.widget._DEFAULT_PAD_NOTES
+   nbplay.widget._PAD_MAX_COUNT
 
 
 Classes
@@ -32,6 +33,7 @@ Classes
 
 .. autoapisummary::
 
+   nbplay.widget.PadAction
    nbplay.widget.SynthWidget
    nbplay.widget.SettingsWidget
    nbplay.widget.MixerWidget
@@ -39,8 +41,10 @@ Classes
    nbplay.widget.SequencerWidget
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
+   nbplay.widget.KeyboardRoute
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
+   nbplay.widget.PadWidget
    nbplay.widget.Track
    nbplay.widget.Session
 
@@ -52,9 +56,24 @@ Functions
 
    nbplay.widget._default_step
    nbplay.widget._default_steps
+   nbplay.widget._clamp_int
+   nbplay.widget._clamp_midi_note
+   nbplay.widget._clamp_velocity
+   nbplay.widget._pack_float32
+   nbplay.widget._unpack_float32
+   nbplay.widget._decimate_samples
+   nbplay.widget._resize_number_list
    nbplay.widget._measure_beats
    nbplay.widget._step_duration_for_length
    nbplay.widget._resize_pad_notes
+   nbplay.widget._resize_pad_velocities
+   nbplay.widget._safe_trait_name
+   nbplay.widget._normalize_pad_action
+   nbplay.widget._normalize_pad_actions
+   nbplay.widget._normalize_sample_slices
+   nbplay.widget._default_pad_notes
+   nbplay.widget._positive_pad_dimension
+   nbplay.widget._build_route
 
 
 Module Contents
@@ -74,11 +93,92 @@ Module Contents
    :value: [48, 52, 55, 59, 60, 64, 67, 71]
 
 
+.. py:data:: _PAD_MAX_COUNT
+   :value: 128
+
+
+.. py:function:: _clamp_int(value, low, high)
+
+.. py:function:: _clamp_midi_note(value)
+
+.. py:function:: _clamp_velocity(value)
+
+.. py:function:: _pack_float32(samples)
+
+.. py:function:: _unpack_float32(data)
+
+.. py:function:: _decimate_samples(samples, max_points=2048)
+
+.. py:function:: _resize_number_list(values, count, fill, clamp)
+
 .. py:function:: _measure_beats(time_signature_num, time_signature_den)
 
 .. py:function:: _step_duration_for_length(length, measures=1, time_signature_num=4, time_signature_den=4)
 
 .. py:function:: _resize_pad_notes(notes, pad_count)
+
+.. py:function:: _resize_pad_velocities(velocities, pad_count, velocity=100)
+
+.. py:function:: _safe_trait_name(value)
+
+.. py:class:: PadAction(*, type='note', note=60, velocity=None, trait=None, value=None, label=None, slice_index=None)
+
+   Validated pad action descriptor.
+
+   ``type="note"`` is the current playback path. ``type="trait"`` and
+   ``type="event"`` provide a stable synced shape for future controller pads.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: type
+      :value: 'note'
+
+
+
+   .. py:attribute:: note
+
+
+   .. py:attribute:: velocity
+      :value: None
+
+
+
+   .. py:attribute:: trait
+      :value: None
+
+
+
+   .. py:attribute:: value
+      :value: None
+
+
+
+   .. py:attribute:: label
+      :value: ''
+
+
+
+   .. py:attribute:: slice_index
+      :value: None
+
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:function:: _normalize_pad_action(action, default_note=60, default_velocity=100, prefer_defaults=False)
+
+.. py:function:: _normalize_pad_actions(actions, pad_count, pad_notes=None, pad_velocities=None, prefer_defaults=False)
+
+.. py:function:: _normalize_sample_slices(slices, sample_length=0)
 
 .. py:class:: SynthWidget(**kwargs)
 
@@ -88,14 +188,11 @@ Module Contents
    Interactive synthesizer widget for Jupyter environments.
 
    :param oscillator_type: One of ``"sine"``, ``"square"``, ``"saw"``, ``"noise"``.
-   :type oscillator_type: str
    :param frequency: Oscillator frequency in Hz (20–8000).
-   :type frequency: float
    :param amplitude: Oscillator amplitude (0.0–1.0).
-   :type amplitude: float
    :param sample_rate: Sample rate used for the waveform preview.
-   :type sample_rate: int
-   :param Public constructor:
+
+   Public constructor
 
 
    .. py:attribute:: _esm
@@ -180,13 +277,12 @@ Module Contents
    Bases: :py:obj:`anywidget.AnyWidget`
 
 
-   Mixer console widget with per-channel faders, pan, mute/solo,
-   and a master output fader.
+   Mixer console with per-channel faders, pan, mute/solo, and master fader.
 
-   Channels are synced as a JSON list of dicts. Each dict has keys:
+   Channels are synced as a JSON list of dicts with keys
    ``name``, ``gain``, ``pan``, ``mute``, ``solo``.
 
-   The ``Mixer`` Rust/Python object can be used for offline rendering
+   The ``Mixer`` Rust object can be used for offline rendering
    via ``mix_down()``; this widget provides the interactive UI.
 
    Public constructor
@@ -209,13 +305,19 @@ Module Contents
 
    .. py:method:: add_channel(name='Channel')
 
-      Add a new channel strip and return its index.
+      Add a new channel strip.
+
+      :param name: Display name for the channel.
+
+      :returns: Index of the new channel.
 
 
 
    .. py:method:: remove_channel(index)
 
       Remove a channel by index.
+
+      :param index: Zero-based channel index.
 
 
 
@@ -233,7 +335,9 @@ Module Contents
 
    .. py:method:: to_mixer()
 
-      Create a Rust ``Mixer`` instance matching the current widget state.
+      Build a Rust ``Mixer`` matching the current widget state.
+
+      :returns: A new ``nbplay.Mixer`` instance.
 
 
 
@@ -245,11 +349,10 @@ Module Contents
    A single voice's per-step note/velocity/duration assignments.
 
    This is a lightweight traitlets object (not a rendered widget).
-   A monophonic sequencer has one NoteComposer; a polyphonic sequencer
-   has N NoteComposers sharing the same step clock.
+   A monophonic sequencer has one composer; a polyphonic sequencer
+   has *N* composers sharing the same step clock.
 
    :param length: Number of steps.
-   :type length: int
 
 
    .. py:attribute:: steps
@@ -264,17 +367,28 @@ Module Contents
 
       Resize the step list, preserving existing steps where possible.
 
+      :param length: New step count (truncates or extends with defaults).
 
 
-   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True)
+
+   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, probability=100)
 
       Set a step at the given index.
+
+      :param index: Zero-based step index.
+      :param note: MIDI note number (0–127).
+      :param velocity: MIDI velocity (1–127).
+      :param duration_ticks: Step duration in ticks.
+      :param active: Whether the step is active.
+      :param probability: Trigger probability (0–100).
 
 
 
    .. py:method:: toggle_step(index)
 
       Toggle the active state of a step.
+
+      :param index: Zero-based step index.
 
 
 
@@ -286,7 +400,11 @@ Module Contents
 
    .. py:method:: to_pattern(loop_enabled=True)
 
-      Create a Rust ``Pattern`` instance from the current state.
+      Build a Rust ``Pattern`` from the current state.
+
+      :param loop_enabled: Whether the pattern should loop.
+
+      :returns: A new ``nbplay.Pattern`` instance.
 
 
 
@@ -298,15 +416,14 @@ Module Contents
    Bases: :py:obj:`anywidget.AnyWidget`
 
 
-   Step sequencer widget with a grid-based pattern editor,
-   transport controls, and BPM setting.
+   Step sequencer widget with a grid-based pattern editor.
 
-   Supports monophonic (default, ``num_voices=1``) and polyphonic
-   (``num_voices=N``) modes.  In monophonic mode, the API is fully
-   backward-compatible with the original single-voice sequencer.
+   Supports monophonic (``num_voices=1``) and polyphonic
+   (``num_voices=N``) modes. Internally each voice is a
+   ``NoteComposer``; the ``steps`` property aliases ``voices[0].steps``.
 
-   Internally, each voice is a ``NoteComposer`` instance.  The ``steps``
-   property is a convenience alias for ``voices[0].steps``.
+   :param num_voices: Number of voices (1 = monophonic, N = polyphonic).
+   :param length: Number of steps.
 
    Public constructor
 
@@ -333,6 +450,15 @@ Module Contents
 
 
    .. py:attribute:: step_duration
+
+
+   .. py:attribute:: swing
+
+
+   .. py:attribute:: groove
+
+
+   .. py:attribute:: automation_lanes
 
 
    .. py:attribute:: is_playing
@@ -372,6 +498,15 @@ Module Contents
 
 
 
+   .. py:method:: _validate_swing(proposal)
+
+
+   .. py:method:: _validate_groove(proposal)
+
+
+   .. py:method:: _validate_automation_lanes(proposal)
+
+
    .. py:method:: _on_composer_change(change)
 
       Keep voices_data in sync when any composer's steps change.
@@ -407,10 +542,13 @@ Module Contents
 
    .. py:method:: configure_grid(measures=None, step_duration=None)
 
-      Configure pattern length from measure count and musical step duration.
+      Configure pattern length from measure count and step duration.
 
-      ``step_duration`` is measured in quarter-note beats. In 4/4, ``0.5``
-      produces eighth-note steps and ``0.25`` produces sixteenth-note steps.
+      ``step_duration`` is in quarter-note beats. In 4/4, ``0.5``
+      gives eighth-notes and ``0.25`` gives sixteenth-notes.
+
+      :param measures: Number of measures (bars).
+      :param step_duration: Step duration in quarter-note beats.
 
 
 
@@ -429,15 +567,26 @@ Module Contents
       Steps for voice 0 (backward-compatible with monophonic API).
 
 
-   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0)
+   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100)
 
       Set a step at the given index on the given voice.
+
+      :param index: Zero-based step index.
+      :param note: MIDI note number (0–127).
+      :param velocity: MIDI velocity (1–127).
+      :param duration_ticks: Step duration in ticks.
+      :param active: Whether the step is active.
+      :param voice: Voice index (0-based).
+      :param probability: Trigger probability (0–100).
 
 
 
    .. py:method:: toggle_step(index, voice=0)
 
       Toggle the active state of a step on the given voice.
+
+      :param index: Zero-based step index.
+      :param voice: Voice index (0-based).
 
 
 
@@ -449,13 +598,22 @@ Module Contents
 
    .. py:method:: to_pattern(voice=0)
 
-      Create a Rust ``Pattern`` instance from the given voice.
+      Build a Rust ``Pattern`` from the given voice.
+
+      :param voice: Voice index (0-based).
+
+      :returns: A ``nbplay.Pattern``, or ``None`` if voice is out of range.
 
 
 
    .. py:method:: to_step_sequencer(channel=0, voice=0)
 
-      Create a Rust ``StepSequencer`` from the given voice.
+      Build a Rust ``StepSequencer`` from the given voice.
+
+      :param channel: MIDI channel.
+      :param voice: Voice index (0-based).
+
+      :returns: A ``nbplay.StepSequencer``, or ``None`` if voice is out of range.
 
 
 
@@ -464,11 +622,11 @@ Module Contents
    Bases: :py:obj:`anywidget.AnyWidget`
 
 
-   Sampler widget showing loaded sample info, envelope controls,
-   and a waveform display.
+   Sampler widget with waveform display, envelope, and trigger pads.
 
-   The sample data is synced as binary Float32Array bytes for waveform
-   visualisation. Envelope parameters are synced as individual traits.
+   Sample data is synced as binary Float32Array bytes for
+   waveform visualisation. Envelope parameters are synced
+   as individual traits.
 
    Public constructor
 
@@ -494,6 +652,9 @@ Module Contents
    .. py:attribute:: waveform
 
 
+   .. py:attribute:: sample_data
+
+
    .. py:attribute:: attack
 
 
@@ -509,7 +670,31 @@ Module Contents
    .. py:attribute:: pad_notes
 
 
+   .. py:attribute:: pad_velocities
+
+
+   .. py:attribute:: pad_actions
+
+
+   .. py:attribute:: sample_slices
+
+
    .. py:attribute:: pad_count
+
+
+   .. py:attribute:: velocity
+
+
+   .. py:attribute:: velocity_sensitive
+
+
+   .. py:attribute:: active_pads
+
+
+   .. py:attribute:: last_note_event
+
+
+   .. py:attribute:: last_pad_event
 
 
    .. py:attribute:: max_voices
@@ -529,27 +714,150 @@ Module Contents
 
 
 
+   .. py:method:: _validate_velocity(proposal)
+
+
    .. py:method:: _on_pad_count_change(change)
 
 
    .. py:method:: _on_pad_notes_change(change)
 
 
-   .. py:method:: configure_pads(pad_count=None, pad_notes=None)
+   .. py:method:: _on_pad_velocities_change(change)
 
-      Configure the number of sampler trigger pads, preserving notes.
+
+   .. py:method:: _on_pad_actions_change(change)
+
+
+   .. py:method:: _on_sample_slices_change(change)
+
+
+   .. py:method:: _set_sample_data(samples)
+
+
+   .. py:method:: get_sample_data()
+
+      Return decoded mono PCM sample data as floats.
+
+
+
+   .. py:method:: _read_wav_file(path)
+
+
+   .. py:method:: load_audio_file(path, root_note=69, name=None)
+
+      Load a local audio file into the sampler.
+
+      WAV uses Python's stdlib. MP3/OGG/other formats
+      require the optional ``soundfile`` package.
+
+      :param path: Path to the audio file.
+      :param root_note: MIDI root note for pitch shifting.
+      :param name: Display name (defaults to filename).
+
+      :returns: Self for chaining.
+
+      :raises ValueError: If format is unsupported and ``soundfile``
+          is not installed, or if WAV format is invalid.
+
+
+
+   .. py:method:: configure_pads(pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None)
+
+      Configure sampler trigger pads.
+
+      :param pad_count: Number of pads.
+      :param pad_notes: MIDI note for each pad.
+      :param pad_velocities: Velocity for each pad.
+      :param pad_actions: Action descriptors for each pad.
 
 
 
    .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
 
-      Load sample PCM data (list of floats) into the widget.
+      Load sample PCM data into the widget.
+
+      :param data: List of float samples.
+      :param sample_rate: Sample rate in Hz.
+      :param root_note: MIDI root note for pitch shifting.
+      :param name: Display name for the sample.
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: trim_sample(start=0, end=None)
+
+      Trim sample data to frame range [start, end).
+
+      :param start: Start frame index.
+      :param end: End frame index (defaults to sample length).
+
+      :returns: Self for chaining.
+
+      :raises ValueError: If the trim range is empty.
+
+
+
+   .. py:method:: normalize_sample(target=1.0)
+
+      Scale sample data so peak absolute amplitude reaches target.
+
+      :param target: Target peak amplitude (0.0–1.0).
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: reverse_sample()
+
+      Reverse sample data in place.
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: fade_sample(fade_in=0, fade_out=0)
+
+      Apply linear fade-in/fade-out in sample frames.
+
+      :param fade_in: Number of frames to fade in.
+      :param fade_out: Number of frames to fade out.
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: slice_sample(count, start_note=36)
+
+      Create equal sample slices mapped to ascending notes.
+
+      :param count: Number of slices.
+      :param start_note: MIDI note for the first slice.
+
+      :returns: List of slice dicts with ``index``, ``note``, ``start``, ``end``.
+
+      :raises ValueError: If no sample is loaded.
+
+
+
+   .. py:method:: map_slices_to_pads(pads, count=None, start_note=36)
+
+      Map sampler slices to a ``PadWidget``.
+
+      :param pads: Target ``PadWidget``.
+      :param count: Number of slices (defaults to pad count).
+      :param start_note: MIDI note for the first slice.
+
+      :returns: The ``PadWidget`` with notes and actions configured.
 
 
 
    .. py:method:: to_sampler()
 
-      Create a Rust ``Sampler`` from the current widget state.
+      Build a Rust ``Sampler`` from the current widget state.
+
+      :returns: A new ``nbplay.Sampler`` instance.
 
 
 
@@ -558,10 +866,11 @@ Module Contents
    Bases: :py:obj:`anywidget.AnyWidget`
 
 
-   Global transport controls — play/stop, BPM, time signature, bar/beat counter.
+   Global transport controls: play/stop, BPM, time signature, bar/beat.
 
-   Used as the master clock for a Session.  All connected SequencerWidgets
-   sync their BPM and play state to this transport via ``traitlets.link``.
+   Used as the master clock for a ``Session``. All connected
+   ``SequencerWidget`` instances sync their BPM and play state
+   to this transport via ``traitlets.link``.
 
    Public constructor
 
@@ -599,6 +908,72 @@ Module Contents
    .. py:attribute:: loop_end_bar
 
 
+.. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
+
+   Validated route descriptor for keyboard → sampler mapping.
+
+   Determines which MIDI notes a ``KeyboardWidget`` or
+   ``MidiKeyboardWidget`` routes to a specific sampler.
+
+   :param channel_index: The sampler's channel index on the session bus (≥ 0).
+   :param match: One of ``"all"``, ``"zone"``, ``"octave"``, ``"note"``, ``"notes"``.
+   :param zone: Required when *match="zone"*. ``"upper"`` or ``"lower"``.
+   :param octave: Required when *match="octave"*. MIDI octave 0–9.
+   :param note: Required when *match="note"*. Single MIDI note 0–127.
+   :param notes: Required when *match="notes"*. Non-empty list of MIDI notes 0–127.
+
+
+   .. py:attribute:: _VALID_MATCHES
+
+
+   .. py:attribute:: _VALID_ZONES
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: match
+      :value: 'all'
+
+
+
+   .. py:attribute:: zone
+      :value: None
+
+
+
+   .. py:attribute:: octave
+      :value: None
+
+
+
+   .. py:attribute:: note
+      :value: None
+
+
+
+   .. py:attribute:: notes
+      :value: None
+
+
+
+   .. py:method:: to_dict() -> dict
+
+      Serialize to the dict format stored in ``sampler_routing``.
+
+      :returns: Dict with keys ``channel_index``, ``match``, and optional fields.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+
+   .. py:method:: __hash__() -> int
+
+
 .. py:class:: KeyboardWidget(**kwargs)
 
    Bases: :py:obj:`anywidget.AnyWidget`
@@ -607,15 +982,17 @@ Module Contents
    Musical typing keyboard widget (Logic Pro style).
 
    4-row QWERTY layout across two independent octave halves.
-   Triggers audio via Web Audio, emits note events for sequencer
-   recording and sampler triggering.
+   Triggers audio via Web Audio and emits note events for
+   sequencer recording and sampler triggering.
 
    Key mapping:
-       Upper: 2 3 _ 5 6 7 _ 9 0 (sharps) / Q W E R T Y U I O P (naturals)
-       Lower: A S _ F G H _ K L (sharps) / Z X C V B N M , . (naturals)
-       [ ] octave shift upper, ; ' octave shift lower
-       - = velocity down/up (hold to accelerate)
-       ` sustain upper, / sustain lower, Space global sustain
+       - Upper sharps: **2 3 _ 5 6 7 _ 9 0**
+       - Upper naturals: **Q W E R T Y U I O P**
+       - Lower sharps: **A S _ F G H _ K L**
+       - Lower naturals: **Z X C V B N M , .**
+       - ``[ ]`` octave shift upper, ``; '`` octave shift lower
+       - ``- =`` velocity down/up (hold to accelerate)
+       - ``\` `` sustain upper, ``/`` sustain lower, ``Space`` global sustain
 
    Public constructor
 
@@ -673,29 +1050,35 @@ Module Contents
 
       Link this keyboard to a sequencer for recording and note input.
 
+      :param sequencer: A ``SequencerWidget`` to connect.
+
 
 
    .. py:method:: disconnect_sequencer(sequencer)
 
       Unlink this keyboard from a sequencer.
 
+      :param sequencer: A ``SequencerWidget`` to disconnect.
 
 
-   .. py:method:: connect_sampler(sampler, zone='all')
+
+   .. py:method:: connect_sampler(sampler, zone=None, octave=None, note=None, notes=None)
 
       Connect a sampler to the keyboard.
 
-      :param sampler: The sampler to connect.
-      :type sampler: SamplerWidget
-      :param zone: ``"all"`` (whole keyboard), ``"upper"`` (QWERTY rows),
-                   or ``"lower"`` (ZXCV rows).
-      :type zone: str
+      :param sampler: The ``SamplerWidget`` to connect.
+      :param zone: ``"upper"``, ``"lower"``, or ``None`` (whole keyboard).
+      :param octave: Route all notes in this MIDI octave (0–9).
+      :param note: Route a single MIDI note (0–127).
+      :param notes: Route specific MIDI notes.
 
 
 
    .. py:method:: disconnect_sampler(sampler)
 
-      Disconnect a sampler from the keyboard.
+      Disconnect a sampler.
+
+      :param sampler: The ``SamplerWidget`` to disconnect.
 
 
 
@@ -706,8 +1089,9 @@ Module Contents
 
    Browser Web MIDI keyboard input widget.
 
-   Uses the same sequencer and sampler connection API as ``KeyboardWidget``,
-   but receives note events from a selected browser MIDI input device.
+   Uses the same sequencer and sampler connection API as
+   ``KeyboardWidget``, but receives note events from a
+   selected browser MIDI input device.
 
    Public constructor
 
@@ -724,12 +1108,206 @@ Module Contents
    .. py:attribute:: available_midi_ports
 
 
+.. py:function:: _default_pad_notes(rows=4, cols=4)
+
+   Default pad notes starting at MIDI 36 (C2), ascending chromatically.
+
+
+.. py:function:: _positive_pad_dimension(value)
+
+   Clamp pad grid dimensions to at least one row/column.
+
+
+.. py:class:: PadWidget(**kwargs)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   On-screen trigger-pad grid.
+
+   A grid of clickable, velocity-sensitive pads that send MIDI notes
+   through the session bus, using the same ``sampler_routing``
+   infrastructure as ``KeyboardWidget``. Falls back to a built-in
+   sine-wave oscillator when no sampler is connected.
+
+   :param rows: Number of pad rows (default 4).
+   :param cols: Number of pad columns (default 4).
+   :param velocity: Default velocity for pad triggers (1–127).
+   :param velocity_sensitive: If True, vertical click position maps to
+                              velocity (top = soft, bottom = hard).
+   :param pad_notes: MIDI note assignments (row-major). Defaults to
+                     [36, 37, ...] starting at C2.
+   :param pad_velocities: Per-pad velocity values (1–127). Shift+scroll
+                          on a pad adjusts its individual velocity.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: rows
+
+
+   .. py:attribute:: cols
+
+
+   .. py:attribute:: velocity
+
+
+   .. py:attribute:: velocity_sensitive
+
+
+   .. py:attribute:: pad_notes
+
+
+   .. py:attribute:: pad_velocities
+
+
+   .. py:attribute:: pad_actions
+
+
+   .. py:attribute:: active_pads
+
+
+   .. py:attribute:: last_note_event
+
+
+   .. py:attribute:: last_pad_event
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: sampler_routing
+
+
+   .. py:attribute:: _connected_samplers
+      :type:  list
+      :value: []
+
+
+
+   .. py:method:: _validate_velocity(proposal)
+
+
+   .. py:method:: _validate_grid_dimension(proposal)
+
+
+   .. py:method:: _validate_pad_notes(proposal)
+
+
+   .. py:method:: _validate_pad_velocities(proposal)
+
+
+   .. py:method:: _validate_pad_actions(proposal)
+
+
+   .. py:method:: _on_grid_change(change)
+
+      Resize pad_notes and pad_velocities when grid dimensions change.
+
+
+
+   .. py:method:: _on_pad_values_change(change)
+
+
+   .. py:method:: _on_velocity_change(change)
+
+
+   .. py:method:: configure_grid_for_actions(notes=None, velocities=None, actions=None, rows=None, cols=None)
+
+      Configure pad grid from note/control actions.
+
+      :param notes: MIDI note assignments.
+      :param velocities: Per-pad velocity values.
+      :param actions: ``PadAction`` descriptors.
+      :param rows: Grid row count.
+      :param cols: Grid column count.
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: set_base_note(note)
+
+      Set pads to ascending chromatic notes.
+
+      :param note: Starting MIDI note.
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: transpose_pads(semitones)
+
+      Transpose current note pads by semitones.
+
+      :param semitones: Number of semitones to transpose (positive or negative).
+
+      :returns: Self for chaining.
+
+
+
+   .. py:method:: connect_sampler(sampler, **kwargs)
+
+      Connect a sampler to all pads.
+
+      Uses the same ``KeyboardRoute`` routing model as
+      ``KeyboardWidget.connect_sampler``. By default routes
+      all pads to the sampler (``match="all"``).
+
+      Pads do not have keyboard zones; ``zone="upper"`` and
+      ``zone="lower"`` raise ``ValueError``. Use
+      ``match="all"``, ``match="octave"``, ``match="note"``,
+      or ``match="notes"`` instead.
+
+      :param sampler: The ``SamplerWidget`` to connect.
+      :param \*\*kwargs: Passed to ``KeyboardRoute``.
+
+
+
+   .. py:method:: disconnect_sampler(sampler)
+
+      Disconnect a sampler from the pads.
+
+      :param sampler: The ``SamplerWidget`` to disconnect.
+
+
+
+.. py:function:: _build_route(channel_index, zone=None, octave=None, note=None, notes=None)
+
+   Build a ``KeyboardRoute`` from kwargs.
+
+   Shared by ``KeyboardWidget`` and ``PadWidget``.
+
+   :param channel_index: Sampler channel index.
+   :param zone: ``None``, ``"all"``, ``"upper"``, or ``"lower"``.
+                Invalid values raise ``ValueError``.
+   :param octave: MIDI octave (0–9).
+   :param note: Single MIDI note (0–127).
+   :param notes: Non-empty list of MIDI notes.
+
+   :returns: A validated ``KeyboardRoute``.
+
+
 .. py:class:: Track(name, sequencer, sound_source, mixer_channel)
 
    Binds a sequencer to a sound source and a mixer channel.
 
-   Uses ``traitlets.link()`` to propagate BPM and play state from the
-   Session's transport to the sequencer.
+   Uses ``traitlets.link()`` to propagate BPM and play state
+   from the ``Session`` transport to the sequencer.
+
+   :param name: Track display name.
+   :param sequencer: A ``SequencerWidget``.
+   :param sound_source: A widget that produces audio.
+   :param mixer_channel: Zero-based mixer channel index.
 
 
    .. py:attribute:: name
@@ -753,11 +1331,12 @@ Module Contents
 
       Link this track's sequencer BPM and play state to the transport.
 
-      BPM is bidirectional so editing BPM on either widget stays in
-      sync.  ``is_playing`` is one-directional (transport → sequencer)
-      so that a single sequencer reaching its end (non-loop) does not
-      propagate ``is_playing=False`` back to the transport and stop
-      every other sequencer.
+      BPM is bidirectional so editing BPM on either widget stays
+      in sync. ``is_playing`` is one-directional (transport →
+      sequencer) so a single non-looping sequencer reaching its
+      end does not stop every other sequencer.
+
+      :param transport: A ``TransportWidget``.
 
 
 
@@ -774,8 +1353,12 @@ Module Contents
 
    A collection of tracks with a shared transport and mixer.
 
-   Manages ``traitlets.link`` connections between the transport and all
-   track sequencers, and assigns mixer channels for audio routing.
+   Manages ``traitlets.link`` connections between the transport
+   and all track sequencers, and assigns mixer channels for
+   audio routing.
+
+   :param bpm: Initial tempo in beats per minute.
+   :param time_signature: ``(numerator, denominator)`` tuple.
 
 
    .. py:attribute:: _session_id
@@ -798,13 +1381,19 @@ Module Contents
 
       Add a track, create a mixer channel, and link transport state.
 
-      Returns the new ``Track`` object.
+      :param name: Track display name.
+      :param sequencer: A ``SequencerWidget``.
+      :param sound_source: A widget that produces audio.
+
+      :returns: The new ``Track`` object.
 
 
 
    .. py:method:: remove_track(index)
 
-      Remove a track by index, unlinking transport and removing mixer channel.
+      Remove a track, unlinking transport and removing mixer channel.
+
+      :param index: Zero-based track index.
 
 
 

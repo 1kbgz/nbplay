@@ -40,8 +40,11 @@ Classes
    test_all.TestSequencerWidget
    test_all.TestSamplerWidget
    test_all.TestTransportWidget
+   test_all.TestKeyboardRoute
    test_all.TestKeyboardWidget
    test_all.TestMidiKeyboardWidget
+   test_all.TestPadAction
+   test_all.TestPadWidget
    test_all.TestTrack
    test_all.TestSession
    test_all.TestDemoNotebook
@@ -729,6 +732,18 @@ Module Contents
    .. py:method:: test_set_step()
 
 
+   .. py:method:: test_set_step_probability_clamped()
+
+
+   .. py:method:: test_swing_clamped()
+
+
+   .. py:method:: test_groove_clamped()
+
+
+   .. py:method:: test_automation_lanes_normalized()
+
+
    .. py:method:: test_set_step_voice()
 
       set_step with voice kwarg targets a specific voice.
@@ -806,6 +821,18 @@ Module Contents
    .. py:method:: test_pad_notes_assignment_updates_pad_count()
 
 
+   .. py:method:: test_load_audio_file_wav(tmp_path)
+
+
+   .. py:method:: test_sample_edit_operations()
+
+
+   .. py:method:: test_slice_sample_maps_sampler_pads()
+
+
+   .. py:method:: test_map_slices_to_pad_widget()
+
+
    .. py:method:: test_custom_init()
 
 
@@ -835,6 +862,68 @@ Module Contents
    .. py:method:: test_loop()
 
 
+.. py:class:: TestKeyboardRoute
+
+   .. py:method:: test_all()
+
+
+   .. py:method:: test_zone_upper()
+
+
+   .. py:method:: test_zone_lower()
+
+
+   .. py:method:: test_octave()
+
+
+   .. py:method:: test_note()
+
+
+   .. py:method:: test_notes()
+
+
+   .. py:method:: test_invalid_match()
+
+
+   .. py:method:: test_invalid_zone()
+
+
+   .. py:method:: test_invalid_octave_too_low()
+
+
+   .. py:method:: test_invalid_octave_too_high()
+
+
+   .. py:method:: test_invalid_note_too_high()
+
+
+   .. py:method:: test_invalid_note_too_low()
+
+
+   .. py:method:: test_invalid_notes_empty()
+
+
+   .. py:method:: test_invalid_notes_oob()
+
+
+   .. py:method:: test_invalid_channel_index()
+
+
+   .. py:method:: test_invalid_float_octave()
+
+
+   .. py:method:: test_invalid_float_note()
+
+
+   .. py:method:: test_invalid_float_in_notes()
+
+
+   .. py:method:: test_equality()
+
+
+   .. py:method:: test_repr()
+
+
 .. py:class:: TestKeyboardWidget
 
    .. py:method:: test_defaults()
@@ -858,7 +947,22 @@ Module Contents
    .. py:method:: test_connect_sampler_all()
 
 
+   .. py:method:: test_connect_sampler_all_explicit()
+
+
    .. py:method:: test_connect_sampler_split()
+
+
+   .. py:method:: test_connect_sampler_per_octave()
+
+
+   .. py:method:: test_connect_sampler_per_note()
+
+
+   .. py:method:: test_connect_sampler_per_notes()
+
+
+   .. py:method:: test_connect_sampler_layered()
 
 
    .. py:method:: test_disconnect_sampler()
@@ -866,7 +970,7 @@ Module Contents
 
    .. py:method:: test_connect_sampler_replaces_same_channel()
 
-      Re-connecting the same sampler updates zone, doesn't duplicate.
+      Re-connecting the same sampler updates route, doesn't duplicate.
 
 
 
@@ -882,6 +986,91 @@ Module Contents
 
 
    .. py:method:: test_connect_sampler()
+
+
+.. py:class:: TestPadAction
+
+   .. py:method:: test_note_action()
+
+
+   .. py:method:: test_trait_action()
+
+
+   .. py:method:: test_invalid_trait_name()
+
+
+.. py:class:: TestPadWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_custom_dimensions()
+
+
+   .. py:method:: test_grid_dimensions_clamped_on_init()
+
+
+   .. py:method:: test_grid_dimensions_clamped_on_assignment()
+
+
+   .. py:method:: test_grid_resize_extends_notes()
+
+
+   .. py:method:: test_grid_resize_truncates_notes()
+
+
+   .. py:method:: test_custom_pad_notes()
+
+
+   .. py:method:: test_velocity()
+
+
+   .. py:method:: test_velocity_sensitive()
+
+
+   .. py:method:: test_connect_sampler()
+
+
+   .. py:method:: test_connect_sampler_rejects_zone()
+
+
+   .. py:method:: test_disconnect_sampler()
+
+
+   .. py:method:: test_active_pads()
+
+
+   .. py:method:: test_last_note_event()
+
+
+   .. py:method:: test_pad_velocities_default()
+
+
+   .. py:method:: test_pad_velocities_custom()
+
+
+   .. py:method:: test_pad_velocities_resize_extends()
+
+
+   .. py:method:: test_pad_velocities_set_individually()
+
+
+   .. py:method:: test_velocity_change_resets_pad_velocities()
+
+
+   .. py:method:: test_velocity_clamped()
+
+
+   .. py:method:: test_pad_notes_clamped()
+
+
+   .. py:method:: test_pad_velocities_clamped()
+
+
+   .. py:method:: test_configure_grid_for_actions()
+
+
+   .. py:method:: test_set_base_note_and_transpose()
 
 
 .. py:class:: TestTrack

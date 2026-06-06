@@ -215,7 +215,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/examples/07_midi_keyboard.ipynb.txt" title="View this page">
+  <a class="muted-link" href="../_sources/examples/08_midi_keyboard.ipynb.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -241,7 +241,7 @@
 <p>Render the widget, choose a MIDI input port in the browser, then play notes. Velocity is preserved in <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code> and broadcast to other widgets.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiKeyboardWidget</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiKeyboardWidget</span>
 
 <span class="n">midi_keyboard</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">()</span>
 <span class="n">midi_keyboard</span>
@@ -255,7 +255,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">connect_sequencer()</span></code> enables the sequencer recording controls and lets MIDI note events fill steps while the sequencer is playing.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequencerWidget</span>
 
 <span class="n">record_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">112.0</span><span class="p">)</span>
 <span class="n">midi_keyboard</span><span class="o">.</span><span class="n">connect_sequencer</span><span class="p">(</span><span class="n">record_seq</span><span class="p">)</span>
@@ -271,7 +271,7 @@
 <p>Connect the MIDI widget to a sampler track in a session to route incoming notes through the same browser audio bus as the typing keyboard.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">Session</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">Session</span>
 
 <span class="n">sampler_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">112.0</span><span class="p">)</span>
 <span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">pad_count</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
@@ -293,7 +293,7 @@
 <p>Multiple samplers can share one MIDI keyboard. Use upper/lower zones to create a simple octave-style split.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">split_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">96.0</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">split_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">96.0</span><span class="p">)</span>
 <span class="n">lower_sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s1">&#39;Lower sampler&#39;</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">upper_sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s1">&#39;Upper sampler&#39;</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">split_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">&#39;Lower&#39;</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">lower_sampler</span><span class="p">)</span>
