@@ -82,6 +82,30 @@ test.describe("PadWidget", () => {
     await expect(page.locator(".nbplay-pad-cell")).toHaveCount(1);
   });
 
+  test("tap updates note state without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+
+    const pad = page.locator(".nbplay-pad-cell").first();
+    const box = await pad.boundingBox();
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.waitForFunction(
+      () => window.__testModel._state.last_note_event.note === 36,
+    );
+
+    const event = await page.evaluate(
+      () => window.__testModel._state.last_note_event,
+    );
+    expect(event.note).toBe(36);
+  });
+
   // 5. Pads show note names
   test("pads display note names", async ({ page }) => {
     await renderWidget(page, {

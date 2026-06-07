@@ -89,6 +89,29 @@ test.describe("SamplerWidget", () => {
     await expect(page.locator(".nbplay-samp-info-len")).toHaveText("100 ms");
   });
 
+  test("pad trigger updates note state without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+    await page.evaluate(() => {
+      const samples = new Float32Array([0, 0.5, 0]);
+      window.__testModel.set("sample_data", new DataView(samples.buffer));
+      window.__testModel._trigger("change:sample_data");
+    });
+
+    await page
+      .locator(".nbplay-samp-pad")
+      .first()
+      .click({ position: { x: 4, y: 4 } });
+
+    const event = await page.evaluate(
+      () => window.__testModel._state.last_note_event,
+    );
+    expect(event.note).toBe(48);
+  });
+
   // 6. ADSR values displayed
   test("displays ADSR values correctly", async ({ page }) => {
     await renderWidget(page);

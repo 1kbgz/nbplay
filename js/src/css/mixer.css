@@ -282,6 +282,65 @@
   border-color: var(--jp-warn-color1, #f97316);
   color: var(--jp-layout-color0, var(--jp-layout-color1, #1a1a2e));
 }
+.nbplay-mixer .nbplay-strip-effects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.nbplay-mixer .nbplay-strip-fx-add {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+.nbplay-mixer .nbplay-strip-fx-select {
+  min-width: 0;
+  flex: 1;
+  height: 20px;
+  font-family: inherit;
+  font-size: 9px;
+  color: var(--jp-ui-font-color1, #c7d2fe);
+  background: var(--jp-layout-color0, #0f0f1a);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  border-radius: 4px;
+}
+.nbplay-mixer .nbplay-strip-fx-add-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--jp-ui-font-color1, #c7d2fe);
+  background: var(--jp-layout-color0, #0f0f1a);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.nbplay-mixer .nbplay-strip-fx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.nbplay-mixer .nbplay-strip-fx-chip {
+  min-height: 18px;
+  padding: 1px 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--jp-brand-color2, #a855f7);
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color2, #a855f7) 12%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--jp-brand-color2, #a855f7) 40%, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+}
 /* remove button */
 .nbplay-mixer .nbplay-strip-remove {
   font-size: 14px;

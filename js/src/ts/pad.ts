@@ -1,7 +1,12 @@
 // nbplay PadWidget – on-screen trigger-pad grid
 // MPC-style velocity-sensitive pads with session-bus sampler routing.
 
-import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
+import {
+  type AnyModel,
+  createAudioContext,
+  makeEditable,
+  onKernelDisconnect,
+} from "./helpers.ts";
 import {
   clampVelocity,
   normalizePadActions,
@@ -47,10 +52,11 @@ function createAudioEngine(
           output = nbplay[sessionId].channels[channelIndex].gain;
           ownCtx = false;
         } else {
-          ctx = new AudioContext();
-          ownCtx = true;
+          ctx = createAudioContext();
+          if (ctx) ownCtx = true;
         }
       }
+      if (!ctx) return;
       if (ctx.state === "suspended") ctx.resume();
 
       const freq = midiToHz(note);

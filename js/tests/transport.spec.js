@@ -4,11 +4,13 @@ import { test, expect } from "@playwright/test";
 
 const DEFAULTS = {
   is_playing: false,
+  is_recording: false,
   bpm: 120,
   time_signature_num: 4,
   time_signature_den: 4,
   bar_number: 0,
   beat_in_bar: 0,
+  current_beat: 0,
   loop_enabled: false,
   loop_start_bar: 0,
   loop_end_bar: 4,
@@ -93,18 +95,23 @@ test.describe("TransportWidget", () => {
       is_playing: true,
       bar_number: 3,
       beat_in_bar: 2,
+      current_beat: 14,
     });
     const stopBtn = page.locator(".nbplay-transport-stop");
     await stopBtn.click();
 
     const state = await page.evaluate(() => ({
       is_playing: window.__testModel._state.is_playing,
+      is_recording: window.__testModel._state.is_recording,
       bar_number: window.__testModel._state.bar_number,
       beat_in_bar: window.__testModel._state.beat_in_bar,
+      current_beat: window.__testModel._state.current_beat,
     }));
     expect(state.is_playing).toBe(false);
+    expect(state.is_recording).toBe(false);
     expect(state.bar_number).toBe(0);
     expect(state.beat_in_bar).toBe(0);
+    expect(state.current_beat).toBe(0);
 
     // Position display should update (bar_number 0 → "001", beat_in_bar 0 → "1")
     await page.evaluate(() => {
@@ -258,6 +265,65 @@ test.describe("TransportWidget", () => {
     });
     // beat_in_bar 3 → display "4"
     await expect(page.locator(".nbplay-transport-beat")).toHaveText("4");
+  });
+
+  test("record button arms recording and starts playback", async ({ page }) => {
+    await renderWidget(page);
+    const recordBtn = page.locator(".nbplay-transport-record");
+
+    await recordBtn.click();
+    let state = await page.evaluate(() => ({
+      is_recording: window.__testModel._state.is_recording,
+      is_playing: window.__testModel._state.is_playing,
+    }));
+    expect(state.is_recording).toBe(true);
+    expect(state.is_playing).toBe(true);
+    await expect(recordBtn).toHaveClass(/recording/);
+
+    await recordBtn.click();
+    state = await page.evaluate(() => ({
+      is_recording: window.__testModel._state.is_recording,
+      is_playing: window.__testModel._state.is_playing,
+    }));
+    expect(state.is_recording).toBe(false);
+    expect(state.is_playing).toBe(true);
+    await expect(recordBtn).not.toHaveClass(/recording/);
+  });
+
+  test("play clock advances current_beat continuously", async ({ page }) => {
+    await renderWidget(page, { bpm: 600 });
+    await page.locator(".nbplay-transport-play").click();
+
+    await expect
+      .poll(
+        async () => page.evaluate(() => window.__testModel._state.current_beat),
+        { timeout: 1000 },
+      )
+      .toBeGreaterThan(0);
+  });
+
+  test("play clock throttles synced saves", async ({ page }) => {
+    await renderWidget(page, { bpm: 6000 });
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      const originalSet = model.set.bind(model);
+      model.set = (key, val) => {
+        originalSet(key, val);
+        if (key === "current_beat") {
+          (model._listeners["change:current_beat"] || []).forEach((fn) => fn());
+        }
+      };
+    });
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForTimeout(650);
+
+    const saves = await page.evaluate(
+      () =>
+        window.__testModel._history.filter((entry) => entry.type === "save")
+          .length,
+    );
+    expect(saves).toBeGreaterThanOrEqual(2);
+    expect(saves).toBeLessThanOrEqual(5);
   });
 
   // 13. BPM double-click edit — type "140", Enter, verify
@@ -466,10 +532,12 @@ test.describe("TransportWidget", () => {
       const defaults = {
         bpm: 120,
         is_playing: false,
+        is_recording: false,
         time_signature_num: 4,
         time_signature_den: 4,
         bar_number: 0,
         beat_in_bar: 0,
+        current_beat: 0,
         loop_enabled: false,
         loop_start_bar: 0,
         loop_end_bar: 4,

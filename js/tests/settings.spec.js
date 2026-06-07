@@ -205,6 +205,18 @@ test.describe("SettingsWidget", () => {
     expect(texts).toContain("Not connected");
   });
 
+  test("MIDI port select stays idle when Web MIDI is unavailable", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      navigator.requestMIDIAccess = undefined;
+    });
+    await renderWidget(page);
+
+    await expect(page.locator(".nbplay-midi-status")).toHaveText("Idle");
+    await expect(page.locator(".nbplay-midi-select option")).toHaveCount(1);
+  });
+
   // 20. Model change:audio_device updates display
   test("model change:audio_device updates display", async ({ page }) => {
     await renderWidget(page);

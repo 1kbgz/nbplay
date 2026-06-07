@@ -1,111 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Widget Test Harness</title>
-  <style>body { margin: 0; background: #0f0f1a; color: #e0e4f0; }</style>
-</head>
-<body>
-  <div id="root"></div>
-  <script>
-    // Mock AudioContext for headless testing
-    class MockAudioParam {
-      constructor(v) { this.value = v; }
-      setTargetAtTime() {}
-      setValueAtTime() {}
-      linearRampToValueAtTime() {}
-      cancelScheduledValues() {}
-    }
-
-    class MockGainNode {
-      constructor() { this.gain = new MockAudioParam(1); }
-      connect() { return this; }
-      disconnect() {}
-    }
-
-    class MockOscillatorNode {
-      constructor() { this.frequency = new MockAudioParam(440); this.type = "sine"; }
-      connect() { return this; }
-      disconnect() {}
-      start() {}
-      stop() {}
-    }
-
-    class MockAudioBufferSourceNode {
-      constructor() { this.loop = false; this.buffer = null; this.playbackRate = new MockAudioParam(1); }
-      connect() { return this; }
-      disconnect() {}
-      start() {}
-      stop() {}
-    }
-
-    class MockAudioBuffer {
-      constructor(opts) {
-        this.numberOfChannels = opts.numberOfChannels || 1;
-        this.length = opts.length;
-        this.sampleRate = opts.sampleRate || 44100;
-        this._data = new Float32Array(opts.length);
+  <head>
+    <meta charset="UTF-8" />
+    <title>Widget Test Harness</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0f0f1a;
+        color: #e0e4f0;
       }
-      getChannelData() { return this._data; }
-    }
-
-    class MockAudioContext {
-      constructor(opts) {
-        this.sampleRate = opts?.sampleRate || 44100;
-        this.currentTime = 0;
-        this.state = "running";
-        this.destination = {};
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Mock AudioContext for headless testing
+      class MockAudioParam {
+        constructor(v) {
+          this.value = v;
+        }
+        setTargetAtTime() {}
+        setValueAtTime() {}
+        linearRampToValueAtTime() {}
+        cancelScheduledValues() {}
       }
-      createGain() { return new MockGainNode(); }
-      createOscillator() { return new MockOscillatorNode(); }
-      createBufferSource() { return new MockAudioBufferSourceNode(); }
-      createStereoPanner() { return { pan: new MockAudioParam(0), connect() { return this; }, disconnect() {} }; }
-      createDynamicsCompressor() { return { connect() { return this; }, disconnect() {} }; }
-      createBuffer(ch, len, sr) { return new MockAudioBuffer({ numberOfChannels: ch, length: len, sampleRate: sr }); }
-      decodeAudioData(buf) { return Promise.resolve(new MockAudioBuffer({ length: 1024 })); }
-      close() { return Promise.resolve(); }
-      resume() { return Promise.resolve(); }
-    }
 
-    window.AudioContext = MockAudioContext;
-    window.webkitAudioContext = MockAudioContext;
+      class MockAudioNode {
+        constructor() {
+          this.connections = [];
+          this.disconnected = false;
+        }
+        connect(node) {
+          this.connections.push(node);
+          this.disconnected = false;
+          return node;
+        }
+        disconnect() {
+          this.connections = [];
+          this.disconnected = true;
+        }
+      }
 
-    // Mock model factory
-    window.createMockModel = function(defaults) {
-      const state = { ...defaults };
-      const listeners = {};
-      const history = [];
-      return {
-        get(key) { return state[key]; },
-        set(key, val) {
-          state[key] = val;
-          history.push({ key, val });
-        },
-        save_changes() {
-          history.push({ type: "save" });
-          // Auto-fire change events for any recently set keys
-          const recent = [];
-          for (let i = history.length - 2; i >= 0; i--) {
-            if (history[i].type === "save") break;
-            if (history[i].key) recent.push(history[i].key);
-          }
-          recent.forEach(k => {
-            (listeners["change:" + k] || []).forEach(fn => fn());
+      class MockGainNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.gain = new MockAudioParam(1);
+        }
+      }
+
+      class MockBiquadFilterNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.type = "lowpass";
+          this.frequency = new MockAudioParam(350);
+          this.Q = new MockAudioParam(1);
+        }
+      }
+
+      class MockDelayNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.delayTime = new MockAudioParam(0);
+        }
+      }
+
+      class MockDynamicsCompressorNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.threshold = new MockAudioParam(-24);
+          this.knee = new MockAudioParam(30);
+          this.ratio = new MockAudioParam(12);
+          this.attack = new MockAudioParam(0.003);
+          this.release = new MockAudioParam(0.25);
+        }
+      }
+
+      class MockConvolverNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.buffer = null;
+        }
+      }
+
+      class MockStereoPannerNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.pan = new MockAudioParam(0);
+        }
+      }
+
+      class MockOscillatorNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.frequency = new MockAudioParam(440);
+          this.type = "sine";
+        }
+        start() {}
+        stop() {}
+      }
+
+      class MockAudioBufferSourceNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.loop = false;
+          this.buffer = null;
+          this.playbackRate = new MockAudioParam(1);
+        }
+        start() {}
+        stop() {}
+      }
+
+      class MockMediaElementSourceNode extends MockAudioNode {
+        constructor(media) {
+          super();
+          this.media = media;
+        }
+      }
+
+      class MockMediaStreamSourceNode extends MockAudioNode {
+        constructor(stream) {
+          super();
+          this.stream = stream;
+        }
+      }
+
+      class MockAudioBuffer {
+        constructor(opts) {
+          this.numberOfChannels = opts.numberOfChannels || 1;
+          this.length = opts.length;
+          this.sampleRate = opts.sampleRate || 44100;
+          this._data = new Float32Array(opts.length);
+        }
+        getChannelData() {
+          return this._data;
+        }
+      }
+
+      class MockAudioContext {
+        constructor(opts) {
+          this.sampleRate = opts?.sampleRate || 44100;
+          this.currentTime = 0;
+          this.state = "running";
+          this.destination = new MockAudioNode();
+        }
+        createGain() {
+          return new MockGainNode();
+        }
+        createOscillator() {
+          return new MockOscillatorNode();
+        }
+        createBufferSource() {
+          return new MockAudioBufferSourceNode();
+        }
+        createMediaElementSource(media) {
+          const source = new MockMediaElementSourceNode(media);
+          window.__mediaElementSources = window.__mediaElementSources || [];
+          window.__mediaElementSources.push(source);
+          return source;
+        }
+        createMediaStreamSource(stream) {
+          const source = new MockMediaStreamSourceNode(stream);
+          window.__mediaStreamSources = window.__mediaStreamSources || [];
+          window.__mediaStreamSources.push(source);
+          return source;
+        }
+        createStereoPanner() {
+          return new MockStereoPannerNode();
+        }
+        createBiquadFilter() {
+          return new MockBiquadFilterNode();
+        }
+        createDelay() {
+          return new MockDelayNode();
+        }
+        createDynamicsCompressor() {
+          return new MockDynamicsCompressorNode();
+        }
+        createConvolver() {
+          return new MockConvolverNode();
+        }
+        createBuffer(ch, len, sr) {
+          return new MockAudioBuffer({
+            numberOfChannels: ch,
+            length: len,
+            sampleRate: sr,
           });
-        },
-        on(event, cb) {
-          if (!listeners[event]) listeners[event] = [];
-          listeners[event].push(cb);
-        },
-        // Test helpers
-        _state: state,
-        _history: history,
-        _listeners: listeners,
-        _trigger(event) {
-          (listeners[event] || []).forEach(fn => fn());
-        },
+        }
+        decodeAudioData(buf) {
+          return Promise.resolve(new MockAudioBuffer({ length: 1024 }));
+        }
+        close() {
+          return Promise.resolve();
+        }
+        resume() {
+          return Promise.resolve();
+        }
+      }
+
+      window.AudioContext = MockAudioContext;
+      window.webkitAudioContext = MockAudioContext;
+
+      // Mock model factory
+      window.createMockModel = function (defaults) {
+        const state = { ...defaults };
+        const listeners = {};
+        const history = [];
+        return {
+          get(key) {
+            return state[key];
+          },
+          set(key, val) {
+            state[key] = val;
+            history.push({ key, val });
+          },
+          save_changes() {
+            history.push({ type: "save" });
+            // Auto-fire change events for any recently set keys
+            const recent = [];
+            for (let i = history.length - 2; i >= 0; i--) {
+              if (history[i].type === "save") break;
+              if (history[i].key) recent.push(history[i].key);
+            }
+            recent.forEach((k) => {
+              (listeners["change:" + k] || []).forEach((fn) => fn());
+            });
+          },
+          on(event, cb) {
+            if (!listeners[event]) listeners[event] = [];
+            listeners[event].push(cb);
+          },
+          // Test helpers
+          _state: state,
+          _history: history,
+          _listeners: listeners,
+          _trigger(event) {
+            (listeners[event] || []).forEach((fn) => fn());
+          },
+        };
       };
-    };
-  </script>
-</body>
+    </script>
+  </body>
 </html>

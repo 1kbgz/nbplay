@@ -69,6 +69,37 @@ test.describe("MidiKeyboardWidget", () => {
     ).toHaveText("USB Keys");
   });
 
+  test("renders idle state when Web MIDI is unavailable", async ({ page }) => {
+    await page.evaluate(() => {
+      navigator.requestMIDIAccess = undefined;
+    });
+    await renderWidget(page);
+
+    await expect(page.locator(".nbplay-midi-keyboard")).toBeVisible();
+    await expect(page.locator(".nbplay-midi-kb-status")).toHaveText("Idle");
+    await expect(page.locator(".nbplay-midi-kb-select option")).toHaveCount(1);
+  });
+
+  test("MIDI note state updates without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+
+    await page.evaluate(() => {
+      window.__midiInput.send([0x90, 60, 96]);
+    });
+
+    const state = await page.evaluate(() => ({
+      activeNotes: window.__testModel._state.active_notes,
+      lastEvent: window.__testModel._state.last_note_event,
+    }));
+    expect(state.activeNotes).toEqual([60]);
+    expect(state.lastEvent).toEqual({ note: 60, velocity: 96, type: "on" });
+  });
+
   test("selecting a MIDI port stores the port name", async ({ page }) => {
     await renderWidget(page);
     await page.locator(".nbplay-midi-kb-select").selectOption("input-1");

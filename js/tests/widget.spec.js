@@ -139,6 +139,24 @@ test.describe("SynthWidget", () => {
     expect(stopped).toBe(false);
   });
 
+  test("play button falls back cleanly without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+    const btn = page.locator(".nbplay-play-btn");
+
+    await btn.click();
+    await page.evaluate(() => window.__testModel._trigger("change:is_playing"));
+
+    await expect(btn).toContainText("Play");
+    const playing = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
+    expect(playing).toBe(false);
+  });
+
   // 9. Model change updates DOM
   test("model change:frequency updates the frequency label", async ({
     page,

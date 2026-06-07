@@ -1,7 +1,11 @@
 // nbplay MidiKeyboardWidget - browser Web MIDI note input
 // External MIDI keyboard input with sampler routing and velocity.
 
-import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
+import {
+  type AnyModel,
+  createAudioContext,
+  onKernelDisconnect,
+} from "./helpers.ts";
 import {
   routeNoteOn,
   routeNoteOff,
@@ -152,16 +156,17 @@ function createMidiAudio() {
         return;
       }
       if (!audioCtx) {
-        audioCtx = new AudioContext();
-        ownAudioCtx = true;
+        audioCtx = createAudioContext();
+        if (audioCtx) ownAudioCtx = true;
       }
     },
 
     ensureCtx(): void {
       if (!audioCtx) {
-        audioCtx = new AudioContext();
-        ownAudioCtx = true;
+        audioCtx = createAudioContext();
+        if (audioCtx) ownAudioCtx = true;
       }
+      if (!audioCtx) return;
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
       }

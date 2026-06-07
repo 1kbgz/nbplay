@@ -168,6 +168,8 @@ files are generated.
   count.
 - `_resize_pad_notes(notes, pad_count)` clamps MIDI pad notes to 0-127 and
   preserves or extends the list when sampler pad count changes.
+- `AudioClip`, `TimelineTrack`, and their normalizers define the synced
+  metadata shape for timeline lanes and browser-recorded clips.
 - `PadAction` and `_normalize_pad_actions()` define the shared pad action shape
   used by sampler pads and PadWidget. Note actions are live today; trait/event
   actions provide a stable controller-pad path for future automation and MIDI
@@ -179,10 +181,11 @@ files are generated.
 | --- | --- | --- | --- |
 | `SynthWidget` | `widget.js` | `widget.css` | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform` |
 | `SettingsWidget` | `settings.js` | `settings.css` | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event` |
-| `MixerWidget` | `mixer.js` | `mixer.css` | `channels`, `master_gain`, `session_id` |
+| `MixerWidget` | `mixer.js` | `mixer.css` | `channels`, `master_gain`, `master_effects`, `session_id` |
 | `SequencerWidget` | `sequencer.js` | `sequencer.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data` |
 | `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
-| `TransportWidget` | `transport.js` | `transport.css` | `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
+| `TransportWidget` | `transport.js` | `transport.css` | `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
+| `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
 | `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
 | `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
@@ -199,11 +202,11 @@ time signature bidirectionally between a session transport and the sequencer,
 and dlinks `is_playing` from transport to sequencer so a non-looping sequencer
 cannot stop every track.
 
-`Session` creates a shared `session_id`, a `TransportWidget`, and a
-`MixerWidget`. `Session.add_track()` creates a mixer channel, links transport
-state, and writes `session_id` and `channel_index` into the sequencer and sound
-source. Browser widgets use those fields to route audio through the shared
-mixer bus.
+`Session` creates a shared `session_id`, a `TransportWidget`, a `MixerWidget`,
+and a `TimelineWidget`. `Session.add_track()` creates a mixer channel, links
+transport state, adds a timeline lane, and writes `session_id` and
+`channel_index` into the sequencer and sound source. Browser widgets use those
+fields to route audio through the shared mixer bus.
 
 ## Rust core
 
@@ -338,16 +341,20 @@ globalThis.__nbplay[sessionId] = {
   audioCtx,
   masterGain,
   channels: [{ gain, pan }, ...],
+  plugins: { [effectType]: (ctx, effect) => AudioNode | EffectUnit },
   samplers: { [channelIndex]: { triggerNote, releaseNote } },
   noteListeners: [(evt) => void]
 };
 ```
 
 The exact properties are created lazily by participating widgets. The mixer owns
-`audioCtx`, `masterGain`, and `channels`. Samplers add `samplers[channelIndex]`
-so KeyboardWidget and MidiKeyboardWidget can trigger them. Keyboard widgets also
-broadcast `nbplay-note` on `document`, which lets sequencers record notes even
-without a shared mixer bus.
+`audioCtx`, `masterGain`, `channels`, and a fresh merged view of browser insert
+effect plugin factories. Samplers add `samplers[channelIndex]` so KeyboardWidget
+and MidiKeyboardWidget can trigger them. Keyboard widgets also broadcast
+`nbplay-note` on `document`, which lets sequencers record notes even without a
+shared mixer bus. Timeline clip playback reads `audioCtx` and `channels` from
+the bus so recorded clips can route through the same mixer channel strip and
+insert effects as live sources.
 
 Render order can vary in notebooks. SamplerWidget handles this by listening for
 `nbplay-bus-ready` and registering again when the mixer creates the bus.
@@ -400,18 +407,30 @@ Python class: `MixerWidget`. Browser file: `js/src/ts/mixer.ts`. CSS file:
 `js/src/css/mixer.css`.
 
 MixerWidget owns a list of channel dictionaries with `name`, `gain`, `pan`,
-`mute`, and `solo`, plus a `master_gain`. Python provides convenience methods
-for adding/removing channels and setting channel properties, and `to_mixer()`
-creates a Rust `Mixer` for offline mixdown.
+`mute`, `solo`, and optional browser `effects`, plus `master_gain` and
+`master_effects`. Python provides convenience methods for adding/removing
+channels, setting channel properties, and adding/replacing/clearing channel or
+master insert chains. `to_mixer()` creates a Rust `Mixer` for offline mixdown;
+browser insert effects are real-time Web Audio only.
 
 Browser code builds one channel strip per channel and a master strip. Faders
 show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.
 
+Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
+`compressor`, `limiter`, `delay`, and `reverb`. Unknown descriptor types are
+left intact when their params are JSON-safe so notebook code can register
+custom browser plugins on `globalThis.__nbplayPlugins[type]`. Built-in names are
+reserved and win over user registry entries. The mixer exposes a merged plugin
+map on the session bus without mutating `globalThis.__nbplayPlugins`. A plugin
+factory receives `(audioCtx, descriptor)` and returns either an `AudioNode` or
+an `{input, output, dispose?}` unit.
+
 When `session_id` is set, the browser creates the shared `AudioContext`, one
-`GainNode` plus `StereoPannerNode` per channel, and a master `GainNode` connected
-to destination. Mute/solo affects the channel gain nodes. The bus is registered
-on `globalThis.__nbplay` and removed on cleanup.
+`GainNode` plus `StereoPannerNode` per channel, channel insert chains, a master
+`GainNode`, and a master insert chain connected to destination. Mute/solo
+affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
+and removed on cleanup.
 
 ### SequencerWidget
 
@@ -505,6 +524,36 @@ clock uses `performance.now()` and a 50 ms interval to compute elapsed beats.
 When the displayed bar or beat changes, it updates and saves `bar_number` and
 `beat_in_bar`. Looping wraps the displayed position between `loop_start_bar` and
 `loop_end_bar` when enabled.
+
+### TimelineWidget
+
+Python class: `TimelineWidget`. Browser file: `js/src/ts/timeline.ts`. CSS
+file: `js/src/css/timeline.css`.
+
+TimelineWidget is the multitrack clip lane and browser recorder. Python owns
+validated `TimelineTrack` and `AudioClip` metadata dictionaries. Browser code
+renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
+play/stop, record/stop, count-in, recording auto-extension, playhead reset,
+playhead seek/drag, timeline length, and selected-clip deletion. In a `Session`, transport BPM, time
+signature, play/record state, and `current_beat` are linked with the timeline so
+either surface can control global playback and seek position.
+
+Recording uses `navigator.mediaDevices.getUserMedia({ audio: true })` and
+`MediaRecorder` when the browser exposes them. A completed take creates a
+browser-local object URL and appends clip metadata to `clips`; the binary audio
+blob is not persisted through traitlets. Playback uses an `HTMLAudioElement` and
+connects it through `globalThis.__nbplay[sessionId].channels[channel_index].gain`
+when the mixer bus is available, falling back to direct media playback when it
+is not.
+
+Count-in is stored as `count_in_bars` and displayed through
+`recording_countdown_beats`. If the chosen record point has enough timeline
+space before it, recording pre-rolls from `current_beat - count_in_bars`; at
+beat 0, capture starts after the count-in and the recorded clip begins at 0.
+When `auto_extend_recording` is true, the browser extends `length` by
+`recording_extend_bars` whenever recording approaches the timeline end. Normal
+playback still stops at the end; recording stops only when the user stops it or
+the timeline reaches the validated maximum length.
 
 ### KeyboardWidget
 

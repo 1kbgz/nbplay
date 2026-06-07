@@ -8,6 +8,7 @@
 
 import {
   type AnyModel,
+  createAudioContext,
   cssVar,
   makeEditable,
   onKernelDisconnect,
@@ -111,7 +112,7 @@ function drawWaveform(
 
 // Web Audio engine
 interface AudioEngine {
-  start(type: string, freq: number, amp: number, sr: number): void;
+  start(type: string, freq: number, amp: number, sr: number): boolean;
   stop(): void;
   setFrequency(f: number): void;
   setAmplitude(a: number): void;
@@ -123,9 +124,10 @@ function createAudioEngine(): AudioEngine {
   let gainNode: GainNode | null = null;
 
   return {
-    start(type: string, freq: number, amp: number, sr: number): void {
+    start(type: string, freq: number, amp: number, sr: number): boolean {
       this.stop();
-      audioCtx = new AudioContext({ sampleRate: sr });
+      audioCtx = createAudioContext({ sampleRate: sr });
+      if (!audioCtx) return false;
       gainNode = audioCtx.createGain();
       gainNode.gain.value = amp;
       gainNode.connect(audioCtx.destination);
@@ -148,6 +150,7 @@ function createAudioEngine(): AudioEngine {
         osc.start();
         srcNode = osc;
       }
+      return true;
     },
 
     stop(): void {
@@ -364,12 +367,17 @@ function render({
   model.on("change:is_playing", () => {
     syncPlay();
     if (model.get("is_playing") as boolean) {
-      audio.start(
+      const started = audio.start(
         model.get("oscillator_type") as string,
         model.get("frequency") as number,
         model.get("amplitude") as number,
         model.get("sample_rate") as number,
       );
+      if (!started) {
+        model.set("is_playing", false);
+        model.save_changes();
+        syncPlay();
+      }
     } else {
       audio.stop();
     }

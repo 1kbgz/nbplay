@@ -22,6 +22,7 @@ const WIDGET_NAMES = [
   "mixer",
   "sampler",
   "sequencer",
+  "timeline",
   "transport",
   "settings",
   "keyboard",

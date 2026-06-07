@@ -16,6 +16,7 @@ function render({
     <div class="nbplay-transport-controls">
       <button class="nbplay-transport-stop" title="Stop">\u25A0</button>
       <button class="nbplay-transport-play" title="Play / Pause">\u25B6</button>
+      <button class="nbplay-transport-record" title="Record">\u25CF</button>
     </div>
     <div class="nbplay-transport-tempo">
       <label>BPM</label>
@@ -43,6 +44,9 @@ function render({
   const stopBtn = el.querySelector(
     ".nbplay-transport-stop",
   ) as HTMLButtonElement;
+  const recordBtn = el.querySelector(
+    ".nbplay-transport-record",
+  ) as HTMLButtonElement;
   const bpmSl = el.querySelector(
     ".nbplay-transport-bpm-slider",
   ) as HTMLInputElement;
@@ -69,6 +73,11 @@ function render({
     playBtn.classList.toggle("playing", on);
   }
 
+  function syncRecord(): void {
+    const on = Boolean(model.get("is_recording"));
+    recordBtn.classList.toggle("recording", on);
+  }
+
   function syncBpm(): void {
     const b = model.get("bpm") as number;
     bpmSl.value = String(b);
@@ -89,6 +98,33 @@ function render({
     beatDisp.textContent = String((model.get("beat_in_bar") as number) + 1);
   }
 
+  function beatFromBars(): number {
+    return (
+      (model.get("bar_number") as number) *
+        (model.get("time_signature_num") as number) +
+      (model.get("beat_in_bar") as number)
+    );
+  }
+
+  let internalPositionUpdate = false;
+
+  function setPositionFromBeat(beat: number, writeCurrent = true): number {
+    const bpb = Math.max(1, model.get("time_signature_num") as number);
+    const bounded = Number.isFinite(beat) ? Math.max(0, beat) : 0;
+    if (writeCurrent) {
+      internalPositionUpdate = true;
+      try {
+        model.set("current_beat", bounded);
+      } finally {
+        internalPositionUpdate = false;
+      }
+    }
+    model.set("bar_number", Math.floor(bounded / bpb));
+    model.set("beat_in_bar", Math.floor(bounded % bpb));
+    syncPosition();
+    return bounded;
+  }
+
   function syncLoop(): void {
     loopBtn.classList.toggle("active", model.get("loop_enabled") as boolean);
     loopRng.textContent =
@@ -100,14 +136,26 @@ function render({
 
   // Play / Stop
   playBtn.addEventListener("click", () => {
-    model.set("is_playing", !model.get("is_playing"));
+    const next = !model.get("is_playing");
+    if (!next) flushClock(false);
+    model.set("is_playing", next);
+    model.save_changes();
+  });
+
+  recordBtn.addEventListener("click", () => {
+    const next = !Boolean(model.get("is_recording"));
+    if (Boolean(model.get("is_playing"))) flushClock(false);
+    model.set("is_recording", next);
+    if (next) model.set("is_playing", true);
     model.save_changes();
   });
 
   stopBtn.addEventListener("click", () => {
     model.set("is_playing", false);
+    model.set("is_recording", false);
     model.set("bar_number", 0);
     model.set("beat_in_bar", 0);
+    model.set("current_beat", 0);
     model.save_changes();
   });
 
@@ -115,6 +163,7 @@ function render({
   bpmSl.addEventListener("input", () => {
     const v = parseFloat(bpmSl.value);
     bpmVal.textContent = Math.round(v) + " BPM";
+    if (Boolean(model.get("is_playing"))) flushClock(false);
     model.set("bpm", v);
     model.save_changes();
   });
@@ -143,11 +192,21 @@ function render({
 
   // Model observers
   model.on("change:is_playing", syncPlay);
+  model.on("change:is_recording", syncRecord);
   model.on("change:bpm", syncBpm);
   model.on("change:time_signature_num", syncTimeSig);
   model.on("change:time_signature_den", syncTimeSig);
   model.on("change:bar_number", syncPosition);
   model.on("change:beat_in_bar", syncPosition);
+  model.on("change:current_beat", () => {
+    const bounded = setPositionFromBeat(
+      model.get("current_beat") as number,
+      false,
+    );
+    if (!internalPositionUpdate && (model.get("is_playing") as boolean)) {
+      resetClockOrigin(bounded);
+    }
+  });
   model.on("change:loop_enabled", syncLoop);
   model.on("change:loop_start_bar", syncLoop);
   model.on("change:loop_end_bar", syncLoop);
@@ -156,13 +215,23 @@ function render({
   let clockTimer: ReturnType<typeof setInterval> | null = null;
   let clockStart = 0;
   let beatOrigin = 0;
+  let lastSyncedBeat = 0;
+  let lastSyncMs = 0;
+  const coarseSyncMs = 250;
+
+  function resetClockOrigin(beat: number): void {
+    clockStart = performance.now();
+    beatOrigin = beat;
+    lastSyncedBeat = beat;
+    lastSyncMs = clockStart;
+  }
 
   function startClock(): void {
-    clockStart = performance.now();
-    beatOrigin =
-      (model.get("bar_number") as number) *
-        (model.get("time_signature_num") as number) +
-      (model.get("beat_in_bar") as number);
+    stopClock();
+    const currentBeat = Number(model.get("current_beat"));
+    resetClockOrigin(
+      Number.isFinite(currentBeat) ? currentBeat : beatFromBars(),
+    );
     clockTimer = setInterval(tickClock, 50);
   }
 
@@ -173,32 +242,40 @@ function render({
     }
   }
 
-  function tickClock(): void {
-    const elapsed = (performance.now() - clockStart) / 1000;
-    const totalBeat =
-      beatOrigin + Math.floor((elapsed * (model.get("bpm") as number)) / 60);
-    const bpb = model.get("time_signature_num") as number;
-
-    let bar = Math.floor(totalBeat / bpb);
-    let beat = totalBeat % bpb;
+  function computeClockBeat(now: number): number {
+    const elapsed = (now - clockStart) / 1000;
+    let totalBeat = beatOrigin + (elapsed * (model.get("bpm") as number)) / 60;
+    const bpb = Math.max(1, model.get("time_signature_num") as number);
 
     if (model.get("loop_enabled") as boolean) {
       const ls = model.get("loop_start_bar") as number;
       const le = model.get("loop_end_bar") as number;
-      if (le > ls && bar >= le) {
+      if (le > ls && totalBeat >= le * bpb) {
         const loopBeats = (le - ls) * bpb;
         const adj = (totalBeat - ls * bpb) % loopBeats;
-        bar = ls + Math.floor(adj / bpb);
-        beat = adj % bpb;
+        totalBeat = ls * bpb + adj;
       }
     }
+    return totalBeat;
+  }
 
-    if (
-      bar !== (model.get("bar_number") as number) ||
-      beat !== (model.get("beat_in_bar") as number)
-    ) {
-      model.set("bar_number", bar);
-      model.set("beat_in_bar", beat);
+  function flushClock(save = true): void {
+    if (clockTimer === null) return;
+    const now = performance.now();
+    const beat = setPositionFromBeat(computeClockBeat(now));
+    lastSyncedBeat = beat;
+    lastSyncMs = now;
+    if (save) model.save_changes();
+  }
+
+  function tickClock(): void {
+    const now = performance.now();
+    const totalBeat = setPositionFromBeat(computeClockBeat(now));
+    const currentBucket = Math.floor(totalBeat);
+    const syncedBucket = Math.floor(lastSyncedBeat);
+    if (currentBucket !== syncedBucket && now - lastSyncMs >= coarseSyncMs) {
+      lastSyncedBeat = totalBeat;
+      lastSyncMs = now;
       model.save_changes();
     }
   }
@@ -222,10 +299,13 @@ function render({
   // because sending comm messages during render can race with other
   // widgets still being initialised (e.g. Session dlinks).
   model.set("is_playing", false);
+  model.set("is_recording", false);
   model.set("bar_number", 0);
   model.set("beat_in_bar", 0);
+  model.set("current_beat", 0);
 
   syncPlay();
+  syncRecord();
   syncBpm();
   syncTimeSig();
   syncPosition();
@@ -234,10 +314,13 @@ function render({
   // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
     model.set("is_playing", false);
+    model.set("is_recording", false);
     model.set("bar_number", 0);
     model.set("beat_in_bar", 0);
+    model.set("current_beat", 0);
     stopClock();
     syncPlay();
+    syncRecord();
     syncPosition();
   });
 

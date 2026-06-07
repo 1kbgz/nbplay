@@ -1,7 +1,11 @@
 // nbplay KeyboardWidget – anywidget ESM frontend
 // 4-row musical typing keyboard (Logic Pro style) with Web Audio playback
 
-import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
+import {
+  type AnyModel,
+  createAudioContext,
+  onKernelDisconnect,
+} from "./helpers.ts";
 import {
   routeNoteOn,
   routeNoteOff,
@@ -152,16 +156,17 @@ function createKeyboardAudio() {
         return;
       }
       if (!audioCtx) {
-        audioCtx = new AudioContext();
-        ownAudioCtx = true;
+        audioCtx = createAudioContext();
+        if (audioCtx) ownAudioCtx = true;
       }
     },
 
     ensureCtx(): void {
       if (!audioCtx) {
-        audioCtx = new AudioContext();
-        ownAudioCtx = true;
+        audioCtx = createAudioContext();
+        if (audioCtx) ownAudioCtx = true;
       }
+      if (!audioCtx) return;
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
       }

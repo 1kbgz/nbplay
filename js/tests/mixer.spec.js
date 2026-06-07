@@ -9,6 +9,7 @@ const DEFAULTS = {
     { name: "Bass", gain: 0.5, pan: -0.2, mute: false, solo: false },
   ],
   master_gain: 0.85,
+  master_effects: [],
 };
 
 /** Boot the mixer widget inside the harness page. */
@@ -25,7 +26,7 @@ async function renderWidget(page, overrides = {}) {
     const el = document.getElementById("root");
     const model = window.createMockModel({ ...opts });
     window.__testModel = model;
-    mod.default.render({ model, el });
+    window.__cleanup = mod.default.render({ model, el });
   }, opts);
 }
 
@@ -505,5 +506,602 @@ test.describe("MixerWidget", () => {
     await expect(page.locator(`${STRIP} .nbplay-strip-name`)).toHaveText(
       "Bass",
     );
+  });
+
+  test("renders channel effect chips from model", async ({ page }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Vox",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [
+            {
+              type: "compressor",
+              threshold: -18,
+              knee: 20,
+              ratio: 4,
+              attack: 0.003,
+              release: 0.2,
+            },
+            { type: "reverb", seconds: 1.2, decay: 2, wet: 0.3 },
+          ],
+        },
+      ],
+    });
+
+    const chips = page
+      .locator(`${STRIP}`)
+      .nth(0)
+      .locator(".nbplay-strip-fx-chip");
+    await expect(chips).toHaveCount(2);
+    await expect(chips.nth(0)).toHaveText("compressor");
+    await expect(chips.nth(1)).toHaveText("reverb");
+  });
+
+  test("adding a channel effect updates model", async ({ page }) => {
+    await renderWidget(page);
+    const strip = page.locator(STRIP).nth(0);
+    await strip.locator(".nbplay-strip-fx-select").selectOption("limiter");
+    await strip.locator(".nbplay-strip-fx-add-btn").click();
+
+    const effects = await page.evaluate(
+      () => window.__testModel._state.channels[0].effects,
+    );
+    expect(effects).toEqual([
+      { type: "limiter", threshold: -1, release: 0.05 },
+    ]);
+    await expect(strip.locator(".nbplay-strip-fx-chip")).toHaveText("limiter");
+  });
+
+  test("clicking channel effect chip removes it", async ({ page }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Vox",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "delay", time: 0.2, feedback: 0.2, wet: 0.3 }],
+        },
+      ],
+    });
+
+    await page.locator(`${STRIP} .nbplay-strip-fx-chip`).click();
+
+    const effects = await page.evaluate(
+      () => window.__testModel._state.channels[0].effects,
+    );
+    expect(effects).toEqual([]);
+    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveCount(0);
+  });
+
+  test("adding a master effect updates model", async ({ page }) => {
+    await renderWidget(page);
+    const master = page.locator(".nbplay-master-strip");
+    await master.locator(".nbplay-strip-fx-select").selectOption("compressor");
+    await master.locator(".nbplay-strip-fx-add-btn").click();
+
+    const effects = await page.evaluate(
+      () => window.__testModel._state.master_effects,
+    );
+    expect(effects).toEqual([
+      {
+        type: "compressor",
+        threshold: -24,
+        knee: 30,
+        ratio: 12,
+        attack: 0.003,
+        release: 0.25,
+      },
+    ]);
+    await expect(master.locator(".nbplay-strip-fx-chip")).toHaveText(
+      "compressor",
+    );
+  });
+
+  test("clicking master effect chip removes it", async ({ page }) => {
+    await renderWidget(page, {
+      master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
+    });
+
+    await page.locator(".nbplay-master-strip .nbplay-strip-fx-chip").click();
+
+    const effects = await page.evaluate(
+      () => window.__testModel._state.master_effects,
+    );
+    expect(effects).toEqual([]);
+    await expect(
+      page.locator(".nbplay-master-strip .nbplay-strip-fx-chip"),
+    ).toHaveCount(0);
+  });
+
+  test("session bus wires initial channel and master graph", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [],
+        },
+      ],
+    });
+
+    const result = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const channel = bus.channels[0];
+      return {
+        channelCount: bus.channels.length,
+        gainToPan: channel.gain.connections.includes(channel.pan),
+        panConnections: channel.pan.connections.length,
+        masterConnections: bus.masterGain.connections.length,
+        masterToDestination: bus.masterGain.connections.includes(
+          bus.audioCtx.destination,
+        ),
+      };
+    });
+    expect(result).toEqual({
+      channelCount: 1,
+      gainToPan: true,
+      panConnections: 1,
+      masterConnections: 1,
+      masterToDestination: true,
+    });
+  });
+
+  test("renders controls without registering bus when Web Audio is unavailable", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+
+    await renderWidget(page);
+
+    await expect(page.locator(".nbplay-mixer")).toBeVisible();
+    const bus = await page.evaluate(() => window.__nbplay?.["test-session"]);
+    expect(bus).toBeUndefined();
+  });
+
+  test("null effect params use built-in defaults", async ({ page }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [
+            { type: "filter", filter_type: null, frequency: null, q: null },
+          ],
+        },
+      ],
+    });
+
+    const params = await page.evaluate(() => {
+      const filter =
+        window.__nbplay["test-session"].channels[0].effects[0].input;
+      return {
+        type: filter.type,
+        frequency: filter.frequency.value,
+        q: filter.Q.value,
+      };
+    });
+    expect(params).toEqual({ type: "lowpass", frequency: 1200, q: 1 });
+  });
+
+  test("delay and reverb effects wire wet/dry chains", async ({ page }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [
+            { type: "delay", time: 0.2, feedback: 0.25, wet: 0.5 },
+            { type: "reverb", seconds: 0.5, decay: 2, wet: 0.4 },
+          ],
+        },
+      ],
+    });
+
+    const graph = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const channel = bus.channels[0];
+      const [delay, reverb] = channel.effects;
+      return {
+        panToDelay: channel.pan.connections.includes(delay.input),
+        delayInputConnections: delay.input.connections.length,
+        delayOutputToReverb: delay.output.connections.includes(reverb.input),
+        reverbInputConnections: reverb.input.connections.length,
+        reverbOutputToMaster: reverb.output.connections.includes(
+          bus.masterGain,
+        ),
+      };
+    });
+    expect(graph).toEqual({
+      panToDelay: true,
+      delayInputConnections: 2,
+      delayOutputToReverb: true,
+      reverbInputConnections: 2,
+      reverbOutputToMaster: true,
+    });
+  });
+
+  test("effect param changes rebuild and dispose old effect nodes", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "gain", gain: 1 }],
+        },
+      ],
+    });
+
+    const result = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const oldEffect = bus.channels[0].effects[0].input;
+      const channels = window.__testModel._state.channels;
+      window.__testModel.set("channels", [
+        { ...channels[0], effects: [{ type: "gain", gain: 0.5 }] },
+      ]);
+      window.__testModel._trigger("change:channels");
+      const newEffect = bus.channels[0].effects[0].input;
+      return {
+        oldDisconnected: oldEffect.disconnected,
+        sameNode: oldEffect === newEffect,
+        newGain: newEffect.gain.value,
+      };
+    });
+    expect(result).toEqual({
+      oldDisconnected: true,
+      sameNode: false,
+      newGain: 0.5,
+    });
+  });
+
+  test("shrinking channel count disconnects removed audio nodes", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+
+    const result = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const oldSecond = bus.channels[1];
+      window.__testModel.set("channels", [
+        window.__testModel._state.channels[0],
+      ]);
+      window.__testModel._trigger("change:channels");
+      return {
+        channelCount: bus.channels.length,
+        oldGainDisconnected: oldSecond.gain.disconnected,
+        oldPanDisconnected: oldSecond.pan.disconnected,
+      };
+    });
+    expect(result).toEqual({
+      channelCount: 1,
+      oldGainDisconnected: true,
+      oldPanDisconnected: true,
+    });
+  });
+
+  test("renders user strings as text, not HTML", async ({ page }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: '<img src=x onerror="window.__xssName=1">',
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: '<img src=x onerror="window.__xssEffect=1">' }],
+        },
+      ],
+    });
+
+    await expect(page.locator(`${STRIP} .nbplay-strip-name`)).toHaveText(
+      '<img src=x onerror="window.__xssName=1">',
+    );
+    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveText(
+      '<img src=x onerror="window.__xssEffect=1">',
+    );
+    const result = await page.evaluate(() => ({
+      imgCount: document.querySelectorAll(".nbplay-mixer img").length,
+      xssName: window.__xssName,
+      xssEffect: window.__xssEffect,
+    }));
+    expect(result).toEqual({
+      imgCount: 0,
+      xssName: undefined,
+      xssEffect: undefined,
+    });
+  });
+
+  test("cleanup preserves sampler-owned session bus fields", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+
+    const result = await page.evaluate(() => {
+      window.__nbplay["test-session"].samplers = { 0: { ready: true } };
+      window.__cleanup();
+      return {
+        hasSession: Boolean(window.__nbplay["test-session"]),
+        samplers: window.__nbplay["test-session"].samplers,
+        hasMixerAudio: "audioCtx" in window.__nbplay["test-session"],
+      };
+    });
+
+    expect(result).toEqual({
+      hasSession: true,
+      samplers: { 0: { ready: true } },
+      hasMixerAudio: false,
+    });
+  });
+
+  test("session bus preserves custom plugin registry hook", async ({
+    page,
+  }) => {
+    await page.goto("/tests/fixtures/harness.html");
+    await page.evaluate(async () => {
+      window.__customPluginCalls = 0;
+      window.__nbplayPlugins = {
+        customDrive(ctx) {
+          window.__customPluginCalls += 1;
+          return ctx.createGain();
+        },
+      };
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/mixer.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/mixer.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({
+        session_id: "test-session",
+        master_gain: 0.85,
+        master_effects: [],
+        channels: [
+          {
+            name: "Lead",
+            gain: 1,
+            pan: 0,
+            mute: false,
+            solo: false,
+            effects: [{ type: "customDrive", amount: 0.7 }],
+          },
+        ],
+      });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    const result = await page.evaluate(() => ({
+      calls: window.__customPluginCalls,
+      hasGlobalBuiltin: Boolean(window.__nbplayPlugins.compressor),
+      hasBusPlugin: Boolean(
+        window.__nbplay["test-session"].plugins.customDrive,
+      ),
+      hasBusBuiltin: Boolean(
+        window.__nbplay["test-session"].plugins.compressor,
+      ),
+      hasLateBusPlugin: (() => {
+        window.__nbplayPlugins.latePlugin = () => null;
+        return Boolean(window.__nbplay["test-session"].plugins.latePlugin);
+      })(),
+    }));
+    expect(result).toEqual({
+      calls: 1,
+      hasGlobalBuiltin: false,
+      hasBusPlugin: true,
+      hasBusBuiltin: true,
+      hasLateBusPlugin: true,
+    });
+  });
+
+  test("built-in effect names cannot be overridden by custom registry", async ({
+    page,
+  }) => {
+    await page.goto("/tests/fixtures/harness.html");
+    await page.evaluate(async () => {
+      window.__customPluginCalls = 0;
+      window.__nbplayPlugins = {
+        compressor(ctx) {
+          window.__customPluginCalls += 1;
+          return ctx.createGain();
+        },
+      };
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/mixer.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/mixer.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({
+        session_id: "test-session",
+        master_gain: 0.85,
+        master_effects: [],
+        channels: [
+          {
+            name: "Lead",
+            gain: 1,
+            pan: 0,
+            mute: false,
+            solo: false,
+            effects: [{ type: "compressor" }],
+          },
+        ],
+      });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    const result = await page.evaluate(() => ({
+      calls: window.__customPluginCalls,
+      threshold:
+        window.__nbplay["test-session"].channels[0].effects[0].input.threshold
+          .value,
+    }));
+    expect(result).toEqual({ calls: 0, threshold: -24 });
+  });
+
+  test("inherited plugin names do not crash graph wiring", async ({ page }) => {
+    await page.goto("/tests/fixtures/harness.html");
+    await page.evaluate(async () => {
+      window.__nbplayPlugins = {};
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/mixer.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/mixer.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({
+        session_id: "test-session",
+        master_gain: 0.85,
+        master_effects: [],
+        channels: [
+          {
+            name: "Lead",
+            gain: 1,
+            pan: 0,
+            mute: false,
+            solo: false,
+            effects: [{ type: "constructor" }],
+          },
+        ],
+      });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    await expect(page.locator(".nbplay-mixer")).toBeVisible();
+    const effectCount = await page.evaluate(
+      () => window.__nbplay["test-session"].channels[0].effects.length,
+    );
+    expect(effectCount).toBe(0);
+  });
+
+  test("malformed custom plugin output does not prevent mixer render", async ({
+    page,
+  }) => {
+    await page.goto("/tests/fixtures/harness.html");
+    const warnings = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "warning") warnings.push(msg.text());
+    });
+    await page.evaluate(async () => {
+      window.__nbplayPlugins = {
+        malformed() {
+          return { input: {}, output: {} };
+        },
+      };
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/mixer.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/mixer.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({
+        session_id: "test-session",
+        master_gain: 0.85,
+        master_effects: [],
+        channels: [
+          {
+            name: "Lead",
+            gain: 1,
+            pan: 0,
+            mute: false,
+            solo: false,
+            effects: [{ type: "malformed" }],
+          },
+        ],
+      });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    await expect(page.locator(".nbplay-mixer")).toBeVisible();
+    const effectCount = await page.evaluate(
+      () => window.__nbplay["test-session"].channels[0].effects.length,
+    );
+    expect(effectCount).toBe(0);
+    expect(
+      warnings.some((text) =>
+        text.includes("nbplay mixer effect plugin failed malformed"),
+      ),
+    ).toBe(true);
+  });
+
+  test("throwing custom plugin does not prevent mixer render", async ({
+    page,
+  }) => {
+    await page.goto("/tests/fixtures/harness.html");
+    const warnings = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "warning") warnings.push(msg.text());
+    });
+    await page.evaluate(async () => {
+      window.__nbplayPlugins = {
+        broken() {
+          throw new Error("plugin failed");
+        },
+      };
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/mixer.css";
+      document.head.appendChild(link);
+
+      const mod = await import("/dist/widgets/mixer.js");
+      const el = document.getElementById("root");
+      const model = window.createMockModel({
+        session_id: "test-session",
+        master_gain: 0.85,
+        master_effects: [],
+        channels: [
+          {
+            name: "Lead",
+            gain: 1,
+            pan: 0,
+            mute: false,
+            solo: false,
+            effects: [{ type: "broken" }],
+          },
+        ],
+      });
+      window.__testModel = model;
+      mod.default.render({ model, el });
+    });
+
+    await expect(page.locator(".nbplay-mixer")).toBeVisible();
+    await expect(page.locator(`${STRIP} .nbplay-strip-name`)).toHaveText(
+      "Lead",
+    );
+    expect(
+      warnings.some((text) =>
+        text.includes("nbplay mixer effect plugin failed broken"),
+      ),
+    ).toBe(true);
   });
 });
