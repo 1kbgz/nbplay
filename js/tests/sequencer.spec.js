@@ -209,6 +209,23 @@ test.describe("SequencerWidget", () => {
     await expect(btn).toContainText("▶");
   });
 
+  test("play button updates transport without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+    const btn = page.locator(".nbplay-seq-play");
+
+    await btn.click();
+
+    const playing = await page.evaluate(
+      () => window.__testModel._state.is_playing,
+    );
+    expect(playing).toBe(true);
+    await expect(btn).toContainText("⏸");
+  });
+
   // 9. Stop button resets playback
   test("stop button stops playback and resets current_step", async ({
     page,

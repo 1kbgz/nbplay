@@ -29,6 +29,8 @@ from nbplay.nbplay import (  # noqa: F401, E402
     Velocity,
 )
 from nbplay.widget import (  # noqa: F401, E402
+    AudioClip,
+    EffectPlugin,
     KeyboardRoute,
     KeyboardWidget,
     MidiKeyboardWidget,
@@ -41,6 +43,8 @@ from nbplay.widget import (  # noqa: F401, E402
     Session,
     SettingsWidget,
     SynthWidget,
+    TimelineTrack,
+    TimelineWidget,
     Track,
     TransportWidget,
 )

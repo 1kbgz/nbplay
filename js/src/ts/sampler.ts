@@ -4,6 +4,7 @@
 
 import {
   type AnyModel,
+  createAudioContext,
   cssVar,
   makeEditable,
   onKernelDisconnect,
@@ -252,8 +253,8 @@ function createSamplerEngine(maxVoices = 8) {
       rawSampleRate = sampleRate;
       waveformBuffer = null;
       if (!audioCtx) {
-        audioCtx = new AudioContext({ sampleRate });
-        ownAudioCtx = true;
+        audioCtx = createAudioContext({ sampleRate });
+        if (audioCtx) ownAudioCtx = true;
       }
     },
 
@@ -1027,11 +1028,8 @@ function render({
   }
 
   async function loadBrowserAudio(file: File): Promise<void> {
-    const AudioCtor =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
-    const decodeCtx = new AudioCtor();
+    const decodeCtx = createAudioContext();
+    if (!decodeCtx) return;
     const audioBuffer = await decodeCtx.decodeAudioData(
       await file.arrayBuffer(),
     );

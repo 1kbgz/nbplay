@@ -87,6 +87,29 @@ export function cssVar(el: Element, name: string, fallback: string): string {
   return v || fallback;
 }
 
+type AudioContextConstructor = new (
+  options?: AudioContextOptions,
+) => AudioContext;
+
+export function createAudioContext(
+  options?: AudioContextOptions,
+): AudioContext | null {
+  const g = globalThis as Record<string, unknown>;
+  const Ctor =
+    (g.AudioContext as AudioContextConstructor | undefined) ||
+    (g.webkitAudioContext as AudioContextConstructor | undefined);
+  if (!Ctor) return null;
+  try {
+    return new Ctor(options);
+  } catch (_) {
+    try {
+      return new Ctor();
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
 /** Options for makeEditable. */
 export interface EditableOpts {
   className?: string;

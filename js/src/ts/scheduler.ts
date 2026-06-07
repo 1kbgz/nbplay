@@ -1,7 +1,7 @@
 // nbplay Sequencer Scheduler - timing, step advancement, voice iteration,
 // oscillator triggering, probability, groove, and automation.
 
-import { type AnyModel } from "./helpers.ts";
+import { type AnyModel, createAudioContext } from "./helpers.ts";
 
 export interface StepData {
   active: boolean;
@@ -192,7 +192,7 @@ export function scheduleOscillator(
 }
 
 export function resolveAudioOutput(model: AnyModel): {
-  ctx: AudioContext;
+  ctx: AudioContext | null;
   output: AudioNode | null;
   ownCtx: boolean;
 } {
@@ -210,7 +210,7 @@ export function resolveAudioOutput(model: AnyModel): {
       };
     }
   }
-  return { ctx: new AudioContext(), output: null, ownCtx: true };
+  return { ctx: createAudioContext(), output: null, ownCtx: true };
 }
 
 export function voicesFromModel(model: AnyModel): StepData[][] {
@@ -233,6 +233,7 @@ export function createAudioScheduler(
   const self: AudioScheduler = {
     start(model: AnyModel): void {
       const resolved = resolveAudioOutput(model);
+      if (!resolved.ctx) return;
       audioCtx = resolved.ctx;
       outputNode = resolved.output;
       ownAudioCtx = resolved.ownCtx;

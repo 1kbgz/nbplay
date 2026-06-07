@@ -8,8 +8,10 @@ import pytest
 
 from nbplay import (
     AudioBuffer,
+    AudioClip,
     AudioFormat,
     AudioSample,
+    EffectPlugin,
     Envelope,
     EventSequence,
     KeyboardRoute,
@@ -41,6 +43,8 @@ from nbplay import (
     Step,
     StepSequencer,
     SynthWidget,
+    TimelineTrack,
+    TimelineWidget,
     Track,
     TransportClock,
     TransportWidget,
@@ -671,6 +675,7 @@ class TestMixerWidget:
         w = MixerWidget()
         assert w.channels == []
         assert w.master_gain == pytest.approx(0.8)
+        assert w.master_effects == []
         assert w.session_id == ""
 
     def test_add_channel(self):
@@ -680,6 +685,7 @@ class TestMixerWidget:
         assert len(w.channels) == 1
         assert w.channels[0]["name"] == "Synth 1"
         assert w.channels[0]["gain"] == pytest.approx(0.8)
+        assert w.channels[0]["effects"] == []
 
     def test_add_multiple_channels(self):
         w = MixerWidget()
@@ -730,6 +736,154 @@ class TestMixerWidget:
         w.add_channel("ch")
         w.set_channel_solo(0, True)
         assert w.channels[0]["solo"] is True
+
+    def test_set_channel_effects(self):
+        w = MixerWidget()
+        w.add_channel("ch")
+        w.set_channel_effects(
+            0,
+            [
+                EffectPlugin("compressor", threshold=-18, ratio=6),
+                {"type": "reverb", "seconds": 2.0, "wet": 0.4},
+                {"type": "limiter", "threshold": 3},
+            ],
+        )
+        assert w.channels[0]["effects"] == [
+            {
+                "type": "compressor",
+                "threshold": -18.0,
+                "knee": 30.0,
+                "ratio": 6.0,
+                "attack": 0.003,
+                "release": 0.25,
+            },
+            {"type": "reverb", "seconds": 2.0, "decay": 2.0, "wet": 0.4},
+            {"type": "limiter", "threshold": 0.0, "release": 0.05},
+        ]
+
+    def test_add_and_clear_effects(self):
+        w = MixerWidget()
+        w.add_channel("ch")
+        w.add_channel_effect(0, {"type": "filter", "filter_type": "highpass", "frequency": 30, "q": 0.5})
+        w.set_master_effects([EffectPlugin("gain", gain=2.0)])
+        assert w.master_effects == [{"type": "gain", "gain": 2.0}]
+
+        w.add_master_effect({"type": "delay", "time": 0.5, "feedback": 0.2, "wet": 0.3})
+        assert w.channels[0]["effects"][0] == {
+            "type": "filter",
+            "filter_type": "highpass",
+            "frequency": 30.0,
+            "q": 0.5,
+        }
+        assert w.master_effects == [
+            {"type": "gain", "gain": 2.0},
+            {"type": "delay", "time": 0.5, "feedback": 0.2, "wet": 0.3},
+        ]
+        w.clear_channel_effects(0)
+        w.clear_master_effects()
+        assert w.channels[0]["effects"] == []
+        assert w.master_effects == []
+
+    def test_invalid_effect_type_raises(self):
+        with pytest.raises(ValueError):
+            EffectPlugin("chorus")
+
+    def test_invalid_filter_type_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.add_master_effect({"type": "filter", "filter_type": "comb"})
+
+    def test_effect_plugin_is_hashable(self):
+        first = EffectPlugin("compressor", threshold=-18, ratio=4)
+        second = EffectPlugin("compressor", threshold=-18, ratio=4)
+        assert first == second
+        assert len({first, second}) == 1
+
+    def test_direct_channel_assignment_normalizes_effects(self):
+        w = MixerWidget()
+        w.channels = [
+            {
+                "name": "raw",
+                "gain": 3,
+                "pan": -3,
+                "mute": 1,
+                "solo": 0,
+                "effects": [
+                    {"type": "limiter", "threshold": 3},
+                    {
+                        "type": "customDrive",
+                        "curve": [0, 0.5, 1],
+                        "config": {"enabled": True, "mode": "wide", "none": None},
+                    },
+                ],
+            }
+        ]
+
+        assert w.channels[0]["gain"] == pytest.approx(2.0)
+        assert w.channels[0]["pan"] == pytest.approx(-1.0)
+        assert w.channels[0]["mute"] is True
+        assert w.channels[0]["solo"] is False
+        assert w.channels[0]["effects"] == [
+            {"type": "limiter", "threshold": 0.0, "release": 0.05},
+            {
+                "type": "customDrive",
+                "curve": [0, 0.5, 1],
+                "config": {"enabled": True, "mode": "wide", "none": None},
+            },
+        ]
+
+    def test_invalid_channel_gain_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.channels = [{"gain": None}]
+        w.add_channel("raw")
+        with pytest.raises(ValueError):
+            w.set_channel_gain(0, True)
+
+    def test_invalid_channel_pan_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.channels = [{"pan": math.nan}]
+
+    def test_master_effect_assignment_preserves_json_safe_custom_params(self):
+        w = MixerWidget()
+        w.master_effects = [
+            {
+                "type": "customMatrix",
+                "matrix": [[1, 0], [0, 1]],
+                "labels": ("L", "R"),
+                "config": {"enabled": True, "none": None},
+            }
+        ]
+
+        assert w.master_effects == [
+            {
+                "type": "customMatrix",
+                "matrix": [[1, 0], [0, 1]],
+                "labels": ["L", "R"],
+                "config": {"enabled": True, "none": None},
+            }
+        ]
+
+    def test_builtin_effect_none_params_use_defaults(self):
+        w = MixerWidget()
+        w.master_effects = [{"type": "filter", "filter_type": None, "frequency": None, "q": None}]
+        assert w.master_effects == [{"type": "filter", "filter_type": "lowpass", "frequency": 1200.0, "q": 1.0}]
+
+    def test_non_json_safe_effect_param_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.add_master_effect({"type": "custom", "bad": object()})
+
+    def test_non_finite_builtin_effect_param_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.add_master_effect({"type": "gain", "gain": math.nan})
+
+    def test_bool_builtin_effect_param_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError):
+            w.add_master_effect({"type": "delay", "wet": True})
 
     def test_to_mixer(self):
         w = MixerWidget()
@@ -1766,10 +1920,12 @@ class TestTransportWidget:
         t = TransportWidget()
         assert t.bpm == 120.0
         assert t.is_playing is False
+        assert t.is_recording is False
         assert t.time_signature_num == 4
         assert t.time_signature_den == 4
         assert t.bar_number == 0
         assert t.beat_in_bar == 0
+        assert t.current_beat == pytest.approx(0.0)
         assert t.loop_enabled is False
         assert t.loop_start_bar == 0
         assert t.loop_end_bar == 4
@@ -1792,6 +1948,8 @@ class TestTransportWidget:
         t = TransportWidget()
         t.is_playing = True
         assert t.is_playing is True
+        t.is_recording = True
+        assert t.is_recording is True
         t.is_playing = False
         assert t.is_playing is False
 
@@ -1799,8 +1957,10 @@ class TestTransportWidget:
         t = TransportWidget()
         t.bar_number = 5
         t.beat_in_bar = 2
+        t.current_beat = 22.5
         assert t.bar_number == 5
         assert t.beat_in_bar == 2
+        assert t.current_beat == pytest.approx(22.5)
 
     def test_loop(self):
         t = TransportWidget()
@@ -2245,6 +2405,156 @@ class TestPadWidget:
         assert p.pad_notes == [72, 73, 74]
 
 
+#  Timeline
+
+
+class TestTimelineDescriptors:
+    def test_audio_clip_defaults(self):
+        clip = AudioClip(name="Vox", track_index=1, start=2.0, duration=3.5)
+        data = clip.to_dict()
+        assert data["id"].startswith("clip-")
+        assert data["name"] == "Vox"
+        assert data["track_index"] == 1
+        assert data["start"] == pytest.approx(2.0)
+        assert data["duration"] == pytest.approx(3.5)
+        assert data["sample_rate"] == 44100
+
+    def test_audio_clip_clamps_ranges(self):
+        clip = AudioClip(track_index=-4, start=-2.0, duration=-1.0, sample_rate=-10)
+        data = clip.to_dict()
+        assert data["track_index"] == 0
+        assert data["start"] == pytest.approx(0.0)
+        assert data["duration"] == pytest.approx(0.001)
+        assert data["sample_rate"] == 1
+
+    def test_audio_clip_requires_numeric_duration(self):
+        with pytest.raises(ValueError):
+            AudioClip(duration=True)
+
+    def test_timeline_track_defaults(self):
+        track = TimelineTrack(name="Vocals", channel_index=2, armed=True)
+        assert track.to_dict() == {
+            "name": "Vocals",
+            "channel_index": 2,
+            "armed": True,
+            "muted": False,
+            "solo": False,
+            "input": "microphone",
+            "monitor": False,
+        }
+
+
+class TestTimelineWidget:
+    def test_defaults(self):
+        timeline = TimelineWidget()
+        assert timeline.bpm == pytest.approx(120.0)
+        assert timeline.length == pytest.approx(16.0)
+        assert timeline.tracks == []
+        assert timeline.clips == []
+        assert timeline.recording_track == -1
+        assert timeline.is_recording is False
+        assert timeline.count_in_bars == pytest.approx(0.0)
+        assert timeline.recording_countdown_beats == pytest.approx(0.0)
+        assert timeline.auto_extend_recording is True
+        assert timeline.recording_extend_bars == pytest.approx(8.0)
+
+    def test_add_track(self):
+        timeline = TimelineWidget()
+        idx = timeline.add_track("Vox", channel_index=3, armed=True, monitor=True)
+        assert idx == 0
+        assert timeline.tracks[0]["name"] == "Vox"
+        assert timeline.tracks[0]["channel_index"] == 3
+        assert timeline.tracks[0]["armed"] is True
+        assert timeline.tracks[0]["monitor"] is True
+
+    def test_count_in_validation(self):
+        timeline = TimelineWidget(count_in_bars=12)
+        assert timeline.count_in_bars == pytest.approx(8.0)
+        timeline.recording_countdown_beats = 3.5
+        assert timeline.recording_countdown_beats == pytest.approx(3.5)
+
+    def test_auto_extend_recording_validation(self):
+        timeline = TimelineWidget(recording_extend_bars=0)
+        assert timeline.recording_extend_bars == pytest.approx(1.0)
+        timeline.recording_extend_bars = 300
+        assert timeline.recording_extend_bars == pytest.approx(256.0)
+
+    def test_arm_track_exclusive(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A", armed=True)
+        timeline.add_track("B", armed=False)
+        timeline.arm_track(1, True, exclusive=True)
+        assert [track["armed"] for track in timeline.tracks] == [False, True]
+
+    def test_arm_track_out_of_range(self):
+        timeline = TimelineWidget()
+        with pytest.raises(IndexError):
+            timeline.arm_track(0)
+
+    def test_add_clip(self):
+        timeline = TimelineWidget()
+        timeline.add_track("Vox")
+        clip = timeline.add_clip("Take", track_index=0, start=1.0, duration=2.0, recorded=True)
+        assert len(timeline.clips) == 1
+        assert timeline.selected_clip_id == clip["id"]
+        assert timeline.clips[0]["recorded"] is True
+        assert timeline.length == pytest.approx(16.0)
+
+    def test_add_clip_extends_length(self):
+        timeline = TimelineWidget(length=4.0)
+        timeline.add_track("Vox")
+        timeline.add_clip("Long", start=3.0, duration=4.0)
+        assert timeline.length == pytest.approx(7.0)
+
+    def test_move_and_resize_clip(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        timeline.add_track("B")
+        clip = timeline.add_clip("Take", track_index=0)
+        timeline.move_clip(clip["id"], track_index=1, start=6.0)
+        timeline.resize_clip(clip["id"], 1.5)
+        assert timeline.clips[0]["track_index"] == 1
+        assert timeline.clips[0]["start"] == pytest.approx(6.0)
+        assert timeline.clips[0]["duration"] == pytest.approx(1.5)
+
+    def test_missing_clip_raises(self):
+        timeline = TimelineWidget()
+        with pytest.raises(ValueError):
+            timeline.move_clip("missing", start=1.0)
+        with pytest.raises(ValueError):
+            timeline.resize_clip("missing", 2.0)
+
+    def test_remove_clip_clears_selection(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        clip = timeline.add_clip("Take")
+        timeline.remove_clip(clip["id"])
+        assert timeline.clips == []
+        assert timeline.selected_clip_id == ""
+
+    def test_remove_track_drops_clips_and_shifts(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A", channel_index=0)
+        timeline.add_track("B", channel_index=1)
+        timeline.add_track("C", channel_index=2)
+        timeline.add_clip("A1", track_index=0)
+        timeline.add_clip("B1", track_index=1)
+        timeline.add_clip("C1", track_index=2)
+        timeline.remove_track(1)
+        assert [track["name"] for track in timeline.tracks] == ["A", "C"]
+        assert [track["channel_index"] for track in timeline.tracks] == [0, 1]
+        assert [clip["name"] for clip in timeline.clips] == ["A1", "C1"]
+        assert timeline.clips[1]["track_index"] == 1
+
+    def test_remove_unrouted_track_does_not_shift_channels(self):
+        timeline = TimelineWidget()
+        timeline.add_track("Scratch", channel_index=-1)
+        timeline.add_track("A", channel_index=0)
+        timeline.add_track("B", channel_index=1)
+        timeline.remove_track(0)
+        assert [track["channel_index"] for track in timeline.tracks] == [0, 1]
+
+
 #  Track
 
 
@@ -2339,15 +2649,20 @@ class TestSession:
         assert len(s.mixer.channels) == 0
         assert s._session_id.startswith("nbplay-")
         assert s.mixer.session_id == s._session_id
+        assert s.timeline.session_id == s._session_id
+        assert s.timeline.tracks == []
 
     def test_custom_bpm(self):
         s = Session(bpm=140.0)
         assert s.transport.bpm == pytest.approx(140.0)
+        assert s.timeline.bpm == pytest.approx(140.0)
 
     def test_custom_time_signature(self):
         s = Session(time_signature=(3, 8))
         assert s.transport.time_signature_num == 3
         assert s.transport.time_signature_den == 8
+        assert s.timeline.time_signature_num == 3
+        assert s.timeline.time_signature_den == 8
 
     def test_add_track_syncs_transport_time_signature(self):
         s = Session(time_signature=(3, 8))
@@ -2372,6 +2687,9 @@ class TestSession:
         assert track.mixer_channel == 0
         assert len(s.mixer.channels) == 1
         assert s.mixer.channels[0]["name"] == "Lead"
+        assert len(s.timeline.tracks) == 1
+        assert s.timeline.tracks[0]["name"] == "Lead"
+        assert s.timeline.tracks[0]["channel_index"] == 0
         # Session routing metadata set on sequencer
         assert seq.session_id == s._session_id
         assert seq.channel_index == 0
@@ -2391,6 +2709,7 @@ class TestSession:
         s.add_track("Drums", SequencerWidget(), SamplerWidget())
         assert len(s.tracks) == 3
         assert len(s.mixer.channels) == 3
+        assert len(s.timeline.tracks) == 3
         assert s.tracks[0].mixer_channel == 0
         assert s.tracks[1].mixer_channel == 1
         assert s.tracks[2].mixer_channel == 2
@@ -2406,6 +2725,22 @@ class TestSession:
         s.transport.bpm = 90.0
         assert seq1.bpm == pytest.approx(90.0)
         assert seq2.bpm == pytest.approx(90.0)
+        assert s.timeline.bpm == pytest.approx(90.0)
+
+    def test_timeline_transport_sync(self):
+        s = Session()
+        s.timeline.bpm = 132.0
+        assert s.transport.bpm == pytest.approx(132.0)
+        s.timeline.is_playing = True
+        assert s.transport.is_playing is True
+        s.transport.is_playing = False
+        assert s.timeline.is_playing is False
+        s.transport.is_recording = True
+        assert s.timeline.is_recording is True
+        s.transport.current_beat = 7.25
+        assert s.timeline.current_beat == pytest.approx(7.25)
+        s.timeline.current_beat = 3.5
+        assert s.transport.current_beat == pytest.approx(3.5)
 
     def test_play_sync(self):
         """Transport play state propagates to all sequencers."""
@@ -2434,11 +2769,14 @@ class TestSession:
         s.remove_track(1)  # remove "B"
         assert len(s.tracks) == 2
         assert len(s.mixer.channels) == 2
+        assert len(s.timeline.tracks) == 2
         assert s.tracks[0].name == "A"
         assert s.tracks[1].name == "C"
+        assert [track["name"] for track in s.timeline.tracks] == ["A", "C"]
         # Channel indices adjusted
         assert s.tracks[0].mixer_channel == 0
         assert s.tracks[1].mixer_channel == 1
+        assert s.timeline.tracks[1]["channel_index"] == 1
         # Removed track's sequencer has routing cleared
         assert seq_b.session_id == ""
         assert seq_b.channel_index == -1

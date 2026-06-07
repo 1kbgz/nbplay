@@ -12,6 +12,7 @@ API in the browser so latency stays minimal.
 from __future__ import annotations
 
 import array
+import math
 import pathlib
 import uuid
 import wave
@@ -109,6 +110,316 @@ def _resize_pad_velocities(velocities, pad_count, velocity=100):
 def _safe_trait_name(value):
     text = str(value)
     return text.isidentifier() and not text.startswith("_")
+
+
+class EffectPlugin:
+    """Validated Web Audio effect descriptor for mixer insert chains."""
+
+    _VALID_TYPES = frozenset({"gain", "filter", "delay", "reverb", "compressor", "limiter"})
+    _FILTER_TYPES = frozenset({"lowpass", "highpass", "bandpass", "notch", "lowshelf", "highshelf", "peaking"})
+
+    def __init__(self, type, **params):
+        if type not in self._VALID_TYPES:
+            raise ValueError(f"type must be one of {sorted(self._VALID_TYPES)}, got {type!r}")
+        self.type = type
+        self.params = self._normalize_params(type, params)
+
+    @staticmethod
+    def _param(params, *names, default=None):
+        for name in names:
+            value = params.get(name)
+            if value is not None and value != "":
+                return value
+        return default
+
+    @classmethod
+    def _number(cls, params, *names, default, low, high):
+        value = cls._param(params, *names, default=default)
+        if isinstance(value, bool):
+            raise ValueError(f"{names[0]} must be numeric, got bool")
+        numeric = float(value)
+        if not math.isfinite(numeric):
+            raise ValueError(f"{names[0]} must be finite, got {value!r}")
+        return max(low, min(high, numeric))
+
+    def _normalize_params(self, type, params):
+        if type == "gain":
+            return {"gain": self._number(params, "gain", default=1.0, low=0.0, high=4.0)}
+        if type == "filter":
+            filter_type = str(self._param(params, "filter_type", "mode", default="lowpass"))
+            if filter_type not in self._FILTER_TYPES:
+                raise ValueError(f"filter_type must be one of {sorted(self._FILTER_TYPES)}, got {filter_type!r}")
+            return {
+                "filter_type": filter_type,
+                "frequency": self._number(params, "frequency", "cutoff", default=1200.0, low=20.0, high=20000.0),
+                "q": self._number(params, "q", "Q", default=1.0, low=0.0001, high=100.0),
+            }
+        if type == "delay":
+            return {
+                "time": self._number(params, "time", default=0.25, low=0.0, high=5.0),
+                "feedback": self._number(params, "feedback", default=0.25, low=0.0, high=0.95),
+                "wet": self._number(params, "wet", default=0.35, low=0.0, high=1.0),
+            }
+        if type == "reverb":
+            return {
+                "seconds": self._number(params, "seconds", default=1.5, low=0.01, high=10.0),
+                "decay": self._number(params, "decay", default=2.0, low=0.01, high=12.0),
+                "wet": self._number(params, "wet", default=0.25, low=0.0, high=1.0),
+            }
+        if type == "compressor":
+            return {
+                "threshold": self._number(params, "threshold", default=-24.0, low=-100.0, high=0.0),
+                "knee": self._number(params, "knee", default=30.0, low=0.0, high=40.0),
+                "ratio": self._number(params, "ratio", default=12.0, low=1.0, high=20.0),
+                "attack": self._number(params, "attack", default=0.003, low=0.0, high=1.0),
+                "release": self._number(params, "release", default=0.25, low=0.0, high=1.0),
+            }
+        return {
+            "threshold": self._number(params, "threshold", default=-1.0, low=-100.0, high=0.0),
+            "release": self._number(params, "release", default=0.05, low=0.0, high=1.0),
+        }
+
+    def to_dict(self):
+        return {"type": self.type, **self.params}
+
+    def __repr__(self):
+        return f"EffectPlugin({self.to_dict()!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, EffectPlugin):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()
+
+    def __hash__(self):
+        return hash(_freeze_effect_value(self.to_dict()))
+
+
+def _json_safe_effect_value(value, path="effect param"):
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError(f"{path} must be finite, got {value!r}")
+        return value
+    if isinstance(value, (list, tuple)):
+        return [_json_safe_effect_value(item, path) for item in value]
+    if isinstance(value, dict):
+        return {str(key): _json_safe_effect_value(item, f"{path}.{key}") for key, item in value.items()}
+    raise ValueError(f"{path} must be JSON-serializable, got {type(value).__name__}")
+
+
+def _freeze_effect_value(value):
+    if isinstance(value, dict):
+        return tuple(sorted((str(key), _freeze_effect_value(item)) for key, item in value.items()))
+    if isinstance(value, list):
+        return tuple(_freeze_effect_value(item) for item in value)
+    return value
+
+
+def _normalize_effect(effect):
+    if isinstance(effect, EffectPlugin):
+        return effect.to_dict()
+    if not isinstance(effect, dict):
+        raise ValueError(f"effect must be dict or EffectPlugin, got {type(effect).__name__}")
+    kind = str(effect.get("type", ""))
+    if not kind or kind.startswith("_"):
+        raise ValueError(f"effect type must be a non-private string, got {kind!r}")
+    params = {k: v for k, v in effect.items() if k != "type"}
+    if kind not in EffectPlugin._VALID_TYPES:
+        normalized = {"type": kind}
+        for key, value in params.items():
+            normalized[str(key)] = _json_safe_effect_value(value, f"{kind}.{key}")
+        return normalized
+    return EffectPlugin(kind, **params).to_dict()
+
+
+def _normalize_effects(effects):
+    return [_normalize_effect(effect) for effect in list(effects or [])]
+
+
+def _clamped_number(value, low, high, name):
+    if value is None or isinstance(value, bool):
+        raise ValueError(f"{name} must be numeric, got {value!r}")
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        raise ValueError(f"{name} must be finite, got {value!r}")
+    return max(low, min(high, numeric))
+
+
+def _normalize_mixer_channel(channel, index=0):
+    if not isinstance(channel, dict):
+        raise ValueError(f"channel must be dict, got {type(channel).__name__}")
+    normalized = dict(channel)
+    normalized["name"] = str(normalized.get("name", f"Ch {index + 1}"))
+    normalized["gain"] = _clamped_number(normalized.get("gain", 0.8), 0.0, 2.0, "gain")
+    normalized["pan"] = _clamped_number(normalized.get("pan", 0.0), -1.0, 1.0, "pan")
+    normalized["mute"] = bool(normalized.get("mute", False))
+    normalized["solo"] = bool(normalized.get("solo", False))
+    normalized["effects"] = _normalize_effects(normalized.get("effects", []))
+    return normalized
+
+
+def _clip_id():
+    return f"clip-{uuid.uuid4().hex[:8]}"
+
+
+def _positive_number(value, name, minimum=0.001, maximum=4096.0):
+    return _clamped_number(value, minimum, maximum, name)
+
+
+def _nonnegative_number(value, name, maximum=4096.0):
+    return _clamped_number(value, 0.0, maximum, name)
+
+
+def _normalize_timeline_track(track, index=0):
+    if isinstance(track, TimelineTrack):
+        return track.to_dict()
+    if not isinstance(track, dict):
+        raise ValueError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")
+    channel = int(track.get("channel_index", index))
+    return {
+        "name": str(track.get("name", f"Track {index + 1}")),
+        "channel_index": max(-1, channel),
+        "armed": bool(track.get("armed", False)),
+        "muted": bool(track.get("muted", False)),
+        "solo": bool(track.get("solo", False)),
+        "input": str(track.get("input", "microphone")),
+        "monitor": bool(track.get("monitor", False)),
+    }
+
+
+def _normalize_timeline_tracks(tracks):
+    return [_normalize_timeline_track(track, index) for index, track in enumerate(tracks or [])]
+
+
+def _normalize_audio_clip(clip, index=0, track_count=None):
+    if isinstance(clip, AudioClip):
+        data = clip.to_dict()
+    elif isinstance(clip, dict):
+        data = dict(clip)
+    else:
+        raise ValueError(f"audio clip must be dict or AudioClip, got {type(clip).__name__}")
+
+    track_index = max(0, int(data.get("track_index", 0)))
+    if track_count:
+        track_index = min(track_index, max(0, int(track_count) - 1))
+
+    normalized = {
+        "id": str(data.get("id") or _clip_id()),
+        "name": str(data.get("name", f"Clip {index + 1}")),
+        "track_index": track_index,
+        "start": _nonnegative_number(data.get("start", 0.0), "start"),
+        "duration": _positive_number(data.get("duration", 4.0), "duration"),
+        "loop": bool(data.get("loop", False)),
+        "muted": bool(data.get("muted", False)),
+        "recorded": bool(data.get("recorded", False)),
+        "audio_url": str(data.get("audio_url", "")),
+        "blob_type": str(data.get("blob_type", "")),
+        "source": str(data.get("source", "recording")),
+        "sample_rate": max(1, int(data.get("sample_rate", 44100))),
+    }
+    if data.get("blob_size") is not None:
+        normalized["blob_size"] = max(0, int(data["blob_size"]))
+    if data.get("color") is not None:
+        normalized["color"] = str(data["color"])
+    return normalized
+
+
+def _normalize_audio_clips(clips, track_count=None):
+    return [_normalize_audio_clip(clip, index, track_count) for index, clip in enumerate(clips or [])]
+
+
+class AudioClip:
+    """Serializable audio clip descriptor for timeline lanes."""
+
+    def __init__(
+        self,
+        *,
+        id=None,
+        name="Clip",
+        track_index=0,
+        start=0.0,
+        duration=4.0,
+        loop=False,
+        muted=False,
+        recorded=False,
+        audio_url="",
+        blob_type="",
+        source="recording",
+        sample_rate=44100,
+        blob_size=None,
+        color=None,
+    ):
+        data = {
+            "id": id or _clip_id(),
+            "name": name,
+            "track_index": track_index,
+            "start": start,
+            "duration": duration,
+            "loop": loop,
+            "muted": muted,
+            "recorded": recorded,
+            "audio_url": audio_url,
+            "blob_type": blob_type,
+            "source": source,
+            "sample_rate": sample_rate,
+        }
+        if blob_size is not None:
+            data["blob_size"] = blob_size
+        if color is not None:
+            data["color"] = color
+        self._data = _normalize_audio_clip(data)
+
+    def to_dict(self):
+        return dict(self._data)
+
+    def __repr__(self):
+        return f"AudioClip({self._data!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, AudioClip):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()
+
+
+class TimelineTrack:
+    """Serializable track-lane descriptor for ``TimelineWidget``."""
+
+    def __init__(
+        self,
+        *,
+        name="Track",
+        channel_index=0,
+        armed=False,
+        muted=False,
+        solo=False,
+        input="microphone",
+        monitor=False,
+    ):
+        self._data = _normalize_timeline_track(
+            {
+                "name": name,
+                "channel_index": channel_index,
+                "armed": armed,
+                "muted": muted,
+                "solo": solo,
+                "input": input,
+                "monitor": monitor,
+            }
+        )
+
+    def to_dict(self):
+        return dict(self._data)
+
+    def __repr__(self):
+        return f"TimelineTrack({self._data!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, TimelineTrack):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()
 
 
 class PadAction:
@@ -349,9 +660,18 @@ class MixerWidget(anywidget.AnyWidget):
     # JSON-serialized list of channel dicts
     channels = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
     master_gain = traitlets.Float(0.8).tag(sync=True)
+    master_effects = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
     # Session routing (set by Session to enable shared AudioContext)
     session_id = traitlets.Unicode("").tag(sync=True)
+
+    @traitlets.validate("channels")
+    def _validate_channels(self, proposal):
+        return [_normalize_mixer_channel(channel, index) for index, channel in enumerate(proposal["value"] or [])]
+
+    @traitlets.validate("master_effects")
+    def _validate_master_effects(self, proposal):
+        return _normalize_effects(proposal["value"])
 
     def add_channel(self, name="Channel"):
         """Add a new channel strip.
@@ -362,7 +682,7 @@ class MixerWidget(anywidget.AnyWidget):
         Returns:
             Index of the new channel.
         """
-        ch = {"name": name, "gain": 0.8, "pan": 0.0, "mute": False, "solo": False}
+        ch = {"name": name, "gain": 0.8, "pan": 0.0, "mute": False, "solo": False, "effects": []}
         self.channels = [*self.channels, ch]
         return len(self.channels) - 1
 
@@ -380,13 +700,13 @@ class MixerWidget(anywidget.AnyWidget):
     def set_channel_gain(self, index, gain):
         chs = list(self.channels)
         if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "gain": max(0.0, min(2.0, gain))}
+            chs[index] = {**chs[index], "gain": _clamped_number(gain, 0.0, 2.0, "gain")}
             self.channels = chs
 
     def set_channel_pan(self, index, pan):
         chs = list(self.channels)
         if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "pan": max(-1.0, min(1.0, pan))}
+            chs[index] = {**chs[index], "pan": _clamped_number(pan, -1.0, 1.0, "pan")}
             self.channels = chs
 
     def set_channel_mute(self, index, mute):
@@ -400,6 +720,38 @@ class MixerWidget(anywidget.AnyWidget):
         if 0 <= index < len(chs):
             chs[index] = {**chs[index], "solo": bool(solo)}
             self.channels = chs
+
+    def set_channel_effects(self, index, effects):
+        """Replace a channel's browser insert effect chain."""
+        chs = list(self.channels)
+        if 0 <= index < len(chs):
+            chs[index] = {**chs[index], "effects": _normalize_effects(effects)}
+            self.channels = chs
+
+    def add_channel_effect(self, index, effect):
+        """Append one effect descriptor to a channel insert chain."""
+        chs = list(self.channels)
+        if 0 <= index < len(chs):
+            effects = _normalize_effects(chs[index].get("effects", []))
+            effects.append(_normalize_effect(effect))
+            chs[index] = {**chs[index], "effects": effects}
+            self.channels = chs
+
+    def clear_channel_effects(self, index):
+        """Remove all browser insert effects from a channel."""
+        self.set_channel_effects(index, [])
+
+    def set_master_effects(self, effects):
+        """Replace the master bus browser insert effect chain."""
+        self.master_effects = _normalize_effects(effects)
+
+    def add_master_effect(self, effect):
+        """Append one effect descriptor to the master bus effect chain."""
+        self.master_effects = [*self.master_effects, _normalize_effect(effect)]
+
+    def clear_master_effects(self):
+        """Remove all browser insert effects from the master bus."""
+        self.master_effects = []
 
     def to_mixer(self):
         """Build a Rust ``Mixer`` matching the current widget state.
@@ -1191,6 +1543,7 @@ class TransportWidget(anywidget.AnyWidget):
     # Transport state
     bpm = traitlets.Float(120.0).tag(sync=True)
     is_playing = traitlets.Bool(False).tag(sync=True)
+    is_recording = traitlets.Bool(False).tag(sync=True)
 
     # Time signature
     time_signature_num = traitlets.Int(4).tag(sync=True)
@@ -1199,11 +1552,196 @@ class TransportWidget(anywidget.AnyWidget):
     # Position (updated by browser-side clock)
     bar_number = traitlets.Int(0).tag(sync=True)
     beat_in_bar = traitlets.Int(0).tag(sync=True)
+    current_beat = traitlets.Float(0.0).tag(sync=True)
 
     # Loop
     loop_enabled = traitlets.Bool(False).tag(sync=True)
     loop_start_bar = traitlets.Int(0).tag(sync=True)
     loop_end_bar = traitlets.Int(4).tag(sync=True)
+
+
+class TimelineWidget(anywidget.AnyWidget):
+    """Multi-track clip timeline with browser recording controls.
+
+    Clips are synced as JSON metadata. Browser-recorded audio is kept
+    as an object URL in the frontend for immediate playback; durable
+    binary persistence is intentionally left to an export/import path.
+    """
+
+    _esm = _STATIC / "timeline.js"
+    _css = _STATIC / "timeline.css"
+
+    session_id = traitlets.Unicode("").tag(sync=True)
+    bpm = traitlets.Float(120.0).tag(sync=True)
+    is_playing = traitlets.Bool(False).tag(sync=True)
+    is_recording = traitlets.Bool(False).tag(sync=True)
+    recording_track = traitlets.Int(-1).tag(sync=True)
+    recording_error = traitlets.Unicode("").tag(sync=True)
+
+    time_signature_num = traitlets.Int(4).tag(sync=True)
+    time_signature_den = traitlets.Int(4).tag(sync=True)
+    length = traitlets.Float(16.0).tag(sync=True)
+    current_beat = traitlets.Float(0.0).tag(sync=True)
+    count_in_bars = traitlets.Float(0.0).tag(sync=True)
+    recording_countdown_beats = traitlets.Float(0.0).tag(sync=True)
+    auto_extend_recording = traitlets.Bool(True).tag(sync=True)
+    recording_extend_bars = traitlets.Float(8.0).tag(sync=True)
+
+    tracks = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    clips = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    selected_clip_id = traitlets.Unicode("").tag(sync=True)
+    recorded_clip = traitlets.Dict(default_value={}).tag(sync=True)
+
+    @traitlets.validate("length")
+    def _validate_length(self, proposal):
+        return _positive_number(proposal["value"], "length", minimum=1.0, maximum=4096.0)
+
+    @traitlets.validate("current_beat")
+    def _validate_current_beat(self, proposal):
+        return min(self.length, _nonnegative_number(proposal["value"], "current_beat"))
+
+    @traitlets.validate("count_in_bars")
+    def _validate_count_in_bars(self, proposal):
+        return _nonnegative_number(proposal["value"], "count_in_bars", maximum=8.0)
+
+    @traitlets.validate("recording_countdown_beats")
+    def _validate_recording_countdown_beats(self, proposal):
+        return _nonnegative_number(proposal["value"], "recording_countdown_beats")
+
+    @traitlets.validate("recording_extend_bars")
+    def _validate_recording_extend_bars(self, proposal):
+        return _positive_number(proposal["value"], "recording_extend_bars", minimum=1.0, maximum=256.0)
+
+    @traitlets.validate("tracks")
+    def _validate_tracks(self, proposal):
+        return _normalize_timeline_tracks(proposal["value"])
+
+    @traitlets.validate("clips")
+    def _validate_clips(self, proposal):
+        return _normalize_audio_clips(proposal["value"], len(self.tracks))
+
+    @traitlets.validate("recording_track")
+    def _validate_recording_track(self, proposal):
+        track = int(proposal["value"])
+        if track < 0 or not self.tracks:
+            return -1
+        return min(track, len(self.tracks) - 1)
+
+    def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False):
+        """Append a timeline lane and return its index."""
+        idx = len(self.tracks)
+        track = TimelineTrack(
+            name=name,
+            channel_index=idx if channel_index is None else channel_index,
+            armed=armed,
+            monitor=monitor,
+        ).to_dict()
+        self.tracks = [*self.tracks, track]
+        return idx
+
+    def remove_track(self, index):
+        """Remove a lane, dropping its clips and shifting later lanes."""
+        index = int(index)
+        if index < 0 or index >= len(self.tracks):
+            return
+        removed = self.tracks[index]
+        removed_channel = int(removed.get("channel_index", index))
+        next_tracks = []
+        for i, track in enumerate(self.tracks):
+            if i == index:
+                continue
+            item = dict(track)
+            if removed_channel >= 0 and int(item.get("channel_index", -1)) > removed_channel:
+                item["channel_index"] = int(item["channel_index"]) - 1
+            next_tracks.append(_normalize_timeline_track(item, len(next_tracks)))
+        next_clips = []
+        for clip in self.clips:
+            item = dict(clip)
+            track_index = int(item.get("track_index", 0))
+            if track_index == index:
+                continue
+            if track_index > index:
+                item["track_index"] = track_index - 1
+            next_clips.append(item)
+        self.tracks = next_tracks
+        self.clips = _normalize_audio_clips(next_clips, len(next_tracks))
+        if self.recording_track == index:
+            self.recording_track = -1
+            self.is_recording = False
+        elif self.recording_track > index:
+            self.recording_track -= 1
+
+    def arm_track(self, index, armed=True, *, exclusive=False):
+        """Set lane arm state."""
+        index = int(index)
+        if index < 0 or index >= len(self.tracks):
+            raise IndexError(f"track index out of range: {index}")
+        tracks = []
+        for i, track in enumerate(self.tracks):
+            item = dict(track)
+            if exclusive and i != index:
+                item["armed"] = False
+            elif i == index:
+                item["armed"] = bool(armed)
+            tracks.append(item)
+        self.tracks = tracks
+        if not any(track.get("armed") for track in tracks):
+            self.recording_track = -1
+
+    def add_clip(self, name="Clip", track_index=0, start=0.0, duration=4.0, **kwargs):
+        """Append a clip descriptor and return it."""
+        clip = AudioClip(
+            name=name,
+            track_index=track_index,
+            start=start,
+            duration=duration,
+            **kwargs,
+        ).to_dict()
+        clip = _normalize_audio_clip(clip, len(self.clips), len(self.tracks))
+        self.clips = [*self.clips, clip]
+        self.selected_clip_id = clip["id"]
+        self.length = max(self.length, clip["start"] + clip["duration"])
+        return clip
+
+    def remove_clip(self, clip_id):
+        """Remove a clip by id."""
+        clip_id = str(clip_id)
+        self.clips = [clip for clip in self.clips if clip.get("id") != clip_id]
+        if self.selected_clip_id == clip_id:
+            self.selected_clip_id = ""
+
+    def move_clip(self, clip_id, *, track_index=None, start=None):
+        """Move a clip to a new lane and/or beat position."""
+        clip_id = str(clip_id)
+        next_clips = []
+        found = False
+        for clip in self.clips:
+            item = dict(clip)
+            if item.get("id") == clip_id:
+                found = True
+                if track_index is not None:
+                    item["track_index"] = int(track_index)
+                if start is not None:
+                    item["start"] = start
+            next_clips.append(item)
+        if not found:
+            raise ValueError(f"clip not found: {clip_id}")
+        self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
+
+    def resize_clip(self, clip_id, duration):
+        """Set a clip duration in beats."""
+        clip_id = str(clip_id)
+        next_clips = []
+        found = False
+        for clip in self.clips:
+            item = dict(clip)
+            if item.get("id") == clip_id:
+                found = True
+                item["duration"] = duration
+            next_clips.append(item)
+        if not found:
+            raise ValueError(f"clip not found: {clip_id}")
+        self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
 
 
 class KeyboardRoute:
@@ -1782,6 +2320,20 @@ class Session:
             time_signature_den=time_signature[1],
         )
         self.mixer = MixerWidget(session_id=self._session_id)
+        self.timeline = TimelineWidget(
+            session_id=self._session_id,
+            bpm=bpm,
+            time_signature_num=time_signature[0],
+            time_signature_den=time_signature[1],
+        )
+        self._timeline_links = [
+            traitlets.link((self.transport, "bpm"), (self.timeline, "bpm")),
+            traitlets.link((self.transport, "time_signature_num"), (self.timeline, "time_signature_num")),
+            traitlets.link((self.transport, "time_signature_den"), (self.timeline, "time_signature_den")),
+            traitlets.link((self.transport, "is_playing"), (self.timeline, "is_playing")),
+            traitlets.link((self.transport, "is_recording"), (self.timeline, "is_recording")),
+            traitlets.link((self.transport, "current_beat"), (self.timeline, "current_beat")),
+        ]
         self.tracks = []
 
     def add_track(self, name, sequencer, sound_source):
@@ -1808,6 +2360,7 @@ class Session:
         if hasattr(sound_source, "channel_index"):
             sound_source.channel_index = channel_idx
         self.tracks.append(track)
+        self.timeline.add_track(name, channel_idx)
         return track
 
     def remove_track(self, index):
@@ -1827,6 +2380,7 @@ class Session:
             if hasattr(track.sound_source, "channel_index"):
                 track.sound_source.channel_index = -1
             self.mixer.remove_channel(track.mixer_channel)
+            self.timeline.remove_track(index)
             # Adjust mixer_channel indices for remaining tracks
             for t in self.tracks:
                 if t.mixer_channel > track.mixer_channel:

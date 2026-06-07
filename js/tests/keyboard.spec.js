@@ -86,6 +86,24 @@ test.describe("KeyboardWidget", () => {
     expect(await blackKeys.count()).toBeGreaterThanOrEqual(7);
   });
 
+  test("note state updates without Web Audio", async ({ page }) => {
+    await page.evaluate(() => {
+      window.AudioContext = undefined;
+      window.webkitAudioContext = undefined;
+    });
+    await renderWidget(page);
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+    await kb.dispatchEvent("keydown", { key: "q" });
+
+    const state = await page.evaluate(() => ({
+      activeNotes: window.__testModel._state.active_notes,
+      lastEvent: window.__testModel._state.last_note_event,
+    }));
+    expect(state.activeNotes).toEqual([48]);
+    expect(state.lastEvent).toEqual({ note: 48, velocity: 100, type: "on" });
+  });
+
   // 6. Key press emits note event
   test("keydown on Q produces note event", async ({ page }) => {
     await renderWidget(page);
