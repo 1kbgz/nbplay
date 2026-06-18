@@ -102,8 +102,8 @@ replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "binder/requirements.txt"
-search = "jupyterlab_templates=={current_version}"
-replace = "jupyterlab_templates=={new_version}"
+search = "nbplay=={current_version}"
+replace = "nbplay=={new_version}"
 
 [tool.cibuildwheel]
 build = "cp310-*"
