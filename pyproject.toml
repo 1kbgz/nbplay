@@ -14,7 +14,7 @@ authors = [
 description = "let's play!"
 readme = "README.md"
 license = { text = "Apache-2.0" }
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.10"
 keywords = []
 
@@ -65,7 +65,7 @@ Repository = "https://github.com/1kbgz/nbplay"
 Homepage = "https://github.com/1kbgz/nbplay"
 
 [tool.bumpversion]
-current_version = "0.1.0"
+current_version = "0.1.1"
 commit = true
 tag = true
 commit_args = "-s"

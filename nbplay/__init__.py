@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from nbplay.nbplay import (  # noqa: F401, E402
     AudioBuffer,
