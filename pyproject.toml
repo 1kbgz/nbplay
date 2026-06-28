@@ -172,6 +172,11 @@ packages = [
     "Cargo.lock",
 ]
 exclude = [
+    "nbplay/*.dll",
+    "nbplay/*.dylib",
+    "nbplay/*.so",
+    "nbplay/extension",
+    "js/dist",
     "js/node_modules",
     "rust/Makefile",
     "target",
@@ -180,6 +185,9 @@ exclude = [
 [tool.hatch.build.targets.wheel]
 packages = [
     "nbplay",
+]
+artifacts = [
+    "nbplay/extension/**/*",
 ]
 exclude = [
     "js",
