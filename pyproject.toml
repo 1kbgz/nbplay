@@ -145,22 +145,16 @@ fail_under = 50
 
 [tool.hatch.build]
 artifacts = [
-<<<<<<< before updating
-    "nbplay/static",
-    "nbplay/extension",
-]
-
-=======
     "nbplay/*.dll",
     "nbplay/*.dylib",
     "nbplay/*.so",
+    "nbplay/static",
     "nbplay/extension",
 ]
 
 [tool.hatch.build.sources]
 src = "/"
 
->>>>>>> after updating
 [tool.hatch.build.hooks.hatch-js]
 path = "js"
 build_cmd = "build"
