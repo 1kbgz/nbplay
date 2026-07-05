@@ -30,7 +30,6 @@ const WIDGET_NAMES = [
   "pad",
 ];
 
-<<<<<<< before updating
 const WIDGET_BUNDLES = WIDGET_NAMES.map((name) => ({
   entryPoints: [`src/ts/${name}.ts`],
   outfile: `dist/widgets/${name}.js`,
@@ -39,16 +38,6 @@ const WIDGET_BUNDLES = WIDGET_NAMES.map((name) => ({
 async function copy_widgets_to_python() {
   fs.mkdirSync("../nbplay/static", { recursive: true });
   await cpy("dist/widgets/*.js", "../nbplay/static");
-=======
-  // Copy HTML
-  await cpy("src/html/*", "dist/");
-
-  // Copy images
-  if (fs.existsSync("src/img")) {
-    fs.mkdirSync("dist/img", { recursive: true });
-    await cpy("src/img/*", "dist/img");
-  }
->>>>>>> after updating
 
   for (const name of WIDGET_NAMES) {
     const cssPath = `dist/css/${name}.css`;
@@ -60,19 +49,9 @@ async function copy_widgets_to_python() {
 
 async function copy_extension_assets() {
   // Copy servable assets to python extension (exclude esm/)
-  fs.rmSync("../nbplay/extension", {
-    recursive: true,
-    force: true,
-  });
   fs.mkdirSync("../nbplay/extension", { recursive: true });
   await cpy("dist/**/*", "../nbplay/extension", {
-<<<<<<< before updating
     filter: (file) => !file.relativePath.startsWith("esm"),
-=======
-    filter: (file) =>
-      !file.relativePath.startsWith("esm/") &&
-      !file.relativePath.startsWith("dist/esm/"),
->>>>>>> after updating
   });
 }
 
