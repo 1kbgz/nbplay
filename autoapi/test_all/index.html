@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>test_all - nbplay v0.1.0</title>
+        <title>test_all - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -346,6 +346,12 @@
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestPadWidget" title="test_all.TestPadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPadWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTimelineDescriptors" title="test_all.TestTimelineDescriptors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTimelineDescriptors</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestTimelineWidget" title="test_all.TestTimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTimelineWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
@@ -969,6 +975,71 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_solo">
 <span class="sig-name descname"><span class="pre">test_set_channel_solo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_set_channel_effects">
+<span class="sig-name descname"><span class="pre">test_set_channel_effects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_set_channel_effects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_add_and_clear_effects">
+<span class="sig-name descname"><span class="pre">test_add_and_clear_effects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_add_and_clear_effects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_invalid_effect_type_raises">
+<span class="sig-name descname"><span class="pre">test_invalid_effect_type_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_invalid_effect_type_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_invalid_filter_type_raises">
+<span class="sig-name descname"><span class="pre">test_invalid_filter_type_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_invalid_filter_type_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_effect_plugin_is_hashable">
+<span class="sig-name descname"><span class="pre">test_effect_plugin_is_hashable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_effect_plugin_is_hashable" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_direct_channel_assignment_normalizes_effects">
+<span class="sig-name descname"><span class="pre">test_direct_channel_assignment_normalizes_effects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_direct_channel_assignment_normalizes_effects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_invalid_channel_gain_raises">
+<span class="sig-name descname"><span class="pre">test_invalid_channel_gain_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_invalid_channel_gain_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_invalid_channel_pan_raises">
+<span class="sig-name descname"><span class="pre">test_invalid_channel_pan_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_invalid_channel_pan_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_master_effect_assignment_preserves_json_safe_custom_params">
+<span class="sig-name descname"><span class="pre">test_master_effect_assignment_preserves_json_safe_custom_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_master_effect_assignment_preserves_json_safe_custom_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_builtin_effect_none_params_use_defaults">
+<span class="sig-name descname"><span class="pre">test_builtin_effect_none_params_use_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_builtin_effect_none_params_use_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_non_json_safe_effect_param_raises">
+<span class="sig-name descname"><span class="pre">test_non_json_safe_effect_param_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_non_json_safe_effect_param_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_non_finite_builtin_effect_param_raises">
+<span class="sig-name descname"><span class="pre">test_non_finite_builtin_effect_param_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_non_finite_builtin_effect_param_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMixerWidget.test_bool_builtin_effect_param_raises">
+<span class="sig-name descname"><span class="pre">test_bool_builtin_effect_param_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMixerWidget.test_bool_builtin_effect_param_raises" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -2080,6 +2151,101 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestTimelineDescriptors">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTimelineDescriptors</span></span><a class="headerlink" href="#test_all.TestTimelineDescriptors" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineDescriptors.test_audio_clip_defaults">
+<span class="sig-name descname"><span class="pre">test_audio_clip_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineDescriptors.test_audio_clip_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineDescriptors.test_audio_clip_clamps_ranges">
+<span class="sig-name descname"><span class="pre">test_audio_clip_clamps_ranges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineDescriptors.test_audio_clip_clamps_ranges" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineDescriptors.test_audio_clip_requires_numeric_duration">
+<span class="sig-name descname"><span class="pre">test_audio_clip_requires_numeric_duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineDescriptors.test_audio_clip_requires_numeric_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineDescriptors.test_timeline_track_defaults">
+<span class="sig-name descname"><span class="pre">test_timeline_track_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineDescriptors.test_timeline_track_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTimelineWidget</span></span><a class="headerlink" href="#test_all.TestTimelineWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_add_track">
+<span class="sig-name descname"><span class="pre">test_add_track</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_add_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_count_in_validation">
+<span class="sig-name descname"><span class="pre">test_count_in_validation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_count_in_validation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_auto_extend_recording_validation">
+<span class="sig-name descname"><span class="pre">test_auto_extend_recording_validation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_auto_extend_recording_validation" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_arm_track_exclusive">
+<span class="sig-name descname"><span class="pre">test_arm_track_exclusive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_arm_track_exclusive" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_arm_track_out_of_range">
+<span class="sig-name descname"><span class="pre">test_arm_track_out_of_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_arm_track_out_of_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_add_clip">
+<span class="sig-name descname"><span class="pre">test_add_clip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_add_clip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_add_clip_extends_length">
+<span class="sig-name descname"><span class="pre">test_add_clip_extends_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_add_clip_extends_length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_move_and_resize_clip">
+<span class="sig-name descname"><span class="pre">test_move_and_resize_clip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_move_and_resize_clip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_missing_clip_raises">
+<span class="sig-name descname"><span class="pre">test_missing_clip_raises</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_missing_clip_raises" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_remove_clip_clears_selection">
+<span class="sig-name descname"><span class="pre">test_remove_clip_clears_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_remove_clip_clears_selection" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_remove_track_drops_clips_and_shifts">
+<span class="sig-name descname"><span class="pre">test_remove_track_drops_clips_and_shifts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_remove_track_drops_clips_and_shifts" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTimelineWidget.test_remove_unrouted_track_does_not_shift_channels">
+<span class="sig-name descname"><span class="pre">test_remove_unrouted_track_does_not_shift_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTimelineWidget.test_remove_unrouted_track_does_not_shift_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_all.TestTrack">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTrack</span></span><a class="headerlink" href="#test_all.TestTrack" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -2154,6 +2320,11 @@
 <span class="sig-name descname"><span class="pre">test_bpm_sync</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_bpm_sync" title="Link to this definition">¶</a></dt>
 <dd><p>Transport BPM propagates to all sequencers via traitlets.link.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSession.test_timeline_transport_sync">
+<span class="sig-name descname"><span class="pre">test_timeline_transport_sync</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_timeline_transport_sync" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="test_all.TestSession.test_play_sync">
@@ -2418,6 +2589,19 @@
 <li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_pan"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_pan()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_mute"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_mute()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_solo"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_solo()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_set_channel_effects"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_set_channel_effects()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_add_and_clear_effects"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_add_and_clear_effects()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_invalid_effect_type_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_invalid_effect_type_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_invalid_filter_type_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_invalid_filter_type_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_effect_plugin_is_hashable"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_effect_plugin_is_hashable()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_direct_channel_assignment_normalizes_effects"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_direct_channel_assignment_normalizes_effects()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_invalid_channel_gain_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_invalid_channel_gain_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_invalid_channel_pan_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_invalid_channel_pan_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_master_effect_assignment_preserves_json_safe_custom_params"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_master_effect_assignment_preserves_json_safe_custom_params()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_builtin_effect_none_params_use_defaults"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_builtin_effect_none_params_use_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_non_json_safe_effect_param_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_non_json_safe_effect_param_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_non_finite_builtin_effect_param_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_non_finite_builtin_effect_param_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMixerWidget.test_bool_builtin_effect_param_raises"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_bool_builtin_effect_param_raises()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMixerWidget.test_to_mixer"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_to_mixer()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMixerWidget.test_to_mixer_mix_down"><code class="docutils literal notranslate"><span class="pre">TestMixerWidget.test_to_mixer_mix_down()</span></code></a></li>
 </ul>
@@ -2679,6 +2863,29 @@
 <li><a class="reference internal" href="#test_all.TestPadWidget.test_set_base_note_and_transpose"><code class="docutils literal notranslate"><span class="pre">TestPadWidget.test_set_base_note_and_transpose()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#test_all.TestTimelineDescriptors"><code class="docutils literal notranslate"><span class="pre">TestTimelineDescriptors</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTimelineDescriptors.test_audio_clip_defaults"><code class="docutils literal notranslate"><span class="pre">TestTimelineDescriptors.test_audio_clip_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineDescriptors.test_audio_clip_clamps_ranges"><code class="docutils literal notranslate"><span class="pre">TestTimelineDescriptors.test_audio_clip_clamps_ranges()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineDescriptors.test_audio_clip_requires_numeric_duration"><code class="docutils literal notranslate"><span class="pre">TestTimelineDescriptors.test_audio_clip_requires_numeric_duration()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineDescriptors.test_timeline_track_defaults"><code class="docutils literal notranslate"><span class="pre">TestTimelineDescriptors.test_timeline_track_defaults()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_add_track"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_add_track()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_count_in_validation"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_count_in_validation()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_auto_extend_recording_validation"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_auto_extend_recording_validation()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_arm_track_exclusive"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_arm_track_exclusive()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_arm_track_out_of_range"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_arm_track_out_of_range()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_add_clip"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_add_clip()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_add_clip_extends_length"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_add_clip_extends_length()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_move_and_resize_clip"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_move_and_resize_clip()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_missing_clip_raises"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_missing_clip_raises()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_remove_clip_clears_selection"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_remove_clip_clears_selection()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_remove_track_drops_clips_and_shifts"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_remove_track_drops_clips_and_shifts()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTimelineWidget.test_remove_unrouted_track_does_not_shift_channels"><code class="docutils literal notranslate"><span class="pre">TestTimelineWidget.test_remove_unrouted_track_does_not_shift_channels()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#test_all.TestTrack"><code class="docutils literal notranslate"><span class="pre">TestTrack</span></code></a><ul>
 <li><a class="reference internal" href="#test_all.TestTrack.test_creation"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_creation()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestTrack.test_link_transport"><code class="docutils literal notranslate"><span class="pre">TestTrack.test_link_transport()</span></code></a></li>
@@ -2696,6 +2903,7 @@
 <li><a class="reference internal" href="#test_all.TestSession.test_add_track_sets_sound_source_routing"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_track_sets_sound_source_routing()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_add_multiple_tracks"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_multiple_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_bpm_sync"><code class="docutils literal notranslate"><span class="pre">TestSession.test_bpm_sync()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_timeline_transport_sync"><code class="docutils literal notranslate"><span class="pre">TestSession.test_timeline_transport_sync()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_play_sync"><code class="docutils literal notranslate"><span class="pre">TestSession.test_play_sync()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track_clears_sound_source_routing"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_clears_sound_source_routing()</span></code></a></li>
@@ -2725,7 +2933,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=a58bc63e"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>09 MixerWidget Tutorial - nbplay v0.1.0</title>
+        <title>10 MixerWidget Tutorial - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -234,29 +234,53 @@
         </div>
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="mixerwidget-tutorial">
-<h1>09 MixerWidget Tutorial<a class="headerlink" href="#mixerwidget-tutorial" title="Link to this heading">¶</a></h1>
-<p>Create three channels and set gain/pan on each strip.</p>
+<h1>10 MixerWidget Tutorial<a class="headerlink" href="#mixerwidget-tutorial" title="Link to this heading">¶</a></h1>
+<p>Create channel strips, add built-in Web Audio insert effects, and register one notebook-local browser plugin hook.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixerWidget</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Javascript</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">EffectPlugin</span><span class="p">,</span> <span class="n">MixerWidget</span>
+
+<span class="c1"># Custom plugin hook. Built-in names remain reserved; use your own descriptor type.</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Javascript</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">globalThis.__nbplayPlugins = globalThis.__nbplayPlugins || </span><span class="si">{}</span><span class="s2">;</span>
+<span class="s2">globalThis.__nbplayPlugins.notebook_lowpass = (ctx, effect) =&gt; {</span>
+<span class="s2">  const filter = ctx.createBiquadFilter();</span>
+<span class="s2">  filter.type = &quot;lowpass&quot;;</span>
+<span class="s2">  filter.frequency.value = Number(effect.frequency ?? 1200);</span>
+<span class="s2">  filter.Q.value = Number(effect.q ?? 0.7);</span>
+<span class="s2">  return filter;</span>
+<span class="s2">};</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
 
 <span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">)</span>
+<span class="n">lead</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Lead&quot;</span><span class="p">)</span>
+<span class="n">bass</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Bass&quot;</span><span class="p">)</span>
+<span class="n">drums</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">)</span>
 
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.78</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">)</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="mf">0.78</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mi">3200</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;notebook_lowpass&quot;</span><span class="p">,</span> <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1800</span><span class="p">,</span> <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">})</span>
+
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="n">bass</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_pan</span><span class="p">(</span><span class="n">bass</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">bass</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;compressor&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">20</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">attack</span><span class="o">=</span><span class="mf">0.004</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="mf">0.18</span><span class="p">))</span>
+
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;delay&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span> <span class="n">feedback</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">0.18</span><span class="p">))</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;reverb&quot;</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">2.4</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">0.16</span><span class="p">))</span>
+
 <span class="n">mixer</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;limiter&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
 
 <span class="n">mixer</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>Try this after the mixer renders: change faders, toggle mute/solo, add effects from the widget controls, or run another cell that mutates <code class="docutils literal notranslate"><span class="pre">mixer.channels</span></code> and <code class="docutils literal notranslate"><span class="pre">mixer.master_effects</span></code>.</p>
 </section>
 
         </article>
@@ -290,7 +314,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../_static/documentation_options.js?v=a58bc63e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

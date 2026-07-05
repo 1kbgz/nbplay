@@ -31,7 +31,7 @@
     "bass = SynthWidget(oscillator_type=\"square\", frequency=110.0, amplitude=0.65)\n",
     "texture = SynthWidget(oscillator_type=\"noise\", amplitude=0.18)\n",
     "\n",
-    "widgets.HBox([lead, bass, texture], layout=widgets.Layout(gap=\"16px\"))"
+    "widgets.HBox([lead, bass, texture])"
    ]
   },
   {

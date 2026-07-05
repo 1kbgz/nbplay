@@ -45,6 +45,8 @@ Classes
    test_all.TestMidiKeyboardWidget
    test_all.TestPadAction
    test_all.TestPadWidget
+   test_all.TestTimelineDescriptors
+   test_all.TestTimelineWidget
    test_all.TestTrack
    test_all.TestSession
    test_all.TestDemoNotebook
@@ -401,6 +403,45 @@ Module Contents
 
 
    .. py:method:: test_set_channel_solo()
+
+
+   .. py:method:: test_set_channel_effects()
+
+
+   .. py:method:: test_add_and_clear_effects()
+
+
+   .. py:method:: test_invalid_effect_type_raises()
+
+
+   .. py:method:: test_invalid_filter_type_raises()
+
+
+   .. py:method:: test_effect_plugin_is_hashable()
+
+
+   .. py:method:: test_direct_channel_assignment_normalizes_effects()
+
+
+   .. py:method:: test_invalid_channel_gain_raises()
+
+
+   .. py:method:: test_invalid_channel_pan_raises()
+
+
+   .. py:method:: test_master_effect_assignment_preserves_json_safe_custom_params()
+
+
+   .. py:method:: test_builtin_effect_none_params_use_defaults()
+
+
+   .. py:method:: test_non_json_safe_effect_param_raises()
+
+
+   .. py:method:: test_non_finite_builtin_effect_param_raises()
+
+
+   .. py:method:: test_bool_builtin_effect_param_raises()
 
 
    .. py:method:: test_to_mixer()
@@ -1073,6 +1114,61 @@ Module Contents
    .. py:method:: test_set_base_note_and_transpose()
 
 
+.. py:class:: TestTimelineDescriptors
+
+   .. py:method:: test_audio_clip_defaults()
+
+
+   .. py:method:: test_audio_clip_clamps_ranges()
+
+
+   .. py:method:: test_audio_clip_requires_numeric_duration()
+
+
+   .. py:method:: test_timeline_track_defaults()
+
+
+.. py:class:: TestTimelineWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_add_track()
+
+
+   .. py:method:: test_count_in_validation()
+
+
+   .. py:method:: test_auto_extend_recording_validation()
+
+
+   .. py:method:: test_arm_track_exclusive()
+
+
+   .. py:method:: test_arm_track_out_of_range()
+
+
+   .. py:method:: test_add_clip()
+
+
+   .. py:method:: test_add_clip_extends_length()
+
+
+   .. py:method:: test_move_and_resize_clip()
+
+
+   .. py:method:: test_missing_clip_raises()
+
+
+   .. py:method:: test_remove_clip_clears_selection()
+
+
+   .. py:method:: test_remove_track_drops_clips_and_shifts()
+
+
+   .. py:method:: test_remove_unrouted_track_does_not_shift_channels()
+
+
 .. py:class:: TestTrack
 
    .. py:method:: test_creation()
@@ -1123,6 +1219,9 @@ Module Contents
 
       Transport BPM propagates to all sequencers via traitlets.link.
 
+
+
+   .. py:method:: test_timeline_transport_sync()
 
 
    .. py:method:: test_play_sync()

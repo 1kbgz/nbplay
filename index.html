@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>nbplay v0.1.0</title>
+        <title>nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="#"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
-  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -250,6 +250,38 @@
 <p>This library is in early development and the API is subject to change without deprecation. Feedback and contributions are very welcome!</p>
 </div>
 <p><a class="reference external" href="https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif"><img alt="Music composition widgets in a jupyter notebook" src="https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif" /></a></p>
+<p>nbplay provides composable Jupyter widgets for a browser-backed DAW: synths,
+samplers, sequencers, keyboards, pads, transport, timeline recording, and
+mixer/session routing.
+Mixer channels and the master bus support Web Audio insert chains with built-in
+gain, filter, compressor, limiter, delay, and reverb effects, plus custom browser
+plugin factories. Custom effect descriptors must be JSON-safe; built-in effect
+names are reserved. Widgets render non-crashing fallback states when Web Audio or
+Web MIDI is unavailable.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nb</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+<span class="n">seq</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SequencerWidget</span><span class="p">(</span><span class="n">num_voices</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SamplerWidget</span><span class="p">()</span>
+<span class="n">track</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">&quot;Drums&quot;</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">sampler</span><span class="p">)</span>
+
+<span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span>
+    <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span>
+    <span class="n">nb</span><span class="o">.</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;compressor&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">18</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;limiter&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">count_in_bars</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">auto_extend_recording</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">recording_extend_bars</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">arm_track</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">timeline_tracks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">track</span><span class="p">)</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
+<span class="n">timeline_tracks</span><span class="p">[</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">][</span><span class="s2">&quot;monitor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="n">timeline_tracks</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="s2">&quot;Kick loop&quot;</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>
@@ -288,7 +320,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=01f34227"></script>
+</div><script src="_static/documentation_options.js?v=a58bc63e"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

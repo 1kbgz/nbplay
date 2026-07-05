@@ -33,6 +33,9 @@ Classes
 
 .. autoapisummary::
 
+   nbplay.widget.EffectPlugin
+   nbplay.widget.AudioClip
+   nbplay.widget.TimelineTrack
    nbplay.widget.PadAction
    nbplay.widget.SynthWidget
    nbplay.widget.SettingsWidget
@@ -41,6 +44,7 @@ Classes
    nbplay.widget.SequencerWidget
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
+   nbplay.widget.TimelineWidget
    nbplay.widget.KeyboardRoute
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
@@ -68,6 +72,19 @@ Functions
    nbplay.widget._resize_pad_notes
    nbplay.widget._resize_pad_velocities
    nbplay.widget._safe_trait_name
+   nbplay.widget._json_safe_effect_value
+   nbplay.widget._freeze_effect_value
+   nbplay.widget._normalize_effect
+   nbplay.widget._normalize_effects
+   nbplay.widget._clamped_number
+   nbplay.widget._normalize_mixer_channel
+   nbplay.widget._clip_id
+   nbplay.widget._positive_number
+   nbplay.widget._nonnegative_number
+   nbplay.widget._normalize_timeline_track
+   nbplay.widget._normalize_timeline_tracks
+   nbplay.widget._normalize_audio_clip
+   nbplay.widget._normalize_audio_clips
    nbplay.widget._normalize_pad_action
    nbplay.widget._normalize_pad_actions
    nbplay.widget._normalize_sample_slices
@@ -120,6 +137,108 @@ Module Contents
 .. py:function:: _resize_pad_velocities(velocities, pad_count, velocity=100)
 
 .. py:function:: _safe_trait_name(value)
+
+.. py:class:: EffectPlugin(type, **params)
+
+   Validated Web Audio effect descriptor for mixer insert chains.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: _FILTER_TYPES
+
+
+   .. py:attribute:: type
+
+
+   .. py:attribute:: params
+
+
+   .. py:method:: _param(params, *names, default=None)
+      :staticmethod:
+
+
+
+   .. py:method:: _number(params, *names, default, low, high)
+      :classmethod:
+
+
+
+   .. py:method:: _normalize_params(type, params)
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+   .. py:method:: __hash__()
+
+
+.. py:function:: _json_safe_effect_value(value, path='effect param')
+
+.. py:function:: _freeze_effect_value(value)
+
+.. py:function:: _normalize_effect(effect)
+
+.. py:function:: _normalize_effects(effects)
+
+.. py:function:: _clamped_number(value, low, high, name)
+
+.. py:function:: _normalize_mixer_channel(channel, index=0)
+
+.. py:function:: _clip_id()
+
+.. py:function:: _positive_number(value, name, minimum=0.001, maximum=4096.0)
+
+.. py:function:: _nonnegative_number(value, name, maximum=4096.0)
+
+.. py:function:: _normalize_timeline_track(track, index=0)
+
+.. py:function:: _normalize_timeline_tracks(tracks)
+
+.. py:function:: _normalize_audio_clip(clip, index=0, track_count=None)
+
+.. py:function:: _normalize_audio_clips(clips, track_count=None)
+
+.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None)
+
+   Serializable audio clip descriptor for timeline lanes.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:class:: TimelineTrack(*, name='Track', channel_index=0, armed=False, muted=False, solo=False, input='microphone', monitor=False)
+
+   Serializable track-lane descriptor for ``TimelineWidget``.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
 
 .. py:class:: PadAction(*, type='note', note=60, velocity=None, trait=None, value=None, label=None, slice_index=None)
 
@@ -300,7 +419,16 @@ Module Contents
    .. py:attribute:: master_gain
 
 
+   .. py:attribute:: master_effects
+
+
    .. py:attribute:: session_id
+
+
+   .. py:method:: _validate_channels(proposal)
+
+
+   .. py:method:: _validate_master_effects(proposal)
 
 
    .. py:method:: add_channel(name='Channel')
@@ -331,6 +459,42 @@ Module Contents
 
 
    .. py:method:: set_channel_solo(index, solo)
+
+
+   .. py:method:: set_channel_effects(index, effects)
+
+      Replace a channel's browser insert effect chain.
+
+
+
+   .. py:method:: add_channel_effect(index, effect)
+
+      Append one effect descriptor to a channel insert chain.
+
+
+
+   .. py:method:: clear_channel_effects(index)
+
+      Remove all browser insert effects from a channel.
+
+
+
+   .. py:method:: set_master_effects(effects)
+
+      Replace the master bus browser insert effect chain.
+
+
+
+   .. py:method:: add_master_effect(effect)
+
+      Append one effect descriptor to the master bus effect chain.
+
+
+
+   .. py:method:: clear_master_effects()
+
+      Remove all browser insert effects from the master bus.
+
 
 
    .. py:method:: to_mixer()
@@ -887,6 +1051,9 @@ Module Contents
    .. py:attribute:: is_playing
 
 
+   .. py:attribute:: is_recording
+
+
    .. py:attribute:: time_signature_num
 
 
@@ -899,6 +1066,9 @@ Module Contents
    .. py:attribute:: beat_in_bar
 
 
+   .. py:attribute:: current_beat
+
+
    .. py:attribute:: loop_enabled
 
 
@@ -906,6 +1076,146 @@ Module Contents
 
 
    .. py:attribute:: loop_end_bar
+
+
+.. py:class:: TimelineWidget(*args: object, **kwargs: object)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   Multi-track clip timeline with browser recording controls.
+
+   Clips are synced as JSON metadata. Browser-recorded audio is kept
+   as an object URL in the frontend for immediate playback; durable
+   binary persistence is intentionally left to an export/import path.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: bpm
+
+
+   .. py:attribute:: is_playing
+
+
+   .. py:attribute:: is_recording
+
+
+   .. py:attribute:: recording_track
+
+
+   .. py:attribute:: recording_error
+
+
+   .. py:attribute:: time_signature_num
+
+
+   .. py:attribute:: time_signature_den
+
+
+   .. py:attribute:: length
+
+
+   .. py:attribute:: current_beat
+
+
+   .. py:attribute:: count_in_bars
+
+
+   .. py:attribute:: recording_countdown_beats
+
+
+   .. py:attribute:: auto_extend_recording
+
+
+   .. py:attribute:: recording_extend_bars
+
+
+   .. py:attribute:: tracks
+
+
+   .. py:attribute:: clips
+
+
+   .. py:attribute:: selected_clip_id
+
+
+   .. py:attribute:: recorded_clip
+
+
+   .. py:method:: _validate_length(proposal)
+
+
+   .. py:method:: _validate_current_beat(proposal)
+
+
+   .. py:method:: _validate_count_in_bars(proposal)
+
+
+   .. py:method:: _validate_recording_countdown_beats(proposal)
+
+
+   .. py:method:: _validate_recording_extend_bars(proposal)
+
+
+   .. py:method:: _validate_tracks(proposal)
+
+
+   .. py:method:: _validate_clips(proposal)
+
+
+   .. py:method:: _validate_recording_track(proposal)
+
+
+   .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False)
+
+      Append a timeline lane and return its index.
+
+
+
+   .. py:method:: remove_track(index)
+
+      Remove a lane, dropping its clips and shifting later lanes.
+
+
+
+   .. py:method:: arm_track(index, armed=True, *, exclusive=False)
+
+      Set lane arm state.
+
+
+
+   .. py:method:: add_clip(name='Clip', track_index=0, start=0.0, duration=4.0, **kwargs)
+
+      Append a clip descriptor and return it.
+
+
+
+   .. py:method:: remove_clip(clip_id)
+
+      Remove a clip by id.
+
+
+
+   .. py:method:: move_clip(clip_id, *, track_index=None, start=None)
+
+      Move a clip to a new lane and/or beat position.
+
+
+
+   .. py:method:: resize_clip(clip_id, duration)
+
+      Set a clip duration in beats.
+
 
 
 .. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
@@ -1370,6 +1680,12 @@ Module Contents
 
 
    .. py:attribute:: mixer
+
+
+   .. py:attribute:: timeline
+
+
+   .. py:attribute:: _timeline_links
 
 
    .. py:attribute:: tracks

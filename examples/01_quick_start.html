@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>01 Quick Start - nbplay v0.1.0</title>
+        <title>01 Quick Start - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -235,29 +235,73 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="quick-start">
 <h1>01 Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h1>
-<p>Create and display one widget of each major type to validate your host setup.</p>
+<p>Create a compact playground with the main nbplay widgets. Run the cell, then open the tabs and interact with each surface.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traitlets</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">KeyboardWidget</span><span class="p">,</span>
+    <span class="n">MidiKeyboardWidget</span><span class="p">,</span>
     <span class="n">MixerWidget</span><span class="p">,</span>
+    <span class="n">PadWidget</span><span class="p">,</span>
     <span class="n">SamplerWidget</span><span class="p">,</span>
     <span class="n">SequencerWidget</span><span class="p">,</span>
     <span class="n">SettingsWidget</span><span class="p">,</span>
     <span class="n">SynthWidget</span><span class="p">,</span>
+    <span class="n">TimelineWidget</span><span class="p">,</span>
     <span class="n">TransportWidget</span><span class="p">,</span>
+    <span class="n">EffectPlugin</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">()</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">()</span>
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">()</span>
-<span class="n">seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-<span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">()</span>
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
-<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Channel 1&quot;</span><span class="p">)</span>
+<span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">)</span>
 
-<span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">mixer</span><span class="p">])</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">&quot;saw&quot;</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.35</span><span class="p">)</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s2">&quot;Drop audio here&quot;</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">num_voices</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">60</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">59</span><span class="p">]):</span>
+    <span class="n">seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">keyboard</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">(</span><span class="n">upper_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lower_octave</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">96</span><span class="p">)</span>
+<span class="n">midi_keyboard</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">upper_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lower_octave</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
+
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
+<span class="n">channel</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">&quot;Preview&quot;</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;compressor&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">18</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">&quot;limiter&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">timeline</span> <span class="o">=</span> <span class="n">TimelineWidget</span><span class="p">(</span>
+    <span class="n">bpm</span><span class="o">=</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span><span class="p">,</span>
+    <span class="n">length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">count_in_bars</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">auto_extend_recording</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">recording_extend_bars</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">transport_links</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;bpm&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;bpm&quot;</span><span class="p">)),</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;time_signature_num&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;time_signature_num&quot;</span><span class="p">)),</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;time_signature_den&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;time_signature_den&quot;</span><span class="p">)),</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;is_playing&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;is_playing&quot;</span><span class="p">)),</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;is_recording&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;is_recording&quot;</span><span class="p">)),</span>
+    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">&quot;current_beat&quot;</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">&quot;current_beat&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+<span class="n">timeline</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">&quot;Audio&quot;</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">timeline</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="s2">&quot;Drop or record here&quot;</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;placeholder&quot;</span><span class="p">)</span>
+
+<span class="n">tabs</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Tab</span><span class="p">([</span>
+    <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">]),</span>
+    <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">synth</span><span class="p">,</span> <span class="n">seq</span><span class="p">]),</span>
+    <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">sampler</span><span class="p">,</span> <span class="n">pads</span><span class="p">]),</span>
+    <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">keyboard</span><span class="p">,</span> <span class="n">midi_keyboard</span><span class="p">]),</span>
+    <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">timeline</span><span class="p">,</span> <span class="n">mixer</span><span class="p">]),</span>
+<span class="p">])</span>
+<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;Setup&quot;</span><span class="p">,</span> <span class="s2">&quot;Synth + Seq&quot;</span><span class="p">,</span> <span class="s2">&quot;Sampler + Pads&quot;</span><span class="p">,</span> <span class="s2">&quot;Keys&quot;</span><span class="p">,</span> <span class="s2">&quot;Timeline + Mixer&quot;</span><span class="p">]):</span>
+    <span class="n">tabs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+
+<span class="n">tabs</span>
 </pre></div>
 </div>
 </div>
@@ -295,7 +339,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../_static/documentation_options.js?v=a58bc63e"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

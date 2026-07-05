@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>nbplay Developer Guide - nbplay v0.1.0</title>
+        <title>nbplay Developer Guide - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">nbplay <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.1</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -437,6 +437,8 @@ signature into quarter-note beats per measure.</p></li>
 count.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">_resize_pad_notes(notes,</span> <span class="pre">pad_count)</span></code> clamps MIDI pad notes to 0-127 and
 preserves or extends the list when sampler pad count changes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AudioClip</span></code>, <code class="docutils literal notranslate"><span class="pre">TimelineTrack</span></code>, and their normalizers define the synced
+metadata shape for timeline lanes and browser-recorded clips.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">PadAction</span></code> and <code class="docutils literal notranslate"><span class="pre">_normalize_pad_actions()</span></code> define the shared pad action shape
 used by sampler pads and PadWidget. Note actions are live today; trait/event
 actions provide a stable controller-pad path for future automation and MIDI
@@ -468,7 +470,7 @@ learn work.</p></li>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mixer.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mixer.css</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>, <code class="docutils literal notranslate"><span class="pre">master_effects</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">sequencer.js</span></code></p></td>
@@ -483,19 +485,24 @@ learn work.</p></li>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">transport.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">transport.css</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timeline.js</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timeline.css</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">keyboard.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">keyboard.css</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">upper_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, sustain traits, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_keyboard.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_keyboard.css</span></code></p></td>
 <td><p>Keyboard traits plus <code class="docutils literal notranslate"><span class="pre">midi_port</span></code> and <code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pad.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pad.css</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>, <code class="docutils literal notranslate"><span class="pre">cols</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code></p></td>
@@ -514,11 +521,11 @@ property remains a backward-compatible alias for voice 0.</p>
 time signature bidirectionally between a session transport and the sequencer,
 and dlinks <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> from transport to sequencer so a non-looping sequencer
 cannot stop every track.</p>
-<p><code class="docutils literal notranslate"><span class="pre">Session</span></code> creates a shared <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, a <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>, and a
-<code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>. <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> creates a mixer channel, links transport
-state, and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound
-source. Browser widgets use those fields to route audio through the shared
-mixer bus.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Session</span></code> creates a shared <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, a <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>, a <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>,
+and a <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>. <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> creates a mixer channel, links
+transport state, adds a timeline lane, and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and
+<code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound source. Browser widgets use those
+fields to route audio through the shared mixer bus.</p>
 </section>
 </section>
 <section id="rust-core">
@@ -675,16 +682,20 @@ ticks, velocity key repeat, and sampler active-voice display.</p></li>
 <span class="w">  </span><span class="nx">audioCtx</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">masterGain</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">gain</span><span class="p">,</span><span class="w"> </span><span class="nx">pan</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">...],</span>
+<span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">effectType</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">effect</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">AudioNode</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">EffectUnit</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">samplers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">channelIndex</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">triggerNote</span><span class="p">,</span><span class="w"> </span><span class="nx">releaseNote</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">noteListeners</span><span class="o">:</span><span class="w"> </span><span class="p">[(</span><span class="nx">evt</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">]</span>
 <span class="p">};</span>
 </pre></div>
 </div>
 <p>The exact properties are created lazily by participating widgets. The mixer owns
-<code class="docutils literal notranslate"><span class="pre">audioCtx</span></code>, <code class="docutils literal notranslate"><span class="pre">masterGain</span></code>, and <code class="docutils literal notranslate"><span class="pre">channels</span></code>. Samplers add <code class="docutils literal notranslate"><span class="pre">samplers[channelIndex]</span></code>
-so KeyboardWidget and MidiKeyboardWidget can trigger them. Keyboard widgets also
-broadcast <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>, which lets sequencers record notes even
-without a shared mixer bus.</p>
+<code class="docutils literal notranslate"><span class="pre">audioCtx</span></code>, <code class="docutils literal notranslate"><span class="pre">masterGain</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>, and a fresh merged view of browser insert
+effect plugin factories. Samplers add <code class="docutils literal notranslate"><span class="pre">samplers[channelIndex]</span></code> so KeyboardWidget
+and MidiKeyboardWidget can trigger them. Keyboard widgets also broadcast
+<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>, which lets sequencers record notes even without a
+shared mixer bus. Timeline clip playback reads <code class="docutils literal notranslate"><span class="pre">audioCtx</span></code> and <code class="docutils literal notranslate"><span class="pre">channels</span></code> from
+the bus so recorded clips can route through the same mixer channel strip and
+insert effects as live sources.</p>
 <p>Render order can vary in notebooks. SamplerWidget handles this by listening for
 <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer creates the bus.</p>
 </section>
@@ -731,16 +742,27 @@ monitoring surface for user configuration.</p>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/mixer.ts</span></code>. CSS file:
 <code class="docutils literal notranslate"><span class="pre">js/src/css/mixer.css</span></code>.</p>
 <p>MixerWidget owns a list of channel dictionaries with <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">pan</span></code>,
-<code class="docutils literal notranslate"><span class="pre">mute</span></code>, and <code class="docutils literal notranslate"><span class="pre">solo</span></code>, plus a <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>. Python provides convenience methods
-for adding/removing channels and setting channel properties, and <code class="docutils literal notranslate"><span class="pre">to_mixer()</span></code>
-creates a Rust <code class="docutils literal notranslate"><span class="pre">Mixer</span></code> for offline mixdown.</p>
+<code class="docutils literal notranslate"><span class="pre">mute</span></code>, <code class="docutils literal notranslate"><span class="pre">solo</span></code>, and optional browser <code class="docutils literal notranslate"><span class="pre">effects</span></code>, plus <code class="docutils literal notranslate"><span class="pre">master_gain</span></code> and
+<code class="docutils literal notranslate"><span class="pre">master_effects</span></code>. Python provides convenience methods for adding/removing
+channels, setting channel properties, and adding/replacing/clearing channel or
+master insert chains. <code class="docutils literal notranslate"><span class="pre">to_mixer()</span></code> creates a Rust <code class="docutils literal notranslate"><span class="pre">Mixer</span></code> for offline mixdown;
+browser insert effects are real-time Web Audio only.</p>
 <p>Browser code builds one channel strip per channel and a master strip. Faders
 show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.</p>
+<p>Effect descriptors are plain dictionaries. Built-ins are <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">filter</span></code>,
+<code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>, and <code class="docutils literal notranslate"><span class="pre">reverb</span></code>. Unknown descriptor types are
+left intact when their params are JSON-safe so notebook code can register
+custom browser plugins on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplayPlugins[type]</span></code>. Built-in names are
+reserved and win over user registry entries. The mixer exposes a merged plugin
+map on the session bus without mutating <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplayPlugins</span></code>. A plugin
+factory receives <code class="docutils literal notranslate"><span class="pre">(audioCtx,</span> <span class="pre">descriptor)</span></code> and returns either an <code class="docutils literal notranslate"><span class="pre">AudioNode</span></code> or
+an <code class="docutils literal notranslate"><span class="pre">{input,</span> <span class="pre">output,</span> <span class="pre">dispose?}</span></code> unit.</p>
 <p>When <code class="docutils literal notranslate"><span class="pre">session_id</span></code> is set, the browser creates the shared <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, one
-<code class="docutils literal notranslate"><span class="pre">GainNode</span></code> plus <code class="docutils literal notranslate"><span class="pre">StereoPannerNode</span></code> per channel, and a master <code class="docutils literal notranslate"><span class="pre">GainNode</span></code> connected
-to destination. Mute/solo affects the channel gain nodes. The bus is registered
-on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code> and removed on cleanup.</p>
+<code class="docutils literal notranslate"><span class="pre">GainNode</span></code> plus <code class="docutils literal notranslate"><span class="pre">StereoPannerNode</span></code> per channel, channel insert chains, a master
+<code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and a master insert chain connected to destination. Mute/solo
+affects the channel gain nodes. The bus is registered on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code>
+and removed on cleanup.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -822,6 +844,33 @@ clock uses <code class="docutils literal notranslate"><span class="pre">performa
 When the displayed bar or beat changes, it updates and saves <code class="docutils literal notranslate"><span class="pre">bar_number</span></code> and
 <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>. Looping wraps the displayed position between <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code> and
 <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code> when enabled.</p>
+</section>
+<section id="timelinewidget">
+<h3>TimelineWidget<a class="headerlink" href="#timelinewidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/timeline.ts</span></code>. CSS
+file: <code class="docutils literal notranslate"><span class="pre">js/src/css/timeline.css</span></code>.</p>
+<p>TimelineWidget is the multitrack clip lane and browser recorder. Python owns
+validated <code class="docutils literal notranslate"><span class="pre">TimelineTrack</span></code> and <code class="docutils literal notranslate"><span class="pre">AudioClip</span></code> metadata dictionaries. Browser code
+renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
+play/stop, record/stop, count-in, recording auto-extension, playhead reset,
+playhead seek/drag, timeline length, and selected-clip deletion. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, transport BPM, time
+signature, play/record state, and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> are linked with the timeline so
+either surface can control global playback and seek position.</p>
+<p>Recording uses <code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> and
+<code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> when the browser exposes them. A completed take creates a
+browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>; the binary audio
+blob is not persisted through traitlets. Playback uses an <code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and
+connects it through <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code>
+when the mixer bus is available, falling back to direct media playback when it
+is not.</p>
+<p>Count-in is stored as <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code> and displayed through
+<code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>. If the chosen record point has enough timeline
+space before it, recording pre-rolls from <code class="docutils literal notranslate"><span class="pre">current_beat</span> <span class="pre">-</span> <span class="pre">count_in_bars</span></code>; at
+beat 0, capture starts after the count-in and the recorded clip begins at 0.
+When <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code> is true, the browser extends <code class="docutils literal notranslate"><span class="pre">length</span></code> by
+<code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code> whenever recording approaches the timeline end. Normal
+playback still stops at the end; recording stops only when the user stops it or
+the timeline reaches the validated maximum length.</p>
 </section>
 <section id="keyboardwidget">
 <h3>KeyboardWidget<a class="headerlink" href="#keyboardwidget" title="Link to this heading">¶</a></h3>
@@ -1213,6 +1262,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#sequencerwidget">SequencerWidget</a></li>
 <li><a class="reference internal" href="#samplerwidget">SamplerWidget</a></li>
 <li><a class="reference internal" href="#transportwidget">TransportWidget</a></li>
+<li><a class="reference internal" href="#timelinewidget">TimelineWidget</a></li>
 <li><a class="reference internal" href="#keyboardwidget">KeyboardWidget</a></li>
 <li><a class="reference internal" href="#midikeyboardwidget">MidiKeyboardWidget</a></li>
 <li><a class="reference internal" href="#padwidget">PadWidget</a></li>
@@ -1250,7 +1300,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=a58bc63e"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
