@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="nbplay" href="nbplay/index.html"><link rel="prev" title="nbplay" href="../index.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>PadWidget — Trigger Pads - nbplay v0.1.1</title>
+        <title>API Reference - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -196,13 +196,13 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
+  <ul class="current">
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../autoapi/test_all/index.html">test_all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_all/index.html">test_all</a></li>
 </ul>
 </li>
 </ul>
@@ -225,7 +225,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/examples/07_pads.ipynb.txt" title="View this page">
+  <a class="muted-link" href="../_sources/autoapi/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -238,115 +238,29 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="padwidget-trigger-pads">
-<h1>PadWidget — Trigger Pads<a class="headerlink" href="#padwidget-trigger-pads" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code> is an MPC-style grid of velocity-sensitive trigger pads.
-Each pad sends a MIDI note through the session bus — connect it to a
-sampler and you’ve got an instant drum machine in a notebook cell.</p>
-<ul class="simple">
-<li><p><strong>Velocity-sensitive</strong> — click near the top of a pad for soft hits,
-near the bottom for hard hits</p></li>
-<li><p><strong>Assignable notes</strong> — double-click a pad’s label to type a new note
-name (e.g. <code class="docutils literal notranslate"><span class="pre">C#4</span></code>) or MIDI number; scroll to nudge ±1 semitone</p></li>
-<li><p><strong>Session routing</strong> — uses the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> as the
-<code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> so one sampler can serve both</p></li>
+          <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<p>This page contains auto-generated API reference documentation <a class="footnote-reference brackets" href="#f1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nbplay/index.html">nbplay</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">PadWidget</span>
-
-<span class="c1"># Create a 4×4 pad grid — defaults to MIDI notes 36–51 (C2–D#3)</span>
-<span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">pads</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Click any pad to hear a sine tone. The pad flashes on impact.</p>
-<ul class="simple">
-<li><p><strong>Velocity-sensitive by default</strong> — click near the top for a quiet hit
-(≈vel 20) and near the bottom for a loud one (up to the slider value).</p></li>
-<li><p><strong>Hold pads</strong> — multiple pads can be held simultaneously for chords
-or layered drum hits.</p></li>
-<li><p><strong>Scroll wheel</strong> on a pad adjusts its note ±1 semitone.</p></li>
-<li><p><strong>Double-click</strong> a pad’s note label to type a new note name.</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="test_all/index.html">test_all</a></li>
 </ul>
-<section id="custom-layout">
-<h2>Custom Layout<a class="headerlink" href="#custom-layout" title="Link to this heading">¶</a></h2>
-<p>Any rectangular grid works — here’s a 2×8 layout with a
-<strong>minor pentatonic scale</strong> mapped across the pads.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2 rows × 8 columns with a minor pentatonic scale starting at C2</span>
-<span class="n">pentatonic</span> <span class="o">=</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span>
-              <span class="mi">55</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">72</span><span class="p">]</span>
-
-<span class="n">pads_custom</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span>
-    <span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">cols</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-    <span class="n">pad_notes</span><span class="o">=</span><span class="n">pentatonic</span><span class="p">,</span>
-    <span class="n">velocity</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">pads_custom</span>
-</pre></div>
 </div>
-</div>
-</div>
-</section>
-<section id="pads-sampler-via-session">
-<h2>Pads + Sampler via Session<a class="headerlink" href="#pads-sampler-via-session" title="Link to this heading">¶</a></h2>
-<p>Connect the pads to a sampler through the session bus — the same
-pattern used by <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">PadWidget</span>
-
-<span class="c1"># Create a simple sine-wave &quot;sample&quot; for the sampler to play</span>
-<span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span>
-<span class="n">duration</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">freq</span> <span class="o">=</span> <span class="mf">440.0</span>
-<span class="n">frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="n">duration</span><span class="p">)</span>
-<span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.6</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames</span><span class="p">)]</span>
-
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span>
-    <span class="n">channel_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-    <span class="n">attack</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
-    <span class="n">decay</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-    <span class="n">sustain</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-    <span class="n">release</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">max_voices</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sine&quot;</span><span class="p">)</span>
-
-<span class="c1"># 4×4 drum-style pads connected to the sampler</span>
-<span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
-<span class="n">pads</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
-
-<span class="n">sampler</span><span class="p">,</span> <span class="n">pads</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="what-s-next">
-<h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><strong>Double-click</strong> any pad label to change its note — type <code class="docutils literal notranslate"><span class="pre">C#4</span></code> or <code class="docutils literal notranslate"><span class="pre">60</span></code>.</p></li>
-<li><p><strong>Scroll</strong> on a pad to nudge its note up or down one semitone.</p></li>
-<li><p><strong>Drag</strong> the velocity slider to set the maximum velocity; with
-<em>Vel-Sensitive</em> checked, click position within the pad determines
-actual velocity (top = soft, bottom = hard).</p></li>
-<li><p>Combine <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code>, and <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> in one
-<code class="docutils literal notranslate"><span class="pre">Session</span></code> for a full multi-instrument setup.</p></li>
-</ul>
-</section>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Created with <a class="reference external" href="https://github.com/readthedocs/sphinx-autoapi">sphinx-autoapi</a></p>
+</aside>
+</aside>
 </section>
 
         </article>
@@ -354,8 +268,26 @@ actual velocity (top = soft, bottom = hard).</p></li>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="nbplay/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">nbplay</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -374,29 +306,8 @@ actual velocity (top = soft, bottom = hard).</p></li>
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">PadWidget — Trigger Pads</a><ul>
-<li><a class="reference internal" href="#custom-layout">Custom Layout</a></li>
-<li><a class="reference internal" href="#pads-sampler-via-session">Pads + Sampler via Session</a></li>
-<li><a class="reference internal" href="#what-s-next">What’s Next</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
