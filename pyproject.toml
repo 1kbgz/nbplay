@@ -25,7 +25,6 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -106,7 +105,7 @@ search = "nbplay=={current_version}"
 replace = "nbplay=={new_version}"
 
 [tool.cibuildwheel]
-build = "cp310-*"
+build = "cp311-*"
 test-command = "pytest -vvv {project}/nbplay/tests"
 test-extras = "develop"
 
@@ -231,3 +230,10 @@ section-order = [
     "F401",
     "F403",
 ]
+
+[tool.yardang]
+title = "nbplay"
+root = "README.md"
+pages = []
+use-autoapi = true
+
