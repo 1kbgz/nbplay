@@ -16,6 +16,7 @@ import math
 import pathlib
 import uuid
 import wave
+from typing import ClassVar
 
 import anywidget
 import traitlets
@@ -136,7 +137,7 @@ class EffectPlugin:
     def _number(cls, params, *names, default, low, high):
         value = cls._param(params, *names, default=default)
         if isinstance(value, bool):
-            raise ValueError(f"{names[0]} must be numeric, got bool")
+            raise TypeError(f"{names[0]} must be numeric, got bool")
         numeric = float(value)
         if not math.isfinite(numeric):
             raise ValueError(f"{names[0]} must be finite, got {value!r}")
@@ -222,7 +223,7 @@ def _normalize_effect(effect):
     if isinstance(effect, EffectPlugin):
         return effect.to_dict()
     if not isinstance(effect, dict):
-        raise ValueError(f"effect must be dict or EffectPlugin, got {type(effect).__name__}")
+        raise TypeError(f"effect must be dict or EffectPlugin, got {type(effect).__name__}")
     kind = str(effect.get("type", ""))
     if not kind or kind.startswith("_"):
         raise ValueError(f"effect type must be a non-private string, got {kind!r}")
@@ -250,7 +251,7 @@ def _clamped_number(value, low, high, name):
 
 def _normalize_mixer_channel(channel, index=0):
     if not isinstance(channel, dict):
-        raise ValueError(f"channel must be dict, got {type(channel).__name__}")
+        raise TypeError(f"channel must be dict, got {type(channel).__name__}")
     normalized = dict(channel)
     normalized["name"] = str(normalized.get("name", f"Ch {index + 1}"))
     normalized["gain"] = _clamped_number(normalized.get("gain", 0.8), 0.0, 2.0, "gain")
@@ -277,7 +278,7 @@ def _normalize_timeline_track(track, index=0):
     if isinstance(track, TimelineTrack):
         return track.to_dict()
     if not isinstance(track, dict):
-        raise ValueError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")
+        raise TypeError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")
     channel = int(track.get("channel_index", index))
     return {
         "name": str(track.get("name", f"Track {index + 1}")),
@@ -300,7 +301,7 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
     elif isinstance(clip, dict):
         data = dict(clip)
     else:
-        raise ValueError(f"audio clip must be dict or AudioClip, got {type(clip).__name__}")
+        raise TypeError(f"audio clip must be dict or AudioClip, got {type(clip).__name__}")
 
     track_index = max(0, int(data.get("track_index", 0)))
     if track_count:
@@ -1000,7 +1001,7 @@ class SequencerWidget(anywidget.AnyWidget):
     def _configured_length(self):
         step_duration = max(0.001, float(self.step_duration))
         measures = max(1, int(self.measures))
-        return max(1, int(round((measures * self._measure_beats()) / step_duration)))
+        return max(1, round((measures * self._measure_beats()) / step_duration))
 
     def _resize_composers(self, length):
         for composer in self._composers:
@@ -1775,7 +1776,7 @@ class KeyboardRoute:
         if match not in self._VALID_MATCHES:
             raise ValueError(f"match must be one of {sorted(self._VALID_MATCHES)}, got {match!r}")
         if not isinstance(channel_index, int):
-            raise ValueError(f"channel_index must be int, got {type(channel_index).__name__}")
+            raise TypeError(f"channel_index must be int, got {type(channel_index).__name__}")
         if match == "zone":
             if zone not in self._VALID_ZONES:
                 raise ValueError(f"zone must be one of {sorted(self._VALID_ZONES)}, got {zone!r}")
@@ -1785,9 +1786,8 @@ class KeyboardRoute:
         elif match == "note":
             if note is None or not isinstance(note, int) or not (0 <= note <= 127):
                 raise ValueError(f"note must be int 0–127, got {note!r}")
-        elif match == "notes":
-            if not notes or not all(isinstance(n, int) and 0 <= n <= 127 for n in notes):
-                raise ValueError(f"notes must be a non-empty list of ints 0–127, got {notes!r}")
+        elif match == "notes" and (not notes or not all(isinstance(n, int) and 0 <= n <= 127 for n in notes)):
+            raise ValueError(f"notes must be a non-empty list of ints 0–127, got {notes!r}")
         if channel_index < 0:
             raise ValueError(f"channel_index must be >= 0, got {channel_index}")
 
@@ -1846,7 +1846,7 @@ class KeyboardRoute:
 
 
 class KeyboardWidget(anywidget.AnyWidget):
-    """Musical typing keyboard widget (Logic Pro style).
+    r"""Musical typing keyboard widget (Logic Pro style).
 
     4-row QWERTY layout across two independent octave halves.
     Triggers audio via Web Audio and emits note events for
@@ -1882,8 +1882,8 @@ class KeyboardWidget(anywidget.AnyWidget):
     sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
     # Internal references (not synced)
-    _connected_sequencers = []
-    _connected_samplers = []
+    _connected_sequencers: ClassVar[list] = []
+    _connected_samplers: ClassVar[list] = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -2014,7 +2014,7 @@ class PadWidget(anywidget.AnyWidget):
     channel_index = traitlets.Int(-1).tag(sync=True)
     sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
-    _connected_samplers: list = []
+    _connected_samplers: ClassVar[list] = []
 
     @traitlets.validate("velocity")
     def _validate_velocity(self, proposal):

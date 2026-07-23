@@ -2889,5 +2889,5 @@ class TestDemoNotebook:
             try:
                 code = compile(src, f"{notebook_path.name}[{i}]", "exec")
                 exec(code, ns)  # noqa: S102
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 pytest.fail(f"{notebook_path.name} cell {i} failed:\n{src}\n\n{exc}")
