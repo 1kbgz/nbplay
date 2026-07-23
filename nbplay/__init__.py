@@ -1,6 +1,6 @@
 __version__ = "0.1.1"
 
-from nbplay.nbplay import (  # noqa: F401, E402
+from nbplay.nbplay import (
     AudioBuffer,
     AudioFormat,
     AudioOutput,
@@ -28,7 +28,7 @@ from nbplay.nbplay import (  # noqa: F401, E402
     TransportClock,
     Velocity,
 )
-from nbplay.widget import (  # noqa: F401, E402
+from nbplay.widget import (
     AudioClip,
     EffectPlugin,
     KeyboardRoute,
