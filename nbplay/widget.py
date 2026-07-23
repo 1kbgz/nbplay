@@ -137,7 +137,7 @@ class EffectPlugin:
     def _number(cls, params, *names, default, low, high):
         value = cls._param(params, *names, default=default)
         if isinstance(value, bool):
-            raise TypeError(f"{names[0]} must be numeric, got bool")
+            raise ValueError(f"{names[0]} must be numeric, got bool")  # noqa: TRY004
         numeric = float(value)
         if not math.isfinite(numeric):
             raise ValueError(f"{names[0]} must be finite, got {value!r}")
@@ -223,7 +223,7 @@ def _normalize_effect(effect):
     if isinstance(effect, EffectPlugin):
         return effect.to_dict()
     if not isinstance(effect, dict):
-        raise TypeError(f"effect must be dict or EffectPlugin, got {type(effect).__name__}")
+        raise ValueError(f"effect must be dict or EffectPlugin, got {type(effect).__name__}")  # noqa: TRY004
     kind = str(effect.get("type", ""))
     if not kind or kind.startswith("_"):
         raise ValueError(f"effect type must be a non-private string, got {kind!r}")
@@ -251,7 +251,7 @@ def _clamped_number(value, low, high, name):
 
 def _normalize_mixer_channel(channel, index=0):
     if not isinstance(channel, dict):
-        raise TypeError(f"channel must be dict, got {type(channel).__name__}")
+        raise ValueError(f"channel must be dict, got {type(channel).__name__}")  # noqa: TRY004
     normalized = dict(channel)
     normalized["name"] = str(normalized.get("name", f"Ch {index + 1}"))
     normalized["gain"] = _clamped_number(normalized.get("gain", 0.8), 0.0, 2.0, "gain")
@@ -278,7 +278,7 @@ def _normalize_timeline_track(track, index=0):
     if isinstance(track, TimelineTrack):
         return track.to_dict()
     if not isinstance(track, dict):
-        raise TypeError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")
+        raise ValueError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")  # noqa: TRY004
     channel = int(track.get("channel_index", index))
     return {
         "name": str(track.get("name", f"Track {index + 1}")),
@@ -301,7 +301,7 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
     elif isinstance(clip, dict):
         data = dict(clip)
     else:
-        raise TypeError(f"audio clip must be dict or AudioClip, got {type(clip).__name__}")
+        raise ValueError(f"audio clip must be dict or AudioClip, got {type(clip).__name__}")  # noqa: TRY004
 
     track_index = max(0, int(data.get("track_index", 0)))
     if track_count:
@@ -1776,7 +1776,7 @@ class KeyboardRoute:
         if match not in self._VALID_MATCHES:
             raise ValueError(f"match must be one of {sorted(self._VALID_MATCHES)}, got {match!r}")
         if not isinstance(channel_index, int):
-            raise TypeError(f"channel_index must be int, got {type(channel_index).__name__}")
+            raise ValueError(f"channel_index must be int, got {type(channel_index).__name__}")  # noqa: TRY004
         if match == "zone":
             if zone not in self._VALID_ZONES:
                 raise ValueError(f"zone must be one of {sorted(self._VALID_ZONES)}, got {zone!r}")
