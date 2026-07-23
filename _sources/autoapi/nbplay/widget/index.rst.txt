@@ -1347,11 +1347,13 @@ Module Contents
 
 
    .. py:attribute:: _connected_sequencers
+      :type:  ClassVar[list]
       :value: []
 
 
 
    .. py:attribute:: _connected_samplers
+      :type:  ClassVar[list]
       :value: []
 
 
@@ -1499,7 +1501,7 @@ Module Contents
 
 
    .. py:attribute:: _connected_samplers
-      :type:  list
+      :type:  ClassVar[list]
       :value: []
 
 
