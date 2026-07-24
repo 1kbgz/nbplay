@@ -426,6 +426,9 @@ Module Contents
    .. py:method:: test_invalid_channel_gain_raises()
 
 
+   .. py:method:: test_invalid_channel_type_raises()
+
+
    .. py:method:: test_invalid_channel_pan_raises()
 
 
@@ -436,6 +439,9 @@ Module Contents
 
 
    .. py:method:: test_non_json_safe_effect_param_raises()
+
+
+   .. py:method:: test_invalid_effect_descriptor_type_raises()
 
 
    .. py:method:: test_non_finite_builtin_effect_param_raises()
@@ -950,6 +956,9 @@ Module Contents
    .. py:method:: test_invalid_channel_index()
 
 
+   .. py:method:: test_invalid_channel_index_type()
+
+
    .. py:method:: test_invalid_float_octave()
 
 
@@ -1131,6 +1140,9 @@ Module Contents
 .. py:class:: TestTimelineWidget
 
    .. py:method:: test_defaults()
+
+
+   .. py:method:: test_invalid_descriptor_types_raise()
 
 
    .. py:method:: test_add_track()
