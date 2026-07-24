@@ -840,6 +840,11 @@ class TestMixerWidget:
         with pytest.raises(ValueError):
             w.set_channel_gain(0, True)
 
+    def test_invalid_channel_type_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError, match="channel must be dict"):
+            w._validate_channels({"value": [None]})
+
     def test_invalid_channel_pan_raises(self):
         w = MixerWidget()
         with pytest.raises(ValueError):
@@ -874,6 +879,11 @@ class TestMixerWidget:
         w = MixerWidget()
         with pytest.raises(ValueError):
             w.add_master_effect({"type": "custom", "bad": object()})
+
+    def test_invalid_effect_descriptor_type_raises(self):
+        w = MixerWidget()
+        with pytest.raises(ValueError, match="effect must be dict"):
+            w.add_master_effect(None)
 
     def test_non_finite_builtin_effect_param_raises(self):
         w = MixerWidget()
@@ -2040,6 +2050,10 @@ class TestKeyboardRoute:
         with pytest.raises(ValueError):
             KeyboardRoute(-1, match="all")
 
+    def test_invalid_channel_index_type(self):
+        with pytest.raises(ValueError, match="channel_index must be int"):
+            KeyboardRoute("0", match="all")
+
     def test_invalid_float_octave(self):
         with pytest.raises(ValueError):
             KeyboardRoute(0, match="octave", octave=4.5)
@@ -2457,6 +2471,13 @@ class TestTimelineWidget:
         assert timeline.recording_countdown_beats == pytest.approx(0.0)
         assert timeline.auto_extend_recording is True
         assert timeline.recording_extend_bars == pytest.approx(8.0)
+
+    def test_invalid_descriptor_types_raise(self):
+        timeline = TimelineWidget()
+        with pytest.raises(ValueError, match="timeline track must be dict"):
+            timeline._validate_tracks({"value": [None]})
+        with pytest.raises(ValueError, match="audio clip must be dict"):
+            timeline._validate_clips({"value": [None]})
 
     def test_add_track(self):
         timeline = TimelineWidget()
@@ -2889,5 +2910,5 @@ class TestDemoNotebook:
             try:
                 code = compile(src, f"{notebook_path.name}[{i}]", "exec")
                 exec(code, ns)  # noqa: S102
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:  # noqa: BLE001  # pragma: no cover
                 pytest.fail(f"{notebook_path.name} cell {i} failed:\n{src}\n\n{exc}")
