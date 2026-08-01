@@ -50,7 +50,7 @@
     "watch": "nodemon --watch src -e ts,css,html --exec \"pnpm build:debug\""
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.62.0",
     "cpy": "^13.2.2",
     "esbuild": "^0.28.0",
     "lightningcss": "^1.29.3",
