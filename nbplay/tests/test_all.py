@@ -1,12 +1,8 @@
-<<<<<<< before updating
 import json
 import math
 import pathlib
 import struct
 import wave
-=======
-from nbplay import *
->>>>>>> after updating
 
 import pytest
 
