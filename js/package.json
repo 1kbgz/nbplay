@@ -50,15 +50,22 @@
     "watch": "nodemon --watch src -e ts,css,html --exec \"pnpm build:debug\""
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.62.0",
     "cpy": "^13.2.2",
-    "esbuild": "^0.28.0",
-    "lightningcss": "^1.29.3",
+    "esbuild": "^0.28.1",
+    "lightningcss": "^1.33.0",
     "http-server": "^14.1.1",
+<<<<<<< before updating
     "less": "^4.6.4",
     "nodemon": "^3.1.14",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
+=======
+    "nodemon": "^3.1.14",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2"
+>>>>>>> after updating
   }
 }
