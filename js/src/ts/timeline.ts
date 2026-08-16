@@ -356,7 +356,7 @@ export default {
     }
 
     function ensurePlaybackStarted(): void {
-      if (Boolean(model.get("is_playing"))) return;
+      if (model.get("is_playing")) return;
       recordingStartedPlayback = true;
       model.set("is_playing", true);
     }
@@ -472,7 +472,7 @@ export default {
           disposed ||
           generation !== recordingGeneration ||
           !recordingPending ||
-          !Boolean(model.get("is_recording"))
+          !model.get("is_recording")
         ) {
           stream.getTracks().forEach((track) => track.stop());
           if (generation === recordingGeneration) recordingPending = false;
@@ -582,10 +582,7 @@ export default {
     }
 
     function maybeExtendTimelineForRecording(beat: number): boolean {
-      if (
-        !Boolean(model.get("is_recording")) ||
-        !Boolean(model.get("auto_extend_recording"))
-      )
+      if (!model.get("is_recording") || !model.get("auto_extend_recording"))
         return false;
 
       const bpb = beatsPerBar(model);
@@ -948,7 +945,7 @@ export default {
       root
         .querySelector(".nbplay-timeline-play")
         ?.addEventListener("click", () => {
-          const next = !Boolean(model.get("is_playing"));
+          const next = !model.get("is_playing");
           setAndSave(model, "is_playing", next);
         });
       root
@@ -987,7 +984,7 @@ export default {
 
     function syncPlaybackState(): void {
       if (disposed) return;
-      if (Boolean(model.get("is_playing"))) startPlayback();
+      if (model.get("is_playing")) startPlayback();
       else {
         stopPlayback(false);
         if (mediaRecorder || countInTimer || recordingPending) stopRecording();
@@ -1017,7 +1014,7 @@ export default {
     model.on("change:is_playing", syncPlaybackState);
     model.on("change:is_recording", () => {
       if (disposed) return;
-      if (Boolean(model.get("is_recording"))) {
+      if (model.get("is_recording")) {
         if (!mediaRecorder && !countInTimer && !recordingPending)
           void startRecording();
       } else if (mediaRecorder || countInTimer || recordingPending) {
