@@ -143,8 +143,8 @@ function render({
   });
 
   recordBtn.addEventListener("click", () => {
-    const next = !Boolean(model.get("is_recording"));
-    if (Boolean(model.get("is_playing"))) flushClock(false);
+    const next = !model.get("is_recording");
+    if (model.get("is_playing")) flushClock(false);
     model.set("is_recording", next);
     if (next) model.set("is_playing", true);
     model.save_changes();
@@ -163,7 +163,7 @@ function render({
   bpmSl.addEventListener("input", () => {
     const v = parseFloat(bpmSl.value);
     bpmVal.textContent = Math.round(v) + " BPM";
-    if (Boolean(model.get("is_playing"))) flushClock(false);
+    if (model.get("is_playing")) flushClock(false);
     model.set("bpm", v);
     model.save_changes();
   });
