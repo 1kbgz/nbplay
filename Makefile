@@ -17,7 +17,7 @@ requirements-py:  ## install prerequisite python build requirements
 	uv pip install -r pyproject.toml --extra develop
 
 requirements-js:  ## install prerequisite javascript build requirements
-	cd js; pnpm install && npx playwright install --with-deps
+	cd js; pnpm install && npx playwright install
 
 requirements-rs:  ## install prerequisite rust build requirements
 	make -C rust requirements
