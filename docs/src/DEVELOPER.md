@@ -651,12 +651,14 @@ make dist          # Full distribution build and checks
 
 The JavaScript build in `js/package.json` is ordered as:
 
-1. `pnpm build:rust`: compile the WASM crate for `wasm32-unknown-unknown`.
-2. `pnpm build:wasm-bindgen`: generate JS glue and `.wasm` under
+1. `pnpm build:clean`: remove `js/dist/` and `nbplay/extension/`.
+2. `pnpm build:rust`: compile the WASM crate for `wasm32-unknown-unknown`.
+3. `pnpm build:wasm-bindgen`: generate JS glue and `.wasm` under
    `js/dist/pkg/`.
-3. `pnpm build:prod`: run `js/build.mjs`, which bundles TypeScript entries,
+4. `pnpm build:prod`: run `js/build.mjs`, which bundles TypeScript entries,
    processes CSS, copies extension assets, and copies widget JS/CSS into
    `nbplay/static/`.
+5. `pnpm build:types`: emit TypeScript declarations under `js/dist/esm/`.
 
 The Python build uses Hatch hooks:
 
