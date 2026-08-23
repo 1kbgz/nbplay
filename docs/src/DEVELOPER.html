@@ -340,10 +340,10 @@ Traits are declared with <code class="docutils literal notranslate"><span class=
 trait, the value is serialized through the Jupyter comm protocol to the browser
 model. Browser code reads and writes the same state through the anywidget model
 interface:</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;trait_name&quot;</span><span class="p">);</span>
-<span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s2">&quot;trait_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">nextValue</span><span class="p">);</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"trait_name"</span><span class="p">);</span>
+<span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s2">"trait_name"</span><span class="p">,</span><span class="w"> </span><span class="nx">nextValue</span><span class="p">);</span>
 <span class="nx">model</span><span class="p">.</span><span class="nx">save_changes</span><span class="p">();</span>
-<span class="nx">model</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;change:trait_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">callback</span><span class="p">);</span>
+<span class="nx">model</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"change:trait_name"</span><span class="p">,</span><span class="w"> </span><span class="nx">callback</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>User-initiated changes call <code class="docutils literal notranslate"><span class="pre">model.save_changes()</span></code> so the kernel receives them.
@@ -966,12 +966,14 @@ make<span class="w"> </span>dist<span class="w">          </span><span class="c1
 </div>
 <p>The JavaScript build in <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code> is ordered as:</p>
 <ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:clean</span></code>: remove <code class="docutils literal notranslate"><span class="pre">js/dist/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:rust</span></code>: compile the WASM crate for <code class="docutils literal notranslate"><span class="pre">wasm32-unknown-unknown</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:wasm-bindgen</span></code>: generate JS glue and <code class="docutils literal notranslate"><span class="pre">.wasm</span></code> under
 <code class="docutils literal notranslate"><span class="pre">js/dist/pkg/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:prod</span></code>: run <code class="docutils literal notranslate"><span class="pre">js/build.mjs</span></code>, which bundles TypeScript entries,
 processes CSS, copies extension assets, and copies widget JS/CSS into
 <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:types</span></code>: emit TypeScript declarations under <code class="docutils literal notranslate"><span class="pre">js/dist/esm/</span></code>.</p></li>
 </ol>
 <p>The Python build uses Hatch hooks:</p>
 <ul class="simple">
@@ -993,7 +995,7 @@ sequencer conversion, widget trait defaults, <code class="docutils literal notra
 sampler connections, MIDI keyboard traits, and notebook metadata/execution.</p>
 <p>Run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests
-python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;TestDemoNotebook&quot;</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">"TestDemoNotebook"</span>
 </pre></div>
 </div>
 </section>
@@ -1169,7 +1171,7 @@ features almost always cross at least two layers.</p></li>
 <h2>Release checklist for a feature<a class="headerlink" href="#release-checklist-for-a-feature" title="Link to this heading">¶</a></h2>
 <p>Use the smallest focused verification first, then broaden before release:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Python/widget API</span>
-python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;&lt;focused pattern&gt;&quot;</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>nbplay/tests/test_all.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">"&lt;focused pattern&gt;"</span>
 
 <span class="c1"># Browser widget behavior</span>
 <span class="nb">cd</span><span class="w"> </span>js

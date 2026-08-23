@@ -307,7 +307,7 @@ pattern used by <code class="docutils literal notranslate"><span class="pre">Key
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerWidget</span><span class="p">,</span> <span class="n">PadWidget</span>
 
-<span class="c1"># Create a simple sine-wave &quot;sample&quot; for the sampler to play</span>
+<span class="c1"># Create a simple sine-wave "sample" for the sampler to play</span>
 <span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">44100</span>
 <span class="n">duration</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="n">freq</span> <span class="o">=</span> <span class="mf">440.0</span>
@@ -323,7 +323,7 @@ pattern used by <code class="docutils literal notranslate"><span class="pre">Key
     <span class="n">release</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">max_voices</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sine&quot;</span><span class="p">)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Sine"</span><span class="p">)</span>
 
 <span class="c1"># 4×4 drum-style pads connected to the sampler</span>
 <span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
