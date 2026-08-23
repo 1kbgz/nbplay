@@ -17,6 +17,7 @@ const BUNDLES = [
   },
 ];
 
+<<<<<<< before updating
 const WIDGET_NAMES = [
   "widget",
   "mixer",
@@ -29,6 +30,23 @@ const WIDGET_NAMES = [
   "midi_keyboard",
   "pad",
 ];
+=======
+async function build() {
+  if (fs.existsSync("dist")) {
+    for (const entry of fs.readdirSync("dist")) {
+      if (entry !== "pkg") {
+        fs.rmSync(`dist/${entry}`, { recursive: true, force: true });
+      }
+    }
+  }
+  fs.rmSync("../nbplay/extension", {
+    recursive: true,
+    force: true,
+  });
+
+  // Bundle css
+  await bundle_css();
+>>>>>>> after updating
 
 const WIDGET_BUNDLES = WIDGET_NAMES.map((name) => ({
   entryPoints: [`src/ts/${name}.ts`],
@@ -55,6 +73,7 @@ async function copy_extension_assets() {
   });
 }
 
+<<<<<<< before updating
 async function build() {
   await bundle_css("src/css");
   await cpy("src/html/*", "dist/");
@@ -72,3 +91,6 @@ async function build() {
 }
 
 build();
+=======
+await build();
+>>>>>>> after updating
