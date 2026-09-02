@@ -99,7 +99,7 @@ impl AudioOutput {
         let stream = self
             .device
             .build_output_stream(
-                &stream_config,
+                stream_config,
                 move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                     render_fn(data);
                 },
