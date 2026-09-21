@@ -33,6 +33,7 @@ from nbplay.widget import (
     EffectPlugin,
     KeyboardRoute,
     KeyboardWidget,
+    LauncherWidget,
     MidiKeyboardWidget,
     MixerWidget,
     NoteComposer,
