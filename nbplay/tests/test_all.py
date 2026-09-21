@@ -2567,6 +2567,89 @@ class TestTimelineWidget:
         assert [clip["name"] for clip in timeline.clips] == ["A1", "C1"]
         assert timeline.clips[1]["track_index"] == 1
 
+    def test_recording_tracks_validation(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        timeline.add_track("B")
+        timeline.recording_tracks = [1, 7, 1, -2, 0]
+        assert timeline.recording_tracks == [1, 0]
+        timeline.remove_track(0)
+        assert timeline.recording_tracks == [0]
+
+    def test_track_input_validation(self):
+        timeline = TimelineWidget()
+        timeline.add_track("Bounce", input="channel")
+        assert timeline.tracks[0]["input"] == "channel"
+        with pytest.raises(ValueError, match="timeline track input"):
+            timeline.add_track("Bad", input="line-in")
+
+    def test_pixels_per_beat_validation(self):
+        timeline = TimelineWidget(pixels_per_beat=900)
+        assert timeline.pixels_per_beat == pytest.approx(400.0)
+        timeline.pixels_per_beat = -4
+        assert timeline.pixels_per_beat == pytest.approx(0.0)
+
+    def test_clip_offset(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        clip = timeline.add_clip("Take", offset=1.5)
+        assert clip["offset"] == pytest.approx(1.5)
+        assert AudioClip().to_dict()["offset"] == pytest.approx(0.0)
+
+    def test_duplicate_clip(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        clip = timeline.add_clip("Take", start=2.0, duration=3.0)
+        copy = timeline.duplicate_clip(clip["id"])
+        assert len(timeline.clips) == 2
+        assert copy["start"] == pytest.approx(5.0)
+        assert copy["duration"] == pytest.approx(3.0)
+        assert copy["id"] != clip["id"]
+        assert timeline.selected_clip_id == copy["id"]
+        with pytest.raises(ValueError):
+            timeline.duplicate_clip("missing")
+
+    def test_export_clip_requests_browser_bytes(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        clip = timeline.add_clip("Take")
+        timeline.exported_clip_data = b"stale"
+        timeline.export_clip(clip["id"])
+        assert timeline.export_clip_id == clip["id"]
+        assert timeline.exported_clip_data == b""
+        with pytest.raises(ValueError):
+            timeline.export_clip("missing")
+        with pytest.raises(ValueError, match="no exported clip data"):
+            timeline.write_exported_clip("unused.webm")
+
+    def test_write_exported_clip(self, tmp_path):
+        timeline = TimelineWidget()
+        timeline.exported_clip = {"id": "clip-x", "name": "Take"}
+        timeline.exported_clip_data = b"\x00\x01audio"
+        target = tmp_path / "take.webm"
+        assert timeline.write_exported_clip(target) == {"id": "clip-x", "name": "Take"}
+        assert target.read_bytes() == b"\x00\x01audio"
+
+    def test_import_clip_from_bytes_and_path(self, tmp_path):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        clip = timeline.import_clip(b"webm-bytes", name="Loop", start=4.0, duration=2.0)
+        assert timeline.clips[0]["id"] == clip["id"]
+        assert timeline.clips[0]["source"] == "import"
+        assert timeline.clips[0]["blob_size"] == len(b"webm-bytes")
+        assert timeline.import_clip_data == b"webm-bytes"
+        assert timeline.import_clip_request["id"] == clip["id"]
+        assert timeline.import_clip_request["measure_duration"] is False
+
+        path = tmp_path / "take.webm"
+        path.write_bytes(b"file-bytes")
+        measured = timeline.import_clip(path, name="File")
+        assert timeline.import_clip_request["id"] == measured["id"]
+        assert timeline.import_clip_request["measure_duration"] is True
+        assert timeline.import_clip_data == b"file-bytes"
+        with pytest.raises(ValueError):
+            timeline.import_clip(b"")
+
     def test_remove_unrouted_track_does_not_shift_channels(self):
         timeline = TimelineWidget()
         timeline.add_track("Scratch", channel_index=-1)
@@ -2714,6 +2797,42 @@ class TestSession:
         # Session routing metadata set on sequencer
         assert seq.session_id == s._session_id
         assert seq.channel_index == 0
+
+    def test_add_audio_only_track(self):
+        """A lane with no instrument records from the microphone."""
+        s = Session()
+        track = s.add_track("Vocals")
+        assert track.sequencer is None
+        assert track.sound_source is None
+        assert track.mixer_channel == 0
+        assert len(s.mixer.channels) == 1
+        assert s.timeline.tracks[0]["input"] == "microphone"
+        assert "audio" in repr(track)
+        s.transport.is_playing = True  # no sequencer link to fire
+        s.remove_track(0)
+        assert s.tracks == []
+        assert s.timeline.tracks == []
+
+    def test_add_instrument_track_defaults_to_channel_input(self):
+        s = Session()
+        s.add_track("Lead", SequencerWidget(), SynthWidget())
+        s.add_track("Pads", sound_source=SamplerWidget(), armed=True)
+        s.add_track("Mic", input="microphone")
+        assert [t["input"] for t in s.timeline.tracks] == ["channel", "channel", "microphone"]
+        assert s.timeline.tracks[1]["armed"] is True
+        assert s.tracks[1].sequencer is None
+        assert s.tracks[1].sound_source.channel_index == 1
+
+    def test_remove_track_with_mixed_lanes_adjusts_indices(self):
+        s = Session()
+        s.add_track("Audio")
+        seq = SequencerWidget()
+        samp = SamplerWidget()
+        s.add_track("Inst", seq, samp)
+        s.remove_track(0)
+        assert s.tracks[0].mixer_channel == 0
+        assert seq.channel_index == 0
+        assert samp.channel_index == 0
 
     def test_add_track_sets_sound_source_routing(self):
         """add_track sets session_id and channel_index on the sound source."""

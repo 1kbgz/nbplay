@@ -106,6 +106,32 @@
   font-size: 12px;
 }
 
+.nbplay-timeline .nbplay-timeline-loop-btn.active {
+  background: var(--jp-brand-color2, #2563eb);
+  color: var(--jp-ui-inverse-font-color0, #fff);
+}
+
+/* Horizontal scroll container: ruler and lanes share one scroll offset. */
+.nbplay-timeline .nbplay-timeline-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.nbplay-timeline .nbplay-timeline-scroll.zoomed .nbplay-timeline-ruler,
+.nbplay-timeline .nbplay-timeline-scroll.zoomed .nbplay-timeline-row {
+  grid-template-columns: var(--nbplay-timeline-controls-width) auto;
+  width: max-content;
+  min-width: 100%;
+}
+
+.nbplay-timeline .nbplay-timeline-ruler-spacer,
+.nbplay-timeline .nbplay-timeline-track-controls {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--jp-layout-color1, #14142a);
+}
+
 .nbplay-timeline .nbplay-timeline-ruler {
   display: grid;
   grid-template-columns: var(--nbplay-timeline-controls-width) minmax(
@@ -129,6 +155,32 @@
   transform: translateX(-1px);
   color: var(--jp-ui-font-color3, #64648a);
   font-size: 10px;
+}
+
+.nbplay-timeline .nbplay-timeline-loop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  background: color-mix(
+    in srgb,
+    var(--jp-brand-color2, #2563eb) 35%,
+    transparent
+  );
+  border-top: 2px solid var(--jp-brand-color2, #2563eb);
+  pointer-events: none;
+}
+
+.nbplay-timeline .nbplay-timeline-loop-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 8px;
+  transform: translateX(-4px);
+  cursor: ew-resize;
+  background: var(--jp-brand-color2, #2563eb);
+  opacity: 0.85;
 }
 
 .nbplay-timeline .nbplay-timeline-playhead {
@@ -200,6 +252,19 @@
   padding: 0;
 }
 
+.nbplay-timeline .nbplay-track-input {
+  width: 100%;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--jp-ui-font-color1, #c8cce0);
+  background: var(--jp-layout-color2, #20203a);
+  border: 1px solid var(--jp-border-color0, #2d2d4a);
+  border-radius: 4px;
+}
+
 .nbplay-timeline .nbplay-track-arm.active {
   background: var(--jp-error-color1, #ef4444);
 }
@@ -263,6 +328,33 @@
 
 .nbplay-timeline .nbplay-timeline-clip.muted {
   opacity: 0.45;
+}
+
+.nbplay-timeline .nbplay-timeline-clip {
+  cursor: grab;
+  touch-action: none;
+}
+
+.nbplay-timeline .nbplay-timeline-clip.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 6;
+}
+
+.nbplay-timeline .nbplay-timeline-clip-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.nbplay-timeline .nbplay-timeline-clip-handle.start {
+  left: 0;
+}
+
+.nbplay-timeline .nbplay-timeline-clip-handle.end {
+  right: 0;
 }
 
 .nbplay-timeline .nbplay-timeline-clip span,

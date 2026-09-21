@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import array
 import math
+import os
 import pathlib
 import uuid
 import wave
@@ -274,19 +275,25 @@ def _nonnegative_number(value, name, maximum=4096.0):
     return _clamped_number(value, 0.0, maximum, name)
 
 
+_TIMELINE_INPUTS = frozenset({"microphone", "channel"})
+
+
 def _normalize_timeline_track(track, index=0):
     if isinstance(track, TimelineTrack):
         return track.to_dict()
     if not isinstance(track, dict):
         raise ValueError(f"timeline track must be dict or TimelineTrack, got {type(track).__name__}")  # noqa: TRY004
     channel = int(track.get("channel_index", index))
+    source = str(track.get("input", "microphone"))
+    if source not in _TIMELINE_INPUTS:
+        raise ValueError(f"timeline track input must be one of {sorted(_TIMELINE_INPUTS)}, got {source!r}")
     return {
         "name": str(track.get("name", f"Track {index + 1}")),
         "channel_index": max(-1, channel),
         "armed": bool(track.get("armed", False)),
         "muted": bool(track.get("muted", False)),
         "solo": bool(track.get("solo", False)),
-        "input": str(track.get("input", "microphone")),
+        "input": source,
         "monitor": bool(track.get("monitor", False)),
     }
 
@@ -316,6 +323,7 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
         "loop": bool(data.get("loop", False)),
         "muted": bool(data.get("muted", False)),
         "recorded": bool(data.get("recorded", False)),
+        "offset": _nonnegative_number(data.get("offset", 0.0), "offset"),
         "audio_url": str(data.get("audio_url", "")),
         "blob_type": str(data.get("blob_type", "")),
         "source": str(data.get("source", "recording")),
@@ -346,6 +354,7 @@ class AudioClip:
         loop=False,
         muted=False,
         recorded=False,
+        offset=0.0,
         audio_url="",
         blob_type="",
         source="recording",
@@ -362,6 +371,7 @@ class AudioClip:
             "loop": loop,
             "muted": muted,
             "recorded": recorded,
+            "offset": offset,
             "audio_url": audio_url,
             "blob_type": blob_type,
             "source": source,
@@ -1572,8 +1582,14 @@ class TimelineWidget(anywidget.AnyWidget):
     """Multi-track clip timeline with browser recording controls.
 
     Clips are synced as JSON metadata. Browser-recorded audio is kept
-    as an object URL in the frontend for immediate playback; durable
-    binary persistence is intentionally left to an export/import path.
+    as an object URL in the frontend for immediate playback. Use
+    :meth:`export_clip` / :meth:`write_exported_clip` to pull a clip's
+    audio bytes into Python and :meth:`import_clip` to push audio back.
+
+    Every armed lane records at once against the shared session clock.
+    A lane's ``input`` is ``"microphone"`` (browser microphone) or
+    ``"channel"`` (a tap on the lane's mixer channel, which bounces an
+    instrument track to audio).
     """
 
     _esm = _STATIC / "timeline.js"
@@ -1584,6 +1600,7 @@ class TimelineWidget(anywidget.AnyWidget):
     is_playing = traitlets.Bool(False).tag(sync=True)
     is_recording = traitlets.Bool(False).tag(sync=True)
     recording_track = traitlets.Int(-1).tag(sync=True)
+    recording_tracks = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
     recording_error = traitlets.Unicode("").tag(sync=True)
 
     time_signature_num = traitlets.Int(4).tag(sync=True)
@@ -1599,6 +1616,33 @@ class TimelineWidget(anywidget.AnyWidget):
     clips = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
     selected_clip_id = traitlets.Unicode("").tag(sync=True)
     recorded_clip = traitlets.Dict(default_value={}).tag(sync=True)
+
+    # View: horizontal zoom in pixels per beat (0 fits the widget width)
+    pixels_per_beat = traitlets.Float(0.0).tag(sync=True)
+
+    # Clip audio transfer. ``export_clip_id`` asks the browser for a clip's
+    # bytes; they arrive in ``exported_clip`` / ``exported_clip_data``.
+    # ``import_clip_request`` / ``import_clip_data`` push bytes to the
+    # browser, which attaches a playable URL to the matching clip.
+    export_clip_id = traitlets.Unicode("").tag(sync=True)
+    exported_clip = traitlets.Dict(default_value={}).tag(sync=True)
+    exported_clip_data = traitlets.Bytes(b"").tag(sync=True)
+    import_clip_request = traitlets.Dict(default_value={}).tag(sync=True)
+    import_clip_data = traitlets.Bytes(b"").tag(sync=True)
+
+    @traitlets.validate("pixels_per_beat")
+    def _validate_pixels_per_beat(self, proposal):
+        return _nonnegative_number(proposal["value"], "pixels_per_beat", maximum=400.0)
+
+    @traitlets.validate("recording_tracks")
+    def _validate_recording_tracks(self, proposal):
+        count = len(self.tracks)
+        seen = []
+        for value in proposal["value"] or []:
+            index = int(value)
+            if 0 <= index < count and index not in seen:
+                seen.append(index)
+        return seen
 
     @traitlets.validate("length")
     def _validate_length(self, proposal):
@@ -1635,14 +1679,20 @@ class TimelineWidget(anywidget.AnyWidget):
             return -1
         return min(track, len(self.tracks) - 1)
 
-    def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False):
-        """Append a timeline lane and return its index."""
+    def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False, input="microphone"):
+        """Append a timeline lane and return its index.
+
+        ``input`` selects the record source: ``"microphone"`` captures
+        the browser microphone, ``"channel"`` taps the lane's mixer
+        channel so instrument output is bounced to an audio clip.
+        """
         idx = len(self.tracks)
         track = TimelineTrack(
             name=name,
             channel_index=idx if channel_index is None else channel_index,
             armed=armed,
             monitor=monitor,
+            input=input,
         ).to_dict()
         self.tracks = [*self.tracks, track]
         return idx
@@ -1673,6 +1723,7 @@ class TimelineWidget(anywidget.AnyWidget):
             next_clips.append(item)
         self.tracks = next_tracks
         self.clips = _normalize_audio_clips(next_clips, len(next_tracks))
+        self.recording_tracks = [i if i < index else i - 1 for i in self.recording_tracks if i != index]
         if self.recording_track == index:
             self.recording_track = -1
             self.is_recording = False
@@ -1735,6 +1786,70 @@ class TimelineWidget(anywidget.AnyWidget):
         if not found:
             raise ValueError(f"clip not found: {clip_id}")
         self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
+
+    def duplicate_clip(self, clip_id):
+        """Copy a clip onto the same lane right after the original."""
+        clip_id = str(clip_id)
+        for clip in self.clips:
+            if clip.get("id") == clip_id:
+                copy = {**clip, "id": _clip_id(), "start": clip["start"] + clip["duration"]}
+                copy = _normalize_audio_clip(copy, len(self.clips), len(self.tracks))
+                self.clips = [*self.clips, copy]
+                self.selected_clip_id = copy["id"]
+                self.length = max(self.length, copy["start"] + copy["duration"])
+                return copy
+        raise ValueError(f"clip not found: {clip_id}")
+
+    def export_clip(self, clip_id):
+        """Ask the browser for a clip's audio bytes.
+
+        The bytes arrive asynchronously in ``exported_clip_data`` with
+        the clip descriptor in ``exported_clip``; observe either trait
+        or call :meth:`write_exported_clip` once they have arrived.
+        """
+        clip_id = str(clip_id)
+        if not any(clip.get("id") == clip_id for clip in self.clips):
+            raise ValueError(f"clip not found: {clip_id}")
+        self.exported_clip = {}
+        self.exported_clip_data = b""
+        self.export_clip_id = clip_id
+
+    def write_exported_clip(self, path):
+        """Write the most recently exported clip bytes to ``path``."""
+        if not self.exported_clip_data:
+            raise ValueError("no exported clip data; call export_clip() and wait for the browser")
+        with open(path, "wb") as handle:
+            handle.write(self.exported_clip_data)
+        return self.exported_clip
+
+    def import_clip(self, data, name="Import", track_index=0, start=0.0, duration=None, blob_type="audio/webm", **kwargs):
+        """Add a clip backed by audio bytes (or a file path).
+
+        The clip descriptor is appended immediately; the browser attaches
+        a playable URL to it once the bytes arrive. When ``duration`` is
+        omitted the browser measures the audio and fills it in.
+        """
+        if isinstance(data, (str, os.PathLike)):
+            with open(data, "rb") as handle:
+                data = handle.read()
+        data = bytes(data)
+        if not data:
+            raise ValueError("import_clip requires non-empty audio bytes")
+        clip = self.add_clip(
+            name,
+            track_index=track_index,
+            start=start,
+            duration=duration if duration is not None else 4.0,
+            source="import",
+            blob_type=blob_type,
+            blob_size=len(data),
+            **kwargs,
+        )
+        # Bytes first, then the descriptor: the browser acts on the
+        # descriptor change and expects the matching bytes to be present.
+        self.import_clip_data = data
+        self.import_clip_request = {**clip, "measure_duration": duration is None}
+        return clip
 
     def resize_clip(self, clip_id, duration):
         """Set a clip duration in beats."""
@@ -2261,19 +2376,22 @@ def _build_route(channel_index, zone=None, octave=None, note=None, notes=None):
 
 
 class Track:
-    """Binds a sequencer to a sound source and a mixer channel.
+    """A session lane: a mixer channel plus an optional instrument.
 
-    Uses ``traitlets.link()`` to propagate BPM and play state
-    from the ``Session`` transport to the sequencer.
+    A track may carry a sequencer and a sound source (an instrument
+    lane), only a sound source (a sampler or keyboard lane), or neither
+    (an audio lane that records from the microphone into the timeline).
+    When a sequencer is present, ``traitlets.link()`` propagates BPM
+    and play state from the ``Session`` transport to it.
 
     Args:
         name: Track display name.
-        sequencer: A ``SequencerWidget``.
-        sound_source: A widget that produces audio.
+        sequencer: A ``SequencerWidget`` or ``None``.
+        sound_source: A widget that produces audio, or ``None``.
         mixer_channel: Zero-based mixer channel index.
     """
 
-    def __init__(self, name, sequencer, sound_source, mixer_channel):
+    def __init__(self, name, sequencer=None, sound_source=None, mixer_channel=0):
         self.name = name
         self.sequencer = sequencer
         self.sound_source = sound_source
@@ -2286,11 +2404,14 @@ class Track:
         BPM is bidirectional so editing BPM on either widget stays
         in sync. ``is_playing`` is one-directional (transport →
         sequencer) so a single non-looping sequencer reaching its
-        end does not stop every other sequencer.
+        end does not stop every other sequencer. Tracks without a
+        sequencer have nothing to link.
 
         Args:
             transport: A ``TransportWidget``.
         """
+        if self.sequencer is None:
+            return
         self._links.append(traitlets.link((transport, "bpm"), (self.sequencer, "bpm")))
         self._links.append(traitlets.link((transport, "time_signature_num"), (self.sequencer, "time_signature_num")))
         self._links.append(traitlets.link((transport, "time_signature_den"), (self.sequencer, "time_signature_den")))
@@ -2303,7 +2424,7 @@ class Track:
         self._links.clear()
 
     def __repr__(self):
-        src_type = type(self.sound_source).__name__
+        src_type = type(self.sound_source).__name__ if self.sound_source is not None else "audio"
         return f"Track({self.name!r}, ch={self.mixer_channel}, source={src_type})"
 
 
@@ -2363,13 +2484,23 @@ class Session:
         """Move the shared playhead to ``beat`` (quarter-note units)."""
         self.transport.current_beat = float(beat)
 
-    def add_track(self, name, sequencer, sound_source):
+    def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
         """Add a track, create a mixer channel, and link transport state.
+
+        Every track gets a mixer channel and a timeline lane. Tracks with
+        an instrument (a sequencer and/or a sound source) default their
+        timeline input to ``"channel"`` so the instrument's output can be
+        bounced to audio; tracks with neither default to ``"microphone"``.
 
         Args:
             name: Track display name.
-            sequencer: A ``SequencerWidget``.
-            sound_source: A widget that produces audio.
+            sequencer: A ``SequencerWidget``, or ``None`` for a lane
+                without a step sequencer.
+            sound_source: A widget that produces audio, or ``None`` for
+                an audio-only lane.
+            input: Timeline record source, ``"microphone"`` or
+                ``"channel"``. Defaults by instrument presence.
+            armed: Arm the timeline lane for recording.
 
         Returns:
             The new ``Track`` object.
@@ -2378,8 +2509,9 @@ class Session:
         track = Track(name, sequencer, sound_source, channel_idx)
         track._link_transport(self.transport)
         # Set audio routing metadata so JS can route through mixer
-        sequencer.session_id = self._session_id
-        sequencer.channel_index = channel_idx
+        if sequencer is not None:
+            sequencer.session_id = self._session_id
+            sequencer.channel_index = channel_idx
         # Also set routing on sound source (e.g. SamplerWidget) so it
         # can register on the session bus for keyboard integration.
         if hasattr(sound_source, "session_id"):
@@ -2387,7 +2519,9 @@ class Session:
         if hasattr(sound_source, "channel_index"):
             sound_source.channel_index = channel_idx
         self.tracks.append(track)
-        self.timeline.add_track(name, channel_idx)
+        if input is None:
+            input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
+        self.timeline.add_track(name, channel_idx, armed=armed, input=input)
         return track
 
     def remove_track(self, index):
@@ -2400,8 +2534,9 @@ class Session:
             track = self.tracks.pop(index)
             track._unlink()
             # Clear routing metadata
-            track.sequencer.session_id = ""
-            track.sequencer.channel_index = -1
+            if track.sequencer is not None:
+                track.sequencer.session_id = ""
+                track.sequencer.channel_index = -1
             if hasattr(track.sound_source, "session_id"):
                 track.sound_source.session_id = ""
             if hasattr(track.sound_source, "channel_index"):
@@ -2412,7 +2547,8 @@ class Session:
             for t in self.tracks:
                 if t.mixer_channel > track.mixer_channel:
                     t.mixer_channel -= 1
-                    t.sequencer.channel_index -= 1
+                    if t.sequencer is not None:
+                        t.sequencer.channel_index -= 1
                     if hasattr(t.sound_source, "channel_index"):
                         t.sound_source.channel_index -= 1
 
