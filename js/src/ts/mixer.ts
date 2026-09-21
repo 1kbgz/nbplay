@@ -11,6 +11,11 @@ import {
   linearToDb,
   parseDbInput,
 } from "./helpers.ts";
+import {
+  ensureBusAudioContext,
+  getOrCreateSessionBus,
+  getSessionBus,
+} from "./session.ts";
 
 // Types
 
@@ -355,9 +360,15 @@ function createAudioBus() {
   const channelNodes: ChannelNode[] = [];
 
   return {
-    init(): void {
+    init(sessionId: string): void {
       if (audioCtx) return;
-      audioCtx = createAudioContext();
+      // Adopt the session's AudioContext if another widget (e.g. the
+      // transport clock) already created it, so timing and audio share
+      // one clock. The bus itself is only created once audio is available.
+      const existing = getSessionBus(sessionId);
+      audioCtx = existing
+        ? ensureBusAudioContext(existing)
+        : createAudioContext();
       if (!audioCtx) return;
       masterGain = audioCtx.createGain();
       masterGain.connect(audioCtx.destination);
@@ -414,22 +425,16 @@ function createAudioBus() {
 
     register(sessionId: string): void {
       if (!audioCtx || !masterGain) return;
-      const g = globalThis as Record<string, unknown>;
-      if (!g.__nbplay) g.__nbplay = {};
-      const nbplay = g.__nbplay as Record<string, Record<string, unknown>>;
-      const existing = nbplay[sessionId] || {};
-      const bus = {
-        ...existing,
-        audioCtx,
-        masterGain,
-        channels: channelNodes,
-      };
+      // Mutate the bus in place: other widgets hold references to it.
+      const bus = getOrCreateSessionBus(sessionId);
+      bus.audioCtx = audioCtx;
+      bus.masterGain = masterGain;
+      bus.channels = channelNodes;
       Object.defineProperty(bus, "plugins", {
         configurable: true,
         enumerable: true,
         get: getPluginRegistry,
       });
-      nbplay[sessionId] = bus;
       // Notify widgets (e.g. samplers) that the bus is now available
       document.dispatchEvent(
         new CustomEvent("nbplay-bus-ready", { detail: { sessionId } }),
@@ -437,16 +442,15 @@ function createAudioBus() {
     },
 
     destroy(sessionId: string): void {
-      const g = globalThis as Record<string, unknown>;
-      if (g.__nbplay) {
-        const nbplay = g.__nbplay as Record<string, Record<string, unknown>>;
-        const bus = nbplay[sessionId];
-        if (bus) {
-          delete bus.audioCtx;
-          delete bus.masterGain;
-          delete bus.channels;
-          delete bus.plugins;
-          if (Object.keys(bus).length === 0) delete nbplay[sessionId];
+      const bus = getSessionBus(sessionId);
+      if (bus) {
+        delete bus.audioCtx;
+        delete bus.masterGain;
+        delete bus.channels;
+        delete bus.plugins;
+        if (Object.keys(bus).length === 0) {
+          const g = globalThis as Record<string, unknown>;
+          delete (g.__nbplay as Record<string, unknown>)[sessionId];
         }
       }
       channelNodes.forEach((n) => {
@@ -598,7 +602,7 @@ function render({
   const audioBus = createAudioBus();
   const sessionId = model.get("session_id") as string;
   if (sessionId) {
-    audioBus.init();
+    audioBus.init(sessionId);
     audioBus.syncChannels(
       (model.get("channels") as Channel[]) || [],
       model.get("master_gain") as number,

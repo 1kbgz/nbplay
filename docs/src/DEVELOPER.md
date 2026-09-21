@@ -184,7 +184,7 @@ files are generated.
 | `MixerWidget` | `mixer.js` | `mixer.css` | `channels`, `master_gain`, `master_effects`, `session_id` |
 | `SequencerWidget` | `sequencer.js` | `sequencer.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data` |
 | `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
-| `TransportWidget` | `transport.js` | `transport.css` | `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
+| `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
 | `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
 | `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
@@ -328,8 +328,11 @@ framework:
 - CustomEvent: `nbplay-note`, `nbplay-bus-ready`, and `nbplay-cancel-edit`.
 - Timers: `setInterval()` for sequencer lookahead scheduling, transport clock
   ticks, velocity key repeat, and sampler active-voice display.
-- `performance.now()` for transport position and MIDI fallback timestamps.
-- `globalThis.__nbplay` as a notebook-page-local session bus registry.
+- `AudioContext.currentTime` as the single transport timebase (the
+  `SessionClock` in `js/src/ts/session.ts`); `performance.now()` only for save
+  throttling, count-in timers, and MIDI fallback timestamps.
+- `globalThis.__nbplay` as a notebook-page-local session bus registry, created
+  lazily by `getOrCreateSessionBus()` in `js/src/ts/session.ts`.
 - CSS custom properties from JupyterLab, especially `--jp-*` theme variables.
 
 ### Session bus shape
@@ -516,14 +519,25 @@ file: `js/src/css/transport.css`.
 TransportWidget is the global play/stop and tempo surface. It syncs BPM, play
 state, time signature, bar/beat position, and loop range. In a `Session`, tracks
 link their sequencers to transport BPM and time signature, and dlink transport
-play state into sequencers.
+play state into sequencers; `Session.play()`, `stop()`, and `seek(beat)` wrap
+the transport traits.
 
-The browser UI has stop/play buttons, a BPM slider and inline edit, a time
-signature display, a bar:beat display, and a loop toggle/range. Its position
-clock uses `performance.now()` and a 50 ms interval to compute elapsed beats.
-When the displayed bar or beat changes, it updates and saves `bar_number` and
-`beat_in_bar`. Looping wraps the displayed position between `loop_start_bar` and
-`loop_end_bar` when enabled.
+In the browser the transport owns the session clock: `bus.clock` on
+`globalThis.__nbplay[session_id]`, a `SessionClock` derived from the shared
+`AudioContext.currentTime`. Sequencers and the timeline with the same
+`session_id` subscribe to that clock, so play, stop, seek, tempo, and record
+propagate between widgets without a kernel round-trip. A transport with no
+`session_id` uses a private clock.
+
+The browser UI has stop/play/record buttons, a BPM slider and inline edit, a
+time signature display, a bar:beat display, and a loop toggle/range. Every
+control drives the clock; clock events are mirrored back into the model. A 50 ms
+ticker updates `current_beat`, `bar_number`, and `beat_in_bar` locally while
+playing and saves at most every 250 ms on beat changes. Loop wrapping between
+`loop_start_bar` and `loop_end_bar` and mid-play tempo changes happen inside
+the clock. Model changes arriving from the kernel (`is_playing`, `bpm`,
+`current_beat`, loop traits) are forwarded to the clock, so Python can start,
+stop, and seek the whole session.
 
 ### TimelineWidget
 
@@ -534,9 +548,12 @@ TimelineWidget is the multitrack clip lane and browser recorder. Python owns
 validated `TimelineTrack` and `AudioClip` metadata dictionaries. Browser code
 renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
 play/stop, record/stop, count-in, recording auto-extension, playhead reset,
-playhead seek/drag, timeline length, and selected-clip deletion. In a `Session`, transport BPM, time
-signature, play/record state, and `current_beat` are linked with the timeline so
-either surface can control global playback and seek position.
+playhead seek/drag, timeline length, and selected-clip deletion. The timeline
+follows the session clock for position and play state, so its play/stop/seek
+controls act on the whole session in the browser. In a `Session`, transport BPM,
+time signature, and play/record state are also linked in Python, and
+`current_beat` is dlinked one-way from transport to timeline; the transport is
+the widget that persists the clock position.
 
 Recording uses `navigator.mediaDevices.getUserMedia({ audio: true })` and
 `MediaRecorder` when the browser exposes them. A completed take creates a

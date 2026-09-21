@@ -1,7 +1,8 @@
 // nbplay Sequencer Scheduler - timing, step advancement, voice iteration,
 // oscillator triggering, probability, groove, and automation.
 
-import { type AnyModel, createAudioContext } from "./helpers.ts";
+import { type AnyModel } from "./helpers.ts";
+import { getSessionBus, type SessionClock } from "./session.ts";
 
 export interface StepData {
   active: boolean;
@@ -21,13 +22,11 @@ export interface AutomationLane {
   points: AutomationPoint[];
 }
 
-interface NbplayBus {
-  audioCtx: AudioContext;
-  channels: { gain: AudioNode }[];
-}
-
 export interface AudioScheduler {
-  start(model: AnyModel): void;
+  /** Begin scheduling steps against `clock`, aligned to its beat grid. */
+  start(model: AnyModel, clock: SessionClock): void;
+  /** Re-align to the clock after a seek, tempo, or loop change. */
+  realign(): void;
   stop(): void;
   destroy(): void;
   isPlaying(): boolean;
@@ -35,6 +34,14 @@ export interface AudioScheduler {
 
 interface AudioSchedulerOptions {
   random?: () => number;
+  /** Called when a non-looping pattern reaches its end. */
+  onEnd?: () => void;
+}
+
+/** Position of the next step to schedule, in clock beats and context time. */
+interface StepCursor {
+  beat: number;
+  time: number;
 }
 
 const RESERVED_AUTOMATION_TRAITS = new Set([
@@ -53,15 +60,8 @@ function numberOr(value: unknown, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function readStepSeconds(model: AnyModel): number {
-  return computeStepTime(
-    numberOr(model.get("bpm"), 120),
-    numberOr(model.get("step_duration"), 0.25),
-  );
-}
-
-export function computeStepTime(bpm: number, stepDuration: number): number {
-  return Math.max(0.001, stepDuration) / (Math.max(1, bpm) / 60);
+function readStepBeats(model: AnyModel): number {
+  return Math.max(0.001, numberOr(model.get("step_duration"), 0.25));
 }
 
 export function computeStepOffsetSeconds(
@@ -86,17 +86,6 @@ export function computeStepOffsetSeconds(
 
 export function midiToHz(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12);
-}
-
-export function advanceStep(
-  currentStep: number,
-  stepCount: number,
-  loopEnabled: boolean,
-): { nextStep: number; shouldStop: boolean } {
-  const safeStepCount = Math.max(1, stepCount);
-  const next = (currentStep + 1) % safeStepCount;
-  const shouldStop = next === 0 && currentStep >= 0 && !loopEnabled;
-  return { nextStep: shouldStop ? -1 : next, shouldStop };
 }
 
 export function shouldPlayStep(
@@ -191,30 +180,90 @@ export function scheduleOscillator(
   }
 }
 
-export function resolveAudioOutput(model: AnyModel): {
-  ctx: AudioContext | null;
-  output: AudioNode | null;
-  ownCtx: boolean;
-} {
-  const sid = model.get("session_id") as string;
+export function resolveAudioOutput(
+  model: AnyModel,
+  clock: SessionClock,
+): { ctx: AudioContext | null; output: AudioNode | null } {
+  const sid = String(model.get("session_id") || "");
   const idx = numberOr(model.get("channel_index"), -1);
-  if (sid && idx >= 0) {
-    const bus = (globalThis as Record<string, unknown>).__nbplay as
-      | Record<string, NbplayBus>
-      | undefined;
-    if (bus && bus[sid] && bus[sid].channels[idx]) {
-      return {
-        ctx: bus[sid].audioCtx,
-        output: bus[sid].channels[idx].gain,
-        ownCtx: false,
-      };
-    }
-  }
-  return { ctx: createAudioContext(), output: null, ownCtx: true };
+  const output =
+    sid && idx >= 0 ? getSessionBus(sid)?.channels?.[idx]?.gain || null : null;
+  return { ctx: clock.context(), output };
 }
 
 export function voicesFromModel(model: AnyModel): StepData[][] {
   return (model.get("voices_data") as StepData[][]) || [];
+}
+
+/** Snap `beat` up to the next multiple of `stepBeats`. */
+function snapUp(beat: number, stepBeats: number): number {
+  return Math.ceil(beat / stepBeats - 1e-6) * stepBeats;
+}
+
+/**
+ * Cursor for the step boundary to schedule next. A boundary that passed
+ * less than `graceSeconds` ago is scheduled immediately rather than
+ * skipped, so playback from beat 0 fires step 0 and a seek into the
+ * middle of a step still sounds that step.
+ */
+export function alignCursor(
+  model: AnyModel,
+  clock: SessionClock,
+  now: number,
+  graceSeconds = 0.1,
+): StepCursor {
+  const stepBeats = readStepBeats(model);
+  const spb = clock.secondsPerBeat();
+  const beat = clock.beatAt(now);
+  const floorBeat = Math.floor(beat / stepBeats + 1e-6) * stepBeats;
+  const gridBeat =
+    (beat - floorBeat) * spb < graceSeconds ? floorBeat : floorBeat + stepBeats;
+  return { beat: gridBeat, time: now + (gridBeat - beat) * spb };
+}
+
+/** Advance a cursor by one step, wrapping at the clock loop end. */
+export function advanceCursor(
+  cursor: StepCursor,
+  model: AnyModel,
+  clock: SessionClock,
+): StepCursor {
+  const stepBeats = readStepBeats(model);
+  const spb = clock.secondsPerBeat();
+  let beat = cursor.beat + stepBeats;
+  let time = cursor.time + stepBeats * spb;
+  const loop = clock.loop;
+  if (
+    loop.enabled &&
+    loop.endBeat > loop.startBeat &&
+    beat >= loop.endBeat - 1e-9
+  ) {
+    const wrapped = loop.startBeat + (beat - loop.endBeat);
+    const gridBeat = snapUp(wrapped, stepBeats);
+    time += (gridBeat - wrapped) * spb;
+    beat = gridBeat;
+  }
+  return { beat, time };
+}
+
+/**
+ * Map a clock beat onto a pattern step index. Looping patterns repeat on
+ * the absolute beat grid so that every sequencer in a session stays
+ * aligned; one-shot patterns play once from beat 0 and return -1 at the end.
+ */
+export function stepIndexForBeat(
+  beat: number,
+  stepCount: number,
+  stepBeats: number,
+  loopEnabled: boolean,
+): number {
+  const safeCount = Math.max(1, stepCount);
+  const patternBeats = safeCount * stepBeats;
+  if (loopEnabled) {
+    const pos = ((beat % patternBeats) + patternBeats) % patternBeats;
+    return Math.round(pos / stepBeats) % safeCount;
+  }
+  if (beat < -1e-9 || beat >= patternBeats - 1e-9) return -1;
+  return Math.floor(beat / stepBeats + 1e-6);
 }
 
 export function createAudioScheduler(
@@ -222,32 +271,38 @@ export function createAudioScheduler(
 ): AudioScheduler {
   let audioCtx: AudioContext | null = null;
   let outputNode: AudioNode | null = null;
-  let ownAudioCtx = true;
+  let activeClock: SessionClock | null = null;
+  let activeModel: AnyModel | null = null;
   let schedulerTimer: ReturnType<typeof setInterval> | null = null;
-  let nextScheduleTime = 0;
+  let cursor: StepCursor | null = null;
   const scheduleAheadTime = 0.1;
   const lookAheadTime = 0.025;
-  let currentSchedulerStep = -1;
   const random = options.random || Math.random;
 
   const self: AudioScheduler = {
-    start(model: AnyModel): void {
-      const resolved = resolveAudioOutput(model);
+    start(model: AnyModel, clock: SessionClock): void {
+      const resolved = resolveAudioOutput(model, clock);
       if (!resolved.ctx) return;
       audioCtx = resolved.ctx;
       outputNode = resolved.output;
-      ownAudioCtx = resolved.ownCtx;
+      activeClock = clock;
+      activeModel = model;
+      cursor = null;
 
       if (audioCtx.state === "suspended") {
-        audioCtx.resume();
+        void audioCtx.resume();
       }
       if (!schedulerTimer) {
-        currentSchedulerStep = -1;
-        nextScheduleTime = audioCtx.currentTime;
         schedulerTimer = setInterval(() => {
           scheduler(model);
         }, lookAheadTime * 1000);
       }
+      scheduler(model);
+    },
+
+    realign(): void {
+      cursor = null;
+      if (schedulerTimer && activeModel) scheduler(activeModel);
     },
 
     stop(): void {
@@ -255,17 +310,15 @@ export function createAudioScheduler(
         clearInterval(schedulerTimer);
         schedulerTimer = null;
       }
-      currentSchedulerStep = -1;
+      cursor = null;
+      activeClock = null;
+      activeModel = null;
     },
 
     destroy(): void {
       self.stop();
-      if (ownAudioCtx && audioCtx && audioCtx.state !== "closed") {
-        audioCtx.close();
-      }
       audioCtx = null;
       outputNode = null;
-      ownAudioCtx = true;
     },
 
     isPlaying(): boolean {
@@ -274,51 +327,61 @@ export function createAudioScheduler(
   };
 
   function scheduler(model: AnyModel): void {
-    if (!audioCtx) return;
-    const currentTime = audioCtx.currentTime;
-    while (nextScheduleTime < currentTime + scheduleAheadTime) {
-      const stepSeconds = scheduleStep(model, nextScheduleTime);
-      nextScheduleTime += stepSeconds;
+    const clock = activeClock;
+    if (!audioCtx || !clock) return;
+    const now = audioCtx.currentTime;
+    // Re-align after a seek/tempo change, or if the cursor fell far behind
+    // (for example after the tab was throttled in the background).
+    if (!cursor || cursor.time < now - 0.5)
+      cursor = alignCursor(model, clock, now);
+    while (cursor.time < now + scheduleAheadTime) {
+      if (!scheduleStep(model, clock, cursor)) return;
+      cursor = advanceCursor(cursor, model, clock);
     }
   }
 
-  function scheduleStep(model: AnyModel, audioTime: number): number {
-    if (!audioCtx) return readStepSeconds(model);
+  /** Schedule one step; returns false when the pattern has ended. */
+  function scheduleStep(
+    model: AnyModel,
+    clock: SessionClock,
+    at: StepCursor,
+  ): boolean {
+    if (!audioCtx) return true;
     const vd = voicesFromModel(model);
     const steps = vd[0] || [];
-    if (vd.length === 0 || steps.length === 0) return readStepSeconds(model);
+    if (vd.length === 0 || steps.length === 0) return true;
 
-    const loopEnabled = model.get("loop_enabled") as boolean;
-    const { nextStep, shouldStop } = advanceStep(
-      currentSchedulerStep,
+    const stepBeats = readStepBeats(model);
+    const stepIndex = stepIndexForBeat(
+      at.beat,
       steps.length,
-      loopEnabled,
+      stepBeats,
+      Boolean(model.get("loop_enabled")),
     );
-
-    if (shouldStop) {
-      model.set("is_playing", false);
-      model.set("current_step", -1);
-      model.save_changes();
+    if (stepIndex < 0) {
       self.stop();
-      return readStepSeconds(model);
+      options.onEnd?.();
+      return false;
     }
 
-    currentSchedulerStep = nextStep;
-    model.set("current_step", nextStep);
-    applyAutomationLanes(model, nextStep);
+    model.set("current_step", stepIndex);
+    applyAutomationLanes(model, stepIndex);
 
-    const stepSeconds = readStepSeconds(model);
+    const stepSeconds = stepBeats * clock.secondsPerBeat();
     const offset = computeStepOffsetSeconds(
-      nextStep,
+      stepIndex,
       stepSeconds,
       numberOr(model.get("swing"), 0),
       (model.get("groove") as number[]) || [],
     );
-    const scheduledTime = Math.max(audioCtx.currentTime, audioTime + offset);
+    // Keep the grid time even when it is slightly in the past (a boundary
+    // within the alignment grace): every widget then computes the same
+    // time for the same step, and Web Audio starts past-due nodes at once.
+    const scheduledTime = Math.max(0, at.time + offset);
 
     for (const { freq, velocity, durationTicks } of iterateActiveVoices(
       vd,
-      nextStep,
+      stepIndex,
       random,
     )) {
       scheduleOscillator(
@@ -330,8 +393,7 @@ export function createAudioScheduler(
         stepSeconds * durationTicks,
       );
     }
-
-    return stepSeconds;
+    return true;
   }
 
   return self;

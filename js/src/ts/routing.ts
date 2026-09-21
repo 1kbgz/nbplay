@@ -10,26 +10,9 @@ export type KeyboardRoute =
   | { channel_index: number; match: "note"; note: number }
   | { channel_index: number; match: "notes"; notes: number[] };
 
-export interface SamplerBus {
-  triggerNote: (note: number, velocity: number) => void;
-  releaseNote: (note: number) => void;
-}
+import { getSessionBus, type SamplerBus } from "./session.ts";
 
-interface NbplayBus {
-  audioCtx: AudioContext;
-  channels: { gain: AudioNode }[];
-  samplers?: Record<number, SamplerBus>;
-  noteListeners?: Array<
-    (evt: { note: number; velocity: number; type: string }) => void
-  >;
-}
-
-function getSessionBus(sessionId: string): NbplayBus | undefined {
-  if (!sessionId) return undefined;
-  const g = globalThis as Record<string, unknown>;
-  const nbplay = g.__nbplay as Record<string, NbplayBus> | undefined;
-  return nbplay?.[sessionId];
-}
+export type { SamplerBus };
 
 /**
  * Normalize a route descriptor to the current shape.

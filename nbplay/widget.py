@@ -1533,13 +1533,20 @@ class SamplerWidget(anywidget.AnyWidget):
 class TransportWidget(anywidget.AnyWidget):
     """Global transport controls: play/stop, BPM, time signature, bar/beat.
 
-    Used as the master clock for a ``Session``. All connected
-    ``SequencerWidget`` instances sync their BPM and play state
-    to this transport via ``traitlets.link``.
+    Used as the master clock for a ``Session``. In the browser the transport
+    drives the shared session clock on ``globalThis.__nbplay[session_id]``;
+    every sequencer and timeline with the same ``session_id`` follows that
+    clock directly, so play, seek, and tempo changes never wait on a kernel
+    round-trip. The synced traits mirror the clock for Python callers:
+    setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves
+    the clock, and ``current_beat`` is updated coarsely while playing.
     """
 
     _esm = _STATIC / "transport.js"
     _css = _STATIC / "transport.css"
+
+    # Session routing (set by Session so the browser clock is shared)
+    session_id = traitlets.Unicode("").tag(sync=True)
 
     # Transport state
     bpm = traitlets.Float(120.0).tag(sync=True)
@@ -2315,6 +2322,7 @@ class Session:
     def __init__(self, bpm=120.0, time_signature=(4, 4)):
         self._session_id = f"nbplay-{uuid.uuid4().hex[:8]}"
         self.transport = TransportWidget(
+            session_id=self._session_id,
             bpm=bpm,
             time_signature_num=time_signature[0],
             time_signature_den=time_signature[1],
@@ -2332,9 +2340,28 @@ class Session:
             traitlets.link((self.transport, "time_signature_den"), (self.timeline, "time_signature_den")),
             traitlets.link((self.transport, "is_playing"), (self.timeline, "is_playing")),
             traitlets.link((self.transport, "is_recording"), (self.timeline, "is_recording")),
-            traitlets.link((self.transport, "current_beat"), (self.timeline, "current_beat")),
+            # One-way: the transport persists the shared clock position.
+            # Timeline seeks reach the transport through the browser clock.
+            traitlets.dlink((self.transport, "current_beat"), (self.timeline, "current_beat")),
         ]
         self.tracks = []
+
+    @property
+    def session_id(self):
+        """Identifier shared by every widget on this session's browser bus."""
+        return self._session_id
+
+    def play(self):
+        """Start the shared transport."""
+        self.transport.is_playing = True
+
+    def stop(self):
+        """Stop the shared transport, keeping the playhead position."""
+        self.transport.is_playing = False
+
+    def seek(self, beat):
+        """Move the shared playhead to ``beat`` (quarter-note units)."""
+        self.transport.current_beat = float(beat)
 
     def add_track(self, name, sequencer, sound_source):
         """Add a track, create a mixer channel, and link transport state.

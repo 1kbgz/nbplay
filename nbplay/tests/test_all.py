@@ -2760,8 +2760,24 @@ class TestSession:
         assert s.timeline.is_recording is True
         s.transport.current_beat = 7.25
         assert s.timeline.current_beat == pytest.approx(7.25)
+        # Timeline position is a one-way mirror of the transport; browser
+        # seeks reach the transport through the shared clock instead.
         s.timeline.current_beat = 3.5
-        assert s.transport.current_beat == pytest.approx(3.5)
+        assert s.transport.current_beat == pytest.approx(7.25)
+
+    def test_session_clock_helpers(self):
+        s = Session()
+        assert s.session_id == s._session_id
+        assert s.transport.session_id == s._session_id
+        s.play()
+        assert s.transport.is_playing is True
+        assert s.timeline.is_playing is True
+        s.seek(12)
+        assert s.transport.current_beat == pytest.approx(12.0)
+        assert s.timeline.current_beat == pytest.approx(12.0)
+        s.stop()
+        assert s.transport.is_playing is False
+        assert s.transport.current_beat == pytest.approx(12.0)
 
     def test_play_sync(self):
         """Transport play state propagates to all sequencers."""

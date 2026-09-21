@@ -1,8 +1,15 @@
 // nbplay TransportWidget – anywidget ESM frontend
 // Global transport bar: play/stop, BPM, time signature, bar:beat
 // position counter, and loop controls.
+//
+// The transport owns the session clock (see session.ts). Buttons drive the
+// clock directly; clock events are mirrored into the model so the kernel
+// sees play state, tempo, loop range, and a coarse position. Model changes
+// arriving from the kernel (Python callers, traitlets links) are forwarded
+// to the clock, which every other widget in the session follows.
 
 import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
+import { bindClock, type ClockEvent, type SessionClock } from "./session.ts";
 
 function render({
   model,
@@ -14,9 +21,9 @@ function render({
   el.innerHTML = `
   <div class="nbplay-transport">
     <div class="nbplay-transport-controls">
-      <button class="nbplay-transport-stop" title="Stop">\u25A0</button>
-      <button class="nbplay-transport-play" title="Play / Pause">\u25B6</button>
-      <button class="nbplay-transport-record" title="Record">\u25CF</button>
+      <button class="nbplay-transport-stop" title="Stop">■</button>
+      <button class="nbplay-transport-play" title="Play / Pause">▶</button>
+      <button class="nbplay-transport-record" title="Record">●</button>
     </div>
     <div class="nbplay-transport-tempo">
       <label>BPM</label>
@@ -33,8 +40,8 @@ function render({
       <span class="nbplay-transport-beat">1</span>
     </div>
     <div class="nbplay-transport-loop">
-      <button class="nbplay-transport-loop-btn" title="Toggle loop">\u21BB</button>
-      <span class="nbplay-transport-loop-range">1 \u2013 4</span>
+      <button class="nbplay-transport-loop-btn" title="Toggle loop">↻</button>
+      <span class="nbplay-transport-loop-range">1 – 4</span>
     </div>
   </div>`;
 
@@ -67,9 +74,24 @@ function render({
     ".nbplay-transport-loop-range",
   ) as HTMLSpanElement;
 
+  // While `mirroring` is set, model writes originate from the clock and the
+  // model observers below must not feed them back into the clock.
+  let mirroring = false;
+  let disconnected = false;
+
+  function mirror(write: () => void, save = false): void {
+    mirroring = true;
+    try {
+      write();
+    } finally {
+      mirroring = false;
+    }
+    if (save && !disconnected) model.save_changes();
+  }
+
   function syncPlay(): void {
     const on = model.get("is_playing") as boolean;
-    playBtn.textContent = on ? "\u23F8" : "\u25B6";
+    playBtn.textContent = on ? "⏸" : "▶";
     playBtn.classList.toggle("playing", on);
   }
 
@@ -98,83 +120,202 @@ function render({
     beatDisp.textContent = String((model.get("beat_in_bar") as number) + 1);
   }
 
-  function beatFromBars(): number {
-    return (
-      (model.get("bar_number") as number) *
-        (model.get("time_signature_num") as number) +
-      (model.get("beat_in_bar") as number)
-    );
-  }
-
-  let internalPositionUpdate = false;
-
-  function setPositionFromBeat(beat: number, writeCurrent = true): number {
-    const bpb = Math.max(1, model.get("time_signature_num") as number);
-    const bounded = Number.isFinite(beat) ? Math.max(0, beat) : 0;
-    if (writeCurrent) {
-      internalPositionUpdate = true;
-      try {
-        model.set("current_beat", bounded);
-      } finally {
-        internalPositionUpdate = false;
-      }
-    }
-    model.set("bar_number", Math.floor(bounded / bpb));
-    model.set("beat_in_bar", Math.floor(bounded % bpb));
-    syncPosition();
-    return bounded;
-  }
-
   function syncLoop(): void {
     loopBtn.classList.toggle("active", model.get("loop_enabled") as boolean);
     loopRng.textContent =
       (model.get("loop_start_bar") as number) +
       1 +
-      " \u2013 " +
+      " – " +
       (model.get("loop_end_bar") as number);
   }
 
-  // Play / Stop
+  function beatsPerBar(): number {
+    return Math.max(1, Number(model.get("time_signature_num")) || 4);
+  }
+
+  // Last position written by this widget, so an echo of our own write
+  // (a delayed change event with a stale value) is not taken as a seek.
+  let lastWrittenBeat = -1;
+
+  /** Write a beat position into the model's position traits. */
+  function writePosition(beat: number): void {
+    const bpb = beatsPerBar();
+    const bounded = Number.isFinite(beat) ? Math.max(0, beat) : 0;
+    lastWrittenBeat = bounded;
+    model.set("current_beat", bounded);
+    model.set("bar_number", Math.floor(bounded / bpb));
+    model.set("beat_in_bar", Math.floor(bounded % bpb));
+    syncPosition();
+  }
+
+  // Model → clock
+
+  function pushTempo(clock: SessionClock): void {
+    clock.setTempo(Number(model.get("bpm")));
+  }
+
+  function pushLoop(clock: SessionClock): void {
+    const bpb = beatsPerBar();
+    clock.setBeatsPerBar(bpb);
+    clock.setLoop(
+      Boolean(model.get("loop_enabled")),
+      (Number(model.get("loop_start_bar")) || 0) * bpb,
+      (Number(model.get("loop_end_bar")) || 0) * bpb,
+    );
+  }
+
+  // Clock → model
+
+  function pullState(clock: SessionClock): void {
+    mirror(() => {
+      model.set("is_playing", clock.playing);
+      model.set("is_recording", clock.recording);
+      writePosition(clock.beat());
+    });
+    syncPlay();
+    syncRecord();
+  }
+
+  // Position ticker: runs while the clock plays. Position traits are
+  // updated locally on every tick; saves to the kernel are throttled to
+  // beat boundaries at most every `coarseSyncMs`.
+  let tickTimer: ReturnType<typeof setInterval> | null = null;
+  let lastSyncedBeat = 0;
+  let lastSyncMs = 0;
+  const coarseSyncMs = 250;
+
+  function tick(): void {
+    const beat = clock().beat();
+    mirror(() => writePosition(beat));
+    const now = performance.now();
+    if (
+      Math.floor(beat) !== Math.floor(lastSyncedBeat) &&
+      now - lastSyncMs >= coarseSyncMs
+    ) {
+      lastSyncedBeat = beat;
+      lastSyncMs = now;
+      if (!disconnected) model.save_changes();
+    }
+  }
+
+  function startTicking(beat: number): void {
+    stopTicking();
+    lastSyncedBeat = beat;
+    lastSyncMs = performance.now();
+    tickTimer = setInterval(tick, 50);
+  }
+
+  function stopTicking(): void {
+    if (tickTimer !== null) {
+      clearInterval(tickTimer);
+      tickTimer = null;
+    }
+  }
+
+  function onClockEvent(event: ClockEvent): void {
+    const clk = clock();
+    switch (event.type) {
+      case "play":
+        mirror(() => {
+          model.set("is_playing", true);
+          writePosition(event.beat);
+        }, true);
+        syncPlay();
+        startTicking(event.beat);
+        break;
+      case "stop":
+        stopTicking();
+        mirror(() => {
+          model.set("is_playing", false);
+          writePosition(event.beat);
+        }, true);
+        syncPlay();
+        break;
+      case "seek":
+        lastSyncedBeat = event.beat;
+        mirror(() => writePosition(event.beat), true);
+        break;
+      case "tempo":
+        if (Number(model.get("bpm")) !== clk.bpm) {
+          mirror(() => model.set("bpm", clk.bpm), true);
+        }
+        syncBpm();
+        break;
+      case "record":
+        if (Boolean(model.get("is_recording")) !== clk.recording) {
+          mirror(() => model.set("is_recording", clk.recording), true);
+        }
+        syncRecord();
+        break;
+      case "loop": {
+        const bpb = beatsPerBar();
+        const loop = clk.loop;
+        const startBar = Math.round(loop.startBeat / bpb);
+        const endBar = Math.round(loop.endBeat / bpb);
+        if (
+          Boolean(model.get("loop_enabled")) !== loop.enabled ||
+          Number(model.get("loop_start_bar")) !== startBar ||
+          Number(model.get("loop_end_bar")) !== endBar
+        ) {
+          mirror(() => {
+            model.set("loop_enabled", loop.enabled);
+            model.set("loop_start_bar", startBar);
+            model.set("loop_end_bar", endBar);
+          }, true);
+        }
+        syncLoop();
+        break;
+      }
+      case "timesig":
+        break;
+    }
+  }
+
+  function onRebind(clk: SessionClock): void {
+    stopTicking();
+    pushTempo(clk);
+    pushLoop(clk);
+    pullState(clk);
+    if (clk.playing) startTicking(clk.beat());
+  }
+
+  const binding = bindClock(model, onClockEvent, onRebind);
+  const clock = (): SessionClock => binding.clock();
+
+  // Buttons
+
   playBtn.addEventListener("click", () => {
-    const next = !model.get("is_playing");
-    if (!next) flushClock(false);
-    model.set("is_playing", next);
-    model.save_changes();
+    const clk = clock();
+    if (clk.playing) clk.stop();
+    else clk.play();
   });
 
   recordBtn.addEventListener("click", () => {
-    const next = !model.get("is_recording");
-    if (model.get("is_playing")) flushClock(false);
-    model.set("is_recording", next);
-    if (next) model.set("is_playing", true);
-    model.save_changes();
+    const clk = clock();
+    const next = !clk.recording;
+    clk.setRecording(next);
+    if (next) clk.play();
   });
 
   stopBtn.addEventListener("click", () => {
-    model.set("is_playing", false);
-    model.set("is_recording", false);
-    model.set("bar_number", 0);
-    model.set("beat_in_bar", 0);
-    model.set("current_beat", 0);
-    model.save_changes();
+    const clk = clock();
+    clk.stop();
+    clk.setRecording(false);
+    clk.seek(0);
   });
 
-  // BPM slider
   bpmSl.addEventListener("input", () => {
     const v = parseFloat(bpmSl.value);
     bpmVal.textContent = Math.round(v) + " BPM";
-    if (model.get("is_playing")) flushClock(false);
-    model.set("bpm", v);
-    model.save_changes();
+    clock().setTempo(v);
   });
 
-  // Loop toggle
   loopBtn.addEventListener("click", () => {
     model.set("loop_enabled", !model.get("loop_enabled"));
     model.save_changes();
+    pushLoop(clock());
   });
 
-  // Double-click to edit BPM (uses shared makeEditable with committed guard)
   makeEditable(bpmVal, {
     className: "nbplay-transport-inline-edit",
     getValue: () => String(Math.round(model.get("bpm") as number)),
@@ -184,128 +325,67 @@ function render({
       return Math.max(30, Math.min(300, v));
     },
     apply: (v) => {
-      model.set("bpm", v);
-      model.save_changes();
+      clock().setTempo(v as number);
     },
     sync: syncBpm,
   });
 
-  // Model observers
-  model.on("change:is_playing", syncPlay);
-  model.on("change:is_recording", syncRecord);
-  model.on("change:bpm", syncBpm);
-  model.on("change:time_signature_num", syncTimeSig);
+  // Model observers (kernel-driven changes)
+
+  model.on("change:is_playing", () => {
+    syncPlay();
+    if (mirroring) return;
+    const clk = clock();
+    const want = Boolean(model.get("is_playing"));
+    if (want && !clk.playing) clk.play();
+    else if (!want && clk.playing) clk.stop();
+  });
+  model.on("change:is_recording", () => {
+    syncRecord();
+    if (mirroring) return;
+    clock().setRecording(Boolean(model.get("is_recording")));
+  });
+  model.on("change:bpm", () => {
+    syncBpm();
+    if (mirroring) return;
+    pushTempo(clock());
+  });
+  model.on("change:time_signature_num", () => {
+    syncTimeSig();
+    pushLoop(clock());
+  });
   model.on("change:time_signature_den", syncTimeSig);
   model.on("change:bar_number", syncPosition);
   model.on("change:beat_in_bar", syncPosition);
   model.on("change:current_beat", () => {
-    const bounded = setPositionFromBeat(
-      model.get("current_beat") as number,
-      false,
-    );
-    if (!internalPositionUpdate && (model.get("is_playing") as boolean)) {
-      resetClockOrigin(bounded);
-    }
+    if (mirroring) return;
+    const clk = clock();
+    const beat = Number(model.get("current_beat"));
+    if (!Number.isFinite(beat) || beat === lastWrittenBeat) return;
+    if (Math.abs(beat - clk.beat()) > 1e-6) clk.seek(beat);
   });
-  model.on("change:loop_enabled", syncLoop);
-  model.on("change:loop_start_bar", syncLoop);
-  model.on("change:loop_end_bar", syncLoop);
-
-  // Browser-side position clock
-  let clockTimer: ReturnType<typeof setInterval> | null = null;
-  let clockStart = 0;
-  let beatOrigin = 0;
-  let lastSyncedBeat = 0;
-  let lastSyncMs = 0;
-  const coarseSyncMs = 250;
-
-  function resetClockOrigin(beat: number): void {
-    clockStart = performance.now();
-    beatOrigin = beat;
-    lastSyncedBeat = beat;
-    lastSyncMs = clockStart;
+  for (const trait of ["loop_enabled", "loop_start_bar", "loop_end_bar"]) {
+    model.on(`change:${trait}`, () => {
+      syncLoop();
+      if (mirroring) return;
+      pushLoop(clock());
+    });
   }
 
-  function startClock(): void {
-    stopClock();
-    const currentBeat = Number(model.get("current_beat"));
-    resetClockOrigin(
-      Number.isFinite(currentBeat) ? currentBeat : beatFromBars(),
-    );
-    clockTimer = setInterval(tickClock, 50);
+  // Initial state: tempo, time signature, and loop come from the kernel;
+  // play state and position come from the browser clock, which is fresh
+  // browser state and never stale from a saved notebook. Only local model
+  // state is updated here; do NOT call save_changes() during render
+  // because sending comm messages at that point can race with other
+  // widgets still being initialised (e.g. Session links).
+  {
+    const clk = clock();
+    pushTempo(clk);
+    pushLoop(clk);
+    pullState(clk);
+    if (clk.playing) startTicking(clk.beat());
   }
 
-  function stopClock(): void {
-    if (clockTimer !== null) {
-      clearInterval(clockTimer);
-      clockTimer = null;
-    }
-  }
-
-  function computeClockBeat(now: number): number {
-    const elapsed = (now - clockStart) / 1000;
-    let totalBeat = beatOrigin + (elapsed * (model.get("bpm") as number)) / 60;
-    const bpb = Math.max(1, model.get("time_signature_num") as number);
-
-    if (model.get("loop_enabled") as boolean) {
-      const ls = model.get("loop_start_bar") as number;
-      const le = model.get("loop_end_bar") as number;
-      if (le > ls && totalBeat >= le * bpb) {
-        const loopBeats = (le - ls) * bpb;
-        const adj = (totalBeat - ls * bpb) % loopBeats;
-        totalBeat = ls * bpb + adj;
-      }
-    }
-    return totalBeat;
-  }
-
-  function flushClock(save = true): void {
-    if (clockTimer === null) return;
-    const now = performance.now();
-    const beat = setPositionFromBeat(computeClockBeat(now));
-    lastSyncedBeat = beat;
-    lastSyncMs = now;
-    if (save) model.save_changes();
-  }
-
-  function tickClock(): void {
-    const now = performance.now();
-    const totalBeat = setPositionFromBeat(computeClockBeat(now));
-    const currentBucket = Math.floor(totalBeat);
-    const syncedBucket = Math.floor(lastSyncedBeat);
-    if (currentBucket !== syncedBucket && now - lastSyncMs >= coarseSyncMs) {
-      lastSyncedBeat = totalBeat;
-      lastSyncMs = now;
-      model.save_changes();
-    }
-  }
-
-  model.on("change:is_playing", () => {
-    if (model.get("is_playing") as boolean) startClock();
-    else stopClock();
-  });
-
-  model.on("change:bpm", () => {
-    if (model.get("is_playing") as boolean) {
-      stopClock();
-      startClock();
-    }
-  });
-
-  // Initial state
-  // Force stopped state on render — prevents stale is_playing=true
-  // from a saved notebook from starting the clock in an undefined state.
-  // Only update local model state; do NOT call save_changes() here
-  // because sending comm messages during render can race with other
-  // widgets still being initialised (e.g. Session dlinks).
-  model.set("is_playing", false);
-  model.set("is_recording", false);
-  model.set("bar_number", 0);
-  model.set("beat_in_bar", 0);
-  model.set("current_beat", 0);
-
-  syncPlay();
-  syncRecord();
   syncBpm();
   syncTimeSig();
   syncPosition();
@@ -313,20 +393,19 @@ function render({
 
   // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
-    model.set("is_playing", false);
-    model.set("is_recording", false);
-    model.set("bar_number", 0);
-    model.set("beat_in_bar", 0);
-    model.set("current_beat", 0);
-    stopClock();
-    syncPlay();
-    syncRecord();
-    syncPosition();
+    disconnected = true;
+    const clk = clock();
+    clk.stop();
+    clk.setRecording(false);
+    clk.seek(0);
+    stopTicking();
+    pullState(clk);
   });
 
   return () => {
-    stopClock();
+    stopTicking();
     cancelDisconnect();
+    binding.dispose();
   };
 }
 

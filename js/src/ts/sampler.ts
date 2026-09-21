@@ -20,6 +20,7 @@ import {
   resizePadVelocities,
   type PadAction,
 } from "./pads.ts";
+import { getSessionBus } from "./session.ts";
 
 // Types
 
@@ -226,22 +227,15 @@ function createSamplerEngine(maxVoices = 8) {
       const sid = model.get("session_id") as string;
       const idx = model.get("channel_index") as number;
       if (sid && idx >= 0) {
-        const g = globalThis as Record<string, unknown>;
-        const nbplay = g.__nbplay as
-          | Record<string, Record<string, unknown>>
-          | undefined;
-        const bus = nbplay?.[sid];
-        if (bus) {
-          const channels = bus.channels as { gain: GainNode }[];
-          if (channels[idx]) {
-            if (audioCtx !== (bus.audioCtx as AudioContext)) {
-              waveformBuffer = null;
-            }
-            audioCtx = bus.audioCtx as AudioContext;
-            outputNode = channels[idx].gain;
-            ownAudioCtx = false;
-            return;
+        const bus = getSessionBus(sid);
+        if (bus?.audioCtx && bus.channels?.[idx]) {
+          if (audioCtx !== bus.audioCtx) {
+            waveformBuffer = null;
           }
+          audioCtx = bus.audioCtx;
+          outputNode = bus.channels[idx].gain;
+          ownAudioCtx = false;
+          return;
         }
       }
     },
@@ -1196,13 +1190,9 @@ function render({
     const sid = model.get("session_id") as string;
     const idx = model.get("channel_index") as number;
     if (!sid || idx < 0) return;
-    const g = globalThis as Record<string, unknown>;
-    const nbplay =
-      (g.__nbplay as Record<string, Record<string, unknown>>) || {};
-    g.__nbplay = nbplay;
-    if (!nbplay[sid]) return; // bus not ready yet — will retry on nbplay-bus-ready
-    const bus = nbplay[sid];
-    const samplers = (bus.samplers as Record<number, unknown>) || {};
+    const bus = getSessionBus(sid);
+    if (!bus) return; // bus not ready yet — will retry on nbplay-bus-ready
+    const samplers = bus.samplers || {};
     bus.samplers = samplers;
     samplers[idx] = {
       triggerNote(note: number, velocity: number): void {
@@ -1252,16 +1242,8 @@ function render({
     // Unregister from session bus
     const sid = model.get("session_id") as string;
     const idx = model.get("channel_index") as number;
-    const g = globalThis as Record<string, unknown>;
-    const nbplay = g.__nbplay as
-      | Record<string, Record<string, unknown>>
-      | undefined;
-    if (nbplay?.[sid]) {
-      const samplers = nbplay[sid].samplers as
-        | Record<number, unknown>
-        | undefined;
-      if (samplers) delete samplers[idx];
-    }
+    const samplers = getSessionBus(sid)?.samplers;
+    if (samplers) delete samplers[idx];
     sampler.destroy();
   };
 }

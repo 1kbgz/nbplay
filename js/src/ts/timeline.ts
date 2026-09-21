@@ -1,6 +1,12 @@
 // nbplay TimelineWidget - multi-track clip timeline and browser recorder.
 
-import { type AnyModel, createAudioContext } from "./helpers.ts";
+import { type AnyModel } from "./helpers.ts";
+import {
+  bindClock,
+  type ClockEvent,
+  getSessionBus,
+  type SessionClock,
+} from "./session.ts";
 
 const MAX_TIMELINE_BEATS = 4096;
 
@@ -28,12 +34,6 @@ interface AudioClip {
   blob_size?: number;
   source?: string;
   sample_rate?: number;
-}
-
-interface SessionBus {
-  audioCtx?: AudioContext;
-  masterGain?: AudioNode;
-  channels?: { gain?: AudioNode }[];
 }
 
 function escapeHtml(value: unknown): string {
@@ -101,18 +101,6 @@ function getClips(model: AnyModel): AudioClip[] {
   }));
 }
 
-function getSessionBus(sessionId: string): SessionBus | null {
-  if (!sessionId) return null;
-  const g = globalThis as Record<string, unknown>;
-  const nbplay = g.__nbplay as Record<string, SessionBus> | undefined;
-  return nbplay?.[sessionId] || null;
-}
-
-function setAndSave(model: AnyModel, key: string, value: unknown): void {
-  model.set(key, value);
-  model.save_changes();
-}
-
 function timelineLength(model: AnyModel): number {
   return Math.max(
     1,
@@ -150,7 +138,6 @@ export default {
     model.set("is_recording", false);
     model.set("recording_track", -1);
 
-    let audioCtx: AudioContext | null = null;
     let mediaRecorder: MediaRecorder | null = null;
     let mediaStream: MediaStream | null = null;
     let monitorSource: AudioNode | null = null;
@@ -172,12 +159,91 @@ export default {
     const activeMedia: HTMLMediaElement[] = [];
     const activeSources: AudioNode[] = [];
 
-    function getAudioContext(): AudioContext | null {
-      if (audioCtx) return audioCtx;
-      const bus = getSessionBus(model.get("session_id") as string);
-      audioCtx = bus?.audioCtx || createAudioContext();
-      return audioCtx;
+    // Transport: the timeline follows the session clock (see session.ts).
+    // Model writes that originate from clock events set `mirroring` so the
+    // model observers below do not feed them back into the clock.
+    let mirroring = false;
+    let suppressRestart = false;
+
+    function mirror(write: () => void, save = false): void {
+      mirroring = true;
+      try {
+        write();
+      } finally {
+        mirroring = false;
+      }
+      if (save) model.save_changes();
     }
+
+    function getAudioContext(): AudioContext | null {
+      return clock().context();
+    }
+
+    function currentBeat(): number {
+      return clampBeat(model, clock().beat());
+    }
+
+    function recordingActive(): boolean {
+      return Boolean(mediaRecorder || countInTimer || recordingPending);
+    }
+
+    function setRecordingFlag(on: boolean): void {
+      model.set("is_recording", on);
+      clock().setRecording(on);
+    }
+
+    function onClockEvent(event: ClockEvent): void {
+      const clk = clock();
+      switch (event.type) {
+        case "play":
+          mirror(() => model.set("is_playing", true), true);
+          startPlayback();
+          syncTransportControls();
+          break;
+        case "stop":
+          clearScheduledPlayback();
+          mirror(() => {
+            model.set("is_playing", false);
+            model.set("current_beat", clampBeat(model, event.beat));
+          }, true);
+          if (recordingActive()) stopRecording();
+          syncTransportControls();
+          break;
+        case "seek":
+          playbackDisplayBeat = null;
+          mirror(() => model.set("current_beat", clampBeat(model, event.beat)));
+          if (clk.playing && !suppressRestart) startPlayback();
+          syncTransportControls();
+          break;
+        case "tempo":
+          if (Number(model.get("bpm")) !== clk.bpm) {
+            mirror(() => model.set("bpm", clk.bpm), true);
+          }
+          if (clk.playing) startPlayback();
+          break;
+        case "record":
+          if (clk.recording) {
+            if (!recordingActive()) void startRecording();
+          } else if (recordingActive()) {
+            stopRecording();
+          }
+          syncTransportControls();
+          break;
+        case "loop":
+        case "timesig":
+          break;
+      }
+    }
+
+    function onRebind(clk: SessionClock): void {
+      clearScheduledPlayback();
+      mirror(() => model.set("is_playing", clk.playing));
+      if (clk.playing) startPlayback();
+      syncTransportControls();
+    }
+
+    const binding = bindClock(model, onClockEvent, onRebind);
+    const clock = (): SessionClock => binding.clock();
 
     function clearCountIn(): void {
       if (countInTimer) {
@@ -234,10 +300,6 @@ export default {
       playbackDisplayBeat = null;
     }
 
-    function boundedCurrentBeat(): number {
-      return clampBeat(model, numberValue(model.get("current_beat"), 0));
-    }
-
     function writeRecordingError(message: string): void {
       if (disposed) return;
       clearCountIn();
@@ -248,7 +310,7 @@ export default {
       recordingStartedPlayback = false;
       recordingStopBeat = null;
       model.set("recording_error", message);
-      model.set("is_recording", false);
+      setRecordingFlag(false);
       model.set("recording_track", -1);
       model.save_changes();
       syncTransportControls();
@@ -317,7 +379,7 @@ export default {
       model.set("recorded_clip", clip);
       model.set("selected_clip_id", clip.id);
       model.set("recording_error", "");
-      model.set("is_recording", false);
+      setRecordingFlag(false);
       model.set("recording_track", -1);
       model.set("recording_countdown_beats", 0);
       model.set(
@@ -356,9 +418,10 @@ export default {
     }
 
     function ensurePlaybackStarted(): void {
-      if (model.get("is_playing")) return;
+      const clk = clock();
+      if (clk.playing) return;
       recordingStartedPlayback = true;
-      model.set("is_playing", true);
+      clk.play();
     }
 
     function beginRecording(
@@ -389,7 +452,7 @@ export default {
       model.set("recording_error", "");
       model.set("recording_track", trackIndex);
       model.set("recording_countdown_beats", 0);
-      model.set("is_recording", true);
+      setRecordingFlag(true);
       ensurePlaybackStarted();
       model.save_changes();
       syncTransportControls();
@@ -463,7 +526,7 @@ export default {
       model.set("recording_error", "");
       model.set("recording_track", trackIndex);
       model.set("recording_countdown_beats", 0);
-      model.set("is_recording", true);
+      setRecordingFlag(true);
       model.save_changes();
 
       try {
@@ -481,7 +544,7 @@ export default {
         mediaStream = stream;
         const track = getTracks(model)[trackIndex];
         startInputMonitoring(track, mediaStream);
-        const targetBeat = boundedCurrentBeat();
+        const targetBeat = currentBeat();
         const preRollBeats = countInBeats(model);
         const preRollStartBeat =
           preRollBeats > 0
@@ -496,7 +559,7 @@ export default {
 
         model.set("recording_countdown_beats", delayBeats);
         if (preRollBeats > 0 && targetBeat > 0) {
-          model.set("current_beat", preRollStartBeat);
+          clock().seek(preRollStartBeat);
           ensurePlaybackStarted();
         }
         model.save_changes();
@@ -529,21 +592,19 @@ export default {
       if (!mediaRecorder) {
         recordingGeneration += 1;
         recordingPending = false;
-        model.set("is_recording", false);
+        setRecordingFlag(false);
         model.set("recording_track", -1);
         model.set("recording_countdown_beats", 0);
-        if (recordingStartedPlayback) model.set("is_playing", false);
+        const stopPlayback = recordingStartedPlayback;
         recordingStartedPlayback = false;
         stopStream();
         model.save_changes();
+        if (stopPlayback) clock().stop();
         syncTransportControls();
         return;
       }
       if (mediaRecorder.state !== "inactive") {
-        recordingStopBeat = Math.max(
-          recordingStartBeat,
-          playbackDisplayBeat ?? boundedCurrentBeat(),
-        );
+        recordingStopBeat = Math.max(recordingStartBeat, currentBeat());
         mediaRecorder.stop();
       }
     }
@@ -605,19 +666,22 @@ export default {
 
     function startPlayback(): void {
       clearScheduledPlayback();
-      const ctx = getAudioContext();
+      const clk = clock();
+      const ctx = clk.context();
       void ctx?.resume?.();
 
+      const length = timelineLength(model);
+      if (clk.beat() >= length) {
+        // Reached the end earlier: rewind. The seek event re-enters here.
+        clk.seek(0);
+        return;
+      }
       const tracks = getTracks(model);
       const hasSolo = tracks.some((track) => track.solo);
       const clips = getClips(model);
-      const bpm = Math.max(1, numberValue(model.get("bpm"), 120));
-      const bps = bpm / 60;
-      const length = timelineLength(model);
-      const startBeat =
-        boundedCurrentBeat() >= length ? 0 : boundedCurrentBeat();
+      const bps = 1 / clk.secondsPerBeat();
+      const startBeat = clk.beat();
       playbackDisplayBeat = startBeat;
-      const startMs = performance.now();
 
       clips.forEach((clip) => {
         const track = tracks[clip.track_index];
@@ -637,16 +701,15 @@ export default {
       });
 
       playheadTimer = setInterval(() => {
-        const nextBeat =
-          startBeat + ((performance.now() - startMs) / 1000) * bps;
+        const nextBeat = clk.beat();
         maybeExtendTimelineForRecording(nextBeat);
         const currentLength = timelineLength(model);
         if (nextBeat >= currentLength) {
+          // End of the arrangement: stop the session and park the playhead.
           playbackDisplayBeat = currentLength;
-          model.set("current_beat", currentLength);
-          model.set("is_playing", false);
-          model.save_changes();
-          stopPlayback(false);
+          clearScheduledPlayback();
+          clk.stop();
+          clk.seek(currentLength);
           return;
         }
         playbackDisplayBeat = nextBeat;
@@ -654,26 +717,22 @@ export default {
       }, 50);
     }
 
-    function stopPlayback(save = false): void {
-      clearScheduledPlayback();
-      if (save) setAndSave(model, "is_playing", false);
-      syncTransportControls();
-    }
-
     function seekToBeat(
       beat: number,
       save = true,
       restartPlayback = true,
     ): void {
-      if (mediaRecorder || countInTimer || recordingPending) return;
+      if (recordingActive()) return;
       const nextBeat = clampBeat(model, beat);
-      const wasPlaying = Boolean(model.get("is_playing"));
-      if (wasPlaying && !restartPlayback) clearScheduledPlayback();
-      playbackDisplayBeat = null;
-      model.set("current_beat", nextBeat);
+      const clk = clock();
+      if (clk.playing && !restartPlayback) clearScheduledPlayback();
+      suppressRestart = !restartPlayback;
+      try {
+        clk.seek(nextBeat);
+      } finally {
+        suppressRestart = false;
+      }
       if (save) model.save_changes();
-      syncTransportControls();
-      if (restartPlayback && wasPlaying) startPlayback();
     }
 
     function beatFromPointer(
@@ -945,8 +1004,9 @@ export default {
       root
         .querySelector(".nbplay-timeline-play")
         ?.addEventListener("click", () => {
-          const next = !model.get("is_playing");
-          setAndSave(model, "is_playing", next);
+          const clk = clock();
+          if (clk.playing) clk.stop();
+          else clk.play();
         });
       root
         .querySelector(".nbplay-timeline-record")
@@ -982,22 +1042,36 @@ export default {
       syncTransportControls();
     }
 
+    // Play state and position arriving from the kernel (Python callers,
+    // the Session's transport links). Mirrored clock events skip these.
     function syncPlaybackState(): void {
-      if (disposed) return;
-      if (model.get("is_playing")) startPlayback();
-      else {
-        stopPlayback(false);
-        if (mediaRecorder || countInTimer || recordingPending) stopRecording();
+      if (disposed || mirroring) return;
+      const clk = clock();
+      if (model.get("is_playing")) {
+        if (!clk.playing) clk.play();
+      } else if (clk.playing) {
+        clk.stop();
+      }
+      syncTransportControls();
+    }
+
+    function syncPositionState(): void {
+      if (disposed || mirroring) return;
+      const clk = clock();
+      // While playing, the clock is authoritative; seeks come through
+      // the transport. When stopped, an external write moves the playhead.
+      if (!clk.playing) {
+        const beat = clampBeat(
+          model,
+          numberValue(model.get("current_beat"), 0),
+        );
+        if (Math.abs(beat - clk.beat()) > 1e-9) clk.seek(beat);
       }
       syncTransportControls();
     }
 
     function syncLengthState(): void {
       syncTimeline();
-      syncTransportControls();
-    }
-
-    function syncPositionState(): void {
       syncTransportControls();
     }
 
@@ -1015,16 +1089,37 @@ export default {
     model.on("change:is_recording", () => {
       if (disposed) return;
       if (model.get("is_recording")) {
-        if (!mediaRecorder && !countInTimer && !recordingPending)
-          void startRecording();
-      } else if (mediaRecorder || countInTimer || recordingPending) {
+        if (!recordingActive()) void startRecording();
+      } else if (recordingActive()) {
         stopRecording();
       }
       syncTransportControls();
     });
     model.on("change:current_beat", syncPositionState);
 
+    model.on("change:bpm", () => {
+      if (disposed || mirroring) return;
+      clock().setTempo(numberValue(model.get("bpm"), 120));
+    });
+
+    // Initial state: tempo comes from the kernel; the playhead comes from
+    // the model when the clock is idle, and a running clock (started by
+    // another widget) wins otherwise.
+    {
+      const clk = clock();
+      clk.setTempo(numberValue(model.get("bpm"), 120));
+      if (!clk.playing) {
+        const beat = clampBeat(
+          model,
+          numberValue(model.get("current_beat"), 0),
+        );
+        if (Math.abs(beat - clk.beat()) > 1e-9) clk.seek(beat);
+      }
+      mirror(() => model.set("is_playing", clk.playing));
+    }
+
     syncTimeline();
+    if (clock().playing) startPlayback();
 
     return () => {
       disposed = true;
@@ -1040,6 +1135,7 @@ export default {
       }
       stopStream();
       clearScheduledPlayback();
+      binding.dispose();
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
       root.remove();
     };
