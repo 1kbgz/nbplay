@@ -158,6 +158,7 @@ emsdk
 # AI
 ROADMAP.md
 AGENTS.md
+DESIGN.md
 .github/hooks/sdlc.json
 .superpowers
 
