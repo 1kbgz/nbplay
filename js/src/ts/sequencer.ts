@@ -7,6 +7,7 @@ import {
   type StepData,
   voicesFromModel,
 } from "./scheduler.ts";
+import { bindClock, type ClockEvent, type SessionClock } from "./session.ts";
 
 const NOTE_NAMES: string[] = [
   "C",
@@ -152,7 +153,89 @@ function render({
   const grid = root.querySelector(".nbplay-seq-grid")! as HTMLDivElement;
   const info = root.querySelector(".nbplay-seq-info")! as HTMLSpanElement;
 
-  const audioScheduler = createAudioScheduler();
+  // Transport: the sequencer follows the session clock when it has a
+  // session_id, otherwise a private clock. See session.ts.
+  const audioScheduler = createAudioScheduler({ onEnd: onPatternEnd });
+  let mirroring = false;
+  let disconnected = false;
+
+  function mirror(write: () => void, save = false): void {
+    mirroring = true;
+    try {
+      write();
+    } finally {
+      mirroring = false;
+    }
+    if (save && !disconnected) model.save_changes();
+  }
+
+  function startScheduler(): void {
+    if (!audioScheduler.isPlaying()) audioScheduler.start(model, clock());
+  }
+
+  function stopLocal(save: boolean): void {
+    audioScheduler.stop();
+    mirror(() => {
+      model.set("is_playing", false);
+      model.set("current_step", -1);
+    }, save);
+    syncPlayState();
+  }
+
+  function onPatternEnd(): void {
+    // A one-shot pattern finished. Standalone sequencers own their clock and
+    // rewind it; in a session the clock keeps running for other widgets.
+    if (binding.shared()) {
+      stopLocal(true);
+    } else {
+      const clk = clock();
+      clk.stop();
+      clk.seek(0);
+    }
+  }
+
+  function onClockEvent(event: ClockEvent): void {
+    switch (event.type) {
+      case "play":
+        mirror(() => model.set("is_playing", true), true);
+        startScheduler();
+        syncPlayState();
+        break;
+      case "stop":
+        stopLocal(true);
+        break;
+      case "seek":
+      case "loop":
+        audioScheduler.realign();
+        break;
+      case "tempo": {
+        audioScheduler.realign();
+        const bpm = clock().bpm;
+        if (Number(model.get("bpm")) !== bpm) {
+          mirror(() => model.set("bpm", bpm), true);
+        }
+        syncControls();
+        break;
+      }
+      case "record":
+      case "timesig":
+        break;
+    }
+  }
+
+  function onRebind(clk: SessionClock): void {
+    audioScheduler.stop();
+    clk.setTempo(Number(model.get("bpm")));
+    mirror(() => {
+      model.set("is_playing", clk.playing);
+      model.set("current_step", -1);
+    });
+    if (clk.playing) startScheduler();
+    syncPlayState();
+  }
+
+  const binding = bindClock(model, onClockEvent, onRebind);
+  const clock = (): SessionClock => binding.clock();
 
   // Recording state
   const armedVoices: Set<number> = new Set();
@@ -591,22 +674,31 @@ function render({
   }
 
   playBtn.addEventListener("click", () => {
-    const playing = model.get("is_playing") as boolean;
-    model.set("is_playing", !playing);
-    model.save_changes();
+    const clk = clock();
+    if (model.get("is_playing")) {
+      // In a session, pausing this sequencer leaves the shared clock alone.
+      if (binding.shared()) stopLocal(true);
+      else clk.stop();
+    } else if (clk.playing) {
+      mirror(() => model.set("is_playing", true), true);
+      startScheduler();
+      syncPlayState();
+    } else {
+      clk.play();
+    }
   });
 
   stopBtn.addEventListener("click", () => {
-    model.set("is_playing", false);
-    model.set("current_step", -1);
-    model.save_changes();
+    const clk = clock();
+    if (clk.playing) clk.stop();
+    else stopLocal(true);
+    clk.seek(0);
   });
 
   bpmSlider.addEventListener("input", () => {
     const val = parseFloat(bpmSlider.value);
     bpmVal.textContent = val + " BPM";
-    model.set("bpm", val);
-    model.save_changes();
+    clock().setTempo(val);
   });
 
   makeEditable(bpmVal, {
@@ -618,8 +710,7 @@ function render({
       return Math.max(30, Math.min(300, Math.round(v)));
     },
     apply: (v: unknown) => {
-      model.set("bpm", v);
-      model.save_changes();
+      clock().setTempo(v as number);
     },
     sync: syncControls,
   });
@@ -665,15 +756,33 @@ function render({
       syncGrid();
     }
 
+    syncPlayState();
+  }
+
+  function syncPlayState(): void {
     const playing = model.get("is_playing") as boolean;
     playBtn.textContent = playing ? "⏸" : "▶";
     playBtn.classList.toggle("playing", playing);
+  }
 
-    if (playing && !audioScheduler.isPlaying()) {
-      audioScheduler.start(model);
-    } else if (!playing && audioScheduler.isPlaying()) {
+  // Play state arriving from the kernel (Python callers, the Session's
+  // transport link). Mirrored clock events skip this via `mirroring`.
+  function onPlayStateChange(): void {
+    onModelChange();
+    if (mirroring) return;
+    const clk = clock();
+    if (model.get("is_playing")) {
+      if (clk.playing) startScheduler();
+      else clk.play();
+    } else {
       audioScheduler.stop();
+      if (!binding.shared()) clk.stop();
     }
+  }
+
+  function onBpmChange(): void {
+    syncControls();
+    if (!mirroring) clock().setTempo(Number(model.get("bpm")));
   }
 
   function syncControls(): void {
@@ -692,8 +801,8 @@ function render({
 
   model.on("change:voices_data", onModelChange);
   model.on("change:current_step", onModelChange);
-  model.on("change:is_playing", onModelChange);
-  model.on("change:bpm", syncControls);
+  model.on("change:is_playing", onPlayStateChange);
+  model.on("change:bpm", onBpmChange);
   model.on("change:measures", onGridConfigModelChange);
   model.on("change:step_duration", onGridConfigModelChange);
   model.on("change:time_signature_num", onGridConfigModelChange);
@@ -706,13 +815,19 @@ function render({
   updateRecVisibility();
   buildGrid();
 
-  // Force stopped state on render — prevents stale is_playing=true
-  // from a saved notebook from starting the scheduler immediately.
-  // Only update local model state; do NOT call save_changes() here
-  // because sending comm messages during render can race with other
-  // widgets still being initialised (e.g. Session dlinks).
-  model.set("is_playing", false);
-  model.set("current_step", -1);
+  // Play state comes from the browser clock, never from a saved notebook's
+  // stale is_playing=true. Only update local model state; do NOT call
+  // save_changes() here because sending comm messages during render can
+  // race with other widgets still being initialised (e.g. Session links).
+  {
+    const clk = clock();
+    clk.setTempo(Number(model.get("bpm")));
+    mirror(() => {
+      model.set("is_playing", clk.playing);
+      model.set("current_step", -1);
+    });
+    if (clk.playing) startScheduler();
+  }
 
   onModelChange();
 
@@ -727,9 +842,10 @@ function render({
 
   // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
-    model.set("is_playing", false);
-    model.set("current_step", -1);
+    disconnected = true;
     audioScheduler.stop();
+    if (!binding.shared()) clock().stop();
+    stopLocal(false);
     armedVoices.clear();
     syncRecState();
     onModelChange();
@@ -740,6 +856,7 @@ function render({
     cancelPendingKeyEdit();
     cancelDisconnect();
     audioScheduler.destroy();
+    binding.dispose();
   };
 }
 

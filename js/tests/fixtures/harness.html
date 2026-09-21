@@ -139,9 +139,21 @@
       class MockAudioContext {
         constructor(opts) {
           this.sampleRate = opts?.sampleRate || 44100;
-          this.currentTime = 0;
+          this._createdMs = performance.now();
+          this._timeOffset = 0;
           this.state = "running";
           this.destination = new MockAudioNode();
+        }
+        // currentTime advances in real time like a running context;
+        // assigning it jumps the clock to that value and keeps advancing.
+        get currentTime() {
+          return (
+            this._timeOffset + (performance.now() - this._createdMs) / 1000
+          );
+        }
+        set currentTime(value) {
+          this._timeOffset =
+            value - (performance.now() - this._createdMs) / 1000;
         }
         createGain() {
           return new MockGainNode();

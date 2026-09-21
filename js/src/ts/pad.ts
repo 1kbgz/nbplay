@@ -16,6 +16,7 @@ import {
   type PadAction,
 } from "./pads.ts";
 import { routeNoteOn, routeNoteOff, type KeyboardRoute } from "./routing.ts";
+import { getSessionBus } from "./session.ts";
 
 function midiToHz(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12);
@@ -40,16 +41,10 @@ function createAudioEngine(
   return {
     noteOn(note: number, velocity: number): void {
       if (!ctx) {
-        const g = globalThis as Record<string, unknown>;
-        const nbplay = g.__nbplay as
-          | Record<
-              string,
-              { audioCtx: AudioContext; channels: { gain: AudioNode }[] }
-            >
-          | undefined;
-        if (sessionId && nbplay?.[sessionId]?.channels[channelIndex]) {
-          ctx = nbplay[sessionId].audioCtx;
-          output = nbplay[sessionId].channels[channelIndex].gain;
+        const bus = getSessionBus(sessionId);
+        if (bus?.audioCtx && bus.channels?.[channelIndex]) {
+          ctx = bus.audioCtx;
+          output = bus.channels[channelIndex].gain;
           ownCtx = false;
         } else {
           ctx = createAudioContext();

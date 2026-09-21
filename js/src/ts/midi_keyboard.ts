@@ -6,12 +6,8 @@ import {
   createAudioContext,
   onKernelDisconnect,
 } from "./helpers.ts";
-import {
-  routeNoteOn,
-  routeNoteOff,
-  type KeyboardRoute,
-  type SamplerBus,
-} from "./routing.ts";
+import { routeNoteOn, routeNoteOff, type KeyboardRoute } from "./routing.ts";
+import { getSessionBus, type NoteEvent } from "./session.ts";
 
 const NOTE_NAMES: string[] = [
   "C",
@@ -43,30 +39,10 @@ function zoneForNote(note: number): Zone {
   return note < 60 ? "lower" : "upper";
 }
 
-interface NoteEvent {
-  note: number;
-  velocity: number;
-  type: "on" | "off";
-}
-
-interface NbplayBus {
-  audioCtx: AudioContext;
-  channels: { gain: AudioNode }[];
-  noteListeners?: Array<(evt: NoteEvent) => void>;
-  samplers?: Record<number, SamplerBus>;
-}
-
 interface MidiPortInfo {
   id: string;
   name: string;
   state: string;
-}
-
-function getSessionBus(sessionId: string): NbplayBus | undefined {
-  if (!sessionId) return undefined;
-  const g = globalThis as Record<string, unknown>;
-  const nbplay = g.__nbplay as Record<string, NbplayBus> | undefined;
-  return nbplay?.[sessionId];
 }
 
 function broadcastNote(sessionId: string, evt: NoteEvent): void {
@@ -149,7 +125,7 @@ function createMidiAudio() {
   return {
     setSession(sessionId: string, channelIndex: number): void {
       const bus = getSessionBus(sessionId);
-      if (bus && channelIndex >= 0 && bus.channels[channelIndex]) {
+      if (bus?.audioCtx && channelIndex >= 0 && bus.channels?.[channelIndex]) {
         audioCtx = bus.audioCtx;
         outputNode = bus.channels[channelIndex].gain;
         ownAudioCtx = false;
