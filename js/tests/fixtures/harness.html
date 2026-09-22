@@ -124,6 +124,13 @@
         }
       }
 
+      class MockMediaStreamDestinationNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.stream = { getTracks: () => [], mock: "channel-tap" };
+        }
+      }
+
       class MockAudioBuffer {
         constructor(opts) {
           this.numberOfChannels = opts.numberOfChannels || 1;
@@ -175,6 +182,13 @@
           window.__mediaStreamSources = window.__mediaStreamSources || [];
           window.__mediaStreamSources.push(source);
           return source;
+        }
+        createMediaStreamDestination() {
+          const node = new MockMediaStreamDestinationNode();
+          window.__mediaStreamDestinations =
+            window.__mediaStreamDestinations || [];
+          window.__mediaStreamDestinations.push(node);
+          return node;
         }
         createStereoPanner() {
           return new MockStereoPannerNode();
