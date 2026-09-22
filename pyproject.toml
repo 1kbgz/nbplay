@@ -46,6 +46,7 @@ develop = [
     "hatch-js",
     "hatch-rs",
     "hatchling",
+    "jupyterlab",
     "mdformat",
     "mdformat-tables>=1",
     "pytest",

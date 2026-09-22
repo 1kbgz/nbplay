@@ -30,7 +30,7 @@ export default defineConfig({
     },
     {
       command:
-        "node tools/host-notebook.mjs && python -m jupyter lab --no-browser --port=8899 --ServerApp.ip=127.0.0.1 --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True --ServerApp.root_dir=dist/hosts --LabApp.open_browser=False",
+        "node tools/host-notebook.mjs && python -m jupyter lab --no-browser --port=8899 --ServerApp.ip=127.0.0.1 --ServerApp.token=\"\" --ServerApp.password=\"\" --ServerApp.disable_check_xsrf=True --ServerApp.root_dir=dist/hosts --LabApp.open_browser=False",
       url: "http://127.0.0.1:8899/lab",
       reuseExistingServer: !process.env.CI,
       timeout: 180 * 1000,
