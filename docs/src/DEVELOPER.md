@@ -791,6 +791,25 @@ from third-party lab extensions is unrelated to nbplay. `voila` is a `develop`
 extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
 manager.
 
+### Keyboard shortcuts
+
+`bindShortcuts(root, handlers)` in `helpers.ts` scopes shortcuts to a widget:
+they fire only while focus is inside the widget's root (clicking a widget
+focuses it), never while a text field has focus, and never with Ctrl, Meta,
+or Alt held. Consumed keys call `preventDefault()`, which also stops Space
+from activating a focused button a second time.
+
+| Widget | Keys |
+| --- | --- |
+| Transport | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `↑`/`↓` BPM ±1, `Shift+↑`/`Shift+↓` BPM ±10 |
+| Sequencer | `Space` play/pause, `Shift+Space` stop, arrows move the step cursor, `Enter`/`X` toggle the cursor step, `Esc` clears the cursor and any pending note edit |
+| Timeline | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `D` duplicate clip, `Delete`/`Backspace` delete clip |
+| Launcher | `Space` play/pause, `1`–`9` launch scene, `0`/`Esc` stop all |
+
+The QWERTY `KeyboardWidget` captures keys at window level when it, or a
+sequencer that is recording or waiting for a note, has focus; in that state
+its bindings (including `Space` as global sustain) win.
+
 ### Rust tests
 
 Rust unit tests live beside the implementation modules under `rust/src/` and in

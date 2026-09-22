@@ -8,7 +8,12 @@
 // arriving from the kernel (Python callers, traitlets links) are forwarded
 // to the clock, which every other widget in the session follows.
 
-import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
+import {
+  type AnyModel,
+  bindShortcuts,
+  makeEditable,
+  onKernelDisconnect,
+} from "./helpers.ts";
 import { bindClock, type ClockEvent, type SessionClock } from "./session.ts";
 
 function render({
@@ -282,27 +287,44 @@ function render({
   const binding = bindClock(model, onClockEvent, onRebind);
   const clock = (): SessionClock => binding.clock();
 
-  // Buttons
+  // Actions (buttons and keyboard shortcuts)
 
-  playBtn.addEventListener("click", () => {
+  function togglePlay(): void {
     const clk = clock();
     if (clk.playing) clk.stop();
     else clk.play();
-  });
+  }
 
-  recordBtn.addEventListener("click", () => {
+  function toggleRecord(): void {
     const clk = clock();
     const next = !clk.recording;
     clk.setRecording(next);
     if (next) clk.play();
-  });
+  }
 
-  stopBtn.addEventListener("click", () => {
+  function stopAndRewind(): void {
     const clk = clock();
     clk.stop();
     clk.setRecording(false);
     clk.seek(0);
-  });
+  }
+
+  function nudgeTempo(delta: number): void {
+    const next = Math.max(30, Math.min(300, Math.round(clock().bpm) + delta));
+    bpmVal.textContent = next + " BPM";
+    clock().setTempo(next);
+  }
+
+  function toggleLoop(): void {
+    model.set("loop_enabled", !model.get("loop_enabled"));
+    model.save_changes();
+    pushLoop(clock());
+  }
+
+  playBtn.addEventListener("click", togglePlay);
+  recordBtn.addEventListener("click", toggleRecord);
+  stopBtn.addEventListener("click", stopAndRewind);
+  loopBtn.addEventListener("click", toggleLoop);
 
   bpmSl.addEventListener("input", () => {
     const v = parseFloat(bpmSl.value);
@@ -310,10 +332,16 @@ function render({
     clock().setTempo(v);
   });
 
-  loopBtn.addEventListener("click", () => {
-    model.set("loop_enabled", !model.get("loop_enabled"));
-    model.save_changes();
-    pushLoop(clock());
+  const transportRoot = el.querySelector(".nbplay-transport") as HTMLElement;
+  const unbindShortcuts = bindShortcuts(transportRoot, {
+    Space: togglePlay,
+    "Shift+Space": stopAndRewind,
+    r: toggleRecord,
+    l: toggleLoop,
+    ArrowUp: () => nudgeTempo(1),
+    ArrowDown: () => nudgeTempo(-1),
+    "Shift+ArrowUp": () => nudgeTempo(10),
+    "Shift+ArrowDown": () => nudgeTempo(-10),
   });
 
   makeEditable(bpmVal, {
@@ -405,6 +433,7 @@ function render({
   return () => {
     stopTicking();
     cancelDisconnect();
+    unbindShortcuts();
     binding.dispose();
   };
 }

@@ -1,7 +1,12 @@
 // nbplay SequencerWidget – anywidget ESM frontend
 // Step sequencer grid with Web Audio lookahead scheduler
 
-import { type AnyModel, makeEditable, onKernelDisconnect } from "./helpers.ts";
+import {
+  type AnyModel,
+  bindShortcuts,
+  makeEditable,
+  onKernelDisconnect,
+} from "./helpers.ts";
 import {
   createAudioScheduler,
   type StepData,
@@ -642,6 +647,10 @@ function render({
       if (i >= steps.length) return;
       cell.classList.toggle("active", !!steps[i].active);
       cell.classList.toggle("current", i === currentStep);
+      cell.classList.toggle(
+        "cursor",
+        cursor !== null && cursor.voice === v && cursor.step === i,
+      );
       cell.textContent = noteName(steps[i].note);
       el.title = `Voice ${v + 1} Step ${i + 1}: ${noteName(steps[i].note)} vel=${steps[i].velocity} prob=${steps[i].probability ?? 100}%`;
     });
@@ -673,7 +682,7 @@ function render({
     info.textContent = `${totalActive}/${numSteps * voiceCount} steps active${voiceInfo} · ${model.get("bpm")} BPM · ${formatGridLength()}`;
   }
 
-  playBtn.addEventListener("click", () => {
+  function togglePlay(): void {
     const clk = clock();
     if (model.get("is_playing")) {
       // In a session, pausing this sequencer leaves the shared clock alone.
@@ -686,13 +695,74 @@ function render({
     } else {
       clk.play();
     }
-  });
+  }
 
-  stopBtn.addEventListener("click", () => {
+  function stopAndRewind(): void {
     const clk = clock();
     if (clk.playing) clk.stop();
     else stopLocal(true);
     clk.seek(0);
+  }
+
+  playBtn.addEventListener("click", togglePlay);
+  stopBtn.addEventListener("click", stopAndRewind);
+
+  // Keyboard step cursor: arrow keys move it, Enter/x toggle the step.
+  let cursor: { voice: number; step: number } | null = null;
+
+  function syncCursor(): void {
+    grid.querySelectorAll(".nbplay-seq-cell.cursor").forEach((cell) => {
+      cell.classList.remove("cursor");
+    });
+    if (!cursor) return;
+    const cell = grid.querySelector(
+      `.nbplay-seq-cell[data-voice="${cursor.voice}"][data-step="${cursor.step}"]`,
+    );
+    cell?.classList.add("cursor");
+  }
+
+  function moveCursor(dVoice: number, dStep: number): void {
+    const voices = getVoices();
+    if (voices.length === 0) return;
+    const numSteps = voices[0].length;
+    const next = cursor
+      ? { voice: cursor.voice + dVoice, step: cursor.step + dStep }
+      : { voice: 0, step: 0 };
+    cursor = {
+      voice: Math.max(0, Math.min(voices.length - 1, next.voice)),
+      step: Math.max(0, Math.min(numSteps - 1, next.step)),
+    };
+    syncCursor();
+  }
+
+  function toggleCursorStep(): void {
+    if (!cursor) {
+      moveCursor(0, 0);
+      return;
+    }
+    const vd = [...getVoices()];
+    const s = [...(vd[cursor.voice] || [])];
+    if (cursor.step >= s.length) return;
+    s[cursor.step] = { ...s[cursor.step], active: !s[cursor.step].active };
+    vd[cursor.voice] = s;
+    model.set("voices_data", vd);
+    model.save_changes();
+  }
+
+  const unbindShortcuts = bindShortcuts(root, {
+    Space: togglePlay,
+    "Shift+Space": stopAndRewind,
+    ArrowLeft: () => moveCursor(0, -1),
+    ArrowRight: () => moveCursor(0, 1),
+    ArrowUp: () => moveCursor(-1, 0),
+    ArrowDown: () => moveCursor(1, 0),
+    Enter: toggleCursorStep,
+    x: toggleCursorStep,
+    Escape: () => {
+      cancelPendingKeyEdit();
+      cursor = null;
+      syncCursor();
+    },
   });
 
   bpmSlider.addEventListener("input", () => {
@@ -855,6 +925,7 @@ function render({
     document.removeEventListener("nbplay-note", onDocumentNote);
     cancelPendingKeyEdit();
     cancelDisconnect();
+    unbindShortcuts();
     audioScheduler.destroy();
     binding.dispose();
   };

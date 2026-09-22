@@ -250,6 +250,10 @@
     inset 0 0 4px var(--jp-brand-color1, #00d4ff);
   border-color: var(--jp-brand-color1, #00d4ff);
 }
+.nbplay-seq-cell.cursor {
+  outline: 2px solid var(--jp-brand-color1, #00d4ff);
+  outline-offset: -2px;
+}
 .nbplay-seq-cell.active.current {
   background: var(--jp-brand-color1, #00d4ff);
   color: var(--jp-layout-color0, #000);
