@@ -1887,8 +1887,6 @@ def _slot_voices(pattern):
 
 
 def _normalize_launcher_slot(slot):
-    if not isinstance(slot, dict):
-        raise ValueError(f"launcher slot must be dict, got {type(slot).__name__}")  # noqa: TRY004
     voices = []
     for voice in slot.get("voices_data") or []:
         voices.append([dict(step) for step in voice])
@@ -1959,8 +1957,6 @@ class LauncherWidget(anywidget.AnyWidget):
     def _validate_tracks(self, proposal):
         tracks = []
         for index, track in enumerate(proposal["value"] or []):
-            if not isinstance(track, dict):
-                raise ValueError(f"launcher track must be dict, got {type(track).__name__}")  # noqa: TRY004
             tracks.append(
                 {
                     "name": str(track.get("name", f"Track {index + 1}")),
@@ -2108,7 +2104,7 @@ class LauncherWidget(anywidget.AnyWidget):
 
         def load(_change=None):
             selected = self.selected_slot
-            if not selected:
+            if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
                 return
             state["loading"] = True
             try:

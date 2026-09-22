@@ -2779,6 +2779,41 @@ class TestLauncherWidget:
         editor.set_step(0, note=99, active=True)
         assert launcher.get_slot(0, 0)["voices_data"][0][0]["note"] == 36
 
+    def test_set_slot_from_voice_list_and_validation_errors(self):
+        launcher = self._launcher()
+        voices = [[{"note": 36, "active": True}], [{"note": 48, "active": True}, {"note": 50, "active": False}]]
+        slot = launcher.set_slot(0, 0, voices)
+        assert len(slot["voices_data"]) == 2
+        # Shorter voices are padded to the longest voice
+        assert len(slot["voices_data"][0]) == 2
+        assert slot["voices_data"][0][1]["active"] is False
+        with pytest.raises(ValueError, match="at least one step"):
+            launcher.slots = [{"track_index": 0, "scene_index": 0, "voices_data": [[]]}]
+        assert launcher.active_slots == [-1, -1]
+        launcher.active_slots = [-5, 3]
+        assert launcher.active_slots == [-1, 3]
+        launcher.queued_slots = [-9]
+        assert launcher.queued_slots == [-2]
+
+    def test_launch_scene_without_tracks(self):
+        launcher = LauncherWidget()
+        launcher.add_scene("A")
+        launcher.launch_scene(0)
+        assert launcher.launch_request["action"] == "scene"
+        with pytest.raises(IndexError):
+            launcher.launch_scene(1)
+
+    def test_slot_editor_ignores_cleared_selection(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        editor = SequencerWidget(length=1)
+        launcher.bind_slot_editor(editor)
+        launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        launcher.selected_slot = {"track_index": 1, "scene_index": 1}  # empty slot: nothing to load
+        editor.set_step(0, note=41, active=True)
+        assert launcher.get_slot(1, 1) is None
+        assert launcher.get_slot(0, 0)["voices_data"][0][0]["note"] == 36
+
     def test_slot_to_sequencer_missing(self):
         launcher = self._launcher()
         with pytest.raises(ValueError):
@@ -2969,6 +3004,22 @@ class TestSession:
         assert s.launcher.tracks[0]["channel_index"] == 0
         assert s.launcher.slots[0]["track_index"] == 0
         assert s.launcher.active_slots == [-1]
+
+    def test_remove_track_clears_launcher_selection(self):
+        s = Session()
+        s.add_track("A")
+        s.add_track("B")
+        s.launcher.add_scene()
+        s.launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        s.launcher.set_slot(1, 0, [{"note": 40, "active": True}])
+        s.launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        s.launcher.active_slots = [0, 0]
+        s.remove_track(0)
+        assert s.launcher.selected_slot == {}
+        assert [slot["track_index"] for slot in s.launcher.slots] == [0]
+        assert s.launcher.active_slots == [0]
+        s.remove_track(5)  # out of range: no-op
+        assert len(s.launcher.tracks) == 1
 
     def test_remove_track_with_mixed_lanes_adjusts_indices(self):
         s = Session()
