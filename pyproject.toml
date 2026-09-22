@@ -54,6 +54,7 @@ develop = [
     "twine",
     "ty",
     "uv",
+    "voila",
     "wheel",
 ]
 
