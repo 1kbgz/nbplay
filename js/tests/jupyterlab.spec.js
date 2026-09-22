@@ -27,7 +27,17 @@ test.describe("JupyterLab host", () => {
         await dialog.locator("button.jp-mod-accept").click();
         await expect(dialog).toBeHidden({ timeout: 30 * 1000 });
       }
-      await notebook.locator(".jp-Cell").first().click();
+      try {
+        // A dialog can open between the check above and this click; a short
+        // timeout sends a covered click back through the dialog check.
+        await notebook
+          .locator(".jp-Cell")
+          .first()
+          .click({ timeout: 10 * 1000 });
+      } catch (error) {
+        if (attempt === 3) throw error;
+        continue;
+      }
       await page.keyboard.press("Shift+Enter");
       await page.keyboard.press("Shift+Enter");
       try {
