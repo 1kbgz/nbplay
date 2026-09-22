@@ -16,12 +16,28 @@ test.describe("JupyterLab host", () => {
     ).toBeVisible({ timeout: 120 * 1000 });
 
     // Run all cells: focus the first cell, then Shift+Enter through both.
-    await notebook.locator(".jp-Cell").first().click();
-    await page.keyboard.press("Shift+Enter");
-    await page.keyboard.press("Shift+Enter");
-
+    // A freshly started kernel can swallow the first run request, so retry
+    // until the widgets appear.
     const transport = page.locator(".nbplay-transport");
-    await expect(transport).toBeVisible({ timeout: 120 * 1000 });
+    for (let attempt = 0; attempt < 4; attempt++) {
+      // JupyterLab sometimes asks "Select Kernel" when kernelspecs load after
+      // the notebook opens; accept the preselected Python kernel.
+      const dialog = page.locator(".jp-Dialog");
+      if (await dialog.isVisible()) {
+        await dialog.locator("button.jp-mod-accept").click();
+        await expect(dialog).toBeHidden({ timeout: 30 * 1000 });
+      }
+      await notebook.locator(".jp-Cell").first().click();
+      await page.keyboard.press("Shift+Enter");
+      await page.keyboard.press("Shift+Enter");
+      try {
+        await expect(transport).toBeVisible({ timeout: 30 * 1000 });
+        break;
+      } catch (error) {
+        if (attempt === 3) throw error;
+      }
+    }
+    await expect(transport).toBeVisible();
     // Host startup noise (third-party lab extensions, settings fetches) is
     // not nbplay's: only collect page errors once our widgets are up.
     const errors = [];
