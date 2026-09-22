@@ -16,8 +16,9 @@ let's play!
 [![Music composition widgets in a jupyter notebook](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif)](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif)
 
 nbplay provides composable Jupyter widgets for a browser-backed DAW: synths,
-samplers, sequencers, keyboards, pads, transport, timeline recording, and
-mixer/session routing.
+samplers, sequencers, keyboards, pads, transport, multitrack timeline
+recording, a clip launcher, and mixer/session routing, all following one shared
+session clock in the browser.
 Mixer channels and the master bus support Web Audio insert chains with built-in
 gain, filter, compressor, limiter, delay, and reverb effects, plus custom browser
 plugin factories. Custom effect descriptors must be JSON-safe; built-in effect

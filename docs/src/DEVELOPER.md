@@ -186,6 +186,7 @@ files are generated.
 | `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
 | `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
 | `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
+| `LauncherWidget` | `launcher.js` | `launcher.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
 | `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
 | `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
@@ -593,6 +594,34 @@ When `auto_extend_recording` is true, the browser extends `length` by
 `recording_extend_bars` whenever recording approaches the timeline end. Normal
 playback still stops at the end; recording stops only when the user stops it or
 the timeline reaches the validated maximum length.
+
+### LauncherWidget
+
+Python class: `LauncherWidget`. Browser file: `js/src/ts/launcher.ts`. CSS
+file: `js/src/css/launcher.css`.
+
+LauncherWidget is the beats view: a clip-launcher grid with tracks as rows and
+scenes as columns. Each filled slot holds a pattern in the sequencer's
+`voices_data` shape plus `step_duration`, `swing`, and `groove`. Python fills
+slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a
+`NoteComposer`, a list of step dicts, or a list of voices, and issues
+`launch()`, `launch_scene()`, `stop_track()`, and `stop_all()` through the
+`launch_request` trait (a nonce makes repeated commands distinct).
+`bind_slot_editor(sequencer)` turns a sequencer into the editor for whichever
+slot is selected; edits write back into the slot live.
+
+In the browser every track owns one shared-scheduler instance
+(`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over
+the active slot, so all playing slots follow the session clock's absolute beat
+grid and stay phase-locked. Launches are queued to the next boundary chosen by
+`quantize` (`bar`, `beat`, or `none`) and fired by a 25 ms queue timer; a
+launch from a stopped session starts the clock and begins immediately. A scene
+launch queues every track: tracks with a slot in that scene launch it, tracks
+without one stop. Transport stop pauses the active slots and play resumes
+them. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
+-2 for nothing queued) are mirrored to the kernel. Audio routes through each
+track's `channel_index` on the session bus, so a launcher performance can be
+captured by timeline lanes with channel-tap inputs.
 
 ### KeyboardWidget
 

@@ -16,6 +16,7 @@ from nbplay import (
     EventSequence,
     KeyboardRoute,
     KeyboardWidget,
+    LauncherWidget,
     MidiChannel,
     MidiEvent,
     MidiKeyboardWidget,
@@ -2659,6 +2660,170 @@ class TestTimelineWidget:
         assert [track["channel_index"] for track in timeline.tracks] == [0, 1]
 
 
+#  LauncherWidget
+
+
+class TestLauncherWidget:
+    def _launcher(self):
+        launcher = LauncherWidget()
+        launcher.add_track("Drums", channel_index=0)
+        launcher.add_track("Bass", channel_index=1)
+        launcher.add_scene("Intro")
+        launcher.add_scene()
+        return launcher
+
+    def test_defaults(self):
+        launcher = LauncherWidget()
+        assert launcher.quantize == "bar"
+        assert launcher.tracks == []
+        assert launcher.scenes == []
+        assert launcher.slots == []
+        assert launcher.launch_request == {}
+
+    def test_add_track_and_scene(self):
+        launcher = self._launcher()
+        assert [t["name"] for t in launcher.tracks] == ["Drums", "Bass"]
+        assert launcher.scenes == ["Intro", "Scene 2"]
+        assert launcher.active_slots == [-1, -1]
+        assert launcher.queued_slots == [-2, -2]
+
+    def test_quantize_validation(self):
+        launcher = LauncherWidget(quantize="beat")
+        assert launcher.quantize == "beat"
+        with pytest.raises(ValueError, match="quantize"):
+            launcher.quantize = "half"
+
+    def test_set_slot_from_steps_sequencer_and_composer(self):
+        launcher = self._launcher()
+        slot = launcher.set_slot(0, 0, [{"note": 36, "velocity": 120, "active": True}, {"note": 38, "active": False}])
+        assert slot["name"] == "Drums 1"
+        assert len(slot["voices_data"]) == 1
+        assert len(slot["voices_data"][0]) == 2
+        assert slot["step_duration"] == pytest.approx(0.25)
+
+        seq = SequencerWidget(length=8, num_voices=2, step_duration=0.5, swing=20)
+        seq.set_step(0, note=40, active=True)
+        slot = launcher.set_slot(1, 0, seq, name="Root")
+        assert slot["name"] == "Root"
+        assert len(slot["voices_data"]) == 2
+        assert slot["voices_data"][0][0]["note"] == 40
+        assert slot["step_duration"] == pytest.approx(0.5)
+        assert slot["swing"] == pytest.approx(20.0)
+
+        composer = NoteComposer(length=4)
+        composer.set_step(1, note=48)
+        launcher.set_slot(0, 1, composer)
+        assert launcher.get_slot(0, 1)["voices_data"][0][1]["note"] == 48
+        assert len(launcher.slots) == 3
+
+        # Replacing a slot keeps a single entry per cell
+        launcher.set_slot(0, 1, [{"note": 50, "active": True}])
+        assert len(launcher.slots) == 3
+        assert launcher.get_slot(0, 1)["voices_data"][0][0]["note"] == 50
+
+    def test_set_slot_rejects_bad_patterns(self):
+        launcher = self._launcher()
+        with pytest.raises(ValueError):
+            launcher.set_slot(0, 0, [])
+        with pytest.raises(ValueError):
+            launcher.set_slot(0, 0, "kick")
+        with pytest.raises(IndexError):
+            launcher.set_slot(5, 0, [{"note": 36}])
+        with pytest.raises(IndexError):
+            launcher.set_slot(0, 5, [{"note": 36}])
+
+    def test_clear_slot(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        launcher.clear_slot(0, 0)
+        assert launcher.get_slot(0, 0) is None
+        assert launcher.selected_slot == {}
+
+    def test_launch_requests(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        launcher.launch(0, 0)
+        first = launcher.launch_request
+        assert first["action"] == "launch"
+        assert (first["track_index"], first["scene_index"]) == (0, 0)
+        launcher.launch(0, 0)
+        assert launcher.launch_request["nonce"] == first["nonce"] + 1
+        launcher.stop_track(1)
+        assert launcher.launch_request["action"] == "stop"
+        launcher.launch_scene(1)
+        assert launcher.launch_request == {"action": "scene", "scene_index": 1, "nonce": first["nonce"] + 3}
+        launcher.stop_all()
+        assert launcher.launch_request["action"] == "stop_all"
+        with pytest.raises(ValueError):
+            launcher.launch(1, 1)
+        with pytest.raises(IndexError):
+            launcher.launch_scene(9)
+
+    def test_slot_editor_round_trip(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [{"note": 36, "active": True}, {"note": 38, "active": False}], step_duration=0.5)
+        editor = SequencerWidget(length=2)
+        unbind = launcher.bind_slot_editor(editor)
+        launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        assert editor.step_duration == pytest.approx(0.5)
+        assert editor.voices_data[0][0]["note"] == 36
+
+        editor.set_step(1, note=42, active=True)
+        slot = launcher.get_slot(0, 0)
+        assert slot["voices_data"][0][1]["note"] == 42
+        assert slot["voices_data"][0][1]["active"] is True
+        assert slot["name"] == "Drums 1"
+
+        unbind()
+        editor.set_step(0, note=99, active=True)
+        assert launcher.get_slot(0, 0)["voices_data"][0][0]["note"] == 36
+
+    def test_set_slot_from_voice_list_and_validation_errors(self):
+        launcher = self._launcher()
+        voices = [[{"note": 36, "active": True}], [{"note": 48, "active": True}, {"note": 50, "active": False}]]
+        slot = launcher.set_slot(0, 0, voices)
+        assert len(slot["voices_data"]) == 2
+        # Shorter voices are padded to the longest voice
+        assert len(slot["voices_data"][0]) == 2
+        assert slot["voices_data"][0][1]["active"] is False
+        with pytest.raises(ValueError, match="at least one step"):
+            launcher.slots = [{"track_index": 0, "scene_index": 0, "voices_data": [[]]}]
+        assert launcher.active_slots == [-1, -1]
+        launcher.active_slots = [-5, 3]
+        assert launcher.active_slots == [-1, 3]
+        launcher.queued_slots = [-9]
+        assert launcher.queued_slots == [-2]
+
+    def test_launch_scene_without_tracks(self):
+        launcher = LauncherWidget()
+        launcher.add_scene("A")
+        launcher.launch_scene(0)
+        assert launcher.launch_request["action"] == "scene"
+        with pytest.raises(IndexError):
+            launcher.launch_scene(1)
+
+    def test_slot_editor_ignores_cleared_selection(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        editor = SequencerWidget(length=1)
+        launcher.bind_slot_editor(editor)
+        launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        launcher.selected_slot = {"track_index": 1, "scene_index": 1}  # empty slot: nothing to load
+        editor.set_step(0, note=41, active=True)
+        assert launcher.get_slot(1, 1) is None
+        assert launcher.get_slot(0, 0)["voices_data"][0][0]["note"] == 36
+
+    def test_slot_to_sequencer_missing(self):
+        launcher = self._launcher()
+        with pytest.raises(ValueError):
+            launcher.slot_to_sequencer(0, 0, SequencerWidget())
+
+    def test_repr(self):
+        launcher = self._launcher()
+        assert repr(launcher) == "LauncherWidget(tracks=2, scenes=2, slots=0)"
+
+
 #  Track
 
 
@@ -2822,6 +2987,39 @@ class TestSession:
         assert s.timeline.tracks[1]["armed"] is True
         assert s.tracks[1].sequencer is None
         assert s.tracks[1].sound_source.channel_index == 1
+
+    def test_session_launcher_tracks_follow_session_tracks(self):
+        s = Session(bpm=100.0)
+        assert s.launcher.session_id == s._session_id
+        assert s.launcher.bpm == pytest.approx(100.0)
+        s.add_track("Drums")
+        s.add_track("Bass")
+        s.launcher.add_scene()
+        s.launcher.set_slot(1, 0, [{"note": 40, "active": True}])
+        assert [t["channel_index"] for t in s.launcher.tracks] == [0, 1]
+        s.transport.is_playing = True
+        assert s.launcher.is_playing is True
+        s.remove_track(0)
+        assert [t["name"] for t in s.launcher.tracks] == ["Bass"]
+        assert s.launcher.tracks[0]["channel_index"] == 0
+        assert s.launcher.slots[0]["track_index"] == 0
+        assert s.launcher.active_slots == [-1]
+
+    def test_remove_track_clears_launcher_selection(self):
+        s = Session()
+        s.add_track("A")
+        s.add_track("B")
+        s.launcher.add_scene()
+        s.launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+        s.launcher.set_slot(1, 0, [{"note": 40, "active": True}])
+        s.launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        s.launcher.active_slots = [0, 0]
+        s.remove_track(0)
+        assert s.launcher.selected_slot == {}
+        assert [slot["track_index"] for slot in s.launcher.slots] == [0]
+        assert s.launcher.active_slots == [0]
+        s.remove_track(5)  # out of range: no-op
+        assert len(s.launcher.tracks) == 1
 
     def test_remove_track_with_mixed_lanes_adjusts_indices(self):
         s = Session()

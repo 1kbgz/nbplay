@@ -1867,6 +1867,283 @@ class TimelineWidget(anywidget.AnyWidget):
         self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
 
 
+_LAUNCH_QUANTIZE = ("bar", "beat", "none")
+
+
+def _slot_voices(pattern):
+    """Coerce a pattern into ``voices_data`` (list of voices, each a list of step dicts)."""
+    if isinstance(pattern, SequencerWidget):
+        return [list(steps) for steps in pattern.voices_data]
+    if isinstance(pattern, NoteComposer):
+        return [list(pattern.steps)]
+    if isinstance(pattern, (list, tuple)):
+        if not pattern:
+            raise ValueError("pattern must not be empty")
+        if all(isinstance(voice, (list, tuple)) for voice in pattern):
+            return [list(voice) for voice in pattern]
+        if all(isinstance(step, dict) for step in pattern):
+            return [list(pattern)]
+    raise ValueError("pattern must be a SequencerWidget, NoteComposer, list of step dicts, or list of voices")
+
+
+def _normalize_launcher_slot(slot):
+    voices = []
+    for voice in slot.get("voices_data") or []:
+        voices.append([dict(step) for step in voice])
+    length = max((len(voice) for voice in voices), default=0)
+    if length == 0:
+        raise ValueError("launcher slot needs at least one step")
+    return {
+        "track_index": max(0, int(slot.get("track_index", 0))),
+        "scene_index": max(0, int(slot.get("scene_index", 0))),
+        "name": str(slot.get("name", "Clip")),
+        "voices_data": [voice + _default_steps(length - len(voice)) for voice in voices],
+        "step_duration": _positive_number(slot.get("step_duration", 0.25), "step_duration", minimum=0.001, maximum=16.0),
+        "swing": _clamped_number(slot.get("swing", 0.0), 0.0, 100.0, "swing"),
+        "groove": [float(value) for value in (slot.get("groove") or [])],
+    }
+
+
+class LauncherWidget(anywidget.AnyWidget):
+    """Beats view: a clip launcher in the session-view style.
+
+    Tracks are rows, scenes are columns, and each filled slot holds a step
+    pattern in the same ``voices_data`` shape as :class:`SequencerWidget`.
+    Launching a slot starts it on the next quantization boundary of the
+    shared session clock, so every playing slot stays phase-locked; a scene
+    launches its whole column. Playback runs in the browser through the
+    session mixer channel of each track, which means a launcher performance
+    can be captured by the timeline through channel-tap lanes.
+    """
+
+    _esm = _STATIC / "launcher.js"
+    _css = _STATIC / "launcher.css"
+
+    session_id = traitlets.Unicode("").tag(sync=True)
+    bpm = traitlets.Float(120.0).tag(sync=True)
+    is_playing = traitlets.Bool(False).tag(sync=True)
+    time_signature_num = traitlets.Int(4).tag(sync=True)
+    time_signature_den = traitlets.Int(4).tag(sync=True)
+
+    # "bar", "beat", or "none": when a launch takes effect
+    quantize = traitlets.Unicode("bar").tag(sync=True)
+
+    tracks = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    scenes = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
+    slots = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+
+    # Per track: playing scene index or -1; queued scene index, -1 for a
+    # queued stop, -2 for nothing queued. Mirrored by the browser.
+    active_slots = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
+    queued_slots = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
+    selected_slot = traitlets.Dict(default_value={}).tag(sync=True)
+
+    # Python -> browser command; the nonce makes repeated commands distinct
+    launch_request = traitlets.Dict(default_value={}).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._request_nonce = 0
+        self._editor_links = []
+
+    @traitlets.validate("quantize")
+    def _validate_quantize(self, proposal):
+        value = str(proposal["value"])
+        if value not in _LAUNCH_QUANTIZE:
+            raise ValueError(f"quantize must be one of {_LAUNCH_QUANTIZE}, got {value!r}")
+        return value
+
+    @traitlets.validate("tracks")
+    def _validate_tracks(self, proposal):
+        tracks = []
+        for index, track in enumerate(proposal["value"] or []):
+            tracks.append(
+                {
+                    "name": str(track.get("name", f"Track {index + 1}")),
+                    "channel_index": max(-1, int(track.get("channel_index", index))),
+                }
+            )
+        return tracks
+
+    @traitlets.validate("scenes")
+    def _validate_scenes(self, proposal):
+        return [str(name) for name in proposal["value"] or []]
+
+    @traitlets.validate("slots")
+    def _validate_slots(self, proposal):
+        return [_normalize_launcher_slot(slot) for slot in proposal["value"] or []]
+
+    @traitlets.validate("active_slots", "queued_slots")
+    def _validate_slot_states(self, proposal):
+        floor = -1 if proposal["trait"].name == "active_slots" else -2
+        return [max(floor, int(value)) for value in proposal["value"] or []]
+
+    def _find_slot(self, track_index, scene_index):
+        for position, slot in enumerate(self.slots):
+            if slot["track_index"] == track_index and slot["scene_index"] == scene_index:
+                return position
+        return -1
+
+    def _check_indices(self, track_index, scene_index=None):
+        track_index = int(track_index)
+        if track_index < 0 or track_index >= len(self.tracks):
+            raise IndexError(f"track index out of range: {track_index}")
+        if scene_index is None:
+            return track_index, None
+        scene_index = int(scene_index)
+        if scene_index < 0 or scene_index >= len(self.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        return track_index, scene_index
+
+    def add_track(self, name="Track", channel_index=None):
+        """Append a track row and return its index."""
+        idx = len(self.tracks)
+        self.tracks = [*self.tracks, {"name": name, "channel_index": idx if channel_index is None else channel_index}]
+        self.active_slots = [*self.active_slots, -1]
+        self.queued_slots = [*self.queued_slots, -2]
+        return idx
+
+    def add_scene(self, name=None):
+        """Append a scene column and return its index."""
+        idx = len(self.scenes)
+        self.scenes = [*self.scenes, str(name) if name is not None else f"Scene {idx + 1}"]
+        return idx
+
+    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None):
+        """Fill a slot with a pattern and return the stored slot.
+
+        ``pattern`` may be a :class:`SequencerWidget`, a :class:`NoteComposer`,
+        a list of step dicts (one voice), or a list of voices.
+        """
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        voices = _slot_voices(pattern)
+        if step_duration is None:
+            step_duration = pattern.step_duration if isinstance(pattern, SequencerWidget) else 0.25
+        if swing == 0.0 and isinstance(pattern, SequencerWidget):
+            swing = pattern.swing
+        if groove is None and isinstance(pattern, SequencerWidget):
+            groove = list(pattern.groove)
+        slot = _normalize_launcher_slot(
+            {
+                "track_index": track_index,
+                "scene_index": scene_index,
+                "name": name if name is not None else f"{self.tracks[track_index]['name']} {scene_index + 1}",
+                "voices_data": voices,
+                "step_duration": step_duration,
+                "swing": swing,
+                "groove": groove or [],
+            }
+        )
+        position = self._find_slot(track_index, scene_index)
+        slots = list(self.slots)
+        if position >= 0:
+            slots[position] = slot
+        else:
+            slots.append(slot)
+        self.slots = slots
+        return slot
+
+    def get_slot(self, track_index, scene_index):
+        """Return the slot dict at ``(track_index, scene_index)`` or ``None``."""
+        position = self._find_slot(int(track_index), int(scene_index))
+        return dict(self.slots[position]) if position >= 0 else None
+
+    def clear_slot(self, track_index, scene_index):
+        """Empty a slot."""
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        self.slots = [slot for slot in self.slots if not (slot["track_index"] == track_index and slot["scene_index"] == scene_index)]
+        if self.selected_slot == {"track_index": track_index, "scene_index": scene_index}:
+            self.selected_slot = {}
+
+    def _request(self, **payload):
+        self._request_nonce += 1
+        self.launch_request = {**payload, "nonce": self._request_nonce}
+
+    def launch(self, track_index, scene_index):
+        """Launch a slot on the next quantization boundary."""
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        if self._find_slot(track_index, scene_index) < 0:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        self._request(action="launch", track_index=track_index, scene_index=scene_index)
+
+    def stop_track(self, track_index):
+        """Stop a track on the next quantization boundary."""
+        track_index, _ = self._check_indices(track_index)
+        self._request(action="stop", track_index=track_index)
+
+    def launch_scene(self, scene_index):
+        """Launch every slot in a scene; tracks with no slot there stop."""
+        _, scene_index = self._check_indices(0, scene_index) if self.tracks else (None, int(scene_index))
+        if scene_index < 0 or scene_index >= len(self.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        self._request(action="scene", scene_index=scene_index)
+
+    def stop_all(self):
+        """Stop every track on the next quantization boundary."""
+        self._request(action="stop_all")
+
+    def slot_to_sequencer(self, track_index, scene_index, sequencer):
+        """Load a slot's pattern into a :class:`SequencerWidget` for editing."""
+        slot = self.get_slot(track_index, scene_index)
+        if slot is None:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        sequencer.step_duration = slot["step_duration"]
+        sequencer.swing = slot["swing"]
+        sequencer.groove = list(slot["groove"])
+        sequencer.voices_data = [list(voice) for voice in slot["voices_data"]]
+        return slot
+
+    def bind_slot_editor(self, sequencer):
+        """Use ``sequencer`` as the editor for whichever slot is selected.
+
+        Selecting a slot (by clicking it, or setting ``selected_slot``) loads
+        it into the sequencer; edits to the sequencer's steps write back into
+        that slot. Returns a function that removes the binding.
+        """
+        state = {"loading": False}
+
+        def load(_change=None):
+            selected = self.selected_slot
+            if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
+                return
+            state["loading"] = True
+            try:
+                self.slot_to_sequencer(selected["track_index"], selected["scene_index"], sequencer)
+            finally:
+                state["loading"] = False
+
+        def write_back(_change=None):
+            selected = self.selected_slot
+            if state["loading"] or not selected:
+                return
+            if self._find_slot(selected["track_index"], selected["scene_index"]) < 0:
+                return
+            current = self.get_slot(selected["track_index"], selected["scene_index"])
+            self.set_slot(
+                selected["track_index"],
+                selected["scene_index"],
+                sequencer,
+                name=current["name"],
+                step_duration=sequencer.step_duration,
+                swing=sequencer.swing,
+                groove=list(sequencer.groove),
+            )
+
+        self.observe(load, names="selected_slot")
+        sequencer.observe(write_back, names=["voices_data", "step_duration", "swing", "groove"])
+        load()
+
+        def unbind():
+            self.unobserve(load, names="selected_slot")
+            sequencer.unobserve(write_back, names=["voices_data", "step_duration", "swing", "groove"])
+
+        self._editor_links.append(unbind)
+        return unbind
+
+    def __repr__(self):
+        return f"LauncherWidget(tracks={len(self.tracks)}, scenes={len(self.scenes)}, slots={len(self.slots)})"
+
+
 class KeyboardRoute:
     """Validated route descriptor for keyboard → sampler mapping.
 
@@ -2455,6 +2732,18 @@ class Session:
             time_signature_num=time_signature[0],
             time_signature_den=time_signature[1],
         )
+        self.launcher = LauncherWidget(
+            session_id=self._session_id,
+            bpm=bpm,
+            time_signature_num=time_signature[0],
+            time_signature_den=time_signature[1],
+        )
+        self._launcher_links = [
+            traitlets.link((self.transport, "bpm"), (self.launcher, "bpm")),
+            traitlets.link((self.transport, "time_signature_num"), (self.launcher, "time_signature_num")),
+            traitlets.link((self.transport, "time_signature_den"), (self.launcher, "time_signature_den")),
+            traitlets.link((self.transport, "is_playing"), (self.launcher, "is_playing")),
+        ]
         self._timeline_links = [
             traitlets.link((self.transport, "bpm"), (self.timeline, "bpm")),
             traitlets.link((self.transport, "time_signature_num"), (self.timeline, "time_signature_num")),
@@ -2522,6 +2811,7 @@ class Session:
         if input is None:
             input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
         self.timeline.add_track(name, channel_idx, armed=armed, input=input)
+        self.launcher.add_track(name, channel_idx)
         return track
 
     def remove_track(self, index):
@@ -2543,6 +2833,7 @@ class Session:
                 track.sound_source.channel_index = -1
             self.mixer.remove_channel(track.mixer_channel)
             self.timeline.remove_track(index)
+            self._remove_launcher_track(index)
             # Adjust mixer_channel indices for remaining tracks
             for t in self.tracks:
                 if t.mixer_channel > track.mixer_channel:
@@ -2551,6 +2842,34 @@ class Session:
                         t.sequencer.channel_index -= 1
                     if hasattr(t.sound_source, "channel_index"):
                         t.sound_source.channel_index -= 1
+
+    def _remove_launcher_track(self, index):
+        launcher = self.launcher
+        if index < 0 or index >= len(launcher.tracks):
+            return
+        removed_channel = launcher.tracks[index]["channel_index"]
+        tracks = []
+        for i, track in enumerate(launcher.tracks):
+            if i == index:
+                continue
+            item = dict(track)
+            if removed_channel >= 0 and item["channel_index"] > removed_channel:
+                item["channel_index"] -= 1
+            tracks.append(item)
+        slots = []
+        for slot in launcher.slots:
+            if slot["track_index"] == index:
+                continue
+            item = dict(slot)
+            if item["track_index"] > index:
+                item["track_index"] -= 1
+            slots.append(item)
+        launcher.tracks = tracks
+        launcher.slots = slots
+        launcher.active_slots = [v for i, v in enumerate(launcher.active_slots) if i != index]
+        launcher.queued_slots = [v for i, v in enumerate(launcher.queued_slots) if i != index]
+        if launcher.selected_slot.get("track_index") == index:
+            launcher.selected_slot = {}
 
     def __repr__(self):
         return f"Session(bpm={self.transport.bpm}, tracks={len(self.tracks)}, channels={len(self.mixer.channels)})"
