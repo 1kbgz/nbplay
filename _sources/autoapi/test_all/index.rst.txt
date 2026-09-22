@@ -1178,6 +1178,30 @@ Module Contents
    .. py:method:: test_remove_track_drops_clips_and_shifts()
 
 
+   .. py:method:: test_recording_tracks_validation()
+
+
+   .. py:method:: test_track_input_validation()
+
+
+   .. py:method:: test_pixels_per_beat_validation()
+
+
+   .. py:method:: test_clip_offset()
+
+
+   .. py:method:: test_duplicate_clip()
+
+
+   .. py:method:: test_export_clip_requests_browser_bytes()
+
+
+   .. py:method:: test_write_exported_clip(tmp_path)
+
+
+   .. py:method:: test_import_clip_from_bytes_and_path(tmp_path)
+
+
    .. py:method:: test_remove_unrouted_track_does_not_shift_channels()
 
 
@@ -1216,6 +1240,18 @@ Module Contents
 
 
    .. py:method:: test_add_track()
+
+
+   .. py:method:: test_add_audio_only_track()
+
+      A lane with no instrument records from the microphone.
+
+
+
+   .. py:method:: test_add_instrument_track_defaults_to_channel_input()
+
+
+   .. py:method:: test_remove_track_with_mixed_lanes_adjusts_indices()
 
 
    .. py:method:: test_add_track_sets_sound_source_routing()

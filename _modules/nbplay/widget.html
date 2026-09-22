@@ -253,6 +253,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">wave</span>
@@ -607,6 +608,9 @@
 
 
 
+<span class="n">_TIMELINE_INPUTS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"microphone"</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">})</span>
+
+
 <div class="viewcode-block" id="_normalize_timeline_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay._normalize_timeline_track">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_timeline_track</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -615,13 +619,16 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"timeline track must be dict or TimelineTrack, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">track</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># noqa: TRY004</span>
     <span class="n">channel</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel_index"</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span> <span class="s2">"microphone"</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">source</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_TIMELINE_INPUTS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"timeline track input must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_TIMELINE_INPUTS</span><span class="p">)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">source</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">"name"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Track </span><span class="si">{</span><span class="n">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)),</span>
         <span class="s2">"channel_index"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">channel</span><span class="p">),</span>
         <span class="s2">"armed"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"armed"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
         <span class="s2">"muted"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"muted"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
         <span class="s2">"solo"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"solo"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
-        <span class="s2">"input"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span> <span class="s2">"microphone"</span><span class="p">)),</span>
+        <span class="s2">"input"</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
         <span class="s2">"monitor"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"monitor"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
     <span class="p">}</span></div>
 
@@ -657,6 +664,7 @@
         <span class="s2">"loop"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"loop"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
         <span class="s2">"muted"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"muted"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
         <span class="s2">"recorded"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"recorded"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+        <span class="s2">"offset"</span><span class="p">:</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"offset"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="s2">"offset"</span><span class="p">),</span>
         <span class="s2">"audio_url"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"audio_url"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span>
         <span class="s2">"blob_type"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blob_type"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span>
         <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source"</span><span class="p">,</span> <span class="s2">"recording"</span><span class="p">)),</span>
@@ -693,6 +701,7 @@
         <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">muted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">recorded</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">audio_url</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">blob_type</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="s2">"recording"</span><span class="p">,</span>
@@ -709,6 +718,7 @@
             <span class="s2">"loop"</span><span class="p">:</span> <span class="n">loop</span><span class="p">,</span>
             <span class="s2">"muted"</span><span class="p">:</span> <span class="n">muted</span><span class="p">,</span>
             <span class="s2">"recorded"</span><span class="p">:</span> <span class="n">recorded</span><span class="p">,</span>
+            <span class="s2">"offset"</span><span class="p">:</span> <span class="n">offset</span><span class="p">,</span>
             <span class="s2">"audio_url"</span><span class="p">:</span> <span class="n">audio_url</span><span class="p">,</span>
             <span class="s2">"blob_type"</span><span class="p">:</span> <span class="n">blob_type</span><span class="p">,</span>
             <span class="s2">"source"</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
@@ -2147,8 +2157,14 @@
 <span class="w">    </span><span class="sd">"""Multi-track clip timeline with browser recording controls.</span>
 
 <span class="sd">    Clips are synced as JSON metadata. Browser-recorded audio is kept</span>
-<span class="sd">    as an object URL in the frontend for immediate playback; durable</span>
-<span class="sd">    binary persistence is intentionally left to an export/import path.</span>
+<span class="sd">    as an object URL in the frontend for immediate playback. Use</span>
+<span class="sd">    :meth:`export_clip` / :meth:`write_exported_clip` to pull a clip's</span>
+<span class="sd">    audio bytes into Python and :meth:`import_clip` to push audio back.</span>
+
+<span class="sd">    Every armed lane records at once against the shared session clock.</span>
+<span class="sd">    A lane's ``input`` is ``"microphone"`` (browser microphone) or</span>
+<span class="sd">    ``"channel"`` (a tap on the lane's mixer channel, which bounces an</span>
+<span class="sd">    instrument track to audio).</span>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"timeline.js"</span>
@@ -2159,6 +2175,7 @@
     <span class="n">is_playing</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">is_recording</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">recording_track</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">recording_tracks</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(),</span> <span class="n">default_value</span><span class="o">=</span><span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">recording_error</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">time_signature_num</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2174,6 +2191,33 @@
     <span class="n">clips</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(),</span> <span class="n">default_value</span><span class="o">=</span><span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">selected_clip_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">recorded_clip</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="p">{})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># View: horizontal zoom in pixels per beat (0 fits the widget width)</span>
+    <span class="n">pixels_per_beat</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Clip audio transfer. ``export_clip_id`` asks the browser for a clip's</span>
+    <span class="c1"># bytes; they arrive in ``exported_clip`` / ``exported_clip_data``.</span>
+    <span class="c1"># ``import_clip_request`` / ``import_clip_data`` push bytes to the</span>
+    <span class="c1"># browser, which attaches a playable URL to the matching clip.</span>
+    <span class="n">export_clip_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">exported_clip</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="p">{})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">exported_clip_data</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">import_clip_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="p">{})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">import_clip_data</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bytes</span><span class="p">(</span><span class="sa">b</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@traitlets</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s2">"pixels_per_beat"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_pixels_per_beat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proposal</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">proposal</span><span class="p">[</span><span class="s2">"value"</span><span class="p">],</span> <span class="s2">"pixels_per_beat"</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">400.0</span><span class="p">)</span>
+
+    <span class="nd">@traitlets</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s2">"recording_tracks"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_recording_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proposal</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">proposal</span><span class="p">[</span><span class="s2">"value"</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">count</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seen</span>
 
     <span class="nd">@traitlets</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s2">"length"</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proposal</span><span class="p">):</span>
@@ -2212,14 +2256,20 @@
 
 <div class="viewcode-block" id="TimelineWidget.add_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.add_track">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Track"</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Append a timeline lane and return its index."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Track"</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s2">"microphone"</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Append a timeline lane and return its index.</span>
+
+<span class="sd">        ``input`` selects the record source: ``"microphone"`` captures</span>
+<span class="sd">        the browser microphone, ``"channel"`` taps the lane's mixer</span>
+<span class="sd">        channel so instrument output is bounced to an audio clip.</span>
+<span class="sd">        """</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span>
         <span class="n">track</span> <span class="o">=</span> <span class="n">TimelineTrack</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">channel_index</span><span class="o">=</span><span class="n">idx</span> <span class="k">if</span> <span class="n">channel_index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">channel_index</span><span class="p">,</span>
             <span class="n">armed</span><span class="o">=</span><span class="n">armed</span><span class="p">,</span>
             <span class="n">monitor</span><span class="o">=</span><span class="n">monitor</span><span class="p">,</span>
+            <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">,</span> <span class="n">track</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">idx</span></div>
@@ -2253,6 +2303,7 @@
             <span class="n">next_clips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="n">next_tracks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="n">_normalize_audio_clips</span><span class="p">(</span><span class="n">next_clips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">next_tracks</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_tracks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span> <span class="k">else</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_tracks</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">index</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_track</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">recording_track</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">is_recording</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2327,6 +2378,82 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip not found: </span><span class="si">{</span><span class="n">clip_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="n">_normalize_audio_clips</span><span class="p">(</span><span class="n">next_clips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.duplicate_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.duplicate_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duplicate_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Copy a clip onto the same lane right after the original."""</span>
+        <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="o">==</span> <span class="n">clip_id</span><span class="p">:</span>
+                <span class="n">copy</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">clip</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">:</span> <span class="n">_clip_id</span><span class="p">(),</span> <span class="s2">"start"</span><span class="p">:</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]</span> <span class="o">+</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]}</span>
+                <span class="n">copy</span> <span class="o">=</span> <span class="n">_normalize_audio_clip</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">,</span> <span class="n">copy</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selected_clip_id</span> <span class="o">=</span> <span class="n">copy</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">copy</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]</span> <span class="o">+</span> <span class="n">copy</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">copy</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip not found: </span><span class="si">{</span><span class="n">clip_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.export_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.export_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Ask the browser for a clip's audio bytes.</span>
+
+<span class="sd">        The bytes arrive asynchronously in ``exported_clip_data`` with</span>
+<span class="sd">        the clip descriptor in ``exported_clip``; observe either trait</span>
+<span class="sd">        or call :meth:`write_exported_clip` once they have arrived.</span>
+<span class="sd">        """</span>
+        <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="o">==</span> <span class="n">clip_id</span> <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip not found: </span><span class="si">{</span><span class="n">clip_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exported_clip</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exported_clip_data</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_clip_id</span> <span class="o">=</span> <span class="n">clip_id</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.write_exported_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.write_exported_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_exported_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Write the most recently exported clip bytes to ``path``."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exported_clip_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no exported clip data; call export_clip() and wait for the browser"</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exported_clip_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exported_clip</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.import_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.import_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">import_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Import"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blob_type</span><span class="o">=</span><span class="s2">"audio/webm"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Add a clip backed by audio bytes (or a file path).</span>
+
+<span class="sd">        The clip descriptor is appended immediately; the browser attaches</span>
+<span class="sd">        a playable URL to it once the bytes arrive. When ``duration`` is</span>
+<span class="sd">        omitted the browser measures the audio and fills it in.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"import_clip requires non-empty audio bytes"</span><span class="p">)</span>
+        <span class="n">clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">track_index</span><span class="o">=</span><span class="n">track_index</span><span class="p">,</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">duration</span> <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">4.0</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">"import"</span><span class="p">,</span>
+            <span class="n">blob_type</span><span class="o">=</span><span class="n">blob_type</span><span class="p">,</span>
+            <span class="n">blob_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Bytes first, then the descriptor: the browser acts on the</span>
+        <span class="c1"># descriptor change and expects the matching bytes to be present.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_clip_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">import_clip_request</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">clip</span><span class="p">,</span> <span class="s2">"measure_duration"</span><span class="p">:</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">clip</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.resize_clip">
@@ -2920,19 +3047,22 @@
 <div class="viewcode-block" id="Track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Track</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Binds a sequencer to a sound source and a mixer channel.</span>
+<span class="w">    </span><span class="sd">"""A session lane: a mixer channel plus an optional instrument.</span>
 
-<span class="sd">    Uses ``traitlets.link()`` to propagate BPM and play state</span>
-<span class="sd">    from the ``Session`` transport to the sequencer.</span>
+<span class="sd">    A track may carry a sequencer and a sound source (an instrument</span>
+<span class="sd">    lane), only a sound source (a sampler or keyboard lane), or neither</span>
+<span class="sd">    (an audio lane that records from the microphone into the timeline).</span>
+<span class="sd">    When a sequencer is present, ``traitlets.link()`` propagates BPM</span>
+<span class="sd">    and play state from the ``Session`` transport to it.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name: Track display name.</span>
-<span class="sd">        sequencer: A ``SequencerWidget``.</span>
-<span class="sd">        sound_source: A widget that produces audio.</span>
+<span class="sd">        sequencer: A ``SequencerWidget`` or ``None``.</span>
+<span class="sd">        sound_source: A widget that produces audio, or ``None``.</span>
 <span class="sd">        mixer_channel: Zero-based mixer channel index.</span>
 <span class="sd">    """</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="n">mixer_channel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sound_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mixer_channel</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span> <span class="o">=</span> <span class="n">sequencer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sound_source</span> <span class="o">=</span> <span class="n">sound_source</span>
@@ -2947,11 +3077,14 @@
 <span class="sd">        BPM is bidirectional so editing BPM on either widget stays</span>
 <span class="sd">        in sync. ``is_playing`` is one-directional (transport →</span>
 <span class="sd">        sequencer) so a single non-looping sequencer reaching its</span>
-<span class="sd">        end does not stop every other sequencer.</span>
+<span class="sd">        end does not stop every other sequencer. Tracks without a</span>
+<span class="sd">        sequencer have nothing to link.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            transport: A ``TransportWidget``.</span>
 <span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)))</span>
@@ -2970,7 +3103,7 @@
 <div class="viewcode-block" id="Track.__repr__">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">src_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">src_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sound_source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sound_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"audio"</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"Track(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">, ch=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mixer_channel</span><span class="si">}</span><span class="s2">, source=</span><span class="si">{</span><span class="n">src_type</span><span class="si">}</span><span class="s2">)"</span></div>
 </div>
 
@@ -3045,13 +3178,23 @@
 
 <div class="viewcode-block" id="Session.add_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.add_track">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sound_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a track, create a mixer channel, and link transport state.</span>
+
+<span class="sd">        Every track gets a mixer channel and a timeline lane. Tracks with</span>
+<span class="sd">        an instrument (a sequencer and/or a sound source) default their</span>
+<span class="sd">        timeline input to ``"channel"`` so the instrument's output can be</span>
+<span class="sd">        bounced to audio; tracks with neither default to ``"microphone"``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Track display name.</span>
-<span class="sd">            sequencer: A ``SequencerWidget``.</span>
-<span class="sd">            sound_source: A widget that produces audio.</span>
+<span class="sd">            sequencer: A ``SequencerWidget``, or ``None`` for a lane</span>
+<span class="sd">                without a step sequencer.</span>
+<span class="sd">            sound_source: A widget that produces audio, or ``None`` for</span>
+<span class="sd">                an audio-only lane.</span>
+<span class="sd">            input: Timeline record source, ``"microphone"`` or</span>
+<span class="sd">                ``"channel"``. Defaults by instrument presence.</span>
+<span class="sd">            armed: Arm the timeline lane for recording.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The new ``Track`` object.</span>
@@ -3060,8 +3203,9 @@
         <span class="n">track</span> <span class="o">=</span> <span class="n">Track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">)</span>
         <span class="n">track</span><span class="o">.</span><span class="n">_link_transport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">)</span>
         <span class="c1"># Set audio routing metadata so JS can route through mixer</span>
-        <span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
-        <span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
+        <span class="k">if</span> <span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
         <span class="c1"># Also set routing on sound source (e.g. SamplerWidget) so it</span>
         <span class="c1"># can register on the session bus for keyboard integration.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"session_id"</span><span class="p">):</span>
@@ -3069,7 +3213,9 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">):</span>
             <span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">input</span> <span class="o">=</span> <span class="s2">"channel"</span> <span class="k">if</span> <span class="p">(</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sound_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"microphone"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="n">armed</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">track</span></div>
 
 
@@ -3085,8 +3231,9 @@
             <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="n">track</span><span class="o">.</span><span class="n">_unlink</span><span class="p">()</span>
             <span class="c1"># Clear routing metadata</span>
-            <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">""</span>
-            <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">""</span>
+                <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"session_id"</span><span class="p">):</span>
                 <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">""</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">):</span>
@@ -3097,7 +3244,8 @@
             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">&gt;</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">:</span>
                     <span class="n">t</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">-=</span> <span class="mi">1</span>
-                    <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">):</span>
                         <span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span></div>
 

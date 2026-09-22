@@ -26,6 +26,7 @@ Attributes
    nbplay.widget._PREVIEW_MAX_FRAMES
    nbplay.widget._DEFAULT_PAD_NOTES
    nbplay.widget._PAD_MAX_COUNT
+   nbplay.widget._TIMELINE_INPUTS
 
 
 Classes
@@ -198,6 +199,8 @@ Module Contents
 
 .. py:function:: _nonnegative_number(value, name, maximum=4096.0)
 
+.. py:data:: _TIMELINE_INPUTS
+
 .. py:function:: _normalize_timeline_track(track, index=0)
 
 .. py:function:: _normalize_timeline_tracks(tracks)
@@ -206,7 +209,7 @@ Module Contents
 
 .. py:function:: _normalize_audio_clips(clips, track_count=None)
 
-.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None)
+.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None)
 
    Serializable audio clip descriptor for timeline lanes.
 
@@ -1093,8 +1096,14 @@ Module Contents
    Multi-track clip timeline with browser recording controls.
 
    Clips are synced as JSON metadata. Browser-recorded audio is kept
-   as an object URL in the frontend for immediate playback; durable
-   binary persistence is intentionally left to an export/import path.
+   as an object URL in the frontend for immediate playback. Use
+   :meth:`export_clip` / :meth:`write_exported_clip` to pull a clip's
+   audio bytes into Python and :meth:`import_clip` to push audio back.
+
+   Every armed lane records at once against the shared session clock.
+   A lane's ``input`` is ``"microphone"`` (browser microphone) or
+   ``"channel"`` (a tap on the lane's mixer channel, which bounces an
+   instrument track to audio).
 
    Public constructor
 
@@ -1118,6 +1127,9 @@ Module Contents
 
 
    .. py:attribute:: recording_track
+
+
+   .. py:attribute:: recording_tracks
 
 
    .. py:attribute:: recording_error
@@ -1159,6 +1171,30 @@ Module Contents
    .. py:attribute:: recorded_clip
 
 
+   .. py:attribute:: pixels_per_beat
+
+
+   .. py:attribute:: export_clip_id
+
+
+   .. py:attribute:: exported_clip
+
+
+   .. py:attribute:: exported_clip_data
+
+
+   .. py:attribute:: import_clip_request
+
+
+   .. py:attribute:: import_clip_data
+
+
+   .. py:method:: _validate_pixels_per_beat(proposal)
+
+
+   .. py:method:: _validate_recording_tracks(proposal)
+
+
    .. py:method:: _validate_length(proposal)
 
 
@@ -1183,9 +1219,13 @@ Module Contents
    .. py:method:: _validate_recording_track(proposal)
 
 
-   .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False)
+   .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False, input='microphone')
 
       Append a timeline lane and return its index.
+
+      ``input`` selects the record source: ``"microphone"`` captures
+      the browser microphone, ``"channel"`` taps the lane's mixer
+      channel so instrument output is bounced to an audio clip.
 
 
 
@@ -1216,6 +1256,38 @@ Module Contents
    .. py:method:: move_clip(clip_id, *, track_index=None, start=None)
 
       Move a clip to a new lane and/or beat position.
+
+
+
+   .. py:method:: duplicate_clip(clip_id)
+
+      Copy a clip onto the same lane right after the original.
+
+
+
+   .. py:method:: export_clip(clip_id)
+
+      Ask the browser for a clip's audio bytes.
+
+      The bytes arrive asynchronously in ``exported_clip_data`` with
+      the clip descriptor in ``exported_clip``; observe either trait
+      or call :meth:`write_exported_clip` once they have arrived.
+
+
+
+   .. py:method:: write_exported_clip(path)
+
+      Write the most recently exported clip bytes to ``path``.
+
+
+
+   .. py:method:: import_clip(data, name='Import', track_index=0, start=0.0, duration=None, blob_type='audio/webm', **kwargs)
+
+      Add a clip backed by audio bytes (or a file path).
+
+      The clip descriptor is appended immediately; the browser attaches
+      a playable URL to it once the bytes arrive. When ``duration`` is
+      omitted the browser measures the audio and fills it in.
 
 
 
@@ -1616,16 +1688,19 @@ Module Contents
    :returns: A validated ``KeyboardRoute``.
 
 
-.. py:class:: Track(name, sequencer, sound_source, mixer_channel)
+.. py:class:: Track(name, sequencer=None, sound_source=None, mixer_channel=0)
 
-   Binds a sequencer to a sound source and a mixer channel.
+   A session lane: a mixer channel plus an optional instrument.
 
-   Uses ``traitlets.link()`` to propagate BPM and play state
-   from the ``Session`` transport to the sequencer.
+   A track may carry a sequencer and a sound source (an instrument
+   lane), only a sound source (a sampler or keyboard lane), or neither
+   (an audio lane that records from the microphone into the timeline).
+   When a sequencer is present, ``traitlets.link()`` propagates BPM
+   and play state from the ``Session`` transport to it.
 
    :param name: Track display name.
-   :param sequencer: A ``SequencerWidget``.
-   :param sound_source: A widget that produces audio.
+   :param sequencer: A ``SequencerWidget`` or ``None``.
+   :param sound_source: A widget that produces audio, or ``None``.
    :param mixer_channel: Zero-based mixer channel index.
 
 
@@ -1633,12 +1708,18 @@ Module Contents
 
 
    .. py:attribute:: sequencer
+      :value: None
+
 
 
    .. py:attribute:: sound_source
+      :value: None
+
 
 
    .. py:attribute:: mixer_channel
+      :value: 0
+
 
 
    .. py:attribute:: _links
@@ -1653,7 +1734,8 @@ Module Contents
       BPM is bidirectional so editing BPM on either widget stays
       in sync. ``is_playing`` is one-directional (transport →
       sequencer) so a single non-looping sequencer reaching its
-      end does not stop every other sequencer.
+      end does not stop every other sequencer. Tracks without a
+      sequencer have nothing to link.
 
       :param transport: A ``TransportWidget``.
 
@@ -1725,13 +1807,23 @@ Module Contents
 
 
 
-   .. py:method:: add_track(name, sequencer, sound_source)
+   .. py:method:: add_track(name, sequencer=None, sound_source=None, *, input=None, armed=False)
 
       Add a track, create a mixer channel, and link transport state.
 
+      Every track gets a mixer channel and a timeline lane. Tracks with
+      an instrument (a sequencer and/or a sound source) default their
+      timeline input to ``"channel"`` so the instrument's output can be
+      bounced to audio; tracks with neither default to ``"microphone"``.
+
       :param name: Track display name.
-      :param sequencer: A ``SequencerWidget``.
-      :param sound_source: A widget that produces audio.
+      :param sequencer: A ``SequencerWidget``, or ``None`` for a lane
+                        without a step sequencer.
+      :param sound_source: A widget that produces audio, or ``None`` for
+                           an audio-only lane.
+      :param input: Timeline record source, ``"microphone"`` or
+                    ``"channel"``. Defaults by instrument presence.
+      :param armed: Arm the timeline lane for recording.
 
       :returns: The new ``Track`` object.
 

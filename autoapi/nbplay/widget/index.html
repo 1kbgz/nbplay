@@ -270,6 +270,9 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._PAD_MAX_COUNT" title="nbplay.widget._PAD_MAX_COUNT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PAD_MAX_COUNT</span></code></a></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._TIMELINE_INPUTS" title="nbplay.widget._TIMELINE_INPUTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_INPUTS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -328,7 +331,7 @@ API in the browser so latency stays minimal.</p>
 <td><p>On-screen trigger-pad grid.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
-<td><p>Binds a sequencer to a sound source and a mixer channel.</p></td>
+<td><p>A session lane: a mixer channel plus an optional instrument.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>A collection of tracks with a shared transport and mixer.</p></td>
@@ -643,6 +646,11 @@ API in the browser so latency stays minimal.</p>
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_nonnegative_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_nonnegative_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._nonnegative_number" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.widget._TIMELINE_INPUTS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_TIMELINE_INPUTS</span></span><a class="headerlink" href="#nbplay.widget._TIMELINE_INPUTS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.widget._normalize_timeline_track">
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_timeline_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_timeline_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_timeline_track" title="Link to this definition">¶</a></dt>
@@ -665,7 +673,7 @@ API in the browser so latency stays minimal.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.AudioClip">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">AudioClip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recorded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'recording'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#AudioClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.AudioClip" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">AudioClip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recorded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'recording'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#AudioClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.AudioClip" title="Link to this definition">¶</a></dt>
 <dd><p>Serializable audio clip descriptor for timeline lanes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.AudioClip._data">
@@ -1901,8 +1909,13 @@ the clock, and <code class="docutils literal notranslate"><span class="pre">curr
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Multi-track clip timeline with browser recording controls.</p>
 <p>Clips are synced as JSON metadata. Browser-recorded audio is kept
-as an object URL in the frontend for immediate playback; durable
-binary persistence is intentionally left to an export/import path.</p>
+as an object URL in the frontend for immediate playback. Use
+<a class="reference internal" href="#nbplay.widget.TimelineWidget.export_clip" title="nbplay.widget.TimelineWidget.export_clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">export_clip()</span></code></a> / <a class="reference internal" href="#nbplay.widget.TimelineWidget.write_exported_clip" title="nbplay.widget.TimelineWidget.write_exported_clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_exported_clip()</span></code></a> to pull a clip’s
+audio bytes into Python and <a class="reference internal" href="#nbplay.widget.TimelineWidget.import_clip" title="nbplay.widget.TimelineWidget.import_clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">import_clip()</span></code></a> to push audio back.</p>
+<p>Every armed lane records at once against the shared session clock.
+A lane’s <code class="docutils literal notranslate"><span class="pre">input</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> (browser microphone) or
+<code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> (a tap on the lane’s mixer channel, which bounces an
+instrument track to audio).</p>
 <p>Public constructor</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget._esm">
@@ -1937,6 +1950,11 @@ binary persistence is intentionally left to an export/import path.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.recording_track">
 <span class="sig-name descname"><span class="pre">recording_track</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.recording_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.recording_tracks">
+<span class="sig-name descname"><span class="pre">recording_tracks</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.recording_tracks" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2004,6 +2022,46 @@ binary persistence is intentionally left to an export/import path.</p>
 <span class="sig-name descname"><span class="pre">recorded_clip</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.recorded_clip" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.pixels_per_beat">
+<span class="sig-name descname"><span class="pre">pixels_per_beat</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.pixels_per_beat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.export_clip_id">
+<span class="sig-name descname"><span class="pre">export_clip_id</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.export_clip_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.exported_clip">
+<span class="sig-name descname"><span class="pre">exported_clip</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.exported_clip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.exported_clip_data">
+<span class="sig-name descname"><span class="pre">exported_clip_data</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.exported_clip_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.import_clip_request">
+<span class="sig-name descname"><span class="pre">import_clip_request</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.import_clip_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.import_clip_data">
+<span class="sig-name descname"><span class="pre">import_clip_data</span></span><a class="headerlink" href="#nbplay.widget.TimelineWidget.import_clip_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget._validate_pixels_per_beat">
+<span class="sig-name descname"><span class="pre">_validate_pixels_per_beat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.TimelineWidget._validate_pixels_per_beat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget._validate_recording_tracks">
+<span class="sig-name descname"><span class="pre">_validate_recording_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.TimelineWidget._validate_recording_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget._validate_length">
 <span class="sig-name descname"><span class="pre">_validate_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.TimelineWidget._validate_length" title="Link to this definition">¶</a></dt>
@@ -2046,8 +2104,11 @@ binary persistence is intentionally left to an export/import path.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.add_track">
-<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Track'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.add_track" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Track'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'microphone'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.add_track" title="Link to this definition">¶</a></dt>
 <dd><p>Append a timeline lane and return its index.</p>
+<p><code class="docutils literal notranslate"><span class="pre">input</span></code> selects the record source: <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> captures
+the browser microphone, <code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> taps the lane’s mixer
+channel so instrument output is bounced to an audio clip.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2078,6 +2139,36 @@ binary persistence is intentionally left to an export/import path.</p>
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.move_clip">
 <span class="sig-name descname"><span class="pre">move_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.move_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.move_clip" title="Link to this definition">¶</a></dt>
 <dd><p>Move a clip to a new lane and/or beat position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.duplicate_clip">
+<span class="sig-name descname"><span class="pre">duplicate_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.duplicate_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.duplicate_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Copy a clip onto the same lane right after the original.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.export_clip">
+<span class="sig-name descname"><span class="pre">export_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.export_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.export_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Ask the browser for a clip’s audio bytes.</p>
+<p>The bytes arrive asynchronously in <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code> with
+the clip descriptor in <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code>; observe either trait
+or call <a class="reference internal" href="#nbplay.widget.TimelineWidget.write_exported_clip" title="nbplay.widget.TimelineWidget.write_exported_clip"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_exported_clip()</span></code></a> once they have arrived.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.write_exported_clip">
+<span class="sig-name descname"><span class="pre">write_exported_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.write_exported_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.write_exported_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Write the most recently exported clip bytes to <code class="docutils literal notranslate"><span class="pre">path</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.import_clip">
+<span class="sig-name descname"><span class="pre">import_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Import'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio/webm'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.import_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.import_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Add a clip backed by audio bytes (or a file path).</p>
+<p>The clip descriptor is appended immediately; the browser attaches
+a playable URL to it once the bytes arrive. When <code class="docutils literal notranslate"><span class="pre">duration</span></code> is
+omitted the browser measures the audio and fills it in.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2617,16 +2708,19 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.Track">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">Track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_channel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Track" title="Link to this definition">¶</a></dt>
-<dd><p>Binds a sequencer to a sound source and a mixer channel.</p>
-<p>Uses <code class="docutils literal notranslate"><span class="pre">traitlets.link()</span></code> to propagate BPM and play state
-from the <code class="docutils literal notranslate"><span class="pre">Session</span></code> transport to the sequencer.</p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">Track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Track" title="Link to this definition">¶</a></dt>
+<dd><p>A session lane: a mixer channel plus an optional instrument.</p>
+<p>A track may carry a sequencer and a sound source (an instrument
+lane), only a sound source (a sampler or keyboard lane), or neither
+(an audio lane that records from the microphone into the timeline).
+When a sequencer is present, <code class="docutils literal notranslate"><span class="pre">traitlets.link()</span></code> propagates BPM
+and play state from the <code class="docutils literal notranslate"><span class="pre">Session</span></code> transport to it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – Track display name.</p></li>
-<li><p><strong>sequencer</strong> – A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>.</p></li>
-<li><p><strong>sound_source</strong> – A widget that produces audio.</p></li>
+<li><p><strong>sequencer</strong> – A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>sound_source</strong> – A widget that produces audio, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 <li><p><strong>mixer_channel</strong> – Zero-based mixer channel index.</p></li>
 </ul>
 </dd>
@@ -2638,17 +2732,17 @@ from the <code class="docutils literal notranslate"><span class="pre">Session</s
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Track.sequencer">
-<span class="sig-name descname"><span class="pre">sequencer</span></span><a class="headerlink" href="#nbplay.widget.Track.sequencer" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sequencer</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.widget.Track.sequencer" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Track.sound_source">
-<span class="sig-name descname"><span class="pre">sound_source</span></span><a class="headerlink" href="#nbplay.widget.Track.sound_source" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sound_source</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.widget.Track.sound_source" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Track.mixer_channel">
-<span class="sig-name descname"><span class="pre">mixer_channel</span></span><a class="headerlink" href="#nbplay.widget.Track.mixer_channel" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mixer_channel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nbplay.widget.Track.mixer_channel" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2663,7 +2757,8 @@ from the <code class="docutils literal notranslate"><span class="pre">Session</s
 <p>BPM is bidirectional so editing BPM on either widget stays
 in sync. <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> is one-directional (transport →
 sequencer) so a single non-looping sequencer reaching its
-end does not stop every other sequencer.</p>
+end does not stop every other sequencer. Tracks without a
+sequencer have nothing to link.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>transport</strong> – A <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>.</p>
@@ -2755,14 +2850,23 @@ audio routing.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.add_track">
-<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.add_track" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.add_track" title="Link to this definition">¶</a></dt>
 <dd><p>Add a track, create a mixer channel, and link transport state.</p>
+<p>Every track gets a mixer channel and a timeline lane. Tracks with
+an instrument (a sequencer and/or a sound source) default their
+timeline input to <code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> so the instrument’s output can be
+bounced to audio; tracks with neither default to <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – Track display name.</p></li>
-<li><p><strong>sequencer</strong> – A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>.</p></li>
-<li><p><strong>sound_source</strong> – A widget that produces audio.</p></li>
+<li><p><strong>sequencer</strong> – A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for a lane
+without a step sequencer.</p></li>
+<li><p><strong>sound_source</strong> – A widget that produces audio, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for
+an audio-only lane.</p></li>
+<li><p><strong>input</strong> – Timeline record source, <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> or
+<code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code>. Defaults by instrument presence.</p></li>
+<li><p><strong>armed</strong> – Arm the timeline lane for recording.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2893,6 +2997,7 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget._clip_id"><code class="docutils literal notranslate"><span class="pre">_clip_id()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._positive_number"><code class="docutils literal notranslate"><span class="pre">_positive_number()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._nonnegative_number"><code class="docutils literal notranslate"><span class="pre">_nonnegative_number()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._TIMELINE_INPUTS"><code class="docutils literal notranslate"><span class="pre">_TIMELINE_INPUTS</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_timeline_track"><code class="docutils literal notranslate"><span class="pre">_normalize_timeline_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_timeline_tracks"><code class="docutils literal notranslate"><span class="pre">_normalize_timeline_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_audio_clip"><code class="docutils literal notranslate"><span class="pre">_normalize_audio_clip()</span></code></a></li>
@@ -3108,6 +3213,7 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.is_playing"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.is_playing</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.is_recording"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.is_recording</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.recording_track"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.recording_track</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.recording_tracks"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.recording_tracks</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.recording_error"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.recording_error</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.time_signature_num"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.time_signature_num</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.time_signature_den"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.time_signature_den</span></code></a></li>
@@ -3121,6 +3227,14 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.clips"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.clips</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.selected_clip_id"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.selected_clip_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.recorded_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.recorded_clip</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.pixels_per_beat"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.pixels_per_beat</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.export_clip_id"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.export_clip_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.exported_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.exported_clip</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.exported_clip_data"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.exported_clip_data</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.import_clip_request"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.import_clip_request</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.import_clip_data"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.import_clip_data</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget._validate_pixels_per_beat"><code class="docutils literal notranslate"><span class="pre">TimelineWidget._validate_pixels_per_beat()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget._validate_recording_tracks"><code class="docutils literal notranslate"><span class="pre">TimelineWidget._validate_recording_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget._validate_length"><code class="docutils literal notranslate"><span class="pre">TimelineWidget._validate_length()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget._validate_current_beat"><code class="docutils literal notranslate"><span class="pre">TimelineWidget._validate_current_beat()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget._validate_count_in_bars"><code class="docutils literal notranslate"><span class="pre">TimelineWidget._validate_count_in_bars()</span></code></a></li>
@@ -3135,6 +3249,10 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.remove_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.remove_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.move_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.move_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.duplicate_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.duplicate_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.export_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.export_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.write_exported_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.write_exported_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.import_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.import_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.resize_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.resize_clip()</span></code></a></li>
 </ul>
 </li>

@@ -501,7 +501,7 @@ learn work.</p></li>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">timeline.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">timeline.css</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">pixels_per_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">keyboard.js</span></code></p></td>
@@ -873,23 +873,43 @@ stop, and seek the whole session.</p>
 <h3>TimelineWidget<a class="headerlink" href="#timelinewidget" title="Link to this heading">¶</a></h3>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>. Browser file: <code class="docutils literal notranslate"><span class="pre">js/src/ts/timeline.ts</span></code>. CSS
 file: <code class="docutils literal notranslate"><span class="pre">js/src/css/timeline.css</span></code>.</p>
-<p>TimelineWidget is the multitrack clip lane and browser recorder. Python owns
-validated <code class="docutils literal notranslate"><span class="pre">TimelineTrack</span></code> and <code class="docutils literal notranslate"><span class="pre">AudioClip</span></code> metadata dictionaries. Browser code
-renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
-play/stop, record/stop, count-in, recording auto-extension, playhead reset,
-playhead seek/drag, timeline length, and selected-clip deletion. The timeline
+<p>TimelineWidget is the tracking view: multitrack clip lanes and the browser
+recorder. Python owns validated <code class="docutils literal notranslate"><span class="pre">TimelineTrack</span></code> and <code class="docutils literal notranslate"><span class="pre">AudioClip</span></code> metadata
+dictionaries. Browser code renders track rows, arm/input-monitor/mute/solo
+controls and a record-source selector, clip blocks with drag-to-move and trim
+handles, play/stop, record/stop, count-in, recording auto-extension, a loop
+brace on the ruler, zoom with a shared horizontal scroll, playhead reset,
+playhead seek/drag, timeline length, and clip duplicate/delete. The timeline
 follows the session clock for position and play state, so its play/stop/seek
 controls act on the whole session in the browser. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, transport BPM,
 time signature, and play/record state are also linked in Python, and
 <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> is dlinked one-way from transport to timeline; the transport is
 the widget that persists the clock position.</p>
-<p>Recording uses <code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> and
-<code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> when the browser exposes them. A completed take creates a
-browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>; the binary audio
-blob is not persisted through traitlets. Playback uses an <code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and
-connects it through <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code>
-when the mixer bus is available, falling back to direct media playback when it
-is not.</p>
+<p>Recording captures every armed lane at once (<code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>). A lane’s
+<code class="docutils literal notranslate"><span class="pre">input</span></code> picks the source: <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> lanes share one
+<code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> stream; <code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> lanes
+tap their mixer channel through a <code class="docutils literal notranslate"><span class="pre">MediaStreamAudioDestinationNode</span></code>, which
+bounces an instrument track to audio. One <code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> runs per lane, all
+started together after the count-in. Each completed take creates a
+browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>. Playback uses an
+<code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and connects it through
+<code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code> when the mixer bus
+is available, falling back to direct media playback when it is not. A clip’s
+<code class="docutils literal notranslate"><span class="pre">offset</span></code> (beats into the source audio) is applied when a clip’s start edge has
+been trimmed.</p>
+<p>Clip audio crosses the comm on request. <code class="docutils literal notranslate"><span class="pre">export_clip(clip_id)</span></code> sets
+<code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>; the browser fetches the object URL and answers with
+<code class="docutils literal notranslate"><span class="pre">exported_clip</span></code> and <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code> (bytes), which
+<code class="docutils literal notranslate"><span class="pre">write_exported_clip(path)</span></code> saves. <code class="docutils literal notranslate"><span class="pre">import_clip(bytes_or_path,</span> <span class="pre">...)</span></code> appends
+clip metadata immediately, sends <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code> followed by
+<code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, and the browser attaches an object URL to the matching
+clip, measuring the duration with <code class="docutils literal notranslate"><span class="pre">decodeAudioData</span></code> when none was given.</p>
+<p>The loop brace shows the session clock’s loop range. The Loop button toggles
+it and the handles drag its ends (snapped to bars) through
+<code class="docutils literal notranslate"><span class="pre">clock.setLoop()</span></code>; the transport mirrors the range into <code class="docutils literal notranslate"><span class="pre">loop_*_bar</span></code>. Zoom is
+<code class="docutils literal notranslate"><span class="pre">pixels_per_beat</span></code> (0 fits the widget width); when set, the ruler and lanes get
+an explicit width inside <code class="docutils literal notranslate"><span class="pre">.nbplay-timeline-scroll</span></code> and the playhead keeps
+itself in view during playback.</p>
 <p>Count-in is stored as <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code> and displayed through
 <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>. If the chosen record point has enough timeline
 space before it, recording pre-rolls from <code class="docutils literal notranslate"><span class="pre">current_beat</span> <span class="pre">-</span> <span class="pre">count_in_bars</span></code>; at

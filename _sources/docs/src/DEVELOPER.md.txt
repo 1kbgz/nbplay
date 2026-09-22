@@ -185,7 +185,7 @@ files are generated.
 | `SequencerWidget` | `sequencer.js` | `sequencer.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data` |
 | `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
 | `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
-| `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip` |
+| `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
 | `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
 | `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
@@ -544,24 +544,46 @@ stop, and seek the whole session.
 Python class: `TimelineWidget`. Browser file: `js/src/ts/timeline.ts`. CSS
 file: `js/src/css/timeline.css`.
 
-TimelineWidget is the multitrack clip lane and browser recorder. Python owns
-validated `TimelineTrack` and `AudioClip` metadata dictionaries. Browser code
-renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
-play/stop, record/stop, count-in, recording auto-extension, playhead reset,
-playhead seek/drag, timeline length, and selected-clip deletion. The timeline
+TimelineWidget is the tracking view: multitrack clip lanes and the browser
+recorder. Python owns validated `TimelineTrack` and `AudioClip` metadata
+dictionaries. Browser code renders track rows, arm/input-monitor/mute/solo
+controls and a record-source selector, clip blocks with drag-to-move and trim
+handles, play/stop, record/stop, count-in, recording auto-extension, a loop
+brace on the ruler, zoom with a shared horizontal scroll, playhead reset,
+playhead seek/drag, timeline length, and clip duplicate/delete. The timeline
 follows the session clock for position and play state, so its play/stop/seek
 controls act on the whole session in the browser. In a `Session`, transport BPM,
 time signature, and play/record state are also linked in Python, and
 `current_beat` is dlinked one-way from transport to timeline; the transport is
 the widget that persists the clock position.
 
-Recording uses `navigator.mediaDevices.getUserMedia({ audio: true })` and
-`MediaRecorder` when the browser exposes them. A completed take creates a
-browser-local object URL and appends clip metadata to `clips`; the binary audio
-blob is not persisted through traitlets. Playback uses an `HTMLAudioElement` and
-connects it through `globalThis.__nbplay[sessionId].channels[channel_index].gain`
-when the mixer bus is available, falling back to direct media playback when it
-is not.
+Recording captures every armed lane at once (`recording_tracks`). A lane's
+`input` picks the source: `"microphone"` lanes share one
+`navigator.mediaDevices.getUserMedia({ audio: true })` stream; `"channel"` lanes
+tap their mixer channel through a `MediaStreamAudioDestinationNode`, which
+bounces an instrument track to audio. One `MediaRecorder` runs per lane, all
+started together after the count-in. Each completed take creates a
+browser-local object URL and appends clip metadata to `clips`. Playback uses an
+`HTMLAudioElement` and connects it through
+`globalThis.__nbplay[sessionId].channels[channel_index].gain` when the mixer bus
+is available, falling back to direct media playback when it is not. A clip's
+`offset` (beats into the source audio) is applied when a clip's start edge has
+been trimmed.
+
+Clip audio crosses the comm on request. `export_clip(clip_id)` sets
+`export_clip_id`; the browser fetches the object URL and answers with
+`exported_clip` and `exported_clip_data` (bytes), which
+`write_exported_clip(path)` saves. `import_clip(bytes_or_path, ...)` appends
+clip metadata immediately, sends `import_clip_data` followed by
+`import_clip_request`, and the browser attaches an object URL to the matching
+clip, measuring the duration with `decodeAudioData` when none was given.
+
+The loop brace shows the session clock's loop range. The Loop button toggles
+it and the handles drag its ends (snapped to bars) through
+`clock.setLoop()`; the transport mirrors the range into `loop_*_bar`. Zoom is
+`pixels_per_beat` (0 fits the widget width); when set, the ruler and lanes get
+an explicit width inside `.nbplay-timeline-scroll` and the playhead keeps
+itself in view during playback.
 
 Count-in is stored as `count_in_bars` and displayed through
 `recording_countdown_beats`. If the chosen record point has enough timeline
