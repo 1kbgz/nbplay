@@ -1198,6 +1198,29 @@ Package Contents
 
 
 
+   .. py:property:: session_id
+
+      Identifier shared by every widget on this session's browser bus.
+
+
+   .. py:method:: play()
+
+      Start the shared transport.
+
+
+
+   .. py:method:: stop()
+
+      Stop the shared transport, keeping the playhead position.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move the shared playhead to ``beat`` (quarter-note units).
+
+
+
    .. py:method:: add_track(name, sequencer, sound_source)
 
       Add a track, create a mixer channel, and link transport state.
@@ -1529,9 +1552,13 @@ Package Contents
 
    Global transport controls: play/stop, BPM, time signature, bar/beat.
 
-   Used as the master clock for a ``Session``. All connected
-   ``SequencerWidget`` instances sync their BPM and play state
-   to this transport via ``traitlets.link``.
+   Used as the master clock for a ``Session``. In the browser the transport
+   drives the shared session clock on ``globalThis.__nbplay[session_id]``;
+   every sequencer and timeline with the same ``session_id`` follows that
+   clock directly, so play, seek, and tempo changes never wait on a kernel
+   round-trip. The synced traits mirror the clock for Python callers:
+   setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves
+   the clock, and ``current_beat`` is updated coarsely while playing.
 
    Public constructor
 
@@ -1540,6 +1567,9 @@ Package Contents
 
 
    .. py:attribute:: _css
+
+
+   .. py:attribute:: session_id
 
 
    .. py:attribute:: bpm

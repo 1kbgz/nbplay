@@ -1236,6 +1236,9 @@ Module Contents
    .. py:method:: test_timeline_transport_sync()
 
 
+   .. py:method:: test_session_clock_helpers()
+
+
    .. py:method:: test_play_sync()
 
       Transport play state propagates to all sequencers.

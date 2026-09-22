@@ -2105,13 +2105,20 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">TransportWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Global transport controls: play/stop, BPM, time signature, bar/beat.</span>
 
-<span class="sd">    Used as the master clock for a ``Session``. All connected</span>
-<span class="sd">    ``SequencerWidget`` instances sync their BPM and play state</span>
-<span class="sd">    to this transport via ``traitlets.link``.</span>
+<span class="sd">    Used as the master clock for a ``Session``. In the browser the transport</span>
+<span class="sd">    drives the shared session clock on ``globalThis.__nbplay[session_id]``;</span>
+<span class="sd">    every sequencer and timeline with the same ``session_id`` follows that</span>
+<span class="sd">    clock directly, so play, seek, and tempo changes never wait on a kernel</span>
+<span class="sd">    round-trip. The synced traits mirror the clock for Python callers:</span>
+<span class="sd">    setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves</span>
+<span class="sd">    the clock, and ``current_beat`` is updated coarsely while playing.</span>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"transport.js"</span>
     <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"transport.css"</span>
+
+    <span class="c1"># Session routing (set by Session so the browser clock is shared)</span>
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Transport state</span>
     <span class="n">bpm</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">120.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2986,6 +2993,7 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"nbplay-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span>
+            <span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span><span class="p">,</span>
             <span class="n">bpm</span><span class="o">=</span><span class="n">bpm</span><span class="p">,</span>
             <span class="n">time_signature_num</span><span class="o">=</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">time_signature_den</span><span class="o">=</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -3003,9 +3011,37 @@
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">)),</span>
-            <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
+            <span class="c1"># One-way: the transport persists the shared clock position.</span>
+            <span class="c1"># Timeline seeks reach the transport through the browser clock.</span>
+            <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">session_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Identifier shared by every widget on this session's browser bus."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
+
+<div class="viewcode-block" id="Session.play">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Start the shared transport."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Session.stop">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stop the shared transport, keeping the playhead position."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Session.seek">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.seek">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Move the shared playhead to ``beat`` (quarter-note units)."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">current_beat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">beat</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Session.add_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.add_track">[docs]</a>

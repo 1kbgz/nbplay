@@ -496,7 +496,7 @@ learn work.</p></li>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">transport.js</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">transport.css</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">timeline.js</span></code></p></td>
@@ -681,8 +681,11 @@ events.</p></li>
 <li><p>CustomEvent: <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code>, <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code>, and <code class="docutils literal notranslate"><span class="pre">nbplay-cancel-edit</span></code>.</p></li>
 <li><p>Timers: <code class="docutils literal notranslate"><span class="pre">setInterval()</span></code> for sequencer lookahead scheduling, transport clock
 ticks, velocity key repeat, and sampler active-voice display.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">performance.now()</span></code> for transport position and MIDI fallback timestamps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code> as a notebook-page-local session bus registry.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AudioContext.currentTime</span></code> as the single transport timebase (the
+<code class="docutils literal notranslate"><span class="pre">SessionClock</span></code> in <code class="docutils literal notranslate"><span class="pre">js/src/ts/session.ts</span></code>); <code class="docutils literal notranslate"><span class="pre">performance.now()</span></code> only for save
+throttling, count-in timers, and MIDI fallback timestamps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code> as a notebook-page-local session bus registry, created
+lazily by <code class="docutils literal notranslate"><span class="pre">getOrCreateSessionBus()</span></code> in <code class="docutils literal notranslate"><span class="pre">js/src/ts/session.ts</span></code>.</p></li>
 <li><p>CSS custom properties from JupyterLab, especially <code class="docutils literal notranslate"><span class="pre">--jp-*</span></code> theme variables.</p></li>
 </ul>
 </section>
@@ -848,13 +851,23 @@ file: <code class="docutils literal notranslate"><span class="pre">js/src/css/tr
 <p>TransportWidget is the global play/stop and tempo surface. It syncs BPM, play
 state, time signature, bar/beat position, and loop range. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, tracks
 link their sequencers to transport BPM and time signature, and dlink transport
-play state into sequencers.</p>
-<p>The browser UI has stop/play buttons, a BPM slider and inline edit, a time
-signature display, a bar:beat display, and a loop toggle/range. Its position
-clock uses <code class="docutils literal notranslate"><span class="pre">performance.now()</span></code> and a 50 ms interval to compute elapsed beats.
-When the displayed bar or beat changes, it updates and saves <code class="docutils literal notranslate"><span class="pre">bar_number</span></code> and
-<code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>. Looping wraps the displayed position between <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code> and
-<code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code> when enabled.</p>
+play state into sequencers; <code class="docutils literal notranslate"><span class="pre">Session.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, and <code class="docutils literal notranslate"><span class="pre">seek(beat)</span></code> wrap
+the transport traits.</p>
+<p>In the browser the transport owns the session clock: <code class="docutils literal notranslate"><span class="pre">bus.clock</span></code> on
+<code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[session_id]</span></code>, a <code class="docutils literal notranslate"><span class="pre">SessionClock</span></code> derived from the shared
+<code class="docutils literal notranslate"><span class="pre">AudioContext.currentTime</span></code>. Sequencers and the timeline with the same
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code> subscribe to that clock, so play, stop, seek, tempo, and record
+propagate between widgets without a kernel round-trip. A transport with no
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code> uses a private clock.</p>
+<p>The browser UI has stop/play/record buttons, a BPM slider and inline edit, a
+time signature display, a bar:beat display, and a loop toggle/range. Every
+control drives the clock; clock events are mirrored back into the model. A 50 ms
+ticker updates <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, and <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code> locally while
+playing and saves at most every 250 ms on beat changes. Loop wrapping between
+<code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code> and <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code> and mid-play tempo changes happen inside
+the clock. Model changes arriving from the kernel (<code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>,
+<code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, loop traits) are forwarded to the clock, so Python can start,
+stop, and seek the whole session.</p>
 </section>
 <section id="timelinewidget">
 <h3>TimelineWidget<a class="headerlink" href="#timelinewidget" title="Link to this heading">¶</a></h3>
@@ -864,9 +877,12 @@ file: <code class="docutils literal notranslate"><span class="pre">js/src/css/ti
 validated <code class="docutils literal notranslate"><span class="pre">TimelineTrack</span></code> and <code class="docutils literal notranslate"><span class="pre">AudioClip</span></code> metadata dictionaries. Browser code
 renders track rows, arm/input-monitor/mute/solo controls, clip blocks,
 play/stop, record/stop, count-in, recording auto-extension, playhead reset,
-playhead seek/drag, timeline length, and selected-clip deletion. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, transport BPM, time
-signature, play/record state, and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> are linked with the timeline so
-either surface can control global playback and seek position.</p>
+playhead seek/drag, timeline length, and selected-clip deletion. The timeline
+follows the session clock for position and play state, so its play/stop/seek
+controls act on the whole session in the browser. In a <code class="docutils literal notranslate"><span class="pre">Session</span></code>, transport BPM,
+time signature, and play/record state are also linked in Python, and
+<code class="docutils literal notranslate"><span class="pre">current_beat</span></code> is dlinked one-way from transport to timeline; the transport is
+the widget that persists the clock position.</p>
 <p>Recording uses <code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> and
 <code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> when the browser exposes them. A completed take creates a
 browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>; the binary audio

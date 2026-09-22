@@ -1815,9 +1815,13 @@ is not installed, or if WAV format is invalid.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">TransportWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Global transport controls: play/stop, BPM, time signature, bar/beat.</p>
-<p>Used as the master clock for a <code class="docutils literal notranslate"><span class="pre">Session</span></code>. All connected
-<code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> instances sync their BPM and play state
-to this transport via <code class="docutils literal notranslate"><span class="pre">traitlets.link</span></code>.</p>
+<p>Used as the master clock for a <code class="docutils literal notranslate"><span class="pre">Session</span></code>. In the browser the transport
+drives the shared session clock on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[session_id]</span></code>;
+every sequencer and timeline with the same <code class="docutils literal notranslate"><span class="pre">session_id</span></code> follows that
+clock directly, so play, seek, and tempo changes never wait on a kernel
+round-trip. The synced traits mirror the clock for Python callers:
+setting <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, or <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> from Python moves
+the clock, and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> is updated coarsely while playing.</p>
 <p>Public constructor</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget._esm">
@@ -1827,6 +1831,11 @@ to this transport via <code class="docutils literal notranslate"><span class="pr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget._css">
 <span class="sig-name descname"><span class="pre">_css</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget._css" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.session_id" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2720,6 +2729,30 @@ audio routing.</p>
 <span class="sig-name descname"><span class="pre">tracks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.widget.Session.tracks" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.Session.session_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.Session.session_id" title="Link to this definition">¶</a></dt>
+<dd><p>Identifier shared by every widget on this session’s browser bus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.play">
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.play" title="Link to this definition">¶</a></dt>
+<dd><p>Start the shared transport.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.stop" title="Link to this definition">¶</a></dt>
+<dd><p>Stop the shared transport, keeping the playhead position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.seek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.seek" title="Link to this definition">¶</a></dt>
+<dd><p>Move the shared playhead to <code class="docutils literal notranslate"><span class="pre">beat</span></code> (quarter-note units).</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.add_track">
 <span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.add_track" title="Link to this definition">¶</a></dt>
@@ -3053,6 +3086,7 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget"><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></a><ul>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget._esm"><code class="docutils literal notranslate"><span class="pre">TransportWidget._esm</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget._css"><code class="docutils literal notranslate"><span class="pre">TransportWidget._css</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.session_id"><code class="docutils literal notranslate"><span class="pre">TransportWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.bpm"><code class="docutils literal notranslate"><span class="pre">TransportWidget.bpm</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.is_playing"><code class="docutils literal notranslate"><span class="pre">TransportWidget.is_playing</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.is_recording"><code class="docutils literal notranslate"><span class="pre">TransportWidget.is_recording</span></code></a></li>
@@ -3201,6 +3235,10 @@ audio routing.</p>
 <li><a class="reference internal" href="#nbplay.widget.Session.timeline"><code class="docutils literal notranslate"><span class="pre">Session.timeline</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._timeline_links"><code class="docutils literal notranslate"><span class="pre">Session._timeline_links</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.tracks"><code class="docutils literal notranslate"><span class="pre">Session.tracks</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.session_id"><code class="docutils literal notranslate"><span class="pre">Session.session_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.play"><code class="docutils literal notranslate"><span class="pre">Session.play()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.stop"><code class="docutils literal notranslate"><span class="pre">Session.stop()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.seek"><code class="docutils literal notranslate"><span class="pre">Session.seek()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.add_track"><code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.remove_track"><code class="docutils literal notranslate"><span class="pre">Session.remove_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.__repr__"><code class="docutils literal notranslate"><span class="pre">Session.__repr__()</span></code></a></li>
