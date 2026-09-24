@@ -6,7 +6,7 @@
 // playing slots stay phase-locked. Launches take effect on the next
 // quantization boundary (bar, beat, or immediately).
 
-import { type AnyModel } from "./helpers.ts";
+import { type AnyModel, bindShortcuts } from "./helpers.ts";
 import {
   type AudioScheduler,
   createAudioScheduler,
@@ -226,6 +226,24 @@ export default {
 
     const binding = bindClock(model, onClockEvent, onRebind);
     const clock = (): SessionClock => binding.clock();
+
+    // Keyboard: Space toggles the clock, digits launch scenes, Escape/0 stop all.
+    const shortcuts: Record<string, () => boolean | void> = {
+      Space: () => {
+        const clk = clock();
+        if (clk.playing) clk.stop();
+        else clk.play();
+      },
+      Escape: () => stopAll(),
+      "0": () => stopAll(),
+    };
+    for (let digit = 1; digit <= 9; digit++) {
+      shortcuts[String(digit)] = () => {
+        if (digit - 1 >= getScenes(model).length) return false;
+        launchScene(digit - 1);
+      };
+    }
+    const unbindShortcuts = bindShortcuts(root, shortcuts);
 
     // Launching
 
@@ -613,6 +631,7 @@ export default {
     return () => {
       disposed = true;
       stopQueueTimer();
+      unbindShortcuts();
       states.forEach((state) => state.scheduler.destroy());
       states.length = 0;
       binding.dispose();

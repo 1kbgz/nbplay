@@ -5,7 +5,7 @@
 // getUserMedia stream, channel lanes tap their mixer channel through a
 // MediaStreamAudioDestinationNode so instrument output is bounced to audio.
 
-import { type AnyModel } from "./helpers.ts";
+import { type AnyModel, bindShortcuts } from "./helpers.ts";
 import {
   bindClock,
   type ClockEvent,
@@ -297,6 +297,31 @@ export default {
 
     const binding = bindClock(model, onClockEvent, onRebind);
     const clock = (): SessionClock => binding.clock();
+
+    function togglePlay(): void {
+      const clk = clock();
+      if (clk.playing) clk.stop();
+      else clk.play();
+    }
+
+    function toggleRecord(): void {
+      if (recordingActive() || Boolean(model.get("is_recording")))
+        stopRecording();
+      else void startRecording();
+    }
+
+    const unbindShortcuts = bindShortcuts(root, {
+      Space: togglePlay,
+      "Shift+Space": () => {
+        clock().stop();
+        seekToBeat(0);
+      },
+      r: toggleRecord,
+      l: () => toggleLoop(),
+      d: () => duplicateSelectedClip(),
+      Delete: () => removeSelectedClip(),
+      Backspace: () => removeSelectedClip(),
+    });
 
     // Recording
 
@@ -1568,18 +1593,10 @@ export default {
         ?.addEventListener("click", () => seekToBeat(0));
       root
         .querySelector(".nbplay-timeline-play")
-        ?.addEventListener("click", () => {
-          const clk = clock();
-          if (clk.playing) clk.stop();
-          else clk.play();
-        });
+        ?.addEventListener("click", togglePlay);
       root
         .querySelector(".nbplay-timeline-record")
-        ?.addEventListener("click", () => {
-          if (recordingActive() || Boolean(model.get("is_recording")))
-            stopRecording();
-          else void startRecording();
-        });
+        ?.addEventListener("click", toggleRecord);
       root
         .querySelector(".nbplay-timeline-duplicate")
         ?.addEventListener("click", duplicateSelectedClip);
@@ -1720,6 +1737,7 @@ export default {
       }
       releaseLanes();
       clearScheduledPlayback();
+      unbindShortcuts();
       binding.dispose();
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
       root.remove();

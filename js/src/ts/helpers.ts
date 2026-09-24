@@ -162,6 +162,46 @@ export function makeEditable(el: HTMLElement, opts: EditableOpts): void {
   });
 }
 
+/**
+ * Keyboard shortcuts scoped to a widget. Handlers fire only while focus is
+ * inside `root` and not in a text field. Keys are named like
+ * "Space", "Shift+ArrowUp", or "r"; a handler that returns true consumes
+ * the event (and suppresses button activation for Space/Enter).
+ */
+export function bindShortcuts(
+  root: HTMLElement,
+  handlers: Record<string, () => boolean | void>,
+): () => void {
+  if (root.tabIndex < 0) root.tabIndex = 0;
+  function onKeyDown(e: KeyboardEvent): void {
+    const target = e.target as HTMLElement | null;
+    const tag = target?.tagName;
+    if (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT" ||
+      target?.isContentEditable
+    )
+      return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const base =
+      e.key === " "
+        ? "Space"
+        : e.key.length === 1
+          ? e.key.toLowerCase()
+          : e.key;
+    const name = e.shiftKey && base.length > 1 ? `Shift+${base}` : base;
+    const handler = handlers[name] ?? (e.shiftKey ? handlers[base] : undefined);
+    if (!handler) return;
+    if (handler() !== false) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+  root.addEventListener("keydown", onKeyDown);
+  return () => root.removeEventListener("keydown", onKeyDown);
+}
+
 // Binary buffer helpers
 
 /** Convert an anywidget binary buffer to a Float32Array. */
