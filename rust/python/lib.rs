@@ -1,8 +1,10 @@
 use pyo3::prelude::*;
 
 mod audio;
+#[cfg(not(target_arch = "wasm32"))]
 mod audio_output;
 mod midi;
+#[cfg(not(target_arch = "wasm32"))]
 mod midi_input;
 mod mixer;
 mod oscillator;
@@ -47,10 +49,10 @@ fn nbplay(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<sampler::PySampleMap>()?;
     m.add_class::<sampler::PySampler>()?;
 
-    // Audio output
+    // Native audio output and MIDI input (cpal/midir): absent on wasm32
+    #[cfg(not(target_arch = "wasm32"))]
     m.add_class::<audio_output::PyAudioOutput>()?;
-
-    // MIDI input
+    #[cfg(not(target_arch = "wasm32"))]
     m.add_class::<midi_input::PyMidiInput>()?;
 
     Ok(())

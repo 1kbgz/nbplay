@@ -815,6 +815,20 @@ from third-party lab extensions is unrelated to nbplay. `voila` is a `develop`
 extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
 manager.
 
+### Pyodide wheel
+
+`make test-pyodide` builds a `cp314-pyodide_wasm32` wheel with cibuildwheel
+and smoke-tests it in Pyodide; CI runs the same target in the `pyodide` matrix
+entry. hatch-rs cross-compiles the PyO3 extension to
+`wasm32-unknown-emscripten`; the native-only `AudioOutput` and `MidiInput`
+classes (cpal and midir) are compiled out on wasm32 and import as `None` in
+Python, so `nbplay.AudioOutput is None` is the check for that platform. The
+`[tool.cibuildwheel.pyodide]` section removes any host extension from the
+package directory before the build so only the Emscripten module ships, and
+replaces the pytest suite (which needs a live kernel) with an import and
+session smoke test. The wheel is the basis for running the widgets in
+JupyterLite.
+
 ### Keyboard shortcuts
 
 `bindShortcuts(root, handlers)` in `helpers.ts` scopes shortcuts to a widget:
