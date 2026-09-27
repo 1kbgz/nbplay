@@ -3,6 +3,7 @@ import math
 import pathlib
 import struct
 import wave
+import zipfile
 
 import pytest
 
@@ -2822,6 +2823,179 @@ class TestLauncherWidget:
     def test_repr(self):
         launcher = self._launcher()
         assert repr(launcher) == "LauncherWidget(tracks=2, scenes=2, slots=0)"
+
+
+#  Session persistence
+
+
+class TestSessionPersistence:
+    def _session(self):
+        s = Session(bpm=132.0, time_signature=(3, 4))
+        s.transport.loop_enabled = True
+        s.transport.loop_end_bar = 8
+        seq = SequencerWidget(length=8, num_voices=2, step_duration=0.5, swing=15)
+        seq.set_step(0, note=60, velocity=90, active=True, voice=0)
+        seq.set_step(3, note=67, velocity=70, active=True, voice=1)
+        synth = SynthWidget(oscillator_type="saw", frequency=220.0, amplitude=0.3)
+        lead = s.add_track("Lead", seq, synth)
+        sampler = SamplerWidget(pad_count=4, attack=0.02, release=0.4)
+        sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=48, name="Blip")
+        sampler.pad_notes = [48, 50, 52, 53]
+        drums = s.add_track("Drums", sound_source=sampler, armed=True)
+        s.add_track("Vocals")
+        s.mixer.set_channel_gain(lead.mixer_channel, 0.6)
+        s.mixer.add_channel_effect(lead.mixer_channel, EffectPlugin("filter", filter_type="lowpass", frequency=2000, q=0.8))
+        s.mixer.master_gain = 0.7
+        s.mixer.add_master_effect(EffectPlugin("limiter", threshold=-2))
+        s.timeline.length = 32
+        s.timeline.count_in_bars = 1
+        s.timeline.pixels_per_beat = 24
+        s.timeline.add_clip("Take", track_index=2, start=4.0, duration=2.5, offset=0.5, audio_url="blob:take")
+        s.launcher.add_scene("Intro")
+        s.launcher.add_scene("Drop")
+        s.launcher.set_slot(drums.mixer_channel, 1, [{"note": 36, "active": True}, {"note": 38, "active": True}], name="Kit")
+        s.launcher.quantize = "beat"
+        return s
+
+    def test_to_dict_is_json_safe(self):
+        s = self._session()
+        data = s.to_dict()
+        json.dumps(data)
+        assert data["format"] == "nbplay-session"
+        assert data["transport"]["bpm"] == pytest.approx(132.0)
+        assert [t["name"] for t in data["tracks"]] == ["Lead", "Drums", "Vocals"]
+        assert data["tracks"][0]["sound_source"]["type"] == "SynthWidget"
+        assert data["tracks"][1]["sequencer"] is None
+        assert data["tracks"][2]["sound_source"] is None
+        assert "audio_url" not in data["timeline"]["clips"][0]
+        assert "sample_file" not in data["tracks"][1]["sound_source"]
+
+    def test_unsupported_sound_source_raises(self):
+        s = Session()
+        s.add_track("Keys", sound_source=KeyboardWidget())
+        with pytest.raises(ValueError, match="cannot save sound source"):
+            s.to_dict()
+
+    def test_export_all_clips_queues_and_caches(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        a = timeline.add_clip("A1", audio_url="blob:a")
+        b = timeline.add_clip("B1", audio_url="blob:b")
+        timeline.add_clip("No audio")
+        assert timeline.export_all_clips() == 2
+        assert timeline.export_clip_id == a["id"]
+        assert timeline.pending_exports == 2
+
+        # Simulate the browser answering the first request.
+        timeline.exported_clip = {"id": a["id"], "blob_type": "audio/webm"}
+        timeline.exported_clip_data = b"aaa"
+        assert timeline.clip_audio[a["id"]] == {"data": b"aaa", "blob_type": "audio/webm"}
+        assert timeline.export_clip_id == b["id"]
+        assert timeline.pending_exports == 1
+
+        timeline.exported_clip = {"id": b["id"], "blob_type": "audio/wav"}
+        timeline.exported_clip_data = b"bbb"
+        assert timeline.pending_exports == 0
+        assert sorted(timeline.clip_audio) == sorted([a["id"], b["id"]])
+        assert timeline.export_all_clips() == 0
+        assert timeline.export_all_clips(refresh=True) == 2
+
+    def test_save_and_load_round_trip(self, tmp_path):
+        s = self._session()
+        take = s.timeline.clips[0]
+        s.timeline.exported_clip = {"id": take["id"], "blob_type": "audio/wav"}
+        s.timeline.exported_clip_data = b"RIFF-take"
+        path = tmp_path / "song.nbplay"
+        assert s.save(path) == path
+
+        with zipfile.ZipFile(path) as archive:
+            names = set(archive.namelist())
+        assert "session.json" in names
+        assert "samples/track-1.f32" in names
+        assert f"clips/{take['id']}.bin" in names
+
+        loaded = Session.load(path)
+        assert loaded.transport.bpm == pytest.approx(132.0)
+        assert loaded.transport.time_signature_num == 3
+        assert loaded.transport.loop_enabled is True
+        assert loaded.transport.loop_end_bar == 8
+        assert [t.name for t in loaded.tracks] == ["Lead", "Drums", "Vocals"]
+
+        seq = loaded.tracks[0].sequencer
+        original = s.tracks[0].sequencer
+        assert seq.num_voices == 2
+        assert seq.length == original.length
+        assert seq.time_signature_num == 3
+        assert seq.step_duration == pytest.approx(0.5)
+        assert seq.swing == pytest.approx(15.0)
+        assert seq.voices_data == original.voices_data
+        assert seq.voices_data[0][0]["note"] == 60
+        assert seq.voices_data[1][3]["note"] == 67
+        assert seq.voices_data[1][3]["active"] is True
+        assert seq.session_id == loaded.session_id
+        synth = loaded.tracks[0].sound_source
+        assert isinstance(synth, SynthWidget)
+        assert synth.oscillator_type == "saw"
+        assert synth.frequency == pytest.approx(220.0)
+
+        sampler = loaded.tracks[1].sound_source
+        assert isinstance(sampler, SamplerWidget)
+        assert loaded.tracks[1].sequencer is None
+        assert sampler.sample_name == "Blip"
+        assert sampler.sample_rate == 22050
+        assert sampler.root_note == 48
+        assert sampler.get_sample_data() == pytest.approx([0.0, 0.5, -0.5, 0.25])
+        assert sampler.pad_count == 4
+        assert sampler.pad_notes == [48, 50, 52, 53]
+        assert sampler.attack == pytest.approx(0.02)
+        assert sampler.channel_index == 1
+        assert loaded.tracks[2].sound_source is None
+
+        assert loaded.mixer.channels[0]["gain"] == pytest.approx(0.6)
+        assert loaded.mixer.channels[0]["effects"][0]["type"] == "filter"
+        assert loaded.mixer.master_gain == pytest.approx(0.7)
+        assert loaded.mixer.master_effects[0]["type"] == "limiter"
+
+        tl = loaded.timeline
+        assert tl.length == pytest.approx(32.0)
+        assert tl.count_in_bars == pytest.approx(1.0)
+        assert tl.pixels_per_beat == pytest.approx(24.0)
+        assert [t["input"] for t in tl.tracks] == ["channel", "channel", "microphone"]
+        assert tl.tracks[1]["armed"] is True
+        assert len(tl.clips) == 1
+        clip = tl.clips[0]
+        assert clip["id"] == take["id"]
+        assert clip["start"] == pytest.approx(4.0)
+        assert clip["duration"] == pytest.approx(2.5)
+        assert clip["offset"] == pytest.approx(0.5)
+        assert clip["track_index"] == 2
+        assert tl.import_clip_data == b"RIFF-take"
+        assert tl.import_clip_request["id"] == take["id"]
+        assert tl.import_clip_request["measure_duration"] is False
+
+        assert loaded.launcher.scenes == ["Intro", "Drop"]
+        assert loaded.launcher.quantize == "beat"
+        assert [t["channel_index"] for t in loaded.launcher.tracks] == [0, 1, 2]
+        slot = loaded.launcher.get_slot(1, 1)
+        assert slot["name"] == "Kit"
+        assert slot["voices_data"][0][1]["note"] == 38
+
+    def test_from_dict_without_resources_keeps_metadata(self):
+        s = self._session()
+        data = s.to_dict()
+        loaded = Session.from_dict(data)
+        assert loaded.tracks[1].sound_source.sample_length == 0
+        assert loaded.tracks[1].sound_source.sample_name == "Blip"
+        assert len(loaded.timeline.clips) == 1
+        assert loaded.timeline.import_clip_request == {}
+
+    def test_load_rejects_foreign_data(self):
+        with pytest.raises(ValueError, match="not an nbplay session"):
+            Session.from_dict({"format": "something-else"})
+        with pytest.raises(ValueError, match="unknown sound source type"):
+            Session.from_dict({"format": "nbplay-session", "version": 1, "tracks": [{"name": "X", "sound_source": {"type": "Theremin"}}]})
+        with pytest.raises(ValueError, match="newer"):
+            Session.from_dict({"format": "nbplay-session", "version": 99})
 
 
 #  Track
