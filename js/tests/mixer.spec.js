@@ -638,11 +638,16 @@ test.describe("MixerWidget", () => {
     const result = await page.evaluate(() => {
       const bus = window.__nbplay["test-session"];
       const channel = bus.channels[0];
+      // Analysers (meters) listen on the chain outputs alongside the signal path.
+      const signalPath = (node) =>
+        node.connections.filter((n) => !("fftSize" in n));
       return {
         channelCount: bus.channels.length,
         gainToPan: channel.gain.connections.includes(channel.pan),
-        panConnections: channel.pan.connections.length,
-        masterConnections: bus.masterGain.connections.length,
+        panConnections: signalPath(channel.pan).length,
+        panToMaster: channel.pan.connections.includes(bus.masterGain),
+        panMetered: channel.pan.connections.some((n) => "fftSize" in n),
+        masterConnections: signalPath(bus.masterGain).length,
         masterToDestination: bus.masterGain.connections.includes(
           bus.audioCtx.destination,
         ),
@@ -652,6 +657,8 @@ test.describe("MixerWidget", () => {
       channelCount: 1,
       gainToPan: true,
       panConnections: 1,
+      panToMaster: true,
+      panMetered: true,
       masterConnections: 1,
       masterToDestination: true,
     });
@@ -740,7 +747,74 @@ test.describe("MixerWidget", () => {
     });
   });
 
-  test("effect param changes rebuild and dispose old effect nodes", async ({
+  test("effect param changes update the existing nodes in place", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [
+            { type: "gain", gain: 1 },
+            { type: "filter", filter_type: "lowpass", frequency: 1200, q: 1 },
+          ],
+        },
+      ],
+      master_effects: [
+        { type: "delay", time: 0.25, feedback: 0.25, wet: 0.35 },
+      ],
+    });
+
+    const result = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const oldGain = bus.channels[0].effects[0].input;
+      const oldFilter = bus.channels[0].effects[1].input;
+      const oldMaster = bus.masterGain.connections[0];
+      const channels = window.__testModel._state.channels;
+      window.__testModel.set("channels", [
+        {
+          ...channels[0],
+          effects: [
+            { type: "gain", gain: 0.5 },
+            { type: "filter", filter_type: "highpass", frequency: 300, q: 2 },
+          ],
+        },
+      ]);
+      window.__testModel.set("master_effects", [
+        { type: "delay", time: 0.5, feedback: 0.1, wet: 0.8 },
+      ]);
+      window.__testModel._trigger("change:channels");
+      window.__testModel._trigger("change:master_effects");
+      const newGain = bus.channels[0].effects[0].input;
+      const newFilter = bus.channels[0].effects[1].input;
+      return {
+        sameGainNode: oldGain === newGain,
+        gainConnected: !oldGain.disconnected,
+        newGain: newGain.gain.value,
+        sameFilterNode: oldFilter === newFilter,
+        filterType: newFilter.type,
+        filterFrequency: newFilter.frequency.value,
+        filterQ: newFilter.Q.value,
+        sameMasterInput: oldMaster === bus.masterGain.connections[0],
+      };
+    });
+    expect(result).toEqual({
+      sameGainNode: true,
+      gainConnected: true,
+      newGain: 0.5,
+      sameFilterNode: true,
+      filterType: "highpass",
+      filterFrequency: 300,
+      filterQ: 2,
+      sameMasterInput: true,
+    });
+  });
+
+  test("structural effect changes rebuild only that chain", async ({
     page,
   }) => {
     await renderWidget(page, {
@@ -753,29 +827,95 @@ test.describe("MixerWidget", () => {
           solo: false,
           effects: [{ type: "gain", gain: 1 }],
         },
+        {
+          name: "Pad",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "reverb", seconds: 1, decay: 2, wet: 0.2 }],
+        },
       ],
     });
 
     const result = await page.evaluate(() => {
       const bus = window.__nbplay["test-session"];
-      const oldEffect = bus.channels[0].effects[0].input;
+      const oldLead = bus.channels[0].effects[0].input;
+      const oldPad = bus.channels[1].effects[0].input;
       const channels = window.__testModel._state.channels;
       window.__testModel.set("channels", [
-        { ...channels[0], effects: [{ type: "gain", gain: 0.5 }] },
+        {
+          ...channels[0],
+          effects: [
+            { type: "gain", gain: 1 },
+            { type: "limiter", threshold: -3 },
+          ],
+        },
+        {
+          ...channels[1],
+          effects: [{ type: "reverb", seconds: 3, decay: 2, wet: 0.2 }],
+        },
       ]);
       window.__testModel._trigger("change:channels");
-      const newEffect = bus.channels[0].effects[0].input;
       return {
-        oldDisconnected: oldEffect.disconnected,
-        sameNode: oldEffect === newEffect,
-        newGain: newEffect.gain.value,
+        leadRebuilt: bus.channels[0].effects[0].input !== oldLead,
+        leadOldDisconnected: oldLead.disconnected,
+        leadLength: bus.channels[0].effects.length,
+        padRebuilt: bus.channels[1].effects[0].input !== oldPad,
+        padOldDisconnected: oldPad.disconnected,
       };
     });
     expect(result).toEqual({
-      oldDisconnected: true,
-      sameNode: false,
-      newGain: 0.5,
+      leadRebuilt: true,
+      leadOldDisconnected: true,
+      leadLength: 2,
+      padRebuilt: true,
+      padOldDisconnected: true,
     });
+  });
+
+  test("meters follow the analyser level per strip and master", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    await page.evaluate(() => {
+      window.__mockAnalyserLevel = 0.5;
+    });
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const strips = document.querySelectorAll(
+              ".nbplay-mixer-strip:not(.nbplay-master-strip)",
+            );
+            const master = document.querySelector(".nbplay-master-strip");
+            return {
+              stripPeaks: [...strips].map((s) => s.dataset.peak),
+              masterPeak: master?.dataset.peak,
+              fill: strips[0]?.querySelector(".nbplay-strip-meter-fill")?.style
+                .height,
+              analysers: window.__analysers?.length,
+            };
+          }),
+        { timeout: 2000 },
+      )
+      .toEqual({
+        stripPeaks: ["0.500", "0.500"],
+        masterPeak: "0.500",
+        fill: "90%",
+        analysers: 3,
+      });
+
+    await page.evaluate(() => {
+      window.__mockAnalyserLevel = 0;
+    });
+    await expect
+      .poll(async () =>
+        page.evaluate(
+          () => document.querySelector(".nbplay-strip-meter-fill").style.height,
+        ),
+      )
+      .toBe("0%");
   });
 
   test("shrinking channel count disconnects removed audio nodes", async ({

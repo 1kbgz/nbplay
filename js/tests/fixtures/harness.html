@@ -124,6 +124,21 @@
         }
       }
 
+      class MockAnalyserNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.fftSize = 2048;
+          this.smoothingTimeConstant = 0.8;
+        }
+        // Fills the buffer with a constant level so tests can drive meters.
+        getFloatTimeDomainData(array) {
+          const level = Number(window.__mockAnalyserLevel) || 0;
+          for (let i = 0; i < array.length; i++) {
+            array[i] = i % 2 === 0 ? level : -level;
+          }
+        }
+      }
+
       class MockMediaStreamDestinationNode extends MockAudioNode {
         constructor() {
           super();
@@ -182,6 +197,12 @@
           window.__mediaStreamSources = window.__mediaStreamSources || [];
           window.__mediaStreamSources.push(source);
           return source;
+        }
+        createAnalyser() {
+          const node = new MockAnalyserNode();
+          window.__analysers = window.__analysers || [];
+          window.__analysers.push(node);
+          return node;
         }
         createMediaStreamDestination() {
           const node = new MockMediaStreamDestinationNode();
