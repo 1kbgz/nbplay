@@ -76,7 +76,6 @@ jobs:
         uses: actions-ext/node/setup@34d0fdbdca883e4d0a2da0bcd0fa460fd40b80e7
         with:
           version: 22.x
-        if: matrix.target == 'native'
 
       - name: Install system dependencies (Linux)
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev
@@ -84,7 +83,6 @@ jobs:
 
       - name: Install dependencies
         run: make develop
-        if: matrix.target == 'native'
 
       - name: Lint
         run: make lint
@@ -101,6 +99,11 @@ jobs:
       - name: Test
         run: make coverage
         if: matrix.target == 'native'
+
+      # The wheel build's JavaScript hook only checks its outputs exist; build them here
+      - name: Build JavaScript assets
+        run: make build-js
+        if: matrix.target == 'pyodide'
 
       - name: Build and test Pyodide wheel
         run: make test-pyodide

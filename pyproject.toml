@@ -137,7 +137,7 @@ skip = "*win32 *arm64"
 
 [tool.cibuildwheel.pyodide]
 # Rust cross-compiles through hatch-rs (CARGO_BUILD_TARGET=wasm32-unknown-emscripten).
-xbuild-tools = ["cargo", "rustc", "rustup"]
+xbuild-tools = ["cargo", "rustc", "rustup", "node", "pnpm"]
 # Drop any host extension so only the Emscripten module ships in the wheel.
 before-build = "rm -f {package}/nbplay/*.so"
 # The full pytest suite needs a live kernel and the develop extras; smoke-test the wheel instead.
