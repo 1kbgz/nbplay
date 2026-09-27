@@ -15,6 +15,10 @@ let's play!
 
 [![Music composition widgets in a jupyter notebook](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif)](https://raw.githubusercontent.com/1kbgz/nbplay/refs/heads/main/docs/img/sample.gif)
 
+**Try it in your browser:** the [live demo](https://1kbgz.github.io/nbplay/lite/lab/index.html?path=13_daw_playground.ipynb)
+runs the example notebooks on JupyterLite with nbplay compiled to WebAssembly.
+Nothing to install; open a notebook and run it top to bottom.
+
 nbplay provides composable Jupyter widgets for a browser-backed DAW: synths,
 samplers, sequencers, keyboards, pads, transport, multitrack timeline
 recording, a clip launcher, and mixer/session routing, all following one shared
