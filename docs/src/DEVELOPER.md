@@ -436,6 +436,17 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
 
+Insert chains update in place. Each built-in effect unit exposes
+`update(descriptor)`, which writes the new parameters to the existing
+`AudioParam`s; a chain is rebuilt only when its structure changes (an
+effect added, removed, or retyped), when a custom plugin has no `update`, or
+when a unit declines the change (reverb returns false for a new impulse
+length or decay). Only the chain that changed is rebuilt. Meters: the bus
+creates an `AnalyserNode` per channel and for the master, connected from the
+end of each insert chain, and the widget reads peak/RMS at ~30 fps with
+`requestAnimationFrame` to drive `.nbplay-strip-meter-fill` (height on a
+60 dB scale, `hot` at clipping) and a `data-peak` attribute on each strip.
+
 ### SequencerWidget
 
 Python class: `SequencerWidget`. Browser file: `js/src/ts/sequencer.ts`. CSS

@@ -32,6 +32,13 @@ interface ChannelNode {
   gain: GainNode;
   pan: StereoPannerNode;
   effects: EffectUnit[];
+  descriptors: EffectDescriptor[];
+  analyser: AnalyserNode | null;
+}
+
+interface MeterLevel {
+  peak: number;
+  rms: number;
 }
 
 interface EffectDescriptor {
@@ -43,6 +50,11 @@ interface EffectUnit {
   input: AudioNode;
   output: AudioNode;
   dispose?: () => void;
+  /**
+   * Apply a changed descriptor of the same type in place. Returns false
+   * when the change needs the unit rebuilt (for example a new impulse).
+   */
+  update?: (effect: EffectDescriptor) => boolean;
 }
 
 type EffectFactory = (
@@ -131,6 +143,8 @@ function asEffectUnit(
           typeof candidate.dispose === "function"
             ? candidate.dispose
             : undefined,
+        update:
+          typeof candidate.update === "function" ? candidate.update : undefined,
       };
     }
     throw new TypeError(
@@ -147,7 +161,7 @@ function createWetDryEffect(
   ctx: AudioContext,
   wet: number,
   connectWetPath: (input: GainNode, wetGain: GainNode) => AudioNode[],
-): EffectUnit {
+): EffectUnit & { setWet: (wet: number) => void } {
   const input = ctx.createGain();
   const output = ctx.createGain();
   const dryGain = ctx.createGain();
@@ -161,6 +175,10 @@ function createWetDryEffect(
   return {
     input,
     output,
+    setWet: (value: number) => {
+      dryGain.gain.value = 1 - value;
+      wetGain.gain.value = value;
+    },
     dispose: () => {
       [input, output, dryGain, wetGain, ...wetNodes].forEach(disconnectNode);
     },
@@ -191,52 +209,57 @@ function builtInEffectFactory(
   switch (effect.type) {
     case "gain": {
       const gain = ctx.createGain();
-      gain.gain.value = numberParam(effect, "gain", 1, 0, 4);
-      return { input: gain, output: gain };
+      const apply = (fx: EffectDescriptor) => {
+        gain.gain.value = numberParam(fx, "gain", 1, 0, 4);
+        return true;
+      };
+      apply(effect);
+      return { input: gain, output: gain, update: apply };
     }
     case "filter": {
       const filter = ctx.createBiquadFilter();
-      filter.type = String(effect.filter_type || "lowpass") as BiquadFilterType;
-      filter.frequency.value = numberParam(
-        effect,
-        "frequency",
-        1200,
-        20,
-        20000,
-      );
-      filter.Q.value = numberParam(effect, "q", 1, 0.0001, 100);
-      return { input: filter, output: filter };
+      const apply = (fx: EffectDescriptor) => {
+        filter.type = String(fx.filter_type || "lowpass") as BiquadFilterType;
+        filter.frequency.value = numberParam(fx, "frequency", 1200, 20, 20000);
+        filter.Q.value = numberParam(fx, "q", 1, 0.0001, 100);
+        return true;
+      };
+      apply(effect);
+      return { input: filter, output: filter, update: apply };
     }
     case "compressor": {
       const compressor = ctx.createDynamicsCompressor();
-      setParam(
-        compressor.threshold,
-        numberParam(effect, "threshold", -24, -100, 0),
-      );
-      setParam(compressor.knee, numberParam(effect, "knee", 30, 0, 40));
-      setParam(compressor.ratio, numberParam(effect, "ratio", 12, 1, 20));
-      setParam(compressor.attack, numberParam(effect, "attack", 0.003, 0, 1));
-      setParam(compressor.release, numberParam(effect, "release", 0.25, 0, 1));
-      return { input: compressor, output: compressor };
+      const apply = (fx: EffectDescriptor) => {
+        setParam(
+          compressor.threshold,
+          numberParam(fx, "threshold", -24, -100, 0),
+        );
+        setParam(compressor.knee, numberParam(fx, "knee", 30, 0, 40));
+        setParam(compressor.ratio, numberParam(fx, "ratio", 12, 1, 20));
+        setParam(compressor.attack, numberParam(fx, "attack", 0.003, 0, 1));
+        setParam(compressor.release, numberParam(fx, "release", 0.25, 0, 1));
+        return true;
+      };
+      apply(effect);
+      return { input: compressor, output: compressor, update: apply };
     }
     case "limiter": {
       const limiter = ctx.createDynamicsCompressor();
-      setParam(
-        limiter.threshold,
-        numberParam(effect, "threshold", -1, -100, 0),
-      );
       setParam(limiter.knee, 0);
       setParam(limiter.ratio, 20);
       setParam(limiter.attack, 0.001);
-      setParam(limiter.release, numberParam(effect, "release", 0.05, 0, 1));
-      return { input: limiter, output: limiter };
+      const apply = (fx: EffectDescriptor) => {
+        setParam(limiter.threshold, numberParam(fx, "threshold", -1, -100, 0));
+        setParam(limiter.release, numberParam(fx, "release", 0.05, 0, 1));
+        return true;
+      };
+      apply(effect);
+      return { input: limiter, output: limiter, update: apply };
     }
     case "delay": {
       const delay = ctx.createDelay(5);
       const feedback = ctx.createGain();
-      delay.delayTime.value = numberParam(effect, "time", 0.25, 0, 5);
-      feedback.gain.value = numberParam(effect, "feedback", 0.25, 0, 0.95);
-      return createWetDryEffect(
+      const unit = createWetDryEffect(
         ctx,
         numberParam(effect, "wet", 0.35, 0, 1),
         (input, wetGain) => {
@@ -247,15 +270,21 @@ function builtInEffectFactory(
           return [delay, feedback];
         },
       );
+      const apply = (fx: EffectDescriptor) => {
+        delay.delayTime.value = numberParam(fx, "time", 0.25, 0, 5);
+        feedback.gain.value = numberParam(fx, "feedback", 0.25, 0, 0.95);
+        unit.setWet(numberParam(fx, "wet", 0.35, 0, 1));
+        return true;
+      };
+      apply(effect);
+      return { ...unit, update: apply };
     }
     case "reverb": {
       const convolver = ctx.createConvolver();
-      convolver.buffer = createImpulse(
-        ctx,
-        numberParam(effect, "seconds", 1.5, 0.01, 10),
-        numberParam(effect, "decay", 2, 0.01, 12),
-      );
-      return createWetDryEffect(
+      const seconds = numberParam(effect, "seconds", 1.5, 0.01, 10);
+      const decay = numberParam(effect, "decay", 2, 0.01, 12);
+      convolver.buffer = createImpulse(ctx, seconds, decay);
+      const unit = createWetDryEffect(
         ctx,
         numberParam(effect, "wet", 0.25, 0, 1),
         (input, wetGain) => {
@@ -264,6 +293,17 @@ function builtInEffectFactory(
           return [convolver];
         },
       );
+      const apply = (fx: EffectDescriptor) => {
+        // A different impulse needs a new convolver: ask for a rebuild.
+        if (
+          numberParam(fx, "seconds", 1.5, 0.01, 10) !== seconds ||
+          numberParam(fx, "decay", 2, 0.01, 12) !== decay
+        )
+          return false;
+        unit.setWet(numberParam(fx, "wet", 0.25, 0, 1));
+        return true;
+      };
+      return { ...unit, update: apply };
     }
     default:
       return null;
@@ -352,12 +392,67 @@ function effectLabel(effect: EffectDescriptor): string {
 
 // Shared Audio Bus
 
+/** Point the chain's output at `target` (analysers only listen). */
+function chainOutput(source: AudioNode, effects: EffectUnit[]): AudioNode {
+  return effects.length ? effects[effects.length - 1].output : source;
+}
+
+/**
+ * Bring an existing chain up to date with new descriptors. Returns true
+ * when every unit could be updated in place (same types, same length, and
+ * each unit accepted its new parameters).
+ */
+function updateEffectChain(
+  effects: EffectUnit[],
+  previous: EffectDescriptor[],
+  next: EffectDescriptor[],
+): boolean {
+  if (effects.length !== next.length || previous.length !== next.length)
+    return false;
+  for (let i = 0; i < next.length; i++) {
+    if (previous[i].type !== next[i].type) return false;
+  }
+  for (let i = 0; i < next.length; i++) {
+    if (JSON.stringify(previous[i]) === JSON.stringify(next[i])) continue;
+    const update = effects[i].update;
+    if (!update || !update(next[i])) return false;
+  }
+  return true;
+}
+
+function measureLevel(
+  analyser: AnalyserNode | null,
+  buffer: Float32Array<ArrayBuffer>,
+): MeterLevel {
+  if (!analyser) return { peak: 0, rms: 0 };
+  analyser.getFloatTimeDomainData(buffer);
+  let peak = 0;
+  let sum = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    const v = Math.abs(buffer[i]);
+    if (v > peak) peak = v;
+    sum += buffer[i] * buffer[i];
+  }
+  return { peak, rms: Math.sqrt(sum / Math.max(1, buffer.length)) };
+}
+
 function createAudioBus() {
   let audioCtx: AudioContext | null = null;
   let masterGain: GainNode | null = null;
   let masterEffects: EffectUnit[] = [];
-  let effectSignature = "";
+  let masterDescriptors: EffectDescriptor[] = [];
+  let masterAnalyser: AnalyserNode | null = null;
+  let masterChainBuilt = false;
   const channelNodes: ChannelNode[] = [];
+  const meterBuffer = new Float32Array(256);
+
+  function createAnalyser(): AnalyserNode | null {
+    if (!audioCtx?.createAnalyser) return null;
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.6;
+    return analyser;
+  }
 
   return {
     init(sessionId: string): void {
@@ -372,6 +467,7 @@ function createAudioBus() {
       if (!audioCtx) return;
       masterGain = audioCtx.createGain();
       masterGain.connect(audioCtx.destination);
+      masterAnalyser = createAnalyser();
     },
 
     syncChannels(
@@ -380,38 +476,72 @@ function createAudioBus() {
       masterEffectsValue: EffectDescriptor[] = [],
     ): void {
       if (!audioCtx || !masterGain) return;
-      let graphNeedsRebuild = false;
       while (channelNodes.length < channels.length) {
         const g = audioCtx.createGain();
         const p = audioCtx.createStereoPanner();
         g.connect(p);
-        channelNodes.push({ gain: g, pan: p, effects: [] });
-        graphNeedsRebuild = true;
+        p.connect(masterGain);
+        channelNodes.push({
+          gain: g,
+          pan: p,
+          effects: [],
+          descriptors: [],
+          analyser: createAnalyser(),
+        });
+        const node = channelNodes[channelNodes.length - 1];
+        if (node.analyser) p.connect(node.analyser);
       }
       while (channelNodes.length > channels.length) {
         const n = channelNodes.pop()!;
         disposeEffects(n.effects);
         n.gain.disconnect();
         n.pan.disconnect();
-        graphNeedsRebuild = true;
+        disconnectNode(n.analyser);
       }
-      const nextSignature = JSON.stringify({
-        channels: channels.map((ch) => ch.effects || []),
-        master: masterEffectsValue || [],
+
+      // Insert chains: update parameters in place when the chain's shape
+      // is unchanged, rebuild only the chains whose structure changed.
+      channelNodes.forEach((n, i) => {
+        const next = (channels[i]?.effects || []).map((fx) => ({ ...fx }));
+        if (
+          n.descriptors.length === next.length &&
+          JSON.stringify(n.descriptors) === JSON.stringify(next)
+        )
+          return;
+        if (updateEffectChain(n.effects, n.descriptors, next)) {
+          n.descriptors = next;
+          return;
+        }
+        disconnectNode(n.pan);
+        disposeEffects(n.effects);
+        n.effects = createEffectChain(audioCtx!, next);
+        n.descriptors = next;
+        connectEffectChain(n.pan, n.effects, masterGain!);
+        if (n.analyser) chainOutput(n.pan, n.effects).connect(n.analyser);
       });
-      if (graphNeedsRebuild || nextSignature !== effectSignature) {
-        effectSignature = nextSignature;
-        channelNodes.forEach((n, i) => {
-          disconnectNode(n.pan);
-          disposeEffects(n.effects);
-          n.effects = createEffectChain(audioCtx!, channels[i]?.effects || []);
-          connectEffectChain(n.pan, n.effects, masterGain!);
-        });
-        disconnectNode(masterGain);
-        disposeEffects(masterEffects);
-        masterEffects = createEffectChain(audioCtx, masterEffectsValue || []);
-        connectEffectChain(masterGain, masterEffects, audioCtx.destination);
+
+      const nextMaster = (masterEffectsValue || []).map((fx) => ({ ...fx }));
+      if (
+        !masterChainBuilt ||
+        JSON.stringify(masterDescriptors) !== JSON.stringify(nextMaster)
+      ) {
+        if (
+          masterChainBuilt &&
+          updateEffectChain(masterEffects, masterDescriptors, nextMaster)
+        ) {
+          masterDescriptors = nextMaster;
+        } else {
+          disconnectNode(masterGain);
+          disposeEffects(masterEffects);
+          masterEffects = createEffectChain(audioCtx, nextMaster);
+          masterDescriptors = nextMaster;
+          masterChainBuilt = true;
+          connectEffectChain(masterGain, masterEffects, audioCtx.destination);
+          if (masterAnalyser)
+            chainOutput(masterGain, masterEffects).connect(masterAnalyser);
+        }
       }
+
       const hasSolo = channels.some((ch) => ch.solo);
       channels.forEach((ch, i) => {
         const n = channelNodes[i];
@@ -421,6 +551,17 @@ function createAudioBus() {
         n.pan.pan.value = ch.pan;
       });
       masterGain.gain.value = masterGainValue;
+    },
+
+    /** Current peak/RMS per channel and for the master bus. */
+    levels(): { channels: MeterLevel[]; master: MeterLevel } | null {
+      if (!audioCtx) return null;
+      return {
+        channels: channelNodes.map((n) =>
+          measureLevel(n.analyser, meterBuffer),
+        ),
+        master: measureLevel(masterAnalyser, meterBuffer),
+      };
     },
 
     register(sessionId: string): void {
@@ -457,15 +598,19 @@ function createAudioBus() {
         disposeEffects(n.effects);
         n.gain.disconnect();
         n.pan.disconnect();
+        disconnectNode(n.analyser);
       });
       channelNodes.length = 0;
       disposeEffects(masterEffects);
+      masterDescriptors = [];
+      masterChainBuilt = false;
+      disconnectNode(masterAnalyser);
+      masterAnalyser = null;
       if (masterGain) masterGain.disconnect();
       if (audioCtx && audioCtx.state !== "closed") audioCtx.close();
       audioCtx = null;
       masterGain = null;
       masterEffects = [];
-      effectSignature = "";
     },
   };
 }
@@ -979,7 +1124,41 @@ function render({
   rebuild();
 
   // Cleanup
+  // VU meters: peak level per strip from the bus analysers, ~30 fps.
+  let meterFrame: number | null = null;
+  let lastMeterMs = 0;
+
+  function applyLevel(strip: Element | null, level: MeterLevel): void {
+    const fill = strip?.querySelector(
+      ".nbplay-strip-meter-fill",
+    ) as HTMLElement | null;
+    if (!fill || !strip) return;
+    const db = level.peak > 0 ? 20 * Math.log10(level.peak) : -Infinity;
+    const pct = Math.max(0, Math.min(1, (db + 60) / 60)) * 100;
+    fill.style.height = `${pct.toFixed(1)}%`;
+    fill.classList.toggle("hot", level.peak >= 0.99);
+    (strip as HTMLElement).dataset.peak = level.peak.toFixed(3);
+  }
+
+  function meterTick(now: number): void {
+    meterFrame = requestAnimationFrame(meterTick);
+    if (now - lastMeterMs < 33 || document.hidden) return;
+    lastMeterMs = now;
+    const levels = audioBus.levels();
+    if (!levels) return;
+    const strips = console_.querySelectorAll(
+      ".nbplay-mixer-strip:not(.nbplay-master-strip)",
+    );
+    levels.channels.forEach((level, i) => applyLevel(strips[i] || null, level));
+    applyLevel(console_.querySelector(".nbplay-master-strip"), levels.master);
+  }
+
+  if (sessionId && typeof requestAnimationFrame === "function") {
+    meterFrame = requestAnimationFrame(meterTick);
+  }
+
   return () => {
+    if (meterFrame !== null) cancelAnimationFrame(meterFrame);
     const sid = model.get("session_id") as string;
     if (sid) audioBus.destroy(sid);
   };
