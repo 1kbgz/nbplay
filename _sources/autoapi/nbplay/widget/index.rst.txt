@@ -27,6 +27,15 @@ Attributes
    nbplay.widget._DEFAULT_PAD_NOTES
    nbplay.widget._PAD_MAX_COUNT
    nbplay.widget._TIMELINE_INPUTS
+   nbplay.widget._LAUNCH_QUANTIZE
+   nbplay.widget._SESSION_FORMAT
+   nbplay.widget._SESSION_FORMAT_VERSION
+   nbplay.widget._SEQUENCER_STATE
+   nbplay.widget._SYNTH_STATE
+   nbplay.widget._SAMPLER_STATE
+   nbplay.widget._SAMPLER_PAD_STATE
+   nbplay.widget._TIMELINE_STATE
+   nbplay.widget._TRANSPORT_STATE
 
 
 Classes
@@ -46,6 +55,7 @@ Classes
    nbplay.widget.SamplerWidget
    nbplay.widget.TransportWidget
    nbplay.widget.TimelineWidget
+   nbplay.widget.LauncherWidget
    nbplay.widget.KeyboardRoute
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
@@ -89,6 +99,15 @@ Functions
    nbplay.widget._normalize_pad_action
    nbplay.widget._normalize_pad_actions
    nbplay.widget._normalize_sample_slices
+   nbplay.widget._slot_voices
+   nbplay.widget._normalize_launcher_slot
+   nbplay.widget._json_copy
+   nbplay.widget._widget_state
+   nbplay.widget._sound_source_to_dict
+   nbplay.widget._sound_source_from_dict
+   nbplay.widget._sequencer_from_dict
+   nbplay.widget._session_to_dict
+   nbplay.widget._session_from_dict
    nbplay.widget._default_pad_notes
    nbplay.widget._positive_pad_dimension
    nbplay.widget._build_route
@@ -1088,7 +1107,7 @@ Module Contents
    .. py:attribute:: loop_end_bar
 
 
-.. py:class:: TimelineWidget(*args: object, **kwargs: object)
+.. py:class:: TimelineWidget(**kwargs)
 
    Bases: :py:obj:`anywidget.AnyWidget`
 
@@ -1187,6 +1206,38 @@ Module Contents
 
 
    .. py:attribute:: import_clip_data
+
+
+   .. py:attribute:: _clip_audio
+
+
+   .. py:attribute:: _export_queue
+      :value: []
+
+
+
+   .. py:method:: _on_clip_exported(change)
+
+
+   .. py:property:: clip_audio
+
+      Clip audio bytes received from the browser, keyed by clip id.
+
+
+   .. py:property:: pending_exports
+
+      Number of clip exports still waiting on the browser.
+
+
+   .. py:method:: export_all_clips(*, refresh=False)
+
+      Ask the browser for every clip's audio, one clip at a time.
+
+      Returns the number of clips queued. The bytes accumulate in
+      :attr:`clip_audio` as they arrive; wait for :attr:`pending_exports`
+      to reach zero before saving the session. Clips whose audio is already
+      cached are skipped unless ``refresh`` is true.
+
 
 
    .. py:method:: _validate_pixels_per_beat(proposal)
@@ -1296,6 +1347,239 @@ Module Contents
       Set a clip duration in beats.
 
 
+
+.. py:data:: _LAUNCH_QUANTIZE
+   :value: ('bar', 'beat', 'none')
+
+
+.. py:function:: _slot_voices(pattern)
+
+   Coerce a pattern into ``voices_data`` (list of voices, each a list of step dicts).
+
+
+.. py:function:: _normalize_launcher_slot(slot)
+
+.. py:class:: LauncherWidget(**kwargs)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   Beats view: a clip launcher in the session-view style.
+
+   Tracks are rows, scenes are columns, and each filled slot holds a step
+   pattern in the same ``voices_data`` shape as :class:`SequencerWidget`.
+   Launching a slot starts it on the next quantization boundary of the
+   shared session clock, so every playing slot stays phase-locked; a scene
+   launches its whole column. Playback runs in the browser through the
+   session mixer channel of each track, which means a launcher performance
+   can be captured by the timeline through channel-tap lanes.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: bpm
+
+
+   .. py:attribute:: is_playing
+
+
+   .. py:attribute:: time_signature_num
+
+
+   .. py:attribute:: time_signature_den
+
+
+   .. py:attribute:: quantize
+
+
+   .. py:attribute:: tracks
+
+
+   .. py:attribute:: scenes
+
+
+   .. py:attribute:: slots
+
+
+   .. py:attribute:: active_slots
+
+
+   .. py:attribute:: queued_slots
+
+
+   .. py:attribute:: selected_slot
+
+
+   .. py:attribute:: launch_request
+
+
+   .. py:attribute:: _request_nonce
+      :value: 0
+
+
+
+   .. py:attribute:: _editor_links
+      :value: []
+
+
+
+   .. py:method:: _validate_quantize(proposal)
+
+
+   .. py:method:: _validate_tracks(proposal)
+
+
+   .. py:method:: _validate_scenes(proposal)
+
+
+   .. py:method:: _validate_slots(proposal)
+
+
+   .. py:method:: _validate_slot_states(proposal)
+
+
+   .. py:method:: _find_slot(track_index, scene_index)
+
+
+   .. py:method:: _check_indices(track_index, scene_index=None)
+
+
+   .. py:method:: add_track(name='Track', channel_index=None)
+
+      Append a track row and return its index.
+
+
+
+   .. py:method:: add_scene(name=None)
+
+      Append a scene column and return its index.
+
+
+
+   .. py:method:: set_slot(track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None)
+
+      Fill a slot with a pattern and return the stored slot.
+
+      ``pattern`` may be a :class:`SequencerWidget`, a :class:`NoteComposer`,
+      a list of step dicts (one voice), or a list of voices.
+
+
+
+   .. py:method:: get_slot(track_index, scene_index)
+
+      Return the slot dict at ``(track_index, scene_index)`` or ``None``.
+
+
+
+   .. py:method:: clear_slot(track_index, scene_index)
+
+      Empty a slot.
+
+
+
+   .. py:method:: _request(**payload)
+
+
+   .. py:method:: launch(track_index, scene_index)
+
+      Launch a slot on the next quantization boundary.
+
+
+
+   .. py:method:: stop_track(track_index)
+
+      Stop a track on the next quantization boundary.
+
+
+
+   .. py:method:: launch_scene(scene_index)
+
+      Launch every slot in a scene; tracks with no slot there stop.
+
+
+
+   .. py:method:: stop_all()
+
+      Stop every track on the next quantization boundary.
+
+
+
+   .. py:method:: slot_to_sequencer(track_index, scene_index, sequencer)
+
+      Load a slot's pattern into a :class:`SequencerWidget` for editing.
+
+
+
+   .. py:method:: bind_slot_editor(sequencer)
+
+      Use ``sequencer`` as the editor for whichever slot is selected.
+
+      Selecting a slot (by clicking it, or setting ``selected_slot``) loads
+      it into the sequencer; edits to the sequencer's steps write back into
+      that slot. Returns a function that removes the binding.
+
+
+
+   .. py:method:: __repr__()
+
+      Return a simple repr to avoid expensive ipywidgets trait serialization.
+
+
+
+.. py:data:: _SESSION_FORMAT
+   :value: 'nbplay-session'
+
+
+.. py:data:: _SESSION_FORMAT_VERSION
+   :value: 1
+
+
+.. py:data:: _SEQUENCER_STATE
+   :value: ('num_voices', 'length', 'measures', 'step_duration', 'time_signature_num',...
+
+
+.. py:data:: _SYNTH_STATE
+   :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+
+
+.. py:data:: _SAMPLER_STATE
+   :value: ('sample_name', 'sample_rate', 'root_note', 'attack', 'decay', 'sustain', 'release',...
+
+
+.. py:data:: _SAMPLER_PAD_STATE
+   :value: ('pad_notes', 'pad_velocities', 'pad_actions', 'sample_slices')
+
+
+.. py:data:: _TIMELINE_STATE
+   :value: ('length', 'count_in_bars', 'auto_extend_recording', 'recording_extend_bars', 'pixels_per_beat')
+
+
+.. py:data:: _TRANSPORT_STATE
+   :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar', 'loop_end_bar')
+
+
+.. py:function:: _json_copy(value)
+
+.. py:function:: _widget_state(widget, names)
+
+.. py:function:: _sound_source_to_dict(source, index, resources)
+
+.. py:function:: _sound_source_from_dict(entry, resources)
+
+.. py:function:: _sequencer_from_dict(state)
+
+.. py:function:: _session_to_dict(session, resources=None)
+
+.. py:function:: _session_from_dict(cls, data, resources)
 
 .. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
 
@@ -1776,6 +2060,12 @@ Module Contents
    .. py:attribute:: timeline
 
 
+   .. py:attribute:: launcher
+
+
+   .. py:attribute:: _launcher_links
+
+
    .. py:attribute:: _timeline_links
 
 
@@ -1835,6 +2125,47 @@ Module Contents
 
       :param index: Zero-based track index.
 
+
+
+   .. py:method:: to_dict()
+
+      Serialize the session to a JSON-safe dict (no binary payloads).
+
+      Sampler audio and timeline clip audio are written separately by
+      :meth:`save`; this dict references them by archive path.
+
+
+
+   .. py:method:: save(path)
+
+      Write the session to a ``.nbplay`` zip archive.
+
+      The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
+      little-endian float32) and ``clips/`` (timeline clip audio that has
+      arrived from the browser; call ``session.timeline.export_all_clips()``
+      first and wait for ``pending_exports`` to reach zero).
+
+      :returns: The path written.
+
+
+
+   .. py:method:: load(path)
+      :classmethod:
+
+
+      Rebuild a session from an archive written by :meth:`save`.
+
+
+
+   .. py:method:: from_dict(data, resources=None)
+      :classmethod:
+
+
+      Rebuild a session from :meth:`to_dict` output plus binary resources.
+
+
+
+   .. py:method:: _remove_launcher_track(index)
 
 
    .. py:method:: __repr__()

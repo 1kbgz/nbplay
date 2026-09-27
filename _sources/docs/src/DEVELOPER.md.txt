@@ -186,6 +186,7 @@ files are generated.
 | `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
 | `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
 | `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
+| `LauncherWidget` | `launcher.js` | `launcher.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
 | `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
 | `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
@@ -594,6 +595,34 @@ When `auto_extend_recording` is true, the browser extends `length` by
 playback still stops at the end; recording stops only when the user stops it or
 the timeline reaches the validated maximum length.
 
+### LauncherWidget
+
+Python class: `LauncherWidget`. Browser file: `js/src/ts/launcher.ts`. CSS
+file: `js/src/css/launcher.css`.
+
+LauncherWidget is the beats view: a clip-launcher grid with tracks as rows and
+scenes as columns. Each filled slot holds a pattern in the sequencer's
+`voices_data` shape plus `step_duration`, `swing`, and `groove`. Python fills
+slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a
+`NoteComposer`, a list of step dicts, or a list of voices, and issues
+`launch()`, `launch_scene()`, `stop_track()`, and `stop_all()` through the
+`launch_request` trait (a nonce makes repeated commands distinct).
+`bind_slot_editor(sequencer)` turns a sequencer into the editor for whichever
+slot is selected; edits write back into the slot live.
+
+In the browser every track owns one shared-scheduler instance
+(`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over
+the active slot, so all playing slots follow the session clock's absolute beat
+grid and stay phase-locked. Launches are queued to the next boundary chosen by
+`quantize` (`bar`, `beat`, or `none`) and fired by a 25 ms queue timer; a
+launch from a stopped session starts the clock and begins immediately. A scene
+launch queues every track: tracks with a slot in that scene launch it, tracks
+without one stop. Transport stop pauses the active slots and play resumes
+them. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
+-2 for nothing queued) are mirrored to the kernel. Audio routes through each
+track's `channel_index` on the session bus, so a launcher performance can be
+captured by timeline lanes with channel-tap inputs.
+
 ### KeyboardWidget
 
 Python class: `KeyboardWidget`. Browser file: `js/src/ts/keyboard.ts`. CSS
@@ -739,6 +768,70 @@ Run:
 cd js
 pnpm test
 ```
+
+### Host compatibility tests
+
+`pnpm run test:hosts` (also part of `pnpm test`) boots real Jupyter hosts with
+a live kernel and drives the rendered widgets through Playwright:
+
+- `tests/voila.spec.js` serves `tests/fixtures/host_smoke.ipynb` with
+  `python -m voila` on port 8866.
+- `tests/jupyterlab.spec.js` opens the same notebook in `jupyter lab` on port
+  8899, runs every cell, and then interacts with the outputs.
+
+The smoke notebook builds a `Session` (transport, sequencer track, launcher,
+timeline, mixer) plus a kernel-side probe: an `ipywidgets.HTML` label that a
+`transport.observe()` callback updates, and an `ipywidgets.Button` that calls
+`session.stop()`. Each host test asserts that every widget renders, that
+pressing play propagates through the browser clock to the sequencer and
+timeline, that the kernel probe flips to "playing" (browser to kernel), and
+that the kernel button stops everything (kernel to browser). Page errors are
+collected only after the widgets have rendered, because host startup noise
+from third-party lab extensions is unrelated to nbplay. `voila` is a `develop`
+extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
+manager.
+
+### Keyboard shortcuts
+
+`bindShortcuts(root, handlers)` in `helpers.ts` scopes shortcuts to a widget:
+they fire only while focus is inside the widget's root (clicking a widget
+focuses it), never while a text field has focus, and never with Ctrl, Meta,
+or Alt held. Consumed keys call `preventDefault()`, which also stops Space
+from activating a focused button a second time.
+
+| Widget | Keys |
+| --- | --- |
+| Transport | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `↑`/`↓` BPM ±1, `Shift+↑`/`Shift+↓` BPM ±10 |
+| Sequencer | `Space` play/pause, `Shift+Space` stop, arrows move the step cursor, `Enter`/`X` toggle the cursor step, `Esc` clears the cursor and any pending note edit |
+| Timeline | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `D` duplicate clip, `Delete`/`Backspace` delete clip |
+| Launcher | `Space` play/pause, `1`–`9` launch scene, `0`/`Esc` stop all |
+
+The QWERTY `KeyboardWidget` captures keys at window level when it, or a
+sequencer that is recording or waiting for a note, has focus; in that state
+its bindings (including `Space` as global sustain) win.
+
+### Session persistence
+
+`Session.save(path)` writes a `.nbplay` zip archive and `Session.load(path)`
+rebuilds the session from it. `Session.to_dict()` / `Session.from_dict()` are
+the JSON layer underneath. The archive holds:
+
+- `session.json`: transport (tempo, time signature, loop), mixer (channels
+  with effects, master gain and effects), tracks (name, sequencer state,
+  sound source type and state), timeline (length, count-in, zoom, lanes,
+  clips without their browser-local `audio_url`), and launcher (quantize,
+  scenes, slots).
+- `samples/track-N.f32`: a sampler track's PCM as little-endian float32.
+- `clips/<clip id>.bin`: timeline clip audio that has arrived from the
+  browser.
+
+Sound sources are limited to `SynthWidget` and `SamplerWidget` (or none);
+saving another type raises. Clip audio lives in the browser, so before saving
+call `session.timeline.export_all_clips()`, which queues one `export_clip()`
+request per clip and caches each answer in `timeline.clip_audio`; wait for
+`timeline.pending_exports` to reach zero. On load, cached clips go back through
+`import_clip()` so the browser reattaches playable audio, and other clips keep
+their metadata. Loading creates fresh widgets with a new `session_id`.
 
 ### Rust tests
 
