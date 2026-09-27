@@ -25,7 +25,9 @@ import anywidget
 import traitlets
 
 from nbplay import (
+    EventSequence,
     NoiseSource,
+    NoteEvent,
     SawOscillator,
     SineOscillator,
     SquareOscillator,
@@ -278,7 +280,37 @@ def _nonnegative_number(value, name, maximum=4096.0):
     return _clamped_number(value, 0.0, maximum, name)
 
 
-_TIMELINE_INPUTS = frozenset({"microphone", "channel"})
+_TIMELINE_INPUTS = frozenset({"microphone", "channel", "midi"})
+_CLIP_KINDS = frozenset({"audio", "midi"})
+
+
+def _normalize_midi_event(event, index=0):
+    if isinstance(event, NoteEvent):
+        data = {
+            "beat": event.beat_position,
+            "duration": event.duration,
+            "note": event.note,
+            "velocity": event.velocity,
+        }
+    elif isinstance(event, dict):
+        data = event
+    else:
+        raise ValueError(f"midi event {index} must be dict or NoteEvent, got {type(event).__name__}")  # noqa: TRY004
+    return {
+        "beat": _nonnegative_number(data.get("beat", 0.0), "beat"),
+        "duration": _positive_number(data.get("duration", 0.25), "duration", minimum=0.001, maximum=4096.0),
+        "note": _clamp_midi_note(int(data.get("note", 60))),
+        "velocity": max(1, min(127, int(data.get("velocity", 100)))),
+    }
+
+
+def _normalize_midi_events(events):
+    if isinstance(events, EventSequence):
+        events = events.events()
+    return sorted(
+        (_normalize_midi_event(event, index) for index, event in enumerate(events or [])),
+        key=lambda item: (item["beat"], item["note"]),
+    )
 
 
 def _normalize_timeline_track(track, index=0):
@@ -317,8 +349,12 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
     if track_count:
         track_index = min(track_index, max(0, int(track_count) - 1))
 
+    kind = str(data.get("kind") or ("midi" if data.get("events") is not None else "audio"))
+    if kind not in _CLIP_KINDS:
+        raise ValueError(f"clip kind must be one of {sorted(_CLIP_KINDS)}, got {kind!r}")
     normalized = {
         "id": str(data.get("id") or _clip_id()),
+        "kind": kind,
         "name": str(data.get("name", f"Clip {index + 1}")),
         "track_index": track_index,
         "start": _nonnegative_number(data.get("start", 0.0), "start"),
@@ -332,6 +368,8 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
         "source": str(data.get("source", "recording")),
         "sample_rate": max(1, int(data.get("sample_rate", 44100))),
     }
+    if kind == "midi":
+        normalized["events"] = _normalize_midi_events(data.get("events"))
     if data.get("blob_size") is not None:
         normalized["blob_size"] = max(0, int(data["blob_size"]))
     if data.get("color") is not None:
@@ -364,9 +402,12 @@ class AudioClip:
         sample_rate=44100,
         blob_size=None,
         color=None,
+        kind="audio",
+        events=None,
     ):
         data = {
             "id": id or _clip_id(),
+            "kind": kind,
             "name": name,
             "track_index": track_index,
             "start": start,
@@ -384,6 +425,9 @@ class AudioClip:
             data["blob_size"] = blob_size
         if color is not None:
             data["color"] = color
+        if events is not None:
+            data["events"] = events
+            data["kind"] = "midi"
         self._data = _normalize_audio_clip(data)
 
     def to_dict(self):
@@ -1590,9 +1634,11 @@ class TimelineWidget(anywidget.AnyWidget):
     audio bytes into Python and :meth:`import_clip` to push audio back.
 
     Every armed lane records at once against the shared session clock.
-    A lane's ``input`` is ``"microphone"`` (browser microphone) or
+    A lane's ``input`` is ``"microphone"`` (browser microphone),
     ``"channel"`` (a tap on the lane's mixer channel, which bounces an
-    instrument track to audio).
+    instrument track to audio), or ``"midi"`` (note events from the
+    keyboard, MIDI keyboard, and pad widgets, stored as a MIDI clip that
+    plays back through the lane's sampler or a built-in oscillator).
     """
 
     _esm = _STATIC / "timeline.js"
@@ -1811,6 +1857,32 @@ class TimelineWidget(anywidget.AnyWidget):
         self.selected_clip_id = clip["id"]
         self.length = max(self.length, clip["start"] + clip["duration"])
         return clip
+
+    def add_midi_clip(self, name="MIDI", track_index=0, start=0.0, events=(), duration=None, **kwargs):
+        """Append a MIDI clip and return it.
+
+        ``events`` may be dicts (``beat``, ``duration``, ``note``,
+        ``velocity``; beats are relative to the clip start), ``NoteEvent``
+        objects, or an ``EventSequence``. ``duration`` defaults to the end
+        of the last event, at least one beat.
+        """
+        normalized = _normalize_midi_events(events)
+        if duration is None:
+            duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
+        return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
+
+    def clip_to_event_sequence(self, clip_id):
+        """Return a MIDI clip's events as a Rust ``EventSequence``."""
+        clip_id = str(clip_id)
+        for clip in self.clips:
+            if clip.get("id") == clip_id:
+                if clip.get("kind") != "midi":
+                    raise ValueError(f"clip {clip_id} is not a MIDI clip")
+                sequence = EventSequence()
+                for event in clip.get("events", []):
+                    sequence.add_event(NoteEvent(event["beat"], event["duration"], event["note"], event["velocity"]))
+                return sequence
+        raise ValueError(f"clip not found: {clip_id}")
 
     def remove_clip(self, clip_id):
         """Remove a clip by id."""

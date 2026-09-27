@@ -2652,6 +2652,56 @@ class TestTimelineWidget:
         with pytest.raises(ValueError):
             timeline.import_clip(b"")
 
+    def test_midi_clip_from_dicts_events_and_sequence(self):
+        timeline = TimelineWidget()
+        timeline.add_track("Keys", input="midi")
+        assert timeline.tracks[0]["input"] == "midi"
+        clip = timeline.add_midi_clip(
+            "Riff",
+            events=[
+                {"beat": 1.0, "duration": 0.5, "note": 64, "velocity": 90},
+                {"beat": 0.0, "duration": 0.5, "note": 60},
+                NoteEvent(2.0, 0.25, 67, 110),
+            ],
+        )
+        assert clip["kind"] == "midi"
+        assert clip["duration"] == pytest.approx(2.25)
+        assert [e["note"] for e in clip["events"]] == [60, 64, 67]
+        assert clip["events"][1]["velocity"] == 90
+        assert timeline.clips[0]["kind"] == "midi"
+
+        sequence = timeline.clip_to_event_sequence(clip["id"])
+        assert isinstance(sequence, EventSequence)
+        events = sequence.events()
+        assert [(e.beat_position, e.note) for e in events] == [(0.0, 60), (1.0, 64), (2.0, 67)]
+
+        copied = timeline.add_midi_clip("Copy", start=8.0, events=sequence)
+        assert copied["events"] == clip["events"]
+        assert copied["start"] == pytest.approx(8.0)
+
+        short = timeline.add_midi_clip("Short", events=[{"beat": 0.1, "duration": 0.1, "note": 40}])
+        assert short["duration"] == pytest.approx(1.0)
+
+    def test_midi_clip_validation(self):
+        timeline = TimelineWidget()
+        timeline.add_track("A")
+        audio = timeline.add_clip("Audio")
+        assert audio["kind"] == "audio"
+        assert "events" not in audio
+        with pytest.raises(ValueError, match="not a MIDI clip"):
+            timeline.clip_to_event_sequence(audio["id"])
+        with pytest.raises(ValueError, match="clip not found"):
+            timeline.clip_to_event_sequence("missing")
+        with pytest.raises(ValueError, match="midi event 0 must be dict"):
+            timeline.add_midi_clip("Bad", events=["x"])
+        with pytest.raises(ValueError, match="clip kind"):
+            timeline.add_clip("Bad", kind="video")
+        clamped = timeline.add_midi_clip("Clamp", events=[{"note": 200, "velocity": 0, "duration": 0.5}])
+        assert clamped["events"][0]["note"] == 127
+        assert clamped["events"][0]["velocity"] == 1
+        assert AudioClip(events=[{"note": 60}]).to_dict()["kind"] == "midi"
+        assert timeline.export_all_clips() == 0
+
     def test_remove_unrouted_track_does_not_shift_channels(self):
         timeline = TimelineWidget()
         timeline.add_track("Scratch", channel_index=-1)
@@ -2979,6 +3029,18 @@ class TestSessionPersistence:
         slot = loaded.launcher.get_slot(1, 1)
         assert slot["name"] == "Kit"
         assert slot["voices_data"][0][1]["note"] == 38
+
+    def test_round_trip_keeps_midi_clips(self):
+        s = Session()
+        s.add_track("Keys", input="midi", armed=True)
+        clip = s.timeline.add_midi_clip("Riff", events=[{"beat": 0.5, "duration": 0.25, "note": 62, "velocity": 80}])
+        loaded = Session.from_dict(s.to_dict())
+        assert loaded.timeline.tracks[0]["input"] == "midi"
+        restored = loaded.timeline.clips[0]
+        assert restored["id"] == clip["id"]
+        assert restored["kind"] == "midi"
+        assert restored["events"] == clip["events"]
+        assert loaded.timeline.import_clip_request == {}
 
     def test_from_dict_without_resources_keeps_metadata(self):
         s = self._session()

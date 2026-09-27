@@ -6,6 +6,7 @@
 // MediaStreamAudioDestinationNode so instrument output is bounced to audio.
 
 import { type AnyModel, bindShortcuts } from "./helpers.ts";
+import { midiToHz, scheduleOscillator } from "./scheduler.ts";
 import {
   bindClock,
   type ClockEvent,
@@ -17,6 +18,8 @@ const MAX_TIMELINE_BEATS = 4096;
 const CLIP_SNAP_BEATS = 0.25;
 const MIN_CLIP_BEATS = 0.25;
 const DRAG_THRESHOLD_PX = 3;
+const MIDI_LOOKAHEAD_SECONDS = 0.1;
+const MIDI_TICK_MS = 25;
 
 interface TimelineTrack {
   name: string;
@@ -28,8 +31,17 @@ interface TimelineTrack {
   monitor: boolean;
 }
 
+interface MidiEvent {
+  beat: number;
+  duration: number;
+  note: number;
+  velocity: number;
+}
+
 interface AudioClip {
   id: string;
+  kind: "audio" | "midi";
+  events?: MidiEvent[];
   name: string;
   track_index: number;
   start: number;
@@ -47,9 +59,13 @@ interface AudioClip {
 
 interface RecordingLane {
   trackIndex: number;
-  stream: MediaStream;
+  kind: "audio" | "midi";
+  stream: MediaStream | null;
   recorder: MediaRecorder | null;
+  recording: boolean;
   chunks: Blob[];
+  events: MidiEvent[];
+  openNotes: Map<number, { beat: number; velocity: number }>;
   tap: AudioNode | null;
   monitor: AudioNode | null;
   done: boolean;
@@ -110,9 +126,26 @@ function getTracks(model: AnyModel): TimelineTrack[] {
     armed: Boolean(track.armed),
     muted: Boolean(track.muted),
     solo: Boolean(track.solo),
-    input: track.input === "channel" ? "channel" : "microphone",
+    input:
+      track.input === "channel" || track.input === "midi"
+        ? track.input
+        : "microphone",
     monitor: Boolean(track.monitor),
   }));
+}
+
+function getMidiEvents(clip: Partial<AudioClip>): MidiEvent[] {
+  return (clip.events || [])
+    .map((event) => ({
+      beat: Math.max(0, numberValue(event.beat, 0)),
+      duration: Math.max(0.001, numberValue(event.duration, 0.25)),
+      note: Math.max(0, Math.min(127, Math.round(numberValue(event.note, 60)))),
+      velocity: Math.max(
+        1,
+        Math.min(127, Math.round(numberValue(event.velocity, 100))),
+      ),
+    }))
+    .sort((a, b) => a.beat - b.beat || a.note - b.note);
 }
 
 function getClips(model: AnyModel): AudioClip[] {
@@ -120,6 +153,11 @@ function getClips(model: AnyModel): AudioClip[] {
   return [...raw].map((clip, index) => ({
     ...clip,
     id: String(clip.id || `clip-${index}`),
+    kind: clip.kind === "midi" || Array.isArray(clip.events) ? "midi" : "audio",
+    events:
+      clip.kind === "midi" || Array.isArray(clip.events)
+        ? getMidiEvents(clip)
+        : undefined,
     name: String(clip.name ?? `Clip ${index + 1}`),
     track_index: Math.max(0, numberValue(clip.track_index, 0)),
     start: Math.max(0, numberValue(clip.start, 0)),
@@ -197,6 +235,10 @@ export default {
     let recordingStartedPlayback = false;
     let scheduledTimers: ReturnType<typeof setTimeout>[] = [];
     let playheadTimer: ReturnType<typeof setInterval> | null = null;
+    let midiTimer: ReturnType<typeof setInterval> | null = null;
+    let midiCursorBeat = 0;
+    let midiLastBeat = 0;
+    let noteListenerActive = false;
     let seekFrame: number | null = null;
     let playbackDisplayBeat: number | null = null;
     let clipDrag: ClipDrag | null = null;
@@ -231,7 +273,7 @@ export default {
     }
 
     function recordersActive(): boolean {
-      return lanes.some((lane) => lane.recorder !== null);
+      return lanes.some((lane) => lane.recording);
     }
 
     function recordingActive(): boolean {
@@ -359,6 +401,85 @@ export default {
       lanes = [];
       pendingClips = [];
       stopMicStream();
+      setNoteListener(false);
+    }
+
+    // MIDI recording: note events broadcast on the document by the
+    // keyboard, MIDI keyboard, and pad widgets, timed against the clock.
+    function onDocumentNote(event: Event): void {
+      const detail = (event as CustomEvent).detail as
+        | { note?: number; velocity?: number; type?: string }
+        | undefined;
+      if (!detail) return;
+      const note = Math.round(numberValue(detail.note, -1));
+      if (note < 0 || note > 127) return;
+      const beat = Math.max(0, clock().beat() - recordingStartBeat);
+      lanes.forEach((lane) => {
+        if (lane.kind !== "midi" || !lane.recording) return;
+        if (detail.type === "on" && numberValue(detail.velocity, 0) > 0) {
+          lane.openNotes.set(note, {
+            beat,
+            velocity: Math.max(
+              1,
+              Math.min(127, Math.round(numberValue(detail.velocity, 100))),
+            ),
+          });
+        } else {
+          closeLaneNote(lane, note, beat);
+        }
+      });
+    }
+
+    function closeLaneNote(
+      lane: RecordingLane,
+      note: number,
+      beat: number,
+    ): void {
+      const open = lane.openNotes.get(note);
+      if (!open) return;
+      lane.openNotes.delete(note);
+      lane.events.push({
+        beat: open.beat,
+        duration: Math.max(0.05, beat - open.beat),
+        note,
+        velocity: open.velocity,
+      });
+    }
+
+    function setNoteListener(on: boolean): void {
+      if (on === noteListenerActive) return;
+      noteListenerActive = on;
+      if (on) document.addEventListener("nbplay-note", onDocumentNote);
+      else document.removeEventListener("nbplay-note", onDocumentNote);
+    }
+
+    function finalizeMidiLane(lane: RecordingLane, stopBeat: number): void {
+      const relativeStop = Math.max(0, stopBeat - recordingStartBeat);
+      [...lane.openNotes.keys()].forEach((note) =>
+        closeLaneNote(lane, note, relativeStop),
+      );
+      lane.recording = false;
+      lane.done = true;
+      if (lane.events.length > 0) {
+        const takeNumber = getClips(model).length + pendingClips.length + 1;
+        pendingClips.push({
+          id: uniqueClipId(),
+          kind: "midi",
+          name: `Take ${takeNumber}`,
+          track_index: lane.trackIndex,
+          start: recordingStartBeat,
+          duration: recordingDurationBeats(),
+          loop: false,
+          muted: false,
+          recorded: true,
+          offset: 0,
+          source: "recording",
+          events: [...lane.events].sort(
+            (a, b) => a.beat - b.beat || a.note - b.note,
+          ),
+        });
+      }
+      if (lanes.every((item) => item.done)) finishRecording();
     }
 
     function clearScheduledPlayback(): void {
@@ -378,6 +499,10 @@ export default {
       if (playheadTimer) {
         clearInterval(playheadTimer);
         playheadTimer = null;
+      }
+      if (midiTimer) {
+        clearInterval(midiTimer);
+        midiTimer = null;
       }
       playbackDisplayBeat = null;
     }
@@ -431,6 +556,7 @@ export default {
       const blob = new Blob(lane.chunks, { type: mimeType });
       lane.chunks = [];
       lane.recorder = null;
+      lane.recording = false;
       lane.done = true;
       if (blob.size && typeof URL !== "undefined" && URL.createObjectURL) {
         const url = URL.createObjectURL(blob);
@@ -438,6 +564,7 @@ export default {
         const takeNumber = getClips(model).length + pendingClips.length + 1;
         pendingClips.push({
           id: uniqueClipId(),
+          kind: "audio",
           name: `Take ${takeNumber}`,
           track_index: lane.trackIndex,
           start: recordingStartBeat,
@@ -555,7 +682,11 @@ export default {
       pendingClips = [];
       lanes.forEach((lane) => {
         lane.chunks = [];
+        lane.events = [];
+        lane.openNotes.clear();
         lane.done = false;
+        lane.recording = true;
+        if (lane.kind === "midi" || !lane.stream || !Recorder) return;
         const recorder = new Recorder(lane.stream);
         recorder.addEventListener("dataavailable", (event) => {
           if (event.data?.size) lane.chunks.push(event.data);
@@ -566,6 +697,7 @@ export default {
         lane.recorder = recorder;
       });
       lanes.forEach((lane) => lane.recorder?.start());
+      if (lanes.some((lane) => lane.kind === "midi")) setNoteListener(true);
       model.set("recording_error", "");
       model.set("recording_track", lanes[0].trackIndex);
       model.set(
@@ -626,7 +758,10 @@ export default {
       }
       const tracks = getTracks(model);
       const needsMic = targets.some(
-        (index) => tracks[index].input !== "channel",
+        (index) => tracks[index].input === "microphone",
+      );
+      const needsRecorder = targets.some(
+        (index) => tracks[index].input !== "midi",
       );
 
       const nav = navigator as Navigator & {
@@ -638,7 +773,10 @@ export default {
       };
       const Recorder = (globalThis as { MediaRecorder?: typeof MediaRecorder })
         .MediaRecorder;
-      if (!Recorder || (needsMic && !nav.mediaDevices?.getUserMedia)) {
+      if (
+        (needsRecorder && !Recorder) ||
+        (needsMic && !nav.mediaDevices?.getUserMedia)
+      ) {
         writeRecordingError(
           needsMic
             ? "Microphone recording is unavailable in this browser"
@@ -675,9 +813,27 @@ export default {
         }
 
         const built: RecordingLane[] = [];
+        const blankLane = (
+          index: number,
+          kind: "audio" | "midi",
+        ): RecordingLane => ({
+          trackIndex: index,
+          kind,
+          stream: null,
+          recorder: null,
+          recording: false,
+          chunks: [],
+          events: [],
+          openNotes: new Map(),
+          tap: null,
+          monitor: null,
+          done: false,
+        });
         for (const index of targets) {
           const track = tracks[index];
-          if (track.input === "channel") {
+          if (track.input === "midi") {
+            built.push(blankLane(index, "midi"));
+          } else if (track.input === "channel") {
             const tap = channelTap(track);
             if (!tap) {
               throw new Error(
@@ -685,23 +841,15 @@ export default {
               );
             }
             built.push({
-              trackIndex: index,
+              ...blankLane(index, "audio"),
               stream: tap.stream,
-              recorder: null,
-              chunks: [],
               tap: tap.node,
-              monitor: null,
-              done: false,
             });
           } else {
             built.push({
-              trackIndex: index,
+              ...blankLane(index, "audio"),
               stream: stream!,
-              recorder: null,
-              chunks: [],
-              tap: null,
               monitor: startInputMonitoring(track, stream!),
-              done: false,
             });
           }
         }
@@ -727,9 +875,9 @@ export default {
         }
         model.save_changes();
         if (delayBeats > 0) {
-          scheduleCountIn(Recorder, targetBeat, delayBeats, generation);
+          scheduleCountIn(Recorder!, targetBeat, delayBeats, generation);
         } else {
-          beginRecording(Recorder, targetBeat, generation);
+          beginRecording(Recorder!, targetBeat, generation);
         }
       } catch (err) {
         if (generation !== recordingGeneration) return;
@@ -761,12 +909,108 @@ export default {
         return;
       }
       recordingStopBeat = Math.max(recordingStartBeat, currentBeat());
+      setNoteListener(false);
+      const stopBeat = recordingStopBeat;
       lanes.forEach((lane) => {
+        if (lane.kind === "midi") {
+          if (lane.recording) finalizeMidiLane(lane, stopBeat);
+          return;
+        }
         const recorder = lane.recorder;
         if (!recorder) return;
         if (recorder.state !== "inactive") recorder.stop();
         else finalizeLane(lane);
       });
+    }
+
+    // MIDI playback: a lookahead scheduler over the clock feeds each MIDI
+    // clip's notes to the lane's sampler on the session bus, or to a
+    // built-in oscillator on the lane's mixer channel.
+    function triggerMidiNote(
+      track: TimelineTrack,
+      event: MidiEvent,
+      atTime: number,
+      spb: number,
+    ): void {
+      const clk = clock();
+      const bus = getSessionBus(model.get("session_id") as string);
+      const sampler = bus?.samplers?.[track.channel_index];
+      const durationSeconds = event.duration * spb;
+      if (sampler) {
+        const delayMs = Math.max(0, (atTime - clk.now()) * 1000);
+        scheduledTimers.push(
+          setTimeout(
+            () => sampler.triggerNote(event.note, event.velocity),
+            delayMs,
+          ),
+        );
+        scheduledTimers.push(
+          setTimeout(
+            () => sampler.releaseNote(event.note),
+            delayMs + durationSeconds * 1000,
+          ),
+        );
+        return;
+      }
+      const ctx = clk.context();
+      if (!ctx) return;
+      scheduleOscillator(
+        ctx,
+        bus?.channels?.[track.channel_index]?.gain || bus?.masterGain || null,
+        midiToHz(event.note),
+        event.velocity / 127,
+        atTime,
+        durationSeconds,
+      );
+    }
+
+    function scheduleMidi(clips: AudioClip[], tracks: TimelineTrack[]): void {
+      const clk = clock();
+      const now = clk.beat();
+      // The clock only moves backwards on a loop wrap or a seek: restart
+      // the cursor there so notes after the jump are not lost.
+      if (now < midiLastBeat - 1e-6) midiCursorBeat = now;
+      midiLastBeat = now;
+      const spb = clk.secondsPerBeat();
+      const horizon = now + MIDI_LOOKAHEAD_SECONDS / spb;
+      if (horizon <= midiCursorBeat) return;
+      clips.forEach((clip) => {
+        const track = tracks[clip.track_index];
+        if (!track) return;
+        const offset = clip.offset || 0;
+        (clip.events || []).forEach((event) => {
+          const local = event.beat - offset;
+          if (local < 0 || local >= clip.duration) return;
+          const absolute = clip.start + local;
+          if (absolute < midiCursorBeat || absolute >= horizon) return;
+          triggerMidiNote(track, event, clk.ctxTimeAt(absolute), spb);
+        });
+      });
+      midiCursorBeat = horizon;
+    }
+
+    function startMidiPlayback(startBeat: number): void {
+      const tracks = getTracks(model);
+      const hasSolo = tracks.some((track) => track.solo);
+      const clips = getClips(model).filter((clip) => {
+        const track = tracks[clip.track_index];
+        return (
+          clip.kind === "midi" &&
+          track &&
+          !track.muted &&
+          !(hasSolo && !track.solo) &&
+          !clip.muted &&
+          (clip.events || []).length > 0
+        );
+      });
+      if (clips.length === 0) return;
+      // Start slightly behind the playhead so a note on the start beat
+      // still sounds; past-due notes are triggered immediately.
+      const grace = MIDI_LOOKAHEAD_SECONDS / clock().secondsPerBeat();
+      midiCursorBeat = Math.max(0, startBeat - grace);
+      midiLastBeat = startBeat;
+      scheduleMidi(clips, tracks);
+      midiTimer = setInterval(() => scheduleMidi(clips, tracks), MIDI_TICK_MS);
     }
 
     // Playback
@@ -792,7 +1036,7 @@ export default {
     }
 
     function playClip(clip: AudioClip, offsetSeconds: number): void {
-      if (!clip.audio_url || clip.muted) return;
+      if (clip.kind === "midi" || !clip.audio_url || clip.muted) return;
       const track = getTracks(model)[clip.track_index];
       if (!track || track.muted) return;
       const media = new Audio(clip.audio_url);
@@ -864,8 +1108,10 @@ export default {
       const startBeat = clk.beat();
       playbackDisplayBeat = startBeat;
 
+      startMidiPlayback(startBeat);
       clips.forEach((clip) => {
         const track = tracks[clip.track_index];
+        if (clip.kind === "midi") return;
         if (!track || track.muted || (hasSolo && !track.solo) || clip.muted)
           return;
         if (clipEnd(clip) <= startBeat && !clip.loop) return;
@@ -1454,15 +1700,20 @@ export default {
               );
               const classes = [
                 "nbplay-timeline-clip",
+                clip.kind === "midi" ? "midi" : "",
                 clip.id === selected ? "selected" : "",
                 clip.muted ? "muted" : "",
               ]
                 .filter(Boolean)
                 .join(" ");
-              return `<button class="${classes}" data-clip="${escapeHtml(clip.id)}" style="left:${left}%;width:${width}%">
+              const detail =
+                clip.kind === "midi"
+                  ? `${beatLabel(clip.start, bpb)} \u00b7 ${(clip.events || []).length} notes`
+                  : beatLabel(clip.start, bpb);
+              return `<button class="${classes}" data-clip="${escapeHtml(clip.id)}" data-kind="${clip.kind}" style="left:${left}%;width:${width}%">
                 <i class="nbplay-timeline-clip-handle start"></i>
                 <span>${escapeHtml(clip.name)}</span>
-                <small>${beatLabel(clip.start, bpb)}</small>
+                <small>${detail}</small>
                 <i class="nbplay-timeline-clip-handle end"></i>
               </button>`;
             })
@@ -1483,6 +1734,7 @@ export default {
               <select class="nbplay-track-input" title="Record source">
                 <option value="microphone" ${track.input === "microphone" ? "selected" : ""}>Mic</option>
                 <option value="channel" ${track.input === "channel" ? "selected" : ""} ${track.channel_index < 0 ? "disabled" : ""}>${escapeHtml(channelLabel)}</option>
+                <option value="midi" ${track.input === "midi" ? "selected" : ""}>MIDI</option>
               </select>
             </div>
             <div class="nbplay-timeline-lane nbplay-timeline-seek-surface"${laneStyle}><div class="nbplay-timeline-playhead"></div>${clipHtml}</div>
@@ -1620,7 +1872,10 @@ export default {
           ?.addEventListener("change", (event) => {
             const select = event.currentTarget as HTMLSelectElement;
             updateTrack(index, {
-              input: select.value === "channel" ? "channel" : "microphone",
+              input:
+                select.value === "channel" || select.value === "midi"
+                  ? select.value
+                  : "microphone",
             });
           });
       });
@@ -1737,6 +1992,7 @@ export default {
       }
       releaseLanes();
       clearScheduledPlayback();
+      setNoteListener(false);
       unbindShortcuts();
       binding.dispose();
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
