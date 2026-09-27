@@ -782,6 +782,16 @@ an <code class="docutils literal notranslate"><span class="pre">{input,</span> <
 <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and a master insert chain connected to destination. Mute/solo
 affects the channel gain nodes. The bus is registered on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code>
 and removed on cleanup.</p>
+<p>Insert chains update in place. Each built-in effect unit exposes
+<code class="docutils literal notranslate"><span class="pre">update(descriptor)</span></code>, which writes the new parameters to the existing
+<code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>s; a chain is rebuilt only when its structure changes (an
+effect added, removed, or retyped), when a custom plugin has no <code class="docutils literal notranslate"><span class="pre">update</span></code>, or
+when a unit declines the change (reverb returns false for a new impulse
+length or decay). Only the chain that changed is rebuilt. Meters: the bus
+creates an <code class="docutils literal notranslate"><span class="pre">AnalyserNode</span></code> per channel and for the master, connected from the
+end of each insert chain, and the widget reads peak/RMS at ~30 fps with
+<code class="docutils literal notranslate"><span class="pre">requestAnimationFrame</span></code> to drive <code class="docutils literal notranslate"><span class="pre">.nbplay-strip-meter-fill</span></code> (height on a
+60 dB scale, <code class="docutils literal notranslate"><span class="pre">hot</span></code> at clipping) and a <code class="docutils literal notranslate"><span class="pre">data-peak</span></code> attribute on each strip.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -1115,6 +1125,20 @@ from third-party lab extensions is unrelated to nbplay. <code class="docutils li
 extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
 manager.</p>
 </section>
+<section id="pyodide-wheel">
+<h3>Pyodide wheel<a class="headerlink" href="#pyodide-wheel" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide</span></code> builds a <code class="docutils literal notranslate"><span class="pre">cp314-pyodide_wasm32</span></code> wheel with cibuildwheel
+and smoke-tests it in Pyodide; CI runs the same target in the <code class="docutils literal notranslate"><span class="pre">pyodide</span></code> matrix
+entry. hatch-rs cross-compiles the PyO3 extension to
+<code class="docutils literal notranslate"><span class="pre">wasm32-unknown-emscripten</span></code>; the native-only <code class="docutils literal notranslate"><span class="pre">AudioOutput</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiInput</span></code>
+classes (cpal and midir) are compiled out on wasm32 and import as <code class="docutils literal notranslate"><span class="pre">None</span></code> in
+Python, so <code class="docutils literal notranslate"><span class="pre">nbplay.AudioOutput</span> <span class="pre">is</span> <span class="pre">None</span></code> is the check for that platform. The
+<code class="docutils literal notranslate"><span class="pre">[tool.cibuildwheel.pyodide]</span></code> section removes any host extension from the
+package directory before the build so only the Emscripten module ships, and
+replaces the pytest suite (which needs a live kernel) with an import and
+session smoke test. The wheel is the basis for running the widgets in
+JupyterLite.</p>
+</section>
 <section id="keyboard-shortcuts">
 <h3>Keyboard shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">bindShortcuts(root,</span> <span class="pre">handlers)</span></code> in <code class="docutils literal notranslate"><span class="pre">helpers.ts</span></code> scopes shortcuts to a widget:
@@ -1446,6 +1470,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#python-tests">Python tests</a></li>
 <li><a class="reference internal" href="#javascript-tests">JavaScript tests</a></li>
 <li><a class="reference internal" href="#host-compatibility-tests">Host compatibility tests</a></li>
+<li><a class="reference internal" href="#pyodide-wheel">Pyodide wheel</a></li>
 <li><a class="reference internal" href="#keyboard-shortcuts">Keyboard shortcuts</a></li>
 <li><a class="reference internal" href="#session-persistence">Session persistence</a></li>
 <li><a class="reference internal" href="#rust-tests">Rust tests</a></li>
