@@ -562,8 +562,21 @@ Recording captures every armed lane at once (`recording_tracks`). A lane's
 `input` picks the source: `"microphone"` lanes share one
 `navigator.mediaDevices.getUserMedia({ audio: true })` stream; `"channel"` lanes
 tap their mixer channel through a `MediaStreamAudioDestinationNode`, which
-bounces an instrument track to audio. One `MediaRecorder` runs per lane, all
-started together after the count-in. Each completed take creates a
+bounces an instrument track to audio; `"midi"` lanes listen for the
+`nbplay-note` document events that the keyboard, MIDI keyboard, and pad
+widgets broadcast and time each note against the session clock. One
+`MediaRecorder` runs per audio lane, all started together after the count-in;
+MIDI lanes need no recorder.
+
+Clips carry `kind` (`"audio"` or `"midi"`). A MIDI clip stores `events`
+(`beat` relative to the clip start, `duration`, `note`, `velocity`).
+`add_midi_clip()` accepts dicts, `NoteEvent` objects, or an `EventSequence`,
+and `clip_to_event_sequence()` converts back to the Rust type. During
+playback a 25 ms lookahead scheduler feeds each MIDI clip's notes to the
+lane's sampler on the session bus (`triggerNote` / `releaseNote`) or, when the
+lane has no sampler, to a built-in oscillator on the lane's mixer channel.
+MIDI clips move, trim (honouring `offset`), duplicate, and persist with the
+session like audio clips, but have nothing to export. Each completed take creates a
 browser-local object URL and appends clip metadata to `clips`. Playback uses an
 `HTMLAudioElement` and connects it through
 `globalThis.__nbplay[sessionId].channels[channel_index].gain` when the mixer bus
