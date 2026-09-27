@@ -3451,6 +3451,7 @@ class TestDemoNotebook:
             for cell in notebook["cells"]:
                 assert "metadata" in cell
                 assert "language" in cell["metadata"], f"{notebook_path.name}: cell missing 'language' in metadata"
+                assert "id" in cell["metadata"], f"{notebook_path.name}: cell missing 'id' in metadata"
 
     def test_prefixed_example_notebooks_have_code_cell_output_fields(self):
         examples_dir = pathlib.Path(__file__).resolve().parents[2] / "examples"
