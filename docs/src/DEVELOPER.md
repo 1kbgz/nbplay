@@ -810,6 +810,29 @@ The QWERTY `KeyboardWidget` captures keys at window level when it, or a
 sequencer that is recording or waiting for a note, has focus; in that state
 its bindings (including `Space` as global sustain) win.
 
+### Session persistence
+
+`Session.save(path)` writes a `.nbplay` zip archive and `Session.load(path)`
+rebuilds the session from it. `Session.to_dict()` / `Session.from_dict()` are
+the JSON layer underneath. The archive holds:
+
+- `session.json`: transport (tempo, time signature, loop), mixer (channels
+  with effects, master gain and effects), tracks (name, sequencer state,
+  sound source type and state), timeline (length, count-in, zoom, lanes,
+  clips without their browser-local `audio_url`), and launcher (quantize,
+  scenes, slots).
+- `samples/track-N.f32`: a sampler track's PCM as little-endian float32.
+- `clips/<clip id>.bin`: timeline clip audio that has arrived from the
+  browser.
+
+Sound sources are limited to `SynthWidget` and `SamplerWidget` (or none);
+saving another type raises. Clip audio lives in the browser, so before saving
+call `session.timeline.export_all_clips()`, which queues one `export_clip()`
+request per clip and caches each answer in `timeline.clip_audio`; wait for
+`timeline.pending_exports` to reach zero. On load, cached clips go back through
+`import_clip()` so the browser reattaches playable audio, and other clips keep
+their metadata. Loading creates fresh widgets with a new `session_id`.
+
 ### Rust tests
 
 Rust unit tests live beside the implementation modules under `rust/src/` and in

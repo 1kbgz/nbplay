@@ -21,6 +21,15 @@ recording, a clip launcher, and mixer/session routing, all following one shared
 session clock in the browser. The widgets are plain
 [anywidget](https://anywidget.dev) classes with no extension to install, and
 the test suite drives them under Voila and JupyterLab with a live kernel.
+A session can be saved to a `.nbplay` archive and loaded back:
+
+```python
+session.timeline.export_all_clips()   # pull recorded takes from the browser
+# ... once session.timeline.pending_exports == 0
+session.save("song.nbplay")
+session = nb.Session.load("song.nbplay")
+```
+
 Mixer channels and the master bus support Web Audio insert chains with built-in
 gain, filter, compressor, limiter, delay, and reverb effects, plus custom browser
 plugin factories. Custom effect descriptors must be JSON-safe; built-in effect
