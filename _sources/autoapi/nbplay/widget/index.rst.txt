@@ -27,6 +27,7 @@ Attributes
    nbplay.widget._DEFAULT_PAD_NOTES
    nbplay.widget._PAD_MAX_COUNT
    nbplay.widget._TIMELINE_INPUTS
+   nbplay.widget._CLIP_KINDS
    nbplay.widget._LAUNCH_QUANTIZE
    nbplay.widget._SESSION_FORMAT
    nbplay.widget._SESSION_FORMAT_VERSION
@@ -92,6 +93,8 @@ Functions
    nbplay.widget._clip_id
    nbplay.widget._positive_number
    nbplay.widget._nonnegative_number
+   nbplay.widget._normalize_midi_event
+   nbplay.widget._normalize_midi_events
    nbplay.widget._normalize_timeline_track
    nbplay.widget._normalize_timeline_tracks
    nbplay.widget._normalize_audio_clip
@@ -220,6 +223,12 @@ Module Contents
 
 .. py:data:: _TIMELINE_INPUTS
 
+.. py:data:: _CLIP_KINDS
+
+.. py:function:: _normalize_midi_event(event, index=0)
+
+.. py:function:: _normalize_midi_events(events)
+
 .. py:function:: _normalize_timeline_track(track, index=0)
 
 .. py:function:: _normalize_timeline_tracks(tracks)
@@ -228,7 +237,7 @@ Module Contents
 
 .. py:function:: _normalize_audio_clips(clips, track_count=None)
 
-.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None)
+.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None, kind='audio', events=None)
 
    Serializable audio clip descriptor for timeline lanes.
 
@@ -1120,9 +1129,11 @@ Module Contents
    audio bytes into Python and :meth:`import_clip` to push audio back.
 
    Every armed lane records at once against the shared session clock.
-   A lane's ``input`` is ``"microphone"`` (browser microphone) or
+   A lane's ``input`` is ``"microphone"`` (browser microphone),
    ``"channel"`` (a tap on the lane's mixer channel, which bounces an
-   instrument track to audio).
+   instrument track to audio), or ``"midi"`` (note events from the
+   keyboard, MIDI keyboard, and pad widgets, stored as a MIDI clip that
+   plays back through the lane's sampler or a built-in oscillator).
 
    Public constructor
 
@@ -1295,6 +1306,23 @@ Module Contents
    .. py:method:: add_clip(name='Clip', track_index=0, start=0.0, duration=4.0, **kwargs)
 
       Append a clip descriptor and return it.
+
+
+
+   .. py:method:: add_midi_clip(name='MIDI', track_index=0, start=0.0, events=(), duration=None, **kwargs)
+
+      Append a MIDI clip and return it.
+
+      ``events`` may be dicts (``beat``, ``duration``, ``note``,
+      ``velocity``; beats are relative to the clip start), ``NoteEvent``
+      objects, or an ``EventSequence``. ``duration`` defaults to the end
+      of the last event, at least one beat.
+
+
+
+   .. py:method:: clip_to_event_sequence(clip_id)
+
+      Return a MIDI clip's events as a Rust ``EventSequence``.
 
 
 

@@ -265,7 +265,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">traitlets</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EventSequence</span><span class="p">,</span>
     <span class="n">NoiseSource</span><span class="p">,</span>
+    <span class="n">NoteEvent</span><span class="p">,</span>
     <span class="n">SawOscillator</span><span class="p">,</span>
     <span class="n">SineOscillator</span><span class="p">,</span>
     <span class="n">SquareOscillator</span><span class="p">,</span>
@@ -611,7 +613,43 @@
 
 
 
-<span class="n">_TIMELINE_INPUTS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"microphone"</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">})</span>
+<span class="n">_TIMELINE_INPUTS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"microphone"</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">,</span> <span class="s2">"midi"</span><span class="p">})</span>
+<span class="n">_CLIP_KINDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"audio"</span><span class="p">,</span> <span class="s2">"midi"</span><span class="p">})</span>
+
+
+<div class="viewcode-block" id="_normalize_midi_event">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._normalize_midi_event">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_midi_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">NoteEvent</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"beat"</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">beat_position</span><span class="p">,</span>
+            <span class="s2">"duration"</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
+            <span class="s2">"note"</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">note</span><span class="p">,</span>
+            <span class="s2">"velocity"</span><span class="p">:</span> <span class="n">event</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"midi event </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> must be dict or NoteEvent, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">event</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># noqa: TRY004</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"beat"</span><span class="p">:</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"beat"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="s2">"beat"</span><span class="p">),</span>
+        <span class="s2">"duration"</span><span class="p">:</span> <span class="n">_positive_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"duration"</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="s2">"duration"</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">4096.0</span><span class="p">),</span>
+        <span class="s2">"note"</span><span class="p">:</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">,</span> <span class="mi">60</span><span class="p">))),</span>
+        <span class="s2">"velocity"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"velocity"</span><span class="p">,</span> <span class="mi">100</span><span class="p">)))),</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="_normalize_midi_events">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._normalize_midi_events">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_midi_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">EventSequence</span><span class="p">):</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">events</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">_normalize_midi_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">events</span> <span class="ow">or</span> <span class="p">[])),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">"note"</span><span class="p">]),</span>
+    <span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="_normalize_timeline_track">
@@ -658,8 +696,12 @@
     <span class="k">if</span> <span class="n">track_count</span><span class="p">:</span>
         <span class="n">track_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">track_index</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">track_count</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
+    <span class="n">kind</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"midi"</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"events"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"audio"</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_CLIP_KINDS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip kind must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_CLIP_KINDS</span><span class="p">)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">normalized</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">"id"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_clip_id</span><span class="p">()),</span>
+        <span class="s2">"kind"</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
         <span class="s2">"name"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Clip </span><span class="si">{</span><span class="n">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)),</span>
         <span class="s2">"track_index"</span><span class="p">:</span> <span class="n">track_index</span><span class="p">,</span>
         <span class="s2">"start"</span><span class="p">:</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="s2">"start"</span><span class="p">),</span>
@@ -673,6 +715,8 @@
         <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source"</span><span class="p">,</span> <span class="s2">"recording"</span><span class="p">)),</span>
         <span class="s2">"sample_rate"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sample_rate"</span><span class="p">,</span> <span class="mi">44100</span><span class="p">))),</span>
     <span class="p">}</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"midi"</span><span class="p">:</span>
+        <span class="n">normalized</span><span class="p">[</span><span class="s2">"events"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"events"</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blob_size"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">normalized</span><span class="p">[</span><span class="s2">"blob_size"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"blob_size"</span><span class="p">]))</span>
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"color"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -711,9 +755,12 @@
         <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span>
         <span class="n">blob_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="s2">"audio"</span><span class="p">,</span>
+        <span class="n">events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"id"</span><span class="p">:</span> <span class="nb">id</span> <span class="ow">or</span> <span class="n">_clip_id</span><span class="p">(),</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
             <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
             <span class="s2">"track_index"</span><span class="p">:</span> <span class="n">track_index</span><span class="p">,</span>
             <span class="s2">"start"</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
@@ -731,6 +778,9 @@
             <span class="n">data</span><span class="p">[</span><span class="s2">"blob_size"</span><span class="p">]</span> <span class="o">=</span> <span class="n">blob_size</span>
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">"color"</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="k">if</span> <span class="n">events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"events"</span><span class="p">]</span> <span class="o">=</span> <span class="n">events</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"midi"</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_normalize_audio_clip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AudioClip.to_dict">
@@ -2165,9 +2215,11 @@
 <span class="sd">    audio bytes into Python and :meth:`import_clip` to push audio back.</span>
 
 <span class="sd">    Every armed lane records at once against the shared session clock.</span>
-<span class="sd">    A lane's ``input`` is ``"microphone"`` (browser microphone) or</span>
+<span class="sd">    A lane's ``input`` is ``"microphone"`` (browser microphone),</span>
 <span class="sd">    ``"channel"`` (a tap on the lane's mixer channel, which bounces an</span>
-<span class="sd">    instrument track to audio).</span>
+<span class="sd">    instrument track to audio), or ``"midi"`` (note events from the</span>
+<span class="sd">    keyboard, MIDI keyboard, and pad widgets, stored as a MIDI clip that</span>
+<span class="sd">    plays back through the lane's sampler or a built-in oscillator).</span>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"timeline.js"</span>
@@ -2403,6 +2455,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_clip_id</span> <span class="o">=</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]</span> <span class="o">+</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">clip</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.add_midi_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_midi_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_midi_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"MIDI"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">(),</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Append a MIDI clip and return it.</span>
+
+<span class="sd">        ``events`` may be dicts (``beat``, ``duration``, ``note``,</span>
+<span class="sd">        ``velocity``; beats are relative to the clip start), ``NoteEvent``</span>
+<span class="sd">        objects, or an ``EventSequence``. ``duration`` defaults to the end</span>
+<span class="sd">        of the last event, at least one beat.</span>
+<span class="sd">        """</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">+</span> <span class="n">event</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">normalized</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">track_index</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"midi"</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">normalized</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget.clip_to_event_sequence">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.clip_to_event_sequence">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clip_to_event_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return a MIDI clip's events as a Rust ``EventSequence``."""</span>
+        <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span> <span class="o">==</span> <span class="n">clip_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"midi"</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip </span><span class="si">{</span><span class="n">clip_id</span><span class="si">}</span><span class="s2"> is not a MIDI clip"</span><span class="p">)</span>
+                <span class="n">sequence</span> <span class="o">=</span> <span class="n">EventSequence</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"events"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">sequence</span><span class="o">.</span><span class="n">add_event</span><span class="p">(</span><span class="n">NoteEvent</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="s2">"note"</span><span class="p">],</span> <span class="n">event</span><span class="p">[</span><span class="s2">"velocity"</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="n">sequence</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"clip not found: </span><span class="si">{</span><span class="n">clip_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.remove_clip">

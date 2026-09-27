@@ -1204,6 +1204,12 @@ Module Contents
    .. py:method:: test_import_clip_from_bytes_and_path(tmp_path)
 
 
+   .. py:method:: test_midi_clip_from_dicts_events_and_sequence()
+
+
+   .. py:method:: test_midi_clip_validation()
+
+
    .. py:method:: test_remove_unrouted_track_does_not_shift_channels()
 
 
@@ -1266,6 +1272,9 @@ Module Contents
 
 
    .. py:method:: test_save_and_load_round_trip(tmp_path)
+
+
+   .. py:method:: test_round_trip_keeps_midi_clips()
 
 
    .. py:method:: test_from_dict_without_resources_keeps_metadata()
