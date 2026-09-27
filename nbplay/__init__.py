@@ -3,13 +3,11 @@ __version__ = "0.1.1"
 from nbplay.nbplay import (
     AudioBuffer,
     AudioFormat,
-    AudioOutput,
     AudioSample,
     Envelope,
     EventSequence,
     MidiChannel,
     MidiEvent,
-    MidiInput,
     MidiMessage,
     Mixer,
     MixerChannel,
@@ -28,6 +26,14 @@ from nbplay.nbplay import (
     TransportClock,
     Velocity,
 )
+
+# Native audio output and MIDI input need cpal/midir; the Pyodide wheel has neither.
+try:
+    from nbplay.nbplay import AudioOutput, MidiInput
+except ImportError:  # pragma: no cover - only on wasm32 builds
+    AudioOutput = None
+    MidiInput = None
+
 from nbplay.widget import (
     AudioClip,
     EffectPlugin,
