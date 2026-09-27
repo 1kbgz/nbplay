@@ -894,8 +894,20 @@ the widget that persists the clock position.</p>
 <code class="docutils literal notranslate"><span class="pre">input</span></code> picks the source: <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> lanes share one
 <code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> stream; <code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> lanes
 tap their mixer channel through a <code class="docutils literal notranslate"><span class="pre">MediaStreamAudioDestinationNode</span></code>, which
-bounces an instrument track to audio. One <code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> runs per lane, all
-started together after the count-in. Each completed take creates a
+bounces an instrument track to audio; <code class="docutils literal notranslate"><span class="pre">&quot;midi&quot;</span></code> lanes listen for the
+<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> document events that the keyboard, MIDI keyboard, and pad
+widgets broadcast and time each note against the session clock. One
+<code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> runs per audio lane, all started together after the count-in;
+MIDI lanes need no recorder.</p>
+<p>Clips carry <code class="docutils literal notranslate"><span class="pre">kind</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;audio&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;midi&quot;</span></code>). A MIDI clip stores <code class="docutils literal notranslate"><span class="pre">events</span></code>
+(<code class="docutils literal notranslate"><span class="pre">beat</span></code> relative to the clip start, <code class="docutils literal notranslate"><span class="pre">duration</span></code>, <code class="docutils literal notranslate"><span class="pre">note</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>).
+<code class="docutils literal notranslate"><span class="pre">add_midi_clip()</span></code> accepts dicts, <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code> objects, or an <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">clip_to_event_sequence()</span></code> converts back to the Rust type. During
+playback a 25 ms lookahead scheduler feeds each MIDI clip’s notes to the
+lane’s sampler on the session bus (<code class="docutils literal notranslate"><span class="pre">triggerNote</span></code> / <code class="docutils literal notranslate"><span class="pre">releaseNote</span></code>) or, when the
+lane has no sampler, to a built-in oscillator on the lane’s mixer channel.
+MIDI clips move, trim (honouring <code class="docutils literal notranslate"><span class="pre">offset</span></code>), duplicate, and persist with the
+session like audio clips, but have nothing to export. Each completed take creates a
 browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>. Playback uses an
 <code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and connects it through
 <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code> when the mixer bus
