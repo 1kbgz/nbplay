@@ -829,6 +829,24 @@ replaces the pytest suite (which needs a live kernel) with an import and
 session smoke test. The wheel is the basis for running the widgets in
 JupyterLite.
 
+### JupyterLite demo
+
+`make lite` builds the browser-only demo into `docs/html/lite` and the docs
+workflow publishes it at `/lite/` on the docs site. `docs/lite/prepare.py`
+stages the example notebooks in `docs/lite/contents` with one extra leading
+cell, `%pip install -q nbplay`, which piplite resolves from the bundled Pyodide
+wheel (the repository notebooks are untouched, since that line would reach
+PyPI in a regular kernel). It also writes `jupyter_lite_config.json` listing
+the lab extensions the site needs when `jupyter lite build` cannot discover
+them from `sys.prefix`: the Pyodide kernel, the ipywidgets manager, and
+anywidget's frontend module. Without the last one the widgets fail with
+"No version of module anywidget is registered".
+
+`make test-lite` (also run by the `pyodide` CI job) serves the built site and
+runs `js/tests/jupyterlite.spec.js`: it opens the synth notebook on the
+Pyodide kernel, runs every cell, and waits for an nbplay widget to render.
+Pyodide itself is fetched from its CDN at runtime.
+
 ### Keyboard shortcuts
 
 `bindShortcuts(root, handlers)` in `helpers.ts` scopes shortcuts to a widget:

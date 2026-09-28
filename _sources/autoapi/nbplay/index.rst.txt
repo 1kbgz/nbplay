@@ -19,6 +19,7 @@ Attributes
 .. autoapisummary::
 
    nbplay.__version__
+   nbplay.AudioOutput
 
 
 Package Contents
@@ -26,5 +27,9 @@ Package Contents
 
 .. py:data:: __version__
    :value: '0.1.1'
+
+
+.. py:data:: AudioOutput
+   :value: None
 
 

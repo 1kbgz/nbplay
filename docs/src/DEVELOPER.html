@@ -1139,6 +1139,23 @@ replaces the pytest suite (which needs a live kernel) with an import and
 session smoke test. The wheel is the basis for running the widgets in
 JupyterLite.</p>
 </section>
+<section id="jupyterlite-demo">
+<h3>JupyterLite demo<a class="headerlink" href="#jupyterlite-demo" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">lite</span></code> builds the browser-only demo into <code class="docutils literal notranslate"><span class="pre">docs/html/lite</span></code> and the docs
+workflow publishes it at <code class="docutils literal notranslate"><span class="pre">/lite/</span></code> on the docs site. <code class="docutils literal notranslate"><span class="pre">docs/lite/prepare.py</span></code>
+stages the example notebooks in <code class="docutils literal notranslate"><span class="pre">docs/lite/contents</span></code> with one extra leading
+cell, <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">-q</span> <span class="pre">nbplay</span></code>, which piplite resolves from the bundled Pyodide
+wheel (the repository notebooks are untouched, since that line would reach
+PyPI in a regular kernel). It also writes <code class="docutils literal notranslate"><span class="pre">jupyter_lite_config.json</span></code> listing
+the lab extensions the site needs when <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">lite</span> <span class="pre">build</span></code> cannot discover
+them from <code class="docutils literal notranslate"><span class="pre">sys.prefix</span></code>: the Pyodide kernel, the ipywidgets manager, and
+anywidget’s frontend module. Without the last one the widgets fail with
+“No version of module anywidget is registered”.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-lite</span></code> (also run by the <code class="docutils literal notranslate"><span class="pre">pyodide</span></code> CI job) serves the built site and
+runs <code class="docutils literal notranslate"><span class="pre">js/tests/jupyterlite.spec.js</span></code>: it opens the synth notebook on the
+Pyodide kernel, runs every cell, and waits for an nbplay widget to render.
+Pyodide itself is fetched from its CDN at runtime.</p>
+</section>
 <section id="keyboard-shortcuts">
 <h3>Keyboard shortcuts<a class="headerlink" href="#keyboard-shortcuts" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">bindShortcuts(root,</span> <span class="pre">handlers)</span></code> in <code class="docutils literal notranslate"><span class="pre">helpers.ts</span></code> scopes shortcuts to a widget:
@@ -1471,6 +1488,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#javascript-tests">JavaScript tests</a></li>
 <li><a class="reference internal" href="#host-compatibility-tests">Host compatibility tests</a></li>
 <li><a class="reference internal" href="#pyodide-wheel">Pyodide wheel</a></li>
+<li><a class="reference internal" href="#jupyterlite-demo">JupyterLite demo</a></li>
 <li><a class="reference internal" href="#keyboard-shortcuts">Keyboard shortcuts</a></li>
 <li><a class="reference internal" href="#session-persistence">Session persistence</a></li>
 <li><a class="reference internal" href="#rust-tests">Rust tests</a></li>
