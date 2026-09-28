@@ -121,6 +121,10 @@ index.md
 docs/_build/
 docs/api
 docs/html
+docs/lite/contents/
+docs/lite/jupyter_lite_config.json
+docs/lite/_output/
+docs/lite/.jupyterlite.doit.db
 docs/index.md
 docs/jupyter_execute
 docs/src/_build/

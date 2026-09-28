@@ -135,6 +135,14 @@ tests-rs: test-rs
 coverage-rs:  ## run rust tests and collect test coverage
 	make -C rust coverage
 
+.PHONY: lite test-lite
+lite:  ## build the JupyterLite demo (needs the Pyodide wheel from make test-pyodide)
+	python docs/lite/prepare.py
+	cd docs/lite && jupyter lite build --contents contents --output-dir ../html/lite --piplite-wheels $(abspath $(wildcard dist/pyodide/*.whl))
+
+test-lite: lite  ## build the JupyterLite demo and run a notebook in it
+	cd js; pnpm run test:lite
+
 .PHONY: test test-pyodide coverage tests
 test: test-py test-js test-rs  ## run all tests
 
