@@ -264,48 +264,49 @@
 <p><strong>Try it in your browser:</strong> the <a class="reference external" href="https://1kbgz.github.io/nbplay/lite/lab/index.html?path=13_daw_playground.ipynb">live demo</a>
 runs the example notebooks on JupyterLite with nbplay compiled to WebAssembly.
 Nothing to install; open a notebook and run it top to bottom.</p>
-<p>nbplay provides composable Jupyter widgets for a browser-backed DAW: synths,
-samplers, sequencers, keyboards, pads, transport, multitrack timeline
-recording, a clip launcher, and mixer/session routing, all following one shared
-session clock in the browser. The widgets are plain
-<a class="reference external" href="https://anywidget.dev">anywidget</a> classes with no extension to install, and
-the test suite drives them under Voila and JupyterLab with a live kernel.
-A session can be saved to a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive and loaded back:</p>
+<p>nbplay is a set of Jupyter widgets that together form a small DAW in the
+browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
+trigger pads, a transport, a multitrack timeline that records audio and MIDI,
+a clip launcher, and a mixer. Every widget in a session follows one clock that
+lives in the browser, so play, seek, and tempo changes never wait on the
+kernel. The widgets are plain <a class="reference external" href="https://anywidget.dev">anywidget</a> classes with
+no extension to install; they work in JupyterLab, Notebook, VS Code, Voila, and
+JupyterLite. A session can be saved to a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive and loaded back:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">export_all_clips</span><span class="p">()</span>   <span class="c1"># pull recorded takes from the browser</span>
 <span class="c1"># ... once session.timeline.pending_exports == 0</span>
 <span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"song.nbplay"</span><span class="p">)</span>
 <span class="n">session</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"song.nbplay"</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Mixer channels and the master bus support Web Audio insert chains with built-in
-gain, filter, compressor, limiter, delay, and reverb effects, plus custom browser
-plugin factories. Custom effect descriptors must be JSON-safe; built-in effect
-names are reserved. Widgets render non-crashing fallback states when Web Audio or
-Web MIDI is unavailable.</p>
+<p>Mixer channels and the master bus have Web Audio insert chains with built-in
+gain, filter, compressor, limiter, delay, and reverb effects; you can register
+your own browser plugin factories as well. Effect descriptors must be JSON-safe,
+and the built-in effect names are reserved. When Web Audio or Web MIDI is
+unavailable the widgets still render and their controls keep working; they are
+silent until the browser provides those APIs.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nb</span>
 
-<span class="n">session</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
-<span class="n">seq</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SequencerWidget</span><span class="p">(</span><span class="n">num_voices</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">sampler</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SamplerWidget</span><span class="p">()</span>
-<span class="n">track</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Drums"</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">sampler</span><span class="p">)</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+<span class="n">drums</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Drums"</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">SequencerWidget</span><span class="p">(</span><span class="n">num_voices</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">nb</span><span class="o">.</span><span class="n">SamplerWidget</span><span class="p">())</span>
+<span class="n">vocals</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Vocals"</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>      <span class="c1"># microphone lane</span>
+<span class="n">keys</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Keys"</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s2">"midi"</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># records note events</span>
 
 <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span>
-    <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span>
+    <span class="n">drums</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span>
     <span class="n">nb</span><span class="o">.</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"compressor"</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">18</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"limiter"</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
 <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">64</span>
 <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">count_in_bars</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">auto_extend_recording</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">recording_extend_bars</span> <span class="o">=</span> <span class="mi">16</span>
-<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">arm_track</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">timeline_tracks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">track</span><span class="p">)</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
-<span class="n">timeline_tracks</span><span class="p">[</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">][</span><span class="s2">"monitor"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="n">timeline_tracks</span>
-<span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="s2">"Kick loop"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">add_scene</span><span class="p">(</span><span class="s2">"Intro"</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="n">drums</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">drums</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Beat"</span><span class="p">)</span>
+
+<span class="n">session</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>   <span class="c1"># or press play on any widget; they share the clock</span>
 </pre></div>
 </div>
+<p>The example notebooks in <code class="docutils literal notranslate"><span class="pre">examples/</span></code> walk through each widget and end with a
+full DAW playground and the beats view.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>

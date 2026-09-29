@@ -2,7 +2,7 @@
   "jupyter-config-data": {
     "appName": "nbplay",
     "appUrl": "./lab",
-    "appVersion": "0.8.4",
+    "appVersion": "0.8.5",
     "baseUrl": "./",
     "contentsAllJsonFile": "all.json",
     "defaultKernelName": "python",
@@ -409,7 +409,7 @@
     "litePluginSettings": {
       "@jupyterlite/pyodide-kernel-extension:kernel": {
         "pipliteUrls": [
-          "./pypi/all.json?sha256=58111f6d516492493a9cedb9b86206e39f73aa4e64294968fa6e9f117c18e70a",
+          "./pypi/all.json?sha256=be9a5e33f254e7d777f41a8ab0e36d0071089b9d9405ee76690f52f527972ca7",
           "./extensions/@jupyterlite/pyodide-kernel-extension/static/pypi/all.json?sha256=94e75a51d1c49df7d0c23591188ff4a7ca5475efe7332814b3e5c4b980ef5a71"
         ]
       }

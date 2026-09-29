@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>06 — Keyboard Widget - nbplay v0.1.1</title>
+        <title>06 Keyboard Widget - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -245,11 +245,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="keyboard-widget">
-<h1>06 — Keyboard Widget<a class="headerlink" href="#keyboard-widget" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> provides a <strong>musical typing keyboard</strong> (inspired by Logic Pro’s layout)
-directly inside the notebook.  It maps QWERTY keys to musical notes across two octave
-halves — an upper half and a lower half — each independently transposable.</p>
-<p>In this notebook we will:</p>
+<h1>06 Keyboard Widget<a class="headerlink" href="#keyboard-widget" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> is a musical typing keyboard in the notebook, laid out like
+Logic Pro’s. It maps QWERTY keys to notes in two halves, upper and lower, and
+each half can be transposed on its own.</p>
+<p>This notebook covers three things:</p>
 <ol class="arabic simple">
 <li><p>Create a standalone keyboard and play notes</p></li>
 <li><p>Connect it to a sequencer for live recording</p></li>
@@ -268,7 +268,7 @@ halves — an upper half and a lower half — each independently transposable.</
 </div>
 <section id="standalone-keyboard">
 <h2>Standalone Keyboard<a class="headerlink" href="#standalone-keyboard" title="Link to this heading">¶</a></h2>
-<p>Create a keyboard and display it.  <strong>Click</strong> the widget to focus it, then use
+<p>Create a keyboard and display it. <strong>Click</strong> the widget to focus it, then use
 your QWERTY keys to play notes.</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -325,7 +325,7 @@ your QWERTY keys to play notes.</p>
 <p>When a keyboard is connected to a sequencer, the sequencer gains a <strong>REC</strong> button.
 With REC armed and the sequencer playing, notes you play on the keyboard are
 automatically written to voice 1 at the current step.</p>
-<p>You can also <strong>double-click</strong> a step cell in the sequencer grid — instead of
+<p>You can also <strong>double-click</strong> a step cell in the sequencer grid: instead of
 typing a note name, press a key on the keyboard and the note is captured.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -354,9 +354,9 @@ typing a note name, press a key on the keyboard and the note is captured.</p>
 </section>
 <section id="connecting-to-a-sampler">
 <h2>Connecting to a Sampler<a class="headerlink" href="#connecting-to-a-sampler" title="Link to this heading">¶</a></h2>
-<p>The keyboard can trigger samples loaded in a <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>.  For the audio
-routing to work the sampler needs a <strong>session bus</strong> — this is created
-automatically when you use a <code class="docutils literal notranslate"><span class="pre">Session</span></code> and call <code class="docutils literal notranslate"><span class="pre">add_track</span></code>.</p>
+<p>The keyboard can trigger samples loaded in a <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>. For the audio
+routing to work the sampler needs a <strong>session bus</strong>, which a <code class="docutils literal notranslate"><span class="pre">Session</span></code> creates
+when you call <code class="docutils literal notranslate"><span class="pre">add_track</span></code>.</p>
 <p>There are several routing modes:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -392,12 +392,12 @@ automatically when you use a <code class="docutils literal notranslate"><span cl
 </div>
 <p>Once routing is set up, the sampler’s <strong>ADSR envelope</strong> controls
 (attack, decay, sustain, release) apply to every note played from the keyboard.</p>
-<section id="single-sampler-whole-keyboard">
-<h3>Single sampler — whole keyboard<a class="headerlink" href="#single-sampler-whole-keyboard" title="Link to this heading">¶</a></h3>
-<p>Create a <code class="docutils literal notranslate"><span class="pre">Session</span></code> with a sampler track.  <code class="docutils literal notranslate"><span class="pre">add_track</span></code> wires the sampler’s
-<code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> automatically, so the keyboard can find it
-on the session bus.  Then <code class="docutils literal notranslate"><span class="pre">connect_sampler</span></code> tells the keyboard to route all
-keys through that sampler.</p>
+<section id="one-sampler-for-the-whole-keyboard">
+<h3>One sampler for the whole keyboard<a class="headerlink" href="#one-sampler-for-the-whole-keyboard" title="Link to this heading">¶</a></h3>
+<p>Create a <code class="docutils literal notranslate"><span class="pre">Session</span></code> with a sampler track. <code class="docutils literal notranslate"><span class="pre">add_track</span></code> sets the sampler’s
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, so the keyboard can find it on the session
+bus. Then <code class="docutils literal notranslate"><span class="pre">connect_sampler</span></code> tells the keyboard to route all keys through that
+sampler.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a sampler with a short synthesised blip sample</span>
@@ -427,11 +427,11 @@ keys through that sampler.</p>
 </div>
 </div>
 </section>
-<section id="upper-lower-split-two-samplers">
-<h3>Upper/Lower split — two samplers<a class="headerlink" href="#upper-lower-split-two-samplers" title="Link to this heading">¶</a></h3>
+<section id="upper-lower-split-across-two-samplers">
+<h3>Upper/lower split across two samplers<a class="headerlink" href="#upper-lower-split-across-two-samplers" title="Link to this heading">¶</a></h3>
 <p>Route the upper keyboard rows (QWERTY) to one sampler and the lower rows (ZXCV)
-to another.  Each sampler gets its own ADSR — try changing the attack on one
-while leaving the other fast.</p>
+to another. Each sampler has its own ADSR; try a slow attack on one while
+leaving the other fast.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Two samplers with different timbres</span>
@@ -510,12 +510,12 @@ while leaving the other fast.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">06 — Keyboard Widget</a><ul>
+<li><a class="reference internal" href="#">06 Keyboard Widget</a><ul>
 <li><a class="reference internal" href="#standalone-keyboard">Standalone Keyboard</a></li>
 <li><a class="reference internal" href="#connecting-to-a-sequencer">Connecting to a Sequencer</a></li>
 <li><a class="reference internal" href="#connecting-to-a-sampler">Connecting to a Sampler</a><ul>
-<li><a class="reference internal" href="#single-sampler-whole-keyboard">Single sampler — whole keyboard</a></li>
-<li><a class="reference internal" href="#upper-lower-split-two-samplers">Upper/Lower split — two samplers</a></li>
+<li><a class="reference internal" href="#one-sampler-for-the-whole-keyboard">One sampler for the whole keyboard</a></li>
+<li><a class="reference internal" href="#upper-lower-split-across-two-samplers">Upper/lower split across two samplers</a></li>
 <li><a class="reference internal" href="#disconnect">Disconnect</a></li>
 </ul>
 </li>

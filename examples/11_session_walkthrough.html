@@ -352,7 +352,7 @@
 </div>
 </div>
 </div>
-<p>Arm a timeline track and press record to capture microphone audio into the browser timeline. Recorded clip blobs are browser-local object URLs for now, so rerunning or reloading the notebook clears recorded audio.</p>
+<p>Arm a timeline track and press record to capture microphone audio into the browser timeline. Recorded audio lives in the browser until you pull it into Python: call <code class="docutils literal notranslate"><span class="pre">session.timeline.export_all_clips()</span></code>, wait for <code class="docutils literal notranslate"><span class="pre">pending_exports</span></code> to reach zero, then <code class="docutils literal notranslate"><span class="pre">session.save(&quot;song.nbplay&quot;)</span></code> keeps the takes with the rest of the session.</p>
 </section>
 
         </article>

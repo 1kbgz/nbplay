@@ -246,11 +246,11 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="nbplay-developer-guide">
 <h1>nbplay Developer Guide<a class="headerlink" href="#nbplay-developer-guide" title="Link to this heading">¶</a></h1>
-<p>This guide is the top-to-bottom map for nbplay contributors. It explains how the
-Python package, Rust core, PyO3 extension, WebAssembly bindings, TypeScript
-widgets, browser audio/MIDI runtime, tests, docs, and distribution pipeline fit
-together. It is meant to be detailed enough that a developer can add a feature
-to any component without first reverse-engineering the whole repository.</p>
+<p>This guide is the map of nbplay for contributors. It explains how the Python
+package, Rust core, PyO3 extension, WebAssembly bindings, TypeScript widgets,
+browser audio/MIDI runtime, tests, docs, and distribution pipeline fit together,
+in enough detail to add a feature to any component without reading the whole
+repository first.</p>
 <p>nbplay is a notebook-native digital audio workstation. Users instantiate Python
 objects in a Jupyter kernel; anywidget syncs trait state to browser-side
 TypeScript renderers; the browser uses Web Audio and Web MIDI for low-latency
@@ -411,7 +411,7 @@ bindings for WASM output.</p></li>
 <li><p>Playwright for browser tests.</p></li>
 <li><p>http-server for the local browser test server.</p></li>
 <li><p>nodemon for watch-mode rebuilds.</p></li>
-<li><p>prettier for JS/TS/CSS formatting.</p></li>
+<li><p>oxlint and oxfmt for JS/TS/CSS linting and formatting.</p></li>
 </ul>
 </section>
 <section id="python-build-qa-and-release">
@@ -533,15 +533,18 @@ learn work.</p></li>
 It is not rendered directly. A <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> owns one composer per voice and
 syncs all composers into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code>, a list of step lists. The <code class="docutils literal notranslate"><span class="pre">steps</span></code>
 property remains a backward-compatible alias for voice 0.</p>
-<p><code class="docutils literal notranslate"><span class="pre">Track</span></code> binds a sequencer, a sound source, and a mixer channel. It links BPM and
-time signature bidirectionally between a session transport and the sequencer,
-and dlinks <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> from transport to sequencer so a non-looping sequencer
-cannot stop every track.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Track</span></code> is a session lane: a mixer channel plus an optional sequencer and sound
+source. When a sequencer is present, it links BPM and time signature
+bidirectionally between the session transport and the sequencer, and dlinks
+<code class="docutils literal notranslate"><span class="pre">is_playing</span></code> from transport to sequencer so a non-looping sequencer cannot stop
+every track.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Session</span></code> creates a shared <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, a <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>, a <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code>,
-and a <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>. <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> creates a mixer channel, links
-transport state, adds a timeline lane, and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and
-<code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound source. Browser widgets use those
-fields to route audio through the shared mixer bus.</p>
+a <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>, and a <code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code>. <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> creates a
+mixer channel, links transport state, adds a timeline lane and a launcher row,
+and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound
+source. Browser widgets use those fields to route audio through the shared
+mixer bus. <code class="docutils literal notranslate"><span class="pre">Session.save()</span></code> and <code class="docutils literal notranslate"><span class="pre">Session.load()</span></code> persist the whole thing; see
+“Session persistence”.</p>
 </section>
 </section>
 <section id="rust-core">
@@ -667,12 +670,14 @@ restarts or shuts down.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">makeEditable()</span></code> implements double-click inline editing with an Enter/blur
 commit guard.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> converts anywidget binary buffers into <code class="docutils literal notranslate"><span class="pre">Float32Array</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bindShortcuts()</span></code> binds keyboard shortcuts to a widget root (see
+“Keyboard shortcuts” below).</p></li>
 <li><p>Gain/pan helpers convert and format linear gain, dB, and pan values.</p></li>
 </ul>
 <section id="browser-apis-used">
 <h3>Browser APIs used<a class="headerlink" href="#browser-apis-used" title="Link to this heading">¶</a></h3>
-<p>nbplay uses browser capabilities directly rather than relying on a web audio
-framework:</p>
+<p>nbplay calls the browser APIs directly; there is no audio framework in
+between:</p>
 <ul class="simple">
 <li><p>Web Audio API: <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, <code class="docutils literal notranslate"><span class="pre">OscillatorNode</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioBuffer</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AudioBufferSourceNode</span></code>, <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, <code class="docutils literal notranslate"><span class="pre">StereoPannerNode</span></code>, <code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>,
@@ -696,8 +701,11 @@ lazily by <code class="docutils literal notranslate"><span class="pre">getOrCrea
 </section>
 <section id="session-bus-shape">
 <h3>Session bus shape<a class="headerlink" href="#session-bus-shape" title="Link to this heading">¶</a></h3>
-<p>When a <code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code> has a <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, it registers a bus at:</p>
+<p>Every widget with a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> shares one bus object, fetched with
+<code class="docutils literal notranslate"><span class="pre">getOrCreateSessionBus()</span></code> from <code class="docutils literal notranslate"><span class="pre">js/src/ts/session.ts</span></code>; whichever widget renders
+first creates it:</p>
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nb">globalThis</span><span class="p">.</span><span class="nx">__nbplay</span><span class="p">[</span><span class="nx">sessionId</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">clock</span><span class="p">,</span><span class="w">                     </span><span class="c1">// SessionClock: the shared transport timebase</span>
 <span class="w">  </span><span class="nx">audioCtx</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">masterGain</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">gain</span><span class="p">,</span><span class="w"> </span><span class="nx">pan</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">...],</span>
@@ -707,16 +715,16 @@ lazily by <code class="docutils literal notranslate"><span class="pre">getOrCrea
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>The exact properties are created lazily by participating widgets. The mixer owns
-<code class="docutils literal notranslate"><span class="pre">audioCtx</span></code>, <code class="docutils literal notranslate"><span class="pre">masterGain</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>, and a fresh merged view of browser insert
-effect plugin factories. Samplers add <code class="docutils literal notranslate"><span class="pre">samplers[channelIndex]</span></code> so KeyboardWidget
-and MidiKeyboardWidget can trigger them. Keyboard widgets also broadcast
-<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>, which lets sequencers record notes even without a
-shared mixer bus. Timeline clip playback reads <code class="docutils literal notranslate"><span class="pre">audioCtx</span></code> and <code class="docutils literal notranslate"><span class="pre">channels</span></code> from
-the bus so recorded clips can route through the same mixer channel strip and
-insert effects as live sources.</p>
+<p>Widgets attach their own properties to the bus in place. The mixer owns
+<code class="docutils literal notranslate"><span class="pre">audioCtx</span></code>, <code class="docutils literal notranslate"><span class="pre">masterGain</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>, and a merged view of the browser insert
+effect plugin factories; it adopts an <code class="docutils literal notranslate"><span class="pre">audioCtx</span></code> that another widget created
+first. Samplers add <code class="docutils literal notranslate"><span class="pre">samplers[channelIndex]</span></code> so keyboards, pads, and MIDI clips
+can trigger them. Keyboard widgets also broadcast <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> on <code class="docutils literal notranslate"><span class="pre">document</span></code>,
+which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
+clip playback reads <code class="docutils literal notranslate"><span class="pre">audioCtx</span></code> and <code class="docutils literal notranslate"><span class="pre">channels</span></code> from the bus so recorded clips go
+through the same channel strip and insert effects as live sources.</p>
 <p>Render order can vary in notebooks. SamplerWidget handles this by listening for
-<code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer creates the bus.</p>
+<code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer attaches its graph.</p>
 </section>
 </section>
 <section id="widget-deep-dives">
@@ -784,14 +792,15 @@ affects the channel gain nodes. The bus is registered on <code class="docutils l
 and removed on cleanup.</p>
 <p>Insert chains update in place. Each built-in effect unit exposes
 <code class="docutils literal notranslate"><span class="pre">update(descriptor)</span></code>, which writes the new parameters to the existing
-<code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>s; a chain is rebuilt only when its structure changes (an
-effect added, removed, or retyped), when a custom plugin has no <code class="docutils literal notranslate"><span class="pre">update</span></code>, or
-when a unit declines the change (reverb returns false for a new impulse
-length or decay). Only the chain that changed is rebuilt. Meters: the bus
-creates an <code class="docutils literal notranslate"><span class="pre">AnalyserNode</span></code> per channel and for the master, connected from the
-end of each insert chain, and the widget reads peak/RMS at ~30 fps with
-<code class="docutils literal notranslate"><span class="pre">requestAnimationFrame</span></code> to drive <code class="docutils literal notranslate"><span class="pre">.nbplay-strip-meter-fill</span></code> (height on a
-60 dB scale, <code class="docutils literal notranslate"><span class="pre">hot</span></code> at clipping) and a <code class="docutils literal notranslate"><span class="pre">data-peak</span></code> attribute on each strip.</p>
+<code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>s. A chain is rebuilt only when its structure changes (an effect
+added, removed, or retyped), when a custom plugin has no <code class="docutils literal notranslate"><span class="pre">update</span></code>, or when a
+unit declines the change (reverb returns false for a new impulse length or
+decay), and only that chain is rebuilt.</p>
+<p>For the meters, the bus creates an <code class="docutils literal notranslate"><span class="pre">AnalyserNode</span></code> per channel and for the
+master, connected from the end of each insert chain. The widget reads peak and
+RMS about 30 times per second with <code class="docutils literal notranslate"><span class="pre">requestAnimationFrame</span></code> and sets the height
+of <code class="docutils literal notranslate"><span class="pre">.nbplay-strip-meter-fill</span></code> on a 60 dB scale, adds <code class="docutils literal notranslate"><span class="pre">hot</span></code> at clipping, and
+writes a <code class="docutils literal notranslate"><span class="pre">data-peak</span></code> attribute on each strip.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -805,9 +814,10 @@ thirty-second notes. <code class="docutils literal notranslate"><span class="pre
 controls both resize the underlying <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> while preserving existing
 steps where possible.</p>
 <p>Browser playback uses <code class="docutils literal notranslate"><span class="pre">js/src/ts/scheduler.ts</span></code> as a DOM-free lookahead
-scheduler. A timer runs every 25 ms and schedules notes up to 100 ms ahead using
-<code class="docutils literal notranslate"><span class="pre">AudioContext.currentTime</span></code>. Each active step plays a simple sine oscillator
-through either the session mixer channel or a standalone audio context.
+scheduler. A timer runs every 25 ms and schedules notes up to 100 ms ahead on
+the session clock’s beat grid, so every sequencer in a session lands on the
+same grid. Each active step plays a simple sine oscillator through either the
+session mixer channel or a standalone audio context.
 <code class="docutils literal notranslate"><span class="pre">current_step</span></code> is updated locally for visual highlighting without saving every
 tick.</p>
 <p>The scheduler owns timing helpers for step advancement, voice iteration,
@@ -908,7 +918,13 @@ bounces an instrument track to audio; <code class="docutils literal notranslate"
 <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> document events that the keyboard, MIDI keyboard, and pad
 widgets broadcast and time each note against the session clock. One
 <code class="docutils literal notranslate"><span class="pre">MediaRecorder</span></code> runs per audio lane, all started together after the count-in;
-MIDI lanes need no recorder.</p>
+MIDI lanes need no recorder. Each completed audio take creates a browser-local
+object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>. Playback uses an
+<code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and connects it through
+<code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code> when the mixer bus
+is available, falling back to direct media playback when it is not. A clip’s
+<code class="docutils literal notranslate"><span class="pre">offset</span></code> (beats into the source audio) is applied when its start edge has been
+trimmed.</p>
 <p>Clips carry <code class="docutils literal notranslate"><span class="pre">kind</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;audio&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;midi&quot;</span></code>). A MIDI clip stores <code class="docutils literal notranslate"><span class="pre">events</span></code>
 (<code class="docutils literal notranslate"><span class="pre">beat</span></code> relative to the clip start, <code class="docutils literal notranslate"><span class="pre">duration</span></code>, <code class="docutils literal notranslate"><span class="pre">note</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>).
 <code class="docutils literal notranslate"><span class="pre">add_midi_clip()</span></code> accepts dicts, <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code> objects, or an <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>,
@@ -917,13 +933,7 @@ playback a 25 ms lookahead scheduler feeds each MIDI clip’s notes to the
 lane’s sampler on the session bus (<code class="docutils literal notranslate"><span class="pre">triggerNote</span></code> / <code class="docutils literal notranslate"><span class="pre">releaseNote</span></code>) or, when the
 lane has no sampler, to a built-in oscillator on the lane’s mixer channel.
 MIDI clips move, trim (honouring <code class="docutils literal notranslate"><span class="pre">offset</span></code>), duplicate, and persist with the
-session like audio clips, but have nothing to export. Each completed take creates a
-browser-local object URL and appends clip metadata to <code class="docutils literal notranslate"><span class="pre">clips</span></code>. Playback uses an
-<code class="docutils literal notranslate"><span class="pre">HTMLAudioElement</span></code> and connects it through
-<code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[sessionId].channels[channel_index].gain</span></code> when the mixer bus
-is available, falling back to direct media playback when it is not. A clip’s
-<code class="docutils literal notranslate"><span class="pre">offset</span></code> (beats into the source audio) is applied when a clip’s start edge has
-been trimmed.</p>
+session like audio clips, but have nothing to export.</p>
 <p>Clip audio crosses the comm on request. <code class="docutils literal notranslate"><span class="pre">export_clip(clip_id)</span></code> sets
 <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>; the browser fetches the object URL and answers with
 <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code> and <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code> (bytes), which
@@ -1046,9 +1056,9 @@ Python package.</p>
 <p>Top-level commands are in <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>develop<span class="w">       </span><span class="c1"># Rust tools, JS deps/browser install, Python editable install</span>
 make<span class="w"> </span>build<span class="w">         </span><span class="c1"># Rust core/native build, JS WASM/widgets, Python wheel build</span>
-make<span class="w"> </span><span class="nb">test</span><span class="w">          </span><span class="c1"># Python, Playwright, and Rust tests</span>
+make<span class="w"> </span><span class="nb">test</span><span class="w">          </span><span class="c1"># Python, Playwright, Rust, and Voila/JupyterLab host tests</span>
 make<span class="w"> </span>coverage<span class="w">      </span><span class="c1"># Coverage variants of the test suites</span>
-make<span class="w"> </span>lint<span class="w">          </span><span class="c1"># Rust clippy/fmt, JS prettier, Python ruff, README docs checks</span>
+make<span class="w"> </span>lint<span class="w">          </span><span class="c1"># Rust clippy/fmt, JS oxlint/oxfmt, Python ruff, README docs checks</span>
 make<span class="w"> </span>fix<span class="w">           </span><span class="c1"># Format/fix Rust, JS, Python, and README docs</span>
 make<span class="w"> </span>test-notebooks<span class="w"> </span><span class="c1"># Notebook regression tests only</span>
 make<span class="w"> </span>dist<span class="w">          </span><span class="c1"># Full distribution build and checks</span>

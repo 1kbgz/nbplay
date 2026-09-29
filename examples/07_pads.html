@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>PadWidget — Trigger Pads - nbplay v0.1.1</title>
+        <title>07 PadWidget Trigger Pads - nbplay v0.1.1</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -245,23 +245,23 @@
         </div>
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="padwidget-trigger-pads">
-<h1>PadWidget — Trigger Pads<a class="headerlink" href="#padwidget-trigger-pads" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code> is an MPC-style grid of velocity-sensitive trigger pads.
-Each pad sends a MIDI note through the session bus — connect it to a
-sampler and you’ve got an instant drum machine in a notebook cell.</p>
+<h1>07 PadWidget Trigger Pads<a class="headerlink" href="#padwidget-trigger-pads" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code> is an MPC-style grid of velocity-sensitive trigger pads. Each pad
+sends a MIDI note through the session bus; connect it to a sampler and you have
+a drum machine in a notebook cell.</p>
 <ul class="simple">
-<li><p><strong>Velocity-sensitive</strong> — click near the top of a pad for soft hits,
-near the bottom for hard hits</p></li>
-<li><p><strong>Assignable notes</strong> — double-click a pad’s label to type a new note
-name (e.g. <code class="docutils literal notranslate"><span class="pre">C#4</span></code>) or MIDI number; scroll to nudge ±1 semitone</p></li>
-<li><p><strong>Session routing</strong> — uses the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> as the
-<code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> so one sampler can serve both</p></li>
+<li><p><strong>Velocity-sensitive:</strong> click near the top of a pad for soft hits and near
+the bottom for hard hits.</p></li>
+<li><p><strong>Assignable notes:</strong> double-click a pad’s label to type a new note name
+(<code class="docutils literal notranslate"><span class="pre">C#4</span></code>) or MIDI number; scroll to nudge it a semitone.</p></li>
+<li><p><strong>Session routing:</strong> uses the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code> as <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code>, so
+one sampler can serve both.</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">PadWidget</span>
 
-<span class="c1"># Create a 4×4 pad grid — defaults to MIDI notes 36–51 (C2–D#3)</span>
+<span class="c1"># Create a 4×4 pad grid; the default notes are MIDI 36–51 (C2–D#3)</span>
 <span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">pads</span>
 </pre></div>
@@ -270,17 +270,16 @@ name (e.g. <code class="docutils literal notranslate"><span class="pre">C#4</spa
 </div>
 <p>Click any pad to hear a sine tone. The pad flashes on impact.</p>
 <ul class="simple">
-<li><p><strong>Velocity-sensitive by default</strong> — click near the top for a quiet hit
-(≈vel 20) and near the bottom for a loud one (up to the slider value).</p></li>
-<li><p><strong>Hold pads</strong> — multiple pads can be held simultaneously for chords
-or layered drum hits.</p></li>
+<li><p><strong>Velocity-sensitive by default:</strong> click near the top for a quiet hit
+(about velocity 20) and near the bottom for a loud one (up to the slider value).</p></li>
+<li><p><strong>Hold pads:</strong> several pads can be held at once for chords or layered hits.</p></li>
 <li><p><strong>Scroll wheel</strong> on a pad adjusts its note ±1 semitone.</p></li>
 <li><p><strong>Double-click</strong> a pad’s note label to type a new note name.</p></li>
 </ul>
 <section id="custom-layout">
 <h2>Custom Layout<a class="headerlink" href="#custom-layout" title="Link to this heading">¶</a></h2>
-<p>Any rectangular grid works — here’s a 2×8 layout with a
-<strong>minor pentatonic scale</strong> mapped across the pads.</p>
+<p>Any rectangular grid works. Here is a 2×8 layout with a minor pentatonic
+scale mapped across the pads.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2 rows × 8 columns with a minor pentatonic scale starting at C2</span>
@@ -301,8 +300,8 @@ or layered drum hits.</p></li>
 </section>
 <section id="pads-sampler-via-session">
 <h2>Pads + Sampler via Session<a class="headerlink" href="#pads-sampler-via-session" title="Link to this heading">¶</a></h2>
-<p>Connect the pads to a sampler through the session bus — the same
-pattern used by <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>.</p>
+<p>Connect the pads to a sampler through the session bus, the same way
+<code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code> do.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -339,13 +338,13 @@ pattern used by <code class="docutils literal notranslate"><span class="pre">Key
 <section id="what-s-next">
 <h2>What’s Next<a class="headerlink" href="#what-s-next" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>Double-click</strong> any pad label to change its note — type <code class="docutils literal notranslate"><span class="pre">C#4</span></code> or <code class="docutils literal notranslate"><span class="pre">60</span></code>.</p></li>
+<li><p><strong>Double-click</strong> any pad label to change its note; type <code class="docutils literal notranslate"><span class="pre">C#4</span></code> or <code class="docutils literal notranslate"><span class="pre">60</span></code>.</p></li>
 <li><p><strong>Scroll</strong> on a pad to nudge its note up or down one semitone.</p></li>
 <li><p><strong>Drag</strong> the velocity slider to set the maximum velocity; with
 <em>Vel-Sensitive</em> checked, click position within the pad determines
 actual velocity (top = soft, bottom = hard).</p></li>
 <li><p>Combine <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code>, and <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> in one
-<code class="docutils literal notranslate"><span class="pre">Session</span></code> for a full multi-instrument setup.</p></li>
+<code class="docutils literal notranslate"><span class="pre">Session</span></code> for a multi-instrument setup.</p></li>
 </ul>
 </section>
 </section>
@@ -387,7 +386,7 @@ actual velocity (top = soft, bottom = hard).</p></li>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">PadWidget — Trigger Pads</a><ul>
+<li><a class="reference internal" href="#">07 PadWidget Trigger Pads</a><ul>
 <li><a class="reference internal" href="#custom-layout">Custom Layout</a></li>
 <li><a class="reference internal" href="#pads-sampler-via-session">Pads + Sampler via Session</a></li>
 <li><a class="reference internal" href="#what-s-next">What’s Next</a></li>
