@@ -19,13 +19,14 @@ let's play!
 runs the example notebooks on JupyterLite with nbplay compiled to WebAssembly.
 Nothing to install; open a notebook and run it top to bottom.
 
-nbplay provides composable Jupyter widgets for a browser-backed DAW: synths,
-samplers, sequencers, keyboards, pads, transport, multitrack timeline
-recording, a clip launcher, and mixer/session routing, all following one shared
-session clock in the browser. The widgets are plain
-[anywidget](https://anywidget.dev) classes with no extension to install, and
-the test suite drives them under Voila and JupyterLab with a live kernel.
-A session can be saved to a `.nbplay` archive and loaded back:
+nbplay is a set of Jupyter widgets that together form a small DAW in the
+browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
+trigger pads, a transport, a multitrack timeline that records audio and MIDI,
+a clip launcher, and a mixer. Every widget in a session follows one clock that
+lives in the browser, so play, seek, and tempo changes never wait on the
+kernel. The widgets are plain [anywidget](https://anywidget.dev) classes with
+no extension to install; they work in JupyterLab, Notebook, VS Code, Voila, and
+JupyterLite. A session can be saved to a `.nbplay` archive and loaded back:
 
 ```python
 session.timeline.export_all_clips()   # pull recorded takes from the browser
@@ -34,36 +35,37 @@ session.save("song.nbplay")
 session = nb.Session.load("song.nbplay")
 ```
 
-Mixer channels and the master bus support Web Audio insert chains with built-in
-gain, filter, compressor, limiter, delay, and reverb effects, plus custom browser
-plugin factories. Custom effect descriptors must be JSON-safe; built-in effect
-names are reserved. Widgets render non-crashing fallback states when Web Audio or
-Web MIDI is unavailable.
+Mixer channels and the master bus have Web Audio insert chains with built-in
+gain, filter, compressor, limiter, delay, and reverb effects; you can register
+your own browser plugin factories as well. Effect descriptors must be JSON-safe,
+and the built-in effect names are reserved. When Web Audio or Web MIDI is
+unavailable the widgets still render and their controls keep working; they are
+silent until the browser provides those APIs.
 
 ```python
 import nbplay as nb
 
-session = nb.Session()
-seq = nb.SequencerWidget(num_voices=2)
-sampler = nb.SamplerWidget()
-track = session.add_track("Drums", seq, sampler)
+session = nb.Session(bpm=120)
+drums = session.add_track("Drums", nb.SequencerWidget(num_voices=2), nb.SamplerWidget())
+vocals = session.add_track("Vocals", armed=True)      # microphone lane
+keys = session.add_track("Keys", input="midi", armed=True)  # records note events
 
 session.mixer.add_channel_effect(
-    track.mixer_channel,
+    drums.mixer_channel,
     nb.EffectPlugin("compressor", threshold=-18, ratio=4),
 )
 session.mixer.add_master_effect(nb.EffectPlugin("limiter", threshold=-1))
 
 session.timeline.length = 64
 session.timeline.count_in_bars = 1
-session.timeline.auto_extend_recording = True
-session.timeline.recording_extend_bars = 16
-session.timeline.arm_track(track.mixer_channel, True, exclusive=True)
-timeline_tracks = [dict(track) for track in session.timeline.tracks]
-timeline_tracks[track.mixer_channel]["monitor"] = True
-session.timeline.tracks = timeline_tracks
-session.timeline.add_clip("Kick loop", track_index=track.mixer_channel, start=0, duration=4)
+session.launcher.add_scene("Intro")
+session.launcher.set_slot(drums.mixer_channel, 0, drums.sequencer, name="Beat")
+
+session.play()   # or press play on any widget; they share the clock
 ```
+
+The example notebooks in `examples/` walk through each widget and end with a
+full DAW playground and the beats view.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
