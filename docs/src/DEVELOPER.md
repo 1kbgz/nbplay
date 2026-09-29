@@ -1,10 +1,10 @@
 # nbplay Developer Guide
 
-This guide is the top-to-bottom map for nbplay contributors. It explains how the
-Python package, Rust core, PyO3 extension, WebAssembly bindings, TypeScript
-widgets, browser audio/MIDI runtime, tests, docs, and distribution pipeline fit
-together. It is meant to be detailed enough that a developer can add a feature
-to any component without first reverse-engineering the whole repository.
+This guide is the map of nbplay for contributors. It explains how the Python
+package, Rust core, PyO3 extension, WebAssembly bindings, TypeScript widgets,
+browser audio/MIDI runtime, tests, docs, and distribution pipeline fit together,
+in enough detail to add a feature to any component without reading the whole
+repository first.
 
 nbplay is a notebook-native digital audio workstation. Users instantiate Python
 objects in a Jupyter kernel; anywidget syncs trait state to browser-side
@@ -134,7 +134,7 @@ the browser.
 - Playwright for browser tests.
 - http-server for the local browser test server.
 - nodemon for watch-mode rebuilds.
-- prettier for JS/TS/CSS formatting.
+- oxlint and oxfmt for JS/TS/CSS linting and formatting.
 
 ### Python build, QA, and release
 
@@ -198,19 +198,22 @@ It is not rendered directly. A `SequencerWidget` owns one composer per voice and
 syncs all composers into `voices_data`, a list of step lists. The `steps`
 property remains a backward-compatible alias for voice 0.
 
-`Track` binds a sequencer, a sound source, and a mixer channel. It links BPM and
-time signature bidirectionally between a session transport and the sequencer,
-and dlinks `is_playing` from transport to sequencer so a non-looping sequencer
-cannot stop every track.
+`Track` is a session lane: a mixer channel plus an optional sequencer and sound
+source. When a sequencer is present, it links BPM and time signature
+bidirectionally between the session transport and the sequencer, and dlinks
+`is_playing` from transport to sequencer so a non-looping sequencer cannot stop
+every track.
 
 `Session` creates a shared `session_id`, a `TransportWidget`, a `MixerWidget`,
-and a `TimelineWidget`. `Session.add_track()` creates a mixer channel, links
-transport state, adds a timeline lane, and writes `session_id` and
-`channel_index` into the sequencer and sound source. Browser widgets use those
-fields to route audio through the shared mixer bus. `Session` also mirrors mute
-and solo between timeline lanes and their mixer channels (by `channel_index`)
-in both directions, so a lane's M/S buttons silence the channel's instruments
-as well as its clips.
+a `TimelineWidget`, and a `LauncherWidget`. `Session.add_track()` creates a
+mixer channel, links transport state, adds a timeline lane and a launcher row,
+and writes `session_id` and `channel_index` into the sequencer and sound
+source. Browser widgets use those fields to route audio through the shared
+mixer bus. `Session` also mirrors mute and solo between timeline lanes and
+their mixer channels (by `channel_index`) in both directions, so a lane's M/S
+buttons silence the channel's instruments as well as its clips.
+`Session.save()` and `Session.load()` persist the whole thing; see
+"Session persistence".
 
 ## Rust core
 
@@ -313,12 +316,14 @@ The shared `AnyModel` type and helpers are in `js/src/ts/helpers.ts`:
 - `makeEditable()` implements double-click inline editing with an Enter/blur
   commit guard.
 - `toFloat32()` converts anywidget binary buffers into `Float32Array`.
+- `bindShortcuts()` binds keyboard shortcuts to a widget root (see
+  "Keyboard shortcuts" below).
 - Gain/pan helpers convert and format linear gain, dB, and pan values.
 
 ### Browser APIs used
 
-nbplay uses browser capabilities directly rather than relying on a web audio
-framework:
+nbplay calls the browser APIs directly; there is no audio framework in
+between:
 
 - Web Audio API: `AudioContext`, `OscillatorNode`, `AudioBuffer`,
   `AudioBufferSourceNode`, `GainNode`, `StereoPannerNode`, `AudioParam`,
@@ -341,10 +346,13 @@ framework:
 
 ### Session bus shape
 
-When a `MixerWidget` has a `session_id`, it registers a bus at:
+Every widget with a `session_id` shares one bus object, fetched with
+`getOrCreateSessionBus()` from `js/src/ts/session.ts`; whichever widget renders
+first creates it:
 
 ```ts
 globalThis.__nbplay[sessionId] = {
+  clock,                     // SessionClock: the shared transport timebase
   audioCtx,
   masterGain,
   channels: [{ gain, pan }, ...],
@@ -354,17 +362,17 @@ globalThis.__nbplay[sessionId] = {
 };
 ```
 
-The exact properties are created lazily by participating widgets. The mixer owns
-`audioCtx`, `masterGain`, `channels`, and a fresh merged view of browser insert
-effect plugin factories. Samplers add `samplers[channelIndex]` so KeyboardWidget
-and MidiKeyboardWidget can trigger them. Keyboard widgets also broadcast
-`nbplay-note` on `document`, which lets sequencers record notes even without a
-shared mixer bus. Timeline clip playback reads `audioCtx` and `channels` from
-the bus so recorded clips can route through the same mixer channel strip and
-insert effects as live sources.
+Widgets attach their own properties to the bus in place. The mixer owns
+`audioCtx`, `masterGain`, `channels`, and a merged view of the browser insert
+effect plugin factories; it adopts an `audioCtx` that another widget created
+first. Samplers add `samplers[channelIndex]` so keyboards, pads, and MIDI clips
+can trigger them. Keyboard widgets also broadcast `nbplay-note` on `document`,
+which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
+clip playback reads `audioCtx` and `channels` from the bus so recorded clips go
+through the same channel strip and insert effects as live sources.
 
 Render order can vary in notebooks. SamplerWidget handles this by listening for
-`nbplay-bus-ready` and registering again when the mixer creates the bus.
+`nbplay-bus-ready` and registering again when the mixer attaches its graph.
 
 ## Widget deep dives
 
@@ -447,14 +455,16 @@ and removed on cleanup.
 
 Insert chains update in place. Each built-in effect unit exposes
 `update(descriptor)`, which writes the new parameters to the existing
-`AudioParam`s; a chain is rebuilt only when its structure changes (an
-effect added, removed, or retyped), when a custom plugin has no `update`, or
-when a unit declines the change (reverb returns false for a new impulse
-length or decay). Only the chain that changed is rebuilt. Meters: the bus
-creates an `AnalyserNode` per channel and for the master, connected from the
-end of each insert chain, and the widget reads peak/RMS at ~30 fps with
-`requestAnimationFrame` to drive `.nbplay-strip-meter-fill` (height on a
-60 dB scale, `hot` at clipping) and a `data-peak` attribute on each strip.
+`AudioParam`s. A chain is rebuilt only when its structure changes (an effect
+added, removed, or retyped), when a custom plugin has no `update`, or when a
+unit declines the change (reverb returns false for a new impulse length or
+decay), and only that chain is rebuilt.
+
+For the meters, the bus creates an `AnalyserNode` per channel and for the
+master, connected from the end of each insert chain. The widget reads peak and
+RMS about 30 times per second with `requestAnimationFrame` and sets the height
+of `.nbplay-strip-meter-fill` on a 60 dB scale, adds `hot` at clipping, and
+writes a `data-peak` attribute on each strip.
 
 ### SequencerWidget
 
@@ -470,9 +480,10 @@ controls both resize the underlying `voices_data` while preserving existing
 steps where possible.
 
 Browser playback uses `js/src/ts/scheduler.ts` as a DOM-free lookahead
-scheduler. A timer runs every 25 ms and schedules notes up to 100 ms ahead using
-`AudioContext.currentTime`. Each active step plays a simple sine oscillator
-through either the session mixer channel or a standalone audio context.
+scheduler. A timer runs every 25 ms and schedules notes up to 100 ms ahead on
+the session clock's beat grid, so every sequencer in a session lands on the
+same grid. Each active step plays a simple sine oscillator through either the
+session mixer channel or a standalone audio context.
 `current_step` is updated locally for visual highlighting without saving every
 tick.
 
@@ -586,7 +597,13 @@ bounces an instrument track to audio; `"midi"` lanes listen for the
 `nbplay-note` document events that the keyboard, MIDI keyboard, and pad
 widgets broadcast and time each note against the session clock. One
 `MediaRecorder` runs per audio lane, all started together after the count-in;
-MIDI lanes need no recorder.
+MIDI lanes need no recorder. Each completed audio take creates a browser-local
+object URL and appends clip metadata to `clips`. Playback uses an
+`HTMLAudioElement` and connects it through
+`globalThis.__nbplay[sessionId].channels[channel_index].gain` when the mixer bus
+is available, falling back to direct media playback when it is not. A clip's
+`offset` (beats into the source audio) is applied when its start edge has been
+trimmed.
 
 Clips carry `kind` (`"audio"` or `"midi"`). A MIDI clip stores `events`
 (`beat` relative to the clip start, `duration`, `note`, `velocity`).
@@ -596,13 +613,7 @@ playback a 25 ms lookahead scheduler feeds each MIDI clip's notes to the
 lane's sampler on the session bus (`triggerNote` / `releaseNote`) or, when the
 lane has no sampler, to a built-in oscillator on the lane's mixer channel.
 MIDI clips move, trim (honouring `offset`), duplicate, and persist with the
-session like audio clips, but have nothing to export. Each completed take creates a
-browser-local object URL and appends clip metadata to `clips`. Playback uses an
-`HTMLAudioElement` and connects it through
-`globalThis.__nbplay[sessionId].channels[channel_index].gain` when the mixer bus
-is available, falling back to direct media playback when it is not. A clip's
-`offset` (beats into the source audio) is applied when a clip's start edge has
-been trimmed.
+session like audio clips, but have nothing to export.
 
 Clip audio crosses the comm on request. `export_clip(clip_id)` sets
 `export_clip_id`; the browser fetches the object URL and answers with
@@ -742,9 +753,9 @@ Top-level commands are in `Makefile`.
 ```bash
 make develop       # Rust tools, JS deps/browser install, Python editable install
 make build         # Rust core/native build, JS WASM/widgets, Python wheel build
-make test          # Python, Playwright, and Rust tests
+make test          # Python, Playwright, Rust, and Voila/JupyterLab host tests
 make coverage      # Coverage variants of the test suites
-make lint          # Rust clippy/fmt, JS prettier, Python ruff, README docs checks
+make lint          # Rust clippy/fmt, JS oxlint/oxfmt, Python ruff, README docs checks
 make fix           # Format/fix Rust, JS, Python, and README docs
 make test-notebooks # Notebook regression tests only
 make dist          # Full distribution build and checks
