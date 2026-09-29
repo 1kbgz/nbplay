@@ -47,7 +47,7 @@ develop = [
     "hatch-rs",
     "hatchling",
     "jupyterlab",
-    "jupyterlite-core",
+    "jupyterlite-core[contents]",
     "jupyterlite-pyodide-kernel",
     "mdformat",
     "mdformat-tables>=1",

@@ -46,35 +46,22 @@ jobs:
           repository: ${{ github.repository }}
         if: github.event_name == 'workflow_run'
 
+      # A manual run reuses the latest successful main build instead of rebuilding
+      - name: Download distributions from the latest main build (manual trigger)
+        run: |
+          run_id=$(gh run list --workflow "Build Status" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          echo "using Build Status run $run_id"
+          gh run download "$run_id" --name dist-ubuntu-24.04 --dir dist
+          gh run download "$run_id" --name dist-pyodide --dir dist/pyodide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'workflow_dispatch'
+
       - name: Install from wheel
         run: |
           uv pip install dist/*.whl
           uv pip install dist/*.whl --target . --no-deps
-          uv pip install "yardang[themes]" jupyterlite-core jupyterlite-pyodide-kernel
-        if: github.event_name == 'workflow_run'
-
-      - name: Setup Rust (manual trigger)
-        uses: actions-ext/rust/setup@0f0b7c9ab3cdb6e9a1f79e2147974d6762ddafea
-        if: github.event_name == 'workflow_dispatch'
-
-      - name: Setup Node.js (manual trigger)
-        uses: actions-ext/node/setup@34d0fdbdca883e4d0a2da0bcd0fa460fd40b80e7
-        with:
-          version: 22.x
-        if: github.event_name == 'workflow_dispatch'
-
-      - name: Install from source (manual trigger)
-        run: |
-          make develop
-          uv pip install .
-          uv pip install "yardang[themes]"
-        if: github.event_name == 'workflow_dispatch'
-
-      - name: Build Pyodide wheel (manual trigger)
-        run: |
-          make build-js
-          make test-pyodide
-        if: github.event_name == 'workflow_dispatch'
+          uv pip install "yardang[themes]" "jupyterlite-core[contents]" jupyterlite-pyodide-kernel
 
       - name: Validate example notebooks
         run: |
