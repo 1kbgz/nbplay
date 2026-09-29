@@ -409,10 +409,11 @@
     <span class="n">_VALID_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"gain"</span><span class="p">,</span> <span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"delay"</span><span class="p">,</span> <span class="s2">"reverb"</span><span class="p">,</span> <span class="s2">"compressor"</span><span class="p">,</span> <span class="s2">"limiter"</span><span class="p">})</span>
     <span class="n">_FILTER_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"lowpass"</span><span class="p">,</span> <span class="s2">"highpass"</span><span class="p">,</span> <span class="s2">"bandpass"</span><span class="p">,</span> <span class="s2">"notch"</span><span class="p">,</span> <span class="s2">"lowshelf"</span><span class="p">,</span> <span class="s2">"highshelf"</span><span class="p">,</span> <span class="s2">"peaking"</span><span class="p">})</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_VALID_TYPES</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"type must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_VALID_TYPES</span><span class="p">)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_params</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EffectPlugin._param">
@@ -482,7 +483,11 @@
 <div class="viewcode-block" id="EffectPlugin.to_dict">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">}</span></div>
+        <span class="c1"># A bypassed effect carries enabled=False; enabled effects stay compact.</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"enabled"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="EffectPlugin.__repr__">
@@ -561,6 +566,16 @@
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._normalize_effects">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_effects</span><span class="p">(</span><span class="n">effects</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_effect</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span> <span class="k">for</span> <span class="n">effect</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">effects</span> <span class="ow">or</span> <span class="p">[])]</span></div>
+
+
+
+<div class="viewcode-block" id="_set_effect_enabled">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._set_effect_enabled">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_effect_enabled</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"enabled"</span><span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"enabled"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">_normalize_effect</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 
 
@@ -1218,6 +1233,29 @@
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
             <span class="n">chs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">chs</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="s2">"effects"</span><span class="p">:</span> <span class="n">_normalize_effects</span><span class="p">(</span><span class="n">effects</span><span class="p">)}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">chs</span></div>
+
+
+<div class="viewcode-block" id="MixerWidget.set_channel_effect_enabled">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effect_enabled">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_effect_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effect_index</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Bypass (``False``) or re-enable one channel insert effect."""</span>
+        <span class="n">chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">chs</span><span class="p">):</span>
+            <span class="n">effects</span> <span class="o">=</span> <span class="n">_normalize_effects</span><span class="p">(</span><span class="n">chs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"effects"</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">effect_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">effects</span><span class="p">):</span>
+                <span class="n">effects</span><span class="p">[</span><span class="n">effect_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">_set_effect_enabled</span><span class="p">(</span><span class="n">effects</span><span class="p">[</span><span class="n">effect_index</span><span class="p">],</span> <span class="n">enabled</span><span class="p">)</span>
+                <span class="n">chs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">chs</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="s2">"effects"</span><span class="p">:</span> <span class="n">effects</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">chs</span></div>
+
+
+<div class="viewcode-block" id="MixerWidget.set_master_effect_enabled">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_master_effect_enabled">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_master_effect_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect_index</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Bypass (``False``) or re-enable one master insert effect."""</span>
+        <span class="n">effects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">master_effects</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">effect_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">effects</span><span class="p">):</span>
+            <span class="n">effects</span><span class="p">[</span><span class="n">effect_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">_set_effect_enabled</span><span class="p">(</span><span class="n">effects</span><span class="p">[</span><span class="n">effect_index</span><span class="p">],</span> <span class="n">enabled</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">master_effects</span> <span class="o">=</span> <span class="n">effects</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.add_channel_effect">
@@ -3862,6 +3900,58 @@
             <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Lane mute/solo and mixer channel mute/solo are the same control</span>
+        <span class="c1"># from the user's side; keep them mirrored by channel index.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_timeline_tracks</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"tracks"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_mixer_channels</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"channels"</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Session._on_timeline_tracks">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._on_timeline_tracks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_timeline_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">]</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel_index"</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">lane_key</span><span class="p">,</span> <span class="n">channel_key</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"muted"</span><span class="p">,</span> <span class="s2">"mute"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"solo"</span><span class="p">,</span> <span class="s2">"solo"</span><span class="p">)):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lane_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">channels</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">channel_key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">channels</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">channel_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Session._on_mixer_channels">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._on_mixer_channels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_mixer_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">tracks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">track</span><span class="p">)</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel_index"</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">lane_key</span><span class="p">,</span> <span class="n">channel_key</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"muted"</span><span class="p">,</span> <span class="s2">"mute"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"solo"</span><span class="p">,</span> <span class="s2">"solo"</span><span class="p">)):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">channel_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lane_key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">track</span><span class="p">[</span><span class="n">lane_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="n">tracks</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">session_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

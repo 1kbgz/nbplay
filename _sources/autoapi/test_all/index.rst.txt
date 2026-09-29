@@ -1335,6 +1335,12 @@ Module Contents
    .. py:method:: test_remove_track_clears_launcher_selection()
 
 
+   .. py:method:: test_effect_bypass_flag()
+
+
+   .. py:method:: test_timeline_mute_solo_mirror_mixer_channels()
+
+
    .. py:method:: test_remove_track_with_mixed_lanes_adjusts_indices()
 
 

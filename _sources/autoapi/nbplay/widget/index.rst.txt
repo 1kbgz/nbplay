@@ -88,6 +88,7 @@ Functions
    nbplay.widget._freeze_effect_value
    nbplay.widget._normalize_effect
    nbplay.widget._normalize_effects
+   nbplay.widget._set_effect_enabled
    nbplay.widget._clamped_number
    nbplay.widget._normalize_mixer_channel
    nbplay.widget._clip_id
@@ -161,7 +162,7 @@ Module Contents
 
 .. py:function:: _safe_trait_name(value)
 
-.. py:class:: EffectPlugin(type, **params)
+.. py:class:: EffectPlugin(type, enabled=True, **params)
 
    Validated Web Audio effect descriptor for mixer insert chains.
 
@@ -173,6 +174,11 @@ Module Contents
 
 
    .. py:attribute:: type
+
+
+   .. py:attribute:: enabled
+      :value: True
+
 
 
    .. py:attribute:: params
@@ -210,6 +216,8 @@ Module Contents
 .. py:function:: _normalize_effect(effect)
 
 .. py:function:: _normalize_effects(effects)
+
+.. py:function:: _set_effect_enabled(effect, enabled)
 
 .. py:function:: _clamped_number(value, low, high, name)
 
@@ -495,6 +503,18 @@ Module Contents
    .. py:method:: set_channel_effects(index, effects)
 
       Replace a channel's browser insert effect chain.
+
+
+
+   .. py:method:: set_channel_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one channel insert effect.
+
+
+
+   .. py:method:: set_master_effect_enabled(effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one master insert effect.
 
 
 
@@ -2100,6 +2120,17 @@ Module Contents
    .. py:attribute:: tracks
       :value: []
 
+
+
+   .. py:attribute:: _mirroring_mute_solo
+      :value: False
+
+
+
+   .. py:method:: _on_timeline_tracks(change)
+
+
+   .. py:method:: _on_mixer_channels(change)
 
 
    .. py:property:: session_id

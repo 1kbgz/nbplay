@@ -543,7 +543,10 @@ a <code class="docutils literal notranslate"><span class="pre">TimelineWidget</s
 mixer channel, links transport state, adds a timeline lane and a launcher row,
 and writes <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> into the sequencer and sound
 source. Browser widgets use those fields to route audio through the shared
-mixer bus. <code class="docutils literal notranslate"><span class="pre">Session.save()</span></code> and <code class="docutils literal notranslate"><span class="pre">Session.load()</span></code> persist the whole thing; see
+mixer bus. <code class="docutils literal notranslate"><span class="pre">Session</span></code> also mirrors mute and solo between timeline lanes and
+their mixer channels (by <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>) in both directions, so a lane’s M/S
+buttons silence the channel’s instruments as well as its clips.
+<code class="docutils literal notranslate"><span class="pre">Session.save()</span></code> and <code class="docutils literal notranslate"><span class="pre">Session.load()</span></code> persist the whole thing; see
 “Session persistence”.</p>
 </section>
 </section>
@@ -778,9 +781,15 @@ browser insert effects are real-time Web Audio only.</p>
 show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.</p>
 <p>Effect descriptors are plain dictionaries. Built-ins are <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">filter</span></code>,
-<code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>, and <code class="docutils literal notranslate"><span class="pre">reverb</span></code>. Unknown descriptor types are
-left intact when their params are JSON-safe so notebook code can register
-custom browser plugins on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplayPlugins[type]</span></code>. Built-in names are
+<code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>, and <code class="docutils literal notranslate"><span class="pre">reverb</span></code>. A descriptor with
+<code class="docutils literal notranslate"><span class="pre">enabled:</span> <span class="pre">false</span></code> is bypassed: it stays in the list and in the strip (drawn
+struck through) but is left out of the audio chain. Clicking a chip toggles
+bypass and the small × next to it removes the effect;
+<code class="docutils literal notranslate"><span class="pre">set_channel_effect_enabled()</span></code> and <code class="docutils literal notranslate"><span class="pre">set_master_effect_enabled()</span></code> do the same
+from Python, and <code class="docutils literal notranslate"><span class="pre">EffectPlugin(...,</span> <span class="pre">enabled=False)</span></code> builds a bypassed
+descriptor. Unknown descriptor types are left intact when their params are
+JSON-safe so notebook code can register custom browser plugins on
+<code class="docutils literal notranslate"><span class="pre">globalThis.__nbplayPlugins[type]</span></code>. Built-in names are
 reserved and win over user registry entries. The mixer exposes a merged plugin
 map on the session bus without mutating <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplayPlugins</span></code>. A plugin
 factory receives <code class="docutils literal notranslate"><span class="pre">(audioCtx,</span> <span class="pre">descriptor)</span></code> and returns either an <code class="docutils literal notranslate"><span class="pre">AudioNode</span></code> or
