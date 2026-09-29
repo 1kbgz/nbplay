@@ -3257,6 +3257,52 @@ class TestSession:
         s.remove_track(5)  # out of range: no-op
         assert len(s.launcher.tracks) == 1
 
+    def test_effect_bypass_flag(self):
+        assert EffectPlugin("gain", gain=0.5).to_dict() == {"type": "gain", "gain": 0.5}
+        bypassed = EffectPlugin("gain", gain=0.5, enabled=False).to_dict()
+        assert bypassed == {"type": "gain", "gain": 0.5, "enabled": False}
+        mixer = MixerWidget()
+        index = mixer.add_channel("Lead")
+        mixer.add_channel_effect(index, EffectPlugin("filter", frequency=800))
+        mixer.add_channel_effect(index, bypassed)
+        assert mixer.channels[index]["effects"][1]["enabled"] is False
+        mixer.set_channel_effect_enabled(index, 0, False)
+        assert mixer.channels[index]["effects"][0]["enabled"] is False
+        mixer.set_channel_effect_enabled(index, 0, True)
+        assert "enabled" not in mixer.channels[index]["effects"][0]
+        mixer.add_master_effect(EffectPlugin("limiter"))
+        mixer.set_master_effect_enabled(0, False)
+        assert mixer.master_effects[0]["enabled"] is False
+        mixer.set_master_effect_enabled(0)
+        assert "enabled" not in mixer.master_effects[0]
+        # Custom plugin descriptors keep the flag as a plain JSON value
+        mixer.set_channel_effects(index, [{"type": "myplugin", "enabled": False, "depth": 2}])
+        assert mixer.channels[index]["effects"][0] == {"type": "myplugin", "enabled": False, "depth": 2}
+
+    def test_timeline_mute_solo_mirror_mixer_channels(self):
+        s = Session()
+        s.add_track("Drums")
+        s.add_track("Bass")
+        tracks = [dict(t) for t in s.timeline.tracks]
+        tracks[0]["muted"] = True
+        tracks[1]["solo"] = True
+        s.timeline.tracks = tracks
+        assert s.mixer.channels[0]["mute"] is True
+        assert s.mixer.channels[1]["solo"] is True
+        assert s.mixer.channels[0]["solo"] is False
+
+        s.mixer.set_channel_mute(0, False)
+        s.mixer.set_channel_solo(1, False)
+        assert s.timeline.tracks[0]["muted"] is False
+        assert s.timeline.tracks[1]["solo"] is False
+
+        # Lanes without a channel are left alone
+        s.timeline.add_track("Scratch", channel_index=-1)
+        tracks = [dict(t) for t in s.timeline.tracks]
+        tracks[2]["muted"] = True
+        s.timeline.tracks = tracks
+        assert [c["mute"] for c in s.mixer.channels] == [False, False]
+
     def test_remove_track_with_mixed_lanes_adjusts_indices(self):
         s = Session()
         s.add_track("Audio")

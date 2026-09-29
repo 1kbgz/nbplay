@@ -325,6 +325,30 @@
   gap: 2px;
   width: 100%;
 }
+.nbplay-mixer .nbplay-strip-fx-item {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+}
+.nbplay-mixer .nbplay-strip-fx-chip.bypassed {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.nbplay-mixer .nbplay-strip-fx-remove {
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 1;
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+  background: var(--jp-layout-color1, #14142a);
+  color: var(--jp-ui-font-color2, #8888aa);
+  cursor: pointer;
+}
+.nbplay-mixer .nbplay-strip-fx-remove:hover {
+  color: var(--jp-error-color1, #ef4444);
+  border-color: var(--jp-error-color1, #ef4444);
+}
 .nbplay-mixer .nbplay-strip-fx-chip {
   min-height: 18px;
   padding: 1px 3px;

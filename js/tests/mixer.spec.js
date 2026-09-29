@@ -556,27 +556,54 @@ test.describe("MixerWidget", () => {
     await expect(strip.locator(".nbplay-strip-fx-chip")).toHaveText("limiter");
   });
 
-  test("clicking channel effect chip removes it", async ({ page }) => {
+  test("clicking a channel effect chip bypasses it and × removes it", async ({
+    page,
+  }) => {
     await renderWidget(page, {
       channels: [
         {
-          name: "Vox",
+          name: "Lead",
           gain: 1,
           pan: 0,
           mute: false,
           solo: false,
-          effects: [{ type: "delay", time: 0.2, feedback: 0.2, wet: 0.3 }],
+          effects: [
+            { type: "gain", gain: 0.5 },
+            { type: "filter", filter_type: "lowpass", frequency: 800, q: 1 },
+          ],
         },
       ],
     });
+    const chips = page.locator(`${STRIP} .nbplay-strip-fx-chip`);
+    await expect(chips).toHaveCount(2);
 
-    await page.locator(`${STRIP} .nbplay-strip-fx-chip`).click();
-
-    const effects = await page.evaluate(
+    await chips.first().click();
+    let effects = await page.evaluate(
       () => window.__testModel._state.channels[0].effects,
     );
-    expect(effects).toEqual([]);
-    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveCount(0);
+    expect(effects[0]).toEqual({ type: "gain", gain: 0.5, enabled: false });
+    expect(effects[1].enabled).toBeUndefined();
+    await expect(chips.first()).toHaveClass(/bypassed/);
+    // Bypassed effects leave the audio chain
+    expect(
+      await page.evaluate(
+        () => window.__nbplay["test-session"].channels[0].effects.length,
+      ),
+    ).toBe(1);
+
+    await chips.first().click();
+    effects = await page.evaluate(
+      () => window.__testModel._state.channels[0].effects,
+    );
+    expect(effects[0]).toEqual({ type: "gain", gain: 0.5 });
+    await expect(chips.first()).not.toHaveClass(/bypassed/);
+
+    await page.locator(`${STRIP} .nbplay-strip-fx-remove`).first().click();
+    effects = await page.evaluate(
+      () => window.__testModel._state.channels[0].effects,
+    );
+    expect(effects.map((fx) => fx.type)).toEqual(["filter"]);
+    await expect(chips).toHaveCount(1);
   });
 
   test("adding a master effect updates model", async ({ page }) => {
@@ -603,20 +630,29 @@ test.describe("MixerWidget", () => {
     );
   });
 
-  test("clicking master effect chip removes it", async ({ page }) => {
+  test("clicking a master effect chip bypasses it and × removes it", async ({
+    page,
+  }) => {
     await renderWidget(page, {
       master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
     });
-
-    await page.locator(".nbplay-master-strip .nbplay-strip-fx-chip").click();
-
-    const effects = await page.evaluate(
+    const chip = page.locator(".nbplay-master-strip .nbplay-strip-fx-chip");
+    await chip.click();
+    let effects = await page.evaluate(
       () => window.__testModel._state.master_effects,
     );
-    expect(effects).toEqual([]);
-    await expect(
-      page.locator(".nbplay-master-strip .nbplay-strip-fx-chip"),
-    ).toHaveCount(0);
+    expect(effects[0].enabled).toBe(false);
+    await expect(chip).toHaveClass(/bypassed/);
+    await chip.click();
+    effects = await page.evaluate(
+      () => window.__testModel._state.master_effects,
+    );
+    expect(effects[0].enabled).toBeUndefined();
+
+    await page.locator(".nbplay-master-strip .nbplay-strip-fx-remove").click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.master_effects),
+    ).toEqual([]);
   });
 
   test("session bus wires initial channel and master graph", async ({

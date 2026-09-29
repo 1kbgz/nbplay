@@ -125,10 +125,11 @@ class EffectPlugin:
     _VALID_TYPES = frozenset({"gain", "filter", "delay", "reverb", "compressor", "limiter"})
     _FILTER_TYPES = frozenset({"lowpass", "highpass", "bandpass", "notch", "lowshelf", "highshelf", "peaking"})
 
-    def __init__(self, type, **params):
+    def __init__(self, type, enabled=True, **params):
         if type not in self._VALID_TYPES:
             raise ValueError(f"type must be one of {sorted(self._VALID_TYPES)}, got {type!r}")
         self.type = type
+        self.enabled = bool(enabled)
         self.params = self._normalize_params(type, params)
 
     @staticmethod
@@ -187,7 +188,11 @@ class EffectPlugin:
         }
 
     def to_dict(self):
-        return {"type": self.type, **self.params}
+        # A bypassed effect carries enabled=False; enabled effects stay compact.
+        data = {"type": self.type, **self.params}
+        if not self.enabled:
+            data["enabled"] = False
+        return data
 
     def __repr__(self):
         return f"EffectPlugin({self.to_dict()!r})"
@@ -244,6 +249,13 @@ def _normalize_effect(effect):
 
 def _normalize_effects(effects):
     return [_normalize_effect(effect) for effect in list(effects or [])]
+
+
+def _set_effect_enabled(effect, enabled):
+    data = {k: v for k, v in dict(effect).items() if k != "enabled"}
+    if not enabled:
+        data["enabled"] = False
+    return _normalize_effect(data)
 
 
 def _clamped_number(value, low, high, name):
@@ -785,6 +797,23 @@ class MixerWidget(anywidget.AnyWidget):
         if 0 <= index < len(chs):
             chs[index] = {**chs[index], "effects": _normalize_effects(effects)}
             self.channels = chs
+
+    def set_channel_effect_enabled(self, index, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one channel insert effect."""
+        chs = list(self.channels)
+        if 0 <= index < len(chs):
+            effects = _normalize_effects(chs[index].get("effects", []))
+            if 0 <= effect_index < len(effects):
+                effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+                chs[index] = {**chs[index], "effects": effects}
+                self.channels = chs
+
+    def set_master_effect_enabled(self, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one master insert effect."""
+        effects = list(self.master_effects)
+        if 0 <= effect_index < len(effects):
+            effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+            self.master_effects = effects
 
     def add_channel_effect(self, index, effect):
         """Append one effect descriptor to a channel insert chain."""
@@ -3086,6 +3115,52 @@ class Session:
             traitlets.dlink((self.transport, "current_beat"), (self.timeline, "current_beat")),
         ]
         self.tracks = []
+        # Lane mute/solo and mixer channel mute/solo are the same control
+        # from the user's side; keep them mirrored by channel index.
+        self._mirroring_mute_solo = False
+        self.timeline.observe(self._on_timeline_tracks, names="tracks")
+        self.mixer.observe(self._on_mixer_channels, names="channels")
+
+    def _on_timeline_tracks(self, change):
+        if self._mirroring_mute_solo:
+            return
+        channels = [dict(channel) for channel in self.mixer.channels]
+        changed = False
+        for track in change["new"] or []:
+            index = int(track.get("channel_index", -1))
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    value = bool(track.get(lane_key, False))
+                    if channels[index].get(channel_key) != value:
+                        channels[index][channel_key] = value
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.mixer.channels = channels
+            finally:
+                self._mirroring_mute_solo = False
+
+    def _on_mixer_channels(self, change):
+        if self._mirroring_mute_solo:
+            return
+        channels = change["new"] or []
+        tracks = [dict(track) for track in self.timeline.tracks]
+        changed = False
+        for track in tracks:
+            index = int(track.get("channel_index", -1))
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    value = bool(channels[index].get(channel_key, False))
+                    if track.get(lane_key) != value:
+                        track[lane_key] = value
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.timeline.tracks = tracks
+            finally:
+                self._mirroring_mute_solo = False
 
     @property
     def session_id(self):

@@ -383,6 +383,24 @@ function defaultEffect(type: string): EffectDescriptor {
   return { type: "gain", gain: 1 };
 }
 
+function isEffectEnabled(effect: EffectDescriptor): boolean {
+  return effect.enabled !== false;
+}
+
+function activeEffects(effects: EffectDescriptor[] = []): EffectDescriptor[] {
+  return effects.filter(isEffectEnabled).map((fx) => ({ ...fx }));
+}
+
+function toggleEffectEnabled(effect: EffectDescriptor): EffectDescriptor {
+  const { enabled: _enabled, ...rest } = effect;
+  return isEffectEnabled(effect) ? { ...rest, enabled: false } : rest;
+}
+
+function effectChipHtml(effect: EffectDescriptor, fxIndex: number): string {
+  const bypassed = isEffectEnabled(effect) ? "" : " bypassed";
+  return `<span class="nbplay-strip-fx-item"><button class="nbplay-strip-fx-chip${bypassed}" data-fx-index="${fxIndex}" title="${bypassed ? "Enable effect" : "Bypass effect"}">${escapeHtml(effectLabel(effect))}</button><button class="nbplay-strip-fx-remove" data-fx-index="${fxIndex}" title="Remove effect">\u00d7</button></span>`;
+}
+
 function effectLabel(effect: EffectDescriptor): string {
   if (effect.type === "filter") {
     return `${effect.filter_type || "filter"} ${Math.round(Number(effect.frequency) || 0)}Hz`;
@@ -502,7 +520,7 @@ function createAudioBus() {
       // Insert chains: update parameters in place when the chain's shape
       // is unchanged, rebuild only the chains whose structure changed.
       channelNodes.forEach((n, i) => {
-        const next = (channels[i]?.effects || []).map((fx) => ({ ...fx }));
+        const next = activeEffects(channels[i]?.effects);
         if (
           n.descriptors.length === next.length &&
           JSON.stringify(n.descriptors) === JSON.stringify(next)
@@ -520,7 +538,7 @@ function createAudioBus() {
         if (n.analyser) chainOutput(n.pan, n.effects).connect(n.analyser);
       });
 
-      const nextMaster = (masterEffectsValue || []).map((fx) => ({ ...fx }));
+      const nextMaster = activeEffects(masterEffectsValue);
       if (
         !masterChainBuilt ||
         JSON.stringify(masterDescriptors) !== JSON.stringify(nextMaster)
@@ -628,10 +646,7 @@ function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
       `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`,
   ).join("");
   const effectChips = effects
-    .map(
-      (effect, fxIndex) =>
-        `<button class="nbplay-strip-fx-chip" data-fx-index="${fxIndex}" title="Remove effect">${escapeHtml(effectLabel(effect))}</button>`,
-    )
+    .map((effect, fxIndex) => effectChipHtml(effect, fxIndex))
     .join("");
 
   strip.innerHTML = `
@@ -683,10 +698,7 @@ function buildMasterStrip(
       `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`,
   ).join("");
   const effectChips = effects
-    .map(
-      (effect, fxIndex) =>
-        `<button class="nbplay-strip-fx-chip" data-fx-index="${fxIndex}" title="Remove effect">${escapeHtml(effectLabel(effect))}</button>`,
-    )
+    .map((effect, fxIndex) => effectChipHtml(effect, fxIndex))
     .join("");
 
   strip.innerHTML = `
@@ -742,6 +754,10 @@ function render({
   const addBtn = root.querySelector(
     ".nbplay-mixer-add-btn",
   ) as HTMLButtonElement;
+
+  // Keep clicks inside the widget from moving focus to the notebook, which
+  // makes JupyterLab scroll the active cell into view mid-interaction.
+  root.tabIndex = 0;
 
   // Audio bus for session routing
   const audioBus = createAudioBus();
@@ -963,6 +979,22 @@ function render({
             ((model.get("channels") as Channel[]) || [])[i]?.effects || [];
           updateChannelEffects(
             i,
+            current.map((fx, idx) =>
+              idx === fxIndex ? toggleEffectEnabled(fx) : fx,
+            ),
+          );
+        });
+      });
+      strip.querySelectorAll(".nbplay-strip-fx-remove").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const fxIndex = parseInt(
+            (chip as HTMLElement).dataset.fxIndex || "-1",
+            10,
+          );
+          const current =
+            ((model.get("channels") as Channel[]) || [])[i]?.effects || [];
+          updateChannelEffects(
+            i,
             current.filter((_, idx) => idx !== fxIndex),
           );
         });
@@ -1038,6 +1070,23 @@ function render({
       model.save_changes();
     });
     masterStrip.querySelectorAll(".nbplay-strip-fx-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const fxIndex = parseInt(
+          (chip as HTMLElement).dataset.fxIndex || "-1",
+          10,
+        );
+        const effects =
+          (model.get("master_effects") as EffectDescriptor[]) || [];
+        model.set(
+          "master_effects",
+          effects.map((fx, idx) =>
+            idx === fxIndex ? toggleEffectEnabled(fx) : fx,
+          ),
+        );
+        model.save_changes();
+      });
+    });
+    masterStrip.querySelectorAll(".nbplay-strip-fx-remove").forEach((chip) => {
       chip.addEventListener("click", () => {
         const fxIndex = parseInt(
           (chip as HTMLElement).dataset.fxIndex || "-1",
