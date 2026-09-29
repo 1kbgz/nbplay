@@ -2952,6 +2952,23 @@ class TestMidiFiles:
         assert events[1]["note"] == 72 and events[1]["beat"] == pytest.approx(1.0)
         assert read_midi(path.read_bytes())["tracks"][0]["events"] == events
 
+    def test_events_to_voices_edge_cases(self, tmp_path):
+        from nbplay.midi import events_to_voices, read_midi, write_midi
+        from nbplay.widget import _default_steps
+
+        voices, length = events_to_voices([], step_duration=0.25)
+        assert length == 1
+        assert voices == [_default_steps(1)]
+        events = [{"beat": 0, "duration": 0.25, "note": 60, "velocity": 100}, {"beat": 4, "duration": 0.25, "note": 62, "velocity": 100}]
+        voices, length = events_to_voices(events, step_duration=0.25, length=8)
+        assert length == 8
+        assert [i for i, st in enumerate(voices[0]) if st["active"]] == [0]
+
+        path = tmp_path / "obj.mid"
+        write_midi([{"name": "A", "events": events}], path)
+        with open(path, "rb") as handle:
+            assert len(read_midi(handle)["tracks"][0]["events"]) == 2
+
     def test_timeline_clip_export_and_import(self, tmp_path):
         timeline = TimelineWidget()
         timeline.add_track("Keys", input="midi")
