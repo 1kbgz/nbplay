@@ -455,7 +455,7 @@ dependencies = [
 
 [[package]]
 name = "nbplay"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "cpal",
  "midir",
@@ -464,7 +464,7 @@ dependencies = [
 
 [[package]]
 name = "nbplay_js"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "js-sys",
  "nbplay",
@@ -475,7 +475,7 @@ dependencies = [
 
 [[package]]
 name = "nbplay_py"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "nbplay",
  "pyo3",
