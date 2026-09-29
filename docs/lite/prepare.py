@@ -32,7 +32,8 @@ Audio and Web MIDI APIs. Nothing is installed on your machine.
 Open any notebook and run it top to bottom. The first cell installs the
 bundled nbplay wheel; the first run takes a few seconds while Pyodide loads.
 Click a play button before expecting sound: browsers only start audio after
-a user gesture.
+a user gesture. On an iPhone or iPad, Web Audio follows the ringer switch, so
+a muted phone stays silent even while the transport runs.
 """
 
 

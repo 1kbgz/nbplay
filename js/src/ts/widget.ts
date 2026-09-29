@@ -128,6 +128,9 @@ function createAudioEngine(): AudioEngine {
       this.stop();
       audioCtx = createAudioContext({ sampleRate: sr });
       if (!audioCtx) return false;
+      // Mobile browsers can hand back a suspended context even inside a
+      // user gesture; resuming here keeps the tap that started playback.
+      if (audioCtx.state === "suspended") void audioCtx.resume?.();
       gainNode = audioCtx.createGain();
       gainNode.gain.value = amp;
       gainNode.connect(audioCtx.destination);
