@@ -268,3 +268,138 @@
   text-align: center;
   padding: 0;
 }
+
+.nbplay-samp-zones-section {
+  margin-top: 14px;
+}
+
+.nbplay-samp-zones-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nbplay-samp-zone-pad {
+  font-family: var(--jp-ui-font-family, sans-serif);
+  font-size: 11px;
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.nbplay-samp-zone-file-label,
+.nbplay-samp-zone-rec {
+  font-family: var(--jp-ui-font-family, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--jp-ui-font-color1, #c0c4d8);
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.nbplay-samp-zone-file {
+  display: none;
+}
+
+.nbplay-samp-zone-rec.recording {
+  color: var(--jp-ui-inverse-font-color0, #fff);
+  background: var(--jp-error-color1, #ef4444);
+  border-color: var(--jp-error-color1, #ef4444);
+}
+
+.nbplay-samp-zone-status {
+  font-size: 11px;
+  color: var(--jp-ui-font-color3, #64648a);
+}
+
+.nbplay-samp-zone-map {
+  position: relative;
+  height: 10px;
+  margin: 8px 0 6px;
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.nbplay-samp-zone-map.empty {
+  display: none;
+}
+
+.nbplay-samp-zone-span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0.85;
+}
+
+.nbplay-samp-zone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+  color: var(--jp-ui-font-color1, #c0c4d8);
+}
+
+.nbplay-samp-zone-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--jp-ui-font-color3, #64648a);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.nbplay-samp-zone-row input[type="number"],
+.nbplay-samp-zone-name {
+  font-family: var(--jp-code-font-family, monospace);
+  font-size: 11px;
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  background: var(--jp-layout-color1, #14142a);
+  border: 1px solid var(--jp-border-color1, #1e1e3a);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.nbplay-samp-zone-row input[type="number"] {
+  width: 46px;
+}
+
+.nbplay-samp-zone-name {
+  width: 96px;
+}
+
+.nbplay-samp-zone-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.nbplay-samp-zone-len {
+  font-family: var(--jp-code-font-family, monospace);
+  color: var(--jp-ui-font-color3, #64648a);
+  margin-left: auto;
+}
+
+.nbplay-samp-zone-remove {
+  background: none;
+  border: none;
+  color: var(--jp-ui-font-color3, #64648a);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.nbplay-samp-zone-remove:hover {
+  color: var(--jp-error-color1, #ef4444);
+}

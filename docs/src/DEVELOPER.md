@@ -183,7 +183,7 @@ files are generated.
 | `SettingsWidget` | `settings.js` | `settings.css` | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event` |
 | `MixerWidget` | `mixer.js` | `mixer.css` | `channels`, `master_gain`, `master_effects`, `session_id` |
 | `SequencerWidget` | `sequencer.js` | `sequencer.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data` |
-| `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected` |
+| `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request` |
 | `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
 | `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
 | `LauncherWidget` | `launcher.js` | `launcher.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request` |
@@ -542,6 +542,23 @@ controller discovery, MIDI learn, and automation control.
 When the sampler has a session and channel index, it registers `triggerNote()`
 and `releaseNote()` on the session bus so keyboard widgets, MIDI keyboard input,
 sequencers, and PadWidget routes can drive the same sampler/slice map by note.
+
+Multi-sample zones live in `zones`: each entry maps a note range and a velocity
+range to its own float32 PCM (`data`), root note, and sample rate. When a note
+plays, the first matching zone wins over the main sample and plays one-shot at
+`2 ** ((note - zone.root_note) / 12)`; notes outside every zone fall back to the
+main sample and its slices. Python adds zones with `add_zone()` (floats or
+float32 bytes) and `add_zone_file()`, edits them with `set_zone()`, and builds a
+Rust `SampleMap` with `to_sample_map()` (zones first, main sample as the
+catch-all). The browser shows a key-range bar and a row per zone with editable
+low, high, and root notes. Captured audio lands on the pad chosen in the zone
+controls, as a zone whose range and root are that pad's note: a file through the
+zone file input, a microphone take through the Rec button (`getUserMedia` plus
+`MediaRecorder`, decoded with Web Audio), or a timeline clip through
+`capture_clip(timeline, clip_id, pad=...)`, which hands the clip's browser URL
+and trim to the sampler in a `capture_request`; the sampler fetches, decodes,
+and writes the zone back to `zones`. Both widgets have to be rendered in the
+same page for that. Session save stores zone PCM as `samples/track-N-zone-M.f32`.
 
 ### TransportWidget
 

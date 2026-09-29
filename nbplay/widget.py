@@ -603,6 +603,35 @@ def _normalize_pad_actions(actions, pad_count, pad_notes=None, pad_velocities=No
     return normalized
 
 
+def _normalize_zone(zone, index=0):
+    data = zone.get("data", b"")
+    if isinstance(data, memoryview):
+        data = data.tobytes()
+    if not isinstance(data, (bytes, bytearray)):
+        raise TypeError(f"zone {index} data must be bytes of little-endian float32 samples")
+    data = bytes(data)
+    note_low = _clamp_midi_note(zone.get("note_low", 0))
+    note_high = _clamp_midi_note(zone.get("note_high", 127))
+    velocity_low = _clamp_int(zone.get("velocity_low", 0), 0, 127)
+    velocity_high = _clamp_int(zone.get("velocity_high", 127), 0, 127)
+    return {
+        "id": str(zone.get("id") or uuid.uuid4().hex[:8]),
+        "name": str(zone.get("name") or f"Zone {index + 1}"),
+        "note_low": min(note_low, note_high),
+        "note_high": max(note_low, note_high),
+        "velocity_low": min(velocity_low, velocity_high),
+        "velocity_high": max(velocity_low, velocity_high),
+        "root_note": _clamp_midi_note(zone.get("root_note", 60)),
+        "sample_rate": max(1, int(zone.get("sample_rate", 44100))),
+        "length": len(data) // 4,
+        "data": data,
+    }
+
+
+def _normalize_zones(zones):
+    return [_normalize_zone(zone, index) for index, zone in enumerate(zones or [])]
+
+
 def _normalize_sample_slices(slices, sample_length=0):
     normalized = []
     max_len = max(0, int(sample_length))
@@ -1254,6 +1283,12 @@ class SamplerWidget(anywidget.AnyWidget):
     pad_velocities = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
     pad_actions = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
     sample_slices = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    # Multi-sample zones: each maps a note and velocity range to its own PCM
+    # (``data``: little-endian float32 bytes). A matching zone wins over the
+    # main sample when a note plays.
+    zones = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    # Ask the browser to decode audio it holds (a timeline clip URL) into a zone.
+    capture_request = traitlets.Dict(default_value={}).tag(sync=True)
     pad_count = traitlets.Int(8).tag(sync=True)
     velocity = traitlets.Int(100).tag(sync=True)
     velocity_sensitive = traitlets.Bool(True).tag(sync=True)
@@ -1282,6 +1317,8 @@ class SamplerWidget(anywidget.AnyWidget):
         self.pad_velocities = _resize_pad_velocities(self.pad_velocities, self.pad_count, self.velocity)
         self.pad_actions = _normalize_pad_actions(self.pad_actions, self.pad_count, self.pad_notes, self.pad_velocities)
         self.sample_slices = _normalize_sample_slices(self.sample_slices, self.sample_length)
+        self.zones = _normalize_zones(self.zones)
+        self.observe(self._on_zones_change, names=["zones"])
         self.observe(self._on_pad_count_change, names=["pad_count"])
         self.observe(self._on_pad_notes_change, names=["pad_notes"])
         self.observe(self._on_pad_velocities_change, names=["pad_velocities"])
@@ -1367,6 +1404,135 @@ class SamplerWidget(anywidget.AnyWidget):
         if slices != self.sample_slices:
             self.sample_slices = slices
 
+    def _on_zones_change(self, change):
+        zones = _normalize_zones(change["new"])
+        if zones != self.zones:
+            self.zones = zones
+
+    # Multi-sample zones
+
+    def add_zone(self, data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None):
+        """Add a sample zone covering a note (and velocity) range.
+
+        Args:
+            data: Float samples, or float32 bytes.
+            note_low, note_high: MIDI note range the zone answers to.
+            velocity_low, velocity_high: Velocity range the zone answers to.
+            root_note: Note at which the sample plays unpitched (defaults to
+                ``note_low`` when the range is one note, else 60).
+            sample_rate: Sample rate of ``data``.
+            name: Display name.
+
+        Returns:
+            The zone dict.
+        """
+        if isinstance(data, (bytes, bytearray, memoryview)):
+            packed = bytes(data)
+        else:
+            packed = _pack_float32(list(data))
+        if root_note is None:
+            root_note = note_low if note_low == note_high else 60
+        zone = _normalize_zone(
+            {
+                "name": name or f"Zone {len(self.zones) + 1}",
+                "note_low": note_low,
+                "note_high": note_high,
+                "velocity_low": velocity_low,
+                "velocity_high": velocity_high,
+                "root_note": root_note,
+                "sample_rate": sample_rate,
+                "data": packed,
+            },
+            len(self.zones),
+        )
+        self.zones = [*self.zones, zone]
+        return zone
+
+    def add_zone_file(self, path, note_low=0, note_high=127, **kwargs):
+        """Add a zone from an audio file (WAV via stdlib, others via ``soundfile``)."""
+        path = pathlib.Path(path)
+        samples, sample_rate = self._decode_audio_file(path)
+        kwargs.setdefault("name", path.name)
+        return self.add_zone(samples, note_low, note_high, sample_rate=sample_rate, **kwargs)
+
+    def set_zone(self, index, **fields):
+        """Update fields of one zone (range, root note, name); returns the zone."""
+        zones = list(self.zones)
+        zone = {**zones[index], **fields}
+        zones[index] = _normalize_zone(zone, index)
+        self.zones = zones
+        return zones[index]
+
+    def remove_zone(self, index):
+        """Remove the zone at ``index``."""
+        zones = list(self.zones)
+        del zones[index]
+        self.zones = zones
+
+    def clear_zones(self):
+        self.zones = []
+
+    def zone_for(self, note, velocity=100):
+        """Return the first zone matching ``note`` and ``velocity``, or None."""
+        note = _clamp_midi_note(note)
+        velocity = _clamp_velocity(velocity)
+        for zone in self.zones:
+            if zone["note_low"] <= note <= zone["note_high"] and zone["velocity_low"] <= velocity <= zone["velocity_high"]:
+                return zone
+        return None
+
+    def zone_samples(self, index):
+        """Return one zone's PCM as floats."""
+        return _unpack_float32(self.zones[index]["data"])
+
+    def to_sample_map(self):
+        """Build a Rust ``SampleMap``: zones in order, then the main sample as the fallback."""
+        from nbplay import AudioSample, SampleMap, SampleMapping
+
+        sample_map = SampleMap()
+        for zone in self.zones:
+            sample = AudioSample(_unpack_float32(zone["data"]), zone["sample_rate"], zone["root_note"])
+            sample_map.add_mapping(SampleMapping(sample, zone["note_low"], zone["note_high"], zone["velocity_low"], zone["velocity_high"]))
+        if self.sample_length:
+            sample = AudioSample(self.get_sample_data(), self.sample_rate, self.root_note)
+            sample_map.add_mapping(SampleMapping(sample, 0, 127, 0, 127))
+        return sample_map
+
+    def capture_clip(self, timeline, clip_id, pad=None, note=None, name=None):
+        """Turn a timeline audio clip into a zone, decoded by the browser.
+
+        With ``pad`` (index) or ``note`` the zone answers to that one note
+        and plays unpitched there, so the take sits on a pad; otherwise it
+        covers every note. The clip's trim (``offset``/``duration``) is
+        honoured. The zone appears in ``zones`` once the browser has decoded
+        the audio; both widgets must be rendered in the same page.
+        """
+        clip_id = str(clip_id)
+        clip = next((item for item in timeline.clips if item.get("id") == clip_id), None)
+        if clip is None:
+            raise ValueError(f"clip not found: {clip_id}")
+        if clip.get("kind") == "midi" or not clip.get("audio_url"):
+            raise ValueError(f"clip {clip_id} has no audio in the browser")
+        if pad is not None:
+            note = self.pad_notes[pad]
+        if note is not None:
+            note = _clamp_midi_note(note)
+            note_low = note_high = root_note = note
+        else:
+            note_low, note_high, root_note = 0, 127, self.root_note
+        seconds_per_beat = 60.0 / max(1e-6, float(timeline.bpm))
+        self.capture_request = {
+            "url": clip["audio_url"],
+            "name": name or clip.get("name") or "Take",
+            "note_low": note_low,
+            "note_high": note_high,
+            "root_note": root_note,
+            "offset": float(clip.get("offset", 0.0)) * seconds_per_beat,
+            "duration": float(clip.get("duration", 0.0)) * seconds_per_beat,
+            "nonce": self.capture_request.get("nonce", 0) + 1,
+        }
+        return self.capture_request
+
     def _set_sample_data(self, samples):
         self.sample_length = len(samples)
         self.sample_data = _pack_float32(samples)
@@ -1423,18 +1589,19 @@ class SamplerWidget(anywidget.AnyWidget):
                 is not installed, or if WAV format is invalid.
         """
         path = pathlib.Path(path)
-        suffix = path.suffix.lower()
-        if suffix == ".wav":
-            samples, sample_rate = self._read_wav_file(path)
-        else:
-            try:
-                import soundfile as sf
-            except ImportError as exc:
-                raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
-            data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
-            samples = [float(sum(frame) / len(frame)) for frame in data]
+        samples, sample_rate = self._decode_audio_file(path)
         self.load_sample(samples, sample_rate=sample_rate, root_note=root_note, name=name or path.name)
         return self
+
+    def _decode_audio_file(self, path):
+        if path.suffix.lower() == ".wav":
+            return self._read_wav_file(path)
+        try:
+            import soundfile as sf
+        except ImportError as exc:
+            raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
+        data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
+        return [float(sum(frame) / len(frame)) for frame in data], sample_rate
 
     def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
         """Configure sampler trigger pads.
@@ -2352,6 +2519,16 @@ def _sound_source_to_dict(source, index, resources):
                 resources[name] = bytes(source.sample_data)
                 entry["sample_file"] = name
             entry["sample_length"] = int(source.sample_length)
+        if source.zones:
+            saved = []
+            for zone_index, zone in enumerate(source.zones):
+                item = {k: v for k, v in zone.items() if k != "data"}
+                if resources is not None:
+                    name = f"samples/track-{index}-zone-{zone_index}.f32"
+                    resources[name] = bytes(zone["data"])
+                    item["sample_file"] = name
+                saved.append(item)
+            entry["zones"] = saved
         return entry
     raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthWidget or SamplerWidget")
 
@@ -2376,6 +2553,13 @@ def _sound_source_from_dict(entry, resources):
         for name in _SAMPLER_PAD_STATE:
             if name in state:
                 setattr(sampler, name, state[name])
+        zones = []
+        for zone in entry.get("zones", []):
+            sample_file = zone.get("sample_file")
+            data = resources.get(sample_file, b"") if sample_file else b""
+            zones.append({**{k: v for k, v in zone.items() if k != "sample_file"}, "data": data})
+        if zones:
+            sampler.zones = zones
         return sampler
     raise ValueError(f"unknown sound source type in session data: {kind!r}")
 
