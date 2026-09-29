@@ -2,7 +2,7 @@
 // oscillator triggering, probability, groove, and automation.
 
 import { type AnyModel } from "./helpers.ts";
-import { getSessionBus, type SessionClock } from "./session.ts";
+import { emitBusNote, getSessionBus, type SessionClock } from "./session.ts";
 
 export interface StepData {
   active: boolean;
@@ -103,11 +103,17 @@ export function* iterateActiveVoices(
   voicesData: StepData[][],
   stepIndex: number,
   random: () => number = Math.random,
-): Generator<{ freq: number; velocity: number; durationTicks: number }> {
+): Generator<{
+  note: number;
+  freq: number;
+  velocity: number;
+  durationTicks: number;
+}> {
   for (const voice of voicesData) {
     const step = voice[stepIndex];
     if (!step || !shouldPlayStep(step, random)) continue;
     yield {
+      note: numberOr(step.note, 60),
       freq: midiToHz(numberOr(step.note, 60)),
       velocity: clamp(numberOr(step.velocity, 100), 0, 127) / 127,
       durationTicks: Math.max(0.001, numberOr(step.duration_ticks, 1)),
@@ -379,7 +385,8 @@ export function createAudioScheduler(
     // time for the same step, and Web Audio starts past-due nodes at once.
     const scheduledTime = Math.max(0, at.time + offset);
 
-    for (const { freq, velocity, durationTicks } of iterateActiveVoices(
+    const sessionId = (model.get("session_id") as string) || "";
+    for (const { note, freq, velocity, durationTicks } of iterateActiveVoices(
       vd,
       stepIndex,
       random,
@@ -392,6 +399,13 @@ export function createAudioScheduler(
         scheduledTime,
         stepSeconds * durationTicks,
       );
+      emitBusNote(sessionId, {
+        note,
+        velocity: Math.round(velocity * 127),
+        type: "on",
+        at: scheduledTime,
+        duration: stepSeconds * durationTicks,
+      });
     }
     return true;
   }

@@ -2799,6 +2799,54 @@ class MidiKeyboardWidget(KeyboardWidget):
     midi_port = traitlets.Unicode("").tag(sync=True)
     available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
 
+    # Last control change received: ``{"controller", "value", "channel", "seq"}``.
+    # ``seq`` increases per message so repeated identical values still notify.
+    control_change = traitlets.Dict({}).tag(sync=True)
+
+
+class MidiOutputWidget(anywidget.AnyWidget):
+    """Send notes and control changes to a browser Web MIDI output port.
+
+    With a ``session_id`` the widget forwards every note the session plays
+    (keyboards, sequencers, launcher slots, MIDI clips) to the selected
+    port, at the scheduled time. Without one it forwards the notes that
+    keyboards and pads broadcast. ``forward_notes`` switches that off so
+    only messages sent from Python go out.
+    """
+
+    _esm = _STATIC / "midi_output.js"
+    _css = _STATIC / "midi_output.css"
+
+    session_id = traitlets.Unicode("").tag(sync=True)
+    midi_port = traitlets.Unicode("").tag(sync=True)
+    available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
+    channel = traitlets.Int(0, min=0, max=15).tag(sync=True)
+    forward_notes = traitlets.Bool(True).tag(sync=True)
+    send_request = traitlets.Dict({}).tag(sync=True)
+
+    def _request(self, **message):
+        message["nonce"] = self.send_request.get("nonce", 0) + 1
+        self.send_request = message
+
+    def note_on(self, note, velocity=100):
+        """Send a note-on on the widget's channel."""
+        self._request(kind="note_on", note=_clamp_midi_note(note), velocity=max(1, _clamp_velocity(velocity)))
+
+    def note_off(self, note):
+        """Send a note-off on the widget's channel."""
+        self._request(kind="note_off", note=_clamp_midi_note(note))
+
+    def control_change(self, controller, value):
+        """Send a control change (0-127) on the widget's channel."""
+        self._request(kind="control_change", controller=_clamp_int(controller, 0, 127), value=_clamp_int(value, 0, 127))
+
+    def send(self, data):
+        """Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""
+        data = [_clamp_int(b, 0, 255) for b in data]
+        if not data:
+            raise ValueError("MIDI message must not be empty")
+        self._request(kind="raw", data=data)
+
 
 def _default_pad_notes(rows=4, cols=4):
     """Default pad notes starting at MIDI 36 (C2), ascending chromatically."""
