@@ -207,7 +207,10 @@ cannot stop every track.
 and a `TimelineWidget`. `Session.add_track()` creates a mixer channel, links
 transport state, adds a timeline lane, and writes `session_id` and
 `channel_index` into the sequencer and sound source. Browser widgets use those
-fields to route audio through the shared mixer bus.
+fields to route audio through the shared mixer bus. `Session` also mirrors mute
+and solo between timeline lanes and their mixer channels (by `channel_index`)
+in both directions, so a lane's M/S buttons silence the channel's instruments
+as well as its clips.
 
 ## Rust core
 
@@ -422,9 +425,15 @@ show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.
 
 Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
-`compressor`, `limiter`, `delay`, and `reverb`. Unknown descriptor types are
-left intact when their params are JSON-safe so notebook code can register
-custom browser plugins on `globalThis.__nbplayPlugins[type]`. Built-in names are
+`compressor`, `limiter`, `delay`, and `reverb`. A descriptor with
+`enabled: false` is bypassed: it stays in the list and in the strip (drawn
+struck through) but is left out of the audio chain. Clicking a chip toggles
+bypass and the small × next to it removes the effect;
+`set_channel_effect_enabled()` and `set_master_effect_enabled()` do the same
+from Python, and `EffectPlugin(..., enabled=False)` builds a bypassed
+descriptor. Unknown descriptor types are left intact when their params are
+JSON-safe so notebook code can register custom browser plugins on
+`globalThis.__nbplayPlugins[type]`. Built-in names are
 reserved and win over user registry entries. The mixer exposes a merged plugin
 map on the session bus without mutating `globalThis.__nbplayPlugins`. A plugin
 factory receives `(audioCtx, descriptor)` and returns either an `AudioNode` or
