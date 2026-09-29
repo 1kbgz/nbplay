@@ -606,6 +606,155 @@ test.describe("MixerWidget", () => {
     await expect(chips).toHaveCount(1);
   });
 
+  test("the ✎ button opens a parameter editor that updates effects in place", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [
+            { type: "filter", filter_type: "lowpass", frequency: 800, q: 1 },
+          ],
+        },
+      ],
+    });
+    await expect(page.locator(`${STRIP} .nbplay-strip-fx-editor`)).toHaveCount(
+      0,
+    );
+    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
+    const editor = page.locator(`${STRIP} .nbplay-strip-fx-editor`);
+    await expect(editor).toHaveCount(1);
+    await expect(editor.locator(".nbplay-fx-param-row")).toHaveCount(3);
+    await expect(editor.locator(".nbplay-fx-param-range")).toHaveCount(2);
+    await expect(editor.locator("select.nbplay-fx-param")).toHaveValue(
+      "lowpass",
+    );
+
+    const before = await page.evaluateHandle(
+      () => window.__nbplay["test-session"].channels[0].effects[0].input,
+    );
+    await editor.locator('.nbplay-fx-param[data-key="frequency"]').fill("500");
+    await editor.locator("select.nbplay-fx-param").selectOption("highpass");
+
+    const state = await page.evaluate(() => {
+      const node = window.__nbplay["test-session"].channels[0].effects[0].input;
+      return {
+        effect: window.__testModel._state.channels[0].effects[0],
+        frequency: node.frequency.value,
+        type: node.type,
+      };
+    });
+    expect(state.effect).toEqual({
+      type: "filter",
+      filter_type: "highpass",
+      frequency: 500,
+      q: 1,
+    });
+    expect(state.frequency).toBe(500);
+    expect(state.type).toBe("highpass");
+    expect(
+      await page.evaluate(
+        (b) =>
+          window.__nbplay["test-session"].channels[0].effects[0].input === b,
+        before,
+      ),
+    ).toBe(true);
+
+    // The editor stays open with the new values; the chip label follows.
+    await expect(editor).toHaveCount(1);
+    await expect(
+      editor.locator('.nbplay-fx-param-range[data-key="frequency"]'),
+    ).toHaveValue("500");
+    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveText(
+      "highpass 500Hz",
+    );
+
+    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
+    await expect(page.locator(`${STRIP} .nbplay-strip-fx-editor`)).toHaveCount(
+      0,
+    );
+  });
+
+  test("the master effect editor edits master effects and survives a rebuild", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
+    });
+    const master = ".nbplay-master-strip";
+    await page.locator(`${master} .nbplay-strip-fx-edit`).click();
+    const editor = page.locator(`${master} .nbplay-strip-fx-editor`);
+    await editor.locator('.nbplay-fx-param[data-key="threshold"]').fill("-6");
+    let effects = await page.evaluate(
+      () => window.__testModel._state.master_effects,
+    );
+    expect(effects[0]).toEqual({
+      type: "limiter",
+      threshold: -6,
+      release: 0.05,
+    });
+
+    // Adding a channel rebuilds every strip; the open editor comes back.
+    await page.locator(".nbplay-mixer-add-btn").click();
+    await expect(page.locator(`${master} .nbplay-strip-fx-editor`)).toHaveCount(
+      1,
+    );
+    await expect(
+      page.locator(`${master} .nbplay-fx-param[data-key="threshold"]`),
+    ).toHaveValue("-6");
+
+    // Out-of-range values clamp to the plugin's bounds.
+    await page
+      .locator(`${master} .nbplay-fx-param[data-key="threshold"]`)
+      .fill("5");
+    effects = await page.evaluate(
+      () => window.__testModel._state.master_effects,
+    );
+    expect(effects[0].threshold).toBe(0);
+  });
+
+  test("custom plugin editors expose every JSON field", async ({ page }) => {
+    await page.evaluate(() => {
+      globalThis.__nbplayPlugins = {
+        wobble: (ctx) => ctx.createGain(),
+      };
+    });
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "wobble", depth: 0.5, mode: "sine", sync: true }],
+        },
+      ],
+    });
+    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
+    const editor = page.locator(`${STRIP} .nbplay-strip-fx-editor`);
+    await expect(editor.locator(".nbplay-fx-param-row")).toHaveCount(3);
+    await expect(editor.locator(".nbplay-fx-param-range")).toHaveCount(0);
+    await editor.locator('.nbplay-fx-param[data-key="depth"]').fill("2");
+    await editor.locator('.nbplay-fx-param[data-key="mode"]').fill("square");
+    await editor.locator('.nbplay-fx-param[data-key="mode"]').press("Enter");
+    await editor.locator('.nbplay-fx-param[data-key="sync"]').uncheck();
+    const effect = await page.evaluate(
+      () => window.__testModel._state.channels[0].effects[0],
+    );
+    expect(effect).toEqual({
+      type: "wobble",
+      depth: 2,
+      mode: "square",
+      sync: false,
+    });
+  });
+
   test("adding a master effect updates model", async ({ page }) => {
     await renderWidget(page);
     const master = page.locator(".nbplay-master-strip");

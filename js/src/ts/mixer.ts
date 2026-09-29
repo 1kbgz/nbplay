@@ -71,6 +71,150 @@ const EFFECT_OPTIONS = [
   "reverb",
 ];
 
+/** One editable parameter of an effect descriptor. */
+interface ParamSpec {
+  key: string;
+  label: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: string[];
+  kind: "number" | "select" | "text" | "bool";
+}
+
+const FILTER_TYPES = [
+  "lowpass",
+  "highpass",
+  "bandpass",
+  "notch",
+  "lowshelf",
+  "highshelf",
+  "peaking",
+];
+
+// Ranges match the Python EffectPlugin validation.
+const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
+  gain: [
+    { key: "gain", label: "Gain", min: 0, max: 4, step: 0.01, kind: "number" },
+  ],
+  filter: [
+    {
+      key: "filter_type",
+      label: "Type",
+      options: FILTER_TYPES,
+      kind: "select",
+    },
+    {
+      key: "frequency",
+      label: "Hz",
+      min: 20,
+      max: 20000,
+      step: 1,
+      kind: "number",
+    },
+    { key: "q", label: "Q", min: 0.0001, max: 100, step: 0.01, kind: "number" },
+  ],
+  delay: [
+    { key: "time", label: "Time", min: 0, max: 5, step: 0.001, kind: "number" },
+    {
+      key: "feedback",
+      label: "Fdbk",
+      min: 0,
+      max: 0.95,
+      step: 0.01,
+      kind: "number",
+    },
+    { key: "wet", label: "Wet", min: 0, max: 1, step: 0.01, kind: "number" },
+  ],
+  reverb: [
+    {
+      key: "seconds",
+      label: "Size",
+      min: 0.01,
+      max: 10,
+      step: 0.01,
+      kind: "number",
+    },
+    {
+      key: "decay",
+      label: "Decay",
+      min: 0.01,
+      max: 12,
+      step: 0.01,
+      kind: "number",
+    },
+    { key: "wet", label: "Wet", min: 0, max: 1, step: 0.01, kind: "number" },
+  ],
+  compressor: [
+    {
+      key: "threshold",
+      label: "Thresh",
+      min: -100,
+      max: 0,
+      step: 0.5,
+      kind: "number",
+    },
+    { key: "knee", label: "Knee", min: 0, max: 40, step: 0.5, kind: "number" },
+    {
+      key: "ratio",
+      label: "Ratio",
+      min: 1,
+      max: 20,
+      step: 0.1,
+      kind: "number",
+    },
+    {
+      key: "attack",
+      label: "Attack",
+      min: 0,
+      max: 1,
+      step: 0.001,
+      kind: "number",
+    },
+    {
+      key: "release",
+      label: "Release",
+      min: 0,
+      max: 1,
+      step: 0.001,
+      kind: "number",
+    },
+  ],
+  limiter: [
+    {
+      key: "threshold",
+      label: "Thresh",
+      min: -100,
+      max: 0,
+      step: 0.5,
+      kind: "number",
+    },
+    {
+      key: "release",
+      label: "Release",
+      min: 0,
+      max: 1,
+      step: 0.001,
+      kind: "number",
+    },
+  ],
+};
+
+/** Editable params: the built-in table, or every JSON field of a custom plugin. */
+function paramSpecs(effect: EffectDescriptor): ParamSpec[] {
+  const known = EFFECT_PARAMS[effect.type];
+  if (known) return known;
+  return Object.entries(effect)
+    .filter(([key]) => key !== "type" && key !== "enabled")
+    .map(([key, value]): ParamSpec | null => {
+      if (typeof value === "number") return { key, label: key, kind: "number" };
+      if (typeof value === "boolean") return { key, label: key, kind: "bool" };
+      if (typeof value === "string") return { key, label: key, kind: "text" };
+      return null;
+    })
+    .filter((spec): spec is ParamSpec => spec !== null);
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -398,7 +542,61 @@ function toggleEffectEnabled(effect: EffectDescriptor): EffectDescriptor {
 
 function effectChipHtml(effect: EffectDescriptor, fxIndex: number): string {
   const bypassed = isEffectEnabled(effect) ? "" : " bypassed";
-  return `<span class="nbplay-strip-fx-item"><button class="nbplay-strip-fx-chip${bypassed}" data-fx-index="${fxIndex}" title="${bypassed ? "Enable effect" : "Bypass effect"}">${escapeHtml(effectLabel(effect))}</button><button class="nbplay-strip-fx-remove" data-fx-index="${fxIndex}" title="Remove effect">\u00d7</button></span>`;
+  return `<span class="nbplay-strip-fx-item"><button class="nbplay-strip-fx-chip${bypassed}" data-fx-index="${fxIndex}" title="${bypassed ? "Enable effect" : "Bypass effect"}">${escapeHtml(effectLabel(effect))}</button><button class="nbplay-strip-fx-edit" data-fx-index="${fxIndex}" title="Edit effect">\u270e</button><button class="nbplay-strip-fx-remove" data-fx-index="${fxIndex}" title="Remove effect">\u00d7</button></span>`;
+}
+
+function paramInputHtml(spec: ParamSpec, value: unknown): string {
+  const key = escapeHtml(spec.key);
+  if (spec.kind === "select") {
+    const options = (spec.options || [])
+      .map(
+        (opt) =>
+          `<option value="${escapeHtml(opt)}"${opt === value ? " selected" : ""}>${escapeHtml(opt)}</option>`,
+      )
+      .join("");
+    return `<select class="nbplay-fx-param" data-key="${key}">${options}</select>`;
+  }
+  if (spec.kind === "bool") {
+    return `<input type="checkbox" class="nbplay-fx-param" data-key="${key}"${value ? " checked" : ""} />`;
+  }
+  if (spec.kind === "text") {
+    return `<input type="text" class="nbplay-fx-param" data-key="${key}" value="${escapeHtml(value ?? "")}" />`;
+  }
+  const bounds =
+    spec.min !== undefined && spec.max !== undefined
+      ? ` min="${spec.min}" max="${spec.max}" step="${spec.step ?? "any"}"`
+      : ` step="any"`;
+  const number = `<input type="number" class="nbplay-fx-param" data-key="${key}"${bounds} value="${escapeHtml(value ?? 0)}" />`;
+  if (spec.min === undefined || spec.max === undefined) return number;
+  return `<input type="range" class="nbplay-fx-param-range" data-key="${key}"${bounds} value="${escapeHtml(value ?? 0)}" />${number}`;
+}
+
+/** The inline parameter panel shown under a chip after its ✎ button. */
+function effectEditorHtml(effect: EffectDescriptor, fxIndex: number): string {
+  const rows = paramSpecs(effect)
+    .map(
+      (spec) =>
+        `<label class="nbplay-fx-param-row"><span>${escapeHtml(spec.label)}</span>${paramInputHtml(spec, effect[spec.key])}</label>`,
+    )
+    .join("");
+  return `<div class="nbplay-strip-fx-editor" data-fx-index="${fxIndex}">${rows || '<span class="nbplay-fx-param-none">No parameters</span>'}</div>`;
+}
+
+function parseParamInput(input: HTMLInputElement | HTMLSelectElement): unknown {
+  if (input instanceof HTMLSelectElement) return input.value;
+  if (input.type === "checkbox") return input.checked;
+  if (input.type === "number" || input.type === "range") {
+    const v = parseFloat(input.value);
+    if (!Number.isFinite(v)) return undefined;
+    const min = parseFloat(input.min);
+    const max = parseFloat(input.max);
+    return clamp(
+      v,
+      Number.isFinite(min) ? min : -Infinity,
+      Number.isFinite(max) ? max : Infinity,
+    );
+  }
+  return input.value;
 }
 
 function effectLabel(effect: EffectDescriptor): string {
@@ -826,7 +1024,14 @@ function render({
         nameEl.textContent = ch.name;
         nameEl.title = ch.name;
       }
+      syncEffectControls(strip, ch.effects || []);
     });
+    const masterStripEl = console_.querySelector(".nbplay-master-strip");
+    if (masterStripEl)
+      syncEffectControls(
+        masterStripEl,
+        (model.get("master_effects") as EffectDescriptor[]) || [],
+      );
 
     const masterFader = console_.querySelector(
       ".nbplay-master-fader",
@@ -843,13 +1048,163 @@ function render({
 
   // Full rebuild
 
+  // Only structure (type and bypass) forces a DOM rebuild; parameter edits
+  // update the chips and open editors in place so sliders keep focus.
   function currentEffectSignature(
     channels = (model.get("channels") as Channel[]) || [],
   ): string {
+    const shape = (effects: EffectDescriptor[] = []) =>
+      effects.map((fx) => [fx.type, isEffectEnabled(fx)]);
     return JSON.stringify({
-      channels: channels.map((ch) => ch.effects || []),
-      master: (model.get("master_effects") as EffectDescriptor[]) || [],
+      channels: channels.map((ch) => shape(ch.effects)),
+      master: shape((model.get("master_effects") as EffectDescriptor[]) || []),
     });
+  }
+
+  // Effect parameter editors
+
+  /** Keys of the editors currently open, "channel:i:fx" or "master:fx". */
+  const openEditors = new Set<string>();
+
+  function editorKey(scope: "channel" | "master", index: number, fx: number) {
+    return scope === "master" ? `master:${fx}` : `channel:${index}:${fx}`;
+  }
+
+  function effectsFor(scope: "channel" | "master", index: number) {
+    return scope === "master"
+      ? (model.get("master_effects") as EffectDescriptor[]) || []
+      : ((model.get("channels") as Channel[]) || [])[index]?.effects || [];
+  }
+
+  function writeEffects(
+    scope: "channel" | "master",
+    index: number,
+    effects: EffectDescriptor[],
+  ): void {
+    if (scope === "master") {
+      model.set("master_effects", effects);
+      model.save_changes();
+    } else {
+      updateChannelEffects(index, effects);
+    }
+  }
+
+  function setEffectParam(
+    scope: "channel" | "master",
+    index: number,
+    fxIndex: number,
+    key: string,
+    value: unknown,
+  ): void {
+    if (value === undefined) return;
+    writeEffects(
+      scope,
+      index,
+      effectsFor(scope, index).map((fx, idx) =>
+        idx === fxIndex ? { ...fx, [key]: value } : fx,
+      ),
+    );
+  }
+
+  /** Update chip labels and open editor values without rebuilding the DOM. */
+  function syncEffectControls(strip: Element, effects: EffectDescriptor[]) {
+    strip.querySelectorAll(".nbplay-strip-fx-chip").forEach((chip) => {
+      const fx =
+        effects[parseInt((chip as HTMLElement).dataset.fxIndex || "-1", 10)];
+      if (fx) chip.textContent = effectLabel(fx);
+    });
+    strip.querySelectorAll(".nbplay-strip-fx-editor").forEach((editor) => {
+      const fx =
+        effects[parseInt((editor as HTMLElement).dataset.fxIndex || "-1", 10)];
+      if (!fx) return;
+      editor
+        .querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+          ".nbplay-fx-param, .nbplay-fx-param-range",
+        )
+        .forEach((input) => {
+          if (document.activeElement === input) return;
+          const value = fx[input.dataset.key || ""];
+          if (input instanceof HTMLInputElement && input.type === "checkbox") {
+            input.checked = Boolean(value);
+          } else if (value !== undefined) {
+            input.value = String(value);
+          }
+        });
+    });
+  }
+
+  /** Insert editors for the open keys of this strip and wire their inputs. */
+  function renderEditors(
+    strip: Element,
+    scope: "channel" | "master",
+    index: number,
+  ): void {
+    strip
+      .querySelectorAll(".nbplay-strip-fx-editor")
+      .forEach((el) => el.remove());
+    const effects = effectsFor(scope, index);
+    strip.querySelectorAll(".nbplay-strip-fx-item").forEach((item) => {
+      const editBtn = item.querySelector(
+        ".nbplay-strip-fx-edit",
+      ) as HTMLElement;
+      const fxIndex = parseInt(editBtn?.dataset.fxIndex || "-1", 10);
+      const open = openEditors.has(editorKey(scope, index, fxIndex));
+      editBtn?.classList.toggle("active", open);
+      if (!open || !effects[fxIndex]) return;
+      item.insertAdjacentHTML(
+        "afterend",
+        effectEditorHtml(effects[fxIndex], fxIndex),
+      );
+      const editor = item.nextElementSibling as HTMLElement;
+      editor
+        .querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+          ".nbplay-fx-param, .nbplay-fx-param-range",
+        )
+        .forEach((input) => {
+          const event =
+            input instanceof HTMLSelectElement ||
+            (input instanceof HTMLInputElement && input.type === "checkbox")
+              ? "change"
+              : "input";
+          input.addEventListener(event, () => {
+            const value = parseParamInput(input);
+            // Keep the slider and its number box together.
+            const twin = editor.querySelector<HTMLInputElement>(
+              input.classList.contains("nbplay-fx-param-range")
+                ? `.nbplay-fx-param[data-key="${input.dataset.key}"]`
+                : `.nbplay-fx-param-range[data-key="${input.dataset.key}"]`,
+            );
+            if (twin && value !== undefined) twin.value = String(value);
+            setEffectParam(
+              scope,
+              index,
+              fxIndex,
+              input.dataset.key || "",
+              value,
+            );
+          });
+        });
+    });
+  }
+
+  function bindEffectEditors(
+    strip: Element,
+    scope: "channel" | "master",
+    index: number,
+  ): void {
+    strip.querySelectorAll(".nbplay-strip-fx-edit").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const fxIndex = parseInt(
+          (btn as HTMLElement).dataset.fxIndex || "-1",
+          10,
+        );
+        const key = editorKey(scope, index, fxIndex);
+        if (openEditors.has(key)) openEditors.delete(key);
+        else openEditors.add(key);
+        renderEditors(strip, scope, index);
+      });
+    });
+    renderEditors(strip, scope, index);
   }
 
   function rebuild(): void {
@@ -1010,6 +1365,7 @@ function render({
         model.set("channels", chs);
         model.save_changes();
       });
+      bindEffectEditors(strip, "channel", i);
     });
 
     // Master strip
@@ -1102,6 +1458,7 @@ function render({
       });
     });
     masterFader.addEventListener("change", endDrag);
+    bindEffectEditors(masterStrip, "master", -1);
   }
 
   function endDrag(): void {
