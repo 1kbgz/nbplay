@@ -2875,6 +2875,143 @@ class TestLauncherWidget:
         assert repr(launcher) == "LauncherWidget(tracks=2, scenes=2, slots=0)"
 
 
+#  MIDI files
+
+
+class TestMidiFiles:
+    def test_sequencer_round_trip(self, tmp_path):
+        seq = SequencerWidget(length=8, num_voices=2, step_duration=0.5, bpm=132.0)
+        seq.set_step(0, note=60, velocity=90, active=True)
+        seq.set_step(0, note=64, velocity=80, active=True, voice=1)
+        seq.set_step(3, note=67, velocity=100, duration_ticks=2, active=True)
+        path = tmp_path / "pattern.mid"
+        midi = seq.to_midi(path, name="Lead")
+        assert path.exists()
+        assert [t.name for t in midi.tracks[1:]] == ["Lead"]
+
+        loaded = SequencerWidget().load_midi(path)
+        assert loaded.bpm == pytest.approx(132.0)
+        assert loaded.step_duration == pytest.approx(0.25)  # default grid, finer than the source
+        assert loaded.length == 7  # last note starts on step 6 at sixteenth resolution
+        notes = sorted((i, st["note"], st["duration_ticks"]) for v in loaded.voices_data for i, st in enumerate(v) if st["active"])
+        assert notes == [(0, 60, 2), (0, 64, 2), (6, 67, 4)]
+
+        same_grid = SequencerWidget().load_midi(path, step_duration=0.5)
+        assert same_grid.num_voices == 2
+        assert same_grid.length == 4
+        assert same_grid.voices_data[0][3]["duration_ticks"] == 2
+
+    def test_load_midi_track_selection_and_voice_limit(self, tmp_path):
+        from nbplay.midi import write_midi
+
+        path = tmp_path / "multi.mid"
+        write_midi(
+            [
+                {"name": "A", "events": [{"beat": 0, "duration": 1, "note": 60, "velocity": 100}]},
+                {
+                    "name": "B",
+                    "events": [{"beat": 0, "duration": 1, "note": 62, "velocity": 100}, {"beat": 0, "duration": 1, "note": 65, "velocity": 100}],
+                },
+            ],
+            path,
+            bpm=90,
+        )
+        seq = SequencerWidget().load_midi(path, track=1, step_duration=1.0)
+        assert seq.num_voices == 2
+        assert sorted(v[0]["note"] for v in seq.voices_data) == [62, 65]
+        merged = SequencerWidget().load_midi(path, step_duration=1.0)
+        assert merged.num_voices == 3
+        limited = SequencerWidget().load_midi(path, step_duration=1.0, max_voices=1)
+        assert limited.num_voices == 1
+        with pytest.raises(IndexError):
+            SequencerWidget().load_midi(path, track=5)
+
+    def test_read_midi_handles_running_note_ons_and_empty_tracks(self, tmp_path):
+        import mido
+
+        from nbplay.midi import read_midi
+
+        midi = mido.MidiFile(ticks_per_beat=96)
+        track = mido.MidiTrack()
+        track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(150), time=0))
+        track.append(mido.MetaMessage("time_signature", numerator=3, denominator=4, time=0))
+        track.append(mido.Message("note_on", note=60, velocity=100, time=0))
+        track.append(mido.Message("note_on", note=60, velocity=0, time=48))  # velocity-0 note-off
+        track.append(mido.Message("note_on", note=72, velocity=50, time=48))  # never closed
+        midi.tracks.append(track)
+        midi.tracks.append(mido.MidiTrack())  # no notes
+        path = tmp_path / "raw.mid"
+        midi.save(path)
+
+        data = read_midi(path)
+        assert data["bpm"] == pytest.approx(150.0)
+        assert data["time_signature"] == (3, 4)
+        assert len(data["tracks"]) == 1
+        events = data["tracks"][0]["events"]
+        assert events[0] == {"beat": 0.0, "duration": 0.5, "note": 60, "velocity": 100}
+        assert events[1]["note"] == 72 and events[1]["beat"] == pytest.approx(1.0)
+        assert read_midi(path.read_bytes())["tracks"][0]["events"] == events
+
+    def test_events_to_voices_edge_cases(self, tmp_path):
+        from nbplay.midi import events_to_voices, read_midi, write_midi
+        from nbplay.widget import _default_steps
+
+        voices, length = events_to_voices([], step_duration=0.25)
+        assert length == 1
+        assert voices == [_default_steps(1)]
+        events = [{"beat": 0, "duration": 0.25, "note": 60, "velocity": 100}, {"beat": 4, "duration": 0.25, "note": 62, "velocity": 100}]
+        voices, length = events_to_voices(events, step_duration=0.25, length=8)
+        assert length == 8
+        assert [i for i, st in enumerate(voices[0]) if st["active"]] == [0]
+
+        path = tmp_path / "obj.mid"
+        write_midi([{"name": "A", "events": events}], path)
+        with open(path, "rb") as handle:
+            assert len(read_midi(handle)["tracks"][0]["events"]) == 2
+
+    def test_timeline_clip_export_and_import(self, tmp_path):
+        timeline = TimelineWidget()
+        timeline.add_track("Keys", input="midi")
+        clip = timeline.add_midi_clip("Riff", events=[{"beat": 0.5, "duration": 0.25, "note": 62, "velocity": 80}])
+        path = tmp_path / "riff.mid"
+        timeline.export_midi_clip(clip["id"], path)
+        added = timeline.import_midi(path, track_index=0, start=8.0)
+        assert len(added) == 1
+        assert added[0]["name"] == "Riff"
+        assert added[0]["start"] == pytest.approx(8.0)
+        assert added[0]["events"] == clip["events"]
+        audio = timeline.add_clip("Take")
+        with pytest.raises(ValueError, match="not a MIDI clip"):
+            timeline.export_midi_clip(audio["id"])
+        with pytest.raises(ValueError, match="clip not found"):
+            timeline.export_midi_clip("missing")
+
+    def test_session_export_and_import(self, tmp_path):
+        s = Session(bpm=100.0, time_signature=(3, 4))
+        seq = SequencerWidget(length=6, step_duration=0.5)
+        seq.set_step(2, note=48, active=True)
+        s.add_track("Bass", seq, SynthWidget())
+        s.add_track("Keys", input="midi")
+        s.timeline.add_midi_clip("Riff", track_index=1, start=3.0, events=[{"beat": 1.0, "duration": 0.5, "note": 72, "velocity": 90}], offset=0.5)
+        path = tmp_path / "session.mid"
+        midi = s.export_midi(path)
+        assert [t.name for t in midi.tracks[1:]] == ["Bass", "Riff"]
+
+        loaded = Session()
+        tracks = loaded.import_midi(path)
+        assert [t.name for t in tracks] == ["Bass", "Riff"]
+        assert loaded.transport.bpm == pytest.approx(100.0)
+        assert loaded.transport.time_signature_num == 3
+        assert all(lane["input"] == "midi" for lane in loaded.timeline.tracks)
+        bass, riff = loaded.timeline.clips
+        assert bass["events"][0] == {"beat": 1.0, "duration": 0.5, "note": 48, "velocity": 100}
+        # Clip offset trims the first half beat; the note lands at its timeline position.
+        assert riff["events"][0]["beat"] == pytest.approx(3.5)
+        untouched = Session(bpm=77.0)
+        untouched.import_midi(path, apply_tempo=False)
+        assert untouched.transport.bpm == pytest.approx(77.0)
+
+
 #  Session persistence
 
 
