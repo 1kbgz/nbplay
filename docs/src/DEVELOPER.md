@@ -909,6 +909,12 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
 
+### MIDI files
+
+`nbplay/midi.py` reads and writes `.mid` files through `mido`, an optional dependency installed with `pip install "nbplay[midi]"`. Everything works in beats, the unit the widgets use, and converts to ticks (480 per beat) only at the file boundary. `read_midi()` turns a path, bytes, or file object into beat-based tracks (`name`, `channel`, `events`), pairing note-ons with note-offs and treating velocity-zero note-ons as note-offs; tracks without notes are left out, and the first tempo and time signature are reported. `build_midi()` / `write_midi()` go the other way, with a tempo and time signature meta track first.
+
+On top of that: `SequencerWidget.to_midi()` exports a pattern (step index times `step_duration` is the beat, `duration_ticks` the length) and `load_midi()` quantizes a file onto the grid, one voice per overlapping note up to `max_voices`, growing `length` to fit. `TimelineWidget.export_midi_clip()` and `import_midi()` move MIDI clips in and out. `Session.export_midi()` writes one track per sequencer plus one per MIDI clip at its timeline position, and `Session.import_midi()` adds one MIDI lane per track with the track as a clip, applying the file's tempo unless told not to.
+
 ### Rust tests
 
 Rust unit tests live beside the implementation modules under `rust/src/` and in

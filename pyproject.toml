@@ -37,6 +37,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+midi = [
+    "mido",
+]
 develop = [
     "build",
     "bump-my-version",
@@ -51,6 +54,7 @@ develop = [
     "jupyterlite-pyodide-kernel",
     "mdformat",
     "mdformat-tables>=1",
+    "mido",
     "pytest",
     "pytest-cov",
     "ruff",
