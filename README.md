@@ -64,6 +64,8 @@ session.launcher.set_slot(drums.mixer_channel, 0, drums.sequencer, name="Beat")
 session.play()   # or press play on any widget; they share the clock
 ```
 
+Song structure comes from named patterns: `session.add_pattern("verse", drums.sequencer)`, then `session.chain(drums, ["verse", "verse", "chorus"])` lays them out as clips on the track's timeline lane, and the sequencer stops looping on its own so the arrangement drives it.
+
 The example notebooks in `examples/` walk through each widget and end with a
 full DAW playground and the beats view.
 

@@ -2555,6 +2555,29 @@ class TestTimelineWidget:
         assert timeline.clips == []
         assert timeline.selected_clip_id == ""
 
+    def test_add_pattern_clip_expands_steps(self):
+        timeline = TimelineWidget()
+        timeline.add_track("Keys", input="midi")
+        pattern = [{"note": 60, "active": True}, {"note": 62, "active": False}, {"note": 64, "active": True, "duration_ticks": 2}]
+        clip = timeline.add_pattern_clip("A", pattern, start=4.0, step_duration=0.5, repeat=2)
+        assert clip["kind"] == "midi" and clip["pattern"] == "A"
+        assert clip["start"] == pytest.approx(4.0) and clip["duration"] == pytest.approx(3.0)
+        assert [(e["beat"], e["note"], e["duration"]) for e in clip["events"]] == [
+            (0.0, 60, 0.5),
+            (1.0, 64, 1.0),
+            (1.5, 60, 0.5),
+            (2.5, 64, 1.0),
+        ]
+        seq = SequencerWidget(length=4, step_duration=0.25)
+        seq.set_step(0, note=36, active=True)
+        short = timeline.add_pattern_clip("B", seq, duration=8.0)
+        assert short["duration"] == pytest.approx(8.0) and len(short["events"]) == 1
+        assert timeline.clips[1]["pattern"] == "B"
+        plain = timeline.add_midi_clip("Plain", events=[])
+        assert "pattern" not in plain
+        with pytest.raises(ValueError):
+            timeline.add_pattern_clip("Bad", [])
+
     def test_remove_track_drops_clips_and_shifts(self):
         timeline = TimelineWidget()
         timeline.add_track("A", channel_index=0)
@@ -2905,6 +2928,8 @@ class TestSessionPersistence:
         s.launcher.add_scene("Drop")
         s.launcher.set_slot(drums.mixer_channel, 1, [{"note": 36, "active": True}, {"note": 38, "active": True}], name="Kit")
         s.launcher.quantize = "beat"
+        s.add_pattern("hook", [{"note": 60, "active": True}], step_duration=1.0)
+        s.chain("Lead", ["hook"], start=8.0)
         return s
 
     def test_to_dict_is_json_safe(self):
@@ -2983,6 +3008,10 @@ class TestSessionPersistence:
         assert seq.voices_data[1][3]["note"] == 67
         assert seq.voices_data[1][3]["active"] is True
         assert seq.session_id == loaded.session_id
+        assert seq.follow_transport is False
+        assert loaded.patterns == s.patterns
+        hook = [c for c in loaded.timeline.clips if c.get("pattern") == "hook"]
+        assert len(hook) == 1 and hook[0]["start"] == pytest.approx(8.0)
         synth = loaded.tracks[0].sound_source
         assert isinstance(synth, SynthWidget)
         assert synth.oscillator_type == "saw"
@@ -3012,7 +3041,7 @@ class TestSessionPersistence:
         assert tl.pixels_per_beat == pytest.approx(24.0)
         assert [t["input"] for t in tl.tracks] == ["channel", "channel", "microphone"]
         assert tl.tracks[1]["armed"] is True
-        assert len(tl.clips) == 1
+        assert len(tl.clips) == 2
         clip = tl.clips[0]
         assert clip["id"] == take["id"]
         assert clip["start"] == pytest.approx(4.0)
@@ -3048,7 +3077,7 @@ class TestSessionPersistence:
         loaded = Session.from_dict(data)
         assert loaded.tracks[1].sound_source.sample_length == 0
         assert loaded.tracks[1].sound_source.sample_name == "Blip"
-        assert len(loaded.timeline.clips) == 1
+        assert len(loaded.timeline.clips) == 2
         assert loaded.timeline.import_clip_request == {}
 
     def test_load_rejects_foreign_data(self):
@@ -3240,6 +3269,60 @@ class TestSession:
         assert s.launcher.tracks[0]["channel_index"] == 0
         assert s.launcher.slots[0]["track_index"] == 0
         assert s.launcher.active_slots == [-1]
+
+    def test_chain_places_pattern_clips_and_detaches_sequencer(self):
+        s = Session(bpm=120.0)
+        seq = SequencerWidget(length=8, step_duration=0.5)
+        seq.set_step(0, note=36, active=True)
+        drums = s.add_track("Drums", seq, SamplerWidget())
+        keys = s.add_track("Keys", input="midi")
+        verse = s.add_pattern("verse", seq)
+        assert verse["step_duration"] == pytest.approx(0.5) and len(verse["voices_data"][0]) == 8
+        s.add_pattern("chorus", [[{"note": 40, "active": True}], [{"note": 43, "active": True}, {"note": 47, "active": True}]])
+        assert [len(v) for v in s.patterns["chorus"]["voices_data"]] == [2, 2]
+
+        clips = s.chain(drums, ["verse", "verse", "chorus"], repeat=2)
+        assert seq.follow_transport is False
+        assert [c["name"] for c in clips] == ["verse", "verse", "chorus"]
+        assert [c["start"] for c in clips] == pytest.approx([0.0, 8.0, 16.0])
+        assert [c["duration"] for c in clips] == pytest.approx([8.0, 8.0, 1.0])
+        assert all(c["track_index"] == 0 and c["pattern"] for c in clips)
+        assert len(clips[0]["events"]) == 2
+        assert s.timeline.length >= 17
+
+        more = s.chain("Keys", ["chorus"], start=32.0)
+        assert more[0]["track_index"] == 1 and more[0]["start"] == pytest.approx(32.0)
+        assert keys.sequencer is None
+        assert s.timeline.length == 33
+        by_index = s.chain(1, ["chorus"], start=40.0)
+        assert by_index[0]["track_index"] == 1
+
+        with pytest.raises(ValueError, match="unknown pattern"):
+            s.chain(drums, ["bridge"])
+        with pytest.raises(ValueError, match="no track named"):
+            s.chain("Bass", ["verse"])
+        with pytest.raises(IndexError):
+            s.chain(5, ["verse"])
+
+    def test_update_pattern_regenerates_clips(self):
+        s = Session()
+        s.add_track("Keys", input="midi")
+        s.add_pattern("riff", [{"note": 60, "active": True}, {"note": 62, "active": True}], step_duration=1.0)
+        clips = s.chain("Keys", ["riff", "riff"], repeat=2)
+        ids = [c["id"] for c in clips]
+        plain = s.timeline.add_midi_clip("Free", track_index=0, start=20.0, events=[{"note": 50}])
+        s.update_pattern("riff", [{"note": 72, "active": True}], step_duration=2.0)
+        rebuilt = [c for c in s.timeline.clips if c.get("pattern") == "riff"]
+        assert [c["id"] for c in rebuilt] == ids
+        assert [c["start"] for c in rebuilt] == pytest.approx([0.0, 4.0])
+        assert all(c["duration"] == pytest.approx(4.0) for c in rebuilt)
+        assert [(e["beat"], e["note"]) for e in rebuilt[0]["events"]] == [(0.0, 72), (2.0, 72)]
+        assert s.timeline.clips[-1]["id"] == plain["id"]
+        s.remove_pattern("riff")
+        assert "riff" not in s.patterns
+        assert len([c for c in s.timeline.clips if c.get("pattern") == "riff"]) == 2
+        with pytest.raises(KeyError):
+            s.remove_pattern("riff")
 
     def test_remove_track_clears_launcher_selection(self):
         s = Session()

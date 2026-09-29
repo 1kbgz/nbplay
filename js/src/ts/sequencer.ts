@@ -199,9 +199,15 @@ function render({
     }
   }
 
+  /** False when pattern clips on this track's lane drive it instead. */
+  function followsTransport(): boolean {
+    return model.get("follow_transport") !== false;
+  }
+
   function onClockEvent(event: ClockEvent): void {
     switch (event.type) {
       case "play":
+        if (!followsTransport()) break;
         mirror(() => model.set("is_playing", true), true);
         startScheduler();
         syncPlayState();
@@ -235,7 +241,8 @@ function render({
       model.set("is_playing", clk.playing);
       model.set("current_step", -1);
     });
-    if (clk.playing) startScheduler();
+    if (clk.playing && followsTransport()) startScheduler();
+    else if (clk.playing) mirror(() => model.set("is_playing", false));
     syncPlayState();
   }
 
@@ -694,6 +701,12 @@ function render({
       syncPlayState();
     } else {
       clk.play();
+      if (!followsTransport()) {
+        // The clock event was ignored on purpose; this button still plays.
+        mirror(() => model.set("is_playing", true), true);
+        startScheduler();
+        syncPlayState();
+      }
     }
   }
 

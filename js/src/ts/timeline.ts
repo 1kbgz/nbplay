@@ -42,6 +42,8 @@ interface AudioClip {
   id: string;
   kind: "audio" | "midi";
   events?: MidiEvent[];
+  /** Name of the session pattern this MIDI clip was generated from. */
+  pattern?: string;
   name: string;
   track_index: number;
   start: number;
@@ -158,6 +160,7 @@ function getClips(model: AnyModel): AudioClip[] {
       clip.kind === "midi" || Array.isArray(clip.events)
         ? getMidiEvents(clip)
         : undefined,
+    pattern: typeof clip.pattern === "string" ? clip.pattern : undefined,
     name: String(clip.name ?? `Clip ${index + 1}`),
     track_index: Math.max(0, numberValue(clip.track_index, 0)),
     start: Math.max(0, numberValue(clip.start, 0)),
@@ -1701,13 +1704,15 @@ export default {
               const classes = [
                 "nbplay-timeline-clip",
                 clip.kind === "midi" ? "midi" : "",
+                clip.pattern ? "pattern" : "",
                 clip.id === selected ? "selected" : "",
                 clip.muted ? "muted" : "",
               ]
                 .filter(Boolean)
                 .join(" ");
-              const detail =
-                clip.kind === "midi"
+              const detail = clip.pattern
+                ? `${beatLabel(clip.start, bpb)} \u00b7 pattern`
+                : clip.kind === "midi"
                   ? `${beatLabel(clip.start, bpb)} \u00b7 ${(clip.events || []).length} notes`
                   : beatLabel(clip.start, bpb);
               return `<button class="${classes}" data-clip="${escapeHtml(clip.id)}" data-kind="${clip.kind}" style="left:${left}%;width:${width}%">

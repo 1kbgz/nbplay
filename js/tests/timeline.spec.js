@@ -55,6 +55,33 @@ const DEFAULTS = {
   ],
 };
 
+test.describe("Pattern clips", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/tests/fixtures/harness.html");
+  });
+
+  test("pattern clips are marked and labelled", async ({ page }) => {
+    await renderWidget(page, {
+      clips: [
+        {
+          id: "clip-p",
+          kind: "midi",
+          pattern: "verse",
+          name: "verse",
+          track_index: 1,
+          start: 4,
+          duration: 4,
+          events: [{ beat: 0, duration: 0.5, note: 60, velocity: 100 }],
+        },
+      ],
+    });
+    const clip = page.locator(".nbplay-timeline-clip");
+    await expect(clip).toHaveClass(/midi/);
+    await expect(clip).toHaveClass(/pattern/);
+    await expect(clip.locator("small")).toContainText("pattern");
+  });
+});
+
 async function renderWidget(page, overrides = {}) {
   const opts = { ...DEFAULTS, ...overrides };
   if (overrides.tracks) opts.tracks = overrides.tracks;
