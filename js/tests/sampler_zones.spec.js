@@ -162,11 +162,14 @@ test.describe("Sampler zones", () => {
         loop: s.loop,
       })),
     );
-    expect(played).toEqual([
-      { length: 100, rate: 1, loop: false },
-      { length: 200, rate: Math.pow(2, (42 - 45) / 12), loop: false },
-      { length: 3, rate: Math.pow(2, (36 - 60) / 12), loop: true },
+    expect(played.map(({ length, loop }) => ({ length, loop }))).toEqual([
+      { length: 100, loop: false },
+      { length: 200, loop: false },
+      { length: 3, loop: true },
     ]);
+    expect(played[0].rate).toBeCloseTo(1, 10);
+    expect(played[1].rate).toBeCloseTo(Math.pow(2, (42 - 45) / 12), 10);
+    expect(played[2].rate).toBeCloseTo(Math.pow(2, (36 - 60) / 12), 10);
   });
 
   test("zones play without a main sample and through the session bus", async ({
