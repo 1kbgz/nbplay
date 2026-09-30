@@ -1766,6 +1766,109 @@ class TestSamplerWidget:
         assert w.session_id == ""
         assert w.channel_index == -1
 
+    def test_zones_default_empty(self):
+        w = SamplerWidget()
+        assert w.zones == []
+        assert w.capture_request == {}
+        assert w.zone_for(60) is None
+
+    def test_add_set_remove_zones(self):
+        w = SamplerWidget()
+        low = w.add_zone([0.1, 0.2, 0.3], 0, 59, velocity_low=0, velocity_high=127, sample_rate=22050, name="Low")
+        high = w.add_zone(struct.pack("<2f", 0.5, -0.5), 60, 127, root_note=72)
+        assert low["length"] == 3 and low["sample_rate"] == 22050 and low["root_note"] == 60
+        assert high["length"] == 2 and high["name"] == "Zone 2" and high["root_note"] == 72
+        assert w.zone_for(48)["id"] == low["id"]
+        assert w.zone_for(72)["id"] == high["id"]
+        assert w.zone_samples(1) == pytest.approx([0.5, -0.5])
+        one = w.add_zone([0.9], 36, 36)
+        assert one["root_note"] == 36
+        w.set_zone(2, note_low=40, note_high=38, name="Kick")
+        assert w.zones[2]["note_low"] == 38 and w.zones[2]["note_high"] == 40 and w.zones[2]["name"] == "Kick"
+        w.remove_zone(0)
+        assert [z["name"] for z in w.zones] == ["Zone 2", "Kick"]
+        assert w.zone_for(48) is None
+        w.clear_zones()
+        assert w.zones == []
+
+    def test_zones_are_normalized_on_assignment(self):
+        w = SamplerWidget()
+        w.zones = [{"data": memoryview(struct.pack("<f", 1.0)), "note_low": 200, "velocity_high": -3, "sample_rate": 0}]
+        zone = w.zones[0]
+        assert zone["note_low"] == 127 and zone["note_high"] == 127
+        assert zone["velocity_low"] == 0 and zone["velocity_high"] == 0
+        assert zone["sample_rate"] == 1 and zone["length"] == 1 and zone["name"] == "Zone 1"
+        assert isinstance(zone["data"], bytes)
+        with pytest.raises(TypeError):
+            w.zones = [{"data": "nope"}]
+
+    def test_add_zone_file(self, tmp_path):
+        path = tmp_path / "hit.wav"
+        with wave.open(str(path), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(8000)
+            handle.writeframes(struct.pack("<3h", 0, 16384, -16384))
+        w = SamplerWidget()
+        zone = w.add_zone_file(path, 36, 36)
+        assert zone["name"] == "hit.wav" and zone["sample_rate"] == 8000 and zone["root_note"] == 36
+        assert w.zone_samples(0) == pytest.approx([0.0, 0.5, -0.5])
+
+    def test_non_wav_files_use_soundfile(self, tmp_path, monkeypatch):
+        import sys
+        import types
+
+        path = tmp_path / "hit.ogg"
+        path.write_bytes(b"not really ogg")
+        monkeypatch.setitem(sys.modules, "soundfile", None)
+        with pytest.raises(ValueError, match="soundfile"):
+            SamplerWidget().add_zone_file(path, 36, 36)
+
+        fake = types.SimpleNamespace(read=lambda p, dtype, always_2d: ([[0.5, -0.5], [1.0, 0.0]], 8000))
+        monkeypatch.setitem(sys.modules, "soundfile", fake)
+        w = SamplerWidget()
+        zone = w.add_zone_file(path, 36, 36)
+        assert zone["sample_rate"] == 8000
+        assert w.zone_samples(0) == pytest.approx([0.0, 0.5])
+        w.load_audio_file(path)
+        assert w.get_sample_data() == pytest.approx([0.0, 0.5])
+
+    def test_to_sample_map_prefers_zones_then_main_sample(self):
+        w = SamplerWidget()
+        assert len(w.to_sample_map()) == 0
+        w.load_sample([0.0, 0.1], root_note=60)
+        w.add_zone([0.5], 36, 47, root_note=40)
+        sample_map = w.to_sample_map()
+        assert len(sample_map) == 2
+        assert sample_map.find_sample(40, 100).root_note == 40
+        assert sample_map.find_sample(72, 100).root_note == 60
+
+    def test_capture_clip_requests_browser_decode(self):
+        timeline = TimelineWidget(bpm=120.0)
+        timeline.add_track("Mic")
+        clip = timeline.add_clip("Take 1", start=0.0, duration=2.0, offset=0.5, audio_url="blob:take")
+        w = SamplerWidget(pad_notes=[36, 38, 42, 46])
+        request = w.capture_clip(timeline, clip["id"], pad=1)
+        assert request == {
+            "url": "blob:take",
+            "name": "Take 1",
+            "note_low": 38,
+            "note_high": 38,
+            "root_note": 38,
+            "offset": pytest.approx(0.25),
+            "duration": pytest.approx(1.0),
+            "nonce": 1,
+        }
+        w.capture_clip(timeline, clip["id"], note=60, name="Vox")
+        assert w.capture_request["nonce"] == 2 and w.capture_request["name"] == "Vox" and w.capture_request["note_low"] == 60
+        w.capture_clip(timeline, clip["id"])
+        assert (w.capture_request["note_low"], w.capture_request["note_high"], w.capture_request["root_note"]) == (0, 127, 69)
+        with pytest.raises(ValueError, match="clip not found"):
+            w.capture_clip(timeline, "missing")
+        midi = timeline.add_midi_clip("Riff", events=[])
+        with pytest.raises(ValueError, match="no audio"):
+            w.capture_clip(timeline, midi["id"])
+
     def test_envelope_defaults(self):
         w = SamplerWidget()
         assert w.attack == pytest.approx(0.005)
@@ -3166,6 +3269,7 @@ class TestSessionPersistence:
         sampler = SamplerWidget(pad_count=4, attack=0.02, release=0.4)
         sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=48, name="Blip")
         sampler.pad_notes = [48, 50, 52, 53]
+        sampler.add_zone([0.25, -0.25], 36, 36, sample_rate=8000, name="Kick")
         drums = s.add_track("Drums", sound_source=sampler, armed=True)
         s.add_track("Vocals")
         s.mixer.set_channel_gain(lead.mixer_channel, 0.6)
@@ -3239,6 +3343,7 @@ class TestSessionPersistence:
             names = set(archive.namelist())
         assert "session.json" in names
         assert "samples/track-1.f32" in names
+        assert "samples/track-1-zone-0.f32" in names
         assert f"clips/{take['id']}.bin" in names
 
         loaded = Session.load(path)
@@ -3280,6 +3385,10 @@ class TestSessionPersistence:
         assert sampler.pad_notes == [48, 50, 52, 53]
         assert sampler.attack == pytest.approx(0.02)
         assert sampler.channel_index == 1
+        assert len(sampler.zones) == 1
+        assert sampler.zones[0]["name"] == "Kick"
+        assert sampler.zones[0]["note_low"] == 36 and sampler.zones[0]["sample_rate"] == 8000
+        assert sampler.zone_samples(0) == pytest.approx([0.25, -0.25])
         assert loaded.tracks[2].sound_source is None
 
         assert loaded.mixer.channels[0]["gain"] == pytest.approx(0.6)

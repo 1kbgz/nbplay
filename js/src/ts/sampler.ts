@@ -47,6 +47,48 @@ interface SampleSlice {
   label?: string;
 }
 
+/** A multi-sample zone: its own PCM answering to a note and velocity range. */
+interface Zone {
+  id: string;
+  name: string;
+  note_low: number;
+  note_high: number;
+  velocity_low: number;
+  velocity_high: number;
+  root_note: number;
+  sample_rate: number;
+  samples: Float32Array;
+}
+
+interface ZoneBuffer extends Zone {
+  buffer: AudioBuffer | null;
+}
+
+const ZONE_COLORS = [
+  "#00d4ff",
+  "#f97316",
+  "#a78bfa",
+  "#22c55e",
+  "#f43f5e",
+  "#eab308",
+];
+
+function clampNote(v: unknown, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n)
+    ? Math.max(0, Math.min(127, Math.round(n)))
+    : fallback;
+}
+
+function zoneMatches(zone: Zone, note: number, velocity: number): boolean {
+  return (
+    note >= zone.note_low &&
+    note <= zone.note_high &&
+    velocity >= zone.velocity_low &&
+    velocity <= zone.velocity_high
+  );
+}
+
 // Waveform renderer
 
 function drawWaveform(
@@ -212,6 +254,7 @@ function createSamplerEngine(maxVoices = 8) {
   let waveformBuffer: AudioBuffer | null = null;
   let rawSamples: Float32Array | null = null;
   let rawSampleRate = 44100;
+  let zones: ZoneBuffer[] = [];
 
   function ensureBuffer(): boolean {
     if (!audioCtx || !rawSamples || rawSamples.length === 0) return false;
@@ -220,6 +263,19 @@ function createSamplerEngine(maxVoices = 8) {
     const ch = waveformBuffer.getChannelData(0);
     for (let i = 0; i < rawSamples.length; i++) ch[i] = rawSamples[i];
     return true;
+  }
+
+  function ensureZoneBuffer(zone: ZoneBuffer): AudioBuffer | null {
+    if (!audioCtx || zone.samples.length === 0) return null;
+    if (!zone.buffer) {
+      zone.buffer = audioCtx.createBuffer(
+        1,
+        zone.samples.length,
+        zone.sample_rate,
+      );
+      zone.buffer.getChannelData(0).set(zone.samples);
+    }
+    return zone.buffer;
   }
 
   return {
@@ -231,6 +287,7 @@ function createSamplerEngine(maxVoices = 8) {
         if (bus?.audioCtx && bus.channels?.[idx]) {
           if (audioCtx !== bus.audioCtx) {
             waveformBuffer = null;
+            zones.forEach((zone) => (zone.buffer = null));
           }
           audioCtx = bus.audioCtx;
           outputNode = bus.channels[idx].gain;
@@ -252,6 +309,18 @@ function createSamplerEngine(maxVoices = 8) {
       }
     },
 
+    setZones(list: Zone[]): void {
+      zones = list.map((zone) => ({ ...zone, buffer: null }));
+      if (!audioCtx && zones.length > 0) {
+        audioCtx = createAudioContext();
+        if (audioCtx) ownAudioCtx = true;
+      }
+    },
+
+    zoneFor(note: number, velocity: number): Zone | undefined {
+      return zones.find((zone) => zoneMatches(zone, note, velocity));
+    },
+
     noteOn(
       noteNum: number,
       rootNote: number,
@@ -259,23 +328,29 @@ function createSamplerEngine(maxVoices = 8) {
       velocity = 127,
       slice?: { start: number; end: number },
     ): Voice | undefined {
-      if (!audioCtx || !ensureBuffer()) return;
+      // A matching zone plays its own one-shot sample; otherwise the main sample.
+      const zone = zones.find((z) =>
+        zoneMatches(z, noteNum, clampVelocity(velocity, 127)),
+      );
+      const zoneBuffer = zone ? ensureZoneBuffer(zone) : null;
+      if (!audioCtx || (!zoneBuffer && !ensureBuffer())) return;
       if (audioCtx.state === "suspended") {
         audioCtx.resume();
       }
 
-      const semitones = noteNum - rootNote;
+      const semitones = noteNum - (zone ? zone.root_note : rootNote);
       const playbackRate = Math.pow(2, semitones / 12);
 
       const sourceNode = audioCtx.createBufferSource();
-      sourceNode.buffer = waveformBuffer;
+      sourceNode.buffer = zoneBuffer || waveformBuffer;
       sourceNode.playbackRate.value = playbackRate;
       const hasSlice =
+        !zoneBuffer &&
         slice !== undefined &&
         slice.end > slice.start &&
         slice.start >= 0 &&
         slice.end <= rawSamples!.length;
-      sourceNode.loop = !hasSlice;
+      sourceNode.loop = !hasSlice && !zoneBuffer;
 
       const gainNode = audioCtx.createGain();
       gainNode.connect(outputNode || audioCtx.destination);
@@ -458,6 +533,19 @@ function render({
       </div>
       <div class="nbplay-samp-pads-grid"></div>
     </div>
+    <div class="nbplay-samp-zones-section">
+      <div class="nbplay-samp-zones-controls">
+        <label class="nbplay-samp-label">Zones</label>
+        <select class="nbplay-samp-zone-pad" title="Pad a captured sample lands on"></select>
+        <label class="nbplay-samp-zone-file-label" title="Add a zone from an audio file">
+          File<input type="file" class="nbplay-samp-zone-file" accept="audio/*" />
+        </label>
+        <button class="nbplay-samp-zone-rec" title="Record the microphone into the selected pad">Rec</button>
+        <span class="nbplay-samp-zone-status"></span>
+      </div>
+      <div class="nbplay-samp-zone-map" title="Key ranges"></div>
+      <div class="nbplay-samp-zone-list"></div>
+    </div>
   `;
   el.appendChild(root);
 
@@ -507,6 +595,22 @@ function render({
   const velocitySensitiveInput = root.querySelector(
     ".nbplay-samp-vel-sense",
   ) as HTMLInputElement;
+  const zonePadSelect = root.querySelector(
+    ".nbplay-samp-zone-pad",
+  ) as HTMLSelectElement;
+  const zoneFileInput = root.querySelector(
+    ".nbplay-samp-zone-file",
+  ) as HTMLInputElement;
+  const zoneRecBtn = root.querySelector(
+    ".nbplay-samp-zone-rec",
+  ) as HTMLButtonElement;
+  const zoneStatus = root.querySelector(
+    ".nbplay-samp-zone-status",
+  ) as HTMLSpanElement;
+  const zoneMap = root.querySelector(".nbplay-samp-zone-map") as HTMLDivElement;
+  const zoneList = root.querySelector(
+    ".nbplay-samp-zone-list",
+  ) as HTMLDivElement;
 
   const attackSlider = root.querySelector(
     ".nbplay-samp-attack",
@@ -972,6 +1076,297 @@ function render({
     velocitySensitiveInput.checked = model.get("velocity_sensitive") as boolean;
   }
 
+  // Multi-sample zones
+
+  function getZones(): Zone[] {
+    const raw = (model.get("zones") as Record<string, unknown>[]) || [];
+    return raw.map((z, index) => ({
+      id: String(z.id ?? index),
+      name: typeof z.name === "string" ? z.name : `Zone ${index + 1}`,
+      note_low: clampNote(z.note_low, 0),
+      note_high: clampNote(z.note_high, 127),
+      velocity_low: clampNote(z.velocity_low, 0),
+      velocity_high: clampNote(z.velocity_high, 127),
+      root_note: clampNote(z.root_note, 60),
+      sample_rate: Math.max(1, Number(z.sample_rate) || 44100),
+      samples: toFloat32(z.data) || new Float32Array(0),
+    }));
+  }
+
+  function writeZones(zones: Zone[]): void {
+    model.set(
+      "zones",
+      zones.map((z) => ({
+        id: z.id,
+        name: z.name,
+        note_low: z.note_low,
+        note_high: z.note_high,
+        velocity_low: z.velocity_low,
+        velocity_high: z.velocity_high,
+        root_note: z.root_note,
+        sample_rate: z.sample_rate,
+        length: z.samples.length,
+        data: float32ToDataView(z.samples),
+      })),
+    );
+    model.save_changes();
+    syncZones();
+  }
+
+  function addZone(
+    samples: Float32Array,
+    sampleRate: number,
+    name: string,
+    range: { low: number; high: number; root: number },
+  ): void {
+    const zones = getZones();
+    zones.push({
+      id: Math.random().toString(36).slice(2, 10),
+      name,
+      note_low: range.low,
+      note_high: range.high,
+      velocity_low: 0,
+      velocity_high: 127,
+      root_note: range.root,
+      sample_rate: sampleRate,
+      samples,
+    });
+    writeZones(zones);
+  }
+
+  /** Range for a captured sample: the selected pad's note, or every note. */
+  function captureRange(): { low: number; high: number; root: number } {
+    const pad = Number(zonePadSelect.value);
+    if (Number.isFinite(pad) && pad >= 0) {
+      const note = getPadNotes()[pad];
+      if (note !== undefined) return { low: note, high: note, root: note };
+    }
+    return { low: 0, high: 127, root: 60 };
+  }
+
+  function syncZonePadOptions(): void {
+    const current = zonePadSelect.value;
+    zonePadSelect.innerHTML = '<option value="-1">All notes</option>';
+    getPadNotes().forEach((note, index) => {
+      const opt = document.createElement("option");
+      opt.value = String(index);
+      opt.textContent = `Pad ${index + 1} (${noteName(note)})`;
+      zonePadSelect.appendChild(opt);
+    });
+    zonePadSelect.value = current || "-1";
+    if (zonePadSelect.selectedIndex < 0) zonePadSelect.value = "-1";
+  }
+
+  function syncZones(): void {
+    const zones = getZones();
+    sampler.setZones(zones);
+    zoneMap.innerHTML = "";
+    zoneList.innerHTML = "";
+    zoneMap.classList.toggle("empty", zones.length === 0);
+    zones.forEach((zone, index) => {
+      const color = ZONE_COLORS[index % ZONE_COLORS.length];
+      const span = document.createElement("div");
+      span.className = "nbplay-samp-zone-span";
+      span.style.left = `${(zone.note_low / 128) * 100}%`;
+      span.style.width = `${((zone.note_high - zone.note_low + 1) / 128) * 100}%`;
+      span.style.background = color;
+      span.title = `${zone.name}: ${noteName(zone.note_low)}\u2013${noteName(zone.note_high)}`;
+      zoneMap.appendChild(span);
+
+      const row = document.createElement("div");
+      row.className = "nbplay-samp-zone-row";
+      row.dataset.index = String(index);
+      row.innerHTML = `
+        <span class="nbplay-samp-zone-swatch" style="background:${color}"></span>
+        <input type="text" class="nbplay-samp-zone-name" value="" title="Zone name" />
+        <label>Low<input type="number" class="nbplay-samp-zone-low" min="0" max="127" value="${zone.note_low}" /></label>
+        <label>High<input type="number" class="nbplay-samp-zone-high" min="0" max="127" value="${zone.note_high}" /></label>
+        <label>Root<input type="number" class="nbplay-samp-zone-root" min="0" max="127" value="${zone.root_note}" /></label>
+        <span class="nbplay-samp-zone-len">${fmtLen(zone.samples.length, zone.sample_rate)}</span>
+        <button class="nbplay-samp-zone-remove" title="Remove zone">\u00d7</button>
+      `;
+      (row.querySelector(".nbplay-samp-zone-name") as HTMLInputElement).value =
+        zone.name;
+      const commit = (field: keyof Zone, raw: string) => {
+        const zones = getZones();
+        const target = zones[index];
+        if (!target) return;
+        if (field === "name") target.name = raw.trim() || target.name;
+        else if (field === "note_low" || field === "note_high") {
+          const v = clampNote(raw, target[field]);
+          target[field] = v;
+          if (target.note_low > target.note_high) {
+            if (field === "note_low") target.note_high = v;
+            else target.note_low = v;
+          }
+        } else if (field === "root_note")
+          target.root_note = clampNote(raw, target.root_note);
+        writeZones(zones);
+      };
+      row
+        .querySelector(".nbplay-samp-zone-name")!
+        .addEventListener("change", (e) =>
+          commit("name", (e.target as HTMLInputElement).value),
+        );
+      row
+        .querySelector(".nbplay-samp-zone-low")!
+        .addEventListener("change", (e) =>
+          commit("note_low", (e.target as HTMLInputElement).value),
+        );
+      row
+        .querySelector(".nbplay-samp-zone-high")!
+        .addEventListener("change", (e) =>
+          commit("note_high", (e.target as HTMLInputElement).value),
+        );
+      row
+        .querySelector(".nbplay-samp-zone-root")!
+        .addEventListener("change", (e) =>
+          commit("root_note", (e.target as HTMLInputElement).value),
+        );
+      row
+        .querySelector(".nbplay-samp-zone-remove")!
+        .addEventListener("click", () => {
+          const zones = getZones();
+          zones.splice(index, 1);
+          writeZones(zones);
+        });
+      zoneList.appendChild(row);
+    });
+  }
+
+  async function decodeToMono(
+    data: ArrayBuffer,
+  ): Promise<{ samples: Float32Array; sampleRate: number } | null> {
+    const decodeCtx = createAudioContext();
+    if (!decodeCtx) return null;
+    try {
+      const audioBuffer = await decodeCtx.decodeAudioData(data);
+      return {
+        samples: mixToMono(audioBuffer),
+        sampleRate: audioBuffer.sampleRate,
+      };
+    } finally {
+      if (decodeCtx.state !== "closed") decodeCtx.close();
+    }
+  }
+
+  async function addZoneFromFile(file: File): Promise<void> {
+    const decoded = await decodeToMono(await file.arrayBuffer());
+    if (!decoded) return;
+    addZone(decoded.samples, decoded.sampleRate, file.name, captureRange());
+    zoneStatus.textContent = `Added ${file.name}`;
+  }
+
+  /** Python asked for a timeline clip (by browser URL) to become a zone. */
+  let lastCaptureNonce: unknown = undefined;
+  async function handleCaptureRequest(): Promise<void> {
+    const req = model.get("capture_request") as
+      | {
+          url?: string;
+          name?: string;
+          note_low?: number;
+          note_high?: number;
+          root_note?: number;
+          offset?: number;
+          duration?: number;
+        }
+      | undefined;
+    if (!req?.url) return;
+    const nonce = (req as { nonce?: unknown }).nonce;
+    if (nonce !== undefined && nonce === lastCaptureNonce) return;
+    lastCaptureNonce = nonce;
+    zoneStatus.textContent = "Capturing\u2026";
+    try {
+      const response = await fetch(req.url);
+      const decoded = await decodeToMono(await response.arrayBuffer());
+      if (!decoded) throw new Error("Web Audio is unavailable");
+      let samples = decoded.samples;
+      const start = Math.max(
+        0,
+        Math.floor((req.offset || 0) * decoded.sampleRate),
+      );
+      const frames =
+        req.duration && req.duration > 0
+          ? Math.max(1, Math.round(req.duration * decoded.sampleRate))
+          : samples.length - start;
+      if (start > 0 || start + frames < samples.length) {
+        samples = samples.slice(
+          start,
+          Math.min(samples.length, start + frames),
+        );
+      }
+      const low = clampNote(req.note_low, 0);
+      const high = clampNote(req.note_high, 127);
+      addZone(samples, decoded.sampleRate, req.name || "Take", {
+        low: Math.min(low, high),
+        high: Math.max(low, high),
+        root: clampNote(req.root_note, low),
+      });
+      zoneStatus.textContent = `Captured ${req.name || "take"}`;
+    } catch (err) {
+      zoneStatus.textContent = `Capture failed: ${err instanceof Error ? err.message : String(err)}`;
+    }
+  }
+
+  // Record the microphone straight into a zone on the selected pad.
+  let recorder: MediaRecorder | null = null;
+  let recorderStream: MediaStream | null = null;
+  let recorderChunks: Blob[] = [];
+
+  async function startZoneRecording(): Promise<void> {
+    const nav = navigator as Navigator & {
+      mediaDevices?: {
+        getUserMedia?: (c: MediaStreamConstraints) => Promise<MediaStream>;
+      };
+    };
+    const Recorder = (globalThis as { MediaRecorder?: typeof MediaRecorder })
+      .MediaRecorder;
+    if (!Recorder || !nav.mediaDevices?.getUserMedia) {
+      zoneStatus.textContent = "Microphone recording is unavailable";
+      return;
+    }
+    try {
+      recorderStream = await nav.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      zoneStatus.textContent = `Microphone unavailable: ${err instanceof Error ? err.message : String(err)}`;
+      return;
+    }
+    const range = captureRange();
+    const takeName = `Take ${getZones().length + 1}`;
+    recorderChunks = [];
+    recorder = new Recorder(recorderStream);
+    recorder.addEventListener("dataavailable", (e: BlobEvent) => {
+      if (e.data && e.data.size) recorderChunks.push(e.data);
+    });
+    recorder.addEventListener("stop", async () => {
+      const blob = new Blob(recorderChunks, {
+        type: recorder?.mimeType || "audio/webm",
+      });
+      recorderChunks = [];
+      recorderStream?.getTracks().forEach((track) => track.stop());
+      recorderStream = null;
+      recorder = null;
+      zoneRecBtn.textContent = "Rec";
+      zoneRecBtn.classList.remove("recording");
+      if (!blob.size) {
+        zoneStatus.textContent = "No audio was captured";
+        return;
+      }
+      const decoded = await decodeToMono(await blob.arrayBuffer());
+      if (!decoded) return;
+      addZone(decoded.samples, decoded.sampleRate, takeName, range);
+      zoneStatus.textContent = `Captured ${takeName}`;
+    });
+    recorder.start();
+    zoneRecBtn.textContent = "Stop";
+    zoneRecBtn.classList.add("recording");
+    zoneStatus.textContent = `Recording ${takeName}\u2026`;
+  }
+
+  function stopZoneRecording(): void {
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+  }
+
   function applyPadCount(rawCount: number): void {
     if (Number.isNaN(rawCount)) return;
     const count = Math.max(1, Math.min(32, Math.round(rawCount)));
@@ -1130,8 +1525,23 @@ function render({
     }
   });
 
+  zoneFileInput.addEventListener("change", () => {
+    const file = zoneFileInput.files?.[0];
+    if (file) {
+      addZoneFromFile(file);
+      zoneFileInput.value = "";
+    }
+  });
+
+  zoneRecBtn.addEventListener("click", () => {
+    if (recorder) stopZoneRecording();
+    else startZoneRecording();
+  });
+
   // Model observers
 
+  model.on("change:zones", syncZones);
+  model.on("change:capture_request", handleCaptureRequest);
   model.on("change:waveform", redrawWaveform);
   model.on("change:sample_data", redrawWaveform);
   model.on("change:sample_name", syncInfo);
@@ -1147,6 +1557,7 @@ function render({
     }
     syncPadCount();
     createPads();
+    syncZonePadOptions();
   });
   model.on("change:pad_velocities", createPads);
   model.on("change:pad_actions", createPads);
@@ -1154,6 +1565,7 @@ function render({
   model.on("change:pad_count", () => {
     syncPadCount();
     createPads();
+    syncZonePadOptions();
   });
   model.on("change:velocity", () => {
     syncVelocityControls();
@@ -1229,6 +1641,8 @@ function render({
   redrawWaveform();
   redrawEnvelope();
   createPads();
+  syncZonePadOptions();
+  syncZones();
 
   // Cleanup
   const cancelDisconnect = onKernelDisconnect(model, () => {
@@ -1238,6 +1652,8 @@ function render({
   return () => {
     cancelDisconnect();
     clearInterval(voiceCounterInterval);
+    stopZoneRecording();
+    recorderStream?.getTracks().forEach((track) => track.stop());
     document.removeEventListener("nbplay-bus-ready", onBusReady);
     // Unregister from session bus
     const sid = model.get("session_id") as string;
