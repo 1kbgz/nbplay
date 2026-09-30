@@ -1,24 +1,24 @@
 {
   "nbplay": {
     "releases": {
-      "0.2.0": [
+      "0.3.0": [
         {
           "comment_text": "",
           "digests": {
-            "md5": "541fac802666d830e7a9194cd548eca3",
-            "sha256": "3cc2e65e18248d804e9543dbbab5be907774ee9470e3537a6d16d4425d255a75"
+            "md5": "2656da16b24230f7729f82e3354a7659",
+            "sha256": "243eb2892159baf6726feea9d1334c7d909309b580bead0fd69424a2182bc164"
           },
           "downloads": -1,
-          "filename": "nbplay-0.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+          "filename": "nbplay-0.3.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
           "has_sig": false,
-          "md5_digest": "541fac802666d830e7a9194cd548eca3",
+          "md5_digest": "2656da16b24230f7729f82e3354a7659",
           "packagetype": "bdist_wheel",
           "python_version": "py3",
           "requires_python": ">=3.11",
           "size": 621527,
-          "upload_time": "2026-09-30T01:24:40.967313Z",
-          "upload_time_iso_8601": "2026-09-30T01:24:40.967313Z",
-          "url": "./nbplay-0.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+          "upload_time": "2026-09-30T02:22:05.920409Z",
+          "upload_time_iso_8601": "2026-09-30T02:22:05.920409Z",
+          "url": "./nbplay-0.3.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
           "yanked": false,
           "yanked_reason": null
         }
