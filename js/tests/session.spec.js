@@ -323,6 +323,38 @@ test.describe("Session clock", () => {
     expect(state.onSharedGrid).toBe(true);
   });
 
+  test("a sequencer that does not follow the transport stays silent until its own play", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      follow_transport: false,
+    });
+    await renderWidget(page, "sequencer", "b", SEQUENCER_DEFAULTS);
+
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => (window.__oscStarts.b?.length || 0) >= 2);
+    const silent = await page.evaluate(() => ({
+      a: window.__oscStarts.a?.length || 0,
+      aPlaying: window.__models.a._state.is_playing,
+    }));
+    expect(silent).toEqual({ a: 0, aPlaying: false });
+
+    await page.locator(".nbplay-transport-stop").click();
+    await page.evaluate(() => {
+      window.__oscStarts = {};
+    });
+    await page.locator(".nbplay-seq-play").first().click();
+    await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
+    const own = await page.evaluate(() => ({
+      aPlaying: window.__models.a._state.is_playing,
+      transportPlaying: window.__models.transport._state.is_playing,
+    }));
+    expect(own).toEqual({ aPlaying: true, transportPlaying: true });
+  });
+
   test("standalone sequencer uses a private clock", async ({ page }) => {
     await renderWidget(page, "sequencer", "solo", {
       ...SEQUENCER_DEFAULTS,

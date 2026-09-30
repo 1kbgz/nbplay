@@ -325,6 +325,25 @@ def _normalize_midi_events(events):
     )
 
 
+def _steps_to_events(voices_data, step_duration=0.25):
+    """Expand sequencer voices (lists of step dicts) into MIDI events in beats."""
+    step_duration = max(0.001, float(step_duration))
+    events = []
+    for voice in voices_data or []:
+        for index, step in enumerate(voice or []):
+            if not step.get("active", False) or float(step.get("probability", 100)) <= 0:
+                continue
+            events.append(
+                {
+                    "beat": index * step_duration,
+                    "duration": max(0.001, float(step.get("duration_ticks", 1)) * step_duration),
+                    "note": int(step.get("note", 60)),
+                    "velocity": int(step.get("velocity", 100)),
+                }
+            )
+    return _normalize_midi_events(events)
+
+
 def _normalize_timeline_track(track, index=0):
     if isinstance(track, TimelineTrack):
         return track.to_dict()
@@ -382,6 +401,8 @@ def _normalize_audio_clip(clip, index=0, track_count=None):
     }
     if kind == "midi":
         normalized["events"] = _normalize_midi_events(data.get("events"))
+        if data.get("pattern"):
+            normalized["pattern"] = str(data["pattern"])
     if data.get("blob_size") is not None:
         normalized["blob_size"] = max(0, int(data["blob_size"]))
     if data.get("color") is not None:
@@ -416,6 +437,7 @@ class AudioClip:
         color=None,
         kind="audio",
         events=None,
+        pattern=None,
     ):
         data = {
             "id": id or _clip_id(),
@@ -440,6 +462,8 @@ class AudioClip:
         if events is not None:
             data["events"] = events
             data["kind"] = "midi"
+        if pattern:
+            data["pattern"] = pattern
         self._data = _normalize_audio_clip(data)
 
     def to_dict(self):
@@ -1011,6 +1035,9 @@ class SequencerWidget(anywidget.AnyWidget):
     is_playing = traitlets.Bool(False).tag(sync=True)
     current_step = traitlets.Int(-1).tag(sync=True)
     loop_enabled = traitlets.Bool(True).tag(sync=True)
+    # When false the sequencer ignores transport play (its own play button
+    # still works), so pattern clips on its lane can drive the track instead.
+    follow_transport = traitlets.Bool(True).tag(sync=True)
     num_voices = traitlets.Int(1).tag(sync=True)
 
     # Session routing (set by Session to route audio through mixer)
@@ -2112,6 +2139,25 @@ class TimelineWidget(anywidget.AnyWidget):
             duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
         return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
 
+    def add_pattern_clip(self, name, pattern, track_index=0, start=0.0, step_duration=0.25, repeat=1, duration=None, **kwargs):
+        """Append a MIDI clip that plays ``pattern`` (steps) ``repeat`` times.
+
+        ``pattern`` is anything ``LauncherWidget.set_slot`` accepts: a
+        ``SequencerWidget``, a ``NoteComposer``, a list of step dicts, or a
+        list of voices. Active steps become notes at ``step_duration`` beats
+        per step; the clip's ``pattern`` field records ``name`` so
+        ``Session.update_pattern()`` can regenerate it later.
+        """
+        voices = _slot_voices(pattern)
+        step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
+        length = max(len(voice) for voice in voices) * step_duration
+        base = _steps_to_events(voices, step_duration)
+        repeat = max(1, int(repeat))
+        events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+        if duration is None:
+            duration = length * repeat
+        return self.add_midi_clip(name, track_index=track_index, start=start, events=events, duration=duration, pattern=name, **kwargs)
+
     def export_midi_clip(self, clip_id, path=None):
         """Write one MIDI clip to a ``.mid`` file (or return the ``mido.MidiFile``)."""
         from nbplay.midi import build_midi
@@ -2552,6 +2598,7 @@ _SEQUENCER_STATE = (
     "groove",
     "automation_lanes",
     "loop_enabled",
+    "follow_transport",
 )
 _SYNTH_STATE = ("oscillator_type", "frequency", "amplitude", "sample_rate")
 _SAMPLER_STATE = (
@@ -2646,7 +2693,7 @@ def _sequencer_from_dict(state):
         return None
     ctor = {k: state[k] for k in ("num_voices", "length", "measures", "step_duration", "time_signature_num", "time_signature_den") if k in state}
     sequencer = SequencerWidget(**ctor)
-    for name in ("swing", "groove", "automation_lanes", "loop_enabled"):
+    for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport"):
         if name in state:
             setattr(sequencer, name, state[name])
     if state.get("voices_data"):
@@ -2688,6 +2735,7 @@ def _session_to_dict(session, resources=None):
         "tracks": tracks,
         "timeline": {**_widget_state(session.timeline, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.tracks), "clips": clips},
         "launcher": _widget_state(session.launcher, ("quantize", "scenes", "slots")),
+        "patterns": _json_copy(session.patterns),
     }
     return (data, resources) if resources is not None else data
 
@@ -2762,6 +2810,8 @@ def _session_from_dict(cls, data, resources):
         session.launcher.slots = launcher_data["slots"]
     if "quantize" in launcher_data:
         session.launcher.quantize = launcher_data["quantize"]
+    for name, pattern in data.get("patterns", {}).items():
+        session.add_pattern(name, pattern.get("voices_data", []), step_duration=pattern.get("step_duration", 0.25))
     return session
 
 
@@ -3424,6 +3474,8 @@ class Session:
             traitlets.dlink((self.transport, "current_beat"), (self.timeline, "current_beat")),
         ]
         self.tracks = []
+        # Named patterns for the tracking view: name -> {voices_data, step_duration}.
+        self.patterns = {}
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False
@@ -3557,6 +3609,103 @@ class Session:
                         t.sequencer.channel_index -= 1
                     if hasattr(t.sound_source, "channel_index"):
                         t.sound_source.channel_index -= 1
+
+    # Pattern chaining
+
+    def _track_index(self, track):
+        if isinstance(track, Track):
+            index = self.tracks.index(track)
+        elif isinstance(track, str):
+            names = [item.name for item in self.tracks]
+            if track not in names:
+                raise ValueError(f"no track named {track!r}")
+            index = names.index(track)
+        else:
+            index = int(track)
+            if not 0 <= index < len(self.tracks):
+                raise IndexError(f"track index out of range: {index}")
+        return index
+
+    def add_pattern(self, name, pattern, step_duration=None):
+        """Register a named pattern for chaining; returns its stored form.
+
+        ``pattern`` is a ``SequencerWidget`` (its grid and step duration are
+        used), a ``NoteComposer``, a list of step dicts, or a list of voices.
+        """
+        voices = _slot_voices(pattern)
+        if step_duration is None:
+            step_duration = pattern.step_duration if isinstance(pattern, SequencerWidget) else 0.25
+        length = max(len(voice) for voice in voices)
+        entry = {
+            "voices_data": [[dict(step) for step in voice] + _default_steps(length - len(voice)) for voice in voices],
+            "step_duration": _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0),
+        }
+        self.patterns[str(name)] = entry
+        return entry
+
+    def remove_pattern(self, name):
+        """Forget a pattern; clips already placed keep playing as MIDI clips."""
+        del self.patterns[str(name)]
+
+    def chain(self, track, names, start=0.0, repeat=1):
+        """Place named patterns back to back on a track's lane; returns the clips.
+
+        Each name becomes one pattern clip that plays ``repeat`` times. A
+        track with a sequencer stops following the transport
+        (``follow_transport = False``) so the arrangement drives it; the
+        clips play through the track's sampler or the built-in oscillator.
+        """
+        index = self._track_index(track)
+        item = self.tracks[index]
+        missing = [name for name in names if str(name) not in self.patterns]
+        if missing:
+            raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
+        if item.sequencer is not None:
+            item.sequencer.follow_transport = False
+        clips = []
+        position = _nonnegative_number(start, "start")
+        for name in names:
+            pattern = self.patterns[str(name)]
+            clip = self.timeline.add_pattern_clip(
+                str(name),
+                pattern["voices_data"],
+                track_index=index,
+                start=position,
+                step_duration=pattern["step_duration"],
+                repeat=repeat,
+            )
+            clips.append(clip)
+            position += clip["duration"]
+        end = max(self.timeline.length, math.ceil(position))
+        self.timeline.length = max(self.timeline.length, end)
+        return clips
+
+    def update_pattern(self, name, pattern, step_duration=None):
+        """Replace a pattern and regenerate every clip placed from it."""
+        name = str(name)
+        entry = self.add_pattern(name, pattern, step_duration=step_duration)
+        scratch = TimelineWidget()
+        clips = []
+        for clip in self.timeline.clips:
+            if clip.get("pattern") != name:
+                clips.append(clip)
+                continue
+            length = max(len(voice) for voice in entry["voices_data"]) * entry["step_duration"]
+            repeat = max(1, round(clip["duration"] / length)) if length > 0 else 1
+            rebuilt = scratch.add_pattern_clip(
+                name,
+                entry["voices_data"],
+                track_index=clip["track_index"],
+                start=clip["start"],
+                step_duration=entry["step_duration"],
+                repeat=repeat,
+                duration=clip["duration"],
+                id=clip["id"],
+                muted=clip.get("muted", False),
+            )
+            clips.append(rebuilt)
+        self.timeline.clips = clips
+        return entry
 
     # MIDI files
 

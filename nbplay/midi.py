@@ -34,21 +34,9 @@ def steps_to_events(voices_data, step_duration=0.25):
     ``duration_ticks`` counts steps, so a duration of 2 at eighth-note
     resolution is one beat.
     """
-    step_duration = max(0.001, float(step_duration))
-    events = []
-    for voice in voices_data or []:
-        for index, step in enumerate(voice or []):
-            if not step.get("active", False) or float(step.get("probability", 100)) <= 0:
-                continue
-            events.append(
-                {
-                    "beat": index * step_duration,
-                    "duration": max(0.001, float(step.get("duration_ticks", 1)) * step_duration),
-                    "note": int(step.get("note", 60)),
-                    "velocity": int(step.get("velocity", 100)),
-                }
-            )
-    return _normalize_events(events)
+    from nbplay.widget import _steps_to_events
+
+    return _steps_to_events(voices_data, step_duration)
 
 
 def events_to_voices(events, step_duration=0.25, length=None, max_voices=8):
