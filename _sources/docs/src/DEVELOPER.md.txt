@@ -436,7 +436,7 @@ Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
 `compressor`, `limiter`, `delay`, and `reverb`. A descriptor with
 `enabled: false` is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
-bypass and the small × next to it removes the effect;
+bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
 `set_channel_effect_enabled()` and `set_master_effect_enabled()` do the same
 from Python, and `EffectPlugin(..., enabled=False)` builds a bypassed
 descriptor. Unknown descriptor types are left intact when their params are
@@ -452,6 +452,15 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 `GainNode`, and a master insert chain connected to destination. Mute/solo
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
+
+The parameter editor lists each built-in effect's parameters with the same
+ranges the Python `EffectPlugin` enforces (a slider plus a number box for
+bounded numbers, a select for the filter type) and, for custom plugin types,
+every JSON field of the descriptor as a number, text, or checkbox input. Edits
+write the descriptor back to `channels[i].effects` or `master_effects` on every
+input event. Only a change in chain structure (effect type or bypass) rebuilds
+the strip DOM; parameter changes refresh chip labels and open editors in place
+so sliders keep focus, and open editors are restored after a rebuild.
 
 Insert chains update in place. Each built-in effect unit exposes
 `update(descriptor)`, which writes the new parameters to the existing
@@ -908,6 +917,12 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `timeline.pending_exports` to reach zero. On load, cached clips go back through
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
+
+### MIDI files
+
+`nbplay/midi.py` reads and writes `.mid` files through `mido`, an optional dependency installed with `pip install "nbplay[midi]"`. Everything works in beats, the unit the widgets use, and converts to ticks (480 per beat) only at the file boundary. `read_midi()` turns a path, bytes, or file object into beat-based tracks (`name`, `channel`, `events`), pairing note-ons with note-offs and treating velocity-zero note-ons as note-offs; tracks without notes are left out, and the first tempo and time signature are reported. `build_midi()` / `write_midi()` go the other way, with a tempo and time signature meta track first.
+
+On top of that: `SequencerWidget.to_midi()` exports a pattern (step index times `step_duration` is the beat, `duration_ticks` the length) and `load_midi()` quantizes a file onto the grid, one voice per overlapping note up to `max_voices`, growing `length` to fit. `TimelineWidget.export_midi_clip()` and `import_midi()` move MIDI clips in and out. `Session.export_midi()` writes one track per sequencer plus one per MIDI clip at its timeline position, and `Session.import_midi()` adds one MIDI lane per track with the track as a clip, applying the file's tempo unless told not to.
 
 ### Rust tests
 

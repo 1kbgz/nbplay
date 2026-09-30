@@ -811,6 +811,28 @@ Module Contents
 
 
 
+   .. py:method:: to_midi(path=None, name='Sequencer')
+
+      Export the pattern as a ``mido.MidiFile`` (written to ``path`` if given).
+
+      Every voice's active steps become notes; step index times
+      ``step_duration`` gives the beat, ``duration_ticks`` the length. The
+      file carries the sequencer's BPM and time signature.
+
+
+
+   .. py:method:: load_midi(source, track=None, step_duration=None, max_voices=8)
+
+      Replace the pattern with notes from a MIDI file.
+
+      ``track`` picks one track by index; by default every track with
+      notes is merged. Notes are quantized to ``step_duration`` (defaults
+      to the current grid), overlapping notes go to separate voices up to
+      ``max_voices``, and the grid grows to fit the last note. The file's
+      tempo is applied to ``bpm``. Returns self.
+
+
+
    .. py:method:: to_pattern(voice=0)
 
       Build a Rust ``Pattern`` from the given voice.
@@ -1337,6 +1359,21 @@ Module Contents
       ``velocity``; beats are relative to the clip start), ``NoteEvent``
       objects, or an ``EventSequence``. ``duration`` defaults to the end
       of the last event, at least one beat.
+
+
+
+   .. py:method:: export_midi_clip(clip_id, path=None)
+
+      Write one MIDI clip to a ``.mid`` file (or return the ``mido.MidiFile``).
+
+
+
+   .. py:method:: import_midi(source, track_index=0, start=0.0)
+
+      Add one MIDI clip per MIDI track with notes, all on one lane at ``start``.
+
+      Returns the clips added. Beats in the file map straight onto the
+      timeline; the file's tempo is not applied.
 
 
 
@@ -2183,6 +2220,25 @@ Module Contents
       Remove a track, unlinking transport and removing mixer channel.
 
       :param index: Zero-based track index.
+
+
+
+   .. py:method:: export_midi(path=None)
+
+      Export the session's sequencer patterns and MIDI clips as one MIDI file.
+
+      Each sequencer track becomes one MIDI track from beat 0; each MIDI
+      clip becomes one MIDI track placed at its timeline position. Returns
+      the ``mido.MidiFile`` (written to ``path`` if given).
+
+
+
+   .. py:method:: import_midi(source, *, apply_tempo=True)
+
+      Add one MIDI lane per MIDI track with notes, each holding the track as a clip.
+
+      Returns the new ``Track`` objects. With ``apply_tempo`` the file's
+      tempo and time signature are written to the transport.
 
 
 

@@ -75,6 +75,9 @@ session.launcher.set_slot(drums.mixer_channel, 0, drums.sequencer, name="Beat")
 session.play()   # or press play on any widget; they share the clock
 ```
 
+Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
+`session.export_midi("song.mid")`, and `session.import_midi(path)`.
+
 The example notebooks in `examples/` walk through each widget and end with a
 full DAW playground and the beats view.
 

@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="test_all" href="../../test_all/index.html"><link rel="prev" title="nbplay" href="../index.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="test_all" href="../../test_all/index.html"><link rel="prev" title="nbplay.midi" href="../midi/index.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>nbplay.widget - nbplay v0.2.0</title>
@@ -200,6 +200,7 @@
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">nbplay.widget</a></li>
 </ul>
 </li>
@@ -1530,6 +1531,26 @@ gives eighth-notes and <code class="docutils literal notranslate"><span class="p
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.to_midi">
+<span class="sig-name descname"><span class="pre">to_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Sequencer'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Export the pattern as a <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code> (written to <code class="docutils literal notranslate"><span class="pre">path</span></code> if given).</p>
+<p>Every voice’s active steps become notes; step index times
+<code class="docutils literal notranslate"><span class="pre">step_duration</span></code> gives the beat, <code class="docutils literal notranslate"><span class="pre">duration_ticks</span></code> the length. The
+file carries the sequencer’s BPM and time signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.load_midi">
+<span class="sig-name descname"><span class="pre">load_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_voices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.load_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.load_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Replace the pattern with notes from a MIDI file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">track</span></code> picks one track by index; by default every track with
+notes is merged. Notes are quantized to <code class="docutils literal notranslate"><span class="pre">step_duration</span></code> (defaults
+to the current grid), overlapping notes go to separate voices up to
+<code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, and the grid grows to fit the last note. The file’s
+tempo is applied to <code class="docutils literal notranslate"><span class="pre">bpm</span></code>. Returns self.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.to_pattern">
 <span class="sig-name descname"><span class="pre">to_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.to_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.to_pattern" title="Link to this definition">¶</a></dt>
 <dd><p>Build a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> from the given voice.</p>
@@ -2282,6 +2303,20 @@ channel so instrument output is bounced to an audio clip.</p>
 <code class="docutils literal notranslate"><span class="pre">velocity</span></code>; beats are relative to the clip start), <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code>
 objects, or an <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>. <code class="docutils literal notranslate"><span class="pre">duration</span></code> defaults to the end
 of the last event, at least one beat.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.export_midi_clip">
+<span class="sig-name descname"><span class="pre">export_midi_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.export_midi_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.export_midi_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Write one MIDI clip to a <code class="docutils literal notranslate"><span class="pre">.mid</span></code> file (or return the <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.import_midi">
+<span class="sig-name descname"><span class="pre">import_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.import_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.import_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Add one MIDI clip per MIDI track with notes, all on one lane at <code class="docutils literal notranslate"><span class="pre">start</span></code>.</p>
+<p>Returns the clips added. Beats in the file map straight onto the
+timeline; the file’s tempo is not applied.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3381,6 +3416,23 @@ an audio-only lane.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.export_midi">
+<span class="sig-name descname"><span class="pre">export_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.export_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.export_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Export the session’s sequencer patterns and MIDI clips as one MIDI file.</p>
+<p>Each sequencer track becomes one MIDI track from beat 0; each MIDI
+clip becomes one MIDI track placed at its timeline position. Returns
+the <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code> (written to <code class="docutils literal notranslate"><span class="pre">path</span></code> if given).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.import_midi">
+<span class="sig-name descname"><span class="pre">import_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.import_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.import_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Add one MIDI lane per MIDI track with notes, each holding the track as a clip.</p>
+<p>Returns the new <code class="docutils literal notranslate"><span class="pre">Track</span></code> objects. With <code class="docutils literal notranslate"><span class="pre">apply_tempo</span></code> the file’s
+tempo and time signature are written to the transport.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.to_dict">
 <span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.to_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Serialize the session to a JSON-safe dict (no binary payloads).</p>
@@ -3444,14 +3496,14 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../index.html">
+          <a class="prev-page" href="../midi/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">nbplay</div>
+                <div class="title">nbplay.midi</div>
                 
               </div>
             </a>
@@ -3676,6 +3728,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.set_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.set_step()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.toggle_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.toggle_step()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.clear"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.clear()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.to_midi"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.to_midi()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.load_midi"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.load_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.to_pattern"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.to_pattern()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.to_step_sequencer"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.to_step_sequencer()</span></code></a></li>
 </ul>
@@ -3795,6 +3849,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.arm_track"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.arm_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_midi_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_midi_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.export_midi_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.export_midi_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.import_midi"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.import_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.clip_to_event_sequence"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.clip_to_event_sequence()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.remove_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.remove_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.move_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.move_clip()</span></code></a></li>
@@ -3971,6 +4027,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.Session.seek"><code class="docutils literal notranslate"><span class="pre">Session.seek()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.add_track"><code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.remove_track"><code class="docutils literal notranslate"><span class="pre">Session.remove_track()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.export_midi"><code class="docutils literal notranslate"><span class="pre">Session.export_midi()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.import_midi"><code class="docutils literal notranslate"><span class="pre">Session.import_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.to_dict"><code class="docutils literal notranslate"><span class="pre">Session.to_dict()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.save"><code class="docutils literal notranslate"><span class="pre">Session.save()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.load"><code class="docutils literal notranslate"><span class="pre">Session.load()</span></code></a></li>

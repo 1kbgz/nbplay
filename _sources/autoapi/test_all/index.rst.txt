@@ -48,6 +48,7 @@ Classes
    test_all.TestTimelineDescriptors
    test_all.TestTimelineWidget
    test_all.TestLauncherWidget
+   test_all.TestMidiFiles
    test_all.TestSessionPersistence
    test_all.TestTrack
    test_all.TestSession
@@ -1255,6 +1256,26 @@ Module Contents
 
 
    .. py:method:: test_repr()
+
+
+.. py:class:: TestMidiFiles
+
+   .. py:method:: test_sequencer_round_trip(tmp_path)
+
+
+   .. py:method:: test_load_midi_track_selection_and_voice_limit(tmp_path)
+
+
+   .. py:method:: test_read_midi_handles_running_note_ons_and_empty_tracks(tmp_path)
+
+
+   .. py:method:: test_events_to_voices_edge_cases(tmp_path)
+
+
+   .. py:method:: test_timeline_clip_export_and_import(tmp_path)
+
+
+   .. py:method:: test_session_export_and_import(tmp_path)
 
 
 .. py:class:: TestSessionPersistence

@@ -1,0 +1,89 @@
+nbplay.midi
+===========
+
+.. py:module:: nbplay.midi
+
+.. autoapi-nested-parse::
+
+   MIDI file import and export.
+
+   Everything here works in beats (quarter notes), the unit the widgets use, and
+   converts to and from MIDI ticks at the file boundary. The file reader and
+   writer come from `mido`, an optional dependency: ``pip install nbplay[midi]``.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   nbplay.midi.TICKS_PER_BEAT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.midi._mido
+   nbplay.midi._normalize_events
+   nbplay.midi.steps_to_events
+   nbplay.midi.events_to_voices
+   nbplay.midi.build_midi
+   nbplay.midi.write_midi
+   nbplay.midi.read_midi
+
+
+Module Contents
+---------------
+
+.. py:data:: TICKS_PER_BEAT
+   :value: 480
+
+
+.. py:function:: _mido()
+
+.. py:function:: _normalize_events(events)
+
+.. py:function:: steps_to_events(voices_data, step_duration=0.25)
+
+   Turn sequencer voices (lists of step dicts) into MIDI events in beats.
+
+   Inactive steps and steps with ``probability`` 0 are skipped. A step's
+   ``duration_ticks`` counts steps, so a duration of 2 at eighth-note
+   resolution is one beat.
+
+
+.. py:function:: events_to_voices(events, step_duration=0.25, length=None, max_voices=8)
+
+   Quantize MIDI events onto a step grid, one voice per overlapping note.
+
+   Returns ``(voices_data, length)``. Notes are snapped to the nearest step;
+   when two notes land on the same step they go to separate voices, up to
+   ``max_voices``, and anything beyond that is dropped.
+
+
+.. py:function:: build_midi(tracks, bpm=120.0, time_signature=(4, 4), ticks_per_beat=TICKS_PER_BEAT)
+
+   Build a ``mido.MidiFile`` from tracks of beat-based events.
+
+   ``tracks`` is an iterable of dicts with ``name``, ``events`` (beat,
+   duration, note, velocity), and an optional ``channel`` (0-15).
+
+
+.. py:function:: write_midi(tracks, path, **kwargs)
+
+   Write tracks of beat-based events to a ``.mid`` file and return the path.
+
+
+.. py:function:: read_midi(source)
+
+   Read a MIDI file (path, bytes, or file object) into beat-based tracks.
+
+   Returns ``{"bpm", "time_signature", "ticks_per_beat", "tracks"}`` where
+   each track is ``{"name", "channel", "events"}``. Tracks without notes are
+   left out. Beats are counted from the file's ticks, so tempo changes do not
+   move notes; the first tempo and time signature are reported.
+
+

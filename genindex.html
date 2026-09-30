@@ -198,6 +198,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -417,6 +418,8 @@
           <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._measure_beats">(nbplay.widget.SequencerWidget method)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi._mido">_mido() (in module nbplay.midi)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session._mirroring_mute_solo">_mirroring_mute_solo (nbplay.widget.Session attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._nonnegative_number">_nonnegative_number() (in module nbplay.widget)</a>
@@ -428,6 +431,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_effect">_normalize_effect() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_effects">_normalize_effects() (in module nbplay.widget)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi._normalize_events">_normalize_events() (in module nbplay.midi)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_launcher_slot">_normalize_launcher_slot() (in module nbplay.widget)</a>
 </li>
@@ -443,10 +448,10 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._normalize_params">_normalize_params() (nbplay.widget.EffectPlugin method)</a>
 </li>
-        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_sample_slices">_normalize_sample_slices() (in module nbplay.widget)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_sample_slices">_normalize_sample_slices() (in module nbplay.widget)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_track">_normalize_timeline_track() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_tracks">_normalize_timeline_tracks() (in module nbplay.widget)</a>
@@ -729,6 +734,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SettingsWidget.buffer_size">buffer_size (nbplay.widget.SettingsWidget attribute)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.build_midi">build_midi() (in module nbplay.midi)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -837,13 +844,19 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin.enabled">enabled (nbplay.widget.EffectPlugin attribute)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.events_to_voices">events_to_voices() (in module nbplay.midi)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_all_clips">export_all_clips() (nbplay.widget.TimelineWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_clip">export_clip() (nbplay.widget.TimelineWidget method)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_clip">export_clip() (nbplay.widget.TimelineWidget method)</a>
-</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_clip_id">export_clip_id (nbplay.widget.TimelineWidget attribute)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.export_midi">export_midi() (nbplay.widget.Session method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_midi_clip">export_midi_clip() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.exported_clip">exported_clip (nbplay.widget.TimelineWidget attribute)</a>
 </li>
@@ -895,6 +908,12 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.import_clip_request">import_clip_request (nbplay.widget.TimelineWidget attribute)</a>
 </li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.import_midi">import_midi() (nbplay.widget.Session method)</a>
+
+        <ul>
+          <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.import_midi">(nbplay.widget.TimelineWidget method)</a>
+</li>
+        </ul></li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.is_playing">is_playing (nbplay.widget.LauncherWidget attribute)</a>
 
         <ul>
@@ -967,10 +986,10 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.launcher">launcher (nbplay.widget.Session attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget">LauncherWidget (class in nbplay.widget)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.length">length (nbplay.widget.SequencerWidget attribute)</a>
 
         <ul>
@@ -980,6 +999,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.load">load() (nbplay.widget.Session class method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_audio_file">load_audio_file() (nbplay.widget.SamplerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.load_midi">load_midi() (nbplay.widget.SequencerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_sample">load_sample() (nbplay.widget.SamplerWidget method)</a>
 </li>
@@ -1039,6 +1060,8 @@
         <ul>
           <li><a href="autoapi/nbplay/index.html#module-nbplay">nbplay</a>
 </li>
+          <li><a href="autoapi/nbplay/midi/index.html#module-nbplay.midi">nbplay.midi</a>
+</li>
           <li><a href="autoapi/nbplay/widget/index.html#module-nbplay.widget">nbplay.widget</a>
 </li>
           <li><a href="autoapi/test_all/index.html#module-test_all">test_all</a>
@@ -1061,6 +1084,13 @@
 
         <ul>
           <li><a href="autoapi/nbplay/index.html#module-nbplay">module</a>
+</li>
+        </ul></li>
+        <li>
+    nbplay.midi
+
+        <ul>
+          <li><a href="autoapi/nbplay/midi/index.html#module-nbplay.midi">module</a>
 </li>
         </ul></li>
         <li>
@@ -1164,6 +1194,8 @@
   <h2>R</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.read_midi">read_midi() (in module nbplay.midi)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.recorded_clip">recorded_clip (nbplay.widget.TimelineWidget attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.recording_countdown_beats">recording_countdown_beats (nbplay.widget.TimelineWidget attribute)</a>
@@ -1178,10 +1210,10 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.release">release (nbplay.widget.SamplerWidget attribute)</a>
 </li>
-        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_channel">remove_channel() (nbplay.widget.MixerWidget method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_channel">remove_channel() (nbplay.widget.MixerWidget method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.remove_clip">remove_clip() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_track">remove_track() (nbplay.widget.Session method)</a>
@@ -1270,10 +1302,10 @@
         </ul></li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.set_base_note">set_base_note() (nbplay.widget.PadWidget method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effect_enabled">set_channel_effect_enabled() (nbplay.widget.MixerWidget method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effects">set_channel_effects() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_gain">set_channel_gain() (nbplay.widget.MixerWidget method)</a>
@@ -1316,6 +1348,8 @@
           <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.steps">(nbplay.widget.SequencerWidget property)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.steps_to_events">steps_to_events() (in module nbplay.midi)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.stop">stop() (nbplay.widget.Session method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.stop_all">stop_all() (nbplay.widget.LauncherWidget method)</a>
@@ -1639,6 +1673,8 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestEventSequence.test_events_starting_in_range">test_events_starting_in_range() (test_all.TestEventSequence method)</a>
 </li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_events_to_voices_edge_cases">test_events_to_voices_edge_cases() (test_all.TestMidiFiles method)</a>
+</li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSessionPersistence.test_export_all_clips_queues_and_caches">test_export_all_clips_queues_and_caches() (test_all.TestSessionPersistence method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestTimelineWidget.test_export_clip_requests_browser_bytes">test_export_clip_requests_browser_bytes() (test_all.TestTimelineWidget method)</a>
@@ -1748,6 +1784,8 @@
         <li><a href="autoapi/test_all/index.html#test_all.TestTrack.test_link_transport">test_link_transport() (test_all.TestTrack method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSamplerWidget.test_load_audio_file_wav">test_load_audio_file_wav() (test_all.TestSamplerWidget method)</a>
+</li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_load_midi_track_selection_and_voice_limit">test_load_midi_track_selection_and_voice_limit() (test_all.TestMidiFiles method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSessionPersistence.test_load_rejects_foreign_data">test_load_rejects_foreign_data() (test_all.TestSessionPersistence method)</a>
 </li>
@@ -1861,14 +1899,14 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestDemoNotebook.test_prefixed_example_notebooks_have_code_cell_output_fields">test_prefixed_example_notebooks_have_code_cell_output_fields() (test_all.TestDemoNotebook method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/test_all/index.html#test_all.TestDemoNotebook.test_prefixed_example_notebooks_have_language_metadata">test_prefixed_example_notebooks_have_language_metadata() (test_all.TestDemoNotebook method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestStepSequencer.test_process_active_steps">test_process_active_steps() (test_all.TestStepSequencer method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestStepSequencer.test_process_empty">test_process_empty() (test_all.TestStepSequencer method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/test_all/index.html#test_all.TestMixerChannel.test_process_sample_center">test_process_sample_center() (test_all.TestMixerChannel method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestMixerChannel.test_process_sample_muted">test_process_sample_muted() (test_all.TestMixerChannel method)</a>
@@ -1876,6 +1914,8 @@
         <li><a href="autoapi/test_all/index.html#test_all.TestMidiMessage.test_program_change">test_program_change() (test_all.TestMidiMessage method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestLauncherWidget.test_quantize_validation">test_quantize_validation() (test_all.TestLauncherWidget method)</a>
+</li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_read_midi_handles_running_note_ons_and_empty_tracks">test_read_midi_handles_running_note_ons_and_empty_tracks() (test_all.TestMidiFiles method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestTimelineWidget.test_recording_tracks_validation">test_recording_tracks_validation() (test_all.TestTimelineWidget method)</a>
 </li>
@@ -2003,7 +2043,11 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestTransportClock.test_seek">test_seek() (test_all.TestTransportClock method)</a>
 </li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_sequencer_round_trip">test_sequencer_round_trip() (test_all.TestMidiFiles method)</a>
+</li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSession.test_session_clock_helpers">test_session_clock_helpers() (test_all.TestSession method)</a>
+</li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_session_export_and_import">test_session_export_and_import() (test_all.TestMidiFiles method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSession.test_session_launcher_tracks_follow_session_tracks">test_session_launcher_tracks_follow_session_tracks() (test_all.TestSession method)</a>
 </li>
@@ -2125,6 +2169,8 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestTransportWidget.test_time_signature">test_time_signature() (test_all.TestTransportWidget method)</a>
 </li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles.test_timeline_clip_export_and_import">test_timeline_clip_export_and_import() (test_all.TestMidiFiles method)</a>
+</li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSession.test_timeline_mute_solo_mirror_mixer_channels">test_timeline_mute_solo_mirror_mixer_channels() (test_all.TestSession method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestTimelineDescriptors.test_timeline_track_defaults">test_timeline_track_defaults() (test_all.TestTimelineDescriptors method)</a>
@@ -2241,6 +2287,8 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestMidiEvent">TestMidiEvent (class in test_all)</a>
 </li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMidiFiles">TestMidiFiles (class in test_all)</a>
+</li>
         <li><a href="autoapi/test_all/index.html#test_all.TestMidiKeyboardWidget">TestMidiKeyboardWidget (class in test_all)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestMidiMessage">TestMidiMessage (class in test_all)</a>
@@ -2305,6 +2353,8 @@
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestVelocity">TestVelocity (class in test_all)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.TICKS_PER_BEAT">TICKS_PER_BEAT (in module nbplay.midi)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.time_signature_den">time_signature_den (nbplay.widget.LauncherWidget attribute)</a>
 
         <ul>
@@ -2345,6 +2395,8 @@
           <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineTrack.to_dict">(nbplay.widget.TimelineTrack method)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_midi">to_midi() (nbplay.widget.SequencerWidget method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.to_mixer">to_mixer() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.to_pattern">to_pattern() (nbplay.widget.NoteComposer method)</a>
@@ -2448,6 +2500,8 @@
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.write_exported_clip">write_exported_clip() (nbplay.widget.TimelineWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi/index.html#nbplay.midi.write_midi">write_midi() (in module nbplay.midi)</a>
 </li>
     </ul></td>
   </tr></table>

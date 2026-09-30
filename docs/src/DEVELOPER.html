@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -784,7 +785,7 @@ inline editable. Gain input accepts dB strings and converts to linear gain.</p>
 <code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>, and <code class="docutils literal notranslate"><span class="pre">reverb</span></code>. A descriptor with
 <code class="docutils literal notranslate"><span class="pre">enabled:</span> <span class="pre">false</span></code> is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
-bypass and the small × next to it removes the effect;
+bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
 <code class="docutils literal notranslate"><span class="pre">set_channel_effect_enabled()</span></code> and <code class="docutils literal notranslate"><span class="pre">set_master_effect_enabled()</span></code> do the same
 from Python, and <code class="docutils literal notranslate"><span class="pre">EffectPlugin(...,</span> <span class="pre">enabled=False)</span></code> builds a bypassed
 descriptor. Unknown descriptor types are left intact when their params are
@@ -799,6 +800,14 @@ an <code class="docutils literal notranslate"><span class="pre">{input,</span> <
 <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and a master insert chain connected to destination. Mute/solo
 affects the channel gain nodes. The bus is registered on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay</span></code>
 and removed on cleanup.</p>
+<p>The parameter editor lists each built-in effect’s parameters with the same
+ranges the Python <code class="docutils literal notranslate"><span class="pre">EffectPlugin</span></code> enforces (a slider plus a number box for
+bounded numbers, a select for the filter type) and, for custom plugin types,
+every JSON field of the descriptor as a number, text, or checkbox input. Edits
+write the descriptor back to <code class="docutils literal notranslate"><span class="pre">channels[i].effects</span></code> or <code class="docutils literal notranslate"><span class="pre">master_effects</span></code> on every
+input event. Only a change in chain structure (effect type or bypass) rebuilds
+the strip DOM; parameter changes refresh chip labels and open editors in place
+so sliders keep focus, and open editors are restored after a rebuild.</p>
 <p>Insert chains update in place. Each built-in effect unit exposes
 <code class="docutils literal notranslate"><span class="pre">update(descriptor)</span></code>, which writes the new parameters to the existing
 <code class="docutils literal notranslate"><span class="pre">AudioParam</span></code>s. A chain is rebuilt only when its structure changes (an effect
@@ -1232,6 +1241,11 @@ request per clip and caches each answer in <code class="docutils literal notrans
 <code class="docutils literal notranslate"><span class="pre">import_clip()</span></code> so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new <code class="docutils literal notranslate"><span class="pre">session_id</span></code>.</p>
 </section>
+<section id="midi-files">
+<h3>MIDI files<a class="headerlink" href="#midi-files" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">nbplay/midi.py</span></code> reads and writes <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files through <code class="docutils literal notranslate"><span class="pre">mido</span></code>, an optional dependency installed with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[midi]&quot;</span></code>. Everything works in beats, the unit the widgets use, and converts to ticks (480 per beat) only at the file boundary. <code class="docutils literal notranslate"><span class="pre">read_midi()</span></code> turns a path, bytes, or file object into beat-based tracks (<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">events</span></code>), pairing note-ons with note-offs and treating velocity-zero note-ons as note-offs; tracks without notes are left out, and the first tempo and time signature are reported. <code class="docutils literal notranslate"><span class="pre">build_midi()</span></code> / <code class="docutils literal notranslate"><span class="pre">write_midi()</span></code> go the other way, with a tempo and time signature meta track first.</p>
+<p>On top of that: <code class="docutils literal notranslate"><span class="pre">SequencerWidget.to_midi()</span></code> exports a pattern (step index times <code class="docutils literal notranslate"><span class="pre">step_duration</span></code> is the beat, <code class="docutils literal notranslate"><span class="pre">duration_ticks</span></code> the length) and <code class="docutils literal notranslate"><span class="pre">load_midi()</span></code> quantizes a file onto the grid, one voice per overlapping note up to <code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, growing <code class="docutils literal notranslate"><span class="pre">length</span></code> to fit. <code class="docutils literal notranslate"><span class="pre">TimelineWidget.export_midi_clip()</span></code> and <code class="docutils literal notranslate"><span class="pre">import_midi()</span></code> move MIDI clips in and out. <code class="docutils literal notranslate"><span class="pre">Session.export_midi()</span></code> writes one track per sequencer plus one per MIDI clip at its timeline position, and <code class="docutils literal notranslate"><span class="pre">Session.import_midi()</span></code> adds one MIDI lane per track with the track as a clip, applying the file’s tempo unless told not to.</p>
+</section>
 <section id="rust-tests">
 <h3>Rust tests<a class="headerlink" href="#rust-tests" title="Link to this heading">¶</a></h3>
 <p>Rust unit tests live beside the implementation modules under <code class="docutils literal notranslate"><span class="pre">rust/src/</span></code> and in
@@ -1510,6 +1524,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#jupyterlite-demo">JupyterLite demo</a></li>
 <li><a class="reference internal" href="#keyboard-shortcuts">Keyboard shortcuts</a></li>
 <li><a class="reference internal" href="#session-persistence">Session persistence</a></li>
+<li><a class="reference internal" href="#midi-files">MIDI files</a></li>
 <li><a class="reference internal" href="#rust-tests">Rust tests</a></li>
 <li><a class="reference internal" href="#docs-and-notebooks">Docs and notebooks</a></li>
 </ul>

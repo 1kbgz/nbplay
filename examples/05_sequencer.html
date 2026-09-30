@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -345,6 +346,26 @@
 </div>
 </div>
 </section>
+<section id="midi-files">
+<h2>MIDI Files<a class="headerlink" href="#midi-files" title="Link to this heading">¶</a></h2>
+<p>With the <code class="docutils literal notranslate"><span class="pre">midi</span></code> extra installed (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[midi]&quot;</span></code>), a pattern exports to a <code class="docutils literal notranslate"><span class="pre">.mid</span></code> file and loads back from one. Loading quantizes notes onto the grid and puts overlapping notes on separate voices.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">midi_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span> <span class="o">/</span> <span class="s2">"pattern.mid"</span>
+<span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">to_midi</span><span class="p">(</span><span class="n">midi_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Sixteenths"</span><span class="p">)</span>
+
+<span class="n">from_file</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">()</span>
+<span class="n">from_file</span><span class="o">.</span><span class="n">load_midi</span><span class="p">(</span><span class="n">midi_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">from_file</span><span class="o">.</span><span class="n">num_voices</span><span class="p">,</span> <span class="s2">"voices,"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="s2">"steps of"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">step_duration</span><span class="p">,</span> <span class="s2">"beats"</span><span class="p">)</span>
+<span class="n">from_file</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -389,6 +410,7 @@
 <li><a class="reference internal" href="#configure-bars-and-step-size">Configure Bars and Step Size</a></li>
 <li><a class="reference internal" href="#transport-time-signature-sync">Transport Time Signature Sync</a></li>
 <li><a class="reference internal" href="#notecomposer-and-pattern-export">NoteComposer and Pattern Export</a></li>
+<li><a class="reference internal" href="#midi-files">MIDI Files</a></li>
 </ul>
 </li>
 </ul>

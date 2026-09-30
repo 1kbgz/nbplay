@@ -200,6 +200,7 @@
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="../nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -368,16 +369,19 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestLauncherWidget" title="test_all.TestLauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestLauncherWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSessionPersistence" title="test_all.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMidiFiles" title="test_all.TestMidiFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiFiles</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSessionPersistence" title="test_all.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSession" title="test_all.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestDemoNotebook" title="test_all.TestDemoNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSession" title="test_all.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestDemoNotebook" title="test_all.TestDemoNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -2408,6 +2412,41 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiFiles</span></span><a class="headerlink" href="#test_all.TestMidiFiles" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_sequencer_round_trip">
+<span class="sig-name descname"><span class="pre">test_sequencer_round_trip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_sequencer_round_trip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_load_midi_track_selection_and_voice_limit">
+<span class="sig-name descname"><span class="pre">test_load_midi_track_selection_and_voice_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_load_midi_track_selection_and_voice_limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_read_midi_handles_running_note_ons_and_empty_tracks">
+<span class="sig-name descname"><span class="pre">test_read_midi_handles_running_note_ons_and_empty_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_read_midi_handles_running_note_ons_and_empty_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_events_to_voices_edge_cases">
+<span class="sig-name descname"><span class="pre">test_events_to_voices_edge_cases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_events_to_voices_edge_cases" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_timeline_clip_export_and_import">
+<span class="sig-name descname"><span class="pre">test_timeline_clip_export_and_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_timeline_clip_export_and_import" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiFiles.test_session_export_and_import">
+<span class="sig-name descname"><span class="pre">test_session_export_and_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiFiles.test_session_export_and_import" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_all.TestSessionPersistence">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSessionPersistence</span></span><a class="headerlink" href="#test_all.TestSessionPersistence" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -3173,6 +3212,15 @@
 <li><a class="reference internal" href="#test_all.TestLauncherWidget.test_slot_editor_ignores_cleared_selection"><code class="docutils literal notranslate"><span class="pre">TestLauncherWidget.test_slot_editor_ignores_cleared_selection()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestLauncherWidget.test_slot_to_sequencer_missing"><code class="docutils literal notranslate"><span class="pre">TestLauncherWidget.test_slot_to_sequencer_missing()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestLauncherWidget.test_repr"><code class="docutils literal notranslate"><span class="pre">TestLauncherWidget.test_repr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_sequencer_round_trip"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_sequencer_round_trip()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_load_midi_track_selection_and_voice_limit"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_load_midi_track_selection_and_voice_limit()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_read_midi_handles_running_note_ons_and_empty_tracks"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_read_midi_handles_running_note_ons_and_empty_tracks()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_events_to_voices_edge_cases"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_events_to_voices_edge_cases()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_timeline_clip_export_and_import"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_timeline_clip_export_and_import()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiFiles.test_session_export_and_import"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_session_export_and_import()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#test_all.TestSessionPersistence"><code class="docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a><ul>

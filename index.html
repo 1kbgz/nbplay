@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -305,6 +306,8 @@ silent until the browser provides those APIs.</p>
 <span class="n">session</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>   <span class="c1"># or press play on any widget; they share the clock</span>
 </pre></div>
 </div>
+<p>Patterns and MIDI clips move in and out of <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[midi]&quot;</span></code>): <code class="docutils literal notranslate"><span class="pre">sequencer.to_midi(&quot;lead.mid&quot;)</span></code>, <code class="docutils literal notranslate"><span class="pre">sequencer.load_midi(path)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">session.export_midi(&quot;song.mid&quot;)</span></code>, and <code class="docutils literal notranslate"><span class="pre">session.import_midi(path)</span></code>.</p>
 <p>The example notebooks in <code class="docutils literal notranslate"><span class="pre">examples/</span></code> walk through each widget and end with a
 full DAW playground and the beats view.</p>
 <div class="admonition note">
