@@ -100,6 +100,20 @@ test.describe("MidiKeyboardWidget", () => {
     expect(state.lastEvent).toEqual({ note: 60, velocity: 96, type: "on" });
   });
 
+  test("control changes sync to the control_change trait", async ({ page }) => {
+    await renderWidget(page);
+    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.evaluate(() => {
+      window.__midiInput.send([0xb3, 7, 100]);
+      window.__midiInput.send([0xb3, 7, 100]);
+    });
+    const cc = await page.evaluate(
+      () => window.__testModel._state.control_change,
+    );
+    expect(cc).toEqual({ controller: 7, value: 100, channel: 3, seq: 2 });
+    await expect(page.locator(".nbplay-midi-kb-last")).toHaveText("CC 7  100");
+  });
+
   test("selecting a MIDI port stores the port name", async ({ page }) => {
     await renderWidget(page);
     await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
