@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="nbplay.midi_learn" href="../midi_learn/index.html"><link rel="prev" title="nbplay" href="../index.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="nbplay.widget" href="../widget/index.html"><link rel="prev" title="nbplay.midi" href="../midi/index.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>nbplay.midi - nbplay v0.2.0</title>
+        <title>nbplay.midi_learn - nbplay v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -200,8 +200,8 @@
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">nbplay.midi</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../midi_learn/index.html">nbplay.midi_learn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../midi/index.html">nbplay.midi</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -228,7 +228,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../_sources/autoapi/nbplay/midi/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../_sources/autoapi/nbplay/midi_learn/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -246,49 +246,20 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-nbplay.midi">
-<span id="nbplay-midi"></span><h1>nbplay.midi<a class="headerlink" href="#module-nbplay.midi" title="Link to this heading">¶</a></h1>
-<p>MIDI file import and export.</p>
-<p>Everything here works in beats (quarter notes), the unit the widgets use, and
-converts to and from MIDI ticks at the file boundary. The file reader and
-writer come from <cite>mido</cite>, an optional dependency: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nbplay[midi]</span></code>.</p>
-<section id="attributes">
-<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+          <section id="module-nbplay.midi_learn">
+<span id="nbplay-midi-learn"></span><h1>nbplay.midi_learn<a class="headerlink" href="#module-nbplay.midi_learn" title="Link to this heading">¶</a></h1>
+<p>Map hardware MIDI controllers to widget traits.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> watches the <code class="docutils literal notranslate"><span class="pre">control_change</span></code> trait of a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>
+and writes each mapped controller’s value into a trait of any widget. Knob
+values travel through the kernel, which is fine for controls but not for
+note timing; notes stay in the browser.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi.TICKS_PER_BEAT" title="nbplay.midi.TICKS_PER_BEAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TICKS_PER_BEAT</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi._mido" title="nbplay.midi._mido"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_mido</span></code></a>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.midi._normalize_events" title="nbplay.midi._normalize_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_events</span></code></a>(events)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi.steps_to_events" title="nbplay.midi.steps_to_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steps_to_events</span></code></a>(voices_data[, step_duration])</p></td>
-<td><p>Turn sequencer voices (lists of step dicts) into MIDI events in beats.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.midi.events_to_voices" title="nbplay.midi.events_to_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events_to_voices</span></code></a>(events[, step_duration, length, ...])</p></td>
-<td><p>Quantize MIDI events onto a step grid, one voice per overlapping note.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi.build_midi" title="nbplay.midi.build_midi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_midi</span></code></a>(tracks[, bpm, time_signature, ticks_per_beat])</p></td>
-<td><p>Build a <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code> from tracks of beat-based events.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.midi.write_midi" title="nbplay.midi.write_midi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_midi</span></code></a>(tracks, path, **kwargs)</p></td>
-<td><p>Write tracks of beat-based events to a <code class="docutils literal notranslate"><span class="pre">.mid</span></code> file and return the path.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi.read_midi" title="nbplay.midi.read_midi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_midi</span></code></a>(source)</p></td>
-<td><p>Read a MIDI file (path, bytes, or file object) into beat-based tracks.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi_learn.MidiLearn" title="nbplay.midi_learn.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
+<td><p>Route MIDI control changes to widget traits.</p></td>
 </tr>
 </tbody>
 </table>
@@ -296,61 +267,88 @@ writer come from <cite>mido</cite>, an optional dependency: <code class="docutil
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.midi.TICKS_PER_BEAT">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">TICKS_PER_BEAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">480</span></em><a class="headerlink" href="#nbplay.midi.TICKS_PER_BEAT" title="Link to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.midi_learn.</span></span><span class="sig-name descname"><span class="pre">MidiLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn" title="Link to this definition">¶</a></dt>
+<dd><p>Route MIDI control changes to widget traits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> – A widget with a synced <code class="docutils literal notranslate"><span class="pre">control_change</span></code> trait
+(<code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>).</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">map()</span></code> binds a controller number now; <code class="docutils literal notranslate"><span class="pre">learn()</span></code> binds the next
+controller the hardware sends, so you can call it and turn the knob.
+Bool traits switch on at values of 64 and above. Numeric traits scale
+the 0-127 value into <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>, which default to 0-1 for floats
+and 0-127 for ints.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.source">
+<span class="sig-name descname"><span class="pre">source</span></span><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.source" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi._mido">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">_mido</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#_mido"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi._mido" title="Link to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.mappings">
+<span class="sig-name descname"><span class="pre">mappings</span></span><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.mappings" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi._normalize_events">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">_normalize_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#_normalize_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi._normalize_events" title="Link to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn._pending">
+<span class="sig-name descname"><span class="pre">_pending</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.midi_learn.MidiLearn._pending" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi.steps_to_events">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">steps_to_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voices_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#steps_to_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi.steps_to_events" title="Link to this definition">¶</a></dt>
-<dd><p>Turn sequencer voices (lists of step dicts) into MIDI events in beats.</p>
-<p>Inactive steps and steps with <code class="docutils literal notranslate"><span class="pre">probability</span></code> 0 are skipped. A step’s
-<code class="docutils literal notranslate"><span class="pre">duration_ticks</span></code> counts steps, so a duration of 2 at eighth-note
-resolution is one beat.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.map" title="Link to this definition">¶</a></dt>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">controller</span></code> (0-127) to <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code>; returns the mapping.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi.events_to_voices">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">events_to_voices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_voices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#events_to_voices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi.events_to_voices" title="Link to this definition">¶</a></dt>
-<dd><p>Quantize MIDI events onto a step grid, one voice per overlapping note.</p>
-<p>Returns <code class="docutils literal notranslate"><span class="pre">(voices_data,</span> <span class="pre">length)</span></code>. Notes are snapped to the nearest step;
-when two notes land on the same step they go to separate voices, up to
-<code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, and anything beyond that is dropped.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.learn">
+<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.learn" title="Link to this definition">¶</a></dt>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code> to the next controller the hardware sends.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi.build_midi">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">build_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bpm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ticks_per_beat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TICKS_PER_BEAT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#build_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi.build_midi" title="Link to this definition">¶</a></dt>
-<dd><p>Build a <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code> from tracks of beat-based events.</p>
-<p><code class="docutils literal notranslate"><span class="pre">tracks</span></code> is an iterable of dicts with <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">events</span></code> (beat,
-duration, note, velocity), and an optional <code class="docutils literal notranslate"><span class="pre">channel</span></code> (0-15).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.learning">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">learning</span></span><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.learning" title="Link to this definition">¶</a></dt>
+<dd><p>True while <code class="docutils literal notranslate"><span class="pre">learn()</span></code> is waiting for a controller.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi.write_midi">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">write_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#write_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi.write_midi" title="Link to this definition">¶</a></dt>
-<dd><p>Write tracks of beat-based events to a <code class="docutils literal notranslate"><span class="pre">.mid</span></code> file and return the path.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.cancel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.cancel" title="Link to this definition">¶</a></dt>
+<dd><p>Stop waiting for a controller after <code class="docutils literal notranslate"><span class="pre">learn()</span></code>.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi.read_midi">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi.</span></span><span class="sig-name descname"><span class="pre">read_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi.html#read_midi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi.read_midi" title="Link to this definition">¶</a></dt>
-<dd><p>Read a MIDI file (path, bytes, or file object) into beat-based tracks.</p>
-<p>Returns <code class="docutils literal notranslate"><span class="pre">{&quot;bpm&quot;,</span> <span class="pre">&quot;time_signature&quot;,</span> <span class="pre">&quot;ticks_per_beat&quot;,</span> <span class="pre">&quot;tracks&quot;}</span></code> where
-each track is <code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;,</span> <span class="pre">&quot;channel&quot;,</span> <span class="pre">&quot;events&quot;}</span></code>. Tracks without notes are
-left out. Beats are counted from the file’s ticks, so tempo changes do not
-move notes; the first tempo and time signature are reported.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.unmap">
+<span class="sig-name descname"><span class="pre">unmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.unmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.unmap" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the mapping for <code class="docutils literal notranslate"><span class="pre">controller</span></code>; returns True when one existed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.close" title="Link to this definition">¶</a></dt>
+<dd><p>Stop listening to the source.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.apply" title="Link to this definition">¶</a></dt>
+<dd><p>Apply a controller value as if it came from the hardware; returns the written value or None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn._on_control_change">
+<span class="sig-name descname"><span class="pre">_on_control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn._on_control_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn._on_control_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -361,23 +359,23 @@ move notes; the first tempo and time signature are reported.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../midi_learn/index.html">
+          <a class="next-page" href="../widget/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">nbplay.midi_learn</div>
+                <div class="title">nbplay.widget</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../index.html">
+          <a class="prev-page" href="../midi/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">nbplay</div>
+                <div class="title">nbplay.midi</div>
                 
               </div>
             </a>
@@ -411,18 +409,24 @@ move notes; the first tempo and time signature are reported.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">nbplay.midi</a><ul>
-<li><a class="reference internal" href="#attributes">Attributes</a></li>
-<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#">nbplay.midi_learn</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#nbplay.midi.TICKS_PER_BEAT"><code class="docutils literal notranslate"><span class="pre">TICKS_PER_BEAT</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi._mido"><code class="docutils literal notranslate"><span class="pre">_mido()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi._normalize_events"><code class="docutils literal notranslate"><span class="pre">_normalize_events()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi.steps_to_events"><code class="docutils literal notranslate"><span class="pre">steps_to_events()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi.events_to_voices"><code class="docutils literal notranslate"><span class="pre">events_to_voices()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi.build_midi"><code class="docutils literal notranslate"><span class="pre">build_midi()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi.write_midi"><code class="docutils literal notranslate"><span class="pre">write_midi()</span></code></a></li>
-<li><a class="reference internal" href="#nbplay.midi.read_midi"><code class="docutils literal notranslate"><span class="pre">read_midi()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn"><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.source"><code class="docutils literal notranslate"><span class="pre">MidiLearn.source</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.mappings"><code class="docutils literal notranslate"><span class="pre">MidiLearn.mappings</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn._pending"><code class="docutils literal notranslate"><span class="pre">MidiLearn._pending</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.map"><code class="docutils literal notranslate"><span class="pre">MidiLearn.map()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.learn"><code class="docutils literal notranslate"><span class="pre">MidiLearn.learn()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.learning"><code class="docutils literal notranslate"><span class="pre">MidiLearn.learning</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.cancel"><code class="docutils literal notranslate"><span class="pre">MidiLearn.cancel()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.unmap"><code class="docutils literal notranslate"><span class="pre">MidiLearn.unmap()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.clear"><code class="docutils literal notranslate"><span class="pre">MidiLearn.clear()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.close"><code class="docutils literal notranslate"><span class="pre">MidiLearn.close()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn.apply"><code class="docutils literal notranslate"><span class="pre">MidiLearn.apply()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.midi_learn.MidiLearn._on_control_change"><code class="docutils literal notranslate"><span class="pre">MidiLearn._on_control_change()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

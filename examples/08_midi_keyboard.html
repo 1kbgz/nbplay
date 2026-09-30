@@ -201,6 +201,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi_learn/index.html">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -321,6 +322,40 @@
 </div>
 </div>
 </section>
+<section id="map-knobs-with-midi-learn">
+<h2>Map Knobs with MIDI Learn<a class="headerlink" href="#map-knobs-with-midi-learn" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> routes the control changes a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code> receives to widget traits. Call <code class="docutils literal notranslate"><span class="pre">learn()</span></code> and turn a knob to bind it, or <code class="docutils literal notranslate"><span class="pre">map()</span></code> a controller number directly. Values scale into the <code class="docutils literal notranslate"><span class="pre">low</span></code>/<code class="docutils literal notranslate"><span class="pre">high</span></code> range you give.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiLearn</span><span class="p">,</span> <span class="n">SynthWidget</span>
+
+<span class="n">learn_synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">()</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">MidiLearn</span><span class="p">(</span><span class="n">midi_keyboard</span><span class="p">)</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">learn_synth</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">2000.0</span><span class="p">)</span>  <span class="c1"># now turn a knob</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">learn_synth</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">)</span>  <span class="c1"># mod wheel -&gt; amplitude 0..1</span>
+<span class="n">learn_synth</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="send-notes-out">
+<h2>Send Notes Out<a class="headerlink" href="#send-notes-out" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code> sends notes to a Web MIDI output port, for a hardware synth or another app. With a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> it forwards everything the session plays at the scheduled time; on its own it forwards the keyboards and pads on the page, and Python can send messages directly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiOutputWidget</span>
+
+<span class="n">midi_out</span> <span class="o">=</span> <span class="n">MidiOutputWidget</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">midi_out</span><span class="o">.</span><span class="n">note_on</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>  <span class="c1"># pick a port in the widget first</span>
+<span class="n">midi_out</span><span class="o">.</span><span class="n">note_off</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">midi_out</span><span class="o">.</span><span class="n">control_change</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">midi_out</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -365,6 +400,8 @@
 <li><a class="reference internal" href="#record-into-a-sequencer">Record into a Sequencer</a></li>
 <li><a class="reference internal" href="#play-a-sampler">Play a Sampler</a></li>
 <li><a class="reference internal" href="#split-samplers-by-register">Split Samplers by Register</a></li>
+<li><a class="reference internal" href="#map-knobs-with-midi-learn">Map Knobs with MIDI Learn</a></li>
+<li><a class="reference internal" href="#send-notes-out">Send Notes Out</a></li>
 </ul>
 </li>
 </ul>

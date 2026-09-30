@@ -199,6 +199,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/midi_learn/index.html">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
 </ul>
 </li>
@@ -448,10 +449,10 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._normalize_params">_normalize_params() (nbplay.widget.EffectPlugin method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_sample_slices">_normalize_sample_slices() (in module nbplay.widget)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_track">_normalize_timeline_track() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_tracks">_normalize_timeline_tracks() (in module nbplay.widget)</a>
@@ -461,6 +462,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._on_clip_exported">_on_clip_exported() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_composer_change">_on_composer_change() (nbplay.widget.SequencerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn._on_control_change">_on_control_change() (nbplay.midi_learn.MidiLearn method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget._on_grid_change">_on_grid_change() (nbplay.widget.PadWidget method)</a>
 </li>
@@ -495,6 +498,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._PAD_MAX_COUNT">_PAD_MAX_COUNT (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._param">_param() (nbplay.widget.EffectPlugin static method)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn._pending">_pending (nbplay.midi_learn.MidiLearn attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._positive_number">_positive_number() (in module nbplay.widget)</a>
 </li>
@@ -686,6 +691,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget.amplitude">amplitude (nbplay.widget.SynthWidget attribute)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.apply">apply() (nbplay.midi_learn.MidiLearn method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.arm_track">arm_track() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.attack">attack (nbplay.widget.SamplerWidget attribute)</a>
@@ -744,6 +751,8 @@
   <h2>C</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.cancel">cancel() (nbplay.midi_learn.MidiLearn method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardRoute.channel_index">channel_index (nbplay.widget.KeyboardRoute attribute)</a>
 
         <ul>
@@ -762,9 +771,11 @@
           <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SettingsWidget.channels">(nbplay.widget.SettingsWidget attribute)</a>
 </li>
         </ul></li>
-        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.clear">clear() (nbplay.widget.NoteComposer method)</a>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.clear">clear() (nbplay.midi_learn.MidiLearn method)</a>
 
         <ul>
+          <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.clear">(nbplay.widget.NoteComposer method)</a>
+</li>
           <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.clear">(nbplay.widget.SequencerWidget method)</a>
 </li>
         </ul></li>
@@ -781,6 +792,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.clip_to_event_sequence">clip_to_event_sequence() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.clips">clips (nbplay.widget.TimelineWidget attribute)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.close">close() (nbplay.midi_learn.MidiLearn method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.cols">cols (nbplay.widget.PadWidget attribute)</a>
 </li>
@@ -988,8 +1001,12 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget">LauncherWidget (class in nbplay.widget)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.learn">learn() (nbplay.midi_learn.MidiLearn method)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.learning">learning (nbplay.midi_learn.MidiLearn property)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.length">length (nbplay.widget.SequencerWidget attribute)</a>
 
         <ul>
@@ -1024,7 +1041,11 @@
   <h2>M</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.map">map() (nbplay.midi_learn.MidiLearn method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.map_slices_to_pads">map_slices_to_pads() (nbplay.widget.SamplerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.mappings">mappings (nbplay.midi_learn.MidiLearn attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.master_effects">master_effects (nbplay.widget.MixerWidget attribute)</a>
 </li>
@@ -1048,6 +1069,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MidiKeyboardWidget">MidiKeyboardWidget (class in nbplay.widget)</a>
 </li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn">MidiLearn (class in nbplay.midi_learn)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.mixer">mixer (nbplay.widget.Session attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Track.mixer_channel">mixer_channel (nbplay.widget.Track attribute)</a>
@@ -1061,6 +1084,8 @@
           <li><a href="autoapi/nbplay/index.html#module-nbplay">nbplay</a>
 </li>
           <li><a href="autoapi/nbplay/midi/index.html#module-nbplay.midi">nbplay.midi</a>
+</li>
+          <li><a href="autoapi/nbplay/midi_learn/index.html#module-nbplay.midi_learn">nbplay.midi_learn</a>
 </li>
           <li><a href="autoapi/nbplay/widget/index.html#module-nbplay.widget">nbplay.widget</a>
 </li>
@@ -1094,14 +1119,21 @@
 </li>
         </ul></li>
         <li>
+    nbplay.midi_learn
+
+        <ul>
+          <li><a href="autoapi/nbplay/midi_learn/index.html#module-nbplay.midi_learn">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
     nbplay.widget
 
         <ul>
           <li><a href="autoapi/nbplay/widget/index.html#module-nbplay.widget">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.normalize_sample">normalize_sample() (nbplay.widget.SamplerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardRoute.note">note (nbplay.widget.KeyboardRoute attribute)</a>
@@ -1339,6 +1371,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.slots">slots (nbplay.widget.LauncherWidget attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Track.sound_source">sound_source (nbplay.widget.Track attribute)</a>
+</li>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.source">source (nbplay.midi_learn.MidiLearn attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.step_duration">step_duration (nbplay.widget.SequencerWidget attribute)</a>
 </li>
@@ -2448,6 +2482,10 @@
 <section id="U" class="genindex-section">
   <h2>U</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/nbplay/midi_learn/index.html#nbplay.midi_learn.MidiLearn.unmap">unmap() (nbplay.midi_learn.MidiLearn method)</a>
+</li>
+    </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget.upper_octave">upper_octave (nbplay.widget.KeyboardWidget attribute)</a>
 </li>
