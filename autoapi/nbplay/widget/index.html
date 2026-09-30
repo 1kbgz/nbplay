@@ -461,67 +461,70 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_midi_events" title="nbplay.widget._normalize_midi_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_midi_events</span></code></a>(events)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_timeline_track" title="nbplay.widget._normalize_timeline_track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_track</span></code></a>(track[, index])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._steps_to_events" title="nbplay.widget._steps_to_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_steps_to_events</span></code></a>(voices_data[, step_duration])</p></td>
+<td><p>Expand sequencer voices (lists of step dicts) into MIDI events in beats.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_timeline_track" title="nbplay.widget._normalize_timeline_track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_track</span></code></a>(track[, index])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_timeline_tracks" title="nbplay.widget._normalize_timeline_tracks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_tracks</span></code></a>(tracks)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_timeline_tracks" title="nbplay.widget._normalize_timeline_tracks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_tracks</span></code></a>(tracks)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_audio_clip" title="nbplay.widget._normalize_audio_clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clip</span></code></a>(clip[, index, track_count])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_audio_clip" title="nbplay.widget._normalize_audio_clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clip</span></code></a>(clip[, index, track_count])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_audio_clips" title="nbplay.widget._normalize_audio_clips"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clips</span></code></a>(clips[, track_count])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_audio_clips" title="nbplay.widget._normalize_audio_clips"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clips</span></code></a>(clips[, track_count])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_pad_action" title="nbplay.widget._normalize_pad_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_action</span></code></a>(action[, default_note, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_pad_action" title="nbplay.widget._normalize_pad_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_action</span></code></a>(action[, default_note, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_pad_actions" title="nbplay.widget._normalize_pad_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_actions</span></code></a>(actions, pad_count[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_pad_actions" title="nbplay.widget._normalize_pad_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_actions</span></code></a>(actions, pad_count[, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zone" title="nbplay.widget._normalize_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zone</span></code></a>(zone[, index])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zone" title="nbplay.widget._normalize_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zone</span></code></a>(zone[, index])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zones" title="nbplay.widget._normalize_zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zones</span></code></a>(zones)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zones" title="nbplay.widget._normalize_zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zones</span></code></a>(zones)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_sample_slices" title="nbplay.widget._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_sample_slices" title="nbplay.widget._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._slot_voices" title="nbplay.widget._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._slot_voices" title="nbplay.widget._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
 <td><p>Coerce a pattern into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> (list of voices, each a list of step dicts).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_launcher_slot" title="nbplay.widget._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_launcher_slot" title="nbplay.widget._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._json_copy" title="nbplay.widget._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._json_copy" title="nbplay.widget._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._default_pad_notes" title="nbplay.widget._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._default_pad_notes" title="nbplay.widget._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
 <td><p>Default pad notes starting at MIDI 36 (C2), ascending chromatically.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._positive_pad_dimension" title="nbplay.widget._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._positive_pad_dimension" title="nbplay.widget._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
 <td><p>Clamp pad grid dimensions to at least one row/column.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._build_route" title="nbplay.widget._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._build_route" title="nbplay.widget._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
 <td><p>Build a <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> from kwargs.</p></td>
 </tr>
 </tbody>
@@ -757,6 +760,12 @@ API in the browser so latency stays minimal.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget._steps_to_events">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_steps_to_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voices_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_steps_to_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._steps_to_events" title="Link to this definition">¶</a></dt>
+<dd><p>Expand sequencer voices (lists of step dicts) into MIDI events in beats.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="nbplay.widget._normalize_timeline_track">
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_timeline_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_timeline_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_timeline_track" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -778,7 +787,7 @@ API in the browser so latency stays minimal.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.AudioClip">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">AudioClip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recorded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'recording'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#AudioClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.AudioClip" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">AudioClip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recorded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'recording'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#AudioClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.AudioClip" title="Link to this definition">¶</a></dt>
 <dd><p>Serializable audio clip descriptor for timeline lanes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.AudioClip._data">
@@ -1377,6 +1386,11 @@ has <em>N</em> composers sharing the same step clock.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.loop_enabled">
 <span class="sig-name descname"><span class="pre">loop_enabled</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.loop_enabled" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.follow_transport">
+<span class="sig-name descname"><span class="pre">follow_transport</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.follow_transport" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2419,6 +2433,17 @@ channel so instrument output is bounced to an audio clip.</p>
 <code class="docutils literal notranslate"><span class="pre">velocity</span></code>; beats are relative to the clip start), <code class="docutils literal notranslate"><span class="pre">NoteEvent</span></code>
 objects, or an <code class="docutils literal notranslate"><span class="pre">EventSequence</span></code>. <code class="docutils literal notranslate"><span class="pre">duration</span></code> defaults to the end
 of the last event, at least one beat.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.add_pattern_clip">
+<span class="sig-name descname"><span class="pre">add_pattern_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.add_pattern_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.add_pattern_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Append a MIDI clip that plays <code class="docutils literal notranslate"><span class="pre">pattern</span></code> (steps) <code class="docutils literal notranslate"><span class="pre">repeat</span></code> times.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pattern</span></code> is anything <code class="docutils literal notranslate"><span class="pre">LauncherWidget.set_slot</span></code> accepts: a
+<code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>, a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>, a list of step dicts, or a
+list of voices. Active steps become notes at <code class="docutils literal notranslate"><span class="pre">step_duration</span></code> beats
+per step; the clip’s <code class="docutils literal notranslate"><span class="pre">pattern</span></code> field records <code class="docutils literal notranslate"><span class="pre">name</span></code> so
+<code class="docutils literal notranslate"><span class="pre">Session.update_pattern()</span></code> can regenerate it later.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3542,6 +3567,11 @@ audio routing.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.Session.patterns">
+<span class="sig-name descname"><span class="pre">patterns</span></span><a class="headerlink" href="#nbplay.widget.Session.patterns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session._mirroring_mute_solo">
 <span class="sig-name descname"><span class="pre">_mirroring_mute_solo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.widget.Session._mirroring_mute_solo" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3616,6 +3646,41 @@ an audio-only lane.</p></li>
 <dd class="field-odd"><p><strong>index</strong> – Zero-based track index.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._track_index">
+<span class="sig-name descname"><span class="pre">_track_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._track_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._track_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.add_pattern">
+<span class="sig-name descname"><span class="pre">add_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.add_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.add_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Register a named pattern for chaining; returns its stored form.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pattern</span></code> is a <code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code> (its grid and step duration are
+used), a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>, a list of step dicts, or a list of voices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.remove_pattern">
+<span class="sig-name descname"><span class="pre">remove_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.remove_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.remove_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Forget a pattern; clips already placed keep playing as MIDI clips.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.chain">
+<span class="sig-name descname"><span class="pre">chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.chain" title="Link to this definition">¶</a></dt>
+<dd><p>Place named patterns back to back on a track’s lane; returns the clips.</p>
+<p>Each name becomes one pattern clip that plays <code class="docutils literal notranslate"><span class="pre">repeat</span></code> times. A
+track with a sequencer stops following the transport
+(<code class="docutils literal notranslate"><span class="pre">follow_transport</span> <span class="pre">=</span> <span class="pre">False</span></code>) so the arrangement drives it; the
+clips play through the track’s sampler or the built-in oscillator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.update_pattern">
+<span class="sig-name descname"><span class="pre">update_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.update_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.update_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a pattern and regenerate every clip placed from it.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3792,6 +3857,7 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget._CLIP_KINDS"><code class="docutils literal notranslate"><span class="pre">_CLIP_KINDS</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_midi_event"><code class="docutils literal notranslate"><span class="pre">_normalize_midi_event()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_midi_events"><code class="docutils literal notranslate"><span class="pre">_normalize_midi_events()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._steps_to_events"><code class="docutils literal notranslate"><span class="pre">_steps_to_events()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_timeline_track"><code class="docutils literal notranslate"><span class="pre">_normalize_timeline_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_timeline_tracks"><code class="docutils literal notranslate"><span class="pre">_normalize_timeline_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_audio_clip"><code class="docutils literal notranslate"><span class="pre">_normalize_audio_clip()</span></code></a></li>
@@ -3907,6 +3973,7 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.is_playing"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.is_playing</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.current_step"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.current_step</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.loop_enabled"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.loop_enabled</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SequencerWidget.follow_transport"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.follow_transport</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.num_voices"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.num_voices</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.session_id"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SequencerWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">SequencerWidget.channel_index</span></code></a></li>
@@ -4067,6 +4134,7 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.arm_track"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.arm_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_midi_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_midi_clip()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TimelineWidget.add_pattern_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.add_pattern_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.export_midi_clip"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.export_midi_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.import_midi"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.import_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget.clip_to_event_sequence"><code class="docutils literal notranslate"><span class="pre">TimelineWidget.clip_to_event_sequence()</span></code></a></li>
@@ -4253,6 +4321,7 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.Session._launcher_links"><code class="docutils literal notranslate"><span class="pre">Session._launcher_links</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._timeline_links"><code class="docutils literal notranslate"><span class="pre">Session._timeline_links</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.tracks"><code class="docutils literal notranslate"><span class="pre">Session.tracks</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.patterns"><code class="docutils literal notranslate"><span class="pre">Session.patterns</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._mirroring_mute_solo"><code class="docutils literal notranslate"><span class="pre">Session._mirroring_mute_solo</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._on_timeline_tracks"><code class="docutils literal notranslate"><span class="pre">Session._on_timeline_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._on_mixer_channels"><code class="docutils literal notranslate"><span class="pre">Session._on_mixer_channels()</span></code></a></li>
@@ -4262,6 +4331,11 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.Session.seek"><code class="docutils literal notranslate"><span class="pre">Session.seek()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.add_track"><code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.remove_track"><code class="docutils literal notranslate"><span class="pre">Session.remove_track()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session._track_index"><code class="docutils literal notranslate"><span class="pre">Session._track_index()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.add_pattern"><code class="docutils literal notranslate"><span class="pre">Session.add_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.remove_pattern"><code class="docutils literal notranslate"><span class="pre">Session.remove_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.chain"><code class="docutils literal notranslate"><span class="pre">Session.chain()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.update_pattern"><code class="docutils literal notranslate"><span class="pre">Session.update_pattern()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.export_midi"><code class="docutils literal notranslate"><span class="pre">Session.export_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.import_midi"><code class="docutils literal notranslate"><span class="pre">Session.import_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.to_dict"><code class="docutils literal notranslate"><span class="pre">Session.to_dict()</span></code></a></li>

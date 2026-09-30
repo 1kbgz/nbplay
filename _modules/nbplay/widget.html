@@ -669,6 +669,28 @@
 
 
 
+<div class="viewcode-block" id="_steps_to_events">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._steps_to_events">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_steps_to_events</span><span class="p">(</span><span class="n">voices_data</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Expand sequencer voices (lists of step dicts) into MIDI events in beats."""</span>
+    <span class="n">step_duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">step_duration</span><span class="p">))</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">voices_data</span> <span class="ow">or</span> <span class="p">[]:</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">voice</span> <span class="ow">or</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"active"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"probability"</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">"beat"</span><span class="p">:</span> <span class="n">index</span> <span class="o">*</span> <span class="n">step_duration</span><span class="p">,</span>
+                    <span class="s2">"duration"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"duration_ticks"</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">step_duration</span><span class="p">),</span>
+                    <span class="s2">"note"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note"</span><span class="p">,</span> <span class="mi">60</span><span class="p">)),</span>
+                    <span class="s2">"velocity"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"velocity"</span><span class="p">,</span> <span class="mi">100</span><span class="p">)),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="_normalize_timeline_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_track">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_timeline_track</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -734,6 +756,8 @@
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"midi"</span><span class="p">:</span>
         <span class="n">normalized</span><span class="p">[</span><span class="s2">"events"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"events"</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pattern"</span><span class="p">):</span>
+            <span class="n">normalized</span><span class="p">[</span><span class="s2">"pattern"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"pattern"</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blob_size"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">normalized</span><span class="p">[</span><span class="s2">"blob_size"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"blob_size"</span><span class="p">]))</span>
     <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"color"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -774,6 +798,7 @@
         <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">kind</span><span class="o">=</span><span class="s2">"audio"</span><span class="p">,</span>
         <span class="n">events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">"id"</span><span class="p">:</span> <span class="nb">id</span> <span class="ow">or</span> <span class="n">_clip_id</span><span class="p">(),</span>
@@ -798,6 +823,8 @@
         <span class="k">if</span> <span class="n">events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">"events"</span><span class="p">]</span> <span class="o">=</span> <span class="n">events</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"midi"</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"pattern"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pattern</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_normalize_audio_clip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AudioClip.to_dict">
@@ -1504,6 +1531,9 @@
     <span class="n">is_playing</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">current_step</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">loop_enabled</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># When false the sequencer ignores transport play (its own play button</span>
+    <span class="c1"># still works), so pattern clips on its lane can drive the track instead.</span>
+    <span class="n">follow_transport</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">num_voices</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Session routing (set by Session to route audio through mixer)</span>
@@ -2770,6 +2800,28 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">track_index</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"midi"</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">normalized</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="TimelineWidget.add_pattern_clip">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_pattern_clip">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_pattern_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Append a MIDI clip that plays ``pattern`` (steps) ``repeat`` times.</span>
+
+<span class="sd">        ``pattern`` is anything ``LauncherWidget.set_slot`` accepts: a</span>
+<span class="sd">        ``SequencerWidget``, a ``NoteComposer``, a list of step dicts, or a</span>
+<span class="sd">        list of voices. Active steps become notes at ``step_duration`` beats</span>
+<span class="sd">        per step; the clip's ``pattern`` field records ``name`` so</span>
+<span class="sd">        ``Session.update_pattern()`` can regenerate it later.</span>
+<span class="sd">        """</span>
+        <span class="n">voices</span> <span class="o">=</span> <span class="n">_slot_voices</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="n">step_duration</span> <span class="o">=</span> <span class="n">_positive_number</span><span class="p">(</span><span class="n">step_duration</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">16.0</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">voices</span><span class="p">)</span> <span class="o">*</span> <span class="n">step_duration</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">_steps_to_events</span><span class="p">(</span><span class="n">voices</span><span class="p">,</span> <span class="n">step_duration</span><span class="p">)</span>
+        <span class="n">repeat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">repeat</span><span class="p">))</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">event</span><span class="p">,</span> <span class="s2">"beat"</span><span class="p">:</span> <span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">+</span> <span class="n">cycle</span> <span class="o">*</span> <span class="n">length</span><span class="p">}</span> <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat</span><span class="p">)</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">base</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">length</span> <span class="o">*</span> <span class="n">repeat</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_midi_clip</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">track_index</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="TimelineWidget.export_midi_clip">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_midi_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_midi_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -3295,6 +3347,7 @@
     <span class="s2">"groove"</span><span class="p">,</span>
     <span class="s2">"automation_lanes"</span><span class="p">,</span>
     <span class="s2">"loop_enabled"</span><span class="p">,</span>
+    <span class="s2">"follow_transport"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
 <span class="n">_SAMPLER_STATE</span> <span class="o">=</span> <span class="p">(</span>
@@ -3403,7 +3456,7 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">ctor</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"num_voices"</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">,</span> <span class="s2">"measures"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">state</span><span class="p">}</span>
     <span class="n">sequencer</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="o">**</span><span class="n">ctor</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"automation_lanes"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"automation_lanes"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"follow_transport"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">state</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">state</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">):</span>
@@ -3448,6 +3501,7 @@
         <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">tracks</span><span class="p">,</span>
         <span class="s2">"timeline"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">_widget_state</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="n">_TIMELINE_STATE</span><span class="p">),</span> <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">),</span> <span class="s2">"clips"</span><span class="p">:</span> <span class="n">clips</span><span class="p">},</span>
         <span class="s2">"launcher"</span><span class="p">:</span> <span class="n">_widget_state</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="p">(</span><span class="s2">"quantize"</span><span class="p">,</span> <span class="s2">"scenes"</span><span class="p">,</span> <span class="s2">"slots"</span><span class="p">)),</span>
+        <span class="s2">"patterns"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">patterns</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span> <span class="k">if</span> <span class="n">resources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span></div>
 
@@ -3525,6 +3579,8 @@
         <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">slots</span> <span class="o">=</span> <span class="n">launcher_data</span><span class="p">[</span><span class="s2">"slots"</span><span class="p">]</span>
     <span class="k">if</span> <span class="s2">"quantize"</span> <span class="ow">in</span> <span class="n">launcher_data</span><span class="p">:</span>
         <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">quantize</span> <span class="o">=</span> <span class="n">launcher_data</span><span class="p">[</span><span class="s2">"quantize"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"patterns"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"step_duration"</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">session</span></div>
 
 
@@ -4280,6 +4336,8 @@
             <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Named patterns for the tracking view: name -&gt; {voices_data, step_duration}.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Lane mute/solo and mixer channel mute/solo are the same control</span>
         <span class="c1"># from the user's side; keep them mirrored by channel index.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span>
@@ -4433,6 +4491,118 @@
                         <span class="n">t</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span>
                     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">):</span>
                         <span class="n">t</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span></div>
+
+
+    <span class="c1"># Pattern chaining</span>
+
+<div class="viewcode-block" id="Session._track_index">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._track_index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_track_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Track</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">track</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no track named </span><span class="si">{</span><span class="n">track</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"track index out of range: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">index</span></div>
+
+
+<div class="viewcode-block" id="Session.add_pattern">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.add_pattern">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Register a named pattern for chaining; returns its stored form.</span>
+
+<span class="sd">        ``pattern`` is a ``SequencerWidget`` (its grid and step duration are</span>
+<span class="sd">        used), a ``NoteComposer``, a list of step dicts, or a list of voices.</span>
+<span class="sd">        """</span>
+        <span class="n">voices</span> <span class="o">=</span> <span class="n">_slot_voices</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">step_duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">step_duration</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">step_duration</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.25</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">voices</span><span class="p">)</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"voices_data"</span><span class="p">:</span> <span class="p">[[</span><span class="nb">dict</span><span class="p">(</span><span class="n">step</span><span class="p">)</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">voice</span><span class="p">]</span> <span class="o">+</span> <span class="n">_default_steps</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">))</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">voices</span><span class="p">],</span>
+            <span class="s2">"step_duration"</span><span class="p">:</span> <span class="n">_positive_number</span><span class="p">(</span><span class="n">step_duration</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mf">16.0</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry</span>
+        <span class="k">return</span> <span class="n">entry</span></div>
+
+
+<div class="viewcode-block" id="Session.remove_pattern">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_pattern">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Forget a pattern; clips already placed keep playing as MIDI clips."""</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="Session.chain">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.chain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Place named patterns back to back on a track's lane; returns the clips.</span>
+
+<span class="sd">        Each name becomes one pattern clip that plays ``repeat`` times. A</span>
+<span class="sd">        track with a sequencer stops following the transport</span>
+<span class="sd">        (``follow_transport = False``) so the arrangement drives it; the</span>
+<span class="sd">        clips play through the track's sampler or the built-in oscillator.</span>
+<span class="sd">        """</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_track_index</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown pattern(s): </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">follow_transport</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="s2">"start"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
+            <span class="n">clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_pattern_clip</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">pattern</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span>
+                <span class="n">track_index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                <span class="n">step_duration</span><span class="o">=</span><span class="n">pattern</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">],</span>
+                <span class="n">repeat</span><span class="o">=</span><span class="n">repeat</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">clips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip</span><span class="p">)</span>
+            <span class="n">position</span> <span class="o">+=</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">clips</span></div>
+
+
+<div class="viewcode-block" id="Session.update_pattern">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.update_pattern">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Replace a pattern and regenerate every clip placed from it."""</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">step_duration</span><span class="p">)</span>
+        <span class="n">scratch</span> <span class="o">=</span> <span class="n">TimelineWidget</span><span class="p">()</span>
+        <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pattern"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">clips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">])</span> <span class="o">*</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">]</span>
+            <span class="n">repeat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]</span> <span class="o">/</span> <span class="n">length</span><span class="p">))</span> <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="n">rebuilt</span> <span class="o">=</span> <span class="n">scratch</span><span class="o">.</span><span class="n">add_pattern_clip</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="n">entry</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span>
+                <span class="n">track_index</span><span class="o">=</span><span class="n">clip</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">],</span>
+                <span class="n">step_duration</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">],</span>
+                <span class="n">repeat</span><span class="o">=</span><span class="n">repeat</span><span class="p">,</span>
+                <span class="n">duration</span><span class="o">=</span><span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">],</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">clip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+                <span class="n">muted</span><span class="o">=</span><span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"muted"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">clips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rebuilt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="n">clips</span>
+        <span class="k">return</span> <span class="n">entry</span></div>
 
 
     <span class="c1"># MIDI files</span>

@@ -1234,6 +1234,9 @@ Module Contents
    .. py:method:: test_remove_clip_clears_selection()
 
 
+   .. py:method:: test_add_pattern_clip_expands_steps()
+
+
    .. py:method:: test_remove_track_drops_clips_and_shifts()
 
 
@@ -1407,6 +1410,12 @@ Module Contents
 
 
    .. py:method:: test_session_launcher_tracks_follow_session_tracks()
+
+
+   .. py:method:: test_chain_places_pattern_clips_and_detaches_sequencer()
+
+
+   .. py:method:: test_update_pattern_regenerates_clips()
 
 
    .. py:method:: test_remove_track_clears_launcher_selection()
