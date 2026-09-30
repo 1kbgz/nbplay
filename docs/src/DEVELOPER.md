@@ -188,7 +188,8 @@ files are generated.
 | `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
 | `LauncherWidget` | `launcher.js` | `launcher.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request` |
 | `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
-| `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port` and `available_midi_ports` |
+| `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change` |
+| `MidiOutputWidget` | `midi_output.js` | `midi_output.css` | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request` |
 | `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
 
 ### Non-rendered Python orchestration types
@@ -436,7 +437,7 @@ Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
 `compressor`, `limiter`, `delay`, and `reverb`. A descriptor with
 `enabled: false` is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
-bypass and the small × next to it removes the effect;
+bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
 `set_channel_effect_enabled()` and `set_master_effect_enabled()` do the same
 from Python, and `EffectPlugin(..., enabled=False)` builds a bypassed
 descriptor. Unknown descriptor types are left intact when their params are
@@ -452,6 +453,15 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 `GainNode`, and a master insert chain connected to destination. Mute/solo
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
+
+The parameter editor lists each built-in effect's parameters with the same
+ranges the Python `EffectPlugin` enforces (a slider plus a number box for
+bounded numbers, a select for the filter type) and, for custom plugin types,
+every JSON field of the descriptor as a number, text, or checkbox input. Edits
+write the descriptor back to `channels[i].effects` or `master_effects` on every
+input event. Only a change in chain structure (effect type or bypass) rebuilds
+the strip DOM; parameter changes refresh chip labels and open editors in place
+so sliders keep focus, and open editors are restored after a rebuild.
 
 Insert chains update in place. Each built-in effect unit exposes
 `update(descriptor)`, which writes the new parameters to the existing
@@ -730,6 +740,14 @@ note-off. MIDI velocity is preserved in `last_note_event`, `active_notes`, the
 Zone routing for external MIDI is based on note number: notes below MIDI 60 are
 `lower`, and notes 60 or above are `upper`. This lets one MIDI keyboard drive
 multiple samplers split by range through the same `connect_sampler()` API.
+
+### MidiOutputWidget
+
+`js/src/ts/midi_output.ts` is the session's way out to hardware and other software. It lists Web MIDI output ports (`midi_port`, `available_midi_ports`) and sends on one channel (`channel`, 0-15). With a `session_id` it registers on the bus's `noteListeners`, where every note the session plays arrives: keyboards and pads broadcast when a key goes down, and the sequencer scheduler, launcher slots, and timeline MIDI clips emit their notes as they are scheduled, with `at` (AudioContext time) and `duration`. Scheduled notes are converted to Web MIDI timestamps so the hardware plays them at the same time as the browser. Without a session it listens to the document-level `nbplay-note` events instead, never both, so nothing is sent twice. `forward_notes` turns that forwarding off. Python sends through the `send_request` trait (`note_on()`, `note_off()`, `control_change()`, `send()` for raw bytes), each request carrying a nonce so identical messages still fire. Changing port or channel and teardown send all-notes-off first.
+
+### MIDI learn
+
+`nbplay/midi_learn.py` maps hardware knobs to widget traits through the kernel. `MidiKeyboardWidget` syncs each control change it receives into its `control_change` trait (`controller`, `value`, `channel`, and a `seq` counter so repeated values still notify). `MidiLearn(source)` observes that trait; `map(controller, target, name, low, high, channel)` binds a controller now and `learn(target, name)` binds the next one the hardware sends. Bool traits switch at 64, Int and Float traits scale the 0-127 value into `[low, high]` (defaulting to 0-127 and 0-1). Values go through the kernel, which is fine for knobs; notes stay in the browser.
 
 ### PadWidget
 

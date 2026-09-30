@@ -16,6 +16,7 @@ const WIDGET_NAMES = [
   "settings",
   "keyboard",
   "midi_keyboard",
+  "midi_output",
   "pad",
 ];
 
