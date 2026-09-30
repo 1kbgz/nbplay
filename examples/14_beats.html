@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -241,7 +241,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -315,6 +315,24 @@
 </div>
 <p>Click a slot to launch it (or a scene name to launch the column); the stop buttons at the row ends and <strong>Stop All</strong> take effect on the next bar. Change <strong>Quantize</strong> to launch on beats or immediately. From Python, <code class="docutils literal notranslate"><span class="pre">launcher.launch(track,</span> <span class="pre">scene)</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher.launch_scene(scene)</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher.stop_track(track)</span></code>, and <code class="docutils literal notranslate"><span class="pre">launcher.stop_all()</span></code> do the same.</p>
 <p>The editor sequencer under the grid shows whichever slot is selected; edit its steps and the slot updates live, even while it plays. To capture a performance, arm lanes on the Tracking tab (instrument lanes default to a mixer-channel tap), press <strong>Rec</strong> on the transport, and perform; the takes land on the timeline as audio clips.</p>
+<section id="song-mode-chain-patterns-on-the-timeline">
+<h2>Song Mode: Chain Patterns on the Timeline<a class="headerlink" href="#song-mode-chain-patterns-on-the-timeline" title="Link to this heading">¶</a></h2>
+<p>Once the slots feel right, lay them out as a song. Register named patterns with <code class="docutils literal notranslate"><span class="pre">add_pattern()</span></code> (from a slot’s steps, a sequencer, or a step list) and <code class="docutils literal notranslate"><span class="pre">chain()</span></code> them onto a track’s timeline lane. The clips play through the track’s instrument; a track with a sequencer stops looping on its own so the arrangement drives it. <code class="docutils literal notranslate"><span class="pre">update_pattern()</span></code> regenerates every clip made from a name.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kick_slot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">launcher</span><span class="o">.</span><span class="n">slots</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">kit_slot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">launcher</span><span class="o">.</span><span class="n">slots</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"kick"</span><span class="p">,</span> <span class="n">kick_slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">kick_slot</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">])</span>
+<span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"kit"</span><span class="p">,</span> <span class="n">kit_slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">kit_slot</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">])</span>
+
+<span class="n">song</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">drum_track</span><span class="p">,</span> <span class="p">[</span><span class="s2">"kick"</span><span class="p">,</span> <span class="s2">"kick"</span><span class="p">,</span> <span class="s2">"kit"</span><span class="p">,</span> <span class="s2">"kit"</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">([(</span><span class="n">clip</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">],</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">])</span> <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">song</span><span class="p">])</span>
+<span class="n">session</span><span class="o">.</span><span class="n">timeline</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -342,8 +360,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">14 Beats</a><ul>
+<li><a class="reference internal" href="#song-mode-chain-patterns-on-the-timeline">Song Mode: Chain Patterns on the Timeline</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

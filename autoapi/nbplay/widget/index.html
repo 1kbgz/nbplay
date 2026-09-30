@@ -479,6 +479,12 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_pad_actions" title="nbplay.widget._normalize_pad_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_actions</span></code></a>(actions, pad_count[, ...])</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zone" title="nbplay.widget._normalize_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zone</span></code></a>(zone[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_zones" title="nbplay.widget._normalize_zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zones</span></code></a>(zones)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_sample_slices" title="nbplay.widget._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
 <td><p></p></td>
 </tr>
@@ -893,6 +899,16 @@ API in the browser so latency stays minimal.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.widget._normalize_pad_actions">
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_pad_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_pad_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_pad_actions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget._normalize_zone">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zone</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_zone" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget._normalize_zones">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_zones" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1677,6 +1693,16 @@ as individual traits.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.zones">
+<span class="sig-name descname"><span class="pre">zones</span></span><a class="headerlink" href="#nbplay.widget.SamplerWidget.zones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.capture_request">
+<span class="sig-name descname"><span class="pre">capture_request</span></span><a class="headerlink" href="#nbplay.widget.SamplerWidget.capture_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.pad_count">
 <span class="sig-name descname"><span class="pre">pad_count</span></span><a class="headerlink" href="#nbplay.widget.SamplerWidget.pad_count" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1762,6 +1788,87 @@ as individual traits.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget._on_zones_change">
+<span class="sig-name descname"><span class="pre">_on_zones_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget._on_zones_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget._on_zones_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.add_zone">
+<span class="sig-name descname"><span class="pre">add_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.add_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.add_zone" title="Link to this definition">¶</a></dt>
+<dd><p>Add a sample zone covering a note (and velocity) range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Float samples, or float32 bytes.</p></li>
+<li><p><strong>note_low</strong> – MIDI note range the zone answers to.</p></li>
+<li><p><strong>note_high</strong> – MIDI note range the zone answers to.</p></li>
+<li><p><strong>velocity_low</strong> – Velocity range the zone answers to.</p></li>
+<li><p><strong>velocity_high</strong> – Velocity range the zone answers to.</p></li>
+<li><p><strong>root_note</strong> – Note at which the sample plays unpitched (defaults to
+<code class="docutils literal notranslate"><span class="pre">note_low</span></code> when the range is one note, else 60).</p></li>
+<li><p><strong>sample_rate</strong> – Sample rate of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+<li><p><strong>name</strong> – Display name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The zone dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.add_zone_file">
+<span class="sig-name descname"><span class="pre">add_zone_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.add_zone_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.add_zone_file" title="Link to this definition">¶</a></dt>
+<dd><p>Add a zone from an audio file (WAV via stdlib, others via <code class="docutils literal notranslate"><span class="pre">soundfile</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.set_zone">
+<span class="sig-name descname"><span class="pre">set_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.set_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.set_zone" title="Link to this definition">¶</a></dt>
+<dd><p>Update fields of one zone (range, root note, name); returns the zone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.remove_zone">
+<span class="sig-name descname"><span class="pre">remove_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.remove_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.remove_zone" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the zone at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.clear_zones">
+<span class="sig-name descname"><span class="pre">clear_zones</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.clear_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.clear_zones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.zone_for">
+<span class="sig-name descname"><span class="pre">zone_for</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.zone_for"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.zone_for" title="Link to this definition">¶</a></dt>
+<dd><p>Return the first zone matching <code class="docutils literal notranslate"><span class="pre">note</span></code> and <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, or None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.zone_samples">
+<span class="sig-name descname"><span class="pre">zone_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.zone_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.zone_samples" title="Link to this definition">¶</a></dt>
+<dd><p>Return one zone’s PCM as floats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.to_sample_map">
+<span class="sig-name descname"><span class="pre">to_sample_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.to_sample_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.to_sample_map" title="Link to this definition">¶</a></dt>
+<dd><p>Build a Rust <code class="docutils literal notranslate"><span class="pre">SampleMap</span></code>: zones in order, then the main sample as the fallback.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.capture_clip">
+<span class="sig-name descname"><span class="pre">capture_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget.capture_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget.capture_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Turn a timeline audio clip into a zone, decoded by the browser.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">pad</span></code> (index) or <code class="docutils literal notranslate"><span class="pre">note</span></code> the zone answers to that one note
+and plays unpitched there, so the take sits on a pad; otherwise it
+covers every note. The clip’s trim (<code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">duration</span></code>) is
+honoured. The zone appears in <code class="docutils literal notranslate"><span class="pre">zones</span></code> once the browser has decoded
+the audio; both widgets must be rendered in the same page.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget._set_sample_data">
 <span class="sig-name descname"><span class="pre">_set_sample_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget._set_sample_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget._set_sample_data" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1800,6 +1907,11 @@ is not installed, or if WAV format is invalid.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget._decode_audio_file">
+<span class="sig-name descname"><span class="pre">_decode_audio_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget._decode_audio_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget._decode_audio_file" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.configure_pads">
@@ -3714,6 +3826,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 </li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_pad_action"><code class="docutils literal notranslate"><span class="pre">_normalize_pad_action()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_pad_actions"><code class="docutils literal notranslate"><span class="pre">_normalize_pad_actions()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._normalize_zone"><code class="docutils literal notranslate"><span class="pre">_normalize_zone()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._normalize_zones"><code class="docutils literal notranslate"><span class="pre">_normalize_zones()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_sample_slices"><code class="docutils literal notranslate"><span class="pre">_normalize_sample_slices()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget"><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code></a><ul>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget._esm"><code class="docutils literal notranslate"><span class="pre">SynthWidget._esm</span></code></a></li>
@@ -3842,6 +3956,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.pad_velocities"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.pad_velocities</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.pad_actions"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.pad_actions</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.sample_slices"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.sample_slices</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.zones"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.zones</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.capture_request"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.capture_request</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.pad_count"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.pad_count</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.velocity"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.velocity</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.velocity_sensitive"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.velocity_sensitive</span></code></a></li>
@@ -3859,10 +3975,21 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget._on_pad_velocities_change"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._on_pad_velocities_change()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget._on_pad_actions_change"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._on_pad_actions_change()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget._on_sample_slices_change"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._on_sample_slices_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget._on_zones_change"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._on_zones_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.add_zone"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.add_zone()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.add_zone_file"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.add_zone_file()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.set_zone"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.set_zone()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.remove_zone"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.remove_zone()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.clear_zones"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.clear_zones()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.zone_for"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.zone_for()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.zone_samples"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.zone_samples()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.to_sample_map"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.to_sample_map()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget.capture_clip"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.capture_clip()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget._set_sample_data"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._set_sample_data()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.get_sample_data"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.get_sample_data()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget._read_wav_file"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._read_wav_file()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.load_audio_file"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.load_audio_file()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SamplerWidget._decode_audio_file"><code class="docutils literal notranslate"><span class="pre">SamplerWidget._decode_audio_file()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.configure_pads"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.configure_pads()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.load_sample"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.load_sample()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SamplerWidget.trim_sample"><code class="docutils literal notranslate"><span class="pre">SamplerWidget.trim_sample()</span></code></a></li>

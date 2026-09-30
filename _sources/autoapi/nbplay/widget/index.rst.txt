@@ -103,6 +103,8 @@ Functions
    nbplay.widget._normalize_audio_clips
    nbplay.widget._normalize_pad_action
    nbplay.widget._normalize_pad_actions
+   nbplay.widget._normalize_zone
+   nbplay.widget._normalize_zones
    nbplay.widget._normalize_sample_slices
    nbplay.widget._slot_voices
    nbplay.widget._normalize_launcher_slot
@@ -336,6 +338,10 @@ Module Contents
 .. py:function:: _normalize_pad_action(action, default_note=60, default_velocity=100, prefer_defaults=False)
 
 .. py:function:: _normalize_pad_actions(actions, pad_count, pad_notes=None, pad_velocities=None, prefer_defaults=False)
+
+.. py:function:: _normalize_zone(zone, index=0)
+
+.. py:function:: _normalize_zones(zones)
 
 .. py:function:: _normalize_sample_slices(slices, sample_length=0)
 
@@ -917,6 +923,12 @@ Module Contents
    .. py:attribute:: sample_slices
 
 
+   .. py:attribute:: zones
+
+
+   .. py:attribute:: capture_request
+
+
    .. py:attribute:: pad_count
 
 
@@ -970,6 +982,78 @@ Module Contents
    .. py:method:: _on_sample_slices_change(change)
 
 
+   .. py:method:: _on_zones_change(change)
+
+
+   .. py:method:: add_zone(data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None)
+
+      Add a sample zone covering a note (and velocity) range.
+
+      :param data: Float samples, or float32 bytes.
+      :param note_low: MIDI note range the zone answers to.
+      :param note_high: MIDI note range the zone answers to.
+      :param velocity_low: Velocity range the zone answers to.
+      :param velocity_high: Velocity range the zone answers to.
+      :param root_note: Note at which the sample plays unpitched (defaults to
+                        ``note_low`` when the range is one note, else 60).
+      :param sample_rate: Sample rate of ``data``.
+      :param name: Display name.
+
+      :returns: The zone dict.
+
+
+
+   .. py:method:: add_zone_file(path, note_low=0, note_high=127, **kwargs)
+
+      Add a zone from an audio file (WAV via stdlib, others via ``soundfile``).
+
+
+
+   .. py:method:: set_zone(index, **fields)
+
+      Update fields of one zone (range, root note, name); returns the zone.
+
+
+
+   .. py:method:: remove_zone(index)
+
+      Remove the zone at ``index``.
+
+
+
+   .. py:method:: clear_zones()
+
+
+   .. py:method:: zone_for(note, velocity=100)
+
+      Return the first zone matching ``note`` and ``velocity``, or None.
+
+
+
+   .. py:method:: zone_samples(index)
+
+      Return one zone's PCM as floats.
+
+
+
+   .. py:method:: to_sample_map()
+
+      Build a Rust ``SampleMap``: zones in order, then the main sample as the fallback.
+
+
+
+   .. py:method:: capture_clip(timeline, clip_id, pad=None, note=None, name=None)
+
+      Turn a timeline audio clip into a zone, decoded by the browser.
+
+      With ``pad`` (index) or ``note`` the zone answers to that one note
+      and plays unpitched there, so the take sits on a pad; otherwise it
+      covers every note. The clip's trim (``offset``/``duration``) is
+      honoured. The zone appears in ``zones`` once the browser has decoded
+      the audio; both widgets must be rendered in the same page.
+
+
+
    .. py:method:: _set_sample_data(samples)
 
 
@@ -998,6 +1082,9 @@ Module Contents
       :raises ValueError: If format is unsupported and ``soundfile``
           is not installed, or if WAV format is invalid.
 
+
+
+   .. py:method:: _decode_audio_file(path)
 
 
    .. py:method:: configure_pads(pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None)

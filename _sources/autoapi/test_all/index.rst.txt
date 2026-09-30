@@ -843,6 +843,27 @@ Module Contents
    .. py:method:: test_defaults()
 
 
+   .. py:method:: test_zones_default_empty()
+
+
+   .. py:method:: test_add_set_remove_zones()
+
+
+   .. py:method:: test_zones_are_normalized_on_assignment()
+
+
+   .. py:method:: test_add_zone_file(tmp_path)
+
+
+   .. py:method:: test_non_wav_files_use_soundfile(tmp_path, monkeypatch)
+
+
+   .. py:method:: test_to_sample_map_prefers_zones_then_main_sample()
+
+
+   .. py:method:: test_capture_clip_requests_browser_decode()
+
+
    .. py:method:: test_envelope_defaults()
 
 
