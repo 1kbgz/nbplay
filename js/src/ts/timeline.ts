@@ -10,6 +10,7 @@ import { midiToHz, scheduleOscillator } from "./scheduler.ts";
 import {
   bindClock,
   type ClockEvent,
+  emitBusNote,
   getSessionBus,
   type SessionClock,
 } from "./session.ts";
@@ -939,6 +940,13 @@ export default {
       const bus = getSessionBus(model.get("session_id") as string);
       const sampler = bus?.samplers?.[track.channel_index];
       const durationSeconds = event.duration * spb;
+      emitBusNote(model.get("session_id") as string, {
+        note: event.note,
+        velocity: event.velocity,
+        type: "on",
+        at: atTime,
+        duration: durationSeconds,
+      });
       if (sampler) {
         const delayMs = Math.max(0, (atTime - clk.now()) * 1000);
         scheduledTimers.push(

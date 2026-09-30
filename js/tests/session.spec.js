@@ -163,6 +163,33 @@ test.describe("Session clock", () => {
     expect(Math.abs(state.a - state.b)).toBeLessThan(1e-6);
   });
 
+  test("sequencer steps reach the session bus note listeners at their scheduled time", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await renderWidget(page, "sequencer", "a", SEQUENCER_DEFAULTS);
+    await page.evaluate((id) => {
+      window.__busNotes = [];
+      const bus = globalThis.__nbplay[id];
+      bus.noteListeners = bus.noteListeners || [];
+      bus.noteListeners.push((evt) => window.__busNotes.push(evt));
+    }, SESSION_ID);
+
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
+
+    const state = await page.evaluate(() => ({
+      first: window.__busNotes[0],
+      oscStart: window.__oscStarts.a[0],
+    }));
+    expect(state.first.type).toBe("on");
+    expect(state.first.note).toBe(60);
+    expect(state.first.velocity).toBe(100);
+    expect(state.first.duration).toBeGreaterThan(0);
+    expect(Math.abs(state.first.at - state.oscStart)).toBeLessThan(1e-6);
+  });
+
   test("sequencers stay locked after a tempo change and a seek", async ({
     page,
   }) => {

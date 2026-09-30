@@ -13,6 +13,10 @@ export interface NoteEvent {
   note: number;
   velocity: number;
   type: "on" | "off";
+  /** AudioContext time the note is scheduled for (absent: now). */
+  at?: number;
+  /** Seconds until the scheduled note releases (absent: waits for "off"). */
+  duration?: number;
 }
 
 export interface SamplerBus {
@@ -94,6 +98,12 @@ export function getOrCreateSessionBus(sessionId: string): SessionBus {
   const registry = busRegistry();
   if (!registry[sessionId]) registry[sessionId] = {};
   return registry[sessionId];
+}
+
+/** Hand a note event to the session's note listeners (MIDI output, monitors). */
+export function emitBusNote(sessionId: string, evt: NoteEvent): void {
+  const bus = getSessionBus(sessionId);
+  bus?.noteListeners?.forEach((fn) => fn(evt));
 }
 
 /** Return the shared AudioContext for a bus, creating it once. */

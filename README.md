@@ -66,7 +66,7 @@ session.play()   # or press play on any widget; they share the clock
 
 Song structure comes from named patterns: `session.add_pattern("verse", drums.sequencer)`, then `session.chain(drums, ["verse", "verse", "chorus"])` lays them out as clips on the track's timeline lane, and the sequencer stops looping on its own so the arrangement drives it.
 
-Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
+`MidiOutputWidget` sends what the session plays to a hardware synth or another app over Web MIDI, and `MidiLearn` maps hardware knobs to widget traits (`MidiLearn(midi_keyboard).learn(synth, "frequency", low=100, high=2000)`, then turn a knob). Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
 `session.export_midi("song.mid")`, and `session.import_midi(path)`.
 
 The example notebooks in `examples/` walk through each widget and end with a

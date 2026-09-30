@@ -6,6 +6,7 @@ import wave
 import zipfile
 
 import pytest
+import traitlets
 
 from nbplay import (
     AudioBuffer,
@@ -21,7 +22,9 @@ from nbplay import (
     MidiChannel,
     MidiEvent,
     MidiKeyboardWidget,
+    MidiLearn,
     MidiMessage,
+    MidiOutputWidget,
     Mixer,
     MixerChannel,
     MixerWidget,
@@ -2241,6 +2244,118 @@ class TestMidiKeyboardWidget:
         kb.connect_sampler(sampler, zone="upper")
         assert sampler.keyboard_connected is True
         assert kb.sampler_routing == [{"channel_index": 1, "match": "zone", "zone": "upper"}]
+
+
+class TestMidiOutputWidget:
+    def test_defaults(self):
+        out = MidiOutputWidget()
+        assert out.session_id == ""
+        assert out.midi_port == ""
+        assert out.channel == 0
+        assert out.forward_notes is True
+        assert out.send_request == {}
+
+    def test_requests_carry_increasing_nonces_and_clamp(self):
+        out = MidiOutputWidget(channel=9)
+        out.note_on(60, 200)
+        assert out.send_request == {"kind": "note_on", "note": 60, "velocity": 127, "nonce": 1}
+        out.note_on(200, 0)
+        assert out.send_request == {"kind": "note_on", "note": 127, "velocity": 1, "nonce": 2}
+        out.note_off(-5)
+        assert out.send_request == {"kind": "note_off", "note": 0, "nonce": 3}
+        out.control_change(7, 300)
+        assert out.send_request == {"kind": "control_change", "controller": 7, "value": 127, "nonce": 4}
+        out.send([0xC9, 5, 999])
+        assert out.send_request == {"kind": "raw", "data": [0xC9, 5, 255], "nonce": 5}
+        with pytest.raises(ValueError):
+            out.send([])
+        with pytest.raises(traitlets.TraitError):
+            out.channel = 16
+
+
+class TestMidiLearn:
+    @staticmethod
+    def send(kb, controller, value, channel=0):
+        seq = kb.control_change.get("seq", 0) + 1
+        kb.control_change = {"controller": controller, "value": value, "channel": channel, "seq": seq}
+
+    def test_requires_a_control_change_source(self):
+        with pytest.raises(TypeError):
+            MidiLearn(SynthWidget())
+
+    def test_map_scales_numeric_traits(self):
+        kb = MidiKeyboardWidget()
+        synth = SynthWidget()
+        learn = MidiLearn(kb)
+        learn.map(74, synth, "frequency", low=100.0, high=1000.0)
+        learn.map(1, synth, "amplitude")
+        self.send(kb, 74, 127)
+        self.send(kb, 1, 64)
+        assert synth.frequency == pytest.approx(1000.0)
+        assert synth.amplitude == pytest.approx(64 / 127)
+        self.send(kb, 74, 0)
+        assert synth.frequency == pytest.approx(100.0)
+        assert learn.apply(74, 200) == pytest.approx(1000.0)
+        assert learn.apply(99, 10) is None
+
+    def test_int_and_bool_traits(self):
+        kb = MidiKeyboardWidget()
+        seq = SequencerWidget()
+        learn = MidiLearn(kb)
+        learn.map(20, seq, "length", low=1, high=16)
+        learn.map(21, seq, "loop_enabled")
+        self.send(kb, 20, 127)
+        self.send(kb, 21, 63)
+        assert seq.length == 16
+        assert seq.loop_enabled is False
+        self.send(kb, 20, 0)
+        self.send(kb, 21, 64)
+        assert seq.length == 1
+        assert seq.loop_enabled is True
+
+    def test_learn_binds_the_next_controller(self):
+        kb = MidiKeyboardWidget()
+        synth = SynthWidget()
+        learn = MidiLearn(kb)
+        learn.learn(synth, "amplitude", low=0.0, high=0.5)
+        assert learn.learning is True
+        self.send(kb, 11, 127)
+        assert learn.learning is False
+        assert learn.mappings[11]["name"] == "amplitude"
+        assert synth.amplitude == pytest.approx(0.5)
+        learn.learn(synth, "frequency")
+        learn.cancel()
+        self.send(kb, 12, 1)
+        assert 12 not in learn.mappings
+        with pytest.raises(ValueError):
+            learn.learn(synth, "missing")
+
+    def test_channel_filter_unmap_and_close(self):
+        kb = MidiKeyboardWidget()
+        synth = SynthWidget(amplitude=0.3)
+        learn = MidiLearn(kb)
+        learn.map(1, synth, "amplitude", channel=2)
+        self.send(kb, 1, 127, channel=0)
+        assert synth.amplitude == pytest.approx(0.3)
+        self.send(kb, 1, 127, channel=2)
+        assert synth.amplitude == pytest.approx(1.0)
+        assert learn.unmap(1) is True
+        assert learn.unmap(1) is False
+        learn.map(1, synth, "amplitude")
+        learn.close()
+        self.send(kb, 1, 0)
+        assert synth.amplitude == pytest.approx(1.0)
+        assert learn.mappings == {}
+
+    def test_rejects_unknown_or_unsupported_traits(self):
+        learn = MidiLearn(MidiKeyboardWidget())
+        synth = SynthWidget()
+        with pytest.raises(ValueError):
+            learn.map(1, synth, "missing")
+        with pytest.raises(TypeError):
+            learn.map(1, synth, "oscillator_type")
+        with pytest.raises(ValueError):
+            learn.map(128, synth, "amplitude")
 
 
 #  PadWidget

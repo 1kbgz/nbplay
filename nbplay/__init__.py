@@ -34,6 +34,7 @@ except ImportError:  # pragma: no cover - only on wasm32 builds
     AudioOutput = None
     MidiInput = None
 
+from nbplay.midi_learn import MidiLearn
 from nbplay.widget import (
     AudioClip,
     EffectPlugin,
@@ -41,6 +42,7 @@ from nbplay.widget import (
     KeyboardWidget,
     LauncherWidget,
     MidiKeyboardWidget,
+    MidiOutputWidget,
     MixerWidget,
     NoteComposer,
     PadAction,

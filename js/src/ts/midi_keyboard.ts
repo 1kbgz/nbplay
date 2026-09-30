@@ -318,11 +318,24 @@ function render({
     syncMonitor();
   }
 
+  let ccSeq = 0;
+
+  function controlChange(controller: number, value: number, channel: number) {
+    ccSeq += 1;
+    model.set("control_change", { controller, value, channel, seq: ccSeq });
+    model.save_changes();
+    lastEl.textContent = `CC ${controller}  ${value}`;
+  }
+
   function handleMidiData(data: Uint8Array): void {
     if (!data || data.length < 3) return;
     const status = data[0] & 0xf0;
     const note = data[1];
     const velocity = data[2];
+    if (status === 0xb0) {
+      controlChange(note, velocity, data[0] & 0x0f);
+      return;
+    }
     if (status === 0x90 && velocity > 0) {
       noteOn(note, velocity);
       return;
