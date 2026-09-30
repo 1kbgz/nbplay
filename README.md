@@ -66,6 +66,9 @@ session.play()   # or press play on any widget; they share the clock
 
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
 
+Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
+`session.export_midi("song.mid")`, and `session.import_midi(path)`.
+
 The example notebooks in `examples/` walk through each widget and end with a
 full DAW playground and the beats view.
 

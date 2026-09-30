@@ -1215,6 +1215,51 @@ class SequencerWidget(anywidget.AnyWidget):
         for c in self._composers:
             c.clear()
 
+    def to_midi(self, path=None, name="Sequencer"):
+        """Export the pattern as a ``mido.MidiFile`` (written to ``path`` if given).
+
+        Every voice's active steps become notes; step index times
+        ``step_duration`` gives the beat, ``duration_ticks`` the length. The
+        file carries the sequencer's BPM and time signature.
+        """
+        from nbplay.midi import build_midi, steps_to_events
+
+        midi = build_midi(
+            [{"name": name, "events": steps_to_events(self.voices_data, self.step_duration)}],
+            bpm=self.bpm,
+            time_signature=(self.time_signature_num, self.time_signature_den),
+        )
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def load_midi(self, source, track=None, step_duration=None, max_voices=8):
+        """Replace the pattern with notes from a MIDI file.
+
+        ``track`` picks one track by index; by default every track with
+        notes is merged. Notes are quantized to ``step_duration`` (defaults
+        to the current grid), overlapping notes go to separate voices up to
+        ``max_voices``, and the grid grows to fit the last note. The file's
+        tempo is applied to ``bpm``. Returns self.
+        """
+        from nbplay.midi import events_to_voices, read_midi
+
+        data = read_midi(source)
+        tracks = data["tracks"]
+        if track is not None:
+            if track < 0 or track >= len(tracks):
+                raise IndexError(f"MIDI track index out of range: {track}")
+            tracks = [tracks[track]]
+        events = [event for item in tracks for event in item["events"]]
+        step = self.step_duration if step_duration is None else float(step_duration)
+        voices, length = events_to_voices(events, step, max_voices=max_voices)
+        self.bpm = data["bpm"]
+        self.step_duration = step
+        self.num_voices = len(voices)
+        self.length = length
+        self.voices_data = voices
+        return self
+
     def to_pattern(self, voice=0):
         """Build a Rust ``Pattern`` from the given voice.
 
@@ -2066,6 +2111,38 @@ class TimelineWidget(anywidget.AnyWidget):
         if duration is None:
             duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
         return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
+
+    def export_midi_clip(self, clip_id, path=None):
+        """Write one MIDI clip to a ``.mid`` file (or return the ``mido.MidiFile``)."""
+        from nbplay.midi import build_midi
+
+        clip_id = str(clip_id)
+        for clip in self.clips:
+            if clip.get("id") == clip_id:
+                if clip.get("kind") != "midi":
+                    raise ValueError(f"clip {clip_id} is not a MIDI clip")
+                midi = build_midi(
+                    [{"name": clip["name"], "events": clip.get("events", [])}],
+                    bpm=self.bpm,
+                    time_signature=(self.time_signature_num, self.time_signature_den),
+                )
+                if path is not None:
+                    midi.save(os.fspath(path))
+                return midi
+        raise ValueError(f"clip not found: {clip_id}")
+
+    def import_midi(self, source, track_index=0, start=0.0):
+        """Add one MIDI clip per MIDI track with notes, all on one lane at ``start``.
+
+        Returns the clips added. Beats in the file map straight onto the
+        timeline; the file's tempo is not applied.
+        """
+        from nbplay.midi import read_midi
+
+        added = []
+        for item in read_midi(source)["tracks"]:
+            added.append(self.add_midi_clip(item["name"], track_index=track_index, start=start, events=item["events"]))
+        return added
 
     def clip_to_event_sequence(self, clip_id):
         """Return a MIDI clip's events as a Rust ``EventSequence``."""
@@ -3432,6 +3509,61 @@ class Session:
                         t.sequencer.channel_index -= 1
                     if hasattr(t.sound_source, "channel_index"):
                         t.sound_source.channel_index -= 1
+
+    # MIDI files
+
+    def export_midi(self, path=None):
+        """Export the session's sequencer patterns and MIDI clips as one MIDI file.
+
+        Each sequencer track becomes one MIDI track from beat 0; each MIDI
+        clip becomes one MIDI track placed at its timeline position. Returns
+        the ``mido.MidiFile`` (written to ``path`` if given).
+        """
+        from nbplay.midi import build_midi, steps_to_events
+
+        tracks = []
+        for track in self.tracks:
+            if track.sequencer is not None:
+                events = steps_to_events(track.sequencer.voices_data, track.sequencer.step_duration)
+                tracks.append({"name": track.name, "events": events, "channel": min(15, max(0, track.mixer_channel))})
+        for clip in self.timeline.clips:
+            if clip.get("kind") == "midi" and clip.get("events"):
+                offset = float(clip.get("offset", 0.0))
+                events = [
+                    {**event, "beat": clip["start"] + event["beat"] - offset}
+                    for event in clip["events"]
+                    if event["beat"] >= offset and event["beat"] - offset < clip["duration"]
+                ]
+                lane = self.timeline.tracks[clip["track_index"]] if clip["track_index"] < len(self.timeline.tracks) else {}
+                channel = min(15, max(0, int(lane.get("channel_index", 0))))
+                tracks.append({"name": clip["name"], "events": events, "channel": channel})
+        midi = build_midi(
+            tracks,
+            bpm=self.transport.bpm,
+            time_signature=(self.transport.time_signature_num, self.transport.time_signature_den),
+        )
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def import_midi(self, source, *, apply_tempo=True):
+        """Add one MIDI lane per MIDI track with notes, each holding the track as a clip.
+
+        Returns the new ``Track`` objects. With ``apply_tempo`` the file's
+        tempo and time signature are written to the transport.
+        """
+        from nbplay.midi import read_midi
+
+        data = read_midi(source)
+        if apply_tempo:
+            self.transport.bpm = data["bpm"]
+            self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
+        added = []
+        for item in data["tracks"]:
+            track = self.add_track(item["name"], input="midi")
+            self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
+            added.append(track)
+        return added
 
     # Persistence
 
