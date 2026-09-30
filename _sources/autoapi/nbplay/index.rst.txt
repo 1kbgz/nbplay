@@ -24,6 +24,14 @@ Attributes
    nbplay.AudioOutput
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   nbplay.MidiLearn
+
+
 Package Contents
 ----------------
 
@@ -33,5 +41,77 @@ Package Contents
 
 .. py:data:: AudioOutput
    :value: None
+
+
+.. py:class:: MidiLearn(source)
+
+   Route MIDI control changes to widget traits.
+
+   :param source: A widget with a synced ``control_change`` trait
+                  (``MidiKeyboardWidget``).
+
+   ``map()`` binds a controller number now; ``learn()`` binds the next
+   controller the hardware sends, so you can call it and turn the knob.
+   Bool traits switch on at values of 64 and above. Numeric traits scale
+   the 0-127 value into ``[low, high]``, which default to 0-1 for floats
+   and 0-127 for ints.
+
+
+   .. py:attribute:: source
+
+
+   .. py:attribute:: mappings
+
+
+   .. py:attribute:: _pending
+      :value: None
+
+
+
+   .. py:method:: map(controller, target, name, low=None, high=None, channel=None)
+
+      Bind ``controller`` (0-127) to ``target.<name>``; returns the mapping.
+
+
+
+   .. py:method:: learn(target, name, low=None, high=None)
+
+      Bind ``target.<name>`` to the next controller the hardware sends.
+
+
+
+   .. py:property:: learning
+
+      True while ``learn()`` is waiting for a controller.
+
+
+   .. py:method:: cancel()
+
+      Stop waiting for a controller after ``learn()``.
+
+
+
+   .. py:method:: unmap(controller)
+
+      Remove the mapping for ``controller``; returns True when one existed.
+
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: close()
+
+      Stop listening to the source.
+
+
+
+   .. py:method:: apply(controller, value, channel=None)
+
+      Apply a controller value as if it came from the hardware; returns the written value or None.
+
+
+
+   .. py:method:: _on_control_change(change)
 
 

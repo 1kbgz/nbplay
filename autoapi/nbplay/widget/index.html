@@ -362,13 +362,16 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget" title="nbplay.widget.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
 <td><p>Browser Web MIDI keyboard input widget.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.PadWidget" title="nbplay.widget.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MidiOutputWidget" title="nbplay.widget.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
+<td><p>Send notes and control changes to a browser Web MIDI output port.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.PadWidget" title="nbplay.widget.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
 <td><p>On-screen trigger-pad grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional instrument.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>A collection of tracks with a shared transport and mixer.</p></td>
 </tr>
 </tbody>
@@ -2947,6 +2950,93 @@ selected browser MIDI input device.</p>
 <span class="sig-name descname"><span class="pre">available_midi_ports</span></span><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.available_midi_ports" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiKeyboardWidget.control_change">
+<span class="sig-name descname"><span class="pre">control_change</span></span><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.control_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MidiOutputWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<p>Send notes and control changes to a browser Web MIDI output port.</p>
+<p>With a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> the widget forwards every note the session plays
+(keyboards, sequencers, launcher slots, MIDI clips) to the selected
+port, at the scheduled time. Without one it forwards the notes that
+keyboards and pads broadcast. <code class="docutils literal notranslate"><span class="pre">forward_notes</span></code> switches that off so
+only messages sent from Python go out.</p>
+<p>Public constructor</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget._esm">
+<span class="sig-name descname"><span class="pre">_esm</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget._esm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget._css">
+<span class="sig-name descname"><span class="pre">_css</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget._css" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.midi_port">
+<span class="sig-name descname"><span class="pre">midi_port</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.midi_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.available_midi_ports">
+<span class="sig-name descname"><span class="pre">available_midi_ports</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.available_midi_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.channel">
+<span class="sig-name descname"><span class="pre">channel</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.forward_notes">
+<span class="sig-name descname"><span class="pre">forward_notes</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.forward_notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.send_request">
+<span class="sig-name descname"><span class="pre">send_request</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.send_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget._request">
+<span class="sig-name descname"><span class="pre">_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget._request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget._request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.note_on">
+<span class="sig-name descname"><span class="pre">note_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget.note_on"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.note_on" title="Link to this definition">¶</a></dt>
+<dd><p>Send a note-on on the widget’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.note_off">
+<span class="sig-name descname"><span class="pre">note_off</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget.note_off"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.note_off" title="Link to this definition">¶</a></dt>
+<dd><p>Send a note-off on the widget’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.control_change">
+<span class="sig-name descname"><span class="pre">control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget.control_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.control_change" title="Link to this definition">¶</a></dt>
+<dd><p>Send a control change (0-127) on the widget’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget.send"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.send" title="Link to this definition">¶</a></dt>
+<dd><p>Send raw MIDI bytes, for example <code class="docutils literal notranslate"><span class="pre">[0xC0,</span> <span class="pre">5]</span></code> for a program change.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -3962,6 +4052,23 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget._css"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget._css</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.midi_port"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.midi_port</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.available_midi_ports"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.available_midi_ports</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.control_change"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.control_change</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget._esm"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget._esm</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget._css"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget._css</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.session_id"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.session_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.midi_port"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.midi_port</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.available_midi_ports"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.available_midi_ports</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.channel"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.channel</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.forward_notes"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.forward_notes</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.send_request"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.send_request</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget._request"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget._request()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.note_on"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.note_on()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.note_off"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.note_off()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.control_change"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.control_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.send"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.send()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nbplay.widget._default_pad_notes"><code class="docutils literal notranslate"><span class="pre">_default_pad_notes()</span></code></a></li>

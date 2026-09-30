@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -241,7 +241,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -277,6 +277,43 @@
 </div>
 </div>
 </div>
+<section id="zones-one-sample-per-key-range">
+<h2>Zones: One Sample per Key Range<a class="headerlink" href="#zones-one-sample-per-key-range" title="Link to this heading">¶</a></h2>
+<p>A sampler can hold more than one sample. Each zone maps a note range (and velocity range) to its own audio and root note; a note that lands in a zone plays that zone instead of the main sample. Load zones from Python, from a file in the widget, or record the microphone straight onto a pad with the Rec button.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kick</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">i</span> <span class="o">/</span> <span class="n">sample_rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">4000</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4000</span><span class="p">)]</span>
+<span class="n">snare</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">3000</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">i</span> <span class="o">*</span> <span class="mi">7919</span><span class="p">)</span> <span class="o">%</span> <span class="mi">200</span> <span class="o">/</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3000</span><span class="p">)]</span>
+
+<span class="n">zoned</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">pad_notes</span><span class="o">=</span><span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">46</span><span class="p">])</span>
+<span class="n">zoned</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Kick"</span><span class="p">)</span>
+<span class="n">zoned</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">snare</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Snare"</span><span class="p">)</span>
+<span class="n">zoned</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">sample_data</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Blip keys"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">zoned</span><span class="o">.</span><span class="n">zone_for</span><span class="p">(</span><span class="mi">60</span><span class="p">)[</span><span class="s2">"name"</span><span class="p">],</span> <span class="s2">"|"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">zoned</span><span class="o">.</span><span class="n">to_sample_map</span><span class="p">()),</span> <span class="s2">"mappings"</span><span class="p">)</span>
+<span class="n">zoned</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="take-to-pad">
+<h2>Take to Pad<a class="headerlink" href="#take-to-pad" title="Link to this heading">¶</a></h2>
+<p>A take recorded on the timeline can become a pad. <code class="docutils literal notranslate"><span class="pre">capture_clip()</span></code> hands the clip to the sampler in the browser, which decodes it (honouring the clip’s trim) and adds a zone on the pad’s note. Both widgets must be displayed in the page.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>
+
+<span class="n">capture_session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+<span class="n">capture_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Mic"</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">drums</span> <span class="o">=</span> <span class="n">capture_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Drums"</span><span class="p">,</span> <span class="n">sound_source</span><span class="o">=</span><span class="n">zoned</span><span class="p">)</span>
+<span class="c1"># After recording a take on the Mic lane:</span>
+<span class="c1"># capture_session.timeline.clips[0] -&gt; zoned.capture_clip(capture_session.timeline, clip["id"], pad=2)</span>
+<span class="n">capture_session</span><span class="o">.</span><span class="n">timeline</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -304,8 +341,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">04 SamplerWidget Tutorial</a><ul>
+<li><a class="reference internal" href="#zones-one-sample-per-key-range">Zones: One Sample per Key Range</a></li>
+<li><a class="reference internal" href="#take-to-pad">Take to Pad</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

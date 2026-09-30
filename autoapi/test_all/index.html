@@ -355,6 +355,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMidiKeyboardWidget" title="test_all.TestMidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiKeyboardWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestMidiOutputWidget" title="test_all.TestMidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiOutputWidget</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMidiLearn" title="test_all.TestMidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiLearn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestPadAction" title="test_all.TestPadAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPadAction</span></code></a></p></td>
 <td><p></p></td>
 </tr>
@@ -2043,6 +2049,61 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiOutputWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiOutputWidget</span></span><a class="headerlink" href="#test_all.TestMidiOutputWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiOutputWidget.test_defaults">
+<span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiOutputWidget.test_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiOutputWidget.test_requests_carry_increasing_nonces_and_clamp">
+<span class="sig-name descname"><span class="pre">test_requests_carry_increasing_nonces_and_clamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiOutputWidget.test_requests_carry_increasing_nonces_and_clamp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestMidiLearn</span></span><a class="headerlink" href="#test_all.TestMidiLearn" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.send">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.send" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_requires_a_control_change_source">
+<span class="sig-name descname"><span class="pre">test_requires_a_control_change_source</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_requires_a_control_change_source" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_map_scales_numeric_traits">
+<span class="sig-name descname"><span class="pre">test_map_scales_numeric_traits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_map_scales_numeric_traits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_int_and_bool_traits">
+<span class="sig-name descname"><span class="pre">test_int_and_bool_traits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_int_and_bool_traits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_learn_binds_the_next_controller">
+<span class="sig-name descname"><span class="pre">test_learn_binds_the_next_controller</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_learn_binds_the_next_controller" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_channel_filter_unmap_and_close">
+<span class="sig-name descname"><span class="pre">test_channel_filter_unmap_and_close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_channel_filter_unmap_and_close" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestMidiLearn.test_rejects_unknown_or_unsupported_traits">
+<span class="sig-name descname"><span class="pre">test_rejects_unknown_or_unsupported_traits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestMidiLearn.test_rejects_unknown_or_unsupported_traits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_all.TestPadAction">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestPadAction</span></span><a class="headerlink" href="#test_all.TestPadAction" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -3129,6 +3190,21 @@
 <li><a class="reference internal" href="#test_all.TestMidiKeyboardWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestMidiKeyboardWidget.test_defaults()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMidiKeyboardWidget.test_connect_sequencer"><code class="docutils literal notranslate"><span class="pre">TestMidiKeyboardWidget.test_connect_sequencer()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMidiKeyboardWidget.test_connect_sampler"><code class="docutils literal notranslate"><span class="pre">TestMidiKeyboardWidget.test_connect_sampler()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiOutputWidget"><code class="docutils literal notranslate"><span class="pre">TestMidiOutputWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiOutputWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestMidiOutputWidget.test_defaults()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiOutputWidget.test_requests_carry_increasing_nonces_and_clamp"><code class="docutils literal notranslate"><span class="pre">TestMidiOutputWidget.test_requests_carry_increasing_nonces_and_clamp()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.send"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.send()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_requires_a_control_change_source"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_requires_a_control_change_source()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_map_scales_numeric_traits"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_map_scales_numeric_traits()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_int_and_bool_traits"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_int_and_bool_traits()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_learn_binds_the_next_controller"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_learn_binds_the_next_controller()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_channel_filter_unmap_and_close"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_channel_filter_unmap_and_close()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestMidiLearn.test_rejects_unknown_or_unsupported_traits"><code class="docutils literal notranslate"><span class="pre">TestMidiLearn.test_rejects_unknown_or_unsupported_traits()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#test_all.TestPadAction"><code class="docutils literal notranslate"><span class="pre">TestPadAction</span></code></a><ul>

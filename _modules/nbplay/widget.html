@@ -3554,7 +3554,73 @@
     <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_keyboard.css"</span>
 
     <span class="n">midi_port</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Last control change received: ``{"controller", "value", "channel", "seq"}``.</span>
+    <span class="c1"># ``seq`` increases per message so repeated identical values still notify.</span>
+    <span class="n">control_change</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MidiOutputWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Send notes and control changes to a browser Web MIDI output port.</span>
+
+<span class="sd">    With a ``session_id`` the widget forwards every note the session plays</span>
+<span class="sd">    (keyboards, sequencers, launcher slots, MIDI clips) to the selected</span>
+<span class="sd">    port, at the scheduled time. Without one it forwards the notes that</span>
+<span class="sd">    keyboards and pads broadcast. ``forward_notes`` switches that off so</span>
+<span class="sd">    only messages sent from Python go out.</span>
+<span class="sd">    """</span>
+
+    <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_output.js"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_output.css"</span>
+
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">midi_port</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">channel</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">forward_notes</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">send_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MidiOutputWidget._request">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget._request">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">message</span><span class="p">):</span>
+        <span class="n">message</span><span class="p">[</span><span class="s2">"nonce"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nonce"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_request</span> <span class="o">=</span> <span class="n">message</span></div>
+
+
+<div class="viewcode-block" id="MidiOutputWidget.note_on">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.note_on">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">note_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Send a note-on on the widget's channel."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"note_on"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">),</span> <span class="n">velocity</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">_clamp_velocity</span><span class="p">(</span><span class="n">velocity</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="MidiOutputWidget.note_off">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.note_off">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">note_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Send a note-off on the widget's channel."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"note_off"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MidiOutputWidget.control_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.control_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">control_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Send a control change (0-127) on the widget's channel."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">,</span> <span class="n">controller</span><span class="o">=</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MidiOutputWidget.send">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.send">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"MIDI message must not be empty"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"raw"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+</div>
 
 
 

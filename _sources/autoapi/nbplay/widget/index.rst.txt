@@ -60,6 +60,7 @@ Classes
    nbplay.widget.KeyboardRoute
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
+   nbplay.widget.MidiOutputWidget
    nbplay.widget.PadWidget
    nbplay.widget.Track
    nbplay.widget.Session
@@ -1866,6 +1867,76 @@ Module Contents
 
 
    .. py:attribute:: available_midi_ports
+
+
+   .. py:attribute:: control_change
+
+
+.. py:class:: MidiOutputWidget(*args: object, **kwargs: object)
+
+   Bases: :py:obj:`anywidget.AnyWidget`
+
+
+   Send notes and control changes to a browser Web MIDI output port.
+
+   With a ``session_id`` the widget forwards every note the session plays
+   (keyboards, sequencers, launcher slots, MIDI clips) to the selected
+   port, at the scheduled time. Without one it forwards the notes that
+   keyboards and pads broadcast. ``forward_notes`` switches that off so
+   only messages sent from Python go out.
+
+   Public constructor
+
+
+   .. py:attribute:: _esm
+
+
+   .. py:attribute:: _css
+
+
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: midi_port
+
+
+   .. py:attribute:: available_midi_ports
+
+
+   .. py:attribute:: channel
+
+
+   .. py:attribute:: forward_notes
+
+
+   .. py:attribute:: send_request
+
+
+   .. py:method:: _request(**message)
+
+
+   .. py:method:: note_on(note, velocity=100)
+
+      Send a note-on on the widget's channel.
+
+
+
+   .. py:method:: note_off(note)
+
+      Send a note-off on the widget's channel.
+
+
+
+   .. py:method:: control_change(controller, value)
+
+      Send a control change (0-127) on the widget's channel.
+
+
+
+   .. py:method:: send(data)
+
+      Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change.
+
 
 
 .. py:function:: _default_pad_notes(rows=4, cols=4)

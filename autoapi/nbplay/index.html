@@ -273,6 +273,18 @@
 </table>
 </div>
 </section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
+<td><p>Route MIDI control changes to widget traits.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
 <dl class="py data">
@@ -284,6 +296,90 @@
 <dt class="sig sig-object py" id="nbplay.AudioOutput">
 <span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioOutput</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.AudioOutput" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.MidiLearn">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">MidiLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn" title="Link to this definition">¶</a></dt>
+<dd><p>Route MIDI control changes to widget traits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> – A widget with a synced <code class="docutils literal notranslate"><span class="pre">control_change</span></code> trait
+(<code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>).</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">map()</span></code> binds a controller number now; <code class="docutils literal notranslate"><span class="pre">learn()</span></code> binds the next
+controller the hardware sends, so you can call it and turn the knob.
+Bool traits switch on at values of 64 and above. Numeric traits scale
+the 0-127 value into <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>, which default to 0-1 for floats
+and 0-127 for ints.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.source">
+<span class="sig-name descname"><span class="pre">source</span></span><a class="headerlink" href="#nbplay.MidiLearn.source" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.mappings">
+<span class="sig-name descname"><span class="pre">mappings</span></span><a class="headerlink" href="#nbplay.MidiLearn.mappings" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.MidiLearn._pending">
+<span class="sig-name descname"><span class="pre">_pending</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.MidiLearn._pending" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.map" title="Link to this definition">¶</a></dt>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">controller</span></code> (0-127) to <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code>; returns the mapping.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.learn">
+<span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.learn" title="Link to this definition">¶</a></dt>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code> to the next controller the hardware sends.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.learning">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">learning</span></span><a class="headerlink" href="#nbplay.MidiLearn.learning" title="Link to this definition">¶</a></dt>
+<dd><p>True while <code class="docutils literal notranslate"><span class="pre">learn()</span></code> is waiting for a controller.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.cancel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.cancel" title="Link to this definition">¶</a></dt>
+<dd><p>Stop waiting for a controller after <code class="docutils literal notranslate"><span class="pre">learn()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.unmap">
+<span class="sig-name descname"><span class="pre">unmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.unmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.unmap" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the mapping for <code class="docutils literal notranslate"><span class="pre">controller</span></code>; returns True when one existed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.close" title="Link to this definition">¶</a></dt>
+<dd><p>Stop listening to the source.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn.apply" title="Link to this definition">¶</a></dt>
+<dd><p>Apply a controller value as if it came from the hardware; returns the written value or None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.MidiLearn._on_control_change">
+<span class="sig-name descname"><span class="pre">_on_control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn._on_control_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn._on_control_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 </section>
 </section>
@@ -346,9 +442,25 @@
 <li><a class="reference internal" href="#">nbplay</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
 <li><a class="reference internal" href="#nbplay.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.AudioOutput"><code class="docutils literal notranslate"><span class="pre">AudioOutput</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn"><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.MidiLearn.source"><code class="docutils literal notranslate"><span class="pre">MidiLearn.source</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.mappings"><code class="docutils literal notranslate"><span class="pre">MidiLearn.mappings</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn._pending"><code class="docutils literal notranslate"><span class="pre">MidiLearn._pending</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.map"><code class="docutils literal notranslate"><span class="pre">MidiLearn.map()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.learn"><code class="docutils literal notranslate"><span class="pre">MidiLearn.learn()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.learning"><code class="docutils literal notranslate"><span class="pre">MidiLearn.learning</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.cancel"><code class="docutils literal notranslate"><span class="pre">MidiLearn.cancel()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.unmap"><code class="docutils literal notranslate"><span class="pre">MidiLearn.unmap()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.clear"><code class="docutils literal notranslate"><span class="pre">MidiLearn.clear()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.close"><code class="docutils literal notranslate"><span class="pre">MidiLearn.close()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn.apply"><code class="docutils literal notranslate"><span class="pre">MidiLearn.apply()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.MidiLearn._on_control_change"><code class="docutils literal notranslate"><span class="pre">MidiLearn._on_control_change()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -43,6 +43,8 @@ Classes
    test_all.TestKeyboardRoute
    test_all.TestKeyboardWidget
    test_all.TestMidiKeyboardWidget
+   test_all.TestMidiOutputWidget
+   test_all.TestMidiLearn
    test_all.TestPadAction
    test_all.TestPadWidget
    test_all.TestTimelineDescriptors
@@ -1039,6 +1041,39 @@ Module Contents
 
 
    .. py:method:: test_connect_sampler()
+
+
+.. py:class:: TestMidiOutputWidget
+
+   .. py:method:: test_defaults()
+
+
+   .. py:method:: test_requests_carry_increasing_nonces_and_clamp()
+
+
+.. py:class:: TestMidiLearn
+
+   .. py:method:: send(kb, controller, value, channel=0)
+      :staticmethod:
+
+
+
+   .. py:method:: test_requires_a_control_change_source()
+
+
+   .. py:method:: test_map_scales_numeric_traits()
+
+
+   .. py:method:: test_int_and_bool_traits()
+
+
+   .. py:method:: test_learn_binds_the_next_controller()
+
+
+   .. py:method:: test_channel_filter_unmap_and_close()
+
+
+   .. py:method:: test_rejects_unknown_or_unsupported_traits()
 
 
 .. py:class:: TestPadAction
