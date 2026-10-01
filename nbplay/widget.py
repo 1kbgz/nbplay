@@ -33,6 +33,7 @@ from nbplay import (
     SquareOscillator,
     __version__,
 )
+from nbplay.history import History
 
 _STATIC = pathlib.Path(__file__).parent / "static"
 _PREVIEW_MAX_FRAMES = 2048
@@ -1891,6 +1892,10 @@ class TransportWidget(anywidget.AnyWidget):
     loop_enabled = traitlets.Bool(False).tag(sync=True)
     loop_start_bar = traitlets.Int(0).tag(sync=True)
     loop_end_bar = traitlets.Int(4).tag(sync=True)
+    # Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) in the browser bump these;
+    # a Session answers by undoing or redoing its history.
+    undo_request = traitlets.Int(0).tag(sync=True)
+    redo_request = traitlets.Int(0).tag(sync=True)
 
 
 class TimelineWidget(anywidget.AnyWidget):
@@ -3476,6 +3481,14 @@ class Session:
         self.tracks = []
         # Named patterns for the tracking view: name -> {voices_data, step_duration}.
         self.patterns = {}
+        # Undo/redo over every session widget's state; new tracks attach their
+        # sequencer and sound source as they are added.
+        self.history = History()
+        for widget in (self.transport, self.mixer, self.timeline, self.launcher):
+            self.history.attach(widget)
+        self.transport.observe(lambda change: self.undo(), names="undo_request")
+        self.transport.observe(lambda change: self.redo(), names="redo_request")
+        self.history.bind_ipython()
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False
@@ -3528,6 +3541,16 @@ class Session:
         """Identifier shared by every widget on this session's browser bus."""
         return self._session_id
 
+    # Undo / redo
+
+    def undo(self):
+        """Revert the latest change to any session widget; False when nothing to undo."""
+        return self.history.undo()
+
+    def redo(self):
+        """Reapply the latest undone change; False when nothing to redo."""
+        return self.history.redo()
+
     def play(self):
         """Start the shared transport."""
         self.transport.is_playing = True
@@ -3561,6 +3584,10 @@ class Session:
         Returns:
             The new ``Track`` object.
         """
+        with self.history.paused():
+            return self._add_track(name, sequencer, sound_source, input=input, armed=armed)
+
+    def _add_track(self, name, sequencer, sound_source, *, input, armed):
         channel_idx = self.mixer.add_channel(name)
         track = Track(name, sequencer, sound_source, channel_idx)
         track._link_transport(self.transport)
@@ -3579,6 +3606,8 @@ class Session:
             input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
         self.timeline.add_track(name, channel_idx, armed=armed, input=input)
         self.launcher.add_track(name, channel_idx)
+        self.history.attach(sequencer)
+        self.history.attach(sound_source)
         return track
 
     def remove_track(self, index):
@@ -3587,9 +3616,13 @@ class Session:
         Args:
             index: Zero-based track index.
         """
-        if 0 <= index < len(self.tracks):
+        if not 0 <= index < len(self.tracks):
+            return
+        with self.history.paused():
             track = self.tracks.pop(index)
             track._unlink()
+            self.history.detach(track.sequencer)
+            self.history.detach(track.sound_source)
             # Clear routing metadata
             if track.sequencer is not None:
                 track.sequencer.session_id = ""
@@ -3660,6 +3693,10 @@ class Session:
         missing = [name for name in names if str(name) not in self.patterns]
         if missing:
             raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
+        with self.history.transaction():
+            return self._chain(item, index, names, start, repeat)
+
+    def _chain(self, item, index, names, start, repeat):
         if item.sequencer is not None:
             item.sequencer.follow_transport = False
         clips = []
@@ -3684,6 +3721,11 @@ class Session:
         """Replace a pattern and regenerate every clip placed from it."""
         name = str(name)
         entry = self.add_pattern(name, pattern, step_duration=step_duration)
+        with self.history.transaction():
+            self._regenerate_pattern_clips(name, entry)
+        return entry
+
+    def _regenerate_pattern_clips(self, name, entry):
         scratch = TimelineWidget()
         clips = []
         for clip in self.timeline.clips:
@@ -3705,7 +3747,6 @@ class Session:
             )
             clips.append(rebuilt)
         self.timeline.clips = clips
-        return entry
 
     # MIDI files
 
@@ -3752,14 +3793,16 @@ class Session:
         from nbplay.midi import read_midi
 
         data = read_midi(source)
-        if apply_tempo:
-            self.transport.bpm = data["bpm"]
-            self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
         added = []
-        for item in data["tracks"]:
-            track = self.add_track(item["name"], input="midi")
-            self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
-            added.append(track)
+        # Adding tracks is structural, so the whole import stays out of the history.
+        with self.history.paused():
+            if apply_tempo:
+                self.transport.bpm = data["bpm"]
+                self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
+            for item in data["tracks"]:
+                track = self.add_track(item["name"], input="midi")
+                self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
+                added.append(track)
         return added
 
     # Persistence
