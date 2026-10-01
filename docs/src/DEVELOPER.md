@@ -345,6 +345,10 @@ between:
   lazily by `getOrCreateSessionBus()` in `js/src/ts/session.ts`.
 - CSS custom properties from JupyterLab, especially `--jp-*` theme variables.
 
+### Instruments on the bus
+
+`bus.instruments[channel]` is a `{ scheduleNote(note, velocity, at, duration) }` that samplers and synths register for their track. The shared scheduler (sequencers and launcher slots) and the timeline's MIDI clips call it when present and fall back to the built-in sine oscillator otherwise; both keep the cancel functions it returns and call them on stop for notes that have not sounded, so a scene switch or transport stop never plays the next step anyway.
+
 ### Session bus shape
 
 Every widget with a `session_id` shares one bus object, fetched with
@@ -399,6 +403,13 @@ When extending SynthWidget, update both the Python oscillator/preview path and
 the TypeScript playback path if the feature should affect both the picture and
 the sound. Add tests in Python for preview/backend behavior and Playwright tests
 for DOM and model sync.
+
+With a `session_id` and `channel_index` (set by `Session.add_track()`), the
+synth also registers under `bus.instruments` so sequencers, launcher slots, and
+MIDI clips on its track play notes with its oscillator type and amplitude
+(noise plays a short burst) through the track's mixer channel, instead of the
+scheduler's sine fallback. It registers at render, when the routing traits
+change, and on `nbplay-bus-ready` when the mixer renders later.
 
 ### SettingsWidget
 
@@ -564,7 +575,11 @@ controller discovery, MIDI learn, and automation control.
 
 When the sampler has a session and channel index, it registers `triggerNote()`
 and `releaseNote()` on the session bus so keyboard widgets, MIDI keyboard input,
-sequencers, and PadWidget routes can drive the same sampler/slice map by note.
+and PadWidget routes can drive the same sampler/slice map by note, and
+`scheduleNote(note, velocity, at, duration)` under `bus.instruments` so
+sequencers, launcher slots, and MIDI clips play it at exact audio-clock times
+with an automatic release; the returned function cancels a note that has not
+sounded yet.
 
 Multi-sample zones live in `zones`: each entry maps a note range and a velocity
 range to its own float32 PCM (`data`), root note, and sample rate. When a note
@@ -582,6 +597,10 @@ zone file input, a microphone take through the Rec button (`getUserMedia` plus
 and trim to the sampler in a `capture_request`; the sampler fetches, decodes,
 and writes the zone back to `zones`. Both widgets have to be rendered in the
 same page for that. Session save stores zone PCM as `samples/track-N-zone-M.f32`.
+
+### Transport commands versus status
+
+The transport's play state and position are status. The browser clock writes `is_playing`, `is_recording`, `current_beat`, `bar_number`, and `beat_in_bar` into the model, the session mirrors them one way (`dlink`) into the timeline and launcher, and no browser widget in a session treats a kernel write of these traits as an instruction: a delayed echo of old status can therefore never restart or stop the clock. Kernel code moves the clock through the transport's `command` trait, `{"action": "play" | "stop" | "seek" | "record", ..., "nonce"}`, issued by `play()`, `stop()`, `seek()`, and `record()`; the nonce makes repeated commands distinct and lets a view ignore a command that was already in the model when it rendered. Assigning `is_playing`, `is_recording`, or `current_beat` from user code still works: the widget sees that the write did not come from the browser (ipywidgets holds the property lock for browser writes) and turns it into the same command, while also setting the status optimistically so headless code reads a consistent value. Standalone widgets without a session keep treating a kernel `is_playing` write as a command on their private clock.
 
 ### TransportWidget
 

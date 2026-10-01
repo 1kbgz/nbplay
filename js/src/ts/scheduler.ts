@@ -289,22 +289,12 @@ export function createAudioScheduler(
   const random = options.random || Math.random;
   // Notes handed to Web Audio but not yet sounding; stop() cancels them so
   // a scene switch or transport stop does not play the next step anyway.
-  let pending: { osc: OscillatorNode; at: number }[] = [];
+  let pending: { cancel: () => void; at: number }[] = [];
 
   function cancelPending(): void {
-    if (!audioCtx) {
-      pending = [];
-      return;
-    }
-    const now = audioCtx.currentTime;
+    const now = audioCtx?.currentTime ?? 0;
     pending.forEach((entry) => {
-      if (entry.at <= now) return;
-      try {
-        entry.osc.stop(now);
-        entry.osc.disconnect();
-      } catch (_) {
-        /* already stopped */
-      }
+      if (entry.at > now) entry.cancel();
     });
     pending = [];
   }
@@ -412,20 +402,49 @@ export function createAudioScheduler(
     const scheduledTime = Math.max(0, at.time + offset);
 
     const sessionId = (model.get("session_id") as string) || "";
+    // The track's instrument (sampler or synth on the bus) plays the step
+    // when it has one; the built-in oscillator is the fallback.
+    const channelIndex = numberOr(model.get("channel_index"), -1);
+    const instrument =
+      sessionId && channelIndex >= 0
+        ? getSessionBus(sessionId)?.instruments?.[channelIndex]
+        : undefined;
     for (const { note, freq, velocity, durationTicks } of iterateActiveVoices(
       vd,
       stepIndex,
       random,
     )) {
-      const osc = scheduleOscillator(
-        audioCtx,
-        outputNode,
-        freq,
-        velocity,
-        scheduledTime,
-        stepSeconds * durationTicks,
-      );
-      if (osc) pending.push({ osc, at: scheduledTime });
+      const duration = stepSeconds * durationTicks;
+      let cancel: (() => void) | undefined;
+      if (instrument) {
+        cancel =
+          instrument.scheduleNote(
+            note,
+            Math.round(velocity * 127),
+            scheduledTime,
+            duration,
+          ) || undefined;
+      } else {
+        const osc = scheduleOscillator(
+          audioCtx,
+          outputNode,
+          freq,
+          velocity,
+          scheduledTime,
+          duration,
+        );
+        if (osc) {
+          cancel = () => {
+            try {
+              osc.stop(0);
+              osc.disconnect();
+            } catch (_) {
+              /* already stopped */
+            }
+          };
+        }
+      }
+      if (cancel) pending.push({ cancel, at: scheduledTime });
       emitBusNote(sessionId, {
         note,
         velocity: Math.round(velocity * 127),

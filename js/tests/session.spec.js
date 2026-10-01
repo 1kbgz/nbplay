@@ -211,12 +211,12 @@ test.describe("Session clock", () => {
     }));
     expect(bpms).toEqual({ clock: 240, a: 240, b: 240, transport: 240 });
 
-    // Seek from Python: the transport observes current_beat and moves the clock.
+    // Seek from Python: the kernel issues a transport command.
     await page.evaluate(() => {
       window.__oscStarts = {};
       const model = window.__models.transport;
-      model.set("current_beat", 2);
-      model._trigger("change:current_beat");
+      model.set("command", { action: "seek", beat: 2, nonce: 1 });
+      model._trigger("change:command");
     });
     await page.waitForFunction(
       () =>
@@ -353,6 +353,88 @@ test.describe("Session clock", () => {
       transportPlaying: window.__models.transport._state.is_playing,
     }));
     expect(own).toEqual({ aPlaying: true, transportPlaying: true });
+  });
+
+  test("kernel play status on session widgets never drives the clock", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await renderWidget(page, "sequencer", "a", SEQUENCER_DEFAULTS);
+    await renderWidget(page, "timeline", "timeline", TIMELINE_DEFAULTS);
+
+    // Stale "playing" status arriving while the clock is stopped.
+    await page.evaluate(() => {
+      for (const key of ["a", "timeline"]) {
+        window.__models[key].set("is_playing", true);
+        window.__models[key]._trigger("change:is_playing");
+      }
+    });
+    expect(
+      await page.evaluate(
+        (id) => globalThis.__nbplay[id].clock.playing,
+        SESSION_ID,
+      ),
+    ).toBe(false);
+    expect(await page.evaluate(() => (window.__oscStarts.a || []).length)).toBe(
+      0,
+    );
+
+    // Stale "stopped" status arriving while the clock plays.
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
+    await page.evaluate(() => {
+      for (const key of ["a", "timeline"]) {
+        window.__models[key].set("is_playing", false);
+        window.__models[key]._trigger("change:is_playing");
+      }
+    });
+    expect(
+      await page.evaluate(
+        (id) => globalThis.__nbplay[id].clock.playing,
+        SESSION_ID,
+      ),
+    ).toBe(true);
+  });
+
+  test("a sequencer plays through the track's bus instrument when one is registered", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await page.evaluate((id) => {
+      window.__scheduled = [];
+      window.__cancelled = 0;
+      const bus = globalThis.__nbplay[id];
+      bus.instruments = {
+        0: {
+          scheduleNote(note, velocity, at, duration) {
+            window.__scheduled.push({ note, velocity, at, duration });
+            return () => {
+              window.__cancelled += 1;
+            };
+          },
+        },
+      };
+    }, SESSION_ID);
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      channel_index: 0,
+    });
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => window.__scheduled.length >= 3);
+    const state = await page.evaluate(() => ({
+      first: window.__scheduled[0],
+      oscStarts: (window.__oscStarts.a || []).length,
+    }));
+    expect(state.first.note).toBe(60);
+    expect(state.first.velocity).toBe(100);
+    expect(state.first.duration).toBeCloseTo(0.25, 6);
+    expect(state.oscStarts).toBe(0);
+
+    // Stopping cancels the notes that have not sounded yet.
+    await page.locator(".nbplay-transport-stop").click();
+    expect(await page.evaluate(() => window.__cancelled)).toBeGreaterThan(0);
   });
 
   test("standalone sequencer uses a private clock", async ({ page }) => {

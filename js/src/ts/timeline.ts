@@ -238,6 +238,8 @@ export default {
     let recordingGeneration = 0;
     let recordingStartedPlayback = false;
     let scheduledTimers: ReturnType<typeof setTimeout>[] = [];
+    // Cancellers for notes handed to a bus instrument but not yet sounding.
+    let scheduledNotes: { cancel: () => void; at: number }[] = [];
     let playheadTimer: ReturnType<typeof setInterval> | null = null;
     let midiTimer: ReturnType<typeof setInterval> | null = null;
     let midiCursorBeat = 0;
@@ -489,6 +491,11 @@ export default {
     function clearScheduledPlayback(): void {
       scheduledTimers.forEach((timer) => clearTimeout(timer));
       scheduledTimers = [];
+      const now = clock().now();
+      scheduledNotes.forEach((entry) => {
+        if (entry.at > now) entry.cancel();
+      });
+      scheduledNotes = [];
       activeMedia.forEach((media) => {
         try {
           media.pause();
@@ -939,6 +946,7 @@ export default {
       const clk = clock();
       const bus = getSessionBus(model.get("session_id") as string);
       const sampler = bus?.samplers?.[track.channel_index];
+      const instrument = bus?.instruments?.[track.channel_index];
       const durationSeconds = event.duration * spb;
       emitBusNote(model.get("session_id") as string, {
         note: event.note,
@@ -947,6 +955,21 @@ export default {
         at: atTime,
         duration: durationSeconds,
       });
+      if (instrument) {
+        const cancel = instrument.scheduleNote(
+          event.note,
+          event.velocity,
+          atTime,
+          durationSeconds,
+        );
+        if (cancel) {
+          scheduledNotes.push({ cancel, at: atTime });
+          scheduledNotes = scheduledNotes.filter(
+            (entry) => entry.at > clk.now() - 1,
+          );
+        }
+        return;
+      }
       if (sampler) {
         const delayMs = Math.max(0, (atTime - clk.now()) * 1000);
         scheduledTimers.push(
@@ -1910,11 +1933,15 @@ export default {
     // the Session's transport links). Mirrored clock events skip these.
     function syncPlaybackState(): void {
       if (disposed || mirroring) return;
-      const clk = clock();
-      if (model.get("is_playing")) {
-        if (!clk.playing) clk.play();
-      } else if (clk.playing) {
-        clk.stop();
+      // In a session `is_playing` is status mirrored from the transport;
+      // only a standalone timeline treats a kernel write as a command.
+      if (!binding.shared()) {
+        const clk = clock();
+        if (model.get("is_playing")) {
+          if (!clk.playing) clk.play();
+        } else if (clk.playing) {
+          clk.stop();
+        }
       }
       syncTransportControls();
     }

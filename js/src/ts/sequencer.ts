@@ -854,12 +854,22 @@ function render({
     onModelChange();
     if (mirroring) return;
     const clk = clock();
+    if (binding.shared()) {
+      // Status from the transport: run this sequencer's scheduler to match
+      // when it follows the transport, never touch the shared clock.
+      if (model.get("is_playing")) {
+        if (clk.playing && followsTransport()) startScheduler();
+      } else {
+        audioScheduler.stop();
+      }
+      return;
+    }
     if (model.get("is_playing")) {
       if (clk.playing) startScheduler();
       else clk.play();
     } else {
       audioScheduler.stop();
-      if (!binding.shared()) clk.stop();
+      clk.stop();
     }
   }
 

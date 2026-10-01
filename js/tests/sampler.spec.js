@@ -743,6 +743,65 @@ test.describe("SamplerWidget", () => {
   });
 
   // R5.6 — On widget destroy, sampler is removed from bus
+  test("sampler registers a scheduled instrument on the session bus", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const ctx = new AudioContext();
+      window.__sourceStarts = [];
+      const original = ctx.constructor.prototype.createBufferSource;
+      ctx.constructor.prototype.createBufferSource = function () {
+        const node = original.call(this);
+        const start = node.start.bind(node);
+        const stop = node.stop.bind(node);
+        node.start = (when, offset, duration) => {
+          window.__sourceStarts.push({ when, offset, duration, stops: [] });
+          start(when, offset, duration);
+        };
+        node.stop = (when) => {
+          const entry = window.__sourceStarts[window.__sourceStarts.length - 1];
+          if (entry) entry.stops.push(when);
+          stop(when);
+        };
+        return node;
+      };
+      globalThis.__nbplay = {
+        "inst-session": {
+          audioCtx: ctx,
+          channels: [{ gain: ctx.createGain() }],
+        },
+      };
+    });
+    await renderWidget(page, {
+      session_id: "inst-session",
+      channel_index: 0,
+      sample_length: 3,
+    });
+    await page.evaluate(() => {
+      const samples = new Float32Array([0, 0.5, 0]);
+      window.__testModel.set("sample_data", new DataView(samples.buffer));
+      window.__testModel._trigger("change:sample_data");
+    });
+    const result = await page.evaluate(() => {
+      const bus = globalThis.__nbplay["inst-session"];
+      const at = bus.audioCtx.currentTime + 1;
+      const cancel = bus.instruments[0].scheduleNote(60, 100, at, 0.5);
+      const scheduled = window.__sourceStarts[window.__sourceStarts.length - 1];
+      cancel();
+      return {
+        has: typeof bus.instruments[0].scheduleNote === "function",
+        when: scheduled.when,
+        at,
+        stops: scheduled.stops,
+      };
+    });
+    expect(result.has).toBe(true);
+    expect(result.when).toBeCloseTo(result.at, 6);
+    // The automatic release plus the cancel both stop the source.
+    expect(result.stops.length).toBe(2);
+    expect(result.stops[1]).toBe(0);
+  });
+
   test("sampler removed from bus on widget destroy", async ({ page }) => {
     // Create bus first
     await page.evaluate(() => {

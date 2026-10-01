@@ -327,6 +327,8 @@ function createSamplerEngine(maxVoices = 8) {
       envelope: Envelope,
       velocity = 127,
       slice?: { start: number; end: number },
+      at?: number,
+      duration?: number,
     ): Voice | undefined {
       // A matching zone plays its own one-shot sample; otherwise the main sample.
       const zone = zones.find((z) =>
@@ -356,7 +358,9 @@ function createSamplerEngine(maxVoices = 8) {
       gainNode.connect(outputNode || audioCtx.destination);
       sourceNode.connect(gainNode);
 
-      const now = audioCtx.currentTime;
+      // `at` schedules the note on the audio clock (a sequencer step); the
+      // default plays it now (a key or pad).
+      const now = at ?? audioCtx.currentTime;
       const safeAttack = Math.max(envelope.attack, 0.005);
       const peak = clampVelocity(velocity, 127) / 127;
       gainNode.gain.setValueAtTime(0, now);
@@ -365,13 +369,22 @@ function createSamplerEngine(maxVoices = 8) {
         envelope.sustain * peak,
         now + safeAttack + envelope.decay,
       );
-
       if (hasSlice && slice) {
         const offset = slice.start / rawSampleRate;
-        const duration = (slice.end - slice.start) / rawSampleRate;
-        sourceNode.start(now, offset, duration);
+        const sliceDuration = (slice.end - slice.start) / rawSampleRate;
+        sourceNode.start(now, offset, sliceDuration);
       } else {
         sourceNode.start(now);
+      }
+      let releaseTime: number | null = null;
+      if (duration !== undefined) {
+        // A scheduled note releases itself after `duration` (stop must
+        // follow start, or Web Audio throws).
+        const releaseAt = now + Math.max(0.001, duration);
+        releaseTime = releaseAt;
+        gainNode.gain.setValueAtTime(envelope.sustain * peak, releaseAt);
+        gainNode.gain.linearRampToValueAtTime(0, releaseAt + envelope.release);
+        sourceNode.stop(releaseAt + envelope.release + 0.01);
       }
 
       const voice: Voice = {
@@ -379,7 +392,7 @@ function createSamplerEngine(maxVoices = 8) {
         sourceNode,
         noteNum,
         startTime: now,
-        releaseTime: null,
+        releaseTime,
       };
       activeVoices.push(voice);
 
@@ -1617,6 +1630,34 @@ function render({
         });
       },
     };
+    // Scheduled playback for sequencers, launcher slots, and MIDI clips:
+    // the note starts on the audio clock and releases after `duration`.
+    const instruments = bus.instruments || {};
+    bus.instruments = instruments;
+    instruments[idx] = {
+      scheduleNote(note, velocity, at, duration) {
+        const rootNote = model.get("root_note") as number;
+        const slice = getSampleSlices().find((s) => s.note === note);
+        const voice = sampler.noteOn(
+          note,
+          rootNote,
+          currentEnvelope(),
+          velocity,
+          slice,
+          at,
+          duration,
+        );
+        if (!voice) return;
+        return () => {
+          try {
+            voice.sourceNode.stop(0);
+            voice.gainNode.disconnect();
+          } catch (_) {
+            /* already stopped */
+          }
+        };
+      },
+    };
   }
 
   // Re-register when the session bus becomes available (mixer may
@@ -1658,8 +1699,9 @@ function render({
     // Unregister from session bus
     const sid = model.get("session_id") as string;
     const idx = model.get("channel_index") as number;
-    const samplers = getSessionBus(sid)?.samplers;
-    if (samplers) delete samplers[idx];
+    const bus = getSessionBus(sid);
+    if (bus?.samplers) delete bus.samplers[idx];
+    if (bus?.instruments) delete bus.instruments[idx];
     sampler.destroy();
   };
 }

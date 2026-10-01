@@ -138,15 +138,10 @@ function render({
     return Math.max(1, Number(model.get("time_signature_num")) || 4);
   }
 
-  // Last position written by this widget, so an echo of our own write
-  // (a delayed change event with a stale value) is not taken as a seek.
-  let lastWrittenBeat = -1;
-
   /** Write a beat position into the model's position traits. */
   function writePosition(beat: number): void {
     const bpb = beatsPerBar();
     const bounded = Number.isFinite(beat) ? Math.max(0, beat) : 0;
-    lastWrittenBeat = bounded;
     model.set("current_beat", bounded);
     model.set("bar_number", Math.floor(bounded / bpb));
     model.set("beat_in_bar", Math.floor(bounded % bpb));
@@ -382,19 +377,46 @@ function render({
 
   // Model observers (kernel-driven changes)
 
-  model.on("change:is_playing", () => {
-    syncPlay();
-    if (mirroring) return;
+  // Play state and position traits are status: the browser clock writes
+  // them and the kernel reads them. Kernel code moves the clock through
+  // `command` instead, so a delayed echo of old status can never restart
+  // or stop the clock.
+  let lastCommandNonce = -1;
+  function handleCommand(): void {
+    const cmd = (model.get("command") || {}) as {
+      action?: string;
+      beat?: number;
+      on?: boolean;
+      nonce?: number;
+    };
+    const nonce = Number(cmd.nonce);
+    if (!cmd.action || !Number.isFinite(nonce) || nonce === lastCommandNonce)
+      return;
+    lastCommandNonce = nonce;
     const clk = clock();
-    const want = Boolean(model.get("is_playing"));
-    if (want && !clk.playing) clk.play();
-    else if (!want && clk.playing) clk.stop();
-  });
-  model.on("change:is_recording", () => {
-    syncRecord();
-    if (mirroring) return;
-    clock().setRecording(Boolean(model.get("is_recording")));
-  });
+    switch (cmd.action) {
+      case "play":
+        if (!clk.playing) clk.play();
+        break;
+      case "stop":
+        if (clk.playing) clk.stop();
+        break;
+      case "seek": {
+        const beat = Number(cmd.beat);
+        if (Number.isFinite(beat)) clk.seek(Math.max(0, beat));
+        break;
+      }
+      case "record": {
+        const on = Boolean(cmd.on);
+        clk.setRecording(on);
+        if (on && !clk.playing) clk.play();
+        break;
+      }
+    }
+  }
+  model.on("change:command", handleCommand);
+  model.on("change:is_playing", syncPlay);
+  model.on("change:is_recording", syncRecord);
   model.on("change:bpm", () => {
     syncBpm();
     if (mirroring) return;
@@ -407,13 +429,7 @@ function render({
   model.on("change:time_signature_den", syncTimeSig);
   model.on("change:bar_number", syncPosition);
   model.on("change:beat_in_bar", syncPosition);
-  model.on("change:current_beat", () => {
-    if (mirroring) return;
-    const clk = clock();
-    const beat = Number(model.get("current_beat"));
-    if (!Number.isFinite(beat) || beat === lastWrittenBeat) return;
-    if (Math.abs(beat - clk.beat()) > 1e-6) clk.seek(beat);
-  });
+  model.on("change:current_beat", syncPosition);
   for (const trait of ["loop_enabled", "loop_start_bar", "loop_end_bar"]) {
     model.on(`change:${trait}`, () => {
       syncLoop();
@@ -421,6 +437,11 @@ function render({
       pushLoop(clock());
     });
   }
+
+  lastCommandNonce = Number(
+    (model.get("command") as { nonce?: number } | undefined)?.nonce ?? -1,
+  );
+  if (!Number.isFinite(lastCommandNonce)) lastCommandNonce = -1;
 
   // Initial state: tempo, time signature, and loop come from the kernel;
   // play state and position come from the browser clock, which is fresh
