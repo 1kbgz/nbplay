@@ -386,6 +386,9 @@ Module Contents
    .. py:method:: test_add_channel()
 
 
+   .. py:method:: test_returns_and_sends()
+
+
    .. py:method:: test_add_multiple_channels()
 
 

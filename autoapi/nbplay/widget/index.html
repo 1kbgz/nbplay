@@ -447,6 +447,12 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_mixer_channel" title="nbplay.widget._normalize_mixer_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_mixer_channel</span></code></a>(channel[, index])</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_return_bus" title="nbplay.widget._normalize_return_bus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_return_bus</span></code></a>(bus[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._pad_sends" title="nbplay.widget._pad_sends"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_pad_sends</span></code></a>(sends, count)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._clip_id" title="nbplay.widget._clip_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clip_id</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
@@ -723,6 +729,16 @@ API in the browser so latency stays minimal.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.widget._normalize_mixer_channel">
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_mixer_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_mixer_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_mixer_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget._normalize_return_bus">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_return_bus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_return_bus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_return_bus" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget._pad_sends">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_pad_sends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sends</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_pad_sends"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._pad_sends" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1092,6 +1108,11 @@ via <code class="docutils literal notranslate"><span class="pre">mix_down()</spa
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.returns">
+<span class="sig-name descname"><span class="pre">returns</span></span><a class="headerlink" href="#nbplay.widget.MixerWidget.returns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.MixerWidget.session_id">
 <span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.MixerWidget.session_id" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1099,6 +1120,16 @@ via <code class="docutils literal notranslate"><span class="pre">mix_down()</spa
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.MixerWidget._validate_channels">
 <span class="sig-name descname"><span class="pre">_validate_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.MixerWidget._validate_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget._validate_returns">
+<span class="sig-name descname"><span class="pre">_validate_returns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.MixerWidget._validate_returns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget._on_returns_change">
+<span class="sig-name descname"><span class="pre">_on_returns_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget.MixerWidget._on_returns_change" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1197,6 +1228,53 @@ via <code class="docutils literal notranslate"><span class="pre">mix_down()</spa
 <dt class="sig sig-object py" id="nbplay.widget.MixerWidget.clear_master_effects">
 <span class="sig-name descname"><span class="pre">clear_master_effects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.clear_master_effects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.clear_master_effects" title="Link to this definition">¶</a></dt>
 <dd><p>Remove all browser insert effects from the master bus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.add_return">
+<span class="sig-name descname"><span class="pre">add_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Return'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.add_return"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.add_return" title="Link to this definition">¶</a></dt>
+<dd><p>Add a return bus with its own effect chain; returns its index.</p>
+<p>Every channel gains a send level for it, starting at 0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.remove_return">
+<span class="sig-name descname"><span class="pre">remove_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.remove_return"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.remove_return" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a return bus and every channel’s send to it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget._update_return">
+<span class="sig-name descname"><span class="pre">_update_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget._update_return"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget._update_return" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.set_return_gain">
+<span class="sig-name descname"><span class="pre">set_return_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.set_return_gain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.set_return_gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.set_return_effects">
+<span class="sig-name descname"><span class="pre">set_return_effects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effects</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.set_return_effects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.set_return_effects" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a return bus’s effect chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.add_return_effect">
+<span class="sig-name descname"><span class="pre">add_return_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.add_return_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.add_return_effect" title="Link to this definition">¶</a></dt>
+<dd><p>Append one effect descriptor to a return bus’s chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.set_return_effect_enabled">
+<span class="sig-name descname"><span class="pre">set_return_effect_enabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.set_return_effect_enabled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.set_return_effect_enabled" title="Link to this definition">¶</a></dt>
+<dd><p>Bypass (<code class="docutils literal notranslate"><span class="pre">False</span></code>) or re-enable one return bus effect.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MixerWidget.set_send">
+<span class="sig-name descname"><span class="pre">set_send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget.set_send"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget.set_send" title="Link to this definition">¶</a></dt>
+<dd><p>Set a channel’s post-fader send level (0-1) to a return bus.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3851,6 +3929,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget._set_effect_enabled"><code class="docutils literal notranslate"><span class="pre">_set_effect_enabled()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._clamped_number"><code class="docutils literal notranslate"><span class="pre">_clamped_number()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._normalize_mixer_channel"><code class="docutils literal notranslate"><span class="pre">_normalize_mixer_channel()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._normalize_return_bus"><code class="docutils literal notranslate"><span class="pre">_normalize_return_bus()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget._pad_sends"><code class="docutils literal notranslate"><span class="pre">_pad_sends()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._clip_id"><code class="docutils literal notranslate"><span class="pre">_clip_id()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._positive_number"><code class="docutils literal notranslate"><span class="pre">_positive_number()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget._nonnegative_number"><code class="docutils literal notranslate"><span class="pre">_nonnegative_number()</span></code></a></li>
@@ -3928,8 +4008,11 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.channels"><code class="docutils literal notranslate"><span class="pre">MixerWidget.channels</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.master_gain"><code class="docutils literal notranslate"><span class="pre">MixerWidget.master_gain</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.master_effects"><code class="docutils literal notranslate"><span class="pre">MixerWidget.master_effects</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.returns"><code class="docutils literal notranslate"><span class="pre">MixerWidget.returns</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.session_id"><code class="docutils literal notranslate"><span class="pre">MixerWidget.session_id</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget._validate_channels"><code class="docutils literal notranslate"><span class="pre">MixerWidget._validate_channels()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget._validate_returns"><code class="docutils literal notranslate"><span class="pre">MixerWidget._validate_returns()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget._on_returns_change"><code class="docutils literal notranslate"><span class="pre">MixerWidget._on_returns_change()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget._validate_master_effects"><code class="docutils literal notranslate"><span class="pre">MixerWidget._validate_master_effects()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.add_channel"><code class="docutils literal notranslate"><span class="pre">MixerWidget.add_channel()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.remove_channel"><code class="docutils literal notranslate"><span class="pre">MixerWidget.remove_channel()</span></code></a></li>
@@ -3945,6 +4028,14 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.set_master_effects"><code class="docutils literal notranslate"><span class="pre">MixerWidget.set_master_effects()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.add_master_effect"><code class="docutils literal notranslate"><span class="pre">MixerWidget.add_master_effect()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.clear_master_effects"><code class="docutils literal notranslate"><span class="pre">MixerWidget.clear_master_effects()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.add_return"><code class="docutils literal notranslate"><span class="pre">MixerWidget.add_return()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.remove_return"><code class="docutils literal notranslate"><span class="pre">MixerWidget.remove_return()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget._update_return"><code class="docutils literal notranslate"><span class="pre">MixerWidget._update_return()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.set_return_gain"><code class="docutils literal notranslate"><span class="pre">MixerWidget.set_return_gain()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.set_return_effects"><code class="docutils literal notranslate"><span class="pre">MixerWidget.set_return_effects()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.add_return_effect"><code class="docutils literal notranslate"><span class="pre">MixerWidget.add_return_effect()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.set_return_effect_enabled"><code class="docutils literal notranslate"><span class="pre">MixerWidget.set_return_effect_enabled()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MixerWidget.set_send"><code class="docutils literal notranslate"><span class="pre">MixerWidget.set_send()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MixerWidget.to_mixer"><code class="docutils literal notranslate"><span class="pre">MixerWidget.to_mixer()</span></code></a></li>
 </ul>
 </li>

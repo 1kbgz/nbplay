@@ -92,6 +92,8 @@ Functions
    nbplay.widget._set_effect_enabled
    nbplay.widget._clamped_number
    nbplay.widget._normalize_mixer_channel
+   nbplay.widget._normalize_return_bus
+   nbplay.widget._pad_sends
    nbplay.widget._clip_id
    nbplay.widget._positive_number
    nbplay.widget._nonnegative_number
@@ -226,6 +228,10 @@ Module Contents
 .. py:function:: _clamped_number(value, low, high, name)
 
 .. py:function:: _normalize_mixer_channel(channel, index=0)
+
+.. py:function:: _normalize_return_bus(bus, index=0)
+
+.. py:function:: _pad_sends(sends, count)
 
 .. py:function:: _clip_id()
 
@@ -474,10 +480,19 @@ Module Contents
    .. py:attribute:: master_effects
 
 
+   .. py:attribute:: returns
+
+
    .. py:attribute:: session_id
 
 
    .. py:method:: _validate_channels(proposal)
+
+
+   .. py:method:: _validate_returns(proposal)
+
+
+   .. py:method:: _on_returns_change(change)
 
 
    .. py:method:: _validate_master_effects(proposal)
@@ -558,6 +573,50 @@ Module Contents
    .. py:method:: clear_master_effects()
 
       Remove all browser insert effects from the master bus.
+
+
+
+   .. py:method:: add_return(name='Return', effects=(), gain=0.8)
+
+      Add a return bus with its own effect chain; returns its index.
+
+      Every channel gains a send level for it, starting at 0.
+
+
+
+   .. py:method:: remove_return(index)
+
+      Remove a return bus and every channel's send to it.
+
+
+
+   .. py:method:: _update_return(index, **fields)
+
+
+   .. py:method:: set_return_gain(index, gain)
+
+
+   .. py:method:: set_return_effects(index, effects)
+
+      Replace a return bus's effect chain.
+
+
+
+   .. py:method:: add_return_effect(index, effect)
+
+      Append one effect descriptor to a return bus's chain.
+
+
+
+   .. py:method:: set_return_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one return bus effect.
+
+
+
+   .. py:method:: set_send(channel_index, return_index, level)
+
+      Set a channel's post-fader send level (0-1) to a return bus.
 
 
 

@@ -464,6 +464,8 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._normalize_params">_normalize_params() (nbplay.widget.EffectPlugin method)</a>
 </li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_return_bus">_normalize_return_bus() (in module nbplay.widget)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_sample_slices">_normalize_sample_slices() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._normalize_timeline_track">_normalize_timeline_track() (in module nbplay.widget)</a>
@@ -476,10 +478,10 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._number">_number() (nbplay.widget.EffectPlugin class method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/history/index.html#nbplay.history.History._on_change">_on_change() (nbplay.history.History method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._on_clip_exported">_on_clip_exported() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_composer_change">_on_composer_change() (nbplay.widget.SequencerWidget method)</a>
@@ -510,6 +512,8 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget._on_param_change">_on_param_change() (nbplay.widget.SynthWidget method)</a>
 </li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget._on_returns_change">_on_returns_change() (nbplay.widget.MixerWidget method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._on_sample_slices_change">_on_sample_slices_change() (nbplay.widget.SamplerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session._on_timeline_tracks">_on_timeline_tracks() (nbplay.widget.Session method)</a>
@@ -523,6 +527,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._pack_float32">_pack_float32() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._PAD_MAX_COUNT">_PAD_MAX_COUNT (in module nbplay.widget)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._pad_sends">_pad_sends() (in module nbplay.widget)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.EffectPlugin._param">_param() (nbplay.widget.EffectPlugin static method)</a>
 </li>
@@ -628,6 +634,8 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget._unpack_float32">_unpack_float32() (in module nbplay.widget)</a>
 </li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget._update_return">_update_return() (nbplay.widget.MixerWidget method)</a>
+</li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget._update_waveform">_update_waveform() (nbplay.widget.SynthWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardRoute._VALID_MATCHES">_VALID_MATCHES (nbplay.widget.KeyboardRoute attribute)</a>
@@ -675,6 +683,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._validate_recording_track">_validate_recording_track() (nbplay.widget.TimelineWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._validate_recording_tracks">_validate_recording_tracks() (nbplay.widget.TimelineWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget._validate_returns">_validate_returns() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget._validate_scenes">_validate_scenes() (nbplay.widget.LauncherWidget method)</a>
 </li>
@@ -733,6 +743,10 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.add_pattern">add_pattern() (nbplay.widget.Session method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_pattern_clip">add_pattern_clip() (nbplay.widget.TimelineWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_return">add_return() (nbplay.widget.MixerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_return_effect">add_return_effect() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.add_scene">add_scene() (nbplay.widget.LauncherWidget method)</a>
 </li>
@@ -1410,11 +1424,13 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_channel">remove_channel() (nbplay.widget.MixerWidget method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.remove_clip">remove_clip() (nbplay.widget.TimelineWidget method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_pattern">remove_pattern() (nbplay.widget.Session method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_return">remove_return() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_track">remove_track() (nbplay.widget.Session method)</a>
 
@@ -1427,6 +1443,8 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.NoteComposer.resize">resize() (nbplay.widget.NoteComposer method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.resize_clip">resize_clip() (nbplay.widget.TimelineWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.returns">returns (nbplay.widget.MixerWidget attribute)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.reverse_sample">reverse_sample() (nbplay.widget.SamplerWidget method)</a>
 </li>
@@ -1516,12 +1534,12 @@
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effect_enabled">set_channel_effect_enabled() (nbplay.widget.MixerWidget method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effects">set_channel_effects() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_gain">set_channel_gain() (nbplay.widget.MixerWidget method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_mute">set_channel_mute() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_pan">set_channel_pan() (nbplay.widget.MixerWidget method)</a>
@@ -1531,6 +1549,14 @@
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_master_effect_enabled">set_master_effect_enabled() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_master_effects">set_master_effects() (nbplay.widget.MixerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_effect_enabled">set_return_effect_enabled() (nbplay.widget.MixerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_effects">set_return_effects() (nbplay.widget.MixerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_gain">set_return_gain() (nbplay.widget.MixerWidget method)</a>
+</li>
+        <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_send">set_send() (nbplay.widget.MixerWidget method)</a>
 </li>
         <li><a href="autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.set_slot">set_slot() (nbplay.widget.LauncherWidget method)</a>
 </li>
@@ -2280,6 +2306,8 @@
         <li><a href="autoapi/test_all/index.html#test_all.TestMidiLearn.test_requires_a_control_change_source">test_requires_a_control_change_source() (test_all.TestMidiLearn method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestStepSequencer.test_reset">test_reset() (test_all.TestStepSequencer method)</a>
+</li>
+        <li><a href="autoapi/test_all/index.html#test_all.TestMixerWidget.test_returns_and_sends">test_returns_and_sends() (test_all.TestMixerWidget method)</a>
 </li>
         <li><a href="autoapi/test_all/index.html#test_all.TestSessionPersistence.test_round_trip_keeps_midi_clips">test_round_trip_keeps_midi_clips() (test_all.TestSessionPersistence method)</a>
 </li>
