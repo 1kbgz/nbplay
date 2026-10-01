@@ -1690,6 +1690,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_composer_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"steps"</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_voices_data_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_num_voices_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"num_voices"</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_length_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"length"</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_on_grid_config_change</span><span class="p">,</span>
@@ -1782,6 +1783,24 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_resize_composers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">composer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">:</span>
             <span class="n">composer</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_voices_data</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget._on_num_voices_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget._on_num_voices_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_num_voices_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Grow or shrink the composers so every voice has an editor behind it."""</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">!=</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_voices</span> <span class="o">=</span> <span class="n">count</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+            <span class="n">composer</span> <span class="o">=</span> <span class="n">NoteComposer</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+            <span class="n">composer</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_composer_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"steps"</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">composer</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_composers</span><span class="p">[</span><span class="n">count</span><span class="p">:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sync_voices_data</span><span class="p">()</span></div>
 
 
@@ -3394,10 +3413,14 @@
         <span class="n">slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">slot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no slot at track </span><span class="si">{</span><span class="n">track_index</span><span class="si">}</span><span class="s2">, scene </span><span class="si">{</span><span class="n">scene_index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">voices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">]]</span>
         <span class="n">sequencer</span><span class="o">.</span><span class="n">step_duration</span> <span class="o">=</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">]</span>
         <span class="n">sequencer</span><span class="o">.</span><span class="n">swing</span> <span class="o">=</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"swing"</span><span class="p">]</span>
         <span class="n">sequencer</span><span class="o">.</span><span class="n">groove</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">slot</span><span class="p">[</span><span class="s2">"groove"</span><span class="p">])</span>
-        <span class="n">sequencer</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span> <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">]]</span>
+        <span class="c1"># Voice count first: a one-voice editor given two voices would keep</span>
+        <span class="c1"># one composer and write the pattern back with a voice missing.</span>
+        <span class="n">sequencer</span><span class="o">.</span><span class="n">num_voices</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">voices</span><span class="p">))</span>
+        <span class="n">sequencer</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="n">voices</span>
         <span class="k">return</span> <span class="n">slot</span></div>
 
 

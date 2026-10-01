@@ -1315,6 +1315,12 @@ Module Contents
    .. py:method:: test_slot_editor_ignores_cleared_selection()
 
 
+   .. py:method:: test_num_voices_change_resizes_composers()
+
+
+   .. py:method:: test_slot_editor_keeps_every_voice()
+
+
    .. py:method:: test_slot_to_sequencer_missing()
 
 

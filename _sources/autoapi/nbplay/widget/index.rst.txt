@@ -824,6 +824,12 @@ Module Contents
    .. py:method:: _resize_composers(length)
 
 
+   .. py:method:: _on_num_voices_change(change)
+
+      Grow or shrink the composers so every voice has an editor behind it.
+
+
+
    .. py:method:: _on_length_change(change)
 
 

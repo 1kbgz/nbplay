@@ -1026,11 +1026,22 @@ slot is selected; edits write back into the slot live.</p>
 (<code class="docutils literal notranslate"><span class="pre">createAudioScheduler</span></code> from <code class="docutils literal notranslate"><span class="pre">scheduler.ts</span></code>) fed by a small model adapter over
 the active slot, so all playing slots follow the session clock’s absolute beat
 grid and stay phase-locked. Launches are queued to the next boundary chosen by
-<code class="docutils literal notranslate"><span class="pre">quantize</span></code> (<code class="docutils literal notranslate"><span class="pre">bar</span></code>, <code class="docutils literal notranslate"><span class="pre">beat</span></code>, or <code class="docutils literal notranslate"><span class="pre">none</span></code>) and fired by a 25 ms queue timer; a
-launch from a stopped session starts the clock and begins immediately. A scene
-launch queues every track: tracks with a slot in that scene launch it, tracks
-without one stop. Transport stop pauses the active slots and play resumes
-them. <code class="docutils literal notranslate"><span class="pre">active_slots</span></code> and <code class="docutils literal notranslate"><span class="pre">queued_slots</span></code> (per track: scene index, -1 for stop,
+<code class="docutils literal notranslate"><span class="pre">quantize</span></code> (<code class="docutils literal notranslate"><span class="pre">bar</span></code>, <code class="docutils literal notranslate"><span class="pre">beat</span></code>, or <code class="docutils literal notranslate"><span class="pre">none</span></code>). A pending launch stores the boundary as
+an AudioContext time measured from the current position (a boundary past the
+loop end means the loop restart), so a loop wrap cannot strand it, and it is
+re-aimed after a seek, tempo, or loop change; a 25 ms queue timer fires it. A
+launch from a stopped session starts the clock and begins immediately, while a
+stop request alone leaves the clock stopped. A scene launch or Stop All is
+applied as one batch at one clock position: tracks with a slot in that scene
+launch it, tracks without one stop, all on the same boundary. Transport stop
+clears every launched and queued slot, as on a hardware launcher; play alone
+resumes nothing, and the next launch starts fresh. Removing a track stops the
+performance, since the remaining rows’ indices shift. Scene headers show a
+fully playing scene (<code class="docutils literal notranslate"><span class="pre">active</span></code>), a partly playing one (<code class="docutils literal notranslate"><span class="pre">partial</span></code>), and a queued
+one (<code class="docutils literal notranslate"><span class="pre">queued</span></code>, including scene launches that only stop rows); queued cells
+carry a “next” or “stop” marker. Stopping a slot also cancels the notes its
+scheduler already handed to Web Audio but that have not sounded yet. A <code class="docutils literal notranslate"><span class="pre">slots</span></code>
+write restarts a playing slot only when its own pattern changed. <code class="docutils literal notranslate"><span class="pre">active_slots</span></code> and <code class="docutils literal notranslate"><span class="pre">queued_slots</span></code> (per track: scene index, -1 for stop,
 -2 for nothing queued) are mirrored to the kernel. Audio routes through each
 track’s <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.</p>
