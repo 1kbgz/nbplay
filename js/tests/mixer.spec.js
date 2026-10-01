@@ -680,6 +680,42 @@ test.describe("MixerWidget", () => {
     );
   });
 
+  test("a strip widens while its parameter editor is open", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "delay", time: 0.25, feedback: 0.25, wet: 0.35 }],
+        },
+      ],
+    });
+    const strip = page.locator(STRIP).first();
+    const closed = await strip.evaluate(
+      (el) => el.getBoundingClientRect().width,
+    );
+    await strip.locator(".nbplay-strip-fx-edit").click();
+    await expect(strip).toHaveClass(/editing/);
+    const open = await strip.evaluate((el) => el.getBoundingClientRect().width);
+    expect(open).toBeGreaterThan(closed * 2);
+    const editor = strip.locator(".nbplay-strip-fx-editor");
+    const fits = await editor.evaluate(
+      (el) => el.scrollWidth <= el.clientWidth + 1,
+    );
+    expect(fits).toBe(true);
+
+    // Adding a channel rebuilds the strips; the width follows the open editor.
+    await page.locator(".nbplay-mixer-add-btn").click();
+    await expect(page.locator(STRIP).first()).toHaveClass(/editing/);
+    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).first().click();
+    await expect(page.locator(STRIP).first()).not.toHaveClass(/editing/);
+  });
+
   test("the master effect editor edits master effects and survives a rebuild", async ({
     page,
   }) => {

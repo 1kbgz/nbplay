@@ -1192,6 +1192,12 @@ function render({
     scope: "channel" | "master",
     index: number,
   ): void {
+    // A strip with an open editor widens so the parameter rows fit.
+    const syncEditing = () =>
+      strip.classList.toggle(
+        "editing",
+        strip.querySelector(".nbplay-strip-fx-editor") !== null,
+      );
     strip.querySelectorAll(".nbplay-strip-fx-edit").forEach((btn) => {
       btn.addEventListener("click", () => {
         const fxIndex = parseInt(
@@ -1202,9 +1208,11 @@ function render({
         if (openEditors.has(key)) openEditors.delete(key);
         else openEditors.add(key);
         renderEditors(strip, scope, index);
+        syncEditing();
       });
     });
     renderEditors(strip, scope, index);
+    syncEditing();
   }
 
   function rebuild(): void {

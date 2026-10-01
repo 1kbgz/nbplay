@@ -83,6 +83,18 @@
   width: 68px;
   gap: 6px;
 }
+.nbplay-mixer .nbplay-mixer-strip.editing {
+  min-width: 236px;
+  width: 236px;
+}
+.nbplay-mixer .nbplay-mixer-strip.editing .nbplay-fx-param-row {
+  grid-template-columns: 52px 1fr 60px;
+  font-size: 9px;
+}
+.nbplay-mixer .nbplay-mixer-strip.editing .nbplay-fx-param {
+  font-size: 10px;
+  height: 18px;
+}
 .nbplay-mixer .nbplay-master-strip {
   border-color: color-mix(
     in srgb,
