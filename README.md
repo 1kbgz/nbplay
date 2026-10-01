@@ -71,6 +71,8 @@ Samplers hold one main sample plus `zones`, each mapping a key and velocity rang
 `MidiOutputWidget` sends what the session plays to a hardware synth or another app over Web MIDI, and `MidiLearn` maps hardware knobs to widget traits (`MidiLearn(midi_keyboard).learn(synth, "frequency", low=100, high=2000)`, then turn a knob). The session can lead external gear with MIDI clock (`send_clock` on the output widget) or follow a device's clock (`sync_clock` on the MIDI keyboard). Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
 `session.export_midi("song.mid")`, and `session.import_midi(path)`.
 
+Every change to a session widget is undoable: `session.undo()` and `session.redo()`, or Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z with the transport focused. Adding and removing tracks is the exception.
+
 The example notebooks in `examples/` walk through each widget and end with a
 full DAW playground and the beats view.
 

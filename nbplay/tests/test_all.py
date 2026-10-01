@@ -16,6 +16,7 @@ from nbplay import (
     EffectPlugin,
     Envelope,
     EventSequence,
+    History,
     KeyboardRoute,
     KeyboardWidget,
     LauncherWidget,
@@ -691,6 +692,51 @@ class TestMixerWidget:
         assert w.channels[0]["name"] == "Synth 1"
         assert w.channels[0]["gain"] == pytest.approx(0.8)
         assert w.channels[0]["effects"] == []
+
+    def test_returns_and_sends(self):
+        w = MixerWidget()
+        w.add_channel("A")
+        assert w.channels[0]["sends"] == []
+        idx = w.add_return("Verb", effects=[EffectPlugin("reverb", wet=1.0)])
+        assert idx == 0
+        assert w.returns[0]["name"] == "Verb" and w.returns[0]["gain"] == pytest.approx(0.8)
+        assert w.returns[0]["effects"][0]["type"] == "reverb"
+        assert w.channels[0]["sends"] == [0.0]
+        w.add_channel("B")
+        assert w.channels[1]["sends"] == [0.0]
+        w.add_return("Delay", gain=1.5)
+        assert [ch["sends"] for ch in w.channels] == [[0.0, 0.0], [0.0, 0.0]]
+        w.set_send(0, 1, 0.4)
+        w.set_send(1, 0, 7)
+        assert w.channels[0]["sends"] == [0.0, 0.4]
+        assert w.channels[1]["sends"] == [1.0, 0.0]
+        with pytest.raises(IndexError):
+            w.set_send(0, 5, 0.5)
+        w.set_return_gain(1, 3.0)
+        assert w.returns[1]["gain"] == pytest.approx(2.0)
+        w.add_return_effect(1, {"type": "delay", "time": 0.5})
+        w.set_return_effect_enabled(1, 0, False)
+        assert w.returns[1]["effects"][0]["enabled"] is False
+        w.set_return_effects(1, [])
+        assert w.returns[1]["effects"] == []
+        w.remove_return(0)
+        assert [r["name"] for r in w.returns] == ["Delay"]
+        assert [ch["sends"] for ch in w.channels] == [[0.4], [0.0]]
+        w.returns = []
+        assert [ch["sends"] for ch in w.channels] == [[], []]
+        w.channels = [{"name": "C", "sends": [0.2, 0.9, 0.1]}]
+        assert w.channels[0]["sends"] == []
+        w.returns = [{"name": "R"}]
+        assert w.channels[0]["sends"] == [0.0]
+        # Out-of-range indexes are ignored, like the channel helpers.
+        w.remove_return(5)
+        w.set_return_gain(5, 1.0)
+        w.add_return_effect(5, {"type": "gain"})
+        w.set_return_effect_enabled(5, 0)
+        w.set_return_effect_enabled(0, 9)
+        w.set_send(9, 0, 0.5)
+        assert w.returns == [{"name": "R", "gain": 0.8, "effects": []}]
+        assert w.channels[0]["sends"] == [0.0]
 
     def test_add_multiple_channels(self):
         w = MixerWidget()
@@ -3256,6 +3302,172 @@ class TestMidiFiles:
         assert untouched.transport.bpm == pytest.approx(77.0)
 
 
+#  Undo / redo
+
+
+class TestHistory:
+    def test_undo_and_redo_single_trait(self):
+        mixer = MixerWidget()
+        mixer.add_channel("A")
+        history = History(group_window=0)
+        history.attach(mixer)
+        assert history.can_undo is False and history.undo() is False
+        mixer.set_channel_gain(0, 0.3)
+        mixer.set_channel_gain(0, 0.6)
+        assert len(history) == 2
+        assert history.undo() is True
+        assert mixer.channels[0]["gain"] == pytest.approx(0.3)
+        assert history.undo() is True
+        assert mixer.channels[0]["gain"] == pytest.approx(0.8)
+        assert history.undo() is False
+        assert history.redo() is True
+        assert mixer.channels[0]["gain"] == pytest.approx(0.3)
+        mixer.set_channel_pan(0, 0.5)
+        assert history.can_redo is False
+        assert history.steps[-1] == [(mixer, "channels")]
+
+    def test_rapid_changes_share_a_step_and_mark_splits_them(self):
+        synth = SynthWidget()
+        history = History()
+        history.attach(synth)
+        synth.frequency = 100.0
+        synth.amplitude = 0.1
+        assert len(history) == 1
+        history.mark()
+        synth.frequency = 200.0
+        assert len(history) == 2
+        history.undo()
+        assert synth.frequency == pytest.approx(100.0) and synth.amplitude == pytest.approx(0.1)
+        history.undo()
+        assert synth.frequency == pytest.approx(440.0) and synth.amplitude == pytest.approx(0.8)
+
+    def test_transaction_pause_transient_and_limit(self):
+        seq = SequencerWidget(length=4)
+        history = History(limit=3, group_window=0)
+        history.attach(seq)
+        with history.transaction():
+            seq.set_step(0, note=60, active=True)
+            seq.swing = 20.0
+            with history.transaction():
+                seq.loop_enabled = False
+        assert len(history) == 1
+        history.undo()
+        assert seq.swing == 0.0 and seq.loop_enabled is True and not seq.voices_data[0][0]["active"]
+        with history.paused():
+            seq.swing = 50.0
+        assert history.can_redo is True and len(history) == 0
+        seq.is_playing = True
+        seq.current_step = 2
+        assert len(history) == 0
+        for value in (1.0, 2.0, 3.0, 4.0, 5.0):
+            seq.swing = value
+        assert len(history) == 3
+        history.clear()
+        assert len(history) == 0 and history.can_redo is False
+        history.detach(seq)
+        seq.swing = 9.0
+        assert len(history) == 0
+        history.attach(None)
+        history.attach(object())
+
+    def test_bind_ipython_marks_after_each_cell(self):
+        class Events:
+            def __init__(self):
+                self.registered = []
+
+            def register(self, name, callback):
+                self.registered.append((name, callback))
+
+        class Shell:
+            events = Events()
+
+        synth = SynthWidget()
+        history = History()
+        history.attach(synth)
+        shell = Shell()
+        assert history.bind_ipython(shell) is True
+        ((name, callback),) = shell.events.registered
+        assert name == "post_run_cell"
+        synth.frequency = 100.0
+        callback(object())  # IPython passes the execution result
+        synth.frequency = 200.0
+        assert len(history) == 2
+        assert history.bind_ipython(object()) is False
+
+    def test_detach_drops_widget_entries(self):
+        a, b = SynthWidget(), SynthWidget()
+        history = History(group_window=0)
+        history.attach(a)
+        history.attach(b)
+        a.frequency = 100.0
+        b.frequency = 200.0
+        a.amplitude = 0.2
+        history.detach(a)
+        assert history.steps == [[(b, "frequency")]]
+
+    def test_session_undo_covers_widgets_but_not_track_structure(self):
+        s = Session()
+        seq = SequencerWidget(length=4)
+        synth = SynthWidget()
+        track = s.add_track("Lead", seq, synth)
+        assert len(s.history) == 0
+        s.mixer.set_channel_gain(track.mixer_channel, 0.3)
+        s.history.mark()
+        seq.set_step(1, note=64, active=True)
+        s.history.mark()
+        synth.oscillator_type = "square"
+        s.history.mark()
+        s.transport.bpm = 99.0
+        s.history.mark()
+        s.timeline.add_clip("Take", track_index=0, start=0.0, duration=2.0)
+        assert len(s.history) == 5
+        assert s.undo() and s.timeline.clips == []
+        assert s.undo() and s.transport.bpm == pytest.approx(120.0) and s.timeline.bpm == pytest.approx(120.0)
+        assert s.undo() and synth.oscillator_type == "sine"
+        assert s.undo() and seq.voices_data[0][1]["active"] is False
+        assert s.undo() and s.mixer.channels[0]["gain"] == pytest.approx(0.8)
+        assert s.undo() is False
+        assert s.redo() and s.mixer.channels[0]["gain"] == pytest.approx(0.3)
+        s.history.clear()
+        s.add_track("Keys")
+        s.remove_track(1)
+        assert len(s.history) == 0
+
+    def test_session_chain_and_update_pattern_are_single_steps(self):
+        s = Session()
+        seq = SequencerWidget(length=4, step_duration=1.0)
+        seq.set_step(0, note=36, active=True)
+        drums = s.add_track("Drums", seq, SamplerWidget())
+        s.history.clear()
+        s.add_pattern("a", seq)
+        s.chain(drums, ["a", "a"], start=0.0)
+        assert len(s.history) == 1 and seq.follow_transport is False and len(s.timeline.clips) == 2
+        s.update_pattern("a", [{"note": 40, "active": True}], step_duration=2.0)
+        assert len(s.history) == 2
+        assert s.undo() and s.timeline.clips[0]["events"][0]["note"] == 36
+        assert s.undo() and s.timeline.clips == [] and seq.follow_transport is True
+        assert s.redo() and len(s.timeline.clips) == 2
+
+    def test_transport_requests_drive_undo_and_redo(self):
+        s = Session()
+        s.mixer.master_gain = 0.5
+        s.transport.undo_request += 1
+        assert s.mixer.master_gain == pytest.approx(0.8)
+        s.transport.redo_request += 1
+        assert s.mixer.master_gain == pytest.approx(0.5)
+
+    def test_sampler_load_is_one_step(self):
+        s = Session()
+        sampler = SamplerWidget()
+        s.add_track("Drums", sound_source=sampler)
+        sampler.load_sample([0.1, 0.2], sample_rate=8000, root_note=40, name="Blip")
+        assert len(s.history) == 1
+        s.undo()
+        assert sampler.sample_length == 0 and sampler.sample_name == "(no sample)" and sampler.root_note == 69
+        s.redo()
+        assert sampler.get_sample_data() == pytest.approx([0.1, 0.2])
+
+
 #  Session persistence
 
 
@@ -3279,6 +3491,8 @@ class TestSessionPersistence:
         s.mixer.add_channel_effect(lead.mixer_channel, EffectPlugin("filter", filter_type="lowpass", frequency=2000, q=0.8))
         s.mixer.master_gain = 0.7
         s.mixer.add_master_effect(EffectPlugin("limiter", threshold=-2))
+        s.mixer.add_return("Verb", effects=[EffectPlugin("reverb", wet=1.0)], gain=0.9)
+        s.mixer.set_send(lead.mixer_channel, 0, 0.35)
         s.timeline.length = 32
         s.timeline.count_in_bars = 1
         s.timeline.pixels_per_beat = 24
@@ -3398,6 +3612,10 @@ class TestSessionPersistence:
         assert loaded.mixer.channels[0]["effects"][0]["type"] == "filter"
         assert loaded.mixer.master_gain == pytest.approx(0.7)
         assert loaded.mixer.master_effects[0]["type"] == "limiter"
+        assert loaded.mixer.returns[0]["name"] == "Verb" and loaded.mixer.returns[0]["gain"] == pytest.approx(0.9)
+        assert loaded.mixer.returns[0]["effects"][0]["type"] == "reverb"
+        assert loaded.mixer.channels[0]["sends"] == pytest.approx([0.35])
+        assert loaded.mixer.channels[1]["sends"] == [0.0]
 
         tl = loaded.timeline
         assert tl.length == pytest.approx(32.0)
@@ -3540,6 +3758,7 @@ class TestTrack:
 class TestSession:
     def test_defaults(self):
         s = Session()
+        assert isinstance(s.history, History)
         assert s.transport.bpm == pytest.approx(120.0)
         assert s.transport.time_signature_num == 4
         assert s.transport.time_signature_den == 4

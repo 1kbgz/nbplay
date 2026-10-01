@@ -454,6 +454,19 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
 
+Send/return buses live in `returns` (`name`, `gain`, `effects`), and every
+channel carries one send level per return in `sends` (0-1). Python keeps the
+two aligned: `add_return()` and the `returns` validator pad or trim every
+channel's `sends`, `set_send()` writes one level, and `remove_return()` drops
+the bus and its sends. In the browser each return is an input `GainNode`, an
+insert chain, and a return fader feeding the master; each channel owns one
+send `GainNode` per return that taps the end of its insert chain (post-fader,
+post-insert, so mute and solo silence the sends too) and feeds the return's
+input. Return strips sit between the channels and the master with their own
+fader, effect chips and editor, meter, and remove button; channel strips show a
+small slider per return. The bus exposes `returns` next to `channels` for other
+widgets. `to_mixer()` ignores returns; the offline Rust mixer has no buses.
+
 The parameter editor lists each built-in effect's parameters with the same
 ranges the Python `EffectPlugin` enforces (a slider plus a number box for
 bounded numbers, a select for the filter type) and, for custom plugin types,
@@ -947,6 +960,12 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `timeline.pending_exports` to reach zero. On load, cached clips go back through
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
+
+### Undo and redo
+
+`nbplay/history.py` keeps an undo stack over widget state. `History.attach(widget)` observes every synced trait of a widget except the transient ones listed in `TRANSIENT_TRAITS` (play state, playhead, recording status, selection, meters, request nonces, derived data such as the waveform preview). Each change becomes an entry `(widget, trait, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several traits is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order and moves it to the redo stack; a new change clears redo. Old values are the list and dict objects traitlets hands over, which works because every widget setter assigns new containers instead of mutating in place.
+
+A `Session` owns one `History`, attaches the transport, mixer, timeline, and launcher, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a trait-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` traits, which the session answers.
 
 ### Pattern chaining
 

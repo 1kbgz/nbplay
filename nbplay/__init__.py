@@ -34,6 +34,7 @@ except ImportError:  # pragma: no cover - only on wasm32 builds
     AudioOutput = None
     MidiInput = None
 
+from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
 from nbplay.widget import (
     AudioClip,

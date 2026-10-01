@@ -33,6 +33,7 @@ from nbplay import (
     SquareOscillator,
     __version__,
 )
+from nbplay.history import History
 
 _STATIC = pathlib.Path(__file__).parent / "static"
 _PREVIEW_MAX_FRAMES = 2048
@@ -277,7 +278,21 @@ def _normalize_mixer_channel(channel, index=0):
     normalized["mute"] = bool(normalized.get("mute", False))
     normalized["solo"] = bool(normalized.get("solo", False))
     normalized["effects"] = _normalize_effects(normalized.get("effects", []))
+    normalized["sends"] = [_clamped_number(level, 0.0, 1.0, "send") for level in normalized.get("sends", []) or []]
     return normalized
+
+
+def _normalize_return_bus(bus, index=0):
+    return {
+        "name": str(bus.get("name", f"Return {index + 1}")),
+        "gain": _clamped_number(bus.get("gain", 0.8), 0.0, 2.0, "gain"),
+        "effects": _normalize_effects(bus.get("effects", [])),
+    }
+
+
+def _pad_sends(sends, count):
+    sends = list(sends or [])[:count]
+    return sends + [0.0] * (count - len(sends))
 
 
 def _clip_id():
@@ -784,13 +799,33 @@ class MixerWidget(anywidget.AnyWidget):
     channels = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
     master_gain = traitlets.Float(0.8).tag(sync=True)
     master_effects = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    # Send/return buses: each has a name, gain, and its own insert chain and
+    # feeds the master; every channel carries one post-fader send level per
+    # return in ``sends``.
+    returns = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
     # Session routing (set by Session to enable shared AudioContext)
     session_id = traitlets.Unicode("").tag(sync=True)
 
     @traitlets.validate("channels")
     def _validate_channels(self, proposal):
-        return [_normalize_mixer_channel(channel, index) for index, channel in enumerate(proposal["value"] or [])]
+        count = len(self.returns)
+        channels = []
+        for index, channel in enumerate(proposal["value"] or []):
+            normalized = _normalize_mixer_channel(channel, index)
+            normalized["sends"] = _pad_sends(normalized["sends"], count)
+            channels.append(normalized)
+        return channels
+
+    @traitlets.validate("returns")
+    def _validate_returns(self, proposal):
+        return [_normalize_return_bus(bus, index) for index, bus in enumerate(proposal["value"] or [])]
+
+    @traitlets.observe("returns")
+    def _on_returns_change(self, change):
+        count = len(change["new"])
+        if any(len(channel.get("sends", [])) != count for channel in self.channels):
+            self.channels = [{**channel, "sends": _pad_sends(channel.get("sends"), count)} for channel in self.channels]
 
     @traitlets.validate("master_effects")
     def _validate_master_effects(self, proposal):
@@ -805,7 +840,7 @@ class MixerWidget(anywidget.AnyWidget):
         Returns:
             Index of the new channel.
         """
-        ch = {"name": name, "gain": 0.8, "pan": 0.0, "mute": False, "solo": False, "effects": []}
+        ch = {"name": name, "gain": 0.8, "pan": 0.0, "mute": False, "solo": False, "effects": [], "sends": [0.0] * len(self.returns)}
         self.channels = [*self.channels, ch]
         return len(self.channels) - 1
 
@@ -892,6 +927,61 @@ class MixerWidget(anywidget.AnyWidget):
     def clear_master_effects(self):
         """Remove all browser insert effects from the master bus."""
         self.master_effects = []
+
+    # Send/return buses
+
+    def add_return(self, name="Return", effects=(), gain=0.8):
+        """Add a return bus with its own effect chain; returns its index.
+
+        Every channel gains a send level for it, starting at 0.
+        """
+        self.returns = [*self.returns, {"name": name, "gain": gain, "effects": list(effects)}]
+        return len(self.returns) - 1
+
+    def remove_return(self, index):
+        """Remove a return bus and every channel's send to it."""
+        returns = list(self.returns)
+        if 0 <= index < len(returns):
+            returns.pop(index)
+            self.channels = [{**ch, "sends": [level for i, level in enumerate(ch.get("sends", [])) if i != index]} for ch in self.channels]
+            self.returns = returns
+
+    def _update_return(self, index, **fields):
+        returns = list(self.returns)
+        if 0 <= index < len(returns):
+            returns[index] = {**returns[index], **fields}
+            self.returns = returns
+
+    def set_return_gain(self, index, gain):
+        self._update_return(index, gain=_clamped_number(gain, 0.0, 2.0, "gain"))
+
+    def set_return_effects(self, index, effects):
+        """Replace a return bus's effect chain."""
+        self._update_return(index, effects=_normalize_effects(effects))
+
+    def add_return_effect(self, index, effect):
+        """Append one effect descriptor to a return bus's chain."""
+        if 0 <= index < len(self.returns):
+            self._update_return(index, effects=[*self.returns[index]["effects"], _normalize_effect(effect)])
+
+    def set_return_effect_enabled(self, index, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one return bus effect."""
+        if 0 <= index < len(self.returns):
+            effects = list(self.returns[index]["effects"])
+            if 0 <= effect_index < len(effects):
+                effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+                self._update_return(index, effects=effects)
+
+    def set_send(self, channel_index, return_index, level):
+        """Set a channel's post-fader send level (0-1) to a return bus."""
+        if not 0 <= return_index < len(self.returns):
+            raise IndexError(f"return index out of range: {return_index}")
+        chs = list(self.channels)
+        if 0 <= channel_index < len(chs):
+            sends = _pad_sends(chs[channel_index].get("sends"), len(self.returns))
+            sends[return_index] = _clamped_number(level, 0.0, 1.0, "send")
+            chs[channel_index] = {**chs[channel_index], "sends": sends}
+            self.channels = chs
 
     def to_mixer(self):
         """Build a Rust ``Mixer`` matching the current widget state.
@@ -1891,6 +1981,10 @@ class TransportWidget(anywidget.AnyWidget):
     loop_enabled = traitlets.Bool(False).tag(sync=True)
     loop_start_bar = traitlets.Int(0).tag(sync=True)
     loop_end_bar = traitlets.Int(4).tag(sync=True)
+    # Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) in the browser bump these;
+    # a Session answers by undoing or redoing its history.
+    undo_request = traitlets.Int(0).tag(sync=True)
+    redo_request = traitlets.Int(0).tag(sync=True)
 
 
 class TimelineWidget(anywidget.AnyWidget):
@@ -2731,7 +2825,7 @@ def _session_to_dict(session, resources=None):
         "version": _SESSION_FORMAT_VERSION,
         "nbplay": __version__,
         "transport": _widget_state(session.transport, _TRANSPORT_STATE),
-        "mixer": _widget_state(session.mixer, ("channels", "master_gain", "master_effects")),
+        "mixer": _widget_state(session.mixer, ("channels", "master_gain", "master_effects", "returns")),
         "tracks": tracks,
         "timeline": {**_widget_state(session.timeline, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.tracks), "clips": clips},
         "launcher": _widget_state(session.launcher, ("quantize", "scenes", "slots")),
@@ -2767,6 +2861,8 @@ def _session_from_dict(cls, data, resources):
         )
 
     mixer = data.get("mixer", {})
+    if mixer.get("returns"):
+        session.mixer.returns = mixer["returns"]
     if mixer.get("channels"):
         session.mixer.channels = mixer["channels"]
     if "master_gain" in mixer:
@@ -3484,6 +3580,14 @@ class Session:
         self.tracks = []
         # Named patterns for the tracking view: name -> {voices_data, step_duration}.
         self.patterns = {}
+        # Undo/redo over every session widget's state; new tracks attach their
+        # sequencer and sound source as they are added.
+        self.history = History()
+        for widget in (self.transport, self.mixer, self.timeline, self.launcher):
+            self.history.attach(widget)
+        self.transport.observe(lambda change: self.undo(), names="undo_request")
+        self.transport.observe(lambda change: self.redo(), names="redo_request")
+        self.history.bind_ipython()
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False
@@ -3536,6 +3640,16 @@ class Session:
         """Identifier shared by every widget on this session's browser bus."""
         return self._session_id
 
+    # Undo / redo
+
+    def undo(self):
+        """Revert the latest change to any session widget; False when nothing to undo."""
+        return self.history.undo()
+
+    def redo(self):
+        """Reapply the latest undone change; False when nothing to redo."""
+        return self.history.redo()
+
     def play(self):
         """Start the shared transport."""
         self.transport.is_playing = True
@@ -3569,6 +3683,10 @@ class Session:
         Returns:
             The new ``Track`` object.
         """
+        with self.history.paused():
+            return self._add_track(name, sequencer, sound_source, input=input, armed=armed)
+
+    def _add_track(self, name, sequencer, sound_source, *, input, armed):
         channel_idx = self.mixer.add_channel(name)
         track = Track(name, sequencer, sound_source, channel_idx)
         track._link_transport(self.transport)
@@ -3587,6 +3705,8 @@ class Session:
             input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
         self.timeline.add_track(name, channel_idx, armed=armed, input=input)
         self.launcher.add_track(name, channel_idx)
+        self.history.attach(sequencer)
+        self.history.attach(sound_source)
         return track
 
     def remove_track(self, index):
@@ -3595,9 +3715,13 @@ class Session:
         Args:
             index: Zero-based track index.
         """
-        if 0 <= index < len(self.tracks):
+        if not 0 <= index < len(self.tracks):
+            return
+        with self.history.paused():
             track = self.tracks.pop(index)
             track._unlink()
+            self.history.detach(track.sequencer)
+            self.history.detach(track.sound_source)
             # Clear routing metadata
             if track.sequencer is not None:
                 track.sequencer.session_id = ""
@@ -3668,6 +3792,10 @@ class Session:
         missing = [name for name in names if str(name) not in self.patterns]
         if missing:
             raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
+        with self.history.transaction():
+            return self._chain(item, index, names, start, repeat)
+
+    def _chain(self, item, index, names, start, repeat):
         if item.sequencer is not None:
             item.sequencer.follow_transport = False
         clips = []
@@ -3692,6 +3820,11 @@ class Session:
         """Replace a pattern and regenerate every clip placed from it."""
         name = str(name)
         entry = self.add_pattern(name, pattern, step_duration=step_duration)
+        with self.history.transaction():
+            self._regenerate_pattern_clips(name, entry)
+        return entry
+
+    def _regenerate_pattern_clips(self, name, entry):
         scratch = TimelineWidget()
         clips = []
         for clip in self.timeline.clips:
@@ -3713,7 +3846,6 @@ class Session:
             )
             clips.append(rebuilt)
         self.timeline.clips = clips
-        return entry
 
     # MIDI files
 
@@ -3760,14 +3892,16 @@ class Session:
         from nbplay.midi import read_midi
 
         data = read_midi(source)
-        if apply_tempo:
-            self.transport.bpm = data["bpm"]
-            self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
         added = []
-        for item in data["tracks"]:
-            track = self.add_track(item["name"], input="midi")
-            self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
-            added.append(track)
+        # Adding tracks is structural, so the whole import stays out of the history.
+        with self.history.paused():
+            if apply_tempo:
+                self.transport.bpm = data["bpm"]
+                self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
+            for item in data["tracks"]:
+                track = self.add_track(item["name"], input="midi")
+                self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
+                added.append(track)
         return added
 
     # Persistence
