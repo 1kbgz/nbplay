@@ -51,6 +51,7 @@ Classes
    test_all.TestTimelineWidget
    test_all.TestLauncherWidget
    test_all.TestMidiFiles
+   test_all.TestHistory
    test_all.TestSessionPersistence
    test_all.TestTrack
    test_all.TestSession
@@ -1338,6 +1339,35 @@ Module Contents
 
 
    .. py:method:: test_session_export_and_import(tmp_path)
+
+
+.. py:class:: TestHistory
+
+   .. py:method:: test_undo_and_redo_single_trait()
+
+
+   .. py:method:: test_rapid_changes_share_a_step_and_mark_splits_them()
+
+
+   .. py:method:: test_transaction_pause_transient_and_limit()
+
+
+   .. py:method:: test_bind_ipython_marks_after_each_cell()
+
+
+   .. py:method:: test_detach_drops_widget_entries()
+
+
+   .. py:method:: test_session_undo_covers_widgets_but_not_track_structure()
+
+
+   .. py:method:: test_session_chain_and_update_pattern_are_single_steps()
+
+
+   .. py:method:: test_transport_requests_drive_undo_and_redo()
+
+
+   .. py:method:: test_sampler_load_is_one_step()
 
 
 .. py:class:: TestSessionPersistence

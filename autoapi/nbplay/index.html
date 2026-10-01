@@ -280,7 +280,10 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.History" title="nbplay.History"><code class="xref py py-obj docutils literal notranslate"><span class="pre">History</span></code></a></p></td>
+<td><p>Undo/redo stack over the synced traits of attached widgets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
 <td><p>Route MIDI control changes to widget traits.</p></td>
 </tr>
 </tbody>
@@ -298,6 +301,166 @@
 <dt class="sig sig-object py" id="nbplay.AudioOutput">
 <span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioOutput</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.AudioOutput" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.History">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History" title="Link to this definition">¶</a></dt>
+<dd><p>Undo/redo stack over the synced traits of attached widgets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit</strong> – Maximum number of undo steps kept.</p></li>
+<li><p><strong>group_window</strong> – Seconds within which consecutive changes join the
+same step.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><a class="headerlink" href="#nbplay.History.limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History.group_window">
+<span class="sig-name descname"><span class="pre">group_window</span></span><a class="headerlink" href="#nbplay.History.group_window" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._undo">
+<span class="sig-name descname"><span class="pre">_undo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.History._undo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._redo">
+<span class="sig-name descname"><span class="pre">_redo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.History._redo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._widgets">
+<span class="sig-name descname"><span class="pre">_widgets</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.History._widgets" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._paused">
+<span class="sig-name descname"><span class="pre">_paused</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nbplay.History._paused" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._applying">
+<span class="sig-name descname"><span class="pre">_applying</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.History._applying" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._transaction">
+<span class="sig-name descname"><span class="pre">_transaction</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.History._transaction" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.History._last_time">
+<span class="sig-name descname"><span class="pre">_last_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#nbplay.History._last_time" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.tracked_traits">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tracked_traits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.tracked_traits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.tracked_traits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.attach">
+<span class="sig-name descname"><span class="pre">attach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.attach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.attach" title="Link to this definition">¶</a></dt>
+<dd><p>Start recording changes to <code class="docutils literal notranslate"><span class="pre">widget</span></code>’s synced traits.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.detach">
+<span class="sig-name descname"><span class="pre">detach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.detach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.detach" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History._without">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_without</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History._without"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History._without" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History._on_change">
+<span class="sig-name descname"><span class="pre">_on_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History._on_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History._on_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History._push">
+<span class="sig-name descname"><span class="pre">_push</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History._push"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History._push" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.mark">
+<span class="sig-name descname"><span class="pre">mark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.mark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.mark" title="Link to this definition">¶</a></dt>
+<dd><p>End the current step so the next change starts a new one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.bind_ipython">
+<span class="sig-name descname"><span class="pre">bind_ipython</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.bind_ipython"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.bind_ipython" title="Link to this definition">¶</a></dt>
+<dd><p>End a step after every notebook cell, so cells never share one.</p>
+<p>Uses IPython’s <code class="docutils literal notranslate"><span class="pre">post_run_cell</span></code> event on <code class="docutils literal notranslate"><span class="pre">shell</span></code> (the running
+shell by default). Returns True when a shell was found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.transaction">
+<span class="sig-name descname"><span class="pre">transaction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.transaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.transaction" title="Link to this definition">¶</a></dt>
+<dd><p>Group every change inside the block into one undo step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.paused">
+<span class="sig-name descname"><span class="pre">paused</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.paused"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.paused" title="Link to this definition">¶</a></dt>
+<dd><p>Ignore changes inside the block (structural edits that undo cannot replay).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.History.can_undo">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_undo</span></span><a class="headerlink" href="#nbplay.History.can_undo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.History.can_redo">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_redo</span></span><a class="headerlink" href="#nbplay.History.can_redo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.undo" title="Link to this definition">¶</a></dt>
+<dd><p>Revert the latest step; returns False when there is nothing to undo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.redo" title="Link to this definition">¶</a></dt>
+<dd><p>Reapply the latest undone step; returns False when there is nothing to redo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History._apply">
+<span class="sig-name descname"><span class="pre">_apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History._apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History._apply" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.History.steps">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#nbplay.History.steps" title="Link to this definition">¶</a></dt>
+<dd><p>Undo steps, oldest first, as lists of <code class="docutils literal notranslate"><span class="pre">(widget,</span> <span class="pre">trait)</span></code> pairs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.History.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/history.html#History.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.History.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.MidiLearn">
@@ -448,6 +611,36 @@ and 0-127 for ints.</p>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
 <li><a class="reference internal" href="#nbplay.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.AudioOutput"><code class="docutils literal notranslate"><span class="pre">AudioOutput</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History"><code class="docutils literal notranslate"><span class="pre">History</span></code></a><ul>
+<li><a class="reference internal" href="#nbplay.History.limit"><code class="docutils literal notranslate"><span class="pre">History.limit</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.group_window"><code class="docutils literal notranslate"><span class="pre">History.group_window</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._undo"><code class="docutils literal notranslate"><span class="pre">History._undo</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._redo"><code class="docutils literal notranslate"><span class="pre">History._redo</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._widgets"><code class="docutils literal notranslate"><span class="pre">History._widgets</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._paused"><code class="docutils literal notranslate"><span class="pre">History._paused</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._applying"><code class="docutils literal notranslate"><span class="pre">History._applying</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._transaction"><code class="docutils literal notranslate"><span class="pre">History._transaction</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._last_time"><code class="docutils literal notranslate"><span class="pre">History._last_time</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.tracked_traits"><code class="docutils literal notranslate"><span class="pre">History.tracked_traits()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.attach"><code class="docutils literal notranslate"><span class="pre">History.attach()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.detach"><code class="docutils literal notranslate"><span class="pre">History.detach()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._without"><code class="docutils literal notranslate"><span class="pre">History._without()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._on_change"><code class="docutils literal notranslate"><span class="pre">History._on_change()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._push"><code class="docutils literal notranslate"><span class="pre">History._push()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.mark"><code class="docutils literal notranslate"><span class="pre">History.mark()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.bind_ipython"><code class="docutils literal notranslate"><span class="pre">History.bind_ipython()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.transaction"><code class="docutils literal notranslate"><span class="pre">History.transaction()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.paused"><code class="docutils literal notranslate"><span class="pre">History.paused()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.can_undo"><code class="docutils literal notranslate"><span class="pre">History.can_undo</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.can_redo"><code class="docutils literal notranslate"><span class="pre">History.can_redo</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.undo"><code class="docutils literal notranslate"><span class="pre">History.undo()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.redo"><code class="docutils literal notranslate"><span class="pre">History.redo()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History._apply"><code class="docutils literal notranslate"><span class="pre">History._apply()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.clear"><code class="docutils literal notranslate"><span class="pre">History.clear()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.steps"><code class="docutils literal notranslate"><span class="pre">History.steps</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.History.__len__"><code class="docutils literal notranslate"><span class="pre">History.__len__()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#nbplay.MidiLearn"><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code></a><ul>
 <li><a class="reference internal" href="#nbplay.MidiLearn.source"><code class="docutils literal notranslate"><span class="pre">MidiLearn.source</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.MidiLearn.mappings"><code class="docutils literal notranslate"><span class="pre">MidiLearn.mappings</span></code></a></li>

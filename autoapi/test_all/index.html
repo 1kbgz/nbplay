@@ -380,16 +380,19 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestMidiFiles" title="test_all.TestMidiFiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiFiles</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSessionPersistence" title="test_all.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestHistory" title="test_all.TestHistory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistory</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSessionPersistence" title="test_all.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestSession" title="test_all.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestTrack" title="test_all.TestTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTrack</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestDemoNotebook" title="test_all.TestDemoNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_all.TestSession" title="test_all.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.TestDemoNotebook" title="test_all.TestDemoNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDemoNotebook</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -2555,6 +2558,56 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_all.TestHistory">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestHistory</span></span><a class="headerlink" href="#test_all.TestHistory" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_undo_and_redo_single_trait">
+<span class="sig-name descname"><span class="pre">test_undo_and_redo_single_trait</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_undo_and_redo_single_trait" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_rapid_changes_share_a_step_and_mark_splits_them">
+<span class="sig-name descname"><span class="pre">test_rapid_changes_share_a_step_and_mark_splits_them</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_rapid_changes_share_a_step_and_mark_splits_them" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_transaction_pause_transient_and_limit">
+<span class="sig-name descname"><span class="pre">test_transaction_pause_transient_and_limit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_transaction_pause_transient_and_limit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_bind_ipython_marks_after_each_cell">
+<span class="sig-name descname"><span class="pre">test_bind_ipython_marks_after_each_cell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_bind_ipython_marks_after_each_cell" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_detach_drops_widget_entries">
+<span class="sig-name descname"><span class="pre">test_detach_drops_widget_entries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_detach_drops_widget_entries" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_session_undo_covers_widgets_but_not_track_structure">
+<span class="sig-name descname"><span class="pre">test_session_undo_covers_widgets_but_not_track_structure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_session_undo_covers_widgets_but_not_track_structure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_session_chain_and_update_pattern_are_single_steps">
+<span class="sig-name descname"><span class="pre">test_session_chain_and_update_pattern_are_single_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_session_chain_and_update_pattern_are_single_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_transport_requests_drive_undo_and_redo">
+<span class="sig-name descname"><span class="pre">test_transport_requests_drive_undo_and_redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_transport_requests_drive_undo_and_redo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestHistory.test_sampler_load_is_one_step">
+<span class="sig-name descname"><span class="pre">test_sampler_load_is_one_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestHistory.test_sampler_load_is_one_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_all.TestSessionPersistence">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSessionPersistence</span></span><a class="headerlink" href="#test_all.TestSessionPersistence" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -3363,6 +3416,18 @@
 <li><a class="reference internal" href="#test_all.TestMidiFiles.test_events_to_voices_edge_cases"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_events_to_voices_edge_cases()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMidiFiles.test_timeline_clip_export_and_import"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_timeline_clip_export_and_import()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestMidiFiles.test_session_export_and_import"><code class="docutils literal notranslate"><span class="pre">TestMidiFiles.test_session_export_and_import()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test_all.TestHistory"><code class="docutils literal notranslate"><span class="pre">TestHistory</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestHistory.test_undo_and_redo_single_trait"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_undo_and_redo_single_trait()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_rapid_changes_share_a_step_and_mark_splits_them"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_rapid_changes_share_a_step_and_mark_splits_them()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_transaction_pause_transient_and_limit"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_transaction_pause_transient_and_limit()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_bind_ipython_marks_after_each_cell"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_bind_ipython_marks_after_each_cell()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_detach_drops_widget_entries"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_detach_drops_widget_entries()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_session_undo_covers_widgets_but_not_track_structure"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_session_undo_covers_widgets_but_not_track_structure()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_session_chain_and_update_pattern_are_single_steps"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_session_chain_and_update_pattern_are_single_steps()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_transport_requests_drive_undo_and_redo"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_transport_requests_drive_undo_and_redo()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestHistory.test_sampler_load_is_one_step"><code class="docutils literal notranslate"><span class="pre">TestHistory.test_sampler_load_is_one_step()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#test_all.TestSessionPersistence"><code class="docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a><ul>

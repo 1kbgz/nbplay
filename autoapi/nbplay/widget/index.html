@@ -2237,6 +2237,16 @@ the clock, and <code class="docutils literal notranslate"><span class="pre">curr
 <span class="sig-name descname"><span class="pre">loop_end_bar</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.loop_end_bar" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.undo_request">
+<span class="sig-name descname"><span class="pre">undo_request</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.undo_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.redo_request">
+<span class="sig-name descname"><span class="pre">redo_request</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.redo_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3651,6 +3661,11 @@ audio routing.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.Session.history">
+<span class="sig-name descname"><span class="pre">history</span></span><a class="headerlink" href="#nbplay.widget.Session.history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session._mirroring_mute_solo">
 <span class="sig-name descname"><span class="pre">_mirroring_mute_solo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.widget.Session._mirroring_mute_solo" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3669,6 +3684,18 @@ audio routing.</p>
 <dt class="sig sig-object py" id="nbplay.widget.Session.session_id">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.Session.session_id" title="Link to this definition">¶</a></dt>
 <dd><p>Identifier shared by every widget on this session’s browser bus.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.undo" title="Link to this definition">¶</a></dt>
+<dd><p>Revert the latest change to any session widget; False when nothing to undo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.redo" title="Link to this definition">¶</a></dt>
+<dd><p>Reapply the latest undone change; False when nothing to redo.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3717,6 +3744,11 @@ an audio-only lane.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._add_track">
+<span class="sig-name descname"><span class="pre">_add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._add_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.remove_track">
 <span class="sig-name descname"><span class="pre">remove_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.remove_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.remove_track" title="Link to this definition">¶</a></dt>
 <dd><p>Remove a track, unlinking transport and removing mixer channel.</p>
@@ -3757,10 +3789,20 @@ clips play through the track’s sampler or the built-in oscillator.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._chain">
+<span class="sig-name descname"><span class="pre">_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._chain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.update_pattern">
 <span class="sig-name descname"><span class="pre">update_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.update_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.update_pattern" title="Link to this definition">¶</a></dt>
 <dd><p>Replace a pattern and regenerate every clip placed from it.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._regenerate_pattern_clips">
+<span class="sig-name descname"><span class="pre">_regenerate_pattern_clips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._regenerate_pattern_clips"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._regenerate_pattern_clips" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.export_midi">
@@ -4175,6 +4217,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_enabled"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_enabled</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_start_bar"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_start_bar</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_end_bar"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_end_bar</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.undo_request"><code class="docutils literal notranslate"><span class="pre">TransportWidget.undo_request</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.redo_request"><code class="docutils literal notranslate"><span class="pre">TransportWidget.redo_request</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget"><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a><ul>
@@ -4414,20 +4458,26 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.Session._timeline_links"><code class="docutils literal notranslate"><span class="pre">Session._timeline_links</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.tracks"><code class="docutils literal notranslate"><span class="pre">Session.tracks</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.patterns"><code class="docutils literal notranslate"><span class="pre">Session.patterns</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.history"><code class="docutils literal notranslate"><span class="pre">Session.history</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._mirroring_mute_solo"><code class="docutils literal notranslate"><span class="pre">Session._mirroring_mute_solo</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._on_timeline_tracks"><code class="docutils literal notranslate"><span class="pre">Session._on_timeline_tracks()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._on_mixer_channels"><code class="docutils literal notranslate"><span class="pre">Session._on_mixer_channels()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.session_id"><code class="docutils literal notranslate"><span class="pre">Session.session_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.undo"><code class="docutils literal notranslate"><span class="pre">Session.undo()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session.redo"><code class="docutils literal notranslate"><span class="pre">Session.redo()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.play"><code class="docutils literal notranslate"><span class="pre">Session.play()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.stop"><code class="docutils literal notranslate"><span class="pre">Session.stop()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.seek"><code class="docutils literal notranslate"><span class="pre">Session.seek()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.add_track"><code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session._add_track"><code class="docutils literal notranslate"><span class="pre">Session._add_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.remove_track"><code class="docutils literal notranslate"><span class="pre">Session.remove_track()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session._track_index"><code class="docutils literal notranslate"><span class="pre">Session._track_index()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.add_pattern"><code class="docutils literal notranslate"><span class="pre">Session.add_pattern()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.remove_pattern"><code class="docutils literal notranslate"><span class="pre">Session.remove_pattern()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.chain"><code class="docutils literal notranslate"><span class="pre">Session.chain()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session._chain"><code class="docutils literal notranslate"><span class="pre">Session._chain()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.update_pattern"><code class="docutils literal notranslate"><span class="pre">Session.update_pattern()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.Session._regenerate_pattern_clips"><code class="docutils literal notranslate"><span class="pre">Session._regenerate_pattern_clips()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.export_midi"><code class="docutils literal notranslate"><span class="pre">Session.export_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.import_midi"><code class="docutils literal notranslate"><span class="pre">Session.import_midi()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.Session.to_dict"><code class="docutils literal notranslate"><span class="pre">Session.to_dict()</span></code></a></li>

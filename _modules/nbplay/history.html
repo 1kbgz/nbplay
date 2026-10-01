@@ -297,7 +297,7 @@
 
 
 <div class="viewcode-block" id="History">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">History</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Undo/redo stack over the synced traits of attached widgets.</span>
 
@@ -321,7 +321,7 @@
     <span class="c1"># Attachment</span>
 
 <div class="viewcode-block" id="History.tracked_traits">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.tracked_traits">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.tracked_traits">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span>
@@ -330,7 +330,7 @@
 
 
 <div class="viewcode-block" id="History.attach">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.attach">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.attach">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start recording changes to ``widget``'s synced traits."""</span>
         <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s2">"trait_names"</span><span class="p">):</span>
@@ -343,7 +343,7 @@
 
 
 <div class="viewcode-block" id="History.detach">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.detach">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.detach">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">unobserve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">))</span>
@@ -353,7 +353,7 @@
 
 
 <div class="viewcode-block" id="History._without">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._without">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._without">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">widget</span><span class="p">]</span></div>
@@ -362,7 +362,7 @@
     <span class="c1"># Recording</span>
 
 <div class="viewcode-block" id="History._on_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._on_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._on_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paused</span><span class="p">:</span>
             <span class="k">return</span>
@@ -380,21 +380,21 @@
 
 
 <div class="viewcode-block" id="History._push">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._push">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._push">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
         <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">stack</span><span class="p">[:</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="History.mark">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.mark">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.mark">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">mark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""End the current step so the next change starts a new one."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="mf">0.0</span></div>
 
 
 <div class="viewcode-block" id="History.bind_ipython">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.bind_ipython">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.bind_ipython">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">bind_ipython</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""End a step after every notebook cell, so cells never share one.</span>
 
@@ -414,7 +414,7 @@
 
 
 <div class="viewcode-block" id="History.transaction">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.transaction">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.transaction">[docs]</a>
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Group every change inside the block into one undo step."""</span>
@@ -434,7 +434,7 @@
 
 
 <div class="viewcode-block" id="History.paused">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.paused">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.paused">[docs]</a>
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">paused</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Ignore changes inside the block (structural edits that undo cannot replay)."""</span>
@@ -456,7 +456,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">)</span>
 
 <div class="viewcode-block" id="History.undo">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.undo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.undo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Revert the latest step; returns False when there is nothing to undo."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">:</span>
@@ -468,7 +468,7 @@
 
 
 <div class="viewcode-block" id="History.redo">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.redo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.redo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Reapply the latest undone step; returns False when there is nothing to redo."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">:</span>
@@ -480,7 +480,7 @@
 
 
 <div class="viewcode-block" id="History._apply">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._apply">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._apply">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">reverse</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
@@ -492,7 +492,7 @@
 
 
 <div class="viewcode-block" id="History.clear">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.clear">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.clear">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -505,7 +505,7 @@
         <span class="k">return</span> <span class="p">[[(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">]</span>
 
 <div class="viewcode-block" id="History.__len__">
-<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.__len__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.__len__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span></div>
 </div>

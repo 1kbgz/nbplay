@@ -1314,6 +1314,12 @@ Module Contents
    .. py:attribute:: loop_end_bar
 
 
+   .. py:attribute:: undo_request
+
+
+   .. py:attribute:: redo_request
+
+
 .. py:class:: TimelineWidget(**kwargs)
 
    Bases: :py:obj:`anywidget.AnyWidget`
@@ -2400,6 +2406,9 @@ Module Contents
    .. py:attribute:: patterns
 
 
+   .. py:attribute:: history
+
+
    .. py:attribute:: _mirroring_mute_solo
       :value: False
 
@@ -2414,6 +2423,18 @@ Module Contents
    .. py:property:: session_id
 
       Identifier shared by every widget on this session's browser bus.
+
+
+   .. py:method:: undo()
+
+      Revert the latest change to any session widget; False when nothing to undo.
+
+
+
+   .. py:method:: redo()
+
+      Reapply the latest undone change; False when nothing to redo.
+
 
 
    .. py:method:: play()
@@ -2456,6 +2477,9 @@ Module Contents
 
 
 
+   .. py:method:: _add_track(name, sequencer, sound_source, *, input, armed)
+
+
    .. py:method:: remove_track(index)
 
       Remove a track, unlinking transport and removing mixer channel.
@@ -2493,10 +2517,16 @@ Module Contents
 
 
 
+   .. py:method:: _chain(item, index, names, start, repeat)
+
+
    .. py:method:: update_pattern(name, pattern, step_duration=None)
 
       Replace a pattern and regenerate every clip placed from it.
 
+
+
+   .. py:method:: _regenerate_pattern_clips(name, entry)
 
 
    .. py:method:: export_midi(path=None)

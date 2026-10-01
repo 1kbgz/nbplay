@@ -276,6 +276,7 @@
     <span class="n">SquareOscillator</span><span class="p">,</span>
     <span class="n">__version__</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
 
 <span class="n">_STATIC</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"static"</span>
 <span class="n">_PREVIEW_MAX_FRAMES</span> <span class="o">=</span> <span class="mi">2048</span>
@@ -2647,7 +2648,11 @@
     <span class="c1"># Loop</span>
     <span class="n">loop_enabled</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">loop_start_bar</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">loop_end_bar</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">loop_end_bar</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) in the browser bump these;</span>
+    <span class="c1"># a Session answers by undoing or redoing its history.</span>
+    <span class="n">undo_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">redo_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 
@@ -4460,6 +4465,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Named patterns for the tracking view: name -&gt; {voices_data, step_duration}.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Undo/redo over every session widget's state; new tracks attach their</span>
+        <span class="c1"># sequencer and sound source as they are added.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="k">lambda</span> <span class="n">change</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">undo</span><span class="p">(),</span> <span class="n">names</span><span class="o">=</span><span class="s2">"undo_request"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="k">lambda</span> <span class="n">change</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">redo</span><span class="p">(),</span> <span class="n">names</span><span class="o">=</span><span class="s2">"redo_request"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">bind_ipython</span><span class="p">()</span>
         <span class="c1"># Lane mute/solo and mixer channel mute/solo are the same control</span>
         <span class="c1"># from the user's side; keep them mirrored by channel index.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span>
@@ -4518,6 +4531,22 @@
 <span class="w">        </span><span class="sd">"""Identifier shared by every widget on this session's browser bus."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
 
+    <span class="c1"># Undo / redo</span>
+
+<div class="viewcode-block" id="Session.undo">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.undo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Revert the latest change to any session widget; False when nothing to undo."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Session.redo">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.redo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Reapply the latest undone change; False when nothing to redo."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="Session.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -4562,6 +4591,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The new ``Track`` object.</span>
 <span class="sd">        """</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">paused</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="n">armed</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Session._add_track">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._add_track">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">armed</span><span class="p">):</span>
         <span class="n">channel_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">track</span> <span class="o">=</span> <span class="n">Track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">)</span>
         <span class="n">track</span><span class="o">.</span><span class="n">_link_transport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">)</span>
@@ -4580,6 +4616,8 @@
             <span class="nb">input</span> <span class="o">=</span> <span class="s2">"channel"</span> <span class="k">if</span> <span class="p">(</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sound_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"microphone"</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="n">armed</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">channel_idx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">sequencer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">sound_source</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">track</span></div>
 
 
@@ -4591,9 +4629,13 @@
 <span class="sd">        Args:</span>
 <span class="sd">            index: Zero-based track index.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">paused</span><span class="p">():</span>
             <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="n">track</span><span class="o">.</span><span class="n">_unlink</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">)</span>
             <span class="c1"># Clear routing metadata</span>
             <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">""</span>
@@ -4676,6 +4718,13 @@
         <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown pattern(s): </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">transaction</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">repeat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Session._chain">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._chain">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">repeat</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">follow_transport</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4703,6 +4752,14 @@
 <span class="w">        </span><span class="sd">"""Replace a pattern and regenerate every clip placed from it."""</span>
         <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">step_duration</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">transaction</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_regenerate_pattern_clips</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">entry</span></div>
+
+
+<div class="viewcode-block" id="Session._regenerate_pattern_clips">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._regenerate_pattern_clips">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_regenerate_pattern_clips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span><span class="p">):</span>
         <span class="n">scratch</span> <span class="o">=</span> <span class="n">TimelineWidget</span><span class="p">()</span>
         <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
@@ -4723,8 +4780,7 @@
                 <span class="n">muted</span><span class="o">=</span><span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"muted"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">clips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rebuilt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="n">clips</span>
-        <span class="k">return</span> <span class="n">entry</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="n">clips</span></div>
 
 
     <span class="c1"># MIDI files</span>
@@ -4777,14 +4833,16 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.midi</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_midi</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">read_midi</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">apply_tempo</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"bpm"</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_den</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"time_signature"</span><span class="p">]</span>
         <span class="n">added</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"tracks"</span><span class="p">]:</span>
-            <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="nb">input</span><span class="o">=</span><span class="s2">"midi"</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_midi_clip</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">track_index</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">"events"</span><span class="p">])</span>
-            <span class="n">added</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="c1"># Adding tracks is structural, so the whole import stays out of the history.</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">paused</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">apply_tempo</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"bpm"</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_den</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"time_signature"</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"tracks"</span><span class="p">]:</span>
+                <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="nb">input</span><span class="o">=</span><span class="s2">"midi"</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">add_midi_clip</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">track_index</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">"events"</span><span class="p">])</span>
+                <span class="n">added</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">added</span></div>
 
 
