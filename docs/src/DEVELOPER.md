@@ -454,6 +454,19 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
 
+Send/return buses live in `returns` (`name`, `gain`, `effects`), and every
+channel carries one send level per return in `sends` (0-1). Python keeps the
+two aligned: `add_return()` and the `returns` validator pad or trim every
+channel's `sends`, `set_send()` writes one level, and `remove_return()` drops
+the bus and its sends. In the browser each return is an input `GainNode`, an
+insert chain, and a return fader feeding the master; each channel owns one
+send `GainNode` per return that taps the end of its insert chain (post-fader,
+post-insert, so mute and solo silence the sends too) and feeds the return's
+input. Return strips sit between the channels and the master with their own
+fader, effect chips and editor, meter, and remove button; channel strips show a
+small slider per return. The bus exposes `returns` next to `channels` for other
+widgets. `to_mixer()` ignores returns; the offline Rust mixer has no buses.
+
 The parameter editor lists each built-in effect's parameters with the same
 ranges the Python `EffectPlugin` enforces (a slider plus a number box for
 bounded numbers, a select for the filter type) and, for custom plugin types,
