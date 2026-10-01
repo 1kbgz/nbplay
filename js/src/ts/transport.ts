@@ -344,6 +344,28 @@ function render({
     "Shift+ArrowDown": () => nudgeTempo(-10),
   });
 
+  // Undo/redo go to the kernel: Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z or
+  // Ctrl/Cmd+Y redoes. bindShortcuts skips modifier combos, so this is
+  // its own listener; text fields keep the browser's own undo.
+  function onUndoKey(e: KeyboardEvent): void {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    const target = e.target as HTMLElement | null;
+    if (
+      target?.tagName === "INPUT" ||
+      target?.tagName === "TEXTAREA" ||
+      target?.isContentEditable
+    )
+      return;
+    const key = e.key.toLowerCase();
+    if (key !== "z" && key !== "y") return;
+    const name = key === "y" || e.shiftKey ? "redo_request" : "undo_request";
+    e.preventDefault();
+    e.stopPropagation();
+    model.set(name, (Number(model.get(name)) || 0) + 1);
+    model.save_changes();
+  }
+  transportRoot.addEventListener("keydown", onUndoKey);
+
   makeEditable(bpmVal, {
     className: "nbplay-transport-inline-edit",
     getValue: () => String(Math.round(model.get("bpm") as number)),
@@ -434,6 +456,7 @@ function render({
     stopTicking();
     cancelDisconnect();
     unbindShortcuts();
+    transportRoot.removeEventListener("keydown", onUndoKey);
     binding.dispose();
   };
 }
