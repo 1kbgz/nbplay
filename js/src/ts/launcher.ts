@@ -42,8 +42,19 @@ interface LaunchRequest {
 interface TrackState {
   scheduler: AudioScheduler;
   activeScene: number;
+  /** Serialized pattern the scheduler was started with. */
+  activeData: string;
   queued: { scene: number; atBeat: number; fromBeat: number } | null;
   currentStep: number;
+}
+
+function slotData(slot: LauncherSlot): string {
+  return JSON.stringify([
+    slot.voices_data,
+    slot.step_duration,
+    slot.swing,
+    slot.groove,
+  ]);
 }
 
 function escapeHtml(value: unknown): string {
@@ -177,6 +188,7 @@ export default {
         states.push({
           scheduler: createAudioScheduler({ onEnd: () => stopNow(index) }),
           activeScene: -1,
+          activeData: "",
           queued: null,
           currentStep: -1,
         });
@@ -203,6 +215,7 @@ export default {
           states.forEach((state) => {
             state.scheduler.stop();
             state.activeScene = -1;
+            state.activeData = "";
             state.queued = null;
             state.currentStep = -1;
           });
@@ -228,6 +241,7 @@ export default {
       else
         states.forEach((state) => {
           state.activeScene = -1;
+          state.activeData = "";
           state.queued = null;
           state.currentStep = -1;
         });
@@ -265,6 +279,7 @@ export default {
       if (!state || !track || !slot) return false;
       state.scheduler.stop();
       state.activeScene = sceneIndex;
+      state.activeData = slotData(slot);
       state.currentStep = -1;
       if (clock().playing) {
         state.scheduler.start(
@@ -283,6 +298,7 @@ export default {
       if (!state) return;
       state.scheduler.stop();
       state.activeScene = -1;
+      state.activeData = "";
       state.currentStep = -1;
     }
 
@@ -603,11 +619,21 @@ export default {
     });
     model.on("change:scenes", syncGrid);
     model.on("change:slots", () => {
-      // A playing slot whose pattern changed restarts on the new data.
+      // A playing slot whose pattern changed restarts on the new data. A
+      // slots write that leaves it unchanged (the editor echoing a slot it
+      // just loaded) must not restart it: the restart would schedule the
+      // step inside the alignment grace a second time.
       states.forEach((state, index) => {
-        if (state.activeScene >= 0 && clock().playing)
+        if (state.activeScene < 0 || !clock().playing) return;
+        const slot = findSlot(model, index, state.activeScene);
+        if (!slot) {
+          stopNow(index);
+          return;
+        }
+        if (slotData(slot) !== state.activeData)
           startSlot(index, state.activeScene);
       });
+      mirrorSlotState();
       syncGrid();
     });
     model.on("change:selected_slot", syncGrid);

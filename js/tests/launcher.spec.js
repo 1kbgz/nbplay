@@ -396,6 +396,50 @@ test.describe("LauncherWidget", () => {
     ).toEqual({ active: [-1, 0], playing: true });
   });
 
+  test("an unchanged slots write does not restart a playing slot", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderLauncher(page, { quantize: "none", bpm: 600 });
+    await page
+      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    await page.waitForFunction(() => window.__oscStarts.length >= 2);
+
+    // The editor echoes the slot it loaded: same data, new list object.
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      model.set(
+        "slots",
+        model._state.slots.map((slot) => ({ ...slot })),
+      );
+      model._trigger("change:slots");
+    });
+    await page.waitForFunction(() => window.__oscStarts.length >= 6);
+    const duplicates = await page.evaluate(() => {
+      const times = window.__oscStarts.map((s) => s.time.toFixed(6));
+      return times.length - new Set(times).size;
+    });
+    expect(duplicates).toBe(0);
+
+    // A real change restarts on the new pattern.
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      const slots = model._state.slots.map((slot) => ({ ...slot }));
+      slots[0] = {
+        ...slots[0],
+        voices_data: [
+          slots[0].voices_data[0].map((step) => ({ ...step, note: 48 })),
+        ],
+      };
+      model.set("slots", slots);
+      model._trigger("change:slots");
+    });
+    await page.waitForFunction(() =>
+      window.__oscStarts.some((s) => Math.abs(s.freq - 130.81) < 0.1),
+    );
+  });
+
   test("quantize select writes the model", async ({ page }) => {
     await renderLauncher(page);
     await page.locator(".nbplay-launcher-quantize").selectOption("beat");
