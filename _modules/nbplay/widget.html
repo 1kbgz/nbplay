@@ -3964,7 +3964,12 @@
 
     <span class="c1"># Last control change received: ``{"controller", "value", "channel", "seq"}``.</span>
     <span class="c1"># ``seq`` increases per message so repeated identical values still notify.</span>
-    <span class="n">control_change</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">control_change</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Follow the device's MIDI clock: start/stop/continue and song position</span>
+    <span class="c1"># drive the session clock, and the tick rate sets its tempo.</span>
+    <span class="n">sync_clock</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Tempo measured from incoming clock ticks (0 until a beat has arrived).</span>
+    <span class="n">clock_bpm</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 
@@ -3988,6 +3993,9 @@
     <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">channel</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">forward_notes</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Act as MIDI clock leader: 24 ticks per beat plus start, continue, stop,</span>
+    <span class="c1"># and song position, scheduled from the session clock.</span>
+    <span class="n">send_clock</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">send_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MidiOutputWidget._request">

@@ -2045,6 +2045,12 @@ Module Contents
    .. py:attribute:: control_change
 
 
+   .. py:attribute:: sync_clock
+
+
+   .. py:attribute:: clock_bpm
+
+
 .. py:class:: MidiOutputWidget(*args: object, **kwargs: object)
 
    Bases: :py:obj:`anywidget.AnyWidget`
@@ -2080,6 +2086,9 @@ Module Contents
 
 
    .. py:attribute:: forward_notes
+
+
+   .. py:attribute:: send_clock
 
 
    .. py:attribute:: send_request

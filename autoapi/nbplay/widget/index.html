@@ -3181,6 +3181,16 @@ selected browser MIDI input device.</p>
 <span class="sig-name descname"><span class="pre">control_change</span></span><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.control_change" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiKeyboardWidget.sync_clock">
+<span class="sig-name descname"><span class="pre">sync_clock</span></span><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.sync_clock" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiKeyboardWidget.clock_bpm">
+<span class="sig-name descname"><span class="pre">clock_bpm</span></span><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.clock_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3227,6 +3237,11 @@ only messages sent from Python go out.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.forward_notes">
 <span class="sig-name descname"><span class="pre">forward_notes</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.forward_notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget.send_clock">
+<span class="sig-name descname"><span class="pre">send_clock</span></span><a class="headerlink" href="#nbplay.widget.MidiOutputWidget.send_clock" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -4384,6 +4399,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.midi_port"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.midi_port</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.available_midi_ports"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.available_midi_ports</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.control_change"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.control_change</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.sync_clock"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.sync_clock</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget.clock_bpm"><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget.clock_bpm</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a><ul>
@@ -4394,6 +4411,7 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.available_midi_ports"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.available_midi_ports</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.channel"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.channel</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.forward_notes"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.forward_notes</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.send_clock"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.send_clock</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.send_request"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.send_request</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget._request"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget._request()</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.MidiOutputWidget.note_on"><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget.note_on()</span></code></a></li>
