@@ -3106,6 +3106,31 @@ class TestLauncherWidget:
         assert launcher.get_slot(1, 1) is None
         assert launcher.get_slot(0, 0)["voices_data"][0][0]["note"] == 36
 
+    def test_num_voices_change_resizes_composers(self):
+        seq = SequencerWidget(length=4)
+        seq.set_step(0, note=60, active=True)
+        seq.num_voices = 3
+        assert len(seq.voices_data) == 3
+        assert seq.voices_data[0][0]["note"] == 60 and seq.voices_data[2][0]["active"] is False
+        seq.set_step(1, note=67, active=True, voice=2)
+        assert seq.voices_data[2][1]["note"] == 67
+        seq.num_voices = 1
+        assert len(seq.voices_data) == 1 and seq.voices_data[0][0]["note"] == 60
+        seq.num_voices = 0
+        assert seq.num_voices == 1
+
+    def test_slot_editor_keeps_every_voice(self):
+        launcher = self._launcher()
+        launcher.set_slot(0, 0, [[{"note": 60, "active": True}], [{"note": 64, "active": True}]], name="Chord")
+        editor = SequencerWidget(length=1)
+        launcher.bind_slot_editor(editor)
+        launcher.selected_slot = {"track_index": 0, "scene_index": 0}
+        assert editor.num_voices == 2
+        assert [voice[0]["note"] for voice in editor.voices_data] == [60, 64]
+        editor.set_step(0, note=62, active=True, voice=0)
+        slot = launcher.get_slot(0, 0)
+        assert [voice[0]["note"] for voice in slot["voices_data"]] == [62, 64]
+
     def test_slot_to_sequencer_missing(self):
         launcher = self._launcher()
         with pytest.raises(ValueError):

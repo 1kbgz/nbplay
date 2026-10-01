@@ -159,6 +159,7 @@ export function applyAutomationLanes(model: AnyModel, stepIndex: number): void {
   }
 }
 
+/** Schedule one note; returns its oscillator so a caller can cancel it. */
 export function scheduleOscillator(
   ctx: AudioContext,
   output: AudioNode | null,
@@ -166,7 +167,7 @@ export function scheduleOscillator(
   velocity: number,
   startTime: number,
   duration: number,
-): void {
+): OscillatorNode | null {
   const attackTime = 0.005;
   const releaseTime = Math.min(0.05, duration * 0.2);
   try {
@@ -181,8 +182,10 @@ export function scheduleOscillator(
     gain.connect(output || ctx.destination);
     osc.start(startTime);
     osc.stop(startTime + duration);
+    return osc;
   } catch (_) {
     // Ignore if timing is in the past.
+    return null;
   }
 }
 
@@ -284,6 +287,27 @@ export function createAudioScheduler(
   const scheduleAheadTime = 0.1;
   const lookAheadTime = 0.025;
   const random = options.random || Math.random;
+  // Notes handed to Web Audio but not yet sounding; stop() cancels them so
+  // a scene switch or transport stop does not play the next step anyway.
+  let pending: { osc: OscillatorNode; at: number }[] = [];
+
+  function cancelPending(): void {
+    if (!audioCtx) {
+      pending = [];
+      return;
+    }
+    const now = audioCtx.currentTime;
+    pending.forEach((entry) => {
+      if (entry.at <= now) return;
+      try {
+        entry.osc.stop(now);
+        entry.osc.disconnect();
+      } catch (_) {
+        /* already stopped */
+      }
+    });
+    pending = [];
+  }
 
   const self: AudioScheduler = {
     start(model: AnyModel, clock: SessionClock): void {
@@ -316,6 +340,7 @@ export function createAudioScheduler(
         clearInterval(schedulerTimer);
         schedulerTimer = null;
       }
+      cancelPending();
       cursor = null;
       activeClock = null;
       activeModel = null;
@@ -336,6 +361,7 @@ export function createAudioScheduler(
     const clock = activeClock;
     if (!audioCtx || !clock) return;
     const now = audioCtx.currentTime;
+    pending = pending.filter((entry) => entry.at > now);
     // Re-align after a seek/tempo change, or if the cursor fell far behind
     // (for example after the tab was throttled in the background).
     if (!cursor || cursor.time < now - 0.5)
@@ -391,7 +417,7 @@ export function createAudioScheduler(
       stepIndex,
       random,
     )) {
-      scheduleOscillator(
+      const osc = scheduleOscillator(
         audioCtx,
         outputNode,
         freq,
@@ -399,6 +425,7 @@ export function createAudioScheduler(
         scheduledTime,
         stepSeconds * durationTicks,
       );
+      if (osc) pending.push({ osc, at: scheduledTime });
       emitBusNote(sessionId, {
         note,
         velocity: Math.round(velocity * 127),

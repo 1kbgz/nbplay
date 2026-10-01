@@ -685,13 +685,22 @@ In the browser every track owns one shared-scheduler instance
 (`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over
 the active slot, so all playing slots follow the session clock's absolute beat
 grid and stay phase-locked. Launches are queued to the next boundary chosen by
-`quantize` (`bar`, `beat`, or `none`) and fired by a 25 ms queue timer; a
-launch from a stopped session starts the clock and begins immediately. A scene
-launch queues every track: tracks with a slot in that scene launch it, tracks
-without one stop. Transport stop clears every launched and queued slot, as on
-a hardware launcher; play alone resumes nothing, and the next launch starts
-fresh. Scene headers show the playing scene and a queued one; queued cells
-carry a "next" marker. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
+`quantize` (`bar`, `beat`, or `none`). A pending launch stores the boundary as
+an AudioContext time measured from the current position (a boundary past the
+loop end means the loop restart), so a loop wrap cannot strand it, and it is
+re-aimed after a seek, tempo, or loop change; a 25 ms queue timer fires it. A
+launch from a stopped session starts the clock and begins immediately, while a
+stop request alone leaves the clock stopped. A scene launch or Stop All is
+applied as one batch at one clock position: tracks with a slot in that scene
+launch it, tracks without one stop, all on the same boundary. Transport stop
+clears every launched and queued slot, as on a hardware launcher; play alone
+resumes nothing, and the next launch starts fresh. Removing a track stops the
+performance, since the remaining rows' indices shift. Scene headers show a
+fully playing scene (`active`), a partly playing one (`partial`), and a queued
+one (`queued`, including scene launches that only stop rows); queued cells
+carry a "next" or "stop" marker. Stopping a slot also cancels the notes its
+scheduler already handed to Web Audio but that have not sounded yet. A `slots`
+write restarts a playing slot only when its own pattern changed. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
 -2 for nothing queued) are mirrored to the kernel. Audio routes through each
 track's `channel_index` on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.

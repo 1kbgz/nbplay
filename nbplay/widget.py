@@ -1073,6 +1073,7 @@ class SequencerWidget(anywidget.AnyWidget):
         for i, c in enumerate(self._composers):
             c.observe(self._on_composer_change, names=["steps"])
         self.observe(self._on_voices_data_change, names=["voices_data"])
+        self.observe(self._on_num_voices_change, names=["num_voices"])
         self.observe(self._on_length_change, names=["length"])
         self.observe(
             self._on_grid_config_change,
@@ -1148,6 +1149,21 @@ class SequencerWidget(anywidget.AnyWidget):
     def _resize_composers(self, length):
         for composer in self._composers:
             composer.resize(length)
+        self._sync_voices_data()
+
+    def _on_num_voices_change(self, change):
+        """Grow or shrink the composers so every voice has an editor behind it."""
+        count = max(1, int(change["new"]))
+        if count != change["new"]:
+            self.num_voices = count
+            return
+        if count == len(self._composers):
+            return
+        while len(self._composers) < count:
+            composer = NoteComposer(length=self.length)
+            composer.observe(self._on_composer_change, names=["steps"])
+            self._composers.append(composer)
+        del self._composers[count:]
         self._sync_voices_data()
 
     def _on_length_change(self, change):
@@ -2528,10 +2544,14 @@ class LauncherWidget(anywidget.AnyWidget):
         slot = self.get_slot(track_index, scene_index)
         if slot is None:
             raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        voices = [list(voice) for voice in slot["voices_data"]]
         sequencer.step_duration = slot["step_duration"]
         sequencer.swing = slot["swing"]
         sequencer.groove = list(slot["groove"])
-        sequencer.voices_data = [list(voice) for voice in slot["voices_data"]]
+        # Voice count first: a one-voice editor given two voices would keep
+        # one composer and write the pattern back with a voice missing.
+        sequencer.num_voices = max(1, len(voices))
+        sequencer.voices_data = voices
         return slot
 
     def bind_slot_editor(self, sequencer):
