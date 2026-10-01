@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/history/index.html">nbplay.history</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi_learn/index.html">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
@@ -241,7 +242,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -368,6 +369,84 @@
 <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">import_clip</span><span class="p">(</span><span class="s2">"take.webm"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Take (file)"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="n">vocal_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 </pre></div>
 </div>
+<section id="drum-zones">
+<h2>Drum Zones<a class="headerlink" href="#drum-zones" title="Link to this heading">¶</a></h2>
+<p>The drum sampler keeps its main sample for every note, and zones put a dedicated hit on single pads. Each zone has its own audio, root note, and key range; a matching zone plays instead of the main sample. In the sampler view, the <strong>Rec</strong> button next to the zones records the microphone straight onto the selected pad.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">noise_burst</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mf">0.16</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+    <span class="n">frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span> <span class="o">*</span> <span class="n">seconds</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">seed</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">(</span><span class="n">state</span> <span class="o">*</span> <span class="mi">1103515245</span> <span class="o">+</span> <span class="mi">12345</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="o">**</span><span class="mi">31</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">state</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">30</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span> <span class="o">/</span> <span class="n">frames</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="n">drums</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">decaying_tone</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">0.32</span><span class="p">,</span> <span class="n">drive</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Kick"</span><span class="p">)</span>
+<span class="n">drums</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">noise_burst</span><span class="p">(),</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Snare"</span><span class="p">)</span>
+<span class="n">drums</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">noise_burst</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Hat"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">([(</span><span class="n">zone</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">zone</span><span class="p">[</span><span class="s2">"note_low"</span><span class="p">])</span> <span class="k">for</span> <span class="n">zone</span> <span class="ow">in</span> <span class="n">drums</span><span class="o">.</span><span class="n">zones</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="song-mode">
+<h2>Song Mode<a class="headerlink" href="#song-mode" title="Link to this heading">¶</a></h2>
+<p>Register the drum pattern and a fill as named patterns, then chain them onto the Drums lane. The clips play through the drum sampler and the drum sequencer stops looping on its own, so the arrangement drives that track. Four patterns of one bar each fit the four-bar loop above; <code class="docutils literal notranslate"><span class="pre">update_pattern()</span></code> regenerates every clip made from a name after you edit it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fill_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="n">fill_seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">36</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">38</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">90</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"groove"</span><span class="p">,</span> <span class="n">drum_seq</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"fill"</span><span class="p">,</span> <span class="n">fill_seq</span><span class="p">)</span>
+<span class="n">song</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">drum_track</span><span class="p">,</span> <span class="p">[</span><span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"fill"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">([(</span><span class="n">clip</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">])</span> <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">song</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"drum sequencer follows transport:"</span><span class="p">,</span> <span class="n">drum_seq</span><span class="o">.</span><span class="n">follow_transport</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="take-to-pad">
+<h2>Take to Pad<a class="headerlink" href="#take-to-pad" title="Link to this heading">¶</a></h2>
+<p>After recording, a take on the timeline can become a drum pad. <code class="docutils literal notranslate"><span class="pre">capture_clip()</span></code> hands the clip to the sampler in the browser, which decodes it with the clip’s trim and adds a zone on that pad’s note. Rerun this cell once a take exists.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">takes</span> <span class="o">=</span> <span class="p">[</span><span class="n">clip</span> <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">clips</span> <span class="k">if</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"audio"</span> <span class="ow">and</span> <span class="n">clip</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"audio_url"</span><span class="p">)]</span>
+<span class="k">if</span> <span class="n">takes</span><span class="p">:</span>
+    <span class="n">drums</span><span class="o">.</span><span class="n">capture_clip</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="n">takes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">"id"</span><span class="p">],</span> <span class="n">pad</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Capturing"</span><span class="p">,</span> <span class="n">takes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">"name"</span><span class="p">],</span> <span class="s2">"onto pad 4"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Record a take first, then rerun this cell"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="midi-in-and-out">
+<h2>MIDI In and Out<a class="headerlink" href="#midi-in-and-out" title="Link to this heading">¶</a></h2>
+<p>A hardware controller plugs in through <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>; its keys play the drum sampler and <code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> maps its knobs to widget traits (the mod wheel to the lead level, controller 74 to the tempo). <code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code> sends everything the session plays, sequencers and clips included, to a Web MIDI output port at the scheduled time. Pick the ports in the widgets below; both need a browser with Web MIDI.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiKeyboardWidget</span><span class="p">,</span> <span class="n">MidiLearn</span><span class="p">,</span> <span class="n">MidiOutputWidget</span>
+
+<span class="n">midi_keys</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">)</span>
+<span class="n">midi_keys</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">drums</span><span class="p">)</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">MidiLearn</span><span class="p">(</span><span class="n">midi_keys</span><span class="p">)</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">lead</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">)</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="mi">74</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mf">80.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">160.0</span><span class="p">)</span>
+
+<span class="n">midi_out</span> <span class="o">=</span> <span class="n">MidiOutputWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">midi_keys</span><span class="p">,</span> <span class="n">midi_out</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -395,8 +474,30 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">13 DAW Playground</a><ul>
+<li><a class="reference internal" href="#drum-zones">Drum Zones</a></li>
+<li><a class="reference internal" href="#song-mode">Song Mode</a></li>
+<li><a class="reference internal" href="#take-to-pad">Take to Pad</a></li>
+<li><a class="reference internal" href="#midi-in-and-out">MIDI In and Out</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

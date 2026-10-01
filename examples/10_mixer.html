@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/history/index.html">nbplay.history</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi_learn/index.html">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
@@ -241,7 +242,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -294,6 +295,20 @@
 </div>
 </div>
 <p>Try this after the mixer renders: change faders, toggle mute/solo, add effects from the widget controls, or run another cell that mutates <code class="docutils literal notranslate"><span class="pre">mixer.channels</span></code> and <code class="docutils literal notranslate"><span class="pre">mixer.master_effects</span></code>.</p>
+<section id="send-and-return-buses">
+<h2>Send and Return Buses<a class="headerlink" href="#send-and-return-buses" title="Link to this heading">¶</a></h2>
+<p>A return bus is a shared effect chain with its own fader that feeds the master. Every channel gets a post-fader send level for it, so one reverb can serve several channels at different amounts. In the widget, <strong>+ Return</strong> adds a bus, the small sliders on each channel strip set the sends, and the return strip edits its effects like any other strip.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">verb</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_return</span><span class="p">(</span><span class="s2">"Verb"</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="p">[</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)],</span> <span class="n">gain</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_send</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">set_send</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mixer</span><span class="o">.</span><span class="n">returns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"name"</span><span class="p">],</span> <span class="p">[</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">]</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -321,8 +336,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">10 MixerWidget Tutorial</a><ul>
+<li><a class="reference internal" href="#send-and-return-buses">Send and Return Buses</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>nbplay.midi - nbplay v0.3.0</title>
+        <title>nbplay.history - nbplay v0.3.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -240,227 +240,275 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for nbplay.midi</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""MIDI file import and export.</span>
+          <h1>Source code for nbplay.history</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Undo and redo for widget state.</span>
 
-<span class="sd">Everything here works in beats (quarter notes), the unit the widgets use, and</span>
-<span class="sd">converts to and from MIDI ticks at the file boundary. The file reader and</span>
-<span class="sd">writer come from `mido`, an optional dependency: ``pip install nbplay[midi]``.</span>
+<span class="sd">``History`` watches the synced traits of a set of widgets and records every</span>
+<span class="sd">change as an undo step. Changes that land within a short window of each</span>
+<span class="sd">other (a fader drag, a method that writes several traits) share one step,</span>
+<span class="sd">``transaction()`` groups anything explicitly, and a notebook cell boundary</span>
+<span class="sd">always ends a step. Transient traits such as play state, playhead position,</span>
+<span class="sd">meters, and request nonces are ignored.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="n">TICKS_PER_BEAT</span> <span class="o">=</span> <span class="mi">480</span>
+<span class="c1"># Synced traits that describe the moment rather than the document.</span>
+<span class="n">TRANSIENT_TRAITS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"session_id"</span><span class="p">,</span>
+        <span class="s2">"is_playing"</span><span class="p">,</span>
+        <span class="s2">"is_recording"</span><span class="p">,</span>
+        <span class="s2">"current_beat"</span><span class="p">,</span>
+        <span class="s2">"current_step"</span><span class="p">,</span>
+        <span class="s2">"bar_number"</span><span class="p">,</span>
+        <span class="s2">"beat_in_bar"</span><span class="p">,</span>
+        <span class="s2">"recording_track"</span><span class="p">,</span>
+        <span class="s2">"recording_tracks"</span><span class="p">,</span>
+        <span class="s2">"recording_error"</span><span class="p">,</span>
+        <span class="s2">"recording_countdown_beats"</span><span class="p">,</span>
+        <span class="s2">"recorded_clip"</span><span class="p">,</span>
+        <span class="s2">"selected_clip_id"</span><span class="p">,</span>
+        <span class="s2">"export_clip_id"</span><span class="p">,</span>
+        <span class="s2">"exported_clip"</span><span class="p">,</span>
+        <span class="s2">"exported_clip_data"</span><span class="p">,</span>
+        <span class="s2">"import_clip_request"</span><span class="p">,</span>
+        <span class="s2">"import_clip_data"</span><span class="p">,</span>
+        <span class="s2">"active_slots"</span><span class="p">,</span>
+        <span class="s2">"queued_slots"</span><span class="p">,</span>
+        <span class="s2">"selected_slot"</span><span class="p">,</span>
+        <span class="s2">"launch_request"</span><span class="p">,</span>
+        <span class="s2">"active_notes"</span><span class="p">,</span>
+        <span class="s2">"active_pads"</span><span class="p">,</span>
+        <span class="s2">"last_note_event"</span><span class="p">,</span>
+        <span class="s2">"last_pad_event"</span><span class="p">,</span>
+        <span class="s2">"keyboard_connected"</span><span class="p">,</span>
+        <span class="s2">"capture_request"</span><span class="p">,</span>
+        <span class="s2">"send_request"</span><span class="p">,</span>
+        <span class="s2">"control_change"</span><span class="p">,</span>
+        <span class="s2">"waveform"</span><span class="p">,</span>
+        <span class="s2">"undo_request"</span><span class="p">,</span>
+        <span class="s2">"redo_request"</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
 
 
-<div class="viewcode-block" id="_mido">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi._mido">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_mido</span><span class="p">():</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">mido</span>
-    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised only without the extra</span>
-        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">"MIDI file support needs the 'mido' package: pip install 'nbplay[midi]'"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-    <span class="k">return</span> <span class="n">mido</span></div>
+<div class="viewcode-block" id="History">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">History</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Undo/redo stack over the synced traits of attached widgets.</span>
 
-
-
-<div class="viewcode-block" id="_normalize_events">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi._normalize_events">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">_normalize_midi_events</span>
-
-    <span class="k">return</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="steps_to_events">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi.steps_to_events">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">steps_to_events</span><span class="p">(</span><span class="n">voices_data</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Turn sequencer voices (lists of step dicts) into MIDI events in beats.</span>
-
-<span class="sd">    Inactive steps and steps with ``probability`` 0 are skipped. A step's</span>
-<span class="sd">    ``duration_ticks`` counts steps, so a duration of 2 at eighth-note</span>
-<span class="sd">    resolution is one beat.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        limit: Maximum number of undo steps kept.</span>
+<span class="sd">        group_window: Seconds within which consecutive changes join the</span>
+<span class="sd">            same step.</span>
 <span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">_steps_to_events</span>
 
-    <span class="k">return</span> <span class="n">_steps_to_events</span><span class="p">(</span><span class="n">voices_data</span><span class="p">,</span> <span class="n">step_duration</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">group_window</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_window</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">group_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paused</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Attachment</span>
+
+<div class="viewcode-block" id="History.tracked_traits">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.tracked_traits">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">widget</span><span class="o">.</span><span class="n">trait_names</span><span class="p">()</span> <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">trait_metadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TRANSIENT_TRAITS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
+        <span class="p">]</span></div>
 
 
+<div class="viewcode-block" id="History.attach">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.attach">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Start recording changes to ``widget``'s synced traits."""</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s2">"trait_names"</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="events_to_voices">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi.events_to_voices">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">events_to_voices</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_voices</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Quantize MIDI events onto a step grid, one voice per overlapping note.</span>
 
-<span class="sd">    Returns ``(voices_data, length)``. Notes are snapped to the nearest step;</span>
-<span class="sd">    when two notes land on the same step they go to separate voices, up to</span>
-<span class="sd">    ``max_voices``, and anything beyond that is dropped.</span>
-<span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">_default_step</span><span class="p">,</span> <span class="n">_default_steps</span>
+<div class="viewcode-block" id="History.detach">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.detach">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">unobserve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span></div>
 
-    <span class="n">step_duration</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">step_duration</span><span class="p">))</span>
-    <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="n">placed</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">normalized</span><span class="p">:</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">/</span> <span class="n">step_duration</span><span class="p">)</span>
-        <span class="n">ticks</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]</span> <span class="o">/</span> <span class="n">step_duration</span><span class="p">))</span>
-        <span class="n">placed</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">ticks</span><span class="p">,</span> <span class="n">event</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">placed</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-    <span class="n">voices</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ticks</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">placed</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">length</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="k">for</span> <span class="n">voice</span> <span class="ow">in</span> <span class="n">voices</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">voice</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">"active"</span><span class="p">]:</span>
-                <span class="n">target</span> <span class="o">=</span> <span class="n">voice</span>
-                <span class="k">break</span>
+
+<div class="viewcode-block" id="History._without">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._without">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">widget</span><span class="p">]</span></div>
+
+
+    <span class="c1"># Recording</span>
+
+<div class="viewcode-block" id="History._on_change">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._on_change">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paused</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"owner"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"old"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span> <span class="ow">and</span> <span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_window</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">voices</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">max_voices</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">voices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_default_steps</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">voices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">target</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="o">**</span><span class="n">_default_step</span><span class="p">(),</span>
-            <span class="s2">"note"</span><span class="p">:</span> <span class="n">event</span><span class="p">[</span><span class="s2">"note"</span><span class="p">],</span>
-            <span class="s2">"velocity"</span><span class="p">:</span> <span class="n">event</span><span class="p">[</span><span class="s2">"velocity"</span><span class="p">],</span>
-            <span class="s2">"duration_ticks"</span><span class="p">:</span> <span class="n">ticks</span><span class="p">,</span>
-            <span class="s2">"active"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">voices</span><span class="p">:</span>
-        <span class="n">voices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_default_steps</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">voices</span><span class="p">,</span> <span class="n">length</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">,</span> <span class="p">[</span><span class="n">entry</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="n">now</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="build_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi.build_midi">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">build_midi</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ticks_per_beat</span><span class="o">=</span><span class="n">TICKS_PER_BEAT</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Build a ``mido.MidiFile`` from tracks of beat-based events.</span>
-
-<span class="sd">    ``tracks`` is an iterable of dicts with ``name``, ``events`` (beat,</span>
-<span class="sd">    duration, note, velocity), and an optional ``channel`` (0-15).</span>
-<span class="sd">    """</span>
-    <span class="n">mido</span> <span class="o">=</span> <span class="n">_mido</span><span class="p">()</span>
-    <span class="n">midi</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span><span class="n">ticks_per_beat</span><span class="o">=</span><span class="n">ticks_per_beat</span><span class="p">)</span>
-    <span class="n">meta</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiTrack</span><span class="p">()</span>
-    <span class="n">meta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">"set_tempo"</span><span class="p">,</span> <span class="n">tempo</span><span class="o">=</span><span class="n">mido</span><span class="o">.</span><span class="n">bpm2tempo</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">bpm</span><span class="p">)),</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">meta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span>
-            <span class="s2">"time_signature"</span><span class="p">,</span>
-            <span class="n">numerator</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-            <span class="n">denominator</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">meta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">"end_of_track"</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">midi</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
-        <span class="n">channel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))))</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">_normalize_events</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"events"</span><span class="p">,</span> <span class="p">[])):</span>
-            <span class="n">on</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">*</span> <span class="n">ticks_per_beat</span><span class="p">)</span>
-            <span class="n">off</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">on</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">((</span><span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">+</span> <span class="n">event</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">])</span> <span class="o">*</span> <span class="n">ticks_per_beat</span><span class="p">))</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">on</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="s2">"note_on"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="s2">"note"</span><span class="p">],</span> <span class="n">velocity</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="s2">"velocity"</span><span class="p">],</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)))</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">off</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mido</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="s2">"note_off"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">event</span><span class="p">[</span><span class="s2">"note"</span><span class="p">],</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">)))</span>
-        <span class="c1"># Note-offs sort before note-ons at the same tick so retriggers work.</span>
-        <span class="n">messages</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiTrack</span><span class="p">()</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">"track_name"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"nbplay"</span><span class="p">)),</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">tick</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-            <span class="n">message</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">tick</span> <span class="o">-</span> <span class="n">last</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-            <span class="n">last</span> <span class="o">=</span> <span class="n">tick</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">MetaMessage</span><span class="p">(</span><span class="s2">"end_of_track"</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="n">midi</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">midi</span></div>
+<div class="viewcode-block" id="History._push">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._push">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">stack</span><span class="p">[:</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span></div>
 
 
-
-<div class="viewcode-block" id="write_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi.write_midi">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">write_midi</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Write tracks of beat-based events to a ``.mid`` file and return the path."""</span>
-    <span class="n">midi</span> <span class="o">=</span> <span class="n">build_midi</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">midi</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">path</span></div>
+<div class="viewcode-block" id="History.mark">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.mark">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""End the current step so the next change starts a new one."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_time</span> <span class="o">=</span> <span class="mf">0.0</span></div>
 
 
+<div class="viewcode-block" id="History.bind_ipython">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.bind_ipython">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bind_ipython</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""End a step after every notebook cell, so cells never share one.</span>
 
-<div class="viewcode-block" id="read_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi/index.html#nbplay.midi.read_midi">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">read_midi</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Read a MIDI file (path, bytes, or file object) into beat-based tracks.</span>
+<span class="sd">        Uses IPython's ``post_run_cell`` event on ``shell`` (the running</span>
+<span class="sd">        shell by default). Returns True when a shell was found.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">shell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">IPython</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ipython</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">shell</span> <span class="o">=</span> <span class="n">get_ipython</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">shell</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">shell</span><span class="p">,</span> <span class="s2">"events"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">shell</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"post_run_cell"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
-<span class="sd">    Returns ``{"bpm", "time_signature", "ticks_per_beat", "tracks"}`` where</span>
-<span class="sd">    each track is ``{"name", "channel", "events"}``. Tracks without notes are</span>
-<span class="sd">    left out. Beats are counted from the file's ticks, so tempo changes do not</span>
-<span class="sd">    move notes; the first tempo and time signature are reported.</span>
-<span class="sd">    """</span>
-    <span class="n">mido</span> <span class="o">=</span> <span class="n">_mido</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
-        <span class="n">midi</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">source</span><span class="p">)))</span>
-    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"read"</span><span class="p">):</span>
-        <span class="n">midi</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">midi</span> <span class="o">=</span> <span class="n">mido</span><span class="o">.</span><span class="n">MidiFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
-    <span class="n">ticks_per_beat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">midi</span><span class="o">.</span><span class="n">ticks_per_beat</span> <span class="ow">or</span> <span class="n">TICKS_PER_BEAT</span><span class="p">))</span>
 
-    <span class="n">bpm</span> <span class="o">=</span> <span class="mf">120.0</span>
-    <span class="n">time_signature</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-    <span class="n">seen_tempo</span> <span class="o">=</span> <span class="n">seen_signature</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">midi</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
-        <span class="n">tick</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">""</span>
-        <span class="n">channel</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">open_notes</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">track</span><span class="p">:</span>
-            <span class="n">tick</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">is_meta</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"track_name"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-                    <span class="n">name</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">name</span>
-                <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"set_tempo"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_tempo</span><span class="p">:</span>
-                    <span class="n">bpm</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">mido</span><span class="o">.</span><span class="n">tempo2bpm</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">tempo</span><span class="p">)),</span> <span class="mi">3</span><span class="p">)</span>
-                    <span class="n">seen_tempo</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"time_signature"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_signature</span><span class="p">:</span>
-                    <span class="n">time_signature</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">numerator</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">denominator</span><span class="p">))</span>
-                    <span class="n">seen_signature</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"note_on"</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">velocity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">channel</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">channel</span> <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">channel</span>
-                <span class="n">open_notes</span><span class="p">[(</span><span class="n">message</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">note</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">tick</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">velocity</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"note_off"</span><span class="p">,</span> <span class="s2">"note_on"</span><span class="p">):</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">note</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">open_notes</span><span class="p">:</span>
-                    <span class="n">start</span><span class="p">,</span> <span class="n">velocity</span> <span class="o">=</span> <span class="n">open_notes</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                    <span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="p">{</span>
-                            <span class="s2">"beat"</span><span class="p">:</span> <span class="n">start</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">,</span>
-                            <span class="s2">"duration"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tick</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">,</span>
-                            <span class="s2">"note"</span><span class="p">:</span> <span class="n">message</span><span class="o">.</span><span class="n">note</span><span class="p">,</span>
-                            <span class="s2">"velocity"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">velocity</span><span class="p">),</span>
-                        <span class="p">}</span>
-                    <span class="p">)</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">note</span><span class="p">),</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">velocity</span><span class="p">)</span> <span class="ow">in</span> <span class="n">open_notes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"beat"</span><span class="p">:</span> <span class="n">start</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">,</span> <span class="s2">"duration"</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">ticks_per_beat</span><span class="p">,</span> <span class="s2">"note"</span><span class="p">:</span> <span class="n">note</span><span class="p">,</span> <span class="s2">"velocity"</span><span class="p">:</span> <span class="n">velocity</span><span class="p">})</span>
-        <span class="k">if</span> <span class="n">events</span><span class="p">:</span>
-            <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"Track </span><span class="si">{</span><span class="n">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-                    <span class="s2">"channel"</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="p">),</span>
-                    <span class="s2">"events"</span><span class="p">:</span> <span class="n">_normalize_events</span><span class="p">(</span><span class="n">events</span><span class="p">),</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">"bpm"</span><span class="p">:</span> <span class="n">bpm</span><span class="p">,</span> <span class="s2">"time_signature"</span><span class="p">:</span> <span class="n">time_signature</span><span class="p">,</span> <span class="s2">"ticks_per_beat"</span><span class="p">:</span> <span class="n">ticks_per_beat</span><span class="p">,</span> <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">tracks</span><span class="p">}</span></div>
+<div class="viewcode-block" id="History.transaction">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.transaction">[docs]</a>
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Group every change inside the block into one undo step."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transaction</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="History.paused">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.paused">[docs]</a>
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">paused</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Ignore changes inside the block (structural edits that undo cannot replay)."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paused</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_paused</span> <span class="o">-=</span> <span class="mi">1</span></div>
+
+
+    <span class="c1"># Navigation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">)</span>
+
+<div class="viewcode-block" id="History.undo">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.undo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Revert the latest step; returns False when there is nothing to undo."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="History.redo">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.redo">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Reapply the latest undone step; returns False when there is nothing to redo."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="History._apply">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History._apply">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">reverse</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">group</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">new</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="History.clear">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.clear">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">()</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Undo steps, oldest first, as lists of ``(widget, trait)`` pairs."""</span>
+        <span class="k">return</span> <span class="p">[[(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">]</span>
+
+<div class="viewcode-block" id="History.__len__">
+<a class="viewcode-back" href="../../autoapi/nbplay/history/index.html#nbplay.history.History.__len__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
         </article>

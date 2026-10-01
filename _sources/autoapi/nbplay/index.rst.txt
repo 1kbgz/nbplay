@@ -10,6 +10,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /autoapi/nbplay/history/index
    /autoapi/nbplay/midi/index
    /autoapi/nbplay/midi_learn/index
    /autoapi/nbplay/widget/index

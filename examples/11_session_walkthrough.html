@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -200,6 +200,7 @@
   <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/nbplay/index.html">nbplay</a><input aria-label="Toggle navigation of nbplay" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/history/index.html">nbplay.history</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi/index.html">nbplay.midi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/midi_learn/index.html">nbplay.midi_learn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/nbplay/widget/index.html">nbplay.widget</a></li>
@@ -241,7 +242,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -355,6 +356,26 @@
 </div>
 </div>
 <p>Arm a timeline track and press record to capture microphone audio into the browser timeline. Recorded audio lives in the browser until you pull it into Python: call <code class="docutils literal notranslate"><span class="pre">session.timeline.export_all_clips()</span></code>, wait for <code class="docutils literal notranslate"><span class="pre">pending_exports</span></code> to reach zero, then <code class="docutils literal notranslate"><span class="pre">session.save(&quot;song.nbplay&quot;)</span></code> keeps the takes with the rest of the session.</p>
+<section id="undo-and-redo">
+<h2>Undo and Redo<a class="headerlink" href="#undo-and-redo" title="Link to this heading">¶</a></h2>
+<p>Every change to a session widget lands on the session’s history: faders, effects, steps, clips, patterns, tempo. Changes made in quick succession form one step. <code class="docutils literal notranslate"><span class="pre">undo()</span></code> and <code class="docutils literal notranslate"><span class="pre">redo()</span></code> walk the stack, and with the transport focused, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z do the same from the browser. Adding or removing a track is the one structural change the history leaves alone.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">before</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"gain"</span><span class="p">]</span>
+<span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">set_channel_gain</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">mark</span><span class="p">()</span>
+<span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span> <span class="o">=</span> <span class="mf">140.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"steps:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">history</span><span class="p">))</span>
+<span class="n">session</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+<span class="n">session</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"after undo:"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"gain"</span><span class="p">]</span> <span class="o">==</span> <span class="n">before</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"after redo:"</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"gain"</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -382,8 +403,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">11 Full Session Walkthrough</a><ul>
+<li><a class="reference internal" href="#undo-and-redo">Undo and Redo</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
