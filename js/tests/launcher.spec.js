@@ -303,32 +303,333 @@ test.describe("LauncherWidget", () => {
     );
   });
 
-  test("transport stop pauses slots and play resumes them", async ({
+  test("a scene launched over a playing scene is marked next and takes over", async ({
     page,
   }) => {
+    await renderLauncher(page, { bpm: 6000 });
+    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
+    await expect
+      .poll(async () =>
+        page.evaluate(() => window.__testModel._state.active_slots),
+      )
+      .toEqual([1, -1]);
+    await expect(
+      page.locator('.nbplay-launcher-scene[data-scene="1"]'),
+    ).toHaveClass(/active/);
+
+    // Queue Intro while Drop plays: the header and both cells show it as next.
+    await page.evaluate(() => {
+      window.__launchBeat =
+        globalThis.__nbplay["launcher-session"].clock.beat();
+    });
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    const marked = await page.evaluate(() => ({
+      queued: window.__testModel._state.queued_slots,
+      header: document
+        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .classList.contains("queued"),
+      next: document.querySelectorAll(".nbplay-launcher-next").length,
+    }));
+    if (marked.queued[0] === 0) {
+      expect(marked.header).toBe(true);
+      expect(marked.next).toBe(2);
+    }
+    await expect
+      .poll(async () =>
+        page.evaluate(() => window.__testModel._state.active_slots),
+      )
+      .toEqual([0, 0]);
+    const after = await page.evaluate(() => ({
+      queued: window.__testModel._state.queued_slots,
+      next: document.querySelectorAll(".nbplay-launcher-next").length,
+      activeHeader: document
+        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .classList.contains("active"),
+      oldHeader: document
+        .querySelector('.nbplay-launcher-scene[data-scene="1"]')
+        .classList.contains("active"),
+    }));
+    expect(after).toEqual({
+      queued: [-2, -2],
+      next: 0,
+      activeHeader: true,
+      oldHeader: false,
+    });
+  });
+
+  test("stop clears launched slots and a slot click afterwards plays only itself", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
     await renderTransport(page);
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([0, 0]);
+
+    await page.locator(".nbplay-transport-stop").click();
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        queued: window.__testModel._state.queued_slots,
+        playing: window.__testModel._state.is_playing,
+      })),
+    ).toEqual({ active: [-1, -1], queued: [-2, -2], playing: false });
+    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+
+    // Play alone brings nothing back.
+    await page.locator(".nbplay-transport-play").click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([-1, -1]);
+    await page.locator(".nbplay-transport-stop").click();
+
+    // A single slot click starts the clock with only that slot playing.
+    await page
+      .locator('.nbplay-launcher-slot[data-track="1"][data-scene="0"]')
+      .click();
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        playing: globalThis.__nbplay["launcher-session"].clock.playing,
+      })),
+    ).toEqual({ active: [-1, 0], playing: true });
+  });
+
+  test("an unchanged slots write does not restart a playing slot", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderLauncher(page, { quantize: "none", bpm: 600 });
+    await page
+      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    await page.waitForFunction(() => window.__oscStarts.length >= 2);
+
+    // The editor echoes the slot it loaded: same data, new list object.
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      model.set(
+        "slots",
+        model._state.slots.map((slot) => ({ ...slot })),
+      );
+      model._trigger("change:slots");
+    });
+    await page.waitForFunction(() => window.__oscStarts.length >= 6);
+    const duplicates = await page.evaluate(() => {
+      const times = window.__oscStarts.map((s) => s.time.toFixed(6));
+      return times.length - new Set(times).size;
+    });
+    expect(duplicates).toBe(0);
+
+    // A real change restarts on the new pattern.
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      const slots = model._state.slots.map((slot) => ({ ...slot }));
+      slots[0] = {
+        ...slots[0],
+        voices_data: [
+          slots[0].voices_data[0].map((step) => ({ ...step, note: 48 })),
+        ],
+      };
+      model.set("slots", slots);
+      model._trigger("change:slots");
+    });
+    await page.waitForFunction(() =>
+      window.__oscStarts.some((s) => Math.abs(s.freq - 130.81) < 0.1),
+    );
+  });
+
+  test("a queued launch fires at the loop restart and a backward seek keeps quantization", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { bpm: 600 });
+    await page.evaluate(() => {
+      globalThis.__nbplay["launcher-session"].clock.setLoop(true, 0, 4);
+    });
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([0, 0]);
+
+    // Just before the loop end, the bar boundary at beat 4 is the restart.
+    await page.evaluate(() => {
+      globalThis.__nbplay["launcher-session"].clock.seek(3.95);
+    });
+    await page
+      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="1"]')
+      .click();
+    await expect
+      .poll(
+        async () => page.evaluate(() => window.__testModel._state.active_slots),
+        { timeout: 1500 },
+      )
+      .toEqual([1, 0]);
+
+    // Queue at beat 2, then seek back to 1: the launch re-aims at beat 4
+    // and does not fire early.
+    await page.evaluate(() => {
+      globalThis.__nbplay["launcher-session"].clock.seek(2);
+    });
+    await page
+      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    await page.evaluate(() => {
+      globalThis.__nbplay["launcher-session"].clock.seek(1);
+    });
+    await page.waitForTimeout(150);
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([1, 0]);
+    await expect
+      .poll(
+        async () => page.evaluate(() => window.__testModel._state.active_slots),
+        { timeout: 1500 },
+      )
+      .toEqual([0, 0]);
+  });
+
+  test("a scene launched from a stopped clock starts every row together", async ({
+    page,
+  }) => {
+    await renderLauncher(page);
+    await page.evaluate(() => {
+      globalThis.__nbplay["launcher-session"].clock.seek(1);
+    });
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        queued: window.__testModel._state.queued_slots,
+      })),
+    ).toEqual({ active: [0, 0], queued: [-2, -2] });
+  });
+
+  test("a stop request while stopped does not start the clock", async ({
+    page,
+  }) => {
+    await renderLauncher(page);
+    await page
+      .locator('.nbplay-launcher-slot[data-track="1"][data-scene="1"]')
+      .click();
+    await page.locator(".nbplay-launcher-stop-all").click();
+    expect(
+      await page.evaluate(() => ({
+        playing: globalThis.__nbplay["launcher-session"].clock.playing,
+        active: window.__testModel._state.active_slots,
+      })),
+    ).toEqual({ playing: false, active: [-1, -1] });
+  });
+
+  test("scene headers distinguish full, partial, and queued scenes", async ({
+    page,
+  }) => {
     await renderLauncher(page, { quantize: "none" });
     await page
       .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
-    await page.locator(".nbplay-transport-play").click();
-    let state = await page.evaluate(() => ({
-      playing: window.__testModel._state.is_playing,
-      active: window.__testModel._state.active_slots,
-    }));
-    expect(state.playing).toBe(false);
-    expect(state.active).toEqual([0, -1]);
+    const intro = page.locator('.nbplay-launcher-scene[data-scene="0"]');
+    await expect(intro).toHaveClass(/partial/);
+    await expect(intro).not.toHaveClass(/active/);
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await expect(intro).toHaveClass(/active/);
+    await expect(intro).not.toHaveClass(/partial/);
 
-    await page.locator(".nbplay-transport-play").click();
-    state = await page.evaluate(() => ({
-      playing: window.__testModel._state.is_playing,
-      active: window.__testModel._state.active_slots,
-    }));
-    expect(state.playing).toBe(true);
-    expect(state.active).toEqual([0, -1]);
+    // Queue Drop with bar quantization: Bass has no Drop slot, so its empty
+    // cell is marked as a pending stop and the header as queued.
+    await page.evaluate(() => {
+      window.__testModel.set("quantize", "bar");
+      window.__testModel._trigger("change:quantize");
+      globalThis.__nbplay["launcher-session"].clock.setTempo(1);
+      globalThis.__nbplay["launcher-session"].clock.seek(0.5);
+    });
+    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
     await expect(
-      page.locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
-    ).toHaveClass(/active/);
+      page.locator('.nbplay-launcher-scene[data-scene="1"]'),
+    ).toHaveClass(/queued/);
+    const emptyCell = page.locator(
+      '.nbplay-launcher-slot[data-track="1"][data-scene="1"]',
+    );
+    await expect(emptyCell).toHaveClass(/queued/);
+    await expect(emptyCell.locator(".nbplay-launcher-next")).toHaveText("stop");
+    await expect(
+      page.locator(
+        '.nbplay-launcher-slot[data-track="0"][data-scene="1"] .nbplay-launcher-next',
+      ),
+    ).toHaveText("next");
+  });
+
+  test("removing a track stops the performance instead of shifting it", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      model.set("tracks", model._state.tracks.slice(1));
+      model.set(
+        "slots",
+        model._state.slots
+          .filter((slot) => slot.track_index === 1)
+          .map((slot) => ({ ...slot, track_index: 0 })),
+      );
+      model._trigger("change:tracks");
+    });
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        queued: window.__testModel._state.queued_slots,
+      })),
+    ).toEqual({ active: [-1], queued: [-2] });
+    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+  });
+
+  test("stopping cancels notes already handed to the audio clock", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const BaseAudioContext = window.AudioContext;
+      window.__oscs = [];
+      class RecordingAudioContext extends BaseAudioContext {
+        createOscillator() {
+          const osc = super.createOscillator();
+          const entry = { start: null, stops: [] };
+          const start = osc.start.bind(osc);
+          const stop = osc.stop.bind(osc);
+          osc.start = (time) => {
+            entry.start = time;
+            start(time);
+          };
+          osc.stop = (time) => {
+            entry.stops.push(time);
+            stop(time);
+          };
+          window.__oscs.push(entry);
+          return osc;
+        }
+      }
+      window.AudioContext = RecordingAudioContext;
+      window.webkitAudioContext = RecordingAudioContext;
+    });
+    await renderLauncher(page, { quantize: "none", bpm: 600 });
+    await page
+      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    await page.waitForFunction(() => window.__oscs.length >= 2);
+    const result = await page.evaluate(() => {
+      const ctx = globalThis.__nbplay["launcher-session"].audioCtx;
+      const now = ctx.currentTime;
+      document.querySelector(".nbplay-launcher-stop-all").click();
+      const future = window.__oscs.filter((entry) => entry.start > now);
+      return {
+        future: future.length,
+        cancelled: future.filter((entry) =>
+          entry.stops.some((t) => t <= now + 0.05),
+        ).length,
+      };
+    });
+    expect(result.future).toBeGreaterThan(0);
+    expect(result.cancelled).toBe(result.future);
   });
 
   test("quantize select writes the model", async ({ page }) => {

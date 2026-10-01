@@ -39,11 +39,38 @@ interface LaunchRequest {
   nonce?: number;
 }
 
+interface QueuedLaunch {
+  /** Scene to start, or STOP_QUEUED. */
+  scene: number;
+  /** Scene the request came from: a scene launch marks every row with it. */
+  viaScene: number;
+  atBeat: number;
+  /** AudioContext time of the boundary; survives loop wraps. */
+  atTime: number;
+}
+
+interface Launch {
+  trackIndex: number;
+  scene: number;
+  viaScene: number;
+}
+
 interface TrackState {
   scheduler: AudioScheduler;
   activeScene: number;
-  queued: { scene: number; atBeat: number; fromBeat: number } | null;
+  /** Serialized pattern the scheduler was started with. */
+  activeData: string;
+  queued: QueuedLaunch | null;
   currentStep: number;
+}
+
+function slotData(slot: LauncherSlot): string {
+  return JSON.stringify([
+    slot.voices_data,
+    slot.step_duration,
+    slot.swing,
+    slot.groove,
+  ]);
 }
 
 function escapeHtml(value: unknown): string {
@@ -177,6 +204,7 @@ export default {
         states.push({
           scheduler: createAudioScheduler({ onEnd: () => stopNow(index) }),
           activeScene: -1,
+          activeData: "",
           queued: null,
           currentStep: -1,
         });
@@ -193,23 +221,29 @@ export default {
       switch (event.type) {
         case "play":
           mirror(() => model.set("is_playing", true), true);
-          resumeActive();
           startQueueTimer();
           syncGrid();
           break;
         case "stop":
+          // Like a hardware launcher: stop clears every launched and queued
+          // slot. Play alone resumes nothing; the next launch starts fresh.
           stopQueueTimer();
           states.forEach((state) => {
             state.scheduler.stop();
+            state.activeScene = -1;
+            state.activeData = "";
+            state.queued = null;
             state.currentStep = -1;
           });
           mirror(() => model.set("is_playing", false), true);
+          mirrorSlotState();
           syncGrid();
           break;
         case "seek":
         case "tempo":
         case "loop":
           states.forEach((state) => state.scheduler.realign());
+          requantize();
           break;
         case "record":
         case "timesig":
@@ -221,6 +255,13 @@ export default {
       states.forEach((state) => state.scheduler.stop());
       mirror(() => model.set("is_playing", clk.playing));
       if (clk.playing) resumeActive();
+      else
+        states.forEach((state) => {
+          state.activeScene = -1;
+          state.activeData = "";
+          state.queued = null;
+          state.currentStep = -1;
+        });
       syncGrid();
     }
 
@@ -255,6 +296,7 @@ export default {
       if (!state || !track || !slot) return false;
       state.scheduler.stop();
       state.activeScene = sceneIndex;
+      state.activeData = slotData(slot);
       state.currentStep = -1;
       if (clock().playing) {
         state.scheduler.start(
@@ -273,6 +315,7 @@ export default {
       if (!state) return;
       state.scheduler.stop();
       state.activeScene = -1;
+      state.activeData = "";
       state.currentStep = -1;
     }
 
@@ -291,47 +334,89 @@ export default {
       return Math.max(beat, next);
     }
 
-    function queue(trackIndex: number, scene: number): void {
+    /**
+     * Context time at which `atBeat` arrives, measured from the current
+     * position. With a loop, a boundary past the loop end arrives when the
+     * loop restarts. Time, not beat, so a wrap cannot strand the launch.
+     */
+    function boundaryTime(clk: SessionClock, beat: number, atBeat: number) {
+      const loop = clk.loop;
+      const target =
+        loop.enabled && loop.endBeat > loop.startBeat && atBeat > loop.endBeat
+          ? loop.endBeat
+          : atBeat;
+      return clk.now() + Math.max(0, target - beat) * clk.secondsPerBeat();
+    }
+
+    function applyNow(launch: Launch): void {
+      if (launch.scene >= 0) startSlot(launch.trackIndex, launch.scene);
+      else stopNow(launch.trackIndex);
+      states[launch.trackIndex].queued = null;
+    }
+
+    /** Apply a batch of launches to one clock position so rows stay together. */
+    function applyLaunches(launches: Launch[]): void {
       ensureStates();
-      const state = states[trackIndex];
-      if (!state) return;
+      const valid = launches.filter((launch) => states[launch.trackIndex]);
+      if (!valid.length) return;
       const clk = clock();
       if (!clk.playing) {
-        // Launching from a stopped session starts the transport: the slot
-        // begins immediately at the current position.
-        if (scene >= 0) startSlot(trackIndex, scene);
-        else stopNow(trackIndex);
-        state.queued = null;
+        // Launching from a stopped session starts the transport with only
+        // these slots playing: nothing from before the stop comes back. A
+        // stop request alone just clears the row and leaves the clock be.
+        if (valid.some((launch) => launch.scene >= 0)) clk.play();
+        valid.forEach(applyNow);
         mirrorSlotState();
-        clk.play();
+        syncGrid();
         return;
       }
       const beat = clk.beat();
       const atBeat = nextBoundary(beat);
       if (atBeat <= beat + 1e-9) {
-        if (scene >= 0) startSlot(trackIndex, scene);
-        else stopNow(trackIndex);
-        state.queued = null;
+        valid.forEach(applyNow);
         mirrorSlotState();
         syncGrid();
         return;
       }
-      state.queued = { scene, atBeat, fromBeat: beat };
+      const atTime = boundaryTime(clk, beat, atBeat);
+      valid.forEach((launch) => {
+        states[launch.trackIndex].queued = {
+          scene: launch.scene,
+          viaScene: launch.viaScene,
+          atBeat,
+          atTime,
+        };
+      });
       startQueueTimer();
       mirrorSlotState();
       syncGrid();
     }
 
+    function queue(trackIndex: number, scene: number): void {
+      applyLaunches([{ trackIndex, scene, viaScene: scene }]);
+    }
+
+    /** After a seek, tempo, or loop change, pending launches re-aim. */
+    function requantize(): void {
+      const clk = clock();
+      if (!clk.playing || !states.some((state) => state.queued)) return;
+      const beat = clk.beat();
+      const atBeat = nextBoundary(beat);
+      const atTime = boundaryTime(clk, beat, atBeat);
+      states.forEach((state) => {
+        if (state.queued) state.queued = { ...state.queued, atBeat, atTime };
+      });
+      syncGrid();
+    }
+
     function processQueue(): void {
       const clk = clock();
-      const beat = clk.beat();
+      const now = clk.now();
       let changed = false;
       states.forEach((state, index) => {
         const queued = state.queued;
         if (!queued) return;
-        // Fire at the boundary, or when the clock wrapped behind the
-        // queue time (loop end), so a launch never gets stranded.
-        if (beat + 1e-9 >= queued.atBeat || beat < queued.fromBeat - 1e-9) {
+        if (now + 1e-6 >= queued.atTime) {
           state.queued = null;
           if (queued.scene >= 0) startSlot(index, queued.scene);
           else stopNow(index);
@@ -359,16 +444,23 @@ export default {
     }
 
     function launchScene(sceneIndex: number): void {
-      getTracks(model).forEach((_, index) => {
-        queue(
-          index,
-          findSlot(model, index, sceneIndex) ? sceneIndex : STOP_QUEUED,
-        );
-      });
+      applyLaunches(
+        getTracks(model).map((_, index) => ({
+          trackIndex: index,
+          scene: findSlot(model, index, sceneIndex) ? sceneIndex : STOP_QUEUED,
+          viaScene: sceneIndex,
+        })),
+      );
     }
 
     function stopAll(): void {
-      getTracks(model).forEach((_, index) => queue(index, STOP_QUEUED));
+      applyLaunches(
+        getTracks(model).map((_, index) => ({
+          trackIndex: index,
+          scene: STOP_QUEUED,
+          viaScene: STOP_QUEUED,
+        })),
+      );
     }
 
     function mirrorSlotState(): void {
@@ -453,14 +545,38 @@ export default {
       };
       const playing = Boolean(model.get("is_playing"));
       const quantize = String(model.get("quantize") || "bar");
+      // A scene is "active" when every track that has a slot in it plays
+      // that slot, "partial" when only some do, "queued" when a scene
+      // launch is waiting (even one that only stops rows).
+      const sceneState = (index: number) => {
+        const withSlot = tracks.filter((_, t) =>
+          slots.some((s) => s.track_index === t && s.scene_index === index),
+        ).length;
+        const playingCount = states.filter(
+          (state) => state.activeScene === index,
+        ).length;
+        return {
+          active: withSlot > 0 && playingCount === withSlot,
+          partial: playingCount > 0 && playingCount < withSlot,
+          queued: states.some((state) => state.queued?.viaScene === index),
+        };
+      };
 
       const header = `<div class="nbplay-launcher-row nbplay-launcher-scenes">
         <div class="nbplay-launcher-corner">${playing ? "▶" : "■"}</div>
         ${scenes
-          .map(
-            (name, index) =>
-              `<button class="nbplay-launcher-scene" data-scene="${index}" title="Launch scene">${escapeHtml(name)}</button>`,
-          )
+          .map((name, index) => {
+            const info = sceneState(index);
+            const classes = [
+              "nbplay-launcher-scene",
+              info.active ? "active" : "",
+              info.partial ? "partial" : "",
+              info.queued ? "queued" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            return `<button class="${classes}" data-scene="${index}" title="Launch scene">${escapeHtml(name)}</button>`;
+          })
           .join("")}
         <button class="nbplay-launcher-stop-all" title="Stop all tracks">■ All</button>
       </div>`;
@@ -475,11 +591,15 @@ export default {
                   item.track_index === trackIndex &&
                   item.scene_index === sceneIndex,
               );
+              const queued =
+                state?.queued?.scene === sceneIndex ||
+                (state?.queued?.scene === STOP_QUEUED &&
+                  state?.queued?.viaScene === sceneIndex);
               const classes = [
                 "nbplay-launcher-slot",
                 slot ? "filled" : "empty",
                 state?.activeScene === sceneIndex ? "active" : "",
-                state?.queued?.scene === sceneIndex ? "queued" : "",
+                queued ? "queued" : "",
                 selected.track_index === trackIndex &&
                 selected.scene_index === sceneIndex
                   ? "selected"
@@ -490,7 +610,10 @@ export default {
               const label = slot
                 ? escapeHtml(slot.name)
                 : `<span class="nbplay-launcher-empty-mark">■</span>`;
-              return `<button class="${classes}" data-track="${trackIndex}" data-scene="${sceneIndex}" title="${slot ? "Launch clip" : "Stop track"}"><span class="nbplay-launcher-progress"></span><span class="nbplay-launcher-slot-name">${label}</span></button>`;
+              const marker = queued
+                ? `<span class="nbplay-launcher-next">${slot ? "next" : "stop"}</span>`
+                : "";
+              return `<button class="${classes}" data-track="${trackIndex}" data-scene="${sceneIndex}" title="${slot ? "Launch clip" : "Stop track"}"><span class="nbplay-launcher-progress"></span><span class="nbplay-launcher-slot-name">${label}</span>${marker}</button>`;
             })
             .join("");
           const stopClasses = [
@@ -509,6 +632,21 @@ export default {
           </div>`;
         })
         .join("");
+
+      // The grid is rebuilt as a whole; keep the focused button and the
+      // horizontal scroll so shortcuts and the view survive a state change.
+      const focused = document.activeElement as HTMLElement | null;
+      const focusKey =
+        focused && root.contains(focused)
+          ? {
+              cls: focused.classList[0],
+              track: focused.dataset.track,
+              scene: focused.dataset.scene,
+            }
+          : null;
+      const scrollLeft =
+        (root.querySelector(".nbplay-launcher-grid") as HTMLElement | null)
+          ?.scrollLeft ?? 0;
 
       root.style.setProperty("--nbplay-launcher-scenes", String(scenes.length));
       root.innerHTML = `<div class="nbplay-launcher-header">
@@ -570,21 +708,60 @@ export default {
         });
       });
       states.forEach((_, index) => syncStep(index));
+
+      const grid = root.querySelector(
+        ".nbplay-launcher-grid",
+      ) as HTMLElement | null;
+      if (grid && scrollLeft) grid.scrollLeft = scrollLeft;
+      if (focusKey) {
+        const selector = [
+          `.${focusKey.cls}`,
+          focusKey.track !== undefined
+            ? `[data-track="${focusKey.track}"]`
+            : "",
+          focusKey.scene !== undefined
+            ? `[data-scene="${focusKey.scene}"]`
+            : "",
+        ].join("");
+        (root.querySelector(selector) as HTMLElement | null)?.focus();
+      }
     }
 
     // Model observers
 
     model.on("change:tracks", () => {
+      // Track indices shift when a track is removed, so a running
+      // performance cannot be mapped onto the new rows: stop everything.
+      if (getTracks(model).length < states.length) {
+        states.forEach((state) => {
+          state.scheduler.stop();
+          state.activeScene = -1;
+          state.activeData = "";
+          state.queued = null;
+          state.currentStep = -1;
+        });
+      }
       ensureStates();
+      mirrorSlotState();
       syncGrid();
     });
     model.on("change:scenes", syncGrid);
     model.on("change:slots", () => {
-      // A playing slot whose pattern changed restarts on the new data.
+      // A playing slot whose pattern changed restarts on the new data. A
+      // slots write that leaves it unchanged (the editor echoing a slot it
+      // just loaded) must not restart it: the restart would schedule the
+      // step inside the alignment grace a second time.
       states.forEach((state, index) => {
-        if (state.activeScene >= 0 && clock().playing)
+        if (state.activeScene < 0 || !clock().playing) return;
+        const slot = findSlot(model, index, state.activeScene);
+        if (!slot) {
+          stopNow(index);
+          return;
+        }
+        if (slotData(slot) !== state.activeData)
           startSlot(index, state.activeScene);
       });
+      mirrorSlotState();
       syncGrid();
     });
     model.on("change:selected_slot", syncGrid);
