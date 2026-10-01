@@ -115,3 +115,19 @@
 .nbplay-midi-kb-active {
   color: var(--jp-ui-font-color3, #64648a);
 }
+
+.nbplay-midi-kb-clock-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--jp-ui-font-color1, #c0c4d8);
+  cursor: pointer;
+}
+
+.nbplay-midi-kb-clock {
+  margin-left: auto;
+  font-family: var(--jp-code-font-family, monospace);
+  font-size: 11px;
+  color: var(--jp-ui-font-color3, #64648a);
+}
