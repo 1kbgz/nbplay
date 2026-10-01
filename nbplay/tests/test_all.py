@@ -692,6 +692,51 @@ class TestMixerWidget:
         assert w.channels[0]["gain"] == pytest.approx(0.8)
         assert w.channels[0]["effects"] == []
 
+    def test_returns_and_sends(self):
+        w = MixerWidget()
+        w.add_channel("A")
+        assert w.channels[0]["sends"] == []
+        idx = w.add_return("Verb", effects=[EffectPlugin("reverb", wet=1.0)])
+        assert idx == 0
+        assert w.returns[0]["name"] == "Verb" and w.returns[0]["gain"] == pytest.approx(0.8)
+        assert w.returns[0]["effects"][0]["type"] == "reverb"
+        assert w.channels[0]["sends"] == [0.0]
+        w.add_channel("B")
+        assert w.channels[1]["sends"] == [0.0]
+        w.add_return("Delay", gain=1.5)
+        assert [ch["sends"] for ch in w.channels] == [[0.0, 0.0], [0.0, 0.0]]
+        w.set_send(0, 1, 0.4)
+        w.set_send(1, 0, 7)
+        assert w.channels[0]["sends"] == [0.0, 0.4]
+        assert w.channels[1]["sends"] == [1.0, 0.0]
+        with pytest.raises(IndexError):
+            w.set_send(0, 5, 0.5)
+        w.set_return_gain(1, 3.0)
+        assert w.returns[1]["gain"] == pytest.approx(2.0)
+        w.add_return_effect(1, {"type": "delay", "time": 0.5})
+        w.set_return_effect_enabled(1, 0, False)
+        assert w.returns[1]["effects"][0]["enabled"] is False
+        w.set_return_effects(1, [])
+        assert w.returns[1]["effects"] == []
+        w.remove_return(0)
+        assert [r["name"] for r in w.returns] == ["Delay"]
+        assert [ch["sends"] for ch in w.channels] == [[0.4], [0.0]]
+        w.returns = []
+        assert [ch["sends"] for ch in w.channels] == [[], []]
+        w.channels = [{"name": "C", "sends": [0.2, 0.9, 0.1]}]
+        assert w.channels[0]["sends"] == []
+        w.returns = [{"name": "R"}]
+        assert w.channels[0]["sends"] == [0.0]
+        # Out-of-range indexes are ignored, like the channel helpers.
+        w.remove_return(5)
+        w.set_return_gain(5, 1.0)
+        w.add_return_effect(5, {"type": "gain"})
+        w.set_return_effect_enabled(5, 0)
+        w.set_return_effect_enabled(0, 9)
+        w.set_send(9, 0, 0.5)
+        assert w.returns == [{"name": "R", "gain": 0.8, "effects": []}]
+        assert w.channels[0]["sends"] == [0.0]
+
     def test_add_multiple_channels(self):
         w = MixerWidget()
         w.add_channel("A")
@@ -3276,6 +3321,8 @@ class TestSessionPersistence:
         s.mixer.add_channel_effect(lead.mixer_channel, EffectPlugin("filter", filter_type="lowpass", frequency=2000, q=0.8))
         s.mixer.master_gain = 0.7
         s.mixer.add_master_effect(EffectPlugin("limiter", threshold=-2))
+        s.mixer.add_return("Verb", effects=[EffectPlugin("reverb", wet=1.0)], gain=0.9)
+        s.mixer.set_send(lead.mixer_channel, 0, 0.35)
         s.timeline.length = 32
         s.timeline.count_in_bars = 1
         s.timeline.pixels_per_beat = 24
@@ -3395,6 +3442,10 @@ class TestSessionPersistence:
         assert loaded.mixer.channels[0]["effects"][0]["type"] == "filter"
         assert loaded.mixer.master_gain == pytest.approx(0.7)
         assert loaded.mixer.master_effects[0]["type"] == "limiter"
+        assert loaded.mixer.returns[0]["name"] == "Verb" and loaded.mixer.returns[0]["gain"] == pytest.approx(0.9)
+        assert loaded.mixer.returns[0]["effects"][0]["type"] == "reverb"
+        assert loaded.mixer.channels[0]["sends"] == pytest.approx([0.35])
+        assert loaded.mixer.channels[1]["sends"] == [0.0]
 
         tl = loaded.timeline
         assert tl.length == pytest.approx(32.0)

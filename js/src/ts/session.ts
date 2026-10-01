@@ -28,6 +28,7 @@ export interface SessionBus {
   audioCtx?: AudioContext;
   masterGain?: AudioNode;
   channels?: { gain: AudioNode }[];
+  returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
   noteListeners?: Array<(evt: NoteEvent) => void>;
   plugins?: unknown;
