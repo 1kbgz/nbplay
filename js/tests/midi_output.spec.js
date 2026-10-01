@@ -6,6 +6,7 @@ const DEFAULTS = {
   available_midi_ports: [],
   channel: 0,
   forward_notes: true,
+  send_clock: false,
   send_request: {},
 };
 
@@ -168,6 +169,70 @@ test.describe("MidiOutputWidget", () => {
     expect(
       await page.evaluate(() => window.__testModel._state.forward_notes),
     ).toBe(true);
+  });
+
+  test("leads an external device with MIDI clock from the session clock", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      globalThis.__nbplay = {
+        "clock-session": { audioCtx: new AudioContext() },
+      };
+    });
+    await renderWidget(page, {
+      session_id: "clock-session",
+      send_clock: true,
+      forward_notes: false,
+    });
+    await connect(page);
+    await page.evaluate(() => {
+      const clock = globalThis.__nbplay["clock-session"].clock;
+      clock.setTempo(120);
+      clock.play();
+    });
+    await page.waitForFunction(
+      () =>
+        window.__midiOutput.sent.filter((m) => m.data[0] === 0xf8).length >= 12,
+    );
+    await page.evaluate(() => {
+      const clock = globalThis.__nbplay["clock-session"].clock;
+      clock.seek(8);
+      clock.stop();
+    });
+    const sent = await page.evaluate(() => window.__midiOutput.sent);
+    expect(sent[0].data).toEqual([0xfa]);
+    const ticks = sent.filter((m) => m.data[0] === 0xf8);
+    for (let i = 1; i < 12; i++) {
+      expect(ticks[i].timestamp - ticks[i - 1].timestamp).toBeCloseTo(
+        (60 / 120 / 24) * 1000,
+        0,
+      );
+    }
+    expect(
+      sent.some(
+        (m) => m.data[0] === 0xf2 && m.data[1] === 32 && m.data[2] === 0,
+      ),
+    ).toBe(true);
+    expect(sent[sent.length - 1].data).toEqual([0xfc]);
+
+    // Resuming from a position sends song position plus continue.
+    await page.evaluate(() => {
+      window.__midiOutput.sent.length = 0;
+      globalThis.__nbplay["clock-session"].clock.play();
+    });
+    await page.waitForFunction(() => window.__midiOutput.sent.length >= 3);
+    const resumed = await page.evaluate(() =>
+      window.__midiOutput.sent.slice(0, 2).map((m) => m.data),
+    );
+    expect(resumed).toEqual([[0xf2, 32, 0], [0xfb]]);
+
+    // Turning the checkbox off stops the ticks with a MIDI stop.
+    await page.locator(".nbplay-midi-out-clock-input").uncheck();
+    const after = await page.evaluate(() => ({
+      sendClock: window.__testModel._state.send_clock,
+      last: window.__midiOutput.sent[window.__midiOutput.sent.length - 1].data,
+    }));
+    expect(after).toEqual({ sendClock: false, last: [0xfc] });
   });
 
   test("sends Python requests on the selected channel", async ({ page }) => {

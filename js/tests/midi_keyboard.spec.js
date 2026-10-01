@@ -8,6 +8,8 @@ const DEFAULTS = {
   session_id: "",
   channel_index: -1,
   sampler_routing: [],
+  sync_clock: false,
+  clock_bpm: 0,
 };
 
 async function installMidiMock(page) {
@@ -20,9 +22,12 @@ async function installMidiMock(page) {
         this.state = "connected";
       }
 
-      send(data) {
+      send(data, timeStamp) {
         const event = new Event("midimessage");
         event.data = new Uint8Array(data);
+        if (timeStamp !== undefined) {
+          Object.defineProperty(event, "timeStamp", { value: timeStamp });
+        }
         this.dispatchEvent(event);
       }
     }
@@ -112,6 +117,60 @@ test.describe("MidiKeyboardWidget", () => {
     );
     expect(cc).toEqual({ controller: 7, value: 100, channel: 3, seq: 2 });
     await expect(page.locator(".nbplay-midi-kb-last")).toHaveText("CC 7  100");
+  });
+
+  test("follows the device's MIDI clock when sync_clock is on", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      globalThis.__nbplay = { "clk-session": { audioCtx: new AudioContext() } };
+    });
+    await renderWidget(page, { session_id: "clk-session", sync_clock: true });
+    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await expect(page.locator(".nbplay-midi-kb-clock-input")).toBeChecked();
+
+    const state = await page.evaluate(() => {
+      const input = window.__midiInput;
+      const clock = globalThis.__nbplay["clk-session"].clock;
+      input.send([0xfa], 1000);
+      const playing = clock.playing;
+      // 25 ms per tick → 600 ms per beat → 100 BPM.
+      for (let i = 0; i <= 48; i++) input.send([0xf8], 1000 + i * 25);
+      const bpm = clock.bpm;
+      input.send([0xfc], 3000);
+      const stopped = clock.playing;
+      input.send([0xf2, 32, 0], 3100);
+      const beat = clock.beat();
+      input.send([0xfb], 3200);
+      return {
+        playing,
+        bpm,
+        stopped,
+        beat,
+        resumed: clock.playing,
+        modelBpm: window.__testModel._state.clock_bpm,
+      };
+    });
+    expect(state.playing).toBe(true);
+    expect(state.bpm).toBeCloseTo(100, 1);
+    expect(state.modelBpm).toBeCloseTo(100, 1);
+    expect(state.stopped).toBe(false);
+    expect(state.beat).toBeCloseTo(8, 5);
+    expect(state.resumed).toBe(true);
+    await expect(page.locator(".nbplay-midi-kb-clock")).toHaveText("100.0 BPM");
+
+    // Realtime messages are ignored once the checkbox is off.
+    await page.locator(".nbplay-midi-kb-clock-input").uncheck();
+    const ignored = await page.evaluate(() => {
+      const clock = globalThis.__nbplay["clk-session"].clock;
+      clock.stop();
+      window.__midiInput.send([0xfa], 5000);
+      return {
+        syncClock: window.__testModel._state.sync_clock,
+        playing: clock.playing,
+      };
+    });
+    expect(ignored).toEqual({ syncClock: false, playing: false });
   });
 
   test("selecting a MIDI port stores the port name", async ({ page }) => {

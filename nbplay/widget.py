@@ -3036,6 +3036,11 @@ class MidiKeyboardWidget(KeyboardWidget):
     # Last control change received: ``{"controller", "value", "channel", "seq"}``.
     # ``seq`` increases per message so repeated identical values still notify.
     control_change = traitlets.Dict({}).tag(sync=True)
+    # Follow the device's MIDI clock: start/stop/continue and song position
+    # drive the session clock, and the tick rate sets its tempo.
+    sync_clock = traitlets.Bool(False).tag(sync=True)
+    # Tempo measured from incoming clock ticks (0 until a beat has arrived).
+    clock_bpm = traitlets.Float(0.0).tag(sync=True)
 
 
 class MidiOutputWidget(anywidget.AnyWidget):
@@ -3056,6 +3061,9 @@ class MidiOutputWidget(anywidget.AnyWidget):
     available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
     channel = traitlets.Int(0, min=0, max=15).tag(sync=True)
     forward_notes = traitlets.Bool(True).tag(sync=True)
+    # Act as MIDI clock leader: 24 ticks per beat plus start, continue, stop,
+    # and song position, scheduled from the session clock.
+    send_clock = traitlets.Bool(False).tag(sync=True)
     send_request = traitlets.Dict({}).tag(sync=True)
 
     def _request(self, **message):

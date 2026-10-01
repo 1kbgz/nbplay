@@ -2334,6 +2334,8 @@ class TestMidiKeyboardWidget:
         assert kb.session_id == ""
         assert kb.channel_index == -1
         assert kb.sampler_routing == []
+        assert kb.sync_clock is False
+        assert kb.clock_bpm == 0.0
 
     def test_connect_sequencer(self):
         kb = MidiKeyboardWidget()
@@ -2356,6 +2358,7 @@ class TestMidiOutputWidget:
         assert out.midi_port == ""
         assert out.channel == 0
         assert out.forward_notes is True
+        assert out.send_clock is False
         assert out.send_request == {}
 
     def test_requests_carry_increasing_nonces_and_clamp(self):
