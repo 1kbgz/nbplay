@@ -102,6 +102,18 @@
   font-weight: 700;
 }
 
+.nbplay-launcher .nbplay-launcher-scene.active {
+  color: var(--jp-success-color1, #22c55e);
+  border-color: var(--jp-success-color1, #22c55e);
+}
+
+.nbplay-launcher .nbplay-launcher-scene.queued {
+  color: var(--jp-ui-font-color0, #e0e4f0);
+  border-color: var(--jp-ui-font-color0, #e0e4f0);
+  box-shadow: 0 0 0 1px var(--jp-ui-font-color0, #e0e4f0) inset;
+  animation: nbplay-launcher-blink 0.5s steps(2, start) infinite;
+}
+
 .nbplay-launcher .nbplay-launcher-track {
   display: flex;
   flex-direction: column;
@@ -158,11 +170,28 @@
 
 .nbplay-launcher .nbplay-launcher-slot.queued,
 .nbplay-launcher .nbplay-launcher-track-stop.queued {
+  box-shadow: 0 0 0 2px var(--jp-ui-font-color0, #e0e4f0) inset;
   animation: nbplay-launcher-blink 0.5s steps(2, start) infinite;
+}
+
+.nbplay-launcher .nbplay-launcher-next {
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--jp-ui-font-color0, #e0e4f0);
+  color: var(--jp-layout-color0, #0f0f1a);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 12px;
 }
 
 @keyframes nbplay-launcher-blink {
   to {
+    box-shadow: 0 0 0 2px transparent inset;
     border-color: var(--jp-ui-font-color0, #e0e4f0);
   }
 }

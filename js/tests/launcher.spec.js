@@ -303,32 +303,97 @@ test.describe("LauncherWidget", () => {
     );
   });
 
-  test("transport stop pauses slots and play resumes them", async ({
+  test("a scene launched over a playing scene is marked next and takes over", async ({
     page,
   }) => {
-    await renderTransport(page);
-    await renderLauncher(page, { quantize: "none" });
-    await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
-      .click();
-    await page.locator(".nbplay-transport-play").click();
-    let state = await page.evaluate(() => ({
-      playing: window.__testModel._state.is_playing,
-      active: window.__testModel._state.active_slots,
-    }));
-    expect(state.playing).toBe(false);
-    expect(state.active).toEqual([0, -1]);
-
-    await page.locator(".nbplay-transport-play").click();
-    state = await page.evaluate(() => ({
-      playing: window.__testModel._state.is_playing,
-      active: window.__testModel._state.active_slots,
-    }));
-    expect(state.playing).toBe(true);
-    expect(state.active).toEqual([0, -1]);
+    await renderLauncher(page, { bpm: 6000 });
+    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
+    await expect
+      .poll(async () =>
+        page.evaluate(() => window.__testModel._state.active_slots),
+      )
+      .toEqual([1, -1]);
     await expect(
-      page.locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
+      page.locator('.nbplay-launcher-scene[data-scene="1"]'),
     ).toHaveClass(/active/);
+
+    // Queue Intro while Drop plays: the header and both cells show it as next.
+    await page.evaluate(() => {
+      window.__launchBeat =
+        globalThis.__nbplay["launcher-session"].clock.beat();
+    });
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    const marked = await page.evaluate(() => ({
+      queued: window.__testModel._state.queued_slots,
+      header: document
+        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .classList.contains("queued"),
+      next: document.querySelectorAll(".nbplay-launcher-next").length,
+    }));
+    if (marked.queued[0] === 0) {
+      expect(marked.header).toBe(true);
+      expect(marked.next).toBe(2);
+    }
+    await expect
+      .poll(async () =>
+        page.evaluate(() => window.__testModel._state.active_slots),
+      )
+      .toEqual([0, 0]);
+    const after = await page.evaluate(() => ({
+      queued: window.__testModel._state.queued_slots,
+      next: document.querySelectorAll(".nbplay-launcher-next").length,
+      activeHeader: document
+        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .classList.contains("active"),
+      oldHeader: document
+        .querySelector('.nbplay-launcher-scene[data-scene="1"]')
+        .classList.contains("active"),
+    }));
+    expect(after).toEqual({
+      queued: [-2, -2],
+      next: 0,
+      activeHeader: true,
+      oldHeader: false,
+    });
+  });
+
+  test("stop clears launched slots and a slot click afterwards plays only itself", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
+    await renderTransport(page);
+    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([0, 0]);
+
+    await page.locator(".nbplay-transport-stop").click();
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        queued: window.__testModel._state.queued_slots,
+        playing: window.__testModel._state.is_playing,
+      })),
+    ).toEqual({ active: [-1, -1], queued: [-2, -2], playing: false });
+    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+
+    // Play alone brings nothing back.
+    await page.locator(".nbplay-transport-play").click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([-1, -1]);
+    await page.locator(".nbplay-transport-stop").click();
+
+    // A single slot click starts the clock with only that slot playing.
+    await page
+      .locator('.nbplay-launcher-slot[data-track="1"][data-scene="0"]')
+      .click();
+    expect(
+      await page.evaluate(() => ({
+        active: window.__testModel._state.active_slots,
+        playing: globalThis.__nbplay["launcher-session"].clock.playing,
+      })),
+    ).toEqual({ active: [-1, 0], playing: true });
   });
 
   test("quantize select writes the model", async ({ page }) => {

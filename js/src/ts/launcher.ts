@@ -193,17 +193,21 @@ export default {
       switch (event.type) {
         case "play":
           mirror(() => model.set("is_playing", true), true);
-          resumeActive();
           startQueueTimer();
           syncGrid();
           break;
         case "stop":
+          // Like a hardware launcher: stop clears every launched and queued
+          // slot. Play alone resumes nothing; the next launch starts fresh.
           stopQueueTimer();
           states.forEach((state) => {
             state.scheduler.stop();
+            state.activeScene = -1;
+            state.queued = null;
             state.currentStep = -1;
           });
           mirror(() => model.set("is_playing", false), true);
+          mirrorSlotState();
           syncGrid();
           break;
         case "seek":
@@ -221,6 +225,12 @@ export default {
       states.forEach((state) => state.scheduler.stop());
       mirror(() => model.set("is_playing", clk.playing));
       if (clk.playing) resumeActive();
+      else
+        states.forEach((state) => {
+          state.activeScene = -1;
+          state.queued = null;
+          state.currentStep = -1;
+        });
       syncGrid();
     }
 
@@ -297,13 +307,15 @@ export default {
       if (!state) return;
       const clk = clock();
       if (!clk.playing) {
-        // Launching from a stopped session starts the transport: the slot
-        // begins immediately at the current position.
+        // Launching from a stopped session starts the transport with only
+        // this slot playing: nothing from before the stop comes back. The
+        // clock starts first so the slot's scheduler can run.
+        clk.play();
         if (scene >= 0) startSlot(trackIndex, scene);
         else stopNow(trackIndex);
         state.queued = null;
         mirrorSlotState();
-        clk.play();
+        syncGrid();
         return;
       }
       const beat = clk.beat();
@@ -453,14 +465,24 @@ export default {
       };
       const playing = Boolean(model.get("is_playing"));
       const quantize = String(model.get("quantize") || "bar");
+      const sceneActive = (index: number) =>
+        states.some((state) => state.activeScene === index);
+      const sceneQueued = (index: number) =>
+        states.some((state) => state.queued?.scene === index);
 
       const header = `<div class="nbplay-launcher-row nbplay-launcher-scenes">
         <div class="nbplay-launcher-corner">${playing ? "▶" : "■"}</div>
         ${scenes
-          .map(
-            (name, index) =>
-              `<button class="nbplay-launcher-scene" data-scene="${index}" title="Launch scene">${escapeHtml(name)}</button>`,
-          )
+          .map((name, index) => {
+            const classes = [
+              "nbplay-launcher-scene",
+              sceneActive(index) ? "active" : "",
+              sceneQueued(index) ? "queued" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            return `<button class="${classes}" data-scene="${index}" title="Launch scene">${escapeHtml(name)}</button>`;
+          })
           .join("")}
         <button class="nbplay-launcher-stop-all" title="Stop all tracks">■ All</button>
       </div>`;
@@ -490,7 +512,8 @@ export default {
               const label = slot
                 ? escapeHtml(slot.name)
                 : `<span class="nbplay-launcher-empty-mark">■</span>`;
-              return `<button class="${classes}" data-track="${trackIndex}" data-scene="${sceneIndex}" title="${slot ? "Launch clip" : "Stop track"}"><span class="nbplay-launcher-progress"></span><span class="nbplay-launcher-slot-name">${label}</span></button>`;
+              const queued = state?.queued?.scene === sceneIndex;
+              return `<button class="${classes}" data-track="${trackIndex}" data-scene="${sceneIndex}" title="${slot ? "Launch clip" : "Stop track"}"><span class="nbplay-launcher-progress"></span><span class="nbplay-launcher-slot-name">${label}</span>${queued ? '<span class="nbplay-launcher-next">next</span>' : ""}</button>`;
             })
             .join("");
           const stopClasses = [
