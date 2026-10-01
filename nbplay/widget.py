@@ -282,8 +282,6 @@ def _normalize_mixer_channel(channel, index=0):
 
 
 def _normalize_return_bus(bus, index=0):
-    if not isinstance(bus, dict):
-        raise ValueError(f"return bus must be dict, got {type(bus).__name__}")  # noqa: TRY004
     return {
         "name": str(bus.get("name", f"Return {index + 1}")),
         "gain": _clamped_number(bus.get("gain", 0.8), 0.0, 2.0, "gain"),

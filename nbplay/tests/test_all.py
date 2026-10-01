@@ -727,6 +727,15 @@ class TestMixerWidget:
         assert w.channels[0]["sends"] == []
         w.returns = [{"name": "R"}]
         assert w.channels[0]["sends"] == [0.0]
+        # Out-of-range indexes are ignored, like the channel helpers.
+        w.remove_return(5)
+        w.set_return_gain(5, 1.0)
+        w.add_return_effect(5, {"type": "gain"})
+        w.set_return_effect_enabled(5, 0)
+        w.set_return_effect_enabled(0, 9)
+        w.set_send(9, 0, 0.5)
+        assert w.returns == [{"name": "R", "gain": 0.8, "effects": []}]
+        assert w.channels[0]["sends"] == [0.0]
 
     def test_add_multiple_channels(self):
         w = MixerWidget()
