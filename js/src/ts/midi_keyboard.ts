@@ -7,7 +7,14 @@ import {
   onKernelDisconnect,
 } from "./helpers.ts";
 import { routeNoteOn, routeNoteOff, type KeyboardRoute } from "./routing.ts";
-import { getSessionBus, type NoteEvent } from "./session.ts";
+import { bindClock, getSessionBus, type NoteEvent } from "./session.ts";
+
+const MIDI_CLOCK = 0xf8;
+const MIDI_START = 0xfa;
+const MIDI_CONTINUE = 0xfb;
+const MIDI_STOP = 0xfc;
+const MIDI_SONG_POSITION = 0xf2;
+const TICKS_PER_BEAT = 24;
 
 const NOTE_NAMES: string[] = [
   "C",
@@ -232,6 +239,13 @@ function render({
       <span class="nbplay-midi-kb-label">Status</span>
       <span class="nbplay-midi-kb-status">Idle</span>
     </div>
+    <div class="nbplay-midi-kb-row">
+      <span class="nbplay-midi-kb-label">Clock</span>
+      <label class="nbplay-midi-kb-clock-label">
+        <input type="checkbox" class="nbplay-midi-kb-clock-input" /> Follow device clock
+      </label>
+      <span class="nbplay-midi-kb-clock">\u2014</span>
+    </div>
     <div class="nbplay-midi-kb-monitor">
       <span class="nbplay-midi-kb-last">No notes</span>
       <span class="nbplay-midi-kb-active">0 active</span>
@@ -249,6 +263,12 @@ function render({
     ".nbplay-midi-kb-status",
   ) as HTMLSpanElement;
   const lastEl = root.querySelector(".nbplay-midi-kb-last") as HTMLSpanElement;
+  const clockInput = root.querySelector(
+    ".nbplay-midi-kb-clock-input",
+  ) as HTMLInputElement;
+  const clockEl = root.querySelector(
+    ".nbplay-midi-kb-clock",
+  ) as HTMLSpanElement;
   const activeEl = root.querySelector(
     ".nbplay-midi-kb-active",
   ) as HTMLSpanElement;
@@ -327,8 +347,95 @@ function render({
     lastEl.textContent = `CC ${controller}  ${value}`;
   }
 
-  function handleMidiData(data: Uint8Array): void {
-    if (!data || data.length < 3) return;
+  // MIDI clock follower: the device's transport drives the session clock
+  // and the tick rate sets its tempo.
+  const binding = bindClock(
+    model,
+    () => {},
+    () => {},
+  );
+  let tickTimes: number[] = [];
+  let tickCount = 0;
+  let baseBeat = 0;
+
+  function syncsClock(): boolean {
+    return Boolean(model.get("sync_clock"));
+  }
+
+  function syncClockDisplay(): void {
+    clockInput.checked = syncsClock();
+    const bpm = Number(model.get("clock_bpm")) || 0;
+    clockEl.textContent = bpm > 0 ? `${bpm.toFixed(1)} BPM` : "\u2014";
+  }
+
+  function handleClockTick(timestamp: number): void {
+    const clk = binding.clock();
+    tickTimes.push(timestamp);
+    if (tickTimes.length > TICKS_PER_BEAT + 1) tickTimes.shift();
+    tickCount += 1;
+    if (tickTimes.length === TICKS_PER_BEAT + 1) {
+      const seconds = (tickTimes[TICKS_PER_BEAT] - tickTimes[0]) / 1000;
+      if (seconds > 0) {
+        const bpm = Math.round((60 / seconds) * 10) / 10;
+        if (Math.abs(bpm - clk.bpm) > 0.5) clk.setTempo(bpm);
+        if (Math.abs(bpm - (Number(model.get("clock_bpm")) || 0)) > 0.05) {
+          model.set("clock_bpm", bpm);
+          model.save_changes();
+          syncClockDisplay();
+        }
+      }
+    }
+    // Pull the session back onto the device's beat grid once per beat.
+    if (tickCount % TICKS_PER_BEAT === 0 && clk.playing && !clk.loop.enabled) {
+      const expected = baseBeat + tickCount / TICKS_PER_BEAT;
+      if (Math.abs(clk.beat() - expected) > 0.05) clk.seek(expected);
+    }
+  }
+
+  function handleRealtime(status: number, timestamp: number): void {
+    if (!syncsClock()) return;
+    const clk = binding.clock();
+    if (status === MIDI_CLOCK) {
+      handleClockTick(timestamp);
+    } else if (status === MIDI_START) {
+      tickTimes = [];
+      tickCount = 0;
+      baseBeat = 0;
+      clk.seek(0);
+      clk.play();
+    } else if (status === MIDI_CONTINUE) {
+      tickTimes = [];
+      tickCount = 0;
+      baseBeat = clk.beat();
+      clk.play();
+    } else if (status === MIDI_STOP) {
+      tickTimes = [];
+      clk.stop();
+    }
+  }
+
+  function handleSongPosition(sixteenths: number): void {
+    if (!syncsClock()) return;
+    const beat = sixteenths / 4;
+    tickCount = 0;
+    baseBeat = beat;
+    binding.clock().seek(beat);
+  }
+
+  function handleMidiData(
+    data: Uint8Array,
+    timestamp = performance.now(),
+  ): void {
+    if (!data || data.length === 0) return;
+    if (data[0] >= MIDI_CLOCK) {
+      handleRealtime(data[0], timestamp);
+      return;
+    }
+    if (data[0] === MIDI_SONG_POSITION && data.length >= 3) {
+      handleSongPosition((data[1] & 0x7f) | ((data[2] & 0x7f) << 7));
+      return;
+    }
+    if (data.length < 3) return;
     const status = data[0] & 0xf0;
     const note = data[1];
     const velocity = data[2];
@@ -374,7 +481,9 @@ function render({
       syncPortStatus();
       return;
     }
-    const port = midi.connectInput(portId, (data) => handleMidiData(data));
+    const port = midi.connectInput(portId, (data, timestamp) =>
+      handleMidiData(data, timestamp),
+    );
     model.set("midi_port", port ? port.name : portId);
     model.save_changes();
     syncPortStatus();
@@ -398,9 +507,16 @@ function render({
       model.get("channel_index") as number,
     );
   });
+  model.on("change:sync_clock", syncClockDisplay);
+  model.on("change:clock_bpm", syncClockDisplay);
+  clockInput.addEventListener("change", () => {
+    model.set("sync_clock", clockInput.checked);
+    model.save_changes();
+  });
 
   syncPortStatus();
   syncMonitor();
+  syncClockDisplay();
   refreshPorts();
 
   const cancelDisconnect = onKernelDisconnect(model, () => {
@@ -415,6 +531,7 @@ function render({
     cancelDisconnect();
     midi.disconnectInput();
     audio.destroy();
+    binding.dispose();
   };
 }
 

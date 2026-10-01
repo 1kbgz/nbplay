@@ -454,6 +454,19 @@ When `session_id` is set, the browser creates the shared `AudioContext`, one
 affects the channel gain nodes. The bus is registered on `globalThis.__nbplay`
 and removed on cleanup.
 
+Send/return buses live in `returns` (`name`, `gain`, `effects`), and every
+channel carries one send level per return in `sends` (0-1). Python keeps the
+two aligned: `add_return()` and the `returns` validator pad or trim every
+channel's `sends`, `set_send()` writes one level, and `remove_return()` drops
+the bus and its sends. In the browser each return is an input `GainNode`, an
+insert chain, and a return fader feeding the master; each channel owns one
+send `GainNode` per return that taps the end of its insert chain (post-fader,
+post-insert, so mute and solo silence the sends too) and feeds the return's
+input. Return strips sit between the channels and the master with their own
+fader, effect chips and editor, meter, and remove button; channel strips show a
+small slider per return. The bus exposes `returns` next to `channels` for other
+widgets. `to_mixer()` ignores returns; the offline Rust mixer has no buses.
+
 The parameter editor lists each built-in effect's parameters with the same
 ranges the Python `EffectPlugin` enforces (a slider plus a number box for
 bounded numbers, a select for the filter type) and, for custom plugin types,
@@ -685,11 +698,22 @@ In the browser every track owns one shared-scheduler instance
 (`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over
 the active slot, so all playing slots follow the session clock's absolute beat
 grid and stay phase-locked. Launches are queued to the next boundary chosen by
-`quantize` (`bar`, `beat`, or `none`) and fired by a 25 ms queue timer; a
-launch from a stopped session starts the clock and begins immediately. A scene
-launch queues every track: tracks with a slot in that scene launch it, tracks
-without one stop. Transport stop pauses the active slots and play resumes
-them. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
+`quantize` (`bar`, `beat`, or `none`). A pending launch stores the boundary as
+an AudioContext time measured from the current position (a boundary past the
+loop end means the loop restart), so a loop wrap cannot strand it, and it is
+re-aimed after a seek, tempo, or loop change; a 25 ms queue timer fires it. A
+launch from a stopped session starts the clock and begins immediately, while a
+stop request alone leaves the clock stopped. A scene launch or Stop All is
+applied as one batch at one clock position: tracks with a slot in that scene
+launch it, tracks without one stop, all on the same boundary. Transport stop
+clears every launched and queued slot, as on a hardware launcher; play alone
+resumes nothing, and the next launch starts fresh. Removing a track stops the
+performance, since the remaining rows' indices shift. Scene headers show a
+fully playing scene (`active`), a partly playing one (`partial`), and a queued
+one (`queued`, including scene launches that only stop rows); queued cells
+carry a "next" or "stop" marker. Stopping a slot also cancels the notes its
+scheduler already handed to Web Audio but that have not sounded yet. A `slots`
+write restarts a playing slot only when its own pattern changed. `active_slots` and `queued_slots` (per track: scene index, -1 for stop,
 -2 for nothing queued) are mirrored to the kernel. Audio routes through each
 track's `channel_index` on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.
@@ -744,6 +768,10 @@ multiple samplers split by range through the same `connect_sampler()` API.
 ### MidiOutputWidget
 
 `js/src/ts/midi_output.ts` is the session's way out to hardware and other software. It lists Web MIDI output ports (`midi_port`, `available_midi_ports`) and sends on one channel (`channel`, 0-15). With a `session_id` it registers on the bus's `noteListeners`, where every note the session plays arrives: keyboards and pads broadcast when a key goes down, and the sequencer scheduler, launcher slots, and timeline MIDI clips emit their notes as they are scheduled, with `at` (AudioContext time) and `duration`. Scheduled notes are converted to Web MIDI timestamps so the hardware plays them at the same time as the browser. Without a session it listens to the document-level `nbplay-note` events instead, never both, so nothing is sent twice. `forward_notes` turns that forwarding off. Python sends through the `send_request` trait (`note_on()`, `note_off()`, `control_change()`, `send()` for raw bytes), each request carrying a nonce so identical messages still fire. Changing port or channel and teardown send all-notes-off first.
+
+### MIDI clock sync
+
+The session can lead or follow external MIDI clock. As leader, `MidiOutputWidget` with `send_clock` on binds to the session clock and sends 24 ticks per beat, scheduled ahead from the clock's AudioContext time and converted to Web MIDI timestamps like the notes, so hardware stays in step with the audio. A play from beat zero sends Start, a play from elsewhere sends Song Position plus Continue, a seek while running sends Song Position, and stop sends Stop; turning the checkbox off mid-run sends Stop too. As follower, `MidiKeyboardWidget` with `sync_clock` on handles the realtime bytes its port receives: Start seeks to zero and plays the session clock, Continue plays from the current position, Stop stops, Song Position seeks (sixteenths over four), and the tick rate over the last beat sets the clock tempo, mirrored to the read-only `clock_bpm` trait and shown in the widget. Once per beat it also pulls the session back onto the device's beat grid when they drift more than a twentieth of a beat, except while a loop is active. Tempo changes in either direction go through the shared clock, so every widget in the session follows.
 
 ### MIDI learn
 
@@ -943,6 +971,12 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `timeline.pending_exports` to reach zero. On load, cached clips go back through
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
+
+### Undo and redo
+
+`nbplay/history.py` keeps an undo stack over widget state. `History.attach(widget)` observes every synced trait of a widget except the transient ones listed in `TRANSIENT_TRAITS` (play state, playhead, recording status, selection, meters, request nonces, derived data such as the waveform preview). Each change becomes an entry `(widget, trait, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several traits is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order and moves it to the redo stack; a new change clears redo. Old values are the list and dict objects traitlets hands over, which works because every widget setter assigns new containers instead of mutating in place.
+
+A `Session` owns one `History`, attaches the transport, mixer, timeline, and launcher, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a trait-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` traits, which the session answers.
 
 ### Pattern chaining
 

@@ -10,6 +10,7 @@ const DEFAULTS = {
   ],
   master_gain: 0.85,
   master_effects: [],
+  returns: [],
 };
 
 /** Boot the mixer widget inside the harness page. */
@@ -789,6 +790,161 @@ test.describe("MixerWidget", () => {
       mode: "square",
       sync: false,
     });
+  });
+
+  test("return buses render strips, sends, and a wired audio path", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        {
+          name: "Lead",
+          gain: 1,
+          pan: 0,
+          mute: false,
+          solo: false,
+          sends: [0.3],
+        },
+        {
+          name: "Bass",
+          gain: 0.5,
+          pan: 0,
+          mute: false,
+          solo: false,
+          effects: [{ type: "gain", gain: 1 }],
+          sends: [0],
+        },
+      ],
+      returns: [
+        {
+          name: "Verb",
+          gain: 0.9,
+          effects: [{ type: "reverb", seconds: 1, decay: 2, wet: 1 }],
+        },
+      ],
+    });
+    await expect(page.locator(".nbplay-return-strip")).toHaveCount(1);
+    await expect(
+      page.locator(".nbplay-return-strip .nbplay-strip-name"),
+    ).toHaveText("Verb");
+    await expect(
+      page.locator(".nbplay-return-strip .nbplay-strip-gain-label"),
+    ).toHaveText("-0.9 dB");
+    await expect(
+      page.locator(".nbplay-return-strip .nbplay-strip-fx-chip"),
+    ).toHaveText("reverb");
+    const sends = page.locator(`${STRIP} .nbplay-strip-send-level`);
+    await expect(sends).toHaveCount(2);
+    await expect(sends.first()).toHaveValue("0.3");
+
+    const wiring = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      const lead = bus.channels[0];
+      const bass = bus.channels[1];
+      const ret = bus.returns[0];
+      return {
+        returnCount: bus.returns.length,
+        leadSendLevel: lead.sends[0].gain.value,
+        leadSendFromPan: lead.pan.connections.includes(lead.sends[0]),
+        bassSendFromChain: bass.effects[0].output.connections.includes(
+          bass.sends[0],
+        ),
+        sendToReturn: lead.sends[0].connections.includes(ret.input),
+        returnChain: ret.effects.length,
+        returnToMaster: ret.gain.connections.includes(bus.masterGain),
+        returnGain: ret.gain.gain.value,
+      };
+    });
+    expect(wiring).toEqual({
+      returnCount: 1,
+      leadSendLevel: 0.3,
+      leadSendFromPan: true,
+      bassSendFromChain: true,
+      sendToReturn: true,
+      returnChain: 1,
+      returnToMaster: true,
+      returnGain: 0.9,
+    });
+  });
+
+  test("send and return faders write the model and the bus in place", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      channels: [
+        { name: "Lead", gain: 1, pan: 0, mute: false, solo: false, sends: [0] },
+      ],
+      returns: [{ name: "Verb", gain: 0.8, effects: [] }],
+    });
+    const send = page.locator(`${STRIP} .nbplay-strip-send-level`).first();
+    await send.fill("0.6");
+    await send.dispatchEvent("input");
+    const fader = page.locator(".nbplay-return-strip .nbplay-strip-fader");
+    await fader.fill("1.2");
+    await fader.dispatchEvent("input");
+    await fader.dispatchEvent("change");
+
+    const state = await page.evaluate(() => {
+      const bus = window.__nbplay["test-session"];
+      return {
+        sends: window.__testModel._state.channels[0].sends,
+        returnGain: window.__testModel._state.returns[0].gain,
+        busSend: bus.channels[0].sends[0].gain.value,
+        busReturn: bus.returns[0].gain.gain.value,
+        strips: document.querySelectorAll(".nbplay-return-strip").length,
+      };
+    });
+    expect(state.sends[0]).toBeCloseTo(0.6, 5);
+    expect(state.returnGain).toBeCloseTo(1.2, 5);
+    expect(state.busSend).toBeCloseTo(0.6, 5);
+    expect(state.busReturn).toBeCloseTo(1.2, 5);
+    expect(state.strips).toBe(1);
+  });
+
+  test("+ Return adds a bus with sends and × removes both", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    await page.locator(".nbplay-mixer-add-return-btn").click();
+    let state = await page.evaluate(() => ({
+      returns: window.__testModel._state.returns,
+      sends: window.__testModel._state.channels.map((ch) => ch.sends),
+      busReturns: window.__nbplay["test-session"].returns.length,
+      busSends: window.__nbplay["test-session"].channels.map(
+        (n) => n.sends.length,
+      ),
+    }));
+    expect(state.returns).toEqual([
+      { name: "Return 1", gain: 0.8, effects: [] },
+    ]);
+    expect(state.sends).toEqual([[0], [0]]);
+    expect(state.busReturns).toBe(1);
+    expect(state.busSends).toEqual([1, 1]);
+    await expect(page.locator(".nbplay-return-strip")).toHaveCount(1);
+
+    await page.locator(".nbplay-return-strip .nbplay-strip-fx-add-btn").click();
+    await expect(
+      page.locator(".nbplay-return-strip .nbplay-strip-fx-chip"),
+    ).toHaveCount(1);
+    await page.locator(".nbplay-return-strip .nbplay-strip-fx-edit").click();
+    await expect(
+      page.locator(".nbplay-return-strip .nbplay-strip-fx-editor"),
+    ).toHaveCount(1);
+
+    await page.locator(".nbplay-return-strip .nbplay-strip-remove").click();
+    state = await page.evaluate(() => ({
+      returns: window.__testModel._state.returns,
+      sends: window.__testModel._state.channels.map((ch) => ch.sends),
+      busReturns: window.__nbplay["test-session"].returns.length,
+      busSends: window.__nbplay["test-session"].channels.map(
+        (n) => n.sends.length,
+      ),
+    }));
+    expect(state.returns).toEqual([]);
+    expect(state.sends).toEqual([[], []]);
+    expect(state.busReturns).toBe(0);
+    expect(state.busSends).toEqual([0, 0]);
+    await expect(page.locator(".nbplay-return-strip")).toHaveCount(0);
   });
 
   test("adding a master effect updates model", async ({ page }) => {

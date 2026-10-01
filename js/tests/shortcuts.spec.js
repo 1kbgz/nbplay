@@ -15,6 +15,8 @@ const TRANSPORT = {
   loop_enabled: false,
   loop_start_bar: 0,
   loop_end_bar: 4,
+  undo_request: 0,
+  redo_request: 0,
 };
 
 const SEQUENCER = {
@@ -177,6 +179,21 @@ test.describe("Keyboard shortcuts", () => {
 
     await page.keyboard.press("l");
     expect(await state(page, "loop_enabled")).toBe(true);
+  });
+
+  test("transport: ctrl+z and ctrl+shift+z request undo and redo", async ({
+    page,
+  }) => {
+    await render(page, "transport", TRANSPORT);
+    await page.locator(".nbplay-transport").focus();
+    await page.keyboard.press("Control+z");
+    await page.keyboard.press("Control+z");
+    await page.keyboard.press("Control+Shift+z");
+    await page.keyboard.press("Control+y");
+    await page.keyboard.press("Meta+z");
+    expect(await state(page, "undo_request")).toBe(3);
+    expect(await state(page, "redo_request")).toBe(2);
+    expect(await state(page, "is_playing")).toBe(false);
   });
 
   test("transport: shortcuts do not fire while editing the BPM field", async ({

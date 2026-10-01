@@ -2,10 +2,26 @@
 
 import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
 import {
+  bindClock,
+  type ClockEvent,
   getOrCreateSessionBus,
   type NoteEvent,
   type SessionBus,
+  type SessionClock,
 } from "./session.ts";
+
+const MIDI_CLOCK = 0xf8;
+const MIDI_START = 0xfa;
+const MIDI_CONTINUE = 0xfb;
+const MIDI_STOP = 0xfc;
+const MIDI_SONG_POSITION = 0xf2;
+const TICKS_PER_BEAT = 24;
+
+/** Song position pointer bytes for a beat (14-bit count of sixteenths). */
+export function songPositionBytes(beat: number): number[] {
+  const sixteenths = Math.max(0, Math.min(0x3fff, Math.round(beat * 4)));
+  return [MIDI_SONG_POSITION, sixteenths & 0x7f, (sixteenths >> 7) & 0x7f];
+}
 
 interface MidiPortInfo {
   id: string;
@@ -103,6 +119,9 @@ function render({
       <label class="nbplay-midi-out-forward">
         <input type="checkbox" class="nbplay-midi-out-forward-input" /> Forward session notes
       </label>
+      <label class="nbplay-midi-out-forward">
+        <input type="checkbox" class="nbplay-midi-out-clock-input" /> Send clock
+      </label>
     </div>
     <div class="nbplay-midi-out-row">
       <span class="nbplay-midi-out-label">Status</span>
@@ -123,6 +142,9 @@ function render({
   ) as HTMLSelectElement;
   const forwardInput = root.querySelector(
     ".nbplay-midi-out-forward-input",
+  ) as HTMLInputElement;
+  const clockInput = root.querySelector(
+    ".nbplay-midi-out-clock-input",
   ) as HTMLInputElement;
   const statusEl = root.querySelector(
     ".nbplay-midi-out-status",
@@ -157,11 +179,96 @@ function render({
     }
   }
 
-  /** Convert an AudioContext time on the session bus to a Web MIDI timestamp. */
+  /** Convert an AudioContext time on the session clock to a Web MIDI timestamp. */
   function timestampFor(at: number): number | undefined {
-    const ctx = bus?.audioCtx;
+    const ctx = binding.clock().context() || bus?.audioCtx;
     if (!ctx) return undefined;
     return performance.now() + Math.max(0, at - ctx.currentTime) * 1000;
+  }
+
+  // MIDI clock leader: ticks are scheduled ahead from the session clock's
+  // AudioContext time, so they line up with the audio the session plays.
+  let tickTimer: ReturnType<typeof setInterval> | null = null;
+  let nextTickTime = 0;
+
+  function sendsClock(): boolean {
+    return Boolean(model.get("send_clock")) && Boolean(model.get("midi_port"));
+  }
+
+  function scheduleTicks(): void {
+    const clk = binding.clock();
+    const now = clk.now();
+    const spacing = clk.secondsPerBeat() / TICKS_PER_BEAT;
+    // One clock-to-timestamp offset per pass keeps the tick spacing exact.
+    const ctx = clk.context();
+    const base = ctx ? performance.now() - ctx.currentTime * 1000 : undefined;
+    // After a throttled tab, resume from now instead of flooding old ticks.
+    if (nextTickTime < now - 0.5) nextTickTime = now;
+    while (nextTickTime < now + 0.1) {
+      send(
+        [MIDI_CLOCK],
+        base === undefined ? undefined : base + nextTickTime * 1000,
+      );
+      nextTickTime += spacing;
+    }
+  }
+
+  function startTicks(clk: SessionClock): void {
+    if (tickTimer) return;
+    nextTickTime = clk.now();
+    tickTimer = setInterval(scheduleTicks, 25);
+    scheduleTicks();
+  }
+
+  function stopTicks(): void {
+    if (tickTimer) clearInterval(tickTimer);
+    tickTimer = null;
+  }
+
+  function onClockEvent(event: ClockEvent): void {
+    const clk = binding.clock();
+    switch (event.type) {
+      case "play":
+        if (!sendsClock()) break;
+        if (event.beat < 1e-3) send([MIDI_START]);
+        else {
+          send(songPositionBytes(event.beat));
+          send([MIDI_CONTINUE]);
+        }
+        startTicks(clk);
+        break;
+      case "stop":
+        if (tickTimer) send([MIDI_STOP]);
+        stopTicks();
+        break;
+      case "seek":
+        if (tickTimer) send(songPositionBytes(event.beat));
+        break;
+      case "tempo":
+      case "loop":
+      case "record":
+      case "timesig":
+        break;
+    }
+  }
+
+  function onClockRebind(clk: SessionClock): void {
+    stopTicks();
+    if (sendsClock() && clk.playing) startTicks(clk);
+  }
+
+  const binding = bindClock(model, onClockEvent, onClockRebind);
+
+  function syncClockSending(): void {
+    const clk = binding.clock();
+    if (sendsClock() && clk.playing && !tickTimer) {
+      send(songPositionBytes(clk.beat()));
+      send([MIDI_CONTINUE]);
+      startTicks(clk);
+    } else if (!sendsClock() && tickTimer) {
+      send([MIDI_STOP]);
+      stopTicks();
+    }
   }
 
   function onNote(evt: NoteEvent): void {
@@ -243,6 +350,7 @@ function render({
     statusEl.classList.toggle("connected", connected);
     channelSelect.value = String(channel());
     forwardInput.checked = !!model.get("forward_notes");
+    clockInput.checked = !!model.get("send_clock");
   }
 
   async function refreshPorts(): Promise<void> {
@@ -286,10 +394,22 @@ function render({
     model.set("forward_notes", forwardInput.checked);
     model.save_changes();
   });
+  clockInput.addEventListener("change", () => {
+    model.set("send_clock", clockInput.checked);
+    model.save_changes();
+    syncClockSending();
+  });
 
-  model.on("change:midi_port", syncStatus);
+  model.on("change:midi_port", () => {
+    syncStatus();
+    syncClockSending();
+  });
   model.on("change:channel", syncStatus);
   model.on("change:forward_notes", syncStatus);
+  model.on("change:send_clock", () => {
+    syncStatus();
+    syncClockSending();
+  });
   model.on("change:session_id", bindSession);
   model.on("change:send_request", handleSendRequest);
 
@@ -298,6 +418,8 @@ function render({
   refreshPorts();
 
   function teardown(): void {
+    if (tickTimer) send([MIDI_STOP]);
+    stopTicks();
     allNotesOff();
     if (bus?.noteListeners) {
       bus.noteListeners = bus.noteListeners.filter((fn) => fn !== onNote);
@@ -310,6 +432,7 @@ function render({
   return () => {
     cancelDisconnect();
     teardown();
+    binding.dispose();
   };
 }
 

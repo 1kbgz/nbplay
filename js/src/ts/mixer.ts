@@ -26,6 +26,14 @@ interface Channel {
   mute: boolean;
   solo: boolean;
   effects?: EffectDescriptor[];
+  /** Post-fader send level per return bus, 0-1. */
+  sends?: number[];
+}
+
+interface ReturnBus {
+  name: string;
+  gain: number;
+  effects?: EffectDescriptor[];
 }
 
 interface ChannelNode {
@@ -34,7 +42,19 @@ interface ChannelNode {
   effects: EffectUnit[];
   descriptors: EffectDescriptor[];
   analyser: AnalyserNode | null;
+  /** One send gain per return bus, fed from the end of the insert chain. */
+  sends: GainNode[];
 }
+
+interface ReturnNode {
+  input: GainNode;
+  gain: GainNode;
+  effects: EffectUnit[];
+  descriptors: EffectDescriptor[];
+  analyser: AnalyserNode | null;
+}
+
+type EffectScope = "channel" | "master" | "return";
 
 interface MeterLevel {
   peak: number;
@@ -61,6 +81,9 @@ type EffectFactory = (
   ctx: AudioContext,
   effect: EffectDescriptor,
 ) => EffectUnit | AudioNode | null | undefined;
+
+const CHANNEL_STRIPS =
+  ".nbplay-mixer-strip:not(.nbplay-master-strip):not(.nbplay-return-strip)";
 
 const EFFECT_OPTIONS = [
   "gain",
@@ -660,7 +683,15 @@ function createAudioBus() {
   let masterAnalyser: AnalyserNode | null = null;
   let masterChainBuilt = false;
   const channelNodes: ChannelNode[] = [];
+  const returnNodes: ReturnNode[] = [];
   const meterBuffer = new Float32Array(256);
+
+  function disposeReturn(node: ReturnNode): void {
+    disposeEffects(node.effects);
+    node.input.disconnect();
+    node.gain.disconnect();
+    disconnectNode(node.analyser);
+  }
 
   function createAnalyser(): AnalyserNode | null {
     if (!audioCtx?.createAnalyser) return null;
@@ -690,6 +721,7 @@ function createAudioBus() {
       channels: Channel[],
       masterGainValue: number,
       masterEffectsValue: EffectDescriptor[] = [],
+      returns: ReturnBus[] = [],
     ): void {
       if (!audioCtx || !masterGain) return;
       while (channelNodes.length < channels.length) {
@@ -703,6 +735,7 @@ function createAudioBus() {
           effects: [],
           descriptors: [],
           analyser: createAnalyser(),
+          sends: [],
         });
         const node = channelNodes[channelNodes.length - 1];
         if (node.analyser) p.connect(node.analyser);
@@ -712,8 +745,42 @@ function createAudioBus() {
         disposeEffects(n.effects);
         n.gain.disconnect();
         n.pan.disconnect();
+        n.sends.forEach((send) => send.disconnect());
         disconnectNode(n.analyser);
       }
+
+      // Return buses: input -> insert chain -> return fader -> master.
+      while (returnNodes.length < returns.length) {
+        const input = audioCtx.createGain();
+        const gain = audioCtx.createGain();
+        input.connect(gain);
+        gain.connect(masterGain);
+        const node: ReturnNode = {
+          input,
+          gain,
+          effects: [],
+          descriptors: [],
+          analyser: createAnalyser(),
+        };
+        if (node.analyser) gain.connect(node.analyser);
+        returnNodes.push(node);
+      }
+      while (returnNodes.length > returns.length) {
+        disposeReturn(returnNodes.pop()!);
+      }
+      returnNodes.forEach((r, k) => {
+        const next = activeEffects(returns[k]?.effects);
+        if (JSON.stringify(r.descriptors) !== JSON.stringify(next)) {
+          if (!updateEffectChain(r.effects, r.descriptors, next)) {
+            disconnectNode(r.input);
+            disposeEffects(r.effects);
+            r.effects = createEffectChain(audioCtx!, next);
+            connectEffectChain(r.input, r.effects, r.gain);
+          }
+          r.descriptors = next;
+        }
+        r.gain.gain.value = returns[k].gain;
+      });
 
       // Insert chains: update parameters in place when the chain's shape
       // is unchanged, rebuild only the chains whose structure changed.
@@ -733,7 +800,27 @@ function createAudioBus() {
         n.effects = createEffectChain(audioCtx!, next);
         n.descriptors = next;
         connectEffectChain(n.pan, n.effects, masterGain!);
-        if (n.analyser) chainOutput(n.pan, n.effects).connect(n.analyser);
+        const output = chainOutput(n.pan, n.effects);
+        if (n.analyser) output.connect(n.analyser);
+        n.sends.forEach((send) => output.connect(send));
+      });
+
+      // Sends tap the end of each channel's chain (post-fader, post-insert).
+      channelNodes.forEach((n, i) => {
+        while (n.sends.length > returnNodes.length) {
+          n.sends.pop()!.disconnect();
+        }
+        while (n.sends.length < returnNodes.length) {
+          const send = audioCtx!.createGain();
+          send.gain.value = 0;
+          chainOutput(n.pan, n.effects).connect(send);
+          send.connect(returnNodes[n.sends.length].input);
+          n.sends.push(send);
+        }
+        const levels = channels[i]?.sends || [];
+        n.sends.forEach((send, k) => {
+          send.gain.value = clamp(Number(levels[k]) || 0, 0, 1);
+        });
       });
 
       const nextMaster = activeEffects(masterEffectsValue);
@@ -769,13 +856,18 @@ function createAudioBus() {
       masterGain.gain.value = masterGainValue;
     },
 
-    /** Current peak/RMS per channel and for the master bus. */
-    levels(): { channels: MeterLevel[]; master: MeterLevel } | null {
+    /** Current peak/RMS per channel, per return bus, and for the master bus. */
+    levels(): {
+      channels: MeterLevel[];
+      returns: MeterLevel[];
+      master: MeterLevel;
+    } | null {
       if (!audioCtx) return null;
       return {
         channels: channelNodes.map((n) =>
           measureLevel(n.analyser, meterBuffer),
         ),
+        returns: returnNodes.map((r) => measureLevel(r.analyser, meterBuffer)),
         master: measureLevel(masterAnalyser, meterBuffer),
       };
     },
@@ -787,6 +879,7 @@ function createAudioBus() {
       bus.audioCtx = audioCtx;
       bus.masterGain = masterGain;
       bus.channels = channelNodes;
+      bus.returns = returnNodes;
       Object.defineProperty(bus, "plugins", {
         configurable: true,
         enumerable: true,
@@ -804,6 +897,7 @@ function createAudioBus() {
         delete bus.audioCtx;
         delete bus.masterGain;
         delete bus.channels;
+        delete bus.returns;
         delete bus.plugins;
         if (Object.keys(bus).length === 0) {
           const g = globalThis as Record<string, unknown>;
@@ -814,9 +908,12 @@ function createAudioBus() {
         disposeEffects(n.effects);
         n.gain.disconnect();
         n.pan.disconnect();
+        n.sends.forEach((send) => send.disconnect());
         disconnectNode(n.analyser);
       });
       channelNodes.length = 0;
+      returnNodes.forEach(disposeReturn);
+      returnNodes.length = 0;
       disposeEffects(masterEffects);
       masterDescriptors = [];
       masterChainBuilt = false;
@@ -833,7 +930,22 @@ function createAudioBus() {
 
 // Channel strip builder
 
-function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
+function sendsHtml(ch: Channel, returns: ReturnBus[]): string {
+  if (!returns.length) return "";
+  const rows = returns
+    .map((ret, k) => {
+      const level = clamp(Number(ch.sends?.[k]) || 0, 0, 1);
+      return `<label class="nbplay-strip-send" title="Send to ${escapeHtml(ret.name)}"><span>${escapeHtml(ret.name)}</span><input type="range" class="nbplay-strip-send-level" data-return="${k}" min="0" max="1" step="0.01" value="${level}" /></label>`;
+    })
+    .join("");
+  return `<div class="nbplay-strip-sends">${rows}</div>`;
+}
+
+function buildChannelStrip(
+  ch: Channel,
+  index: number,
+  returns: ReturnBus[] = [],
+): HTMLDivElement {
   const strip = document.createElement("div");
   strip.className = "nbplay-mixer-strip";
   strip.dataset.index = String(index);
@@ -866,6 +978,7 @@ function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
       <button class="nbplay-strip-btn nbplay-mute-btn${ch.mute ? " active" : ""}">M</button>
       <button class="nbplay-strip-btn nbplay-solo-btn${ch.solo ? " active" : ""}">S</button>
     </div>
+    ${sendsHtml(ch, returns)}
     <div class="nbplay-strip-effects">
       <div class="nbplay-strip-fx-add">
         <select class="nbplay-strip-fx-select" title="Effect type">
@@ -880,6 +993,46 @@ function buildChannelStrip(ch: Channel, index: number): HTMLDivElement {
     <button class="nbplay-strip-remove" title="Remove channel">\u00d7</button>
   `;
 
+  return strip;
+}
+
+// Return strip builder
+
+function buildReturnStrip(ret: ReturnBus, index: number): HTMLDivElement {
+  const strip = document.createElement("div");
+  strip.className = "nbplay-mixer-strip nbplay-return-strip";
+  strip.dataset.index = String(index);
+  const safeName = escapeHtml(ret.name);
+  const effectOptions = EFFECT_OPTIONS.map(
+    (type) =>
+      `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`,
+  ).join("");
+  const effectChips = (ret.effects || [])
+    .map((effect, fxIndex) => effectChipHtml(effect, fxIndex))
+    .join("");
+  strip.innerHTML = `
+    <div class="nbplay-strip-name" title="${safeName}">${safeName}</div>
+    <div class="nbplay-strip-fader-section">
+      <div class="nbplay-strip-meter">
+        <div class="nbplay-strip-meter-fill"></div>
+      </div>
+      <input type="range" class="nbplay-strip-fader nbplay-return-fader" min="0" max="2" step="0.01"
+             value="${escapeHtml(ret.gain)}" orient="vertical" />
+      <div class="nbplay-strip-gain-label">${fmtGain(ret.gain)}</div>
+    </div>
+    <div class="nbplay-strip-effects">
+      <div class="nbplay-strip-fx-add">
+        <select class="nbplay-strip-fx-select" title="Return effect type">
+          ${effectOptions}
+        </select>
+        <button class="nbplay-strip-fx-add-btn" title="Add return effect">+</button>
+      </div>
+      <div class="nbplay-strip-fx-list">
+        ${effectChips}
+      </div>
+    </div>
+    <button class="nbplay-strip-remove" title="Remove return bus">\u00d7</button>
+  `;
   return strip;
 }
 
@@ -941,6 +1094,7 @@ function render({
       <h3>nbplay</h3>
       <span class="nbplay-badge">mixer</span>
       <button class="nbplay-mixer-add-btn" title="Add channel">+ Channel</button>
+      <button class="nbplay-mixer-add-return-btn" title="Add return bus">+ Return</button>
     </div>
     <div class="nbplay-mixer-console"></div>
   `;
@@ -952,6 +1106,11 @@ function render({
   const addBtn = root.querySelector(
     ".nbplay-mixer-add-btn",
   ) as HTMLButtonElement;
+  const addReturnBtn = root.querySelector(
+    ".nbplay-mixer-add-return-btn",
+  ) as HTMLButtonElement;
+
+  const getReturns = () => (model.get("returns") as ReturnBus[]) || [];
 
   // Keep clicks inside the widget from moving focus to the notebook, which
   // makes JupyterLab scroll the active cell into view mid-interaction.
@@ -966,11 +1125,13 @@ function render({
       (model.get("channels") as Channel[]) || [],
       model.get("master_gain") as number,
       (model.get("master_effects") as EffectDescriptor[]) || [],
+      getReturns(),
     );
     audioBus.register(sessionId);
   }
 
   let domChannelCount = -1;
+  let domReturnCount = -1;
   let domEffectSignature = "";
   let dragging = false;
   let pendingRebuild = false;
@@ -979,9 +1140,7 @@ function render({
 
   function syncStrips(): void {
     const channels = (model.get("channels") as Channel[]) || [];
-    const strips = console_.querySelectorAll(
-      ".nbplay-mixer-strip:not(.nbplay-master-strip)",
-    );
+    const strips = console_.querySelectorAll(CHANNEL_STRIPS);
 
     strips.forEach((strip, i) => {
       if (i >= channels.length) return;
@@ -1025,6 +1184,32 @@ function render({
         nameEl.title = ch.name;
       }
       syncEffectControls(strip, ch.effects || []);
+      strip
+        .querySelectorAll<HTMLInputElement>(".nbplay-strip-send-level")
+        .forEach((input) => {
+          if (document.activeElement === input) return;
+          const k = parseInt(input.dataset.return || "-1", 10);
+          input.value = String(clamp(Number(ch.sends?.[k]) || 0, 0, 1));
+        });
+    });
+
+    const returns = getReturns();
+    console_.querySelectorAll(".nbplay-return-strip").forEach((strip, k) => {
+      const ret = returns[k];
+      if (!ret) return;
+      const fader = strip.querySelector(
+        ".nbplay-strip-fader",
+      ) as HTMLInputElement;
+      if (fader && document.activeElement !== fader)
+        fader.value = String(ret.gain);
+      const label = strip.querySelector(".nbplay-strip-gain-label");
+      if (label) label.textContent = fmtGain(ret.gain);
+      const nameEl = strip.querySelector(".nbplay-strip-name") as HTMLElement;
+      if (nameEl) {
+        nameEl.textContent = ret.name;
+        nameEl.title = ret.name;
+      }
+      syncEffectControls(strip, ret.effects || []);
     });
     const masterStripEl = console_.querySelector(".nbplay-master-strip");
     if (masterStripEl)
@@ -1057,6 +1242,7 @@ function render({
       effects.map((fx) => [fx.type, isEffectEnabled(fx)]);
     return JSON.stringify({
       channels: channels.map((ch) => shape(ch.effects)),
+      returns: getReturns().map((ret) => shape(ret.effects)),
       master: shape((model.get("master_effects") as EffectDescriptor[]) || []),
     });
   }
@@ -1066,31 +1252,34 @@ function render({
   /** Keys of the editors currently open, "channel:i:fx" or "master:fx". */
   const openEditors = new Set<string>();
 
-  function editorKey(scope: "channel" | "master", index: number, fx: number) {
-    return scope === "master" ? `master:${fx}` : `channel:${index}:${fx}`;
+  function editorKey(scope: EffectScope, index: number, fx: number) {
+    return scope === "master" ? `master:${fx}` : `${scope}:${index}:${fx}`;
   }
 
-  function effectsFor(scope: "channel" | "master", index: number) {
-    return scope === "master"
-      ? (model.get("master_effects") as EffectDescriptor[]) || []
-      : ((model.get("channels") as Channel[]) || [])[index]?.effects || [];
+  function effectsFor(scope: EffectScope, index: number) {
+    if (scope === "master")
+      return (model.get("master_effects") as EffectDescriptor[]) || [];
+    if (scope === "return") return getReturns()[index]?.effects || [];
+    return ((model.get("channels") as Channel[]) || [])[index]?.effects || [];
   }
 
   function writeEffects(
-    scope: "channel" | "master",
+    scope: EffectScope,
     index: number,
     effects: EffectDescriptor[],
   ): void {
     if (scope === "master") {
       model.set("master_effects", effects);
       model.save_changes();
+    } else if (scope === "return") {
+      updateReturn(index, "effects", effects);
     } else {
       updateChannelEffects(index, effects);
     }
   }
 
   function setEffectParam(
-    scope: "channel" | "master",
+    scope: EffectScope,
     index: number,
     fxIndex: number,
     key: string,
@@ -1136,7 +1325,7 @@ function render({
   /** Insert editors for the open keys of this strip and wire their inputs. */
   function renderEditors(
     strip: Element,
-    scope: "channel" | "master",
+    scope: EffectScope,
     index: number,
   ): void {
     strip
@@ -1189,7 +1378,7 @@ function render({
 
   function bindEffectEditors(
     strip: Element,
-    scope: "channel" | "master",
+    scope: EffectScope,
     index: number,
   ): void {
     // A strip with an open editor widens so the parameter rows fit.
@@ -1223,12 +1412,30 @@ function render({
 
     console_.innerHTML = "";
     const channels = (model.get("channels") as Channel[]) || [];
+    const returns = getReturns();
     domChannelCount = channels.length;
+    domReturnCount = returns.length;
     domEffectSignature = currentEffectSignature(channels);
 
     channels.forEach((ch, i) => {
-      const strip = buildChannelStrip(ch, i);
+      const strip = buildChannelStrip(ch, i, returns);
       console_.appendChild(strip);
+
+      strip
+        .querySelectorAll<HTMLInputElement>(".nbplay-strip-send-level")
+        .forEach((input) => {
+          input.addEventListener("input", () => {
+            const k = parseInt(input.dataset.return || "-1", 10);
+            const cur = ((model.get("channels") as Channel[]) || [])[i];
+            if (!cur || k < 0) return;
+            const sends = Array.from(
+              { length: getReturns().length },
+              (_, idx) => clamp(Number(cur.sends?.[idx]) || 0, 0, 1),
+            );
+            sends[k] = clamp(parseFloat(input.value) || 0, 0, 1);
+            updateChannel(i, "sends", sends);
+          });
+        });
 
       const fader = strip.querySelector(
         ".nbplay-strip-fader",
@@ -1376,6 +1583,75 @@ function render({
       bindEffectEditors(strip, "channel", i);
     });
 
+    // Return strips
+    returns.forEach((ret, k) => {
+      const strip = buildReturnStrip(ret, k);
+      console_.appendChild(strip);
+      const fader = strip.querySelector(
+        ".nbplay-strip-fader",
+      ) as HTMLInputElement;
+      const gainLabel = strip.querySelector(
+        ".nbplay-strip-gain-label",
+      ) as HTMLDivElement;
+      fader.addEventListener("pointerdown", () => {
+        dragging = true;
+      });
+      fader.addEventListener("input", () => {
+        const val = parseFloat(fader.value);
+        gainLabel.textContent = fmtGain(val);
+        updateReturn(k, "gain", val);
+      });
+      fader.addEventListener("pointerup", endDrag);
+      fader.addEventListener("lostpointercapture", endDrag);
+      fader.addEventListener("change", endDrag);
+
+      const fxSelect = strip.querySelector(
+        ".nbplay-strip-fx-select",
+      ) as HTMLSelectElement;
+      (
+        strip.querySelector(".nbplay-strip-fx-add-btn") as HTMLButtonElement
+      ).addEventListener("click", () => {
+        updateReturn(k, "effects", [
+          ...(getReturns()[k]?.effects || []),
+          defaultEffect(fxSelect.value),
+        ]);
+      });
+      strip.querySelectorAll(".nbplay-strip-fx-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const fxIndex = parseInt(
+            (chip as HTMLElement).dataset.fxIndex || "-1",
+            10,
+          );
+          updateReturn(
+            k,
+            "effects",
+            (getReturns()[k]?.effects || []).map((fx, idx) =>
+              idx === fxIndex ? toggleEffectEnabled(fx) : fx,
+            ),
+          );
+        });
+      });
+      strip.querySelectorAll(".nbplay-strip-fx-remove").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const fxIndex = parseInt(
+            (btn as HTMLElement).dataset.fxIndex || "-1",
+            10,
+          );
+          updateReturn(
+            k,
+            "effects",
+            (getReturns()[k]?.effects || []).filter(
+              (_, idx) => idx !== fxIndex,
+            ),
+          );
+        });
+      });
+      (
+        strip.querySelector(".nbplay-strip-remove") as HTMLButtonElement
+      ).addEventListener("click", () => removeReturn(k));
+      bindEffectEditors(strip, "return", k);
+    });
+
     // Master strip
     const masterStrip = buildMasterStrip(
       model.get("master_gain") as number,
@@ -1494,10 +1770,58 @@ function render({
     updateChannel(index, "effects", effects);
   }
 
+  function updateReturn(index: number, key: string, value: unknown): void {
+    const returns = [...getReturns()];
+    if (index < returns.length) {
+      returns[index] = { ...returns[index], [key]: value };
+      model.set("returns", returns);
+      model.save_changes();
+    }
+  }
+
+  function addReturn(): void {
+    const returns = getReturns();
+    const n = returns.length + 1;
+    model.set("returns", [
+      ...returns,
+      { name: `Return ${n}`, gain: 0.8, effects: [] },
+    ]);
+    model.set(
+      "channels",
+      ((model.get("channels") as Channel[]) || []).map((ch) => ({
+        ...ch,
+        sends: [
+          ...Array.from({ length: returns.length }, (_, k) =>
+            clamp(Number(ch.sends?.[k]) || 0, 0, 1),
+          ),
+          0,
+        ],
+      })),
+    );
+    model.save_changes();
+  }
+
+  /** Drop a return bus and every channel's send to it. */
+  function removeReturn(index: number): void {
+    model.set(
+      "returns",
+      getReturns().filter((_, k) => k !== index),
+    );
+    model.set(
+      "channels",
+      ((model.get("channels") as Channel[]) || []).map((ch) => ({
+        ...ch,
+        sends: (ch.sends || []).filter((_, k) => k !== index),
+      })),
+    );
+    model.save_changes();
+  }
+
   function onModelChange(): void {
     const channels = (model.get("channels") as Channel[]) || [];
     if (
       channels.length !== domChannelCount ||
+      getReturns().length !== domReturnCount ||
       currentEffectSignature(channels) !== domEffectSignature
     ) {
       rebuild();
@@ -1509,9 +1833,12 @@ function render({
         channels,
         model.get("master_gain") as number,
         (model.get("master_effects") as EffectDescriptor[]) || [],
+        getReturns(),
       );
     }
   }
+
+  addReturnBtn.addEventListener("click", addReturn);
 
   // Add channel
   addBtn.addEventListener("click", () => {
@@ -1533,6 +1860,7 @@ function render({
   model.on("change:channels", onModelChange);
   model.on("change:master_gain", onModelChange);
   model.on("change:master_effects", onModelChange);
+  model.on("change:returns", onModelChange);
 
   // Initial render
   rebuild();
@@ -1560,10 +1888,12 @@ function render({
     lastMeterMs = now;
     const levels = audioBus.levels();
     if (!levels) return;
-    const strips = console_.querySelectorAll(
-      ".nbplay-mixer-strip:not(.nbplay-master-strip)",
-    );
+    const strips = console_.querySelectorAll(CHANNEL_STRIPS);
     levels.channels.forEach((level, i) => applyLevel(strips[i] || null, level));
+    const returnStrips = console_.querySelectorAll(".nbplay-return-strip");
+    levels.returns.forEach((level, k) =>
+      applyLevel(returnStrips[k] || null, level),
+    );
     applyLevel(console_.querySelector(".nbplay-master-strip"), levels.master);
   }
 
