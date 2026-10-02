@@ -24,12 +24,28 @@ export interface SamplerBus {
   releaseNote: (note: number) => void;
 }
 
+/**
+ * A track instrument that can play a note at a scheduled AudioContext time.
+ * Samplers and synths register one per channel; sequencers, launcher slots,
+ * and MIDI clips play through it instead of the built-in oscillator. The
+ * returned function cancels the note if it has not sounded yet.
+ */
+export interface InstrumentBus {
+  scheduleNote: (
+    note: number,
+    velocity: number,
+    at: number,
+    duration: number,
+  ) => (() => void) | void;
+}
+
 export interface SessionBus {
   audioCtx?: AudioContext;
   masterGain?: AudioNode;
   channels?: { gain: AudioNode }[];
   returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
+  instruments?: Record<number, InstrumentBus>;
   noteListeners?: Array<(evt: NoteEvent) => void>;
   plugins?: unknown;
   clock?: SessionClock;

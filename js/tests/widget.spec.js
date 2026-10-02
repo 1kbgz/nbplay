@@ -3,6 +3,8 @@ import { test, expect } from "@playwright/test";
 // Shared defaults & setup
 
 const DEFAULTS = {
+  session_id: "",
+  channel_index: -1,
   oscillator_type: "sine",
   frequency: 440,
   amplitude: 0.5,
@@ -357,6 +359,68 @@ test.describe("SynthWidget", () => {
   test("sample rate info is displayed", async ({ page }) => {
     await renderWidget(page, { sample_rate: 48000 });
     await expect(page.locator(".nbplay-info")).toHaveText("48000 Hz");
+  });
+
+  test("synth registers itself as the track's bus instrument", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const BaseAudioContext = window.AudioContext;
+      window.__oscs = [];
+      class RecordingAudioContext extends BaseAudioContext {
+        createOscillator() {
+          const osc = super.createOscillator();
+          const start = osc.start.bind(osc);
+          osc.start = (time) => {
+            window.__oscs.push({
+              time,
+              type: osc.type,
+              freq: osc.frequency.value,
+            });
+            start(time);
+          };
+          return osc;
+        }
+      }
+      window.AudioContext = RecordingAudioContext;
+      const ctx = new RecordingAudioContext();
+      globalThis.__nbplay = {
+        "synth-session": {
+          audioCtx: ctx,
+          channels: [{ gain: ctx.createGain() }],
+        },
+      };
+    });
+    await renderWidget(page, {
+      session_id: "synth-session",
+      channel_index: 0,
+      oscillator_type: "square",
+      amplitude: 0.5,
+    });
+    const result = await page.evaluate(() => {
+      const bus = globalThis.__nbplay["synth-session"];
+      const cancel = bus.instruments[0].scheduleNote(69, 127, 2.5, 0.5);
+      return { osc: window.__oscs[0], cancels: typeof cancel };
+    });
+    expect(result.osc).toEqual({ time: 2.5, type: "square", freq: 440 });
+    expect(result.cancels).toBe("function");
+
+    // Rendering the mixer later announces the bus; the synth registers then.
+    await page.evaluate(() => {
+      delete globalThis.__nbplay["synth-session"].instruments;
+      document.dispatchEvent(
+        new CustomEvent("nbplay-bus-ready", {
+          detail: { sessionId: "synth-session" },
+        }),
+      );
+    });
+    expect(
+      await page.evaluate(
+        () =>
+          typeof globalThis.__nbplay["synth-session"].instruments[0]
+            .scheduleNote,
+      ),
+    ).toBe("function");
   });
 
   test("waveform canvas is rendered", async ({ page }) => {

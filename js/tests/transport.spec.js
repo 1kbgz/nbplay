@@ -14,6 +14,7 @@ const DEFAULTS = {
   loop_enabled: false,
   loop_start_bar: 0,
   loop_end_bar: 4,
+  command: {},
 };
 
 /** Boot the transport widget inside the harness page. */
@@ -124,6 +125,61 @@ test.describe("TransportWidget", () => {
   });
 
   // 5. BPM display shows correct value
+  test("kernel commands move the clock and stale status does not", async ({
+    page,
+  }) => {
+    await renderWidget(page, { session_id: "cmd-session" });
+    const clockState = () =>
+      page.evaluate(() => {
+        const clock = globalThis.__nbplay["cmd-session"].clock;
+        return {
+          playing: clock.playing,
+          recording: clock.recording,
+          beat: clock.beat(),
+          isPlaying: window.__testModel._state.is_playing,
+        };
+      });
+    const command = (cmd) =>
+      page.evaluate((c) => {
+        window.__testModel.set("command", c);
+        window.__testModel._trigger("change:command");
+      }, cmd);
+
+    await command({ action: "play", nonce: 1 });
+    expect((await clockState()).playing).toBe(true);
+    expect((await clockState()).isPlaying).toBe(true);
+
+    // A delayed echo of old status must not stop (or restart) the clock.
+    await page.evaluate(() => {
+      window.__testModel.set("is_playing", false);
+      window.__testModel._trigger("change:is_playing");
+    });
+    expect((await clockState()).playing).toBe(true);
+    await expect(page.locator(".nbplay-transport-play")).toHaveText("▶");
+
+    await command({ action: "stop", nonce: 2 });
+    expect((await clockState()).playing).toBe(false);
+    await page.evaluate(() => {
+      window.__testModel.set("is_playing", true);
+      window.__testModel._trigger("change:is_playing");
+      window.__testModel.set("current_beat", 9);
+      window.__testModel._trigger("change:current_beat");
+    });
+    const after = await clockState();
+    expect(after.playing).toBe(false);
+    expect(after.beat).toBeLessThan(1);
+
+    await command({ action: "seek", beat: 8, nonce: 3 });
+    expect((await clockState()).beat).toBeCloseTo(8, 3);
+    // The same nonce is ignored; a new one applies.
+    await command({ action: "seek", beat: 2, nonce: 3 });
+    expect((await clockState()).beat).toBeCloseTo(8, 3);
+    await command({ action: "record", on: true, nonce: 4 });
+    const rec = await clockState();
+    expect(rec.recording).toBe(true);
+    expect(rec.playing).toBe(true);
+  });
+
   test("BPM display shows correct value", async ({ page }) => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(

@@ -14,6 +14,68 @@ import {
   onKernelDisconnect,
   toFloat32,
 } from "./helpers.ts";
+import { getSessionBus } from "./session.ts";
+
+function midiToHz(note: number): number {
+  return 440 * Math.pow(2, (note - 69) / 12);
+}
+
+/**
+ * Play one note of this synth's oscillator type on the session bus at a
+ * scheduled time; noise plays a short filtered burst. Returns a canceller.
+ */
+function scheduleSynthNote(
+  ctx: AudioContext,
+  output: AudioNode,
+  type: string,
+  amplitude: number,
+  note: number,
+  velocity: number,
+  at: number,
+  duration: number,
+): () => void {
+  const level = Math.max(0, Math.min(1, amplitude)) * (velocity / 127);
+  const attack = 0.005;
+  const release = Math.min(0.05, duration * 0.2);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, at);
+  gain.gain.linearRampToValueAtTime(level, at + attack);
+  gain.gain.linearRampToValueAtTime(
+    0,
+    at + Math.max(attack, duration - release),
+  );
+  gain.connect(output);
+  let source: AudioScheduledSourceNode;
+  if (type === "noise") {
+    const frames = Math.max(1, Math.round(ctx.sampleRate * duration));
+    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+    const node = ctx.createBufferSource();
+    node.buffer = buffer;
+    source = node;
+  } else {
+    const osc = ctx.createOscillator();
+    osc.type = (
+      type === "square" || type === "saw"
+        ? type.replace("saw", "sawtooth")
+        : "sine"
+    ) as OscillatorType;
+    osc.frequency.value = midiToHz(note);
+    source = osc;
+  }
+  source.connect(gain);
+  source.start(at);
+  source.stop(at + duration);
+  return () => {
+    try {
+      source.stop(0);
+      gain.disconnect();
+    } catch (_) {
+      /* already stopped */
+    }
+  };
+}
 
 // Frequency helpers (logarithmic mapping)
 const MIN_FREQ = 20;
@@ -388,6 +450,48 @@ function render({
   model.on("change:sample_rate", syncInfo);
   model.on("change:waveform", syncWaveform);
 
+  // Session instrument: sequencers, launcher slots, and MIDI clips on this
+  // synth's track play through it with its oscillator type and amplitude.
+  function registerOnSessionBus(): void {
+    const sid = String(model.get("session_id") || "");
+    const idx = Number(model.get("channel_index"));
+    if (!sid || !(idx >= 0)) return;
+    const bus = getSessionBus(sid);
+    if (!bus) return; // the mixer renders later and announces nbplay-bus-ready
+    const instruments = bus.instruments || {};
+    bus.instruments = instruments;
+    instruments[idx] = {
+      scheduleNote(note, velocity, at, duration) {
+        const ctx = bus.audioCtx;
+        const output = bus.channels?.[idx]?.gain || bus.masterGain;
+        if (!ctx || !output) return;
+        return scheduleSynthNote(
+          ctx,
+          output,
+          String(model.get("oscillator_type") || "sine"),
+          Number(model.get("amplitude")) || 0,
+          note,
+          velocity,
+          at,
+          duration,
+        );
+      },
+    };
+  }
+  function unregisterFromSessionBus(): void {
+    const bus = getSessionBus(String(model.get("session_id") || ""));
+    const idx = Number(model.get("channel_index"));
+    if (bus?.instruments && idx >= 0) delete bus.instruments[idx];
+  }
+  function onBusReady(e: Event): void {
+    const detail = (e as CustomEvent).detail;
+    if (detail?.sessionId === model.get("session_id")) registerOnSessionBus();
+  }
+  document.addEventListener("nbplay-bus-ready", onBusReady);
+  model.on("change:session_id", registerOnSessionBus);
+  model.on("change:channel_index", registerOnSessionBus);
+  registerOnSessionBus();
+
   // Initial state
   // Force stopped state on render — prevents stale is_playing=true
   // from a saved notebook from launching audio in an undefined state.
@@ -412,6 +516,8 @@ function render({
 
   return () => {
     cancelDisconnect();
+    document.removeEventListener("nbplay-bus-ready", onBusReady);
+    unregisterFromSessionBus();
     audio.stop();
   };
 }

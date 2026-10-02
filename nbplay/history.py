@@ -49,6 +49,7 @@ TRANSIENT_TRAITS = frozenset(
         "waveform",
         "undo_request",
         "redo_request",
+        "command",
     }
 )
 

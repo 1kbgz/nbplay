@@ -182,6 +182,65 @@ test.describe("MIDI clips", () => {
       .toEqual([60, 67]);
   });
 
+  test("prefers the lane's bus instrument and cancels unsounded notes on stop", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      bpm: 60,
+      clips: [
+        midiClip([
+          { beat: 0, duration: 0.5, note: 60, velocity: 100 },
+          { beat: 3, duration: 0.5, note: 67, velocity: 90 },
+        ]),
+      ],
+    });
+    await page.evaluate((sessionId) => {
+      const ctx = new AudioContext();
+      const bus = (window.__nbplay = window.__nbplay || {});
+      window.__scheduled = [];
+      window.__cancelled = [];
+      window.__triggers = [];
+      bus[sessionId] = {
+        ...(bus[sessionId] || {}),
+        audioCtx: ctx,
+        masterGain: ctx.createGain(),
+        channels: [{ gain: ctx.createGain() }],
+        samplers: {
+          0: {
+            triggerNote: (note) => window.__triggers.push(note),
+            releaseNote: () => {},
+          },
+        },
+        instruments: {
+          0: {
+            scheduleNote(note, velocity, at, duration) {
+              window.__scheduled.push({ note, velocity, at, duration });
+              return () => window.__cancelled.push(note);
+            },
+          },
+        },
+      };
+    }, SESSION_ID);
+
+    await page.locator(".nbplay-timeline-play").click();
+    await expect
+      .poll(async () => page.evaluate(() => window.__scheduled.length), {
+        timeout: 2000,
+      })
+      .toBeGreaterThanOrEqual(1);
+    const first = await page.evaluate(() => window.__scheduled[0]);
+    expect(first.note).toBe(60);
+    expect(first.velocity).toBe(100);
+    expect(first.duration).toBeCloseTo(0.5, 6);
+    expect(await page.evaluate(() => window.__triggers)).toEqual([]);
+
+    // The note at beat 3 is still in the future at 60 BPM: stopping (the
+    // play button toggles) cancels it.
+    await page.waitForFunction(() => window.__scheduled.length >= 2);
+    await page.locator(".nbplay-timeline-play").click();
+    expect(await page.evaluate(() => window.__cancelled)).toContain(67);
+  });
+
   test("falls back to an oscillator when the lane has no sampler", async ({
     page,
   }) => {

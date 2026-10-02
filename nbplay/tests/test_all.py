@@ -385,6 +385,15 @@ class TestNoiseSource:
 
 
 class TestSynthWidget:
+    def test_session_routing_defaults(self):
+        w = SynthWidget()
+        assert w.session_id == "" and w.channel_index == -1
+        s = Session()
+        track = s.add_track("Lead", sound_source=w)
+        assert w.session_id == s.session_id and w.channel_index == track.mixer_channel
+        s.remove_track(0)
+        assert w.session_id == "" and w.channel_index == -1
+
     def test_defaults(self):
         w = SynthWidget()
         assert w.oscillator_type == "sine"
@@ -2080,6 +2089,37 @@ class TestSamplerWidget:
 
 
 class TestTransportWidget:
+    def test_commands_and_status(self):
+        t = TransportWidget()
+        assert t.command == {}
+        t.play()
+        assert t.command == {"action": "play", "nonce": 1} and t.is_playing is True
+        t.record()
+        assert t.command == {"action": "record", "on": True, "nonce": 2} and t.is_recording is True
+        t.record(False)
+        assert t.is_recording is False
+        t.stop()
+        assert t.command == {"action": "stop", "nonce": 4} and t.is_playing is False
+        t.seek(-3)
+        assert t.command == {"action": "seek", "beat": 0.0, "nonce": 5}
+
+    def test_assigning_status_from_python_issues_a_command(self):
+        t = TransportWidget()
+        t.is_playing = True
+        assert t.command == {"action": "play", "nonce": 1}
+        t.current_beat = 4.5
+        assert t.command == {"action": "seek", "beat": 4.5, "nonce": 2}
+        t.is_recording = True
+        assert t.command == {"action": "record", "on": True, "nonce": 3}
+
+    def test_browser_status_does_not_echo_as_a_command(self):
+        t = TransportWidget()
+        # The browser mirrors status through set_state, which holds the
+        # property lock; that must never turn into a clock command.
+        t.set_state({"is_playing": True, "current_beat": 2.0, "is_recording": True})
+        assert t.is_playing is True and t.current_beat == pytest.approx(2.0)
+        assert t.command == {}
+
     def test_defaults(self):
         t = TransportWidget()
         assert t.bpm == 120.0
@@ -4042,10 +4082,16 @@ class TestSession:
         s = Session()
         s.timeline.bpm = 132.0
         assert s.transport.bpm == pytest.approx(132.0)
-        s.timeline.is_playing = True
-        assert s.transport.is_playing is True
+        s.transport.is_playing = True
+        assert s.timeline.is_playing is True
         s.transport.is_playing = False
         assert s.timeline.is_playing is False
+        # Status flows one way: a timeline or launcher write never commands
+        # the transport (browser buttons go through the shared clock).
+        s.timeline.is_playing = True
+        assert s.transport.is_playing is False
+        s.launcher.is_playing = True
+        assert s.transport.is_playing is False
         s.transport.is_recording = True
         assert s.timeline.is_recording is True
         s.transport.current_beat = 7.25
@@ -4062,12 +4108,16 @@ class TestSession:
         s.play()
         assert s.transport.is_playing is True
         assert s.timeline.is_playing is True
+        assert s.transport.command == {"action": "play", "nonce": 1}
         s.seek(12)
         assert s.transport.current_beat == pytest.approx(12.0)
         assert s.timeline.current_beat == pytest.approx(12.0)
+        assert s.transport.command == {"action": "seek", "beat": 12.0, "nonce": 2}
+        assert s.transport.bar_number == 3 and s.transport.beat_in_bar == 0
         s.stop()
         assert s.transport.is_playing is False
         assert s.transport.current_beat == pytest.approx(12.0)
+        assert s.transport.command == {"action": "stop", "nonce": 3}
 
     def test_play_sync(self):
         """Transport play state propagates to all sequencers."""
@@ -4140,14 +4190,14 @@ class TestSession:
         assert samp0.channel_index == 0
         assert samp2.channel_index == 1
 
-    def test_add_track_non_sampler_sound_source_no_error(self):
-        """add_track with SynthWidget (no session_id attr) does not error."""
+    def test_add_track_routes_synth_sound_source(self):
+        """add_track gives a SynthWidget the session routing so it joins the bus."""
         s = Session()
         synth = SynthWidget()
         track = s.add_track("Lead", SequencerWidget(), synth)
         assert track.name == "Lead"
-        assert not hasattr(synth, "session_id")
-        assert not hasattr(synth, "channel_index")
+        assert synth.session_id == s.session_id
+        assert synth.channel_index == track.mixer_channel
 
     def test_remove_track_unlinks(self):
         """Removed track no longer syncs with transport."""

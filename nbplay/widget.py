@@ -709,6 +709,11 @@ class SynthWidget(anywidget.AnyWidget):
     _esm = _STATIC / "widget.js"
     _css = _STATIC / "widget.css"
 
+    # Session routing (set by Session): the synth joins the bus as the
+    # track's instrument so sequencers and clips play with its oscillator.
+    session_id = traitlets.Unicode("").tag(sync=True)
+    channel_index = traitlets.Int(-1).tag(sync=True)
+
     oscillator_type = traitlets.Unicode("sine").tag(sync=True)
     frequency = traitlets.Float(440.0).tag(sync=True)
     amplitude = traitlets.Float(0.8).tag(sync=True)
@@ -1968,9 +1973,10 @@ class TransportWidget(anywidget.AnyWidget):
     drives the shared session clock on ``globalThis.__nbplay[session_id]``;
     every sequencer and timeline with the same ``session_id`` follows that
     clock directly, so play, seek, and tempo changes never wait on a kernel
-    round-trip. The synced traits mirror the clock for Python callers:
-    setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves
-    the clock, and ``current_beat`` is updated coarsely while playing.
+    round-trip. ``is_playing``, ``is_recording``, and ``current_beat`` are
+    status written by the browser clock; :meth:`play`, :meth:`stop`,
+    :meth:`seek`, and :meth:`record` move the clock through the ``command``
+    trait, and assigning those traits from Python issues the same command.
     """
 
     _esm = _STATIC / "transport.js"
@@ -2001,6 +2007,60 @@ class TransportWidget(anywidget.AnyWidget):
     # a Session answers by undoing or redoing its history.
     undo_request = traitlets.Int(0).tag(sync=True)
     redo_request = traitlets.Int(0).tag(sync=True)
+    # Kernel -> browser clock commands: ``{"action", ..., "nonce"}``. Status
+    # traits are never commands, so a delayed echo cannot move the clock.
+    command = traitlets.Dict({}).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._status_write = False
+        self.observe(self._on_status_assigned, names=["is_playing", "is_recording", "current_beat"])
+
+    def _command(self, action, **fields):
+        self.command = {"action": action, **fields, "nonce": self.command.get("nonce", 0) + 1}
+
+    def _set_status(self, **values):
+        self._status_write = True
+        try:
+            for name, value in values.items():
+                setattr(self, name, value)
+        finally:
+            self._status_write = False
+
+    def _on_status_assigned(self, change):
+        # Browser writes arrive under the property lock; links and our own
+        # status writes set the flag. Anything else is user code assigning
+        # the trait, which keeps working by turning into a command.
+        if self._status_write or change["name"] in self._property_lock:
+            return
+        if change["name"] == "is_playing":
+            self._command("play" if change["new"] else "stop")
+        elif change["name"] == "is_recording":
+            self._command("record", on=bool(change["new"]))
+        else:
+            self._command("seek", beat=float(change["new"]))
+
+    def play(self):
+        """Start the browser clock (and mark the status as playing)."""
+        self._command("play")
+        self._set_status(is_playing=True)
+
+    def stop(self):
+        """Stop the browser clock, keeping the playhead position."""
+        self._command("stop")
+        self._set_status(is_playing=False)
+
+    def seek(self, beat):
+        """Move the playhead to ``beat`` (quarter-note units)."""
+        beat = max(0.0, float(beat))
+        self._command("seek", beat=beat)
+        bpb = max(1, int(self.time_signature_num))
+        self._set_status(current_beat=beat, bar_number=int(beat // bpb), beat_in_bar=int(beat % bpb))
+
+    def record(self, on=True):
+        """Arm (or disarm) recording; arming also starts the clock."""
+        self._command("record", on=bool(on))
+        self._set_status(is_recording=bool(on), is_playing=self.is_playing or bool(on))
 
 
 class TimelineWidget(anywidget.AnyWidget):
@@ -3581,20 +3641,21 @@ class Session:
             time_signature_num=time_signature[0],
             time_signature_den=time_signature[1],
         )
+        # Play state and position are status owned by the transport: the
+        # other widgets mirror it one way and never command the clock
+        # through these traits (browser actions go through the shared clock).
         self._launcher_links = [
             traitlets.link((self.transport, "bpm"), (self.launcher, "bpm")),
             traitlets.link((self.transport, "time_signature_num"), (self.launcher, "time_signature_num")),
             traitlets.link((self.transport, "time_signature_den"), (self.launcher, "time_signature_den")),
-            traitlets.link((self.transport, "is_playing"), (self.launcher, "is_playing")),
+            traitlets.dlink((self.transport, "is_playing"), (self.launcher, "is_playing")),
         ]
         self._timeline_links = [
             traitlets.link((self.transport, "bpm"), (self.timeline, "bpm")),
             traitlets.link((self.transport, "time_signature_num"), (self.timeline, "time_signature_num")),
             traitlets.link((self.transport, "time_signature_den"), (self.timeline, "time_signature_den")),
-            traitlets.link((self.transport, "is_playing"), (self.timeline, "is_playing")),
-            traitlets.link((self.transport, "is_recording"), (self.timeline, "is_recording")),
-            # One-way: the transport persists the shared clock position.
-            # Timeline seeks reach the transport through the browser clock.
+            traitlets.dlink((self.transport, "is_playing"), (self.timeline, "is_playing")),
+            traitlets.dlink((self.transport, "is_recording"), (self.timeline, "is_recording")),
             traitlets.dlink((self.transport, "current_beat"), (self.timeline, "current_beat")),
         ]
         self.tracks = []
@@ -3672,15 +3733,15 @@ class Session:
 
     def play(self):
         """Start the shared transport."""
-        self.transport.is_playing = True
+        self.transport.play()
 
     def stop(self):
         """Stop the shared transport, keeping the playhead position."""
-        self.transport.is_playing = False
+        self.transport.stop()
 
     def seek(self, beat):
         """Move the shared playhead to ``beat`` (quarter-note units)."""
-        self.transport.current_beat = float(beat)
+        self.transport.seek(beat)
 
     def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
         """Add a track, create a mixer channel, and link transport state.

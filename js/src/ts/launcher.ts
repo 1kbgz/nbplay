@@ -768,11 +768,15 @@ export default {
     model.on("change:quantize", syncGrid);
     model.on("change:is_playing", () => {
       if (disposed || mirroring) return;
-      const clk = clock();
-      if (model.get("is_playing")) {
-        if (!clk.playing) clk.play();
-      } else if (clk.playing) {
-        clk.stop();
+      // In a session `is_playing` is status mirrored from the transport;
+      // only a standalone launcher treats a kernel write as a command.
+      if (!binding.shared()) {
+        const clk = clock();
+        if (model.get("is_playing")) {
+          if (!clk.playing) clk.play();
+        } else if (clk.playing) {
+          clk.stop();
+        }
       }
       syncGrid();
     });
