@@ -806,7 +806,7 @@ test.describe("SamplerWidget", () => {
     );
   });
 
-  test("lookahead voice stealing stops the old voice when the new one starts", async ({
+  test("voice stealing counts held voices and stops the oldest at the new start", async ({
     page,
   }) => {
     await page.evaluate(() => {
@@ -815,18 +815,17 @@ test.describe("SamplerWidget", () => {
       const original = ctx.constructor.prototype.createBufferSource;
       ctx.constructor.prototype.createBufferSource = function () {
         const node = original.call(this);
-        const entry = { start: null, stops: [], gainDisconnected: () => false };
+        const entry = { start: null, stops: [] };
         const start = node.start.bind(node);
         const stop = node.stop.bind(node);
-        node.start = (when) => {
+        node.start = (when, offset, duration) => {
           entry.start = when;
-          start(when);
+          start(when, offset, duration);
         };
         node.stop = (when) => {
           entry.stops.push(when);
           stop(when);
         };
-        node.__entry = entry;
         window.__sources.push(entry);
         return node;
       };
@@ -850,17 +849,30 @@ test.describe("SamplerWidget", () => {
     });
     const result = await page.evaluate(() => {
       const bus = globalThis.__nbplay["steal-session"];
-      const base = bus.audioCtx.currentTime + 1;
-      bus.instruments[0].scheduleNote(60, 100, base, 0.5);
-      bus.instruments[0].scheduleNote(62, 100, base + 0.5, 0.5);
-      const [first, second] = window.__sources;
-      return { firstStops: first.stops, secondStart: second.start, base };
+      // Scheduled notes release themselves and never steal held voices.
+      bus.instruments[0].scheduleNote(
+        60,
+        100,
+        bus.audioCtx.currentTime + 1,
+        0.5,
+      );
+      bus.samplers[0].triggerNote(62, 100);
+      bus.samplers[0].triggerNote(64, 100);
+      const [scheduled, first, second] = window.__sources;
+      return {
+        scheduledStolen: scheduled.stops.length,
+        firstStolenAt: first.stops,
+        secondStart: second.start,
+      };
     });
-    // The first voice is stolen at the second note's start time, not now.
-    expect(
-      result.firstStops.some((t) => Math.abs(t - result.secondStart) < 1e-6),
-    ).toBe(true);
-    expect(result.firstStops.every((t) => t >= result.base)).toBe(true);
+    // The scheduled note keeps only its own automatic stop.
+    expect(result.scheduledStolen).toBe(1);
+    // The held voice is stolen when the replacement starts.
+    expect(result.firstStolenAt.length).toBe(1);
+    expect(result.firstStolenAt[0]).toBeCloseTo(result.secondStart, 6);
+    await expect(page.locator(".nbplay-samp-active-voices")).toHaveText(
+      "1 active",
+    );
   });
 
   test("moving channels or disposing removes only this sampler's registrations", async ({

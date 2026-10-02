@@ -275,6 +275,10 @@ export function stepIndexForBeat(
   return Math.floor(beat / stepBeats + 1e-6);
 }
 
+// How long after a note's duration its handle is kept so a stop can still
+// silence a long release (the sampler allows releases up to five seconds).
+const NOTE_TAIL_SECONDS = 6;
+
 export function createAudioScheduler(
   options: AudioSchedulerOptions = {},
 ): AudioScheduler {
@@ -297,7 +301,20 @@ export function createAudioScheduler(
     pending.forEach((entry) => {
       if (onlyFuture ? entry.at > now : entry.until > now) entry.cancel();
     });
-    pending = [];
+    // Sounding notes keep their handles so a later stop can still end them.
+    pending = onlyFuture ? pending.filter((entry) => entry.at <= now) : [];
+  }
+
+  /** End scheduling without touching notes that are already sounding. */
+  function halt(): void {
+    if (schedulerTimer) {
+      clearInterval(schedulerTimer);
+      schedulerTimer = null;
+    }
+    cancelPending(true);
+    cursor = null;
+    activeClock = null;
+    activeModel = null;
   }
 
   const self: AudioScheduler = {
@@ -383,7 +400,8 @@ export function createAudioScheduler(
       Boolean(model.get("loop_enabled")),
     );
     if (stepIndex < 0) {
-      self.stop();
+      // The pattern ended: stop scheduling but let the last notes ring.
+      halt();
       options.onEnd?.();
       return false;
     }
@@ -450,7 +468,7 @@ export function createAudioScheduler(
         pending.push({
           cancel,
           at: scheduledTime,
-          until: scheduledTime + duration + 1,
+          until: scheduledTime + duration + NOTE_TAIL_SECONDS,
         });
       emitBusNote(sessionId, {
         note,

@@ -20,6 +20,9 @@ const CLIP_SNAP_BEATS = 0.25;
 const MIN_CLIP_BEATS = 0.25;
 const DRAG_THRESHOLD_PX = 3;
 const MIDI_LOOKAHEAD_SECONDS = 0.1;
+// How long after a note's duration its handle is kept so a stop can still
+// silence a long release (the sampler allows releases up to five seconds).
+const NOTE_TAIL_SECONDS = 6;
 const MIDI_TICK_MS = 25;
 
 interface TimelineTrack {
@@ -288,8 +291,9 @@ export default {
     }
 
     function setRecordingFlag(on: boolean): void {
-      model.set("is_recording", on);
+      // Clock first: the status observer reconciles against it.
       clock().setRecording(on);
+      mirror(() => model.set("is_recording", on));
     }
 
     function onClockEvent(event: ClockEvent): void {
@@ -964,7 +968,10 @@ export default {
           durationSeconds,
         );
         if (cancel) {
-          scheduledNotes.push({ cancel, until: atTime + durationSeconds + 1 });
+          scheduledNotes.push({
+            cancel,
+            until: atTime + durationSeconds + NOTE_TAIL_SECONDS,
+          });
           const now = clk.now();
           scheduledNotes = scheduledNotes.filter((entry) => entry.until > now);
         }
@@ -984,11 +991,16 @@ export default {
             delayMs + durationSeconds * 1000,
           ),
         );
+        // Stopping mid-note releases it instead of leaving it hanging.
+        scheduledNotes.push({
+          cancel: () => sampler.releaseNote(event.note),
+          until: atTime + durationSeconds + NOTE_TAIL_SECONDS,
+        });
         return;
       }
       const ctx = clk.context();
       if (!ctx) return;
-      scheduleOscillator(
+      const osc = scheduleOscillator(
         ctx,
         bus?.channels?.[track.channel_index]?.gain || bus?.masterGain || null,
         midiToHz(event.note),
@@ -996,17 +1008,38 @@ export default {
         atTime,
         durationSeconds,
       );
+      if (osc)
+        scheduledNotes.push({
+          cancel: () => {
+            try {
+              osc.stop(0);
+              osc.disconnect();
+            } catch (_) {
+              /* already stopped */
+            }
+          },
+          until: atTime + durationSeconds + NOTE_TAIL_SECONDS,
+        });
     }
 
     function scheduleMidi(clips: AudioClip[], tracks: TimelineTrack[]): void {
       const clk = clock();
       const now = clk.beat();
-      // The clock only moves backwards on a loop wrap or a seek: restart
-      // the cursor there so notes after the jump are not lost.
-      if (now < midiLastBeat - 1e-6) midiCursorBeat = now;
+      const loop = clk.loop;
+      const looping = loop.enabled && loop.endBeat > loop.startBeat;
+      // The clock only moves backwards on a loop wrap or a seek. After a
+      // wrap, restart from the loop start so a note on the first beat is
+      // not skipped by the tick that noticed the wrap; after a seek, from
+      // the new position.
+      if (now < midiLastBeat - 1e-6)
+        midiCursorBeat =
+          looping && now < loop.endBeat ? Math.min(now, loop.startBeat) : now;
       midiLastBeat = now;
       const spb = clk.secondsPerBeat();
-      const horizon = now + MIDI_LOOKAHEAD_SECONDS / spb;
+      let horizon = now + MIDI_LOOKAHEAD_SECONDS / spb;
+      // Never schedule past the loop end: those beats never arrive.
+      if (looping && now < loop.endBeat)
+        horizon = Math.min(horizon, loop.endBeat);
       if (horizon <= midiCursorBeat) return;
       clips.forEach((clip) => {
         const track = tracks[clip.track_index];
