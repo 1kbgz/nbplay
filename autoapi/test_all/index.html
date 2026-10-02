@@ -745,6 +745,11 @@
 <dt class="sig sig-object py" id="test_all.TestSynthWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestSynthWidget</span></span><a class="headerlink" href="#test_all.TestSynthWidget" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestSynthWidget.test_session_routing_defaults">
+<span class="sig-name descname"><span class="pre">test_session_routing_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_session_routing_defaults" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="test_all.TestSynthWidget.test_defaults">
 <span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSynthWidget.test_defaults" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1840,6 +1845,21 @@
 <dt class="sig sig-object py" id="test_all.TestTransportWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">TestTransportWidget</span></span><a class="headerlink" href="#test_all.TestTransportWidget" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_commands_and_status">
+<span class="sig-name descname"><span class="pre">test_commands_and_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_commands_and_status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_assigning_status_from_python_issues_a_command">
+<span class="sig-name descname"><span class="pre">test_assigning_status_from_python_issues_a_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_assigning_status_from_python_issues_a_command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_all.TestTransportWidget.test_browser_status_does_not_echo_as_a_command">
+<span class="sig-name descname"><span class="pre">test_browser_status_does_not_echo_as_a_command</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_browser_status_does_not_echo_as_a_command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="test_all.TestTransportWidget.test_defaults">
 <span class="sig-name descname"><span class="pre">test_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestTransportWidget.test_defaults" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2818,9 +2838,9 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="test_all.TestSession.test_add_track_non_sampler_sound_source_no_error">
-<span class="sig-name descname"><span class="pre">test_add_track_non_sampler_sound_source_no_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_add_track_non_sampler_sound_source_no_error" title="Link to this definition">¶</a></dt>
-<dd><p>add_track with SynthWidget (no session_id attr) does not error.</p>
+<dt class="sig sig-object py" id="test_all.TestSession.test_add_track_routes_synth_sound_source">
+<span class="sig-name descname"><span class="pre">test_add_track_routes_synth_sound_source</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.TestSession.test_add_track_routes_synth_sound_source" title="Link to this definition">¶</a></dt>
+<dd><p>add_track gives a SynthWidget the session routing so it joins the bus.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3006,6 +3026,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#test_all.TestSynthWidget"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestSynthWidget.test_session_routing_defaults"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_session_routing_defaults()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSynthWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_defaults()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_generated_on_init"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_generated_on_init()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSynthWidget.test_waveform_is_binary_float32"><code class="docutils literal notranslate"><span class="pre">TestSynthWidget.test_waveform_is_binary_float32()</span></code></a></li>
@@ -3261,6 +3282,9 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#test_all.TestTransportWidget"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a><ul>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_commands_and_status"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_commands_and_status()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_assigning_status_from_python_issues_a_command"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_assigning_status_from_python_issues_a_command()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestTransportWidget.test_browser_status_does_not_echo_as_a_command"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_browser_status_does_not_echo_as_a_command()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestTransportWidget.test_defaults"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_defaults()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestTransportWidget.test_custom_bpm"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_custom_bpm()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestTransportWidget.test_set_bpm"><code class="docutils literal notranslate"><span class="pre">TestTransportWidget.test_set_bpm()</span></code></a></li>
@@ -3485,7 +3509,7 @@
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track_clears_sound_source_routing"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_clears_sound_source_routing()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_middle_track_adjusts_sound_source_indices"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_middle_track_adjusts_sound_source_indices()</span></code></a></li>
-<li><a class="reference internal" href="#test_all.TestSession.test_add_track_non_sampler_sound_source_no_error"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_track_non_sampler_sound_source_no_error()</span></code></a></li>
+<li><a class="reference internal" href="#test_all.TestSession.test_add_track_routes_synth_sound_source"><code class="docutils literal notranslate"><span class="pre">TestSession.test_add_track_routes_synth_sound_source()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track_unlinks"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_unlinks()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_remove_track_out_of_bounds"><code class="docutils literal notranslate"><span class="pre">TestSession.test_remove_track_out_of_bounds()</span></code></a></li>
 <li><a class="reference internal" href="#test_all.TestSession.test_repr"><code class="docutils literal notranslate"><span class="pre">TestSession.test_repr()</span></code></a></li>

@@ -710,6 +710,10 @@ lazily by <code class="docutils literal notranslate"><span class="pre">getOrCrea
 <li><p>CSS custom properties from JupyterLab, especially <code class="docutils literal notranslate"><span class="pre">--jp-*</span></code> theme variables.</p></li>
 </ul>
 </section>
+<section id="instruments-on-the-bus">
+<h3>Instruments on the bus<a class="headerlink" href="#instruments-on-the-bus" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">bus.instruments[channel]</span></code> is a <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">scheduleNote(note,</span> <span class="pre">velocity,</span> <span class="pre">at,</span> <span class="pre">duration)</span> <span class="pre">}</span></code> that samplers and synths register for their track. The shared scheduler (sequencers and launcher slots) and the timeline’s MIDI clips call it when present and fall back to the built-in sine oscillator otherwise; both keep the cancel functions it returns and call them on stop for notes that have not sounded, so a scene switch or transport stop never plays the next step anyway.</p>
+</section>
 <section id="session-bus-shape">
 <h3>Session bus shape<a class="headerlink" href="#session-bus-shape" title="Link to this heading">¶</a></h3>
 <p>Every widget with a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> shares one bus object, fetched with
@@ -759,6 +763,12 @@ double-clicking their readouts.</p>
 the TypeScript playback path if the feature should affect both the picture and
 the sound. Add tests in Python for preview/backend behavior and Playwright tests
 for DOM and model sync.</p>
+<p>With a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> (set by <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code>), the
+synth also registers under <code class="docutils literal notranslate"><span class="pre">bus.instruments</span></code> so sequencers, launcher slots, and
+MIDI clips on its track play notes with its oscillator type and amplitude
+(noise plays a short burst) through the track’s mixer channel, instead of the
+scheduler’s sine fallback. It registers at render, when the routing traits
+change, and on <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> when the mixer renders later.</p>
 </section>
 <section id="settingswidget">
 <h3>SettingsWidget<a class="headerlink" href="#settingswidget" title="Link to this heading">¶</a></h3>
@@ -904,7 +914,11 @@ trait on the current widget, and <code class="docutils literal notranslate"><spa
 controller discovery, MIDI learn, and automation control.</p>
 <p>When the sampler has a session and channel index, it registers <code class="docutils literal notranslate"><span class="pre">triggerNote()</span></code>
 and <code class="docutils literal notranslate"><span class="pre">releaseNote()</span></code> on the session bus so keyboard widgets, MIDI keyboard input,
-sequencers, and PadWidget routes can drive the same sampler/slice map by note.</p>
+and PadWidget routes can drive the same sampler/slice map by note, and
+<code class="docutils literal notranslate"><span class="pre">scheduleNote(note,</span> <span class="pre">velocity,</span> <span class="pre">at,</span> <span class="pre">duration)</span></code> under <code class="docutils literal notranslate"><span class="pre">bus.instruments</span></code> so
+sequencers, launcher slots, and MIDI clips play it at exact audio-clock times
+with an automatic release; the returned function cancels a note that has not
+sounded yet.</p>
 <p>Multi-sample zones live in <code class="docutils literal notranslate"><span class="pre">zones</span></code>: each entry maps a note range and a velocity
 range to its own float32 PCM (<code class="docutils literal notranslate"><span class="pre">data</span></code>), root note, and sample rate. When a note
 plays, the first matching zone wins over the main sample and plays one-shot at
@@ -921,6 +935,10 @@ zone file input, a microphone take through the Rec button (<code class="docutils
 and trim to the sampler in a <code class="docutils literal notranslate"><span class="pre">capture_request</span></code>; the sampler fetches, decodes,
 and writes the zone back to <code class="docutils literal notranslate"><span class="pre">zones</span></code>. Both widgets have to be rendered in the
 same page for that. Session save stores zone PCM as <code class="docutils literal notranslate"><span class="pre">samples/track-N-zone-M.f32</span></code>.</p>
+</section>
+<section id="transport-commands-versus-status">
+<h3>Transport commands versus status<a class="headerlink" href="#transport-commands-versus-status" title="Link to this heading">¶</a></h3>
+<p>The transport’s play state and position are status. The browser clock writes <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, and <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code> into the model, the session mirrors them one way (<code class="docutils literal notranslate"><span class="pre">dlink</span></code>) into the timeline and launcher, and no browser widget in a session treats a kernel write of these traits as an instruction: a delayed echo of old status can therefore never restart or stop the clock. Kernel code moves the clock through the transport’s <code class="docutils literal notranslate"><span class="pre">command</span></code> trait, <code class="docutils literal notranslate"><span class="pre">{&quot;action&quot;:</span> <span class="pre">&quot;play&quot;</span> <span class="pre">|</span> <span class="pre">&quot;stop&quot;</span> <span class="pre">|</span> <span class="pre">&quot;seek&quot;</span> <span class="pre">|</span> <span class="pre">&quot;record&quot;,</span> <span class="pre">...,</span> <span class="pre">&quot;nonce&quot;}</span></code>, issued by <code class="docutils literal notranslate"><span class="pre">play()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, <code class="docutils literal notranslate"><span class="pre">seek()</span></code>, and <code class="docutils literal notranslate"><span class="pre">record()</span></code>; the nonce makes repeated commands distinct and lets a view ignore a command that was already in the model when it rendered. Assigning <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, or <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> from user code still works: the widget sees that the write did not come from the browser (ipywidgets holds the property lock for browser writes) and turns it into the same command, while also setting the status optimistically so headless code reads a consistent value. Standalone widgets without a session keep treating a kernel <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> write as a command on their private clock.</p>
 </section>
 <section id="transportwidget">
 <h3>TransportWidget<a class="headerlink" href="#transportwidget" title="Link to this heading">¶</a></h3>
@@ -1564,6 +1582,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#wasm-binding-layer">WASM binding layer</a></li>
 <li><a class="reference internal" href="#typescript-widget-architecture">TypeScript widget architecture</a><ul>
 <li><a class="reference internal" href="#browser-apis-used">Browser APIs used</a></li>
+<li><a class="reference internal" href="#instruments-on-the-bus">Instruments on the bus</a></li>
 <li><a class="reference internal" href="#session-bus-shape">Session bus shape</a></li>
 </ul>
 </li>
@@ -1573,6 +1592,7 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
 <li><a class="reference internal" href="#mixerwidget">MixerWidget</a></li>
 <li><a class="reference internal" href="#sequencerwidget">SequencerWidget</a></li>
 <li><a class="reference internal" href="#samplerwidget">SamplerWidget</a></li>
+<li><a class="reference internal" href="#transport-commands-versus-status">Transport commands versus status</a></li>
 <li><a class="reference internal" href="#transportwidget">TransportWidget</a></li>
 <li><a class="reference internal" href="#timelinewidget">TimelineWidget</a></li>
 <li><a class="reference internal" href="#launcherwidget">LauncherWidget</a></li>

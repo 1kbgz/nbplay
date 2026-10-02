@@ -1128,6 +1128,11 @@
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"widget.js"</span>
     <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"widget.css"</span>
 
+    <span class="c1"># Session routing (set by Session): the synth joins the bus as the</span>
+    <span class="c1"># track's instrument so sequencers and clips play with its oscillator.</span>
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">channel_index</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="n">oscillator_type</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">"sine"</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">frequency</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">440.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">amplitude</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2639,9 +2644,10 @@
 <span class="sd">    drives the shared session clock on ``globalThis.__nbplay[session_id]``;</span>
 <span class="sd">    every sequencer and timeline with the same ``session_id`` follows that</span>
 <span class="sd">    clock directly, so play, seek, and tempo changes never wait on a kernel</span>
-<span class="sd">    round-trip. The synced traits mirror the clock for Python callers:</span>
-<span class="sd">    setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves</span>
-<span class="sd">    the clock, and ``current_beat`` is updated coarsely while playing.</span>
+<span class="sd">    round-trip. ``is_playing``, ``is_recording``, and ``current_beat`` are</span>
+<span class="sd">    status written by the browser clock; :meth:`play`, :meth:`stop`,</span>
+<span class="sd">    :meth:`seek`, and :meth:`record` move the clock through the ``command``</span>
+<span class="sd">    trait, and assigning those traits from Python issues the same command.</span>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"transport.js"</span>
@@ -2671,7 +2677,82 @@
     <span class="c1"># Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) in the browser bump these;</span>
     <span class="c1"># a Session answers by undoing or redoing its history.</span>
     <span class="n">undo_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">redo_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">redo_request</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Kernel -&gt; browser clock commands: ``{"action", ..., "nonce"}``. Status</span>
+    <span class="c1"># traits are never commands, so a delayed echo cannot move the clock.</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">({})</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_write</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_status_assigned</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">])</span>
+
+<div class="viewcode-block" id="TransportWidget._command">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget._command">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"nonce"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"nonce"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget._set_status">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget._set_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_write</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_write</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget._on_status_assigned">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget._on_status_assigned">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_status_assigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="c1"># Browser writes arrive under the property lock; links and our own</span>
+        <span class="c1"># status writes set the flag. Anything else is user code assigning</span>
+        <span class="c1"># the trait, which keeps working by turning into a command.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_write</span> <span class="ow">or</span> <span class="n">change</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_property_lock</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"is_playing"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"play"</span> <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"stop"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">change</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"is_recording"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"record"</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"seek"</span><span class="p">,</span> <span class="n">beat</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget.play">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Start the browser clock (and mark the status as playing)."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"play"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_status</span><span class="p">(</span><span class="n">is_playing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget.stop">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stop the browser clock, keeping the playhead position."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"stop"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_status</span><span class="p">(</span><span class="n">is_playing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget.seek">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.seek">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Move the playhead to ``beat`` (quarter-note units)."""</span>
+        <span class="n">beat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">beat</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"seek"</span><span class="p">,</span> <span class="n">beat</span><span class="o">=</span><span class="n">beat</span><span class="p">)</span>
+        <span class="n">bpb</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_status</span><span class="p">(</span><span class="n">current_beat</span><span class="o">=</span><span class="n">beat</span><span class="p">,</span> <span class="n">bar_number</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">beat</span> <span class="o">//</span> <span class="n">bpb</span><span class="p">),</span> <span class="n">beat_in_bar</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">beat</span> <span class="o">%</span> <span class="n">bpb</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="TransportWidget.record">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.record">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Arm (or disarm) recording; arming also starts the clock."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"record"</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">on</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_status</span><span class="p">(</span><span class="n">is_recording</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">on</span><span class="p">),</span> <span class="n">is_playing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_playing</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">on</span><span class="p">))</span></div>
+</div>
 
 
 
@@ -4477,20 +4558,21 @@
             <span class="n">time_signature_num</span><span class="o">=</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">time_signature_den</span><span class="o">=</span><span class="n">time_signature</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
         <span class="p">)</span>
+        <span class="c1"># Play state and position are status owned by the transport: the</span>
+        <span class="c1"># other widgets mirror it one way and never command the clock</span>
+        <span class="c1"># through these traits (browser actions go through the shared clock).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_launcher_links</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)),</span>
-            <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
+            <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timeline_links</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)),</span>
-            <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
-            <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">)),</span>
-            <span class="c1"># One-way: the transport persists the shared clock position.</span>
-            <span class="c1"># Timeline seeks reach the transport through the browser clock.</span>
+            <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
+            <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">)),</span>
             <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4582,21 +4664,21 @@
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start the shared transport."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">play</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Session.stop">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop the shared transport, keeping the playhead position."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">is_playing</span> <span class="o">=</span> <span class="kc">False</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Session.seek">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.seek">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Move the shared playhead to ``beat`` (quarter-note units)."""</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">current_beat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">beat</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">beat</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Session.add_track">

@@ -378,6 +378,12 @@ Module Contents
    .. py:attribute:: _css
 
 
+   .. py:attribute:: session_id
+
+
+   .. py:attribute:: channel_index
+
+
    .. py:attribute:: oscillator_type
 
 
@@ -1260,7 +1266,7 @@ Module Contents
 
 
 
-.. py:class:: TransportWidget(*args: object, **kwargs: object)
+.. py:class:: TransportWidget(**kwargs)
 
    Bases: :py:obj:`anywidget.AnyWidget`
 
@@ -1271,9 +1277,10 @@ Module Contents
    drives the shared session clock on ``globalThis.__nbplay[session_id]``;
    every sequencer and timeline with the same ``session_id`` follows that
    clock directly, so play, seek, and tempo changes never wait on a kernel
-   round-trip. The synced traits mirror the clock for Python callers:
-   setting ``is_playing``, ``bpm``, or ``current_beat`` from Python moves
-   the clock, and ``current_beat`` is updated coarsely while playing.
+   round-trip. ``is_playing``, ``is_recording``, and ``current_beat`` are
+   status written by the browser clock; :meth:`play`, :meth:`stop`,
+   :meth:`seek`, and :meth:`record` move the clock through the ``command``
+   trait, and assigning those traits from Python issues the same command.
 
    Public constructor
 
@@ -1324,6 +1331,47 @@ Module Contents
 
 
    .. py:attribute:: redo_request
+
+
+   .. py:attribute:: command
+
+
+   .. py:attribute:: _status_write
+      :value: False
+
+
+
+   .. py:method:: _command(action, **fields)
+
+
+   .. py:method:: _set_status(**values)
+
+
+   .. py:method:: _on_status_assigned(change)
+
+
+   .. py:method:: play()
+
+      Start the browser clock (and mark the status as playing).
+
+
+
+   .. py:method:: stop()
+
+      Stop the browser clock, keeping the playhead position.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move the playhead to ``beat`` (quarter-note units).
+
+
+
+   .. py:method:: record(on=True)
+
+      Arm (or disarm) recording; arming also starts the clock.
+
 
 
 .. py:class:: TimelineWidget(**kwargs)

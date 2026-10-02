@@ -969,6 +969,16 @@ API in the browser so latency stays minimal.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SynthWidget.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.widget.SynthWidget.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SynthWidget.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><a class="headerlink" href="#nbplay.widget.SynthWidget.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SynthWidget.oscillator_type">
 <span class="sig-name descname"><span class="pre">oscillator_type</span></span><a class="headerlink" href="#nbplay.widget.SynthWidget.oscillator_type" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2162,16 +2172,17 @@ is not installed, or if WAV format is invalid.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">TransportWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">TransportWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Global transport controls: play/stop, BPM, time signature, bar/beat.</p>
 <p>Used as the master clock for a <code class="docutils literal notranslate"><span class="pre">Session</span></code>. In the browser the transport
 drives the shared session clock on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[session_id]</span></code>;
 every sequencer and timeline with the same <code class="docutils literal notranslate"><span class="pre">session_id</span></code> follows that
 clock directly, so play, seek, and tempo changes never wait on a kernel
-round-trip. The synced traits mirror the clock for Python callers:
-setting <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, or <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> from Python moves
-the clock, and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> is updated coarsely while playing.</p>
+round-trip. <code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> are
+status written by the browser clock; <a class="reference internal" href="#nbplay.widget.TransportWidget.play" title="nbplay.widget.TransportWidget.play"><code class="xref py py-meth docutils literal notranslate"><span class="pre">play()</span></code></a>, <a class="reference internal" href="#nbplay.widget.TransportWidget.stop" title="nbplay.widget.TransportWidget.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a>,
+<a class="reference internal" href="#nbplay.widget.TransportWidget.seek" title="nbplay.widget.TransportWidget.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a>, and <a class="reference internal" href="#nbplay.widget.TransportWidget.record" title="nbplay.widget.TransportWidget.record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record()</span></code></a> move the clock through the <code class="docutils literal notranslate"><span class="pre">command</span></code>
+trait, and assigning those traits from Python issues the same command.</p>
 <p>Public constructor</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget._esm">
@@ -2252,6 +2263,55 @@ the clock, and <code class="docutils literal notranslate"><span class="pre">curr
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget.redo_request">
 <span class="sig-name descname"><span class="pre">redo_request</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.redo_request" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.command">
+<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget._status_write">
+<span class="sig-name descname"><span class="pre">_status_write</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.widget.TransportWidget._status_write" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget._command">
+<span class="sig-name descname"><span class="pre">_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget._command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget._command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget._set_status">
+<span class="sig-name descname"><span class="pre">_set_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget._set_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget._set_status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget._on_status_assigned">
+<span class="sig-name descname"><span class="pre">_on_status_assigned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget._on_status_assigned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget._on_status_assigned" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.play">
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget.play" title="Link to this definition">¶</a></dt>
+<dd><p>Start the browser clock (and mark the status as playing).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget.stop" title="Link to this definition">¶</a></dt>
+<dd><p>Stop the browser clock, keeping the playhead position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget.seek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget.seek" title="Link to this definition">¶</a></dt>
+<dd><p>Move the playhead to <code class="docutils literal notranslate"><span class="pre">beat</span></code> (quarter-note units).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.record">
+<span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget.record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget.record" title="Link to this definition">¶</a></dt>
+<dd><p>Arm (or disarm) recording; arming also starts the clock.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -4042,6 +4102,8 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget"><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code></a><ul>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget._esm"><code class="docutils literal notranslate"><span class="pre">SynthWidget._esm</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget._css"><code class="docutils literal notranslate"><span class="pre">SynthWidget._css</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SynthWidget.session_id"><code class="docutils literal notranslate"><span class="pre">SynthWidget.session_id</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.SynthWidget.channel_index"><code class="docutils literal notranslate"><span class="pre">SynthWidget.channel_index</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget.oscillator_type"><code class="docutils literal notranslate"><span class="pre">SynthWidget.oscillator_type</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget.frequency"><code class="docutils literal notranslate"><span class="pre">SynthWidget.frequency</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.SynthWidget.amplitude"><code class="docutils literal notranslate"><span class="pre">SynthWidget.amplitude</span></code></a></li>
@@ -4241,6 +4303,15 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.loop_end_bar"><code class="docutils literal notranslate"><span class="pre">TransportWidget.loop_end_bar</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.undo_request"><code class="docutils literal notranslate"><span class="pre">TransportWidget.undo_request</span></code></a></li>
 <li><a class="reference internal" href="#nbplay.widget.TransportWidget.redo_request"><code class="docutils literal notranslate"><span class="pre">TransportWidget.redo_request</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.command"><code class="docutils literal notranslate"><span class="pre">TransportWidget.command</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget._status_write"><code class="docutils literal notranslate"><span class="pre">TransportWidget._status_write</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget._command"><code class="docutils literal notranslate"><span class="pre">TransportWidget._command()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget._set_status"><code class="docutils literal notranslate"><span class="pre">TransportWidget._set_status()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget._on_status_assigned"><code class="docutils literal notranslate"><span class="pre">TransportWidget._on_status_assigned()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.play"><code class="docutils literal notranslate"><span class="pre">TransportWidget.play()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.stop"><code class="docutils literal notranslate"><span class="pre">TransportWidget.stop()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.seek"><code class="docutils literal notranslate"><span class="pre">TransportWidget.seek()</span></code></a></li>
+<li><a class="reference internal" href="#nbplay.widget.TransportWidget.record"><code class="docutils literal notranslate"><span class="pre">TransportWidget.record()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#nbplay.widget.TimelineWidget"><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a><ul>

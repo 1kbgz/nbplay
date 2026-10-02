@@ -256,6 +256,9 @@ Module Contents
 
 .. py:class:: TestSynthWidget
 
+   .. py:method:: test_session_routing_defaults()
+
+
    .. py:method:: test_defaults()
 
 
@@ -918,6 +921,15 @@ Module Contents
 
 .. py:class:: TestTransportWidget
 
+   .. py:method:: test_commands_and_status()
+
+
+   .. py:method:: test_assigning_status_from_python_issues_a_command()
+
+
+   .. py:method:: test_browser_status_does_not_echo_as_a_command()
+
+
    .. py:method:: test_defaults()
 
 
@@ -1511,9 +1523,9 @@ Module Contents
 
 
 
-   .. py:method:: test_add_track_non_sampler_sound_source_no_error()
+   .. py:method:: test_add_track_routes_synth_sound_source()
 
-      add_track with SynthWidget (no session_id attr) does not error.
+      add_track gives a SynthWidget the session routing so it joins the bus.
 
 
 
