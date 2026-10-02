@@ -14,7 +14,11 @@ import {
   onKernelDisconnect,
   toFloat32,
 } from "./helpers.ts";
-import { getSessionBus } from "./session.ts";
+import {
+  getSessionBus,
+  type InstrumentBus,
+  type SessionBus,
+} from "./session.ts";
 
 function midiToHz(note: number): number {
   return 440 * Math.pow(2, (note - 69) / 12);
@@ -33,6 +37,7 @@ function scheduleSynthNote(
   velocity: number,
   at: number,
   duration: number,
+  onEnded: () => void,
 ): () => void {
   const level = Math.max(0, Math.min(1, amplitude)) * (velocity / 127);
   const attack = 0.005;
@@ -65,6 +70,14 @@ function scheduleSynthNote(
     source = osc;
   }
   source.connect(gain);
+  source.onended = () => {
+    try {
+      gain.disconnect();
+    } catch (_) {
+      /* already disconnected */
+    }
+    onEnded();
+  };
   source.start(at);
   source.stop(at + duration);
   return () => {
@@ -74,6 +87,7 @@ function scheduleSynthNote(
     } catch (_) {
       /* already stopped */
     }
+    onEnded();
   };
 }
 
@@ -452,20 +466,38 @@ function render({
 
   // Session instrument: sequencers, launcher slots, and MIDI clips on this
   // synth's track play through it with its oscillator type and amplitude.
+  // What this view registered and the notes it has playing, so a move or
+  // disposal removes only its own entry and silences its own voices.
+  let registration: {
+    bus: SessionBus;
+    idx: number;
+    entry: InstrumentBus;
+  } | null = null;
+  const liveNotes = new Set<() => void>();
+
+  function unregisterFromSessionBus(): void {
+    liveNotes.forEach((cancel) => cancel());
+    liveNotes.clear();
+    if (!registration) return;
+    const { bus, idx, entry } = registration;
+    if (bus.instruments?.[idx] === entry) delete bus.instruments[idx];
+    registration = null;
+  }
   function registerOnSessionBus(): void {
     const sid = String(model.get("session_id") || "");
     const idx = Number(model.get("channel_index"));
+    unregisterFromSessionBus();
     if (!sid || !(idx >= 0)) return;
     const bus = getSessionBus(sid);
     if (!bus) return; // the mixer renders later and announces nbplay-bus-ready
     const instruments = bus.instruments || {};
     bus.instruments = instruments;
-    instruments[idx] = {
+    const entry: InstrumentBus = {
       scheduleNote(note, velocity, at, duration) {
         const ctx = bus.audioCtx;
         const output = bus.channels?.[idx]?.gain || bus.masterGain;
         if (!ctx || !output) return;
-        return scheduleSynthNote(
+        const cancel: () => void = scheduleSynthNote(
           ctx,
           output,
           String(model.get("oscillator_type") || "sine"),
@@ -474,14 +506,14 @@ function render({
           velocity,
           at,
           duration,
+          () => liveNotes.delete(cancel),
         );
+        liveNotes.add(cancel);
+        return cancel;
       },
     };
-  }
-  function unregisterFromSessionBus(): void {
-    const bus = getSessionBus(String(model.get("session_id") || ""));
-    const idx = Number(model.get("channel_index"));
-    if (bus?.instruments && idx >= 0) delete bus.instruments[idx];
+    instruments[idx] = entry;
+    registration = { bus, idx, entry };
   }
   function onBusReady(e: Event): void {
     const detail = (e as CustomEvent).detail;

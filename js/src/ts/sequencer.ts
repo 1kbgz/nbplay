@@ -854,16 +854,10 @@ function render({
     onModelChange();
     if (mirroring) return;
     const clk = clock();
-    if (binding.shared()) {
-      // Status from the transport: run this sequencer's scheduler to match
-      // when it follows the transport, never touch the shared clock.
-      if (model.get("is_playing")) {
-        if (clk.playing && followsTransport()) startScheduler();
-      } else {
-        audioScheduler.stop();
-      }
-      return;
-    }
+    // In a session `is_playing` is status mirrored from the transport.
+    // Scheduling follows clock events and this widget's own buttons, so a
+    // delayed echo can neither silence nor restart the track.
+    if (binding.shared()) return;
     if (model.get("is_playing")) {
       if (clk.playing) startScheduler();
       else clk.play();

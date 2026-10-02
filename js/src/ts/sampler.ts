@@ -20,7 +20,12 @@ import {
   resizePadVelocities,
   type PadAction,
 } from "./pads.ts";
-import { getSessionBus } from "./session.ts";
+import {
+  getSessionBus,
+  type InstrumentBus,
+  type SamplerBus,
+  type SessionBus,
+} from "./session.ts";
 
 // Types
 
@@ -265,6 +270,17 @@ function createSamplerEngine(maxVoices = 8) {
     return true;
   }
 
+  /** Drop a voice from the pool and free its nodes; safe to call twice. */
+  function retire(voice: Voice): void {
+    const idx = activeVoices.indexOf(voice);
+    if (idx >= 0) activeVoices.splice(idx, 1);
+    try {
+      voice.gainNode.disconnect();
+    } catch (_) {
+      /* already disconnected */
+    }
+  }
+
   function ensureZoneBuffer(zone: ZoneBuffer): AudioBuffer | null {
     if (!audioCtx || zone.samples.length === 0) return null;
     if (!zone.buffer) {
@@ -286,6 +302,12 @@ function createSamplerEngine(maxVoices = 8) {
         const bus = getSessionBus(sid);
         if (bus?.audioCtx && bus.channels?.[idx]) {
           if (audioCtx !== bus.audioCtx) {
+            // Leaving a private context for the bus: silence it and close
+            // it so nothing keeps playing outside the mixer.
+            if (ownAudioCtx && audioCtx) {
+              this.stopAll();
+              if (audioCtx.state !== "closed") void audioCtx.close();
+            }
             waveformBuffer = null;
             zones.forEach((zone) => (zone.buffer = null));
           }
@@ -379,11 +401,21 @@ function createSamplerEngine(maxVoices = 8) {
       let releaseTime: number | null = null;
       if (duration !== undefined) {
         // A scheduled note releases itself after `duration` (stop must
-        // follow start, or Web Audio throws).
+        // follow start, or Web Audio throws). Automation past the release
+        // point (a long attack or decay) is cancelled so the gain cannot
+        // rise again during the release.
         const releaseAt = now + Math.max(0.001, duration);
         releaseTime = releaseAt;
-        gainNode.gain.setValueAtTime(envelope.sustain * peak, releaseAt);
-        gainNode.gain.linearRampToValueAtTime(0, releaseAt + envelope.release);
+        const param = gainNode.gain as AudioParam & {
+          cancelAndHoldAtTime?: (t: number) => void;
+        };
+        if (typeof param.cancelAndHoldAtTime === "function") {
+          param.cancelAndHoldAtTime(releaseAt);
+        } else {
+          param.cancelScheduledValues(releaseAt);
+          param.setValueAtTime(envelope.sustain * peak, releaseAt);
+        }
+        param.linearRampToValueAtTime(0, releaseAt + envelope.release);
         sourceNode.stop(releaseAt + envelope.release + 0.01);
       }
 
@@ -394,17 +426,19 @@ function createSamplerEngine(maxVoices = 8) {
         startTime: now,
         releaseTime,
       };
+      sourceNode.onended = () => retire(voice);
       activeVoices.push(voice);
 
       if (activeVoices.length > maxVoices) {
+        // Steal the oldest voice when the new one starts (which may be in
+        // the lookahead future); its nodes are freed when it ends.
         const oldest = activeVoices[0];
+        activeVoices.shift();
         try {
           oldest.sourceNode.stop(now);
         } catch (_) {
           /* already stopped */
         }
-        oldest.gainNode.disconnect();
-        activeVoices.shift();
       }
 
       return voice;
@@ -422,19 +456,18 @@ function createSamplerEngine(maxVoices = 8) {
         voice.gainNode.gain.setValueAtTime(currentGain, now);
         voice.gainNode.gain.linearRampToValueAtTime(0, now + envelope.release);
         voice.sourceNode.stop(now + envelope.release);
-        setTimeout(
-          () => {
-            const idx = activeVoices.indexOf(voice);
-            if (idx >= 0) activeVoices.splice(idx, 1);
-            try {
-              voice.gainNode.disconnect();
-            } catch (_) {
-              /* already disconnected */
-            }
-          },
-          envelope.release * 1000 + 10,
-        );
+        setTimeout(() => retire(voice), envelope.release * 1000 + 10);
       });
+    },
+
+    /** Stop one voice at once, started or not, and free it. */
+    cancelVoice(voice: Voice): void {
+      try {
+        voice.sourceNode.stop(0);
+      } catch (_) {
+        /* already stopped */
+      }
+      retire(voice);
     },
 
     getActiveVoiceCount(): number {
@@ -444,13 +477,13 @@ function createSamplerEngine(maxVoices = 8) {
     stopAll(): void {
       if (!audioCtx) return;
       const now = audioCtx.currentTime;
-      activeVoices.forEach((voice) => {
+      [...activeVoices].forEach((voice) => {
         try {
           voice.sourceNode.stop(now);
         } catch (_) {
           /* already stopped */
         }
-        voice.gainNode.disconnect();
+        retire(voice);
       });
       activeVoices.length = 0;
     },
@@ -1603,20 +1636,38 @@ function render({
     redrawEnvelope();
   });
   model.on("change:max_voices", syncVoices);
-  model.on("change:session_id", () => {
-    sampler.setSession(model);
-    registerOnSessionBus();
-  });
+  model.on("change:session_id", registerOnSessionBus);
   model.on("change:channel_index", registerOnSessionBus);
 
   // Session bus registration (for keyboard widget)
 
+  // What this view registered, so a move or disposal removes only its own
+  // entries and never another view's.
+  let registration: {
+    bus: SessionBus;
+    idx: number;
+    sampler: SamplerBus;
+    instrument: InstrumentBus;
+  } | null = null;
+
+  function unregisterFromSessionBus(): void {
+    if (!registration) return;
+    const { bus, idx, sampler: samplerEntry, instrument } = registration;
+    if (bus.samplers?.[idx] === samplerEntry) delete bus.samplers[idx];
+    if (bus.instruments?.[idx] === instrument) delete bus.instruments[idx];
+    registration = null;
+  }
+
   function registerOnSessionBus(): void {
     const sid = model.get("session_id") as string;
     const idx = model.get("channel_index") as number;
+    unregisterFromSessionBus();
     if (!sid || idx < 0) return;
     const bus = getSessionBus(sid);
     if (!bus) return; // bus not ready yet — will retry on nbplay-bus-ready
+    // Bind the engine to the bus context and channel first so scheduled
+    // times and routing match the session, not a private context.
+    sampler.setSession(model);
     const samplers = bus.samplers || {};
     bus.samplers = samplers;
     samplers[idx] = {
@@ -1648,15 +1699,14 @@ function render({
           duration,
         );
         if (!voice) return;
-        return () => {
-          try {
-            voice.sourceNode.stop(0);
-            voice.gainNode.disconnect();
-          } catch (_) {
-            /* already stopped */
-          }
-        };
+        return () => sampler.cancelVoice(voice);
       },
+    };
+    registration = {
+      bus,
+      idx,
+      sampler: samplers[idx],
+      instrument: instruments[idx],
     };
   }
 
@@ -1697,11 +1747,7 @@ function render({
     recorderStream?.getTracks().forEach((track) => track.stop());
     document.removeEventListener("nbplay-bus-ready", onBusReady);
     // Unregister from session bus
-    const sid = model.get("session_id") as string;
-    const idx = model.get("channel_index") as number;
-    const bus = getSessionBus(sid);
-    if (bus?.samplers) delete bus.samplers[idx];
-    if (bus?.instruments) delete bus.instruments[idx];
+    unregisterFromSessionBus();
     sampler.destroy();
   };
 }
