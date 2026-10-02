@@ -208,8 +208,9 @@ function render({
     switch (event.type) {
       case "play":
         if (!followsTransport()) break;
-        mirror(() => model.set("is_playing", true), true);
+        // Scheduler first: the status observer checks it on the echo.
         startScheduler();
+        mirror(() => model.set("is_playing", true), true);
         syncPlayState();
         break;
       case "stop":
@@ -238,11 +239,10 @@ function render({
     audioScheduler.stop();
     clk.setTempo(Number(model.get("bpm")));
     mirror(() => {
-      model.set("is_playing", clk.playing);
       model.set("current_step", -1);
     });
     if (clk.playing && followsTransport()) startScheduler();
-    else if (clk.playing) mirror(() => model.set("is_playing", false));
+    mirror(() => model.set("is_playing", audioScheduler.isPlaying()));
     syncPlayState();
   }
 
@@ -696,15 +696,15 @@ function render({
       if (binding.shared()) stopLocal(true);
       else clk.stop();
     } else if (clk.playing) {
-      mirror(() => model.set("is_playing", true), true);
       startScheduler();
+      mirror(() => model.set("is_playing", true), true);
       syncPlayState();
     } else {
       clk.play();
       if (!followsTransport()) {
         // The clock event was ignored on purpose; this button still plays.
-        mirror(() => model.set("is_playing", true), true);
         startScheduler();
+        mirror(() => model.set("is_playing", true), true);
         syncPlayState();
       }
     }
@@ -856,8 +856,16 @@ function render({
     const clk = clock();
     // In a session `is_playing` is status mirrored from the transport.
     // Scheduling follows clock events and this widget's own buttons, so a
-    // delayed echo can neither silence nor restart the track.
-    if (binding.shared()) return;
+    // delayed echo can neither silence nor restart the track; a value that
+    // disagrees with this sequencer's scheduler is written back.
+    if (binding.shared()) {
+      const running = audioScheduler.isPlaying();
+      if (Boolean(model.get("is_playing")) !== running) {
+        mirror(() => model.set("is_playing", running), true);
+        onModelChange();
+      }
+      return;
+    }
     if (model.get("is_playing")) {
       if (clk.playing) startScheduler();
       else clk.play();

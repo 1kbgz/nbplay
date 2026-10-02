@@ -429,11 +429,14 @@ function createSamplerEngine(maxVoices = 8) {
       sourceNode.onended = () => retire(voice);
       activeVoices.push(voice);
 
-      if (activeVoices.length > maxVoices) {
-        // Steal the oldest voice when the new one starts (which may be in
-        // the lookahead future); its nodes are freed when it ends.
-        const oldest = activeVoices[0];
-        activeVoices.shift();
+      // Voice limit over the voices still held (scheduled notes release
+      // themselves and do not count). The stolen voice stops when the new
+      // one starts, which may be in the lookahead future, and stays in the
+      // pool until it ends so stopAll() can still silence it.
+      const held = activeVoices.filter((v) => v.releaseTime === null);
+      if (held.length > maxVoices) {
+        const oldest = held[0];
+        oldest.releaseTime = now;
         try {
           oldest.sourceNode.stop(now);
         } catch (_) {

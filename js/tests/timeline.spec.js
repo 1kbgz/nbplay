@@ -779,6 +779,60 @@ test.describe("TimelineWidget", () => {
     await page.locator(".nbplay-timeline-record").click();
   });
 
+  test("recording starts when the model fires change events synchronously", async ({
+    page,
+  }) => {
+    // Real widget models emit change events inside set(); the harness mock
+    // defers them to save_changes(), which can hide ordering bugs between a
+    // status write and the clock it is reconciled against.
+    await installMediaRecorderMock(page);
+    await page.evaluate(
+      async (opts) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "/dist/css/timeline.css";
+        document.head.appendChild(link);
+        const mod = await import("/dist/widgets/timeline.js");
+        const el = document.getElementById("root");
+        const model = window.createMockModel({ ...opts });
+        const set = model.set.bind(model);
+        model.set = (key, val) => {
+          const changed = model._state[key] !== val;
+          set(key, val);
+          if (changed) model._trigger("change:" + key);
+        };
+        window.__testModel = model;
+        window.__cleanup = mod.default.render({ model, el });
+      },
+      {
+        ...DEFAULTS,
+        clips: [],
+        tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+      },
+    );
+
+    await page.locator(".nbplay-timeline-record").click();
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => ({
+            isRecording: window.__testModel._state.is_recording,
+            clockRecording:
+              globalThis.__nbplay["timeline-session"].clock.recording,
+            rows: document.querySelectorAll(".nbplay-timeline-row.recording")
+              .length,
+          })),
+        { timeout: 2000 },
+      )
+      .toEqual({ isRecording: true, clockRecording: true, rows: 1 });
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
+      "Stop Rec",
+    );
+
+    await page.locator(".nbplay-timeline-record").click();
+    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+  });
+
   test("external record state starts and stops recording", async ({ page }) => {
     await installMediaRecorderMock(page);
     await renderWidget(page, {
