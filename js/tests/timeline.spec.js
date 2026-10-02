@@ -381,8 +381,10 @@ test.describe("TimelineWidget", () => {
     await installMediaRecorderMock(page);
     await renderWidget(page, {
       clips: [],
-      current_beat: 2,
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+    });
+    await page.evaluate(() => {
+      globalThis.__nbplay["timeline-session"].clock.seek(2);
     });
 
     await page.locator(".nbplay-timeline-record").click();
@@ -428,9 +430,12 @@ test.describe("TimelineWidget", () => {
       bpm: 6000,
       clips: [],
       count_in_bars: 1,
-      current_beat: 4,
       length: 100,
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+    });
+    // In a session the position lives in the shared clock, not the model.
+    await page.evaluate(() => {
+      globalThis.__nbplay["timeline-session"].clock.seek(4);
     });
 
     await page.locator(".nbplay-timeline-record").click();
@@ -781,19 +786,31 @@ test.describe("TimelineWidget", () => {
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
     });
 
+    // Recording in a session follows the shared clock (the transport's
+    // record command); the timeline's trait is status.
     await page.evaluate(() => {
-      window.__testModel.set("is_recording", true);
-      window.__testModel.save_changes();
+      const clock = globalThis.__nbplay["timeline-session"].clock;
+      clock.setRecording(true);
+      clock.play();
     });
     await expect(page.locator(".nbplay-timeline-record")).toHaveText(
       "Stop Rec",
     );
+    expect(
+      await page.evaluate(() => window.__testModel._state.is_recording),
+    ).toBe(true);
 
     await page.evaluate(() => {
-      window.__testModel.set("is_recording", false);
-      window.__testModel.save_changes();
+      globalThis.__nbplay["timeline-session"].clock.setRecording(false);
     });
     await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+
+    // A stale status write does not start recording.
+    await page.evaluate(() => {
+      window.__testModel.set("is_recording", true);
+      window.__testModel.save_changes();
+    });
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("Rec");
   });
 
   test("stops and flushes playhead at timeline end", async ({ page }) => {

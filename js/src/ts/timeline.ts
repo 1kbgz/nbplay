@@ -238,8 +238,9 @@ export default {
     let recordingGeneration = 0;
     let recordingStartedPlayback = false;
     let scheduledTimers: ReturnType<typeof setTimeout>[] = [];
-    // Cancellers for notes handed to a bus instrument but not yet sounding.
-    let scheduledNotes: { cancel: () => void; at: number }[] = [];
+    // Cancellers for notes handed to a bus instrument; stop silences the
+    // ones still sounding or not yet started.
+    let scheduledNotes: { cancel: () => void; until: number }[] = [];
     let playheadTimer: ReturnType<typeof setInterval> | null = null;
     let midiTimer: ReturnType<typeof setInterval> | null = null;
     let midiCursorBeat = 0;
@@ -493,7 +494,7 @@ export default {
       scheduledTimers = [];
       const now = clock().now();
       scheduledNotes.forEach((entry) => {
-        if (entry.at > now) entry.cancel();
+        if (entry.until > now) entry.cancel();
       });
       scheduledNotes = [];
       activeMedia.forEach((media) => {
@@ -963,10 +964,9 @@ export default {
           durationSeconds,
         );
         if (cancel) {
-          scheduledNotes.push({ cancel, at: atTime });
-          scheduledNotes = scheduledNotes.filter(
-            (entry) => entry.at > clk.now() - 1,
-          );
+          scheduledNotes.push({ cancel, until: atTime + durationSeconds + 1 });
+          const now = clk.now();
+          scheduledNotes = scheduledNotes.filter((entry) => entry.until > now);
         }
         return;
       }
@@ -1017,7 +1017,14 @@ export default {
           if (local < 0 || local >= clip.duration) return;
           const absolute = clip.start + local;
           if (absolute < midiCursorBeat || absolute >= horizon) return;
-          triggerMidiNote(track, event, clk.ctxTimeAt(absolute), spb);
+          // Measured from now: the clock's linear origin does not move on a
+          // loop wrap, so an absolute mapping would point into the past.
+          triggerMidiNote(
+            track,
+            event,
+            clk.now() + (absolute - now) * spb,
+            spb,
+          );
         });
       });
       midiCursorBeat = horizon;
@@ -1935,13 +1942,16 @@ export default {
       if (disposed || mirroring) return;
       // In a session `is_playing` is status mirrored from the transport;
       // only a standalone timeline treats a kernel write as a command.
+      const clk = clock();
       if (!binding.shared()) {
-        const clk = clock();
         if (model.get("is_playing")) {
           if (!clk.playing) clk.play();
         } else if (clk.playing) {
           clk.stop();
         }
+      } else if (Boolean(model.get("is_playing")) !== clk.playing) {
+        // A stale echo: the shared clock is authoritative, mirror it back.
+        mirror(() => model.set("is_playing", clk.playing), true);
       }
       syncTransportControls();
     }
@@ -1949,9 +1959,10 @@ export default {
     function syncPositionState(): void {
       if (disposed || mirroring) return;
       const clk = clock();
-      // While playing, the clock is authoritative; seeks come through
-      // the transport. When stopped, an external write moves the playhead.
-      if (!clk.playing) {
+      // In a session the position is status mirrored from the transport
+      // and seeks arrive as transport commands; a standalone timeline
+      // moves its own playhead from a kernel write while stopped.
+      if (!binding.shared() && !clk.playing) {
         const beat = clampBeat(
           model,
           numberValue(model.get("current_beat"), 0),
@@ -1979,10 +1990,19 @@ export default {
     model.on("change:is_playing", syncPlaybackState);
     model.on("change:is_recording", () => {
       if (disposed) return;
-      if (model.get("is_recording")) {
-        if (!recordingActive()) void startRecording();
-      } else if (recordingActive()) {
-        stopRecording();
+      // In a session recording follows the clock's "record" event; the
+      // trait is status. A standalone timeline takes the write as a command.
+      if (!binding.shared()) {
+        if (model.get("is_recording")) {
+          if (!recordingActive()) void startRecording();
+        } else if (recordingActive()) {
+          stopRecording();
+        }
+      } else if (
+        !mirroring &&
+        Boolean(model.get("is_recording")) !== clock().recording
+      ) {
+        mirror(() => model.set("is_recording", clock().recording), true);
       }
       syncTransportControls();
     });
@@ -2001,7 +2021,9 @@ export default {
     {
       const clk = clock();
       clk.setTempo(numberValue(model.get("bpm"), 120));
-      if (!clk.playing) {
+      // A standalone timeline restores its playhead from the model; a
+      // session's position lives in the shared clock, never in saved status.
+      if (!binding.shared() && !clk.playing) {
         const beat = clampBeat(
           model,
           numberValue(model.get("current_beat"), 0),

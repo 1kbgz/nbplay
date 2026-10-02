@@ -380,14 +380,16 @@ test.describe("Session clock", () => {
       0,
     );
 
-    // Stale "stopped" status arriving while the clock plays.
+    // Stale "stopped" status arriving while the clock plays: the clock
+    // keeps running and the sequencer keeps scheduling notes.
     await page.locator(".nbplay-transport-play").click();
     await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
-    await page.evaluate(() => {
+    const before = await page.evaluate(() => {
       for (const key of ["a", "timeline"]) {
         window.__models[key].set("is_playing", false);
         window.__models[key]._trigger("change:is_playing");
       }
+      return window.__oscStarts.a.length;
     });
     expect(
       await page.evaluate(
@@ -395,6 +397,23 @@ test.describe("Session clock", () => {
         SESSION_ID,
       ),
     ).toBe(true);
+    await page.waitForFunction(
+      (n) => (window.__oscStarts.a?.length || 0) > n + 1,
+      before,
+    );
+
+    // A stale position write never seeks a session timeline's clock.
+    await page.locator(".nbplay-transport-stop").click();
+    await page.evaluate(() => {
+      window.__models.timeline.set("current_beat", 9);
+      window.__models.timeline._trigger("change:current_beat");
+    });
+    expect(
+      await page.evaluate(
+        (id) => globalThis.__nbplay[id].clock.beat(),
+        SESSION_ID,
+      ),
+    ).toBeLessThan(9);
   });
 
   test("a sequencer plays through the track's bus instrument when one is registered", async ({
@@ -432,9 +451,17 @@ test.describe("Session clock", () => {
     expect(state.first.duration).toBeCloseTo(0.25, 6);
     expect(state.oscStarts).toBe(0);
 
-    // Stopping cancels the notes that have not sounded yet.
+    // A seek cancels the not-yet-sounded notes of the old position.
+    await page.evaluate((id) => {
+      globalThis.__nbplay[id].clock.seek(3);
+    }, SESSION_ID);
+    const afterSeek = await page.evaluate(() => window.__cancelled);
+    expect(afterSeek).toBeGreaterThan(0);
+    // Stopping silences everything still scheduled or sounding.
     await page.locator(".nbplay-transport-stop").click();
-    expect(await page.evaluate(() => window.__cancelled)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.__cancelled)).toBeGreaterThan(
+      afterSeek,
+    );
   });
 
   test("standalone sequencer uses a private clock", async ({ page }) => {

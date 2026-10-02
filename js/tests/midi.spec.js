@@ -241,6 +241,49 @@ test.describe("MIDI clips", () => {
     expect(await page.evaluate(() => window.__cancelled)).toContain(67);
   });
 
+  test("MIDI notes keep valid times across a loop wrap", async ({ page }) => {
+    await renderWidget(page, {
+      bpm: 600,
+      clips: [
+        midiClip([{ beat: 0.5, duration: 0.25, note: 60, velocity: 100 }], {
+          duration: 1,
+        }),
+      ],
+    });
+    await page.evaluate((sessionId) => {
+      const ctx = new AudioContext();
+      const bus = (window.__nbplay = window.__nbplay || {});
+      window.__scheduled = [];
+      bus[sessionId] = {
+        ...(bus[sessionId] || {}),
+        audioCtx: ctx,
+        channels: [{ gain: ctx.createGain() }],
+        instruments: {
+          0: {
+            scheduleNote(note, velocity, at) {
+              window.__scheduled.push({ at, now: ctx.currentTime });
+            },
+          },
+        },
+      };
+    }, SESSION_ID);
+    await page.locator(".nbplay-timeline-play").click();
+    await page.evaluate((sessionId) => {
+      globalThis.__nbplay[sessionId].clock.setLoop(true, 0, 1);
+    }, SESSION_ID);
+    await expect
+      .poll(async () => page.evaluate(() => window.__scheduled.length), {
+        timeout: 3000,
+      })
+      .toBeGreaterThanOrEqual(3);
+    const scheduled = await page.evaluate(() => window.__scheduled);
+    for (let i = 0; i < scheduled.length; i++) {
+      // Never in the past, and each pass later than the previous one.
+      expect(scheduled[i].at).toBeGreaterThanOrEqual(scheduled[i].now - 0.05);
+      if (i > 0) expect(scheduled[i].at).toBeGreaterThan(scheduled[i - 1].at);
+    }
+  });
+
   test("falls back to an oscillator when the lane has no sampler", async ({
     page,
   }) => {

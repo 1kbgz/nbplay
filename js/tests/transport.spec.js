@@ -149,13 +149,15 @@ test.describe("TransportWidget", () => {
     expect((await clockState()).playing).toBe(true);
     expect((await clockState()).isPlaying).toBe(true);
 
-    // A delayed echo of old status must not stop (or restart) the clock.
+    // A delayed echo of old status must not stop (or restart) the clock,
+    // and the clock's real status is written back over the stale value.
     await page.evaluate(() => {
       window.__testModel.set("is_playing", false);
       window.__testModel._trigger("change:is_playing");
     });
     expect((await clockState()).playing).toBe(true);
-    await expect(page.locator(".nbplay-transport-play")).toHaveText("▶");
+    expect((await clockState()).isPlaying).toBe(true);
+    await expect(page.locator(".nbplay-transport-play")).toHaveText("⏸");
 
     await command({ action: "stop", nonce: 2 });
     expect((await clockState()).playing).toBe(false);
@@ -167,14 +169,23 @@ test.describe("TransportWidget", () => {
     });
     const after = await clockState();
     expect(after.playing).toBe(false);
+    expect(after.isPlaying).toBe(false);
     expect(after.beat).toBeLessThan(1);
 
     await command({ action: "seek", beat: 8, nonce: 3 });
     expect((await clockState()).beat).toBeCloseTo(8, 3);
-    // The same nonce is ignored; a new one applies.
+    // The same or an older nonce is ignored; a newer one applies.
     await command({ action: "seek", beat: 2, nonce: 3 });
+    await command({ action: "seek", beat: 2, nonce: 1 });
     expect((await clockState()).beat).toBeCloseTo(8, 3);
-    await command({ action: "record", on: true, nonce: 4 });
+    // A no-op command still repairs stale status.
+    await page.evaluate(() => {
+      window.__testModel.set("is_playing", true);
+      window.__testModel._trigger("change:is_playing");
+    });
+    await command({ action: "stop", nonce: 5 });
+    expect((await clockState()).isPlaying).toBe(false);
+    await command({ action: "record", on: true, nonce: 6 });
     const rec = await clockState();
     expect(rec.recording).toBe(true);
     expect(rec.playing).toBe(true);
@@ -277,21 +288,31 @@ test.describe("TransportWidget", () => {
   });
 
   // 11. Model change:is_playing updates button
-  test("model change:is_playing updates play button", async ({ page }) => {
+  test("play button follows the clock, not stale status", async ({ page }) => {
     await renderWidget(page);
     const btn = page.locator(".nbplay-transport-play");
     await expect(btn).toContainText("▶");
 
+    // Status that disagrees with the (stopped) clock is corrected.
     await page.evaluate(() => {
       window.__testModel.set("is_playing", true);
       window.__testModel._trigger("change:is_playing");
+    });
+    await expect(btn).toContainText("▶");
+    expect(
+      await page.evaluate(() => window.__testModel._state.is_playing),
+    ).toBe(false);
+
+    await page.evaluate(() => {
+      window.__testModel.set("command", { action: "play", nonce: 1 });
+      window.__testModel._trigger("change:command");
     });
     await expect(btn).toContainText("\u23F8");
     await expect(btn).toHaveClass(/playing/);
 
     await page.evaluate(() => {
-      window.__testModel.set("is_playing", false);
-      window.__testModel._trigger("change:is_playing");
+      window.__testModel.set("command", { action: "stop", nonce: 2 });
+      window.__testModel._trigger("change:command");
     });
     await expect(btn).toContainText("▶");
     await expect(btn).not.toHaveClass(/playing/);

@@ -41,7 +41,7 @@ async function renderWidget(page, overrides = {}) {
       const el = document.getElementById("root");
       const model = window.createMockModel({ ...opts });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      window.__cleanup = mod.default.render({ model, el });
     },
     { ...DEFAULTS, ...overrides },
   );
@@ -800,6 +800,107 @@ test.describe("SamplerWidget", () => {
     // The automatic release plus the cancel both stop the source.
     expect(result.stops.length).toBe(2);
     expect(result.stops[1]).toBe(0);
+    // A cancelled voice leaves the pool at once.
+    await expect(page.locator(".nbplay-samp-active-voices")).toHaveText(
+      "0 active",
+    );
+  });
+
+  test("lookahead voice stealing stops the old voice when the new one starts", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const ctx = new AudioContext();
+      window.__sources = [];
+      const original = ctx.constructor.prototype.createBufferSource;
+      ctx.constructor.prototype.createBufferSource = function () {
+        const node = original.call(this);
+        const entry = { start: null, stops: [], gainDisconnected: () => false };
+        const start = node.start.bind(node);
+        const stop = node.stop.bind(node);
+        node.start = (when) => {
+          entry.start = when;
+          start(when);
+        };
+        node.stop = (when) => {
+          entry.stops.push(when);
+          stop(when);
+        };
+        node.__entry = entry;
+        window.__sources.push(entry);
+        return node;
+      };
+      globalThis.__nbplay = {
+        "steal-session": {
+          audioCtx: ctx,
+          channels: [{ gain: ctx.createGain() }],
+        },
+      };
+    });
+    await renderWidget(page, {
+      session_id: "steal-session",
+      channel_index: 0,
+      max_voices: 1,
+      sample_length: 3,
+    });
+    await page.evaluate(() => {
+      const samples = new Float32Array([0, 0.5, 0]);
+      window.__testModel.set("sample_data", new DataView(samples.buffer));
+      window.__testModel._trigger("change:sample_data");
+    });
+    const result = await page.evaluate(() => {
+      const bus = globalThis.__nbplay["steal-session"];
+      const base = bus.audioCtx.currentTime + 1;
+      bus.instruments[0].scheduleNote(60, 100, base, 0.5);
+      bus.instruments[0].scheduleNote(62, 100, base + 0.5, 0.5);
+      const [first, second] = window.__sources;
+      return { firstStops: first.stops, secondStart: second.start, base };
+    });
+    // The first voice is stolen at the second note's start time, not now.
+    expect(
+      result.firstStops.some((t) => Math.abs(t - result.secondStart) < 1e-6),
+    ).toBe(true);
+    expect(result.firstStops.every((t) => t >= result.base)).toBe(true);
+  });
+
+  test("moving channels or disposing removes only this sampler's registrations", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const ctx = new AudioContext();
+      globalThis.__nbplay = {
+        "own-session": {
+          audioCtx: ctx,
+          channels: [{ gain: ctx.createGain() }, { gain: ctx.createGain() }],
+        },
+      };
+    });
+    await renderWidget(page, { session_id: "own-session", channel_index: 0 });
+    await page.evaluate(() => {
+      window.__testModel.set("channel_index", 1);
+      window.__testModel._trigger("change:channel_index");
+    });
+    let state = await page.evaluate(() => {
+      const bus = globalThis.__nbplay["own-session"];
+      return {
+        at0: Boolean(bus.instruments[0]) || Boolean(bus.samplers[0]),
+        at1: typeof bus.instruments[1]?.scheduleNote,
+      };
+    });
+    expect(state).toEqual({ at0: false, at1: "function" });
+
+    // Another view took over channel 1; disposing this one leaves it alone.
+    await page.evaluate(() => {
+      const bus = globalThis.__nbplay["own-session"];
+      bus.instruments[1] = { scheduleNote: () => {}, other: true };
+      bus.samplers[1] = { triggerNote() {}, releaseNote() {}, other: true };
+      window.__cleanup();
+    });
+    state = await page.evaluate(() => {
+      const bus = globalThis.__nbplay["own-session"];
+      return { inst: bus.instruments[1]?.other, samp: bus.samplers[1]?.other };
+    });
+    expect(state).toEqual({ inst: true, samp: true });
   });
 
   test("sampler removed from bus on widget destroy", async ({ page }) => {
