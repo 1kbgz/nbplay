@@ -401,7 +401,12 @@ test.describe("Session clock", () => {
     page,
   }) => {
     await installAudioRecorder(page);
-    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    // Fast enough that the 100 ms lookahead always holds notes not yet
+    // sounded, so a seek has something to cancel.
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 1200,
+    });
     await page.evaluate((id) => {
       window.__scheduled = [];
       window.__cancelled = 0;

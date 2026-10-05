@@ -838,7 +838,13 @@ test.describe("TimelineWidget", () => {
     });
 
     await page.locator(".nbplay-timeline-play").click();
-    await page.waitForTimeout(25);
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => window.__mediaElementSources?.length || 0),
+        { timeout: 2000 },
+      )
+      .toBe(1);
 
     const routed = await page.evaluate(() => {
       const source = window.__mediaElementSources?.[0];
