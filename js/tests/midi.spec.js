@@ -152,7 +152,7 @@ test.describe("MIDI clips", () => {
       window.__triggers = [];
       window.__releases = [];
       bus[sessionId] = {
-        ...(bus[sessionId] || {}),
+        ...bus[sessionId],
         audioCtx: ctx,
         masterGain: ctx.createGain(),
         channels: [{ gain: ctx.createGain() }],
@@ -201,7 +201,7 @@ test.describe("MIDI clips", () => {
       window.__cancelled = [];
       window.__triggers = [];
       bus[sessionId] = {
-        ...(bus[sessionId] || {}),
+        ...bus[sessionId],
         audioCtx: ctx,
         masterGain: ctx.createGain(),
         channels: [{ gain: ctx.createGain() }],
