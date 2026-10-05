@@ -422,9 +422,12 @@ test.describe("Session clock", () => {
         },
       };
     }, SESSION_ID);
+    // The sequencer pushes its own model tempo into the clock at render,
+    // so it must agree with the transport.
     await renderWidget(page, "sequencer", "a", {
       ...SEQUENCER_DEFAULTS,
       channel_index: 0,
+      bpm: 1200,
     });
     await page.locator(".nbplay-transport-play").click();
     await page.waitForFunction(() => window.__scheduled.length >= 3);
@@ -434,7 +437,7 @@ test.describe("Session clock", () => {
     }));
     expect(state.first.note).toBe(60);
     expect(state.first.velocity).toBe(100);
-    expect(state.first.duration).toBeCloseTo(0.25, 6);
+    expect(state.first.duration).toBeCloseTo(0.025, 6); // half a beat at 1200 BPM
     expect(state.oscStarts).toBe(0);
 
     // Stopping cancels the notes that have not sounded yet.
