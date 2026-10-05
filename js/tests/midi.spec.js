@@ -152,7 +152,7 @@ test.describe("MIDI clips", () => {
       window.__triggers = [];
       window.__releases = [];
       bus[sessionId] = {
-        ...(bus[sessionId] || {}),
+        ...bus[sessionId],
         audioCtx: ctx,
         masterGain: ctx.createGain(),
         channels: [{ gain: ctx.createGain() }],
@@ -201,7 +201,7 @@ test.describe("MIDI clips", () => {
       window.__cancelled = [];
       window.__triggers = [];
       bus[sessionId] = {
-        ...(bus[sessionId] || {}),
+        ...bus[sessionId],
         audioCtx: ctx,
         masterGain: ctx.createGain(),
         channels: [{ gain: ctx.createGain() }],
@@ -234,10 +234,13 @@ test.describe("MIDI clips", () => {
     expect(first.duration).toBeCloseTo(0.5, 6);
     expect(await page.evaluate(() => window.__triggers)).toEqual([]);
 
-    // The note at beat 3 is still in the future at 60 BPM: stopping (the
-    // play button toggles) cancels it.
+    // The note at beat 3 is still in the future at 60 BPM: stopping the
+    // shared clock cancels it. (The clock, not the play button, so the
+    // click cannot race a timeline re-render.)
     await page.waitForFunction(() => window.__scheduled.length >= 2);
-    await page.locator(".nbplay-timeline-play").click();
+    await page.evaluate((sessionId) => {
+      globalThis.__nbplay[sessionId].clock.stop();
+    }, SESSION_ID);
     expect(await page.evaluate(() => window.__cancelled)).toContain(67);
   });
 

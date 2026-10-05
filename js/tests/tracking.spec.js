@@ -75,7 +75,7 @@ async function installBus(page) {
     const ctx = new AudioContext();
     const bus = (window.__nbplay = window.__nbplay || {});
     bus[sessionId] = {
-      ...(bus[sessionId] || {}),
+      ...bus[sessionId],
       audioCtx: ctx,
       masterGain: ctx.createGain(),
       channels: [{ gain: ctx.createGain() }, { gain: ctx.createGain() }],
