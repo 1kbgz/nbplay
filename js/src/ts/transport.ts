@@ -390,7 +390,8 @@ function render({
       nonce?: number;
     };
     const nonce = Number(cmd.nonce);
-    if (!cmd.action || !Number.isFinite(nonce) || nonce === lastCommandNonce)
+    // Nonces are monotonic: an older command arriving late is ignored.
+    if (!cmd.action || !Number.isFinite(nonce) || nonce <= lastCommandNonce)
       return;
     lastCommandNonce = nonce;
     const clk = clock();
@@ -413,10 +414,31 @@ function render({
         break;
       }
     }
+    // Even a no-op command re-publishes the clock's real status, so stale
+    // status that slipped into the model is repaired.
+    pullState(clk);
+    if (!disconnected) model.save_changes();
   }
   model.on("change:command", handleCommand);
-  model.on("change:is_playing", syncPlay);
-  model.on("change:is_recording", syncRecord);
+  // Status writes from the kernel that disagree with the clock are stale
+  // echoes: the browser clock is authoritative, so re-mirror it.
+  function reconcileStatus(): void {
+    if (mirroring) return;
+    const clk = clock();
+    if (
+      Boolean(model.get("is_playing")) !== clk.playing ||
+      Boolean(model.get("is_recording")) !== clk.recording
+    ) {
+      mirror(() => {
+        model.set("is_playing", clk.playing);
+        model.set("is_recording", clk.recording);
+      }, true);
+    }
+    syncPlay();
+    syncRecord();
+  }
+  model.on("change:is_playing", reconcileStatus);
+  model.on("change:is_recording", reconcileStatus);
   model.on("change:bpm", () => {
     syncBpm();
     if (mirroring) return;

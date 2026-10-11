@@ -381,8 +381,10 @@ test.describe("TimelineWidget", () => {
     await installMediaRecorderMock(page);
     await renderWidget(page, {
       clips: [],
-      current_beat: 2,
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+    });
+    await page.evaluate(() => {
+      globalThis.__nbplay["timeline-session"].clock.seek(2);
     });
 
     await page.locator(".nbplay-timeline-record").click();
@@ -428,9 +430,12 @@ test.describe("TimelineWidget", () => {
       bpm: 6000,
       clips: [],
       count_in_bars: 1,
-      current_beat: 4,
       length: 100,
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+    });
+    // In a session the position lives in the shared clock, not the model.
+    await page.evaluate(() => {
+      globalThis.__nbplay["timeline-session"].clock.seek(4);
     });
 
     await page.locator(".nbplay-timeline-record").click();
@@ -774,6 +779,60 @@ test.describe("TimelineWidget", () => {
     await page.locator(".nbplay-timeline-record").click();
   });
 
+  test("recording starts when the model fires change events synchronously", async ({
+    page,
+  }) => {
+    // Real widget models emit change events inside set(); the harness mock
+    // defers them to save_changes(), which can hide ordering bugs between a
+    // status write and the clock it is reconciled against.
+    await installMediaRecorderMock(page);
+    await page.evaluate(
+      async (opts) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "/dist/css/timeline.css";
+        document.head.appendChild(link);
+        const mod = await import("/dist/widgets/timeline.js");
+        const el = document.getElementById("root");
+        const model = window.createMockModel({ ...opts });
+        const set = model.set.bind(model);
+        model.set = (key, val) => {
+          const changed = model._state[key] !== val;
+          set(key, val);
+          if (changed) model._trigger("change:" + key);
+        };
+        window.__testModel = model;
+        window.__cleanup = mod.default.render({ model, el });
+      },
+      {
+        ...DEFAULTS,
+        clips: [],
+        tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
+      },
+    );
+
+    await page.locator(".nbplay-timeline-record").click();
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => ({
+            isRecording: window.__testModel._state.is_recording,
+            clockRecording:
+              globalThis.__nbplay["timeline-session"].clock.recording,
+            rows: document.querySelectorAll(".nbplay-timeline-row.recording")
+              .length,
+          })),
+        { timeout: 2000 },
+      )
+      .toEqual({ isRecording: true, clockRecording: true, rows: 1 });
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
+      "Stop Rec",
+    );
+
+    await page.locator(".nbplay-timeline-record").click();
+    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+  });
+
   test("external record state starts and stops recording", async ({ page }) => {
     await installMediaRecorderMock(page);
     await renderWidget(page, {
@@ -781,19 +840,31 @@ test.describe("TimelineWidget", () => {
       tracks: [{ ...DEFAULTS.tracks[0], armed: true }],
     });
 
+    // Recording in a session follows the shared clock (the transport's
+    // record command); the timeline's trait is status.
     await page.evaluate(() => {
-      window.__testModel.set("is_recording", true);
-      window.__testModel.save_changes();
+      const clock = globalThis.__nbplay["timeline-session"].clock;
+      clock.setRecording(true);
+      clock.play();
     });
     await expect(page.locator(".nbplay-timeline-record")).toHaveText(
       "Stop Rec",
     );
+    expect(
+      await page.evaluate(() => window.__testModel._state.is_recording),
+    ).toBe(true);
 
     await page.evaluate(() => {
-      window.__testModel.set("is_recording", false);
-      window.__testModel.save_changes();
+      globalThis.__nbplay["timeline-session"].clock.setRecording(false);
     });
     await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+
+    // A stale status write does not start recording.
+    await page.evaluate(() => {
+      window.__testModel.set("is_recording", true);
+      window.__testModel.save_changes();
+    });
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("Rec");
   });
 
   test("stops and flushes playhead at timeline end", async ({ page }) => {

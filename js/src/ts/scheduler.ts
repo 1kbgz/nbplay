@@ -275,6 +275,10 @@ export function stepIndexForBeat(
   return Math.floor(beat / stepBeats + 1e-6);
 }
 
+// How long after a note's duration its handle is kept so a stop can still
+// silence a long release (the sampler allows releases up to five seconds).
+const NOTE_TAIL_SECONDS = 6;
+
 export function createAudioScheduler(
   options: AudioSchedulerOptions = {},
 ): AudioScheduler {
@@ -287,16 +291,30 @@ export function createAudioScheduler(
   const scheduleAheadTime = 0.1;
   const lookAheadTime = 0.025;
   const random = options.random || Math.random;
-  // Notes handed to Web Audio but not yet sounding; stop() cancels them so
-  // a scene switch or transport stop does not play the next step anyway.
-  let pending: { cancel: () => void; at: number }[] = [];
+  // Notes handed to Web Audio: stop() silences the ones still sounding or
+  // not yet started, and a realign cancels the not-yet-started ones so the
+  // old position's notes do not play on top of the new one.
+  let pending: { cancel: () => void; at: number; until: number }[] = [];
 
-  function cancelPending(): void {
+  function cancelPending(onlyFuture: boolean): void {
     const now = audioCtx?.currentTime ?? 0;
     pending.forEach((entry) => {
-      if (entry.at > now) entry.cancel();
+      if (onlyFuture ? entry.at > now : entry.until > now) entry.cancel();
     });
-    pending = [];
+    // Sounding notes keep their handles so a later stop can still end them.
+    pending = onlyFuture ? pending.filter((entry) => entry.at <= now) : [];
+  }
+
+  /** End scheduling without touching notes that are already sounding. */
+  function halt(): void {
+    if (schedulerTimer) {
+      clearInterval(schedulerTimer);
+      schedulerTimer = null;
+    }
+    cancelPending(true);
+    cursor = null;
+    activeClock = null;
+    activeModel = null;
   }
 
   const self: AudioScheduler = {
@@ -321,6 +339,7 @@ export function createAudioScheduler(
     },
 
     realign(): void {
+      cancelPending(true);
       cursor = null;
       if (schedulerTimer && activeModel) scheduler(activeModel);
     },
@@ -330,7 +349,7 @@ export function createAudioScheduler(
         clearInterval(schedulerTimer);
         schedulerTimer = null;
       }
-      cancelPending();
+      cancelPending(false);
       cursor = null;
       activeClock = null;
       activeModel = null;
@@ -351,7 +370,7 @@ export function createAudioScheduler(
     const clock = activeClock;
     if (!audioCtx || !clock) return;
     const now = audioCtx.currentTime;
-    pending = pending.filter((entry) => entry.at > now);
+    pending = pending.filter((entry) => entry.until > now);
     // Re-align after a seek/tempo change, or if the cursor fell far behind
     // (for example after the tab was throttled in the background).
     if (!cursor || cursor.time < now - 0.5)
@@ -381,7 +400,8 @@ export function createAudioScheduler(
       Boolean(model.get("loop_enabled")),
     );
     if (stepIndex < 0) {
-      self.stop();
+      // The pattern ended: stop scheduling but let the last notes ring.
+      halt();
       options.onEnd?.();
       return false;
     }
@@ -444,7 +464,12 @@ export function createAudioScheduler(
           };
         }
       }
-      if (cancel) pending.push({ cancel, at: scheduledTime });
+      if (cancel)
+        pending.push({
+          cancel,
+          at: scheduledTime,
+          until: scheduledTime + duration + NOTE_TAIL_SECONDS,
+        });
       emitBusNote(sessionId, {
         note,
         velocity: Math.round(velocity * 127),
