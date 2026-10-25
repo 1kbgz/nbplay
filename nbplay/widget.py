@@ -19,7 +19,6 @@ import pathlib
 import uuid
 import wave
 import zipfile
-from typing import ClassVar
 
 import anywidget
 import traitlets
@@ -1780,7 +1779,7 @@ class SamplerWidget(anywidget.AnyWidget):
         if path.suffix.lower() == ".wav":
             return self._read_wav_file(path)
         try:
-            import soundfile as sf
+            import soundfile as sf  # ty: ignore[unresolved-import]
         except ImportError as exc:
             raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
         data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
@@ -3128,8 +3127,8 @@ class KeyboardWidget(anywidget.AnyWidget):
     sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
     # Internal references (not synced)
-    _connected_sequencers: ClassVar[list] = []
-    _connected_samplers: ClassVar[list] = []
+    _connected_sequencers: list
+    _connected_samplers: list
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -3258,7 +3257,7 @@ class MidiOutputWidget(anywidget.AnyWidget):
         """Send a control change (0-127) on the widget's channel."""
         self._request(kind="control_change", controller=_clamp_int(controller, 0, 127), value=_clamp_int(value, 0, 127))
 
-    def send(self, data):
+    def send_raw(self, data):
         """Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""
         data = [_clamp_int(b, 0, 255) for b in data]
         if not data:
@@ -3316,7 +3315,7 @@ class PadWidget(anywidget.AnyWidget):
     channel_index = traitlets.Int(-1).tag(sync=True)
     sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
 
-    _connected_samplers: ClassVar[list] = []
+    _connected_samplers: list
 
     @traitlets.validate("velocity")
     def _validate_velocity(self, proposal):

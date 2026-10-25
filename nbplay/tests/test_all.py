@@ -2246,19 +2246,19 @@ class TestKeyboardRoute:
 
     def test_invalid_channel_index_type(self):
         with pytest.raises(ValueError, match="channel_index must be int"):
-            KeyboardRoute("0", match="all")
+            KeyboardRoute("0", match="all")  # ty: ignore[invalid-argument-type]
 
     def test_invalid_float_octave(self):
         with pytest.raises(ValueError):
-            KeyboardRoute(0, match="octave", octave=4.5)
+            KeyboardRoute(0, match="octave", octave=4.5)  # ty: ignore[invalid-argument-type]
 
     def test_invalid_float_note(self):
         with pytest.raises(ValueError):
-            KeyboardRoute(0, match="note", note=60.5)
+            KeyboardRoute(0, match="note", note=60.5)  # ty: ignore[invalid-argument-type]
 
     def test_invalid_float_in_notes(self):
         with pytest.raises(ValueError):
-            KeyboardRoute(0, match="notes", notes=[60, 62.5])
+            KeyboardRoute(0, match="notes", notes=[60, 62.5])  # ty: ignore[invalid-argument-type]
 
     def test_equality(self):
         a = KeyboardRoute(0, match="all")
@@ -2457,10 +2457,10 @@ class TestMidiOutputWidget:
         assert out.send_request == {"kind": "note_off", "note": 0, "nonce": 3}
         out.control_change(7, 300)
         assert out.send_request == {"kind": "control_change", "controller": 7, "value": 127, "nonce": 4}
-        out.send([0xC9, 5, 999])
+        out.send_raw([0xC9, 5, 999])
         assert out.send_request == {"kind": "raw", "data": [0xC9, 5, 255], "nonce": 5}
         with pytest.raises(ValueError):
-            out.send([])
+            out.send_raw([])
         with pytest.raises(traitlets.TraitError):
             out.channel = 16
 

@@ -39,20 +39,20 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 
 ## Repository map
 
-| Path | Responsibility |
-| --- | --- |
-| `nbplay/widget.py` | Python anywidget classes, session orchestration, and notebook-facing helper APIs. |
-| `nbplay/__init__.py` | Public Python exports for Rust/PyO3 types and widget classes. |
-| `rust/src/` | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O. |
-| `rust/python/` | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension. |
-| `js/src/ts/` | Browser anywidget renderers, one standalone ESM entry per widget. |
-| `js/src/css/` | One scoped stylesheet per widget, processed by lightningcss. |
-| `js/src/rust/` | wasm-bindgen browser bindings around selected Rust functionality. |
-| `js/tests/` | Playwright browser tests using a mock anywidget model and mock Web Audio context. |
-| `nbplay/tests/test_all.py` | Python, Rust-extension, widget, session, and example-notebook regression tests. |
-| `examples/` | Executable tutorial notebooks used by users and docs builds. |
-| `.github/workflows/` | CI for build/test/dist and docs publishing. |
-| `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration. |
+| Path                                              | Responsibility                                                                                     |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                  |
+| `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                      |
+| `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O. |
+| `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                              |
+| `js/src/ts/`                                      | Browser anywidget renderers, one standalone ESM entry per widget.                                  |
+| `js/src/css/`                                     | One scoped stylesheet per widget, processed by lightningcss.                                       |
+| `js/src/rust/`                                    | wasm-bindgen browser bindings around selected Rust functionality.                                  |
+| `js/tests/`                                       | Playwright browser tests using a mock anywidget model and mock Web Audio context.                  |
+| `nbplay/tests/test_all.py`                        | Python, Rust-extension, widget, session, and example-notebook regression tests.                    |
+| `examples/`                                       | Executable tutorial notebooks used by users and docs builds.                                       |
+| `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                        |
+| `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration.                                          |
 
 Generated assets are copied into `nbplay/static/` and `nbplay/extension/` by the
 JavaScript build. These folders are ignored in Git but included in built wheels
@@ -163,8 +163,7 @@ files are generated.
   inactive step dictionaries.
 - `_measure_beats(time_signature_num, time_signature_den)` converts a time
   signature into quarter-note beats per measure.
-- `_step_duration_for_length(length, measures, time_signature_num,
-  time_signature_den)` infers the musical step duration for an explicit step
+- `_step_duration_for_length(length, measures, time_signature_num, time_signature_den)` infers the musical step duration for an explicit step
   count.
 - `_resize_pad_notes(notes, pad_count)` clamps MIDI pad notes to 0-127 and
   preserves or extends the list when sampler pad count changes.
@@ -177,20 +176,20 @@ files are generated.
 
 ### Widget trait summary
 
-| Python class | Browser entry | CSS entry | Key synced traits |
-| --- | --- | --- | --- |
-| `SynthWidget` | `widget.js` | `widget.css` | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform` |
-| `SettingsWidget` | `settings.js` | `settings.css` | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event` |
-| `MixerWidget` | `mixer.js` | `mixer.css` | `channels`, `master_gain`, `master_effects`, `session_id` |
-| `SequencerWidget` | `sequencer.js` | `sequencer.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data` |
-| `SamplerWidget` | `sampler.js` | `sampler.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request` |
-| `TransportWidget` | `transport.js` | `transport.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar` |
-| `TimelineWidget` | `timeline.js` | `timeline.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
-| `LauncherWidget` | `launcher.js` | `launcher.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request` |
-| `KeyboardWidget` | `keyboard.js` | `keyboard.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing` |
-| `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change` |
-| `MidiOutputWidget` | `midi_output.js` | `midi_output.css` | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request` |
-| `PadWidget` | `pad.js` | `pad.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing` |
+| Python class         | Browser entry      | CSS entry           | Key synced traits                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------- | ------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SynthWidget`        | `widget.js`        | `widget.css`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform`                                                                                                                                                                                                                                                                                                                                                                             |
+| `SettingsWidget`     | `settings.js`      | `settings.css`      | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event`                                                                                                                                                                                                                                                                                                                                                      |
+| `MixerWidget`        | `mixer.js`         | `mixer.css`         | `channels`, `master_gain`, `master_effects`, `session_id`                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `SequencerWidget`    | `sequencer.js`     | `sequencer.css`     | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data`                                                                                                                                                                                                  |
+| `SamplerWidget`      | `sampler.js`       | `sampler.css`       | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request`                                                                                                                                                  |
+| `TransportWidget`    | `transport.js`     | `transport.css`     | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`                                                                                                                                                                                                                                                                     |
+| `TimelineWidget`     | `timeline.js`      | `timeline.css`      | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
+| `LauncherWidget`     | `launcher.js`      | `launcher.css`      | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request`                                                                                                                                                                                                                                                                        |
+| `KeyboardWidget`     | `keyboard.js`      | `keyboard.css`      | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                                                                                  |
+| `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change`                                                                                                                                                                                                                                                                                                                                                                                   |
+| `MidiOutputWidget`   | `midi_output.js`   | `midi_output.css`   | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request`                                                                                                                                                                                                                                                                                                                                                                    |
+| `PadWidget`          | `pad.js`           | `pad.css`           | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                             |
 
 ### Non-rendered Python orchestration types
 
@@ -222,16 +221,16 @@ The reusable Rust library is in `rust/src/`. It is compiled as an `rlib` and is
 used by both the PyO3 extension and the WASM crate. Native-only device modules
 are gated out for wasm builds.
 
-| Module | Key types and behavior |
-| --- | --- |
-| `audio.rs` | `SampleRate`, `ChannelCount`, `AudioFormat`, and interleaved `AudioBuffer`. Buffers support silence allocation, frame count, checked sample get/set, add-mixing, and clearing. |
-| `midi.rs` | `MidiChannel`, `Note`, `Velocity`, `ControlNumber`, `MidiMessage`, `MidiEvent`, `note_to_hz()`, `hz_to_note()`, and `parse_midi_bytes()`. Channel range is 0-15; notes, velocity, and controls are 0-127. Note-on with velocity 0 parses as note-off. |
-| `oscillator.rs` | `AudioSource` trait and sine, square, saw, and deterministic-noise sources. Oscillators render into an `AudioBuffer` and wrap phase into [0, 1) to avoid drift. |
-| `mixer.rs` | `MixerChannel` and `Mixer`. Channels apply gain, mute, solo, and constant-power pan. `Mixer::mix_down()` combines mono channel buffers into interleaved stereo output. |
-| `sampler.rs` | `AudioSample`, `Envelope`, polyphonic `Sampler`, `SampleMapping`, and `SampleMap`. The sampler handles pitch ratio, sample-rate ratio, linear interpolation, ADSR, looping, soft clipping, voice stealing, note-off release, and panic/all-notes-off. |
-| `sequencer.rs` | `Step`, `Pattern`, `NoteEvent`, `EventSequence`, `TransportClock`, `TransportState`, and `StepSequencer`. These model fixed step patterns, piano-roll events, beat clocks, and MIDI event generation over beat ranges. |
-| `audio_output.rs` | Native `AudioOutput` via cpal. Builds a fixed-buffer output stream and fills it through a render callback. Not compiled for wasm. |
-| `midi_input.rs` | Native `MidiInput` via midir. Lists ports and connects callbacks that receive parsed `MidiEvent` values. Not compiled for wasm. |
+| Module            | Key types and behavior                                                                                                                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `audio.rs`        | `SampleRate`, `ChannelCount`, `AudioFormat`, and interleaved `AudioBuffer`. Buffers support silence allocation, frame count, checked sample get/set, add-mixing, and clearing.                                                                        |
+| `midi.rs`         | `MidiChannel`, `Note`, `Velocity`, `ControlNumber`, `MidiMessage`, `MidiEvent`, `note_to_hz()`, `hz_to_note()`, and `parse_midi_bytes()`. Channel range is 0-15; notes, velocity, and controls are 0-127. Note-on with velocity 0 parses as note-off. |
+| `oscillator.rs`   | `AudioSource` trait and sine, square, saw, and deterministic-noise sources. Oscillators render into an `AudioBuffer` and wrap phase into \[0, 1) to avoid drift.                                                                                      |
+| `mixer.rs`        | `MixerChannel` and `Mixer`. Channels apply gain, mute, solo, and constant-power pan. `Mixer::mix_down()` combines mono channel buffers into interleaved stereo output.                                                                                |
+| `sampler.rs`      | `AudioSample`, `Envelope`, polyphonic `Sampler`, `SampleMapping`, and `SampleMap`. The sampler handles pitch ratio, sample-rate ratio, linear interpolation, ADSR, looping, soft clipping, voice stealing, note-off release, and panic/all-notes-off. |
+| `sequencer.rs`    | `Step`, `Pattern`, `NoteEvent`, `EventSequence`, `TransportClock`, `TransportState`, and `StepSequencer`. These model fixed step patterns, piano-roll events, beat clocks, and MIDI event generation over beat ranges.                                |
+| `audio_output.rs` | Native `AudioOutput` via cpal. Builds a fixed-buffer output stream and fills it through a render callback. Not compiled for wasm.                                                                                                                     |
+| `midi_input.rs`   | Native `MidiInput` via midir. Lists ports and connects callbacks that receive parsed `MidiEvent` values. Not compiled for wasm.                                                                                                                       |
 
 ### Rust invariants
 
@@ -846,13 +845,13 @@ make dist          # Full distribution build and checks
 The JavaScript build in `js/package.json` is ordered as:
 
 1. `pnpm build:clean`: remove `js/dist/` and `nbplay/extension/`.
-2. `pnpm build:rust`: compile the WASM crate for `wasm32-unknown-unknown`.
-3. `pnpm build:wasm-bindgen`: generate JS glue and `.wasm` under
+1. `pnpm build:rust`: compile the WASM crate for `wasm32-unknown-unknown`.
+1. `pnpm build:wasm-bindgen`: generate JS glue and `.wasm` under
    `js/dist/pkg/`.
-4. `pnpm build:prod`: run `js/build.mjs`, which bundles TypeScript entries,
+1. `pnpm build:prod`: run `js/build.mjs`, which bundles TypeScript entries,
    processes CSS, copies extension assets, and copies widget JS/CSS into
    `nbplay/static/`.
-5. `pnpm build:types`: emit TypeScript declarations under `js/dist/esm/`.
+1. `pnpm build:types`: emit TypeScript declarations under `js/dist/esm/`.
 
 The Python build uses Hatch hooks:
 
@@ -957,12 +956,12 @@ focuses it), never while a text field has focus, and never with Ctrl, Meta,
 or Alt held. Consumed keys call `preventDefault()`, which also stops Space
 from activating a focused button a second time.
 
-| Widget | Keys |
-| --- | --- |
-| Transport | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `↑`/`↓` BPM ±1, `Shift+↑`/`Shift+↓` BPM ±10 |
+| Widget    | Keys                                                                                                                                                       |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Transport | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `↑`/`↓` BPM ±1, `Shift+↑`/`Shift+↓` BPM ±10                                       |
 | Sequencer | `Space` play/pause, `Shift+Space` stop, arrows move the step cursor, `Enter`/`X` toggle the cursor step, `Esc` clears the cursor and any pending note edit |
-| Timeline | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `D` duplicate clip, `Delete`/`Backspace` delete clip |
-| Launcher | `Space` play/pause, `1`–`9` launch scene, `0`/`Esc` stop all |
+| Timeline  | `Space` play/pause, `Shift+Space` stop and rewind, `R` record, `L` loop, `D` duplicate clip, `Delete`/`Backspace` delete clip                              |
+| Launcher  | `Space` play/pause, `1`–`9` launch scene, `0`/`Esc` stop all                                                                                               |
 
 The QWERTY `KeyboardWidget` captures keys at window level when it, or a
 sequencer that is recording or waiting for a note, has focus; in that state
@@ -1037,7 +1036,7 @@ yardang build
 ## CI and publishing
 
 The build workflow runs on Ubuntu, macOS, and Windows with Python 3.11 and Node
-22. It installs Rust, Node, and Python dependencies, installs Linux ALSA headers,
+22\. It installs Rust, Node, and Python dependencies, installs Linux ALSA headers,
 runs lint/checks on Ubuntu, builds the project, runs coverage, uploads JUnit XML,
 uploads coverage to Codecov, builds distribution artifacts, and smoke-tests the
 wheel/sdist on Ubuntu.
@@ -1063,70 +1062,70 @@ make major
 
 1. Implement the type in `rust/src/<module>.rs`. Keep validation in constructors
    or setters and add Rust unit tests near the implementation.
-2. Re-export the type from `rust/src/lib.rs` if it should be public.
-3. Add a PyO3 wrapper in `rust/python/<module>.rs` using the existing `Py*`
+1. Re-export the type from `rust/src/lib.rs` if it should be public.
+1. Add a PyO3 wrapper in `rust/python/<module>.rs` using the existing `Py*`
    naming pattern.
-4. Register the class in `rust/python/lib.rs` with `m.add_class::<...>()?`.
-5. Re-export it from `nbplay/__init__.py`.
-6. Add Python tests in `nbplay/tests/test_all.py` for construction, validation,
+1. Register the class in `rust/python/lib.rs` with `m.add_class::<...>()?`.
+1. Re-export it from `nbplay/__init__.py`.
+1. Add Python tests in `nbplay/tests/test_all.py` for construction, validation,
    repr/equality, and behavior.
-7. Run `make build-rs`, `make build-py`, and focused tests.
+1. Run `make build-rs`, `make build-py`, and focused tests.
 
 ### Add a Rust feature exposed to the browser
 
 1. Implement reusable logic in `rust/src/` when possible.
-2. Add wasm-bindgen wrappers in `js/src/rust/`.
-3. Re-export from `js/src/rust/lib.rs` and `js/src/ts/index.ts` if the binding
+1. Add wasm-bindgen wrappers in `js/src/rust/`.
+1. Re-export from `js/src/rust/lib.rs` and `js/src/ts/index.ts` if the binding
    should be public to JS consumers.
-4. Ensure required `web-sys` features are listed in `js/Cargo.toml`.
-5. Rebuild with `cd js && pnpm build` and add Playwright coverage if a widget
+1. Ensure required `web-sys` features are listed in `js/Cargo.toml`.
+1. Rebuild with `cd js && pnpm build` and add Playwright coverage if a widget
    uses the new binding.
 
 ### Add a new widget
 
 1. Add a Python class in `nbplay/widget.py` extending `anywidget.AnyWidget`.
-2. Give it `_esm = _STATIC / "<name>.js"` and `_css = _STATIC / "<name>.css"`.
-3. Define synced traits with `.tag(sync=True)` and keep defaults valid.
-4. Create `js/src/ts/<name>.ts` exporting `default { render }`.
-5. Create `js/src/css/<name>.css` scoped under a unique `.nbplay-*` root class.
-6. Add `<name>` to `WIDGET_NAMES` in `js/build.mjs`.
-7. Re-export the widget from `nbplay/__init__.py`.
-8. Add Python widget tests and Playwright tests.
-9. Add or update an example notebook when the widget is user-facing.
-10. Run `cd js && pnpm build`, then focused Python and JS tests.
+1. Give it `_esm = _STATIC / "<name>.js"` and `_css = _STATIC / "<name>.css"`.
+1. Define synced traits with `.tag(sync=True)` and keep defaults valid.
+1. Create `js/src/ts/<name>.ts` exporting `default { render }`.
+1. Create `js/src/css/<name>.css` scoped under a unique `.nbplay-*` root class.
+1. Add `<name>` to `WIDGET_NAMES` in `js/build.mjs`.
+1. Re-export the widget from `nbplay/__init__.py`.
+1. Add Python widget tests and Playwright tests.
+1. Add or update an example notebook when the widget is user-facing.
+1. Run `cd js && pnpm build`, then focused Python and JS tests.
 
 ### Modify an existing widget trait
 
 1. Update the Python trait default and validation/coercion logic.
-2. Update the TypeScript model reads, writes, and `change:<trait>` listeners.
-3. Update CSS if the trait changes layout or visible state.
-4. Update `nbplay/static` by rebuilding JS before testing Python rendering from
+1. Update the TypeScript model reads, writes, and `change:<trait>` listeners.
+1. Update CSS if the trait changes layout or visible state.
+1. Update `nbplay/static` by rebuilding JS before testing Python rendering from
    source.
-5. Add Python tests for the trait default/API and Playwright tests for browser
+1. Add Python tests for the trait default/API and Playwright tests for browser
    interaction.
-6. Update examples and this guide when the feature changes developer workflow.
+1. Update examples and this guide when the feature changes developer workflow.
 
 ### Modify audio routing
 
 1. Check whether the feature should use a standalone `AudioContext` fallback, a
    session mixer bus, or both.
-2. Preserve render-order tolerance. If a widget depends on the mixer bus, listen
+1. Preserve render-order tolerance. If a widget depends on the mixer bus, listen
    for `nbplay-bus-ready` or retry registration when `session_id` changes.
-3. Clean up every node, timer, event listener, and bus entry in the render
+1. Clean up every node, timer, event listener, and bus entry in the render
    cleanup function.
-4. Avoid creating multiple owned `AudioContext` instances when routing through a
+1. Avoid creating multiple owned `AudioContext` instances when routing through a
    session bus.
-5. Add integration tests under `js/tests/integration.spec.js` when multiple
+1. Add integration tests under `js/tests/integration.spec.js` when multiple
    widgets are involved.
 
 ### Modify keyboard or MIDI behavior
 
 1. Keep `last_note_event` shape as `{ note, velocity, type }` unless every
    consumer is updated.
-2. Preserve `nbplay-note` CustomEvent dispatch for sequencer recording.
-3. Preserve sampler routing semantics: `all`, `upper`, and `lower` zones.
-4. MIDI note-on with velocity zero should remain equivalent to note-off.
-5. Add tests for active notes, velocity, note-off, sampler routing, and event
+1. Preserve `nbplay-note` CustomEvent dispatch for sequencer recording.
+1. Preserve sampler routing semantics: `all`, `upper`, and `lower` zones.
+1. MIDI note-on with velocity zero should remain equivalent to note-off.
+1. Add tests for active notes, velocity, note-off, sampler routing, and event
    dispatch.
 
 ## Common pitfalls and invariants

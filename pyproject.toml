@@ -169,13 +169,7 @@ fail_under = 50
 
 [tool.hatch.build]
 artifacts = [
-<<<<<<< before updating
-    "nbplay/*.dll",
-    "nbplay/*.dylib",
-    "nbplay/*.so",
     "nbplay/static",
-=======
->>>>>>> after updating
     "nbplay/extension",
 ]
 
@@ -221,6 +215,7 @@ artifacts = [
     "nbplay/*.dll",
     "nbplay/*.dylib",
     "nbplay/*.so",
+    "nbplay/static",
     "nbplay/extension",
 ]
 packages = [
