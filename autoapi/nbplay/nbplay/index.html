@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nbplay.nbplay &#8212; nbplay v0.3.0</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fuma.css?v=9324ae27" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fuma-code.css?v=a950e949" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fonts/fuma-fonts.css?v=c2892c73" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/custom.css?v=88c24c6a" />
+    <script src="../../../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-searchlite-index="searchlite-index.json" defer="defer" src="../../../_static/searchlite.js?v=a5320898"></script>
+    <script defer="defer" src="../../../_static/fuma.js?v=88a16a98"></script>
+    <script src="../../../_static/js/custom.js?v=956e5d78"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="nbplay.widget" href="../widget/index.html" />
+    <link rel="prev" title="nbplay.midi_learn" href="../midi_learn/index.html" />
+    <script>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem("fuma-theme");
+          if (stored) {
+            root.classList.add(stored === "dark" ? "dark" : "light");
+            root.style.colorScheme = stored === "dark" ? "dark" : "light";
+          }
+          if (localStorage.getItem("fuma-sidebar") === "collapsed") root.dataset.sidebarCollapsed = "true";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+<body class="fd-body" data-layout="docs" data-toc-style="normal" data-open-level="0">
+<div id="fd-layout"><header id="fd-subnav">
+  <div class="fd-subnav-inner">
+    <button type="button" class="fd-icon-button fd-sidebar-toggle" aria-controls="fd-sidebar" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+    </button><a class="fd-brand" href="../../../index.html"><span class="fd-brand-name">nbplay v0.3.0</span>
+</a>
+
+    <div class="fd-nav-actions">
+      <button type="button" class="fd-icon-button" data-fd-search-open aria-label="Search" title="Search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="fd-icon-button" href="https://github.com/1kbgz/nbplay" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+      <button type="button" class="fd-icon-button fd-theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon fd-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon fd-icon-dark"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside id="fd-sidebar" aria-label="Documentation">
+  <div class="fd-sidebar-header">
+    <div class="fd-sidebar-brand-row"><a class="fd-brand" href="../../../index.html"><span class="fd-brand-name">nbplay v0.3.0</span>
+</a>
+      <button type="button" class="fd-icon-button fd-sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+    </div>
+    <button type="button" class="fd-search-trigger" data-fd-search-open title="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Search</span><kbd class="fd-kbd">/</kbd>
+    </button>
+  </div>
+
+  <nav class="fd-sidebar-nav">
+    <div class="fd-sidebar-group">
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <details class="fd-folder" open>
+      <summary class="fd-folder-summary" title="Toggle section: API Reference">
+        <a class="fd-link" href="../../index.html">
+          <span class="fd-link-text">API Reference</span>
+        </a>
+        <span class="fd-folder-marker" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg></span>
+      </summary>
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <details class="fd-folder" open>
+      <summary class="fd-folder-summary" title="Toggle section: nbplay">
+        <a class="fd-link" href="../index.html">
+          <span class="fd-link-text">nbplay</span>
+        </a>
+        <span class="fd-folder-marker" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg></span>
+      </summary>
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../history/index.html">
+      <span class="fd-link-text">nbplay.history</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../midi/index.html">
+      <span class="fd-link-text">nbplay.midi</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../midi_learn/index.html">
+      <span class="fd-link-text">nbplay.midi_learn</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link fd-current" href="#">
+      <span class="fd-link-text">nbplay.nbplay</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../widget/index.html">
+      <span class="fd-link-text">nbplay.widget</span>
+    </a>
+  </li>
+</ul>
+    </details>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../test_all/index.html">
+      <span class="fd-link-text">test_all</span>
+    </a>
+  </li>
+</ul>
+    </details>
+  </li>
+</ul>
+    </div>
+  </nav>
+
+  <div class="fd-sidebar-footer">
+    <div class="fd-toolbar">
+      <a class="fd-toolbar-item" href="https://github.com/1kbgz/nbplay" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+      <div class="fd-theme-switch" role="group" aria-label="Theme">
+        <button type="button" class="fd-theme-option" data-fd-theme="light" aria-label="Light theme" title="Light theme"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button>
+        <button type="button" class="fd-theme-option" data-fd-theme="dark" aria-label="Dark theme" title="Dark theme"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"/></svg></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<button type="button" id="fd-sidebar-restore" class="fd-icon-button" aria-label="Expand sidebar" title="Expand sidebar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+<div class="fd-sidebar-scrim" hidden></div>
+  <div id="fd-toc-popover">
+    <button type="button" class="fd-toc-trigger" aria-expanded="false" aria-controls="fd-toc-mobile" title="On this page">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>On this page</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="fd-toc-mobile" hidden><ul class="fd-toc-list">
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#classes">Classes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#module-contents">Module Contents</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioFormat">AudioFormat</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioFormat.sample_rate">AudioFormat.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioFormat.channels">AudioFormat.channels</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioBuffer">AudioBuffer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.frames">AudioBuffer.frames</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.format">AudioBuffer.format</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.__len__">AudioBuffer.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.sample_at">AudioBuffer.sample_at()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.set_sample">AudioBuffer.set_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.clear">AudioBuffer.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.to_list">AudioBuffer.to_list()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiChannel">MidiChannel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiChannel.value">MidiChannel.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Note">Note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.value">Note.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.to_hz">Note.to_hz()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.from_hz">Note.from_hz()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Velocity">Velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Velocity.value">Velocity.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiMessage">MidiMessage</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.note_on">MidiMessage.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.note_off">MidiMessage.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.control_change">MidiMessage.control_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.program_change">MidiMessage.program_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.pitch_bend">MidiMessage.pitch_bend()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.clock">MidiMessage.clock()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.start">MidiMessage.start()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.stop">MidiMessage.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiEvent">MidiEvent</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiEvent.message">MidiEvent.message</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiEvent.timestamp_us">MidiEvent.timestamp_us</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SineOscillator">SineOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.frequency">SineOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.amplitude">SineOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.sample_rate">SineOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.render_to_buffer">SineOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SquareOscillator">SquareOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.frequency">SquareOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.amplitude">SquareOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.sample_rate">SquareOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.render_to_buffer">SquareOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SawOscillator">SawOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.frequency">SawOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.amplitude">SawOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.sample_rate">SawOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.render_to_buffer">SawOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.NoiseSource">NoiseSource</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoiseSource.amplitude">NoiseSource.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoiseSource.render_to_buffer">NoiseSource.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MixerChannel">MixerChannel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.name">MixerChannel.name</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.gain">MixerChannel.gain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.pan">MixerChannel.pan</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.mute">MixerChannel.mute</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.solo">MixerChannel.solo</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.process_sample">MixerChannel.process_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Mixer">Mixer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.master_gain">Mixer.master_gain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.__len__">Mixer.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.channel_count">Mixer.channel_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.add_channel">Mixer.add_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.remove_channel">Mixer.remove_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.get_channel">Mixer.get_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_gain">Mixer.set_channel_gain()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_pan">Mixer.set_channel_pan()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_mute">Mixer.set_channel_mute()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_solo">Mixer.set_channel_solo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.mix_down">Mixer.mix_down()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.channel_names">Mixer.channel_names()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Step">Step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.note">Step.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.velocity">Step.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.duration_ticks">Step.duration_ticks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.active">Step.active</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Pattern">Pattern</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.loop_enabled">Pattern.loop_enabled</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.length">Pattern.length</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.__len__">Pattern.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.set_step">Pattern.set_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.toggle_step">Pattern.toggle_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.get_step">Pattern.get_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.clear">Pattern.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.NoteEvent">NoteEvent</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.beat_position">NoteEvent.beat_position</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.duration">NoteEvent.duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.note">NoteEvent.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.velocity">NoteEvent.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.end_position">NoteEvent.end_position()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.EventSequence">EventSequence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.__len__">EventSequence.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.add_event">EventSequence.add_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.remove_event">EventSequence.remove_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events">EventSequence.events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events_in_range">EventSequence.events_in_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events_starting_in_range">EventSequence.events_starting_in_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.duration">EventSequence.duration()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.clear">EventSequence.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.TransportClock">TransportClock</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.bpm">TransportClock.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.ticks_per_beat">TransportClock.ticks_per_beat</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.position">TransportClock.position</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.state">TransportClock.state</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.play">TransportClock.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.pause">TransportClock.pause()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.stop">TransportClock.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.seek">TransportClock.seek()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.advance_by_frames">TransportClock.advance_by_frames()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.beats_to_seconds">TransportClock.beats_to_seconds()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.seconds_to_beats">TransportClock.seconds_to_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.beats_to_ticks">TransportClock.beats_to_ticks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.ticks_to_beats">TransportClock.ticks_to_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.StepSequencer">StepSequencer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.step_duration">StepSequencer.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.current_step">StepSequencer.current_step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.set_pattern">StepSequencer.set_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.reset">StepSequencer.reset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.process_beat_range">StepSequencer.process_beat_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioSample">AudioSample</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.root_note">AudioSample.root_note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.loop_start">AudioSample.loop_start</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.loop_end">AudioSample.loop_end</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.sample_rate">AudioSample.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.__len__">AudioSample.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.duration_seconds">AudioSample.duration_seconds()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.data">AudioSample.data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Envelope">Envelope</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.attack">Envelope.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.decay">Envelope.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.sustain">Envelope.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.release">Envelope.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SampleMapping">SampleMapping</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMapping.matches">SampleMapping.matches()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SampleMap">SampleMap</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.__len__">SampleMap.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.single_sample">SampleMap.single_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.add_mapping">SampleMap.add_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.find_sample">SampleMap.find_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.mapping_count">SampleMap.mapping_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Sampler">Sampler</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.max_voices">Sampler.max_voices</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.sample_rate">Sampler.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.set_envelope">Sampler.set_envelope()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.note_on">Sampler.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.note_off">Sampler.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.active_voice_count">Sampler.active_voice_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.all_notes_off">Sampler.all_notes_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.panic">Sampler.panic()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.render">Sampler.render()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioOutput">AudioOutput</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.list_devices">AudioOutput.list_devices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.device_name">AudioOutput.device_name()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.is_playing">AudioOutput.is_playing()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.stop">AudioOutput.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiInput">MidiInput</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiInput.list_ports">MidiInput.list_ports()</a>
+  </li>
+</ul>
+</div>
+  </div>
+
+  <main id="fd-main">
+    <article class="fd-page">
+<nav class="fd-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="../../index.html">API Reference</a>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+    </li>
+    <li>
+      <a href="../index.html">nbplay</a>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+    </li>
+    <li aria-current="page">nbplay.nbplay</li>
+  </ol>
+</nav>
+      <div class="fd-prose">
+  <section id="module-nbplay.nbplay">
+<span id="nbplay-nbplay"></span><h1>nbplay.nbplay<a class="headerlink" href="#module-nbplay.nbplay" title="Link to this heading">¶</a></h1>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioFormat" title="nbplay.nbplay.AudioFormat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioFormat</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioBuffer" title="nbplay.nbplay.AudioBuffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioBuffer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiChannel" title="nbplay.nbplay.MidiChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiChannel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Note" title="nbplay.nbplay.Note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Note</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Velocity" title="nbplay.nbplay.Velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocity</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiMessage</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiEvent" title="nbplay.nbplay.MidiEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiEvent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SineOscillator" title="nbplay.nbplay.SineOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SineOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.SquareOscillator" title="nbplay.nbplay.SquareOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SquareOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SawOscillator" title="nbplay.nbplay.SawOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SawOscillator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.NoiseSource" title="nbplay.nbplay.NoiseSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoiseSource</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.MixerChannel" title="nbplay.nbplay.MixerChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerChannel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Mixer" title="nbplay.nbplay.Mixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mixer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Step" title="nbplay.nbplay.Step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Step</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Pattern" title="nbplay.nbplay.Pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Pattern</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteEvent</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.EventSequence" title="nbplay.nbplay.EventSequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventSequence</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.TransportClock" title="nbplay.nbplay.TransportClock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportClock</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.StepSequencer" title="nbplay.nbplay.StepSequencer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StepSequencer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioSample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Envelope" title="nbplay.nbplay.Envelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Envelope</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMapping" title="nbplay.nbplay.SampleMapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMapping</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMap" title="nbplay.nbplay.SampleMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMap</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Sampler" title="nbplay.nbplay.Sampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sampler</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioOutput" title="nbplay.nbplay.AudioOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioOutput</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiInput" title="nbplay.nbplay.MidiInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInput</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioFormat">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.AudioFormat" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioFormat.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.AudioFormat.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioFormat.channels">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.AudioFormat.channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.frames">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.frames" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.format">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#nbplay.nbplay.AudioFormat" title="nbplay.nbplay.AudioFormat"><span class="pre">AudioFormat</span></a></em><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.format" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.sample_at">
+<span class="sig-name descname"><span class="pre">sample_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.sample_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.set_sample">
+<span class="sig-name descname"><span class="pre">set_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.set_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioBuffer.to_list">
+<span class="sig-name descname"><span class="pre">to_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioBuffer.to_list" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiChannel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">MidiChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.MidiChannel" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiChannel.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.MidiChannel.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Note">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Note" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.Note.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Note.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Note.to_hz">
+<span class="sig-name descname"><span class="pre">to_hz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.Note.to_hz" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Note.from_hz">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_hz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.Note" title="nbplay.nbplay.Note"><span class="pre">Note</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.Note.from_hz" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Velocity">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Velocity" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.Velocity.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Velocity.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">MidiMessage</span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.note_on">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">note_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.note_on" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.note_off">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">note_off</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.note_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.control_change">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.control_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.program_change">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">program_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.program_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.pitch_bend">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pitch_bend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.pitch_bend" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.clock">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.clock" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.start">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiMessage.stop">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.MidiMessage.stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">MidiEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp_us</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.MidiEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiEvent.message">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#nbplay.nbplay.MidiMessage" title="nbplay.nbplay.MidiMessage"><span class="pre">MidiMessage</span></a></em><a class="headerlink" href="#nbplay.nbplay.MidiEvent.message" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiEvent.timestamp_us">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestamp_us</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.MidiEvent.timestamp_us" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.SineOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">SineOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">440.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.SineOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SineOscillator.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SineOscillator.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SineOscillator.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SineOscillator.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SineOscillator.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.SineOscillator.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SineOscillator.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.SineOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.SquareOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">SquareOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">440.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.SquareOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SquareOscillator.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SquareOscillator.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SquareOscillator.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SquareOscillator.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SquareOscillator.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.SquareOscillator.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SquareOscillator.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.SquareOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">SawOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">440.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.SawOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SawOscillator.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.SawOscillator.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.SawOscillator.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.SawOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoiseSource">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">NoiseSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.NoiseSource" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoiseSource.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.NoiseSource.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoiseSource.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.NoiseSource.render_to_buffer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">MixerChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Channel'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.MixerChannel" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nbplay.nbplay.MixerChannel.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.gain">
+<span class="sig-name descname"><span class="pre">gain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.MixerChannel.gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.pan">
+<span class="sig-name descname"><span class="pre">pan</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.MixerChannel.pan" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.mute">
+<span class="sig-name descname"><span class="pre">mute</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nbplay.nbplay.MixerChannel.mute" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.solo">
+<span class="sig-name descname"><span class="pre">solo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nbplay.nbplay.MixerChannel.solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MixerChannel.process_sample">
+<span class="sig-name descname"><span class="pre">process_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.MixerChannel.process_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Mixer</span></span><a class="headerlink" href="#nbplay.nbplay.Mixer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.master_gain">
+<span class="sig-name descname"><span class="pre">master_gain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.Mixer.master_gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.channel_count">
+<span class="sig-name descname"><span class="pre">channel_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.channel_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.add_channel">
+<span class="sig-name descname"><span class="pre">add_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.add_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.remove_channel">
+<span class="sig-name descname"><span class="pre">remove_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MixerChannel" title="nbplay.nbplay.MixerChannel"><span class="pre">MixerChannel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.remove_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.get_channel">
+<span class="sig-name descname"><span class="pre">get_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.MixerChannel" title="nbplay.nbplay.MixerChannel"><span class="pre">MixerChannel</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.get_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.set_channel_gain">
+<span class="sig-name descname"><span class="pre">set_channel_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.set_channel_gain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.set_channel_pan">
+<span class="sig-name descname"><span class="pre">set_channel_pan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pan</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.set_channel_pan" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.set_channel_mute">
+<span class="sig-name descname"><span class="pre">set_channel_mute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.set_channel_mute" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.set_channel_solo">
+<span class="sig-name descname"><span class="pre">set_channel_solo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.set_channel_solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.mix_down">
+<span class="sig-name descname"><span class="pre">mix_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_buffers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.mix_down" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Mixer.channel_names">
+<span class="sig-name descname"><span class="pre">channel_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.Mixer.channel_names" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Step">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_ticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Step" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Step.note">
+<span class="sig-name descname"><span class="pre">note</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Step.note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Step.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Step.velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Step.duration_ticks">
+<span class="sig-name descname"><span class="pre">duration_ticks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Step.duration_ticks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Step.active">
+<span class="sig-name descname"><span class="pre">active</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nbplay.nbplay.Step.active" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Pattern" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.loop_enabled">
+<span class="sig-name descname"><span class="pre">loop_enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nbplay.nbplay.Pattern.loop_enabled" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.length">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Pattern.length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.Pattern.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.set_step">
+<span class="sig-name descname"><span class="pre">set_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.Step" title="nbplay.nbplay.Step"><span class="pre">Step</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#nbplay.nbplay.Pattern.set_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.toggle_step">
+<span class="sig-name descname"><span class="pre">toggle_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#nbplay.nbplay.Pattern.toggle_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.get_step">
+<span class="sig-name descname"><span class="pre">get_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.Step" title="nbplay.nbplay.Step"><span class="pre">Step</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.Pattern.get_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Pattern.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Pattern.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">NoteEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beat_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.NoteEvent" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent.beat_position">
+<span class="sig-name descname"><span class="pre">beat_position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.NoteEvent.beat_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.NoteEvent.duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent.note">
+<span class="sig-name descname"><span class="pre">note</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.NoteEvent.note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.NoteEvent.velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.NoteEvent.end_position">
+<span class="sig-name descname"><span class="pre">end_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.NoteEvent.end_position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">EventSequence</span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.add_event">
+<span class="sig-name descname"><span class="pre">add_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><span class="pre">NoteEvent</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.add_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.remove_event">
+<span class="sig-name descname"><span class="pre">remove_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><span class="pre">NoteEvent</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.remove_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.events">
+<span class="sig-name descname"><span class="pre">events</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><span class="pre">NoteEvent</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.events" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.events_in_range">
+<span class="sig-name descname"><span class="pre">events_in_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><span class="pre">NoteEvent</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.events_in_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.events_starting_in_range">
+<span class="sig-name descname"><span class="pre">events_starting_in_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><span class="pre">NoteEvent</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.events_starting_in_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.EventSequence.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.EventSequence.clear" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">TransportClock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bpm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.TransportClock" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.bpm">
+<span class="sig-name descname"><span class="pre">bpm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.TransportClock.bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.ticks_per_beat">
+<span class="sig-name descname"><span class="pre">ticks_per_beat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.TransportClock.ticks_per_beat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.position">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.TransportClock.position" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.state">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nbplay.nbplay.TransportClock.state" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.play">
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.play" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.pause">
+<span class="sig-name descname"><span class="pre">pause</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.pause" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.seek" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.advance_by_frames">
+<span class="sig-name descname"><span class="pre">advance_by_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.advance_by_frames" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.beats_to_seconds">
+<span class="sig-name descname"><span class="pre">beats_to_seconds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.beats_to_seconds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.seconds_to_beats">
+<span class="sig-name descname"><span class="pre">seconds_to_beats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.seconds_to_beats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.beats_to_ticks">
+<span class="sig-name descname"><span class="pre">beats_to_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.beats_to_ticks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TransportClock.ticks_to_beats">
+<span class="sig-name descname"><span class="pre">ticks_to_beats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.TransportClock.ticks_to_beats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">StepSequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.Pattern" title="nbplay.nbplay.Pattern"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.StepSequencer" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer.step_duration">
+<span class="sig-name descname"><span class="pre">step_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.StepSequencer.step_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer.current_step">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.StepSequencer.current_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer.set_pattern">
+<span class="sig-name descname"><span class="pre">set_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.Pattern" title="nbplay.nbplay.Pattern"><span class="pre">Pattern</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.StepSequencer.set_pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.StepSequencer.reset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.StepSequencer.process_beat_range">
+<span class="sig-name descname"><span class="pre">process_beat_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.StepSequencer.process_beat_range" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">69</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.AudioSample" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.root_note">
+<span class="sig-name descname"><span class="pre">root_note</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.AudioSample.root_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.loop_start">
+<span class="sig-name descname"><span class="pre">loop_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.nbplay.AudioSample.loop_start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.loop_end">
+<span class="sig-name descname"><span class="pre">loop_end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.nbplay.AudioSample.loop_end" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.AudioSample.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioSample.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.duration_seconds">
+<span class="sig-name descname"><span class="pre">duration_seconds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioSample.duration_seconds" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioSample.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioSample.data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Envelope">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attack</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sustain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">release</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Envelope" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Envelope.attack">
+<span class="sig-name descname"><span class="pre">attack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.Envelope.attack" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Envelope.decay">
+<span class="sig-name descname"><span class="pre">decay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.Envelope.decay" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Envelope.sustain">
+<span class="sig-name descname"><span class="pre">sustain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.Envelope.sustain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Envelope.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.Envelope.release" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMapping">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">SampleMapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><span class="pre">AudioSample</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.SampleMapping" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMapping.matches">
+<span class="sig-name descname"><span class="pre">matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMapping.matches" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">SampleMap</span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap.__len__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap.single_sample">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">single_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><span class="pre">AudioSample</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.SampleMap" title="nbplay.nbplay.SampleMap"><span class="pre">SampleMap</span></a></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap.single_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap.add_mapping">
+<span class="sig-name descname"><span class="pre">add_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.SampleMapping" title="nbplay.nbplay.SampleMapping"><span class="pre">SampleMapping</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap.add_mapping" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap.find_sample">
+<span class="sig-name descname"><span class="pre">find_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><span class="pre">AudioSample</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap.find_sample" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.SampleMap.mapping_count">
+<span class="sig-name descname"><span class="pre">mapping_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.SampleMap.mapping_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">Sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><span class="pre">AudioSample</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_voices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.Sampler" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.max_voices">
+<span class="sig-name descname"><span class="pre">max_voices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Sampler.max_voices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.Sampler.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.set_envelope">
+<span class="sig-name descname"><span class="pre">set_envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">envelope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#nbplay.nbplay.Envelope" title="nbplay.nbplay.Envelope"><span class="pre">Envelope</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.set_envelope" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.note_on">
+<span class="sig-name descname"><span class="pre">note_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.note_on" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.note_off">
+<span class="sig-name descname"><span class="pre">note_off</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.note_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.active_voice_count">
+<span class="sig-name descname"><span class="pre">active_voice_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.active_voice_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.all_notes_off">
+<span class="sig-name descname"><span class="pre">all_notes_off</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.all_notes_off" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.panic">
+<span class="sig-name descname"><span class="pre">panic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.panic" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.Sampler.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.Sampler.render" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioOutput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">AudioOutput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.AudioOutput" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioOutput.list_devices">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list_devices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioOutput.list_devices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioOutput.device_name">
+<span class="sig-name descname"><span class="pre">device_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioOutput.device_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioOutput.is_playing">
+<span class="sig-name descname"><span class="pre">is_playing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioOutput.is_playing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.AudioOutput.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#nbplay.nbplay.AudioOutput.stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiInput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">MidiInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nbplay'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.MidiInput" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.MidiInput.list_ports">
+<span class="sig-name descname"><span class="pre">list_ports</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.MidiInput.list_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+<nav class="fd-pagination" aria-label="Pagination">
+  <a class="fd-pagination-card fd-pagination-prev" href="../midi_learn/index.html" title="Previous: nbplay.midi_learn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m15 18-6-6 6-6"/></svg>
+    <span class="fd-pagination-text">
+      <span class="fd-pagination-label">Previous</span>
+      <span class="fd-pagination-title">nbplay.midi_learn</span>
+    </span>
+  </a>
+  <a class="fd-pagination-card fd-pagination-next" href="../widget/index.html" title="Next: nbplay.widget">
+    <span class="fd-pagination-text">
+      <span class="fd-pagination-label">Next</span>
+      <span class="fd-pagination-title">nbplay.widget</span>
+    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+</nav>
+<footer id="fd-footer">
+  <p class="fd-footer-meta"><span>&#169; the nbplay authors</span><span>Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.</span>
+  </p>
+</footer>
+    </article>
+  </main>
+<nav id="fd-toc" aria-label="On this page">
+  <p class="fd-toc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>On this page</p>
+  <div class="fd-toc-body"><svg class="fd-toc-rail" aria-hidden="true" preserveAspectRatio="none">
+      <path class="fd-toc-track" fill="none" />
+      <path class="fd-toc-thumb" fill="none" />
+    </svg><ul class="fd-toc-list">
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#classes">Classes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#module-contents">Module Contents</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioFormat">AudioFormat</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioFormat.sample_rate">AudioFormat.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioFormat.channels">AudioFormat.channels</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioBuffer">AudioBuffer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.frames">AudioBuffer.frames</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.format">AudioBuffer.format</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.__len__">AudioBuffer.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.sample_at">AudioBuffer.sample_at()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.set_sample">AudioBuffer.set_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.clear">AudioBuffer.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioBuffer.to_list">AudioBuffer.to_list()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiChannel">MidiChannel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiChannel.value">MidiChannel.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Note">Note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.value">Note.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.to_hz">Note.to_hz()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Note.from_hz">Note.from_hz()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Velocity">Velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Velocity.value">Velocity.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiMessage">MidiMessage</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.note_on">MidiMessage.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.note_off">MidiMessage.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.control_change">MidiMessage.control_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.program_change">MidiMessage.program_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.pitch_bend">MidiMessage.pitch_bend()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.clock">MidiMessage.clock()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.start">MidiMessage.start()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiMessage.stop">MidiMessage.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiEvent">MidiEvent</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiEvent.message">MidiEvent.message</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiEvent.timestamp_us">MidiEvent.timestamp_us</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SineOscillator">SineOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.frequency">SineOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.amplitude">SineOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.sample_rate">SineOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SineOscillator.render_to_buffer">SineOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SquareOscillator">SquareOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.frequency">SquareOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.amplitude">SquareOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.sample_rate">SquareOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SquareOscillator.render_to_buffer">SquareOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SawOscillator">SawOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.frequency">SawOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.amplitude">SawOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.sample_rate">SawOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SawOscillator.render_to_buffer">SawOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.NoiseSource">NoiseSource</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoiseSource.amplitude">NoiseSource.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoiseSource.render_to_buffer">NoiseSource.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MixerChannel">MixerChannel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.name">MixerChannel.name</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.gain">MixerChannel.gain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.pan">MixerChannel.pan</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.mute">MixerChannel.mute</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.solo">MixerChannel.solo</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MixerChannel.process_sample">MixerChannel.process_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Mixer">Mixer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.master_gain">Mixer.master_gain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.__len__">Mixer.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.channel_count">Mixer.channel_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.add_channel">Mixer.add_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.remove_channel">Mixer.remove_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.get_channel">Mixer.get_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_gain">Mixer.set_channel_gain()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_pan">Mixer.set_channel_pan()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_mute">Mixer.set_channel_mute()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.set_channel_solo">Mixer.set_channel_solo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.mix_down">Mixer.mix_down()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Mixer.channel_names">Mixer.channel_names()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Step">Step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.note">Step.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.velocity">Step.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.duration_ticks">Step.duration_ticks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Step.active">Step.active</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Pattern">Pattern</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.loop_enabled">Pattern.loop_enabled</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.length">Pattern.length</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.__len__">Pattern.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.set_step">Pattern.set_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.toggle_step">Pattern.toggle_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.get_step">Pattern.get_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Pattern.clear">Pattern.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.NoteEvent">NoteEvent</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.beat_position">NoteEvent.beat_position</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.duration">NoteEvent.duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.note">NoteEvent.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.velocity">NoteEvent.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.NoteEvent.end_position">NoteEvent.end_position()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.EventSequence">EventSequence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.__len__">EventSequence.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.add_event">EventSequence.add_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.remove_event">EventSequence.remove_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events">EventSequence.events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events_in_range">EventSequence.events_in_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.events_starting_in_range">EventSequence.events_starting_in_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.duration">EventSequence.duration()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.EventSequence.clear">EventSequence.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.TransportClock">TransportClock</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.bpm">TransportClock.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.ticks_per_beat">TransportClock.ticks_per_beat</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.position">TransportClock.position</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.state">TransportClock.state</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.play">TransportClock.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.pause">TransportClock.pause()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.stop">TransportClock.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.seek">TransportClock.seek()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.advance_by_frames">TransportClock.advance_by_frames()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.beats_to_seconds">TransportClock.beats_to_seconds()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.seconds_to_beats">TransportClock.seconds_to_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.beats_to_ticks">TransportClock.beats_to_ticks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TransportClock.ticks_to_beats">TransportClock.ticks_to_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.StepSequencer">StepSequencer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.step_duration">StepSequencer.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.current_step">StepSequencer.current_step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.set_pattern">StepSequencer.set_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.reset">StepSequencer.reset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.StepSequencer.process_beat_range">StepSequencer.process_beat_range()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioSample">AudioSample</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.root_note">AudioSample.root_note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.loop_start">AudioSample.loop_start</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.loop_end">AudioSample.loop_end</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.sample_rate">AudioSample.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.__len__">AudioSample.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.duration_seconds">AudioSample.duration_seconds()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioSample.data">AudioSample.data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Envelope">Envelope</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.attack">Envelope.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.decay">Envelope.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.sustain">Envelope.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Envelope.release">Envelope.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SampleMapping">SampleMapping</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMapping.matches">SampleMapping.matches()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.SampleMap">SampleMap</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.__len__">SampleMap.__len__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.single_sample">SampleMap.single_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.add_mapping">SampleMap.add_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.find_sample">SampleMap.find_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.SampleMap.mapping_count">SampleMap.mapping_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.Sampler">Sampler</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.max_voices">Sampler.max_voices</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.sample_rate">Sampler.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.set_envelope">Sampler.set_envelope()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.note_on">Sampler.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.note_off">Sampler.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.active_voice_count">Sampler.active_voice_count()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.all_notes_off">Sampler.all_notes_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.panic">Sampler.panic()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.Sampler.render">Sampler.render()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.AudioOutput">AudioOutput</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.list_devices">AudioOutput.list_devices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.device_name">AudioOutput.device_name()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.is_playing">AudioOutput.is_playing()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.AudioOutput.stop">AudioOutput.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.MidiInput">MidiInput</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.MidiInput.list_ports">MidiInput.list_ports()</a>
+  </li>
+</ul>
+
+  </div>
+  <div class="fd-toc-actions">
+    <a class="fd-toc-action" href="https://github.com/1kbgz/nbplay/edit/HEAD/autoapi/nbplay/nbplay/index.rst" target="_blank" rel="noopener" title="Edit this page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg><span>Edit this page</span></a>
+    <a class="fd-toc-action" href="../../../_sources/autoapi/nbplay/nbplay/index.rst.txt" rel="nofollow" title="View source"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg><span>View source</span></a>
+  </div>
+</nav>
+</div>
+<dialog id="fd-search-dialog" aria-label="Search">
+  <form class="fd-search-panel" method="dialog" role="search">
+    <div class="fd-search-field">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="fd-search-input" autocomplete="off" spellcheck="false" placeholder="Search documentation..." aria-label="Search" />
+      <kbd class="fd-kbd">Esc</kbd>
+    </div>
+    <div id="fd-search-results" role="listbox" aria-label="Search results"></div>
+    <p id="fd-search-empty" class="fd-search-empty" hidden>No results found.</p>
+  </form>
+</dialog>
+  </body>
+</html>

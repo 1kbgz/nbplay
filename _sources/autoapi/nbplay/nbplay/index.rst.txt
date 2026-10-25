@@ -1,0 +1,579 @@
+nbplay.nbplay
+=============
+
+.. py:module:: nbplay.nbplay
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   nbplay.nbplay.AudioFormat
+   nbplay.nbplay.AudioBuffer
+   nbplay.nbplay.MidiChannel
+   nbplay.nbplay.Note
+   nbplay.nbplay.Velocity
+   nbplay.nbplay.MidiMessage
+   nbplay.nbplay.MidiEvent
+   nbplay.nbplay.SineOscillator
+   nbplay.nbplay.SquareOscillator
+   nbplay.nbplay.SawOscillator
+   nbplay.nbplay.NoiseSource
+   nbplay.nbplay.MixerChannel
+   nbplay.nbplay.Mixer
+   nbplay.nbplay.Step
+   nbplay.nbplay.Pattern
+   nbplay.nbplay.NoteEvent
+   nbplay.nbplay.EventSequence
+   nbplay.nbplay.TransportClock
+   nbplay.nbplay.StepSequencer
+   nbplay.nbplay.AudioSample
+   nbplay.nbplay.Envelope
+   nbplay.nbplay.SampleMapping
+   nbplay.nbplay.SampleMap
+   nbplay.nbplay.Sampler
+   nbplay.nbplay.AudioOutput
+   nbplay.nbplay.MidiInput
+
+
+Module Contents
+---------------
+
+.. py:class:: AudioFormat(sample_rate: int = 44100, channels: int = 2)
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:property:: channels
+      :type: int
+
+
+
+.. py:class:: AudioBuffer(frames: int, sample_rate: int = 44100, channels: int = 1)
+
+   .. py:property:: frames
+      :type: int
+
+
+
+   .. py:property:: format
+      :type: AudioFormat
+
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: sample_at(frame: int, channel: int) -> float
+
+
+   .. py:method:: set_sample(frame: int, channel: int, value: float) -> None
+
+
+   .. py:method:: clear() -> None
+
+
+   .. py:method:: to_list() -> list[float]
+
+
+.. py:class:: MidiChannel(value: int)
+
+   .. py:property:: value
+      :type: int
+
+
+
+.. py:class:: Note(value: int)
+
+   .. py:property:: value
+      :type: int
+
+
+
+   .. py:method:: to_hz() -> float
+
+
+   .. py:method:: from_hz(hz: float) -> Note
+      :staticmethod:
+
+
+
+.. py:class:: Velocity(value: int)
+
+   .. py:property:: value
+      :type: int
+
+
+
+.. py:class:: MidiMessage
+
+   .. py:method:: note_on(channel: int, note: int, velocity: int) -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: note_off(channel: int, note: int, velocity: int) -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: control_change(channel: int, control: int, value: int) -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: program_change(channel: int, program: int) -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: pitch_bend(channel: int, value: int) -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: clock() -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: start() -> MidiMessage
+      :staticmethod:
+
+
+
+   .. py:method:: stop() -> MidiMessage
+      :staticmethod:
+
+
+
+.. py:class:: MidiEvent(message: MidiMessage, timestamp_us: int)
+
+   .. py:property:: message
+      :type: MidiMessage
+
+
+
+   .. py:property:: timestamp_us
+      :type: int
+
+
+
+.. py:class:: SineOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
+
+   .. py:property:: frequency
+      :type: float
+
+
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
+
+
+.. py:class:: SquareOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
+
+   .. py:property:: frequency
+      :type: float
+
+
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
+
+
+.. py:class:: SawOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
+
+   .. py:property:: frequency
+      :type: float
+
+
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
+
+
+.. py:class:: NoiseSource(amplitude: float = 1.0, seed: int = 42)
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
+
+
+.. py:class:: MixerChannel(name: str = 'Channel')
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: gain
+      :type:  float
+
+
+   .. py:attribute:: pan
+      :type:  float
+
+
+   .. py:attribute:: mute
+      :type:  bool
+
+
+   .. py:attribute:: solo
+      :type:  bool
+
+
+   .. py:method:: process_sample(sample: float) -> tuple[float, float]
+
+
+.. py:class:: Mixer
+
+   .. py:attribute:: master_gain
+      :type:  float
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: channel_count() -> int
+
+
+   .. py:method:: add_channel(name: str) -> int
+
+
+   .. py:method:: remove_channel(index: int) -> MixerChannel | None
+
+
+   .. py:method:: get_channel(index: int) -> MixerChannel
+
+
+   .. py:method:: set_channel_gain(index: int, gain: float) -> None
+
+
+   .. py:method:: set_channel_pan(index: int, pan: float) -> None
+
+
+   .. py:method:: set_channel_mute(index: int, mute: bool) -> None
+
+
+   .. py:method:: set_channel_solo(index: int, solo: bool) -> None
+
+
+   .. py:method:: mix_down(channel_buffers: list[list[float]]) -> list[float]
+
+
+   .. py:method:: channel_names() -> list[str]
+
+
+.. py:class:: Step(note: int, velocity: int, duration_ticks: int = 1)
+
+   .. py:attribute:: note
+      :type:  int
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:attribute:: duration_ticks
+      :type:  int
+
+
+   .. py:attribute:: active
+      :type:  bool
+
+
+.. py:class:: Pattern(length: int = 16)
+
+   .. py:attribute:: loop_enabled
+      :type:  bool
+
+
+   .. py:property:: length
+      :type: int
+
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: set_step(index: int, step: Step) -> bool
+
+
+   .. py:method:: toggle_step(index: int) -> bool
+
+
+   .. py:method:: get_step(index: int) -> Step
+
+
+   .. py:method:: clear() -> None
+
+
+.. py:class:: NoteEvent(beat_position: float, duration: float, note: int, velocity: int)
+
+   .. py:attribute:: beat_position
+      :type:  float
+
+
+   .. py:attribute:: duration
+      :type:  float
+
+
+   .. py:attribute:: note
+      :type:  int
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:method:: end_position() -> float
+
+
+.. py:class:: EventSequence
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: add_event(event: NoteEvent) -> None
+
+
+   .. py:method:: remove_event(index: int) -> NoteEvent | None
+
+
+   .. py:method:: events() -> list[NoteEvent]
+
+
+   .. py:method:: events_in_range(start: float, end: float) -> list[NoteEvent]
+
+
+   .. py:method:: events_starting_in_range(start: float, end: float) -> list[NoteEvent]
+
+
+   .. py:method:: duration() -> float
+
+
+   .. py:method:: clear() -> None
+
+
+.. py:class:: TransportClock(bpm: float = 120.0)
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: ticks_per_beat
+      :type:  int
+
+
+   .. py:property:: position
+      :type: float
+
+
+
+   .. py:property:: state
+      :type: str
+
+
+
+   .. py:method:: play() -> None
+
+
+   .. py:method:: pause() -> None
+
+
+   .. py:method:: stop() -> None
+
+
+   .. py:method:: seek(beat: float) -> None
+
+
+   .. py:method:: advance_by_frames(frames: int, sample_rate: int) -> tuple[float, float] | None
+
+
+   .. py:method:: beats_to_seconds(beats: float) -> float
+
+
+   .. py:method:: seconds_to_beats(seconds: float) -> float
+
+
+   .. py:method:: beats_to_ticks(beats: float) -> int
+
+
+   .. py:method:: ticks_to_beats(ticks: int) -> float
+
+
+.. py:class:: StepSequencer(pattern: Pattern, channel: int = 0)
+
+   .. py:attribute:: step_duration
+      :type:  float
+
+
+   .. py:property:: current_step
+      :type: int
+
+
+
+   .. py:method:: set_pattern(pattern: Pattern) -> None
+
+
+   .. py:method:: reset() -> None
+
+
+   .. py:method:: process_beat_range(start: float, end: float) -> list[tuple[str, int, int, int]]
+
+
+.. py:class:: AudioSample(data: list[float], sample_rate: int = 44100, root_note: int = 69)
+
+   .. py:attribute:: root_note
+      :type:  int
+
+
+   .. py:attribute:: loop_start
+      :type:  int | None
+
+
+   .. py:attribute:: loop_end
+      :type:  int | None
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: duration_seconds() -> float
+
+
+   .. py:method:: data() -> list[float]
+
+
+.. py:class:: Envelope(attack: float = 0.005, decay: float = 0.1, sustain: float = 0.8, release: float = 0.1)
+
+   .. py:attribute:: attack
+      :type:  float
+
+
+   .. py:attribute:: decay
+      :type:  float
+
+
+   .. py:attribute:: sustain
+      :type:  float
+
+
+   .. py:attribute:: release
+      :type:  float
+
+
+.. py:class:: SampleMapping(sample: AudioSample, note_low: int, note_high: int, velocity_low: int, velocity_high: int)
+
+   .. py:method:: matches(note: int, velocity: int) -> bool
+
+
+.. py:class:: SampleMap
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: single_sample(sample: AudioSample) -> SampleMap
+      :staticmethod:
+
+
+
+   .. py:method:: add_mapping(mapping: SampleMapping) -> None
+
+
+   .. py:method:: find_sample(note: int, velocity: int) -> AudioSample | None
+
+
+   .. py:method:: mapping_count() -> int
+
+
+.. py:class:: Sampler(sample: AudioSample, sample_rate: int = 44100, max_voices: int = 8)
+
+   .. py:attribute:: max_voices
+      :type:  int
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: set_envelope(envelope: Envelope) -> None
+
+
+   .. py:method:: note_on(note: int, velocity: int) -> None
+
+
+   .. py:method:: note_off(note: int) -> None
+
+
+   .. py:method:: active_voice_count() -> int
+
+
+   .. py:method:: all_notes_off() -> None
+
+
+   .. py:method:: panic() -> None
+
+
+   .. py:method:: render(frames: int) -> list[float]
+
+
+.. py:class:: AudioOutput(sample_rate: int = 44100, channels: int = 2, buffer_size: int = 512)
+
+   .. py:method:: list_devices() -> list[str]
+      :staticmethod:
+
+
+
+   .. py:method:: device_name() -> str
+
+
+   .. py:method:: is_playing() -> bool
+
+
+   .. py:method:: stop() -> None
+
+
+.. py:class:: MidiInput(client_name: str = 'nbplay')
+
+   .. py:method:: list_ports() -> list[str]
+
+
