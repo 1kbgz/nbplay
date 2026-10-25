@@ -53,6 +53,7 @@ develop = [
     "jupyterlite-core[contents]",
     "jupyterlite-pyodide-kernel",
     "mdformat",
+    "mdformat-frontmatter",
     "mdformat-tables>=1",
     "mido",
     "pytest",
@@ -154,7 +155,7 @@ test-command = "python -c \"import nbplay; nbplay.SineOscillator(440.0, 0.5, 441
 [tool.coverage.run]
 branch = true
 omit = [
-    "nbplay/tests/integration/",
+    "nbplay/tests/integration/*",
 ]
 
 [tool.coverage.report]
@@ -168,9 +169,6 @@ fail_under = 50
 
 [tool.hatch.build]
 artifacts = [
-    "nbplay/*.dll",
-    "nbplay/*.dylib",
-    "nbplay/*.so",
     "nbplay/static",
     "nbplay/extension",
 ]
@@ -201,9 +199,10 @@ packages = [
     "Cargo.lock",
 ]
 exclude = [
-    "nbplay/*.dll",
-    "nbplay/*.dylib",
-    "nbplay/*.so",
+    "*.dll",
+    "*.dylib",
+    "*.so",
+    "*.pyd",
     "nbplay/extension",
     "js/dist",
     "js/node_modules",
@@ -212,6 +211,13 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
+artifacts = [
+    "nbplay/*.dll",
+    "nbplay/*.dylib",
+    "nbplay/*.so",
+    "nbplay/static",
+    "nbplay/extension",
+]
 packages = [
     "nbplay",
 ]
