@@ -2,7 +2,7 @@
   "jupyter-config-data": {
     "appName": "nbplay",
     "appUrl": "./lab",
-    "appVersion": "0.8.6",
+    "appVersion": "0.8.7",
     "baseUrl": "./",
     "contentsAllJsonFile": "all.json",
     "defaultKernelName": "python",
@@ -409,7 +409,7 @@
     "litePluginSettings": {
       "@jupyterlite/pyodide-kernel-extension:kernel": {
         "pipliteUrls": [
-          "./pypi/all.json?sha256=fa60ab63378c76f8f39af3cc66e263ceba4bc81d6d06aecfab4d2c21c64b4e3d",
+          "./pypi/all.json?sha256=ca9b53aa83fa2f23d40942c032d27c253638059a0b2a149d00735a4e0a1254ad",
           "./extensions/@jupyterlite/pyodide-kernel-extension/static/pypi/all.json?sha256=94e75a51d1c49df7d0c23591188ff4a7ca5475efe7332814b3e5c4b980ef5a71"
         ]
       }
@@ -417,11 +417,11 @@
     "versionInfo": {
       "@jupyter-notebook/application": {
         "label": "Jupyter Notebook",
-        "version": "7.6.3"
+        "version": "7.6.4"
       },
       "@jupyterlab/application": {
         "label": "JupyterLab",
-        "version": "4.6.4"
+        "version": "4.6.5"
       }
     }
   },
