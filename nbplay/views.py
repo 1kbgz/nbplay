@@ -13,7 +13,7 @@ import inspect
 from typing import ClassVar
 
 import transports
-from spaday import Widget, Wire, element
+from spaday import Widget, element
 
 from .models import TransportConfig, TransportStatus
 
@@ -65,9 +65,10 @@ class TransportView(Widget):
         super().__init__(
             node,
             session=self.session,
+            # Plain wire mappings: the released Wire requires a websocket url.
             wires=[
-                Wire(model=self.config_id, namespace="config"),
-                Wire(model=self.status_id, namespace="status"),
+                {"model": self.config_id, "namespace": "config"},
+                {"model": self.status_id, "namespace": "status"},
             ],
             packages=PACKAGE,
             **kwargs,
