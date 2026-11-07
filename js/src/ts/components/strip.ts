@@ -1,6 +1,12 @@
 import { html, nothing } from "lit";
 import { NbplayElement, define } from "./base.ts";
 import { EFFECT_TYPES, type EffectDescriptor } from "./effects.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./effect-rack.ts";
+import "./fader.ts";
+import "./slider.ts";
+import "./toggle.ts";
+import "./value.ts";
 
 export type StripKind = "channel" | "return" | "master";
 

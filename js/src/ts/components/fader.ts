@@ -1,5 +1,9 @@
 import { html, nothing } from "lit";
 import { NbplayElement, define } from "./base.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./meter.ts";
+import "./slider.ts";
+import "./value.ts";
 
 /**
  * `<nbplay-fader>`: a mixer fader: level meter, vertical gain slider (linear

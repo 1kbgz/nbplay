@@ -63,3 +63,4 @@ export {
   type ZoneSpan,
 } from "./zone-map.ts";
 export { NbplayZoneList, type ZoneRow } from "./zone-list.ts";
+export { NbplayTransport, type TransportCommand } from "./transport.ts";

@@ -1,6 +1,10 @@
 import { html } from "lit";
 import { NbplayElement, define } from "./base.ts";
 import type { ValueKind } from "./format.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./dial.ts";
+import "./slider.ts";
+import "./value.ts";
 
 /**
  * `<nbplay-param>`: a labelled parameter: label, a slider or dial, and an

@@ -1,6 +1,9 @@
 import { html, nothing } from "lit";
 import { clampMidiNote, noteName } from "../pads.ts";
 import { NbplayElement, define } from "./base.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./bar.ts";
+import "./toggle.ts";
 
 export interface Step {
   active: boolean;

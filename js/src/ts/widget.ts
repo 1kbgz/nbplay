@@ -316,7 +316,7 @@ function render({
       </div>
     </div>
 
-    <div class="nbplay-transport">
+    <div class="nbplay-synth-transport">
       <button class="nbplay-play-btn"></button>
       <span class="nbplay-info"></span>
     </div>

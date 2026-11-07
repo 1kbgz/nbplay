@@ -1,6 +1,8 @@
 import { html } from "lit";
 import { NbplayElement, define } from "./base.ts";
 import { paletteColor } from "./zone-map.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./value.ts";
 
 export interface ZoneRow {
   name: string;

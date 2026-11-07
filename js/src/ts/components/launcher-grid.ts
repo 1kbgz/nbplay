@@ -1,5 +1,7 @@
 import { html } from "lit";
 import { NbplayElement, define } from "./base.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./launcher-slot.ts";
 
 export interface LauncherTrack {
   name: string;

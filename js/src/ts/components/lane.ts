@@ -2,6 +2,8 @@ import { html, nothing } from "lit";
 import { NbplayElement, clamp, define } from "./base.ts";
 import type { ClipKind } from "./clip.ts";
 import { beatLabel, capture, snapBeat } from "./ruler.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./toggle.ts";
 
 export interface ClipSpec {
   id: string;

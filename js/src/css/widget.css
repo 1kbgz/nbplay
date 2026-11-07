@@ -161,7 +161,7 @@
   text-align: right;
 }
 /* Transport bar */
-.nbplay-transport {
+.nbplay-synth-transport {
   display: flex;
   align-items: center;
   gap: 10px;

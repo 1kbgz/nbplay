@@ -1,5 +1,7 @@
 import { html, nothing } from "lit";
 import { NbplayElement, define } from "./base.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./bar.ts";
 
 /**
  * `<nbplay-launcher-slot>`: one clip-launcher cell. `name` empty means an

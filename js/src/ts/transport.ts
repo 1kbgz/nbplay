@@ -1,20 +1,38 @@
 // nbplay TransportWidget – anywidget ESM frontend
-// Global transport bar: play/stop, BPM, time signature, bar:beat
-// position counter, and loop controls.
 //
-// The transport owns the session clock (see session.ts). Buttons drive the
-// clock directly; clock events are mirrored into the model so the kernel
-// sees play state, tempo, loop range, and a coarse position. Model changes
-// arriving from the kernel (Python callers, traitlets links) are forwarded
-// to the clock, which every other widget in the session follows.
+// Adapter between the anywidget model and the `<nbplay-transport>` element.
+// Model traits go in as properties; the element's `nbplay-set`,
+// `nbplay-status` and `nbplay-request` events come out as model writes.
+// Kernel commands (the `command` trait with a monotonic nonce) are forwarded
+// to `element.command()`.
 
-import {
-  type AnyModel,
-  bindShortcuts,
-  makeEditable,
-  onKernelDisconnect,
-} from "./helpers.ts";
-import { bindClock, type ClockEvent, type SessionClock } from "./session.ts";
+import { type AnyModel, onKernelDisconnect } from "./helpers.ts";
+import type { NbplayTransport } from "./components/transport.ts";
+import "./components/transport.ts";
+
+/** Model trait → element property for kernel-owned configuration. */
+const CONFIG: Record<string, string> = {
+  bpm: "bpm",
+  time_signature_num: "timeSignatureNum",
+  time_signature_den: "timeSignatureDen",
+  loop_enabled: "loopEnabled",
+  loop_start_bar: "loopStartBar",
+  loop_end_bar: "loopEndBar",
+  session_id: "sessionId",
+};
+
+/** Model trait → element property for browser-owned status. */
+const STATUS: Record<string, string> = {
+  is_playing: "isPlaying",
+  is_recording: "isRecording",
+  current_beat: "currentBeat",
+  bar_number: "barNumber",
+  beat_in_bar: "beatInBar",
+};
+
+function trait(prop: string): string {
+  return prop.replace(/[A-Z]/g, (m) => "_" + m.toLowerCase());
+}
 
 function render({
   model,
@@ -23,370 +41,76 @@ function render({
   model: AnyModel;
   el: HTMLElement;
 }): () => void {
-  el.innerHTML = `
-  <div class="nbplay-transport">
-    <div class="nbplay-transport-controls">
-      <button class="nbplay-transport-stop" title="Stop">■</button>
-      <button class="nbplay-transport-play" title="Play / Pause">▶</button>
-      <button class="nbplay-transport-record" title="Record">●</button>
-    </div>
-    <div class="nbplay-transport-tempo">
-      <label>BPM</label>
-      <input type="range" class="nbplay-transport-bpm-slider"
-             min="30" max="300" step="1">
-      <span class="nbplay-transport-bpm-val">120</span>
-    </div>
-    <div class="nbplay-transport-timesig">
-      <span class="nbplay-transport-timesig-val">4/4</span>
-    </div>
-    <div class="nbplay-transport-position">
-      <span class="nbplay-transport-bar">001</span>
-      <span class="nbplay-transport-sep">:</span>
-      <span class="nbplay-transport-beat">1</span>
-    </div>
-    <div class="nbplay-transport-loop">
-      <button class="nbplay-transport-loop-btn" title="Toggle loop">↻</button>
-      <span class="nbplay-transport-loop-range">1 – 4</span>
-    </div>
-  </div>`;
+  const node = document.createElement("nbplay-transport") as NbplayTransport;
+  const props = node as unknown as Record<string, unknown>;
+  for (const [name, prop] of Object.entries(CONFIG)) {
+    const value = model.get(name);
+    props[prop] = prop === "sessionId" ? String(value || "") : value;
+  }
 
-  const playBtn = el.querySelector(
-    ".nbplay-transport-play",
-  ) as HTMLButtonElement;
-  const stopBtn = el.querySelector(
-    ".nbplay-transport-stop",
-  ) as HTMLButtonElement;
-  const recordBtn = el.querySelector(
-    ".nbplay-transport-record",
-  ) as HTMLButtonElement;
-  const bpmSl = el.querySelector(
-    ".nbplay-transport-bpm-slider",
-  ) as HTMLInputElement;
-  const bpmVal = el.querySelector(
-    ".nbplay-transport-bpm-val",
-  ) as HTMLSpanElement;
-  const tsVal = el.querySelector(
-    ".nbplay-transport-timesig-val",
-  ) as HTMLSpanElement;
-  const barDisp = el.querySelector(".nbplay-transport-bar") as HTMLSpanElement;
-  const beatDisp = el.querySelector(
-    ".nbplay-transport-beat",
-  ) as HTMLSpanElement;
-  const loopBtn = el.querySelector(
-    ".nbplay-transport-loop-btn",
-  ) as HTMLButtonElement;
-  const loopRng = el.querySelector(
-    ".nbplay-transport-loop-range",
-  ) as HTMLSpanElement;
-
-  // While `mirroring` is set, model writes originate from the clock and the
-  // model observers below must not feed them back into the clock.
+  // While `mirroring` is set, model writes originate from the element and
+  // the model observers below must not feed them back.
   let mirroring = false;
   let disconnected = false;
 
-  function mirror(write: () => void, save = false): void {
+  function write(values: Record<string, unknown>, save: boolean): void {
     mirroring = true;
     try {
-      write();
+      for (const [prop, value] of Object.entries(values)) {
+        model.set(trait(prop), value);
+      }
     } finally {
       mirroring = false;
     }
     if (save && !disconnected) model.save_changes();
   }
 
-  function syncPlay(): void {
-    const on = model.get("is_playing") as boolean;
-    playBtn.textContent = on ? "⏸" : "▶";
-    playBtn.classList.toggle("playing", on);
-  }
-
-  function syncRecord(): void {
-    const on = Boolean(model.get("is_recording"));
-    recordBtn.classList.toggle("recording", on);
-  }
-
-  function syncBpm(): void {
-    const b = model.get("bpm") as number;
-    bpmSl.value = String(b);
-    bpmVal.textContent = Math.round(b) + " BPM";
-  }
-
-  function syncTimeSig(): void {
-    tsVal.textContent =
-      (model.get("time_signature_num") as number) +
-      "/" +
-      (model.get("time_signature_den") as number);
-  }
-
-  function syncPosition(): void {
-    barDisp.textContent = String(
-      (model.get("bar_number") as number) + 1,
-    ).padStart(3, "0");
-    beatDisp.textContent = String((model.get("beat_in_bar") as number) + 1);
-  }
-
-  function syncLoop(): void {
-    loopBtn.classList.toggle("active", model.get("loop_enabled") as boolean);
-    loopRng.textContent =
-      (model.get("loop_start_bar") as number) +
-      1 +
-      " – " +
-      (model.get("loop_end_bar") as number);
-  }
-
-  function beatsPerBar(): number {
-    return Math.max(1, Number(model.get("time_signature_num")) || 4);
-  }
-
-  /** Write a beat position into the model's position traits. */
-  function writePosition(beat: number): void {
-    const bpb = beatsPerBar();
-    const bounded = Number.isFinite(beat) ? Math.max(0, beat) : 0;
-    model.set("current_beat", bounded);
-    model.set("bar_number", Math.floor(bounded / bpb));
-    model.set("beat_in_bar", Math.floor(bounded % bpb));
-    syncPosition();
-  }
-
-  // Model → clock
-
-  function pushTempo(clock: SessionClock): void {
-    clock.setTempo(Number(model.get("bpm")));
-  }
-
-  function pushLoop(clock: SessionClock): void {
-    const bpb = beatsPerBar();
-    clock.setBeatsPerBar(bpb);
-    clock.setLoop(
-      Boolean(model.get("loop_enabled")),
-      (Number(model.get("loop_start_bar")) || 0) * bpb,
-      (Number(model.get("loop_end_bar")) || 0) * bpb,
-    );
-  }
-
-  // Clock → model
-
-  function pullState(clock: SessionClock): void {
-    mirror(() => {
-      model.set("is_playing", clock.playing);
-      model.set("is_recording", clock.recording);
-      writePosition(clock.beat());
-    });
-    syncPlay();
-    syncRecord();
-  }
-
-  // Position ticker: runs while the clock plays. Position traits are
-  // updated locally on every tick; saves to the kernel are throttled to
-  // beat boundaries at most every `coarseSyncMs`.
-  let tickTimer: ReturnType<typeof setInterval> | null = null;
-  let lastSyncedBeat = 0;
-  let lastSyncMs = 0;
-  const coarseSyncMs = 250;
-
-  function tick(): void {
-    const beat = clock().beat();
-    mirror(() => writePosition(beat));
-    const now = performance.now();
-    if (
-      Math.floor(beat) !== Math.floor(lastSyncedBeat) &&
-      now - lastSyncMs >= coarseSyncMs
-    ) {
-      lastSyncedBeat = beat;
-      lastSyncMs = now;
-      if (!disconnected) model.save_changes();
-    }
-  }
-
-  function startTicking(beat: number): void {
-    stopTicking();
-    lastSyncedBeat = beat;
-    lastSyncMs = performance.now();
-    tickTimer = setInterval(tick, 50);
-  }
-
-  function stopTicking(): void {
-    if (tickTimer !== null) {
-      clearInterval(tickTimer);
-      tickTimer = null;
-    }
-  }
-
-  function onClockEvent(event: ClockEvent): void {
-    const clk = clock();
-    switch (event.type) {
-      case "play":
-        mirror(() => {
-          model.set("is_playing", true);
-          writePosition(event.beat);
-        }, true);
-        syncPlay();
-        startTicking(event.beat);
-        break;
-      case "stop":
-        stopTicking();
-        mirror(() => {
-          model.set("is_playing", false);
-          writePosition(event.beat);
-        }, true);
-        syncPlay();
-        break;
-      case "seek":
-        lastSyncedBeat = event.beat;
-        mirror(() => writePosition(event.beat), true);
-        break;
-      case "tempo":
-        if (Number(model.get("bpm")) !== clk.bpm) {
-          mirror(() => model.set("bpm", clk.bpm), true);
-        }
-        syncBpm();
-        break;
-      case "record":
-        if (Boolean(model.get("is_recording")) !== clk.recording) {
-          mirror(() => model.set("is_recording", clk.recording), true);
-        }
-        syncRecord();
-        break;
-      case "loop": {
-        const bpb = beatsPerBar();
-        const loop = clk.loop;
-        const startBar = Math.round(loop.startBeat / bpb);
-        const endBar = Math.round(loop.endBeat / bpb);
-        if (
-          Boolean(model.get("loop_enabled")) !== loop.enabled ||
-          Number(model.get("loop_start_bar")) !== startBar ||
-          Number(model.get("loop_end_bar")) !== endBar
-        ) {
-          mirror(() => {
-            model.set("loop_enabled", loop.enabled);
-            model.set("loop_start_bar", startBar);
-            model.set("loop_end_bar", endBar);
-          }, true);
-        }
-        syncLoop();
-        break;
-      }
-      case "timesig":
-        break;
-    }
-  }
-
-  function onRebind(clk: SessionClock): void {
-    stopTicking();
-    pushTempo(clk);
-    pushLoop(clk);
-    pullState(clk);
-    if (clk.playing) startTicking(clk.beat());
-  }
-
-  const binding = bindClock(model, onClockEvent, onRebind);
-  const clock = (): SessionClock => binding.clock();
-
-  // Actions (buttons and keyboard shortcuts)
-
-  function togglePlay(): void {
-    const clk = clock();
-    if (clk.playing) clk.stop();
-    else clk.play();
-  }
-
-  function toggleRecord(): void {
-    const clk = clock();
-    const next = !clk.recording;
-    clk.setRecording(next);
-    if (next) clk.play();
-  }
-
-  function stopAndRewind(): void {
-    const clk = clock();
-    clk.stop();
-    clk.setRecording(false);
-    clk.seek(0);
-  }
-
-  function nudgeTempo(delta: number): void {
-    const next = Math.max(30, Math.min(300, Math.round(clock().bpm) + delta));
-    bpmVal.textContent = next + " BPM";
-    clock().setTempo(next);
-  }
-
-  function toggleLoop(): void {
-    model.set("loop_enabled", !model.get("loop_enabled"));
-    model.save_changes();
-    pushLoop(clock());
-  }
-
-  playBtn.addEventListener("click", togglePlay);
-  recordBtn.addEventListener("click", toggleRecord);
-  stopBtn.addEventListener("click", stopAndRewind);
-  loopBtn.addEventListener("click", toggleLoop);
-
-  bpmSl.addEventListener("input", () => {
-    const v = parseFloat(bpmSl.value);
-    bpmVal.textContent = Math.round(v) + " BPM";
-    clock().setTempo(v);
+  node.addEventListener("nbplay-set", (e) => {
+    write((e as CustomEvent).detail.values, true);
   });
-
-  const transportRoot = el.querySelector(".nbplay-transport") as HTMLElement;
-  const unbindShortcuts = bindShortcuts(transportRoot, {
-    Space: togglePlay,
-    "Shift+Space": stopAndRewind,
-    r: toggleRecord,
-    l: toggleLoop,
-    ArrowUp: () => nudgeTempo(1),
-    ArrowDown: () => nudgeTempo(-1),
-    "Shift+ArrowUp": () => nudgeTempo(10),
-    "Shift+ArrowDown": () => nudgeTempo(-10),
+  node.addEventListener("nbplay-status", (e) => {
+    const { values, save } = (e as CustomEvent).detail;
+    write(values, Boolean(save));
   });
-
-  // Undo/redo go to the kernel: Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z or
-  // Ctrl/Cmd+Y redoes. bindShortcuts skips modifier combos, so this is
-  // its own listener; text fields keep the browser's own undo.
-  function onUndoKey(e: KeyboardEvent): void {
-    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
-    const target = e.target as HTMLElement | null;
-    if (
-      target?.tagName === "INPUT" ||
-      target?.tagName === "TEXTAREA" ||
-      target?.isContentEditable
-    )
-      return;
-    const key = e.key.toLowerCase();
-    if (key !== "z" && key !== "y") return;
-    const name = key === "y" || e.shiftKey ? "redo_request" : "undo_request";
-    e.preventDefault();
-    e.stopPropagation();
+  node.addEventListener("nbplay-request", (e) => {
+    const name = `${(e as CustomEvent).detail.name}_request`;
     model.set(name, (Number(model.get(name)) || 0) + 1);
-    model.save_changes();
-  }
-  transportRoot.addEventListener("keydown", onUndoKey);
-
-  makeEditable(bpmVal, {
-    className: "nbplay-transport-inline-edit",
-    getValue: () => String(Math.round(model.get("bpm") as number)),
-    parse: (raw: string) => {
-      const v = parseInt(raw, 10);
-      if (isNaN(v)) return null;
-      return Math.max(30, Math.min(300, v));
-    },
-    apply: (v) => {
-      clock().setTempo(v as number);
-    },
-    sync: syncBpm,
+    if (!disconnected) model.save_changes();
   });
+
+  el.appendChild(node);
+
+  // Initial status comes from the browser clock, never from the saved
+  // notebook. Local model state only: no save_changes() during render.
+  const initial: Record<string, unknown> = {};
+  for (const prop of Object.values(STATUS)) initial[prop] = props[prop];
+  write(initial, false);
 
   // Model observers (kernel-driven changes)
 
-  // Play state and position traits are status: the browser clock writes
-  // them and the kernel reads them. Kernel code moves the clock through
-  // `command` instead, so a delayed echo of old status can never restart
-  // or stop the clock.
-  let lastCommandNonce = -1;
-  function handleCommand(): void {
+  for (const [name, prop] of Object.entries(CONFIG)) {
+    model.on(`change:${name}`, () => {
+      if (mirroring) return;
+      const value = model.get(name);
+      props[prop] = prop === "sessionId" ? String(value || "") : value;
+    });
+  }
+  // Status written by the kernel is display state at best; the element
+  // corrects anything that disagrees with the clock.
+  for (const [name, prop] of Object.entries(STATUS)) {
+    model.on(`change:${name}`, () => {
+      if (mirroring) return;
+      props[prop] = model.get(name);
+    });
+  }
+
+  let lastCommandNonce = Number(
+    (model.get("command") as { nonce?: number } | undefined)?.nonce ?? -1,
+  );
+  if (!Number.isFinite(lastCommandNonce)) lastCommandNonce = -1;
+  model.on("change:command", () => {
     const cmd = (model.get("command") || {}) as {
       action?: string;
-      beat?: number;
-      on?: boolean;
       nonce?: number;
     };
     const nonce = Number(cmd.nonce);
@@ -394,113 +118,20 @@ function render({
     if (!cmd.action || !Number.isFinite(nonce) || nonce <= lastCommandNonce)
       return;
     lastCommandNonce = nonce;
-    const clk = clock();
-    switch (cmd.action) {
-      case "play":
-        if (!clk.playing) clk.play();
-        break;
-      case "stop":
-        if (clk.playing) clk.stop();
-        break;
-      case "seek": {
-        const beat = Number(cmd.beat);
-        if (Number.isFinite(beat)) clk.seek(Math.max(0, beat));
-        break;
-      }
-      case "record": {
-        const on = Boolean(cmd.on);
-        clk.setRecording(on);
-        if (on && !clk.playing) clk.play();
-        break;
-      }
-    }
-    // Even a no-op command re-publishes the clock's real status, so stale
-    // status that slipped into the model is repaired.
-    pullState(clk);
-    if (!disconnected) model.save_changes();
-  }
-  model.on("change:command", handleCommand);
-  // Status writes from the kernel that disagree with the clock are stale
-  // echoes: the browser clock is authoritative, so re-mirror it.
-  function reconcileStatus(): void {
-    if (mirroring) return;
-    const clk = clock();
-    if (
-      Boolean(model.get("is_playing")) !== clk.playing ||
-      Boolean(model.get("is_recording")) !== clk.recording
-    ) {
-      mirror(() => {
-        model.set("is_playing", clk.playing);
-        model.set("is_recording", clk.recording);
-      }, true);
-    }
-    syncPlay();
-    syncRecord();
-  }
-  model.on("change:is_playing", reconcileStatus);
-  model.on("change:is_recording", reconcileStatus);
-  model.on("change:bpm", () => {
-    syncBpm();
-    if (mirroring) return;
-    pushTempo(clock());
+    node.command(cmd as Parameters<NbplayTransport["command"]>[0]);
   });
-  model.on("change:time_signature_num", () => {
-    syncTimeSig();
-    pushLoop(clock());
-  });
-  model.on("change:time_signature_den", syncTimeSig);
-  model.on("change:bar_number", syncPosition);
-  model.on("change:beat_in_bar", syncPosition);
-  model.on("change:current_beat", syncPosition);
-  for (const trait of ["loop_enabled", "loop_start_bar", "loop_end_bar"]) {
-    model.on(`change:${trait}`, () => {
-      syncLoop();
-      if (mirroring) return;
-      pushLoop(clock());
-    });
-  }
-
-  lastCommandNonce = Number(
-    (model.get("command") as { nonce?: number } | undefined)?.nonce ?? -1,
-  );
-  if (!Number.isFinite(lastCommandNonce)) lastCommandNonce = -1;
-
-  // Initial state: tempo, time signature, and loop come from the kernel;
-  // play state and position come from the browser clock, which is fresh
-  // browser state and never stale from a saved notebook. Only local model
-  // state is updated here; do NOT call save_changes() during render
-  // because sending comm messages at that point can race with other
-  // widgets still being initialised (e.g. Session links).
-  {
-    const clk = clock();
-    pushTempo(clk);
-    pushLoop(clk);
-    pullState(clk);
-    if (clk.playing) startTicking(clk.beat());
-  }
-
-  syncBpm();
-  syncTimeSig();
-  syncPosition();
-  syncLoop();
 
   // Stop playback on kernel disconnect
   const cancelDisconnect = onKernelDisconnect(model, () => {
     disconnected = true;
-    const clk = clock();
-    clk.stop();
-    clk.setRecording(false);
-    clk.seek(0);
-    stopTicking();
-    pullState(clk);
+    node.command({ action: "stop" });
+    node.command({ action: "record", on: false });
+    node.command({ action: "seek", beat: 0 });
   });
 
   return () => {
-    stopTicking();
     cancelDisconnect();
-    unbindShortcuts();
-    transportRoot.removeEventListener("keydown", onUndoKey);
-    binding.dispose();
+    node.remove();
   };
 }
 

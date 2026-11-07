@@ -6,6 +6,8 @@ import {
   effectEnabled,
   effectLabel,
 } from "./effects.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./effect-editor.ts";
 
 /**
  * `<nbplay-effect-rack>`: an insert chain. An add row (type select and

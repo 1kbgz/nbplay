@@ -1,5 +1,7 @@
 import { html, nothing } from "lit";
 import { NbplayElement, define } from "./base.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./toggle.ts";
 
 /**
  * `<nbplay-transport-buttons>`: stop, play/pause, record. The host owns the

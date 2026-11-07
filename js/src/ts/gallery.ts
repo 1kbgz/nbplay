@@ -1095,6 +1095,22 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-transport",
+    title: "nbplay-transport",
+    desc: "The transport instrument on a private clock: play, stop, record, tempo, time signature, position and loop. Focus it for Space, Shift+Space, R, L and arrow shortcuts.",
+    events: ["nbplay-set", "nbplay-status", "nbplay-request"],
+    controls: [
+      { name: "bpm", type: "number" },
+      { name: "timeSignatureNum", type: "number" },
+      { name: "timeSignatureDen", type: "number" },
+      { name: "loopEnabled", type: "boolean" },
+      { name: "loopStartBar", type: "number" },
+      { name: "loopEndBar", type: "number" },
+      { name: "isPlaying", type: "boolean" },
+    ],
+    variants: [{ label: "standalone", props: { bpm: 120 }, wide: true }],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(

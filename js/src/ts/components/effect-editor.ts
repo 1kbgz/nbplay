@@ -5,6 +5,8 @@ import {
   type ParamSpec,
   paramSpecs,
 } from "./effects.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./param.ts";
 
 /**
  * `<nbplay-effect-editor>`: one row per parameter of an effect. Bounded

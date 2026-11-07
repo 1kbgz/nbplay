@@ -2,6 +2,8 @@ import { html } from "lit";
 import { clampMidiNote, clampVelocity, noteName } from "../pads.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
 import type { NbplayValue } from "./value.ts";
+// Register the elements this one renders, for bundles that import only this module.
+import "./bar.ts";
 
 export interface PadSpec {
   note: number;

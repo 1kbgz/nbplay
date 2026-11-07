@@ -202,7 +202,7 @@ test.describe("Session clock", () => {
     await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
 
     // Tempo change from the transport slider.
-    await page.locator(".nbplay-transport-bpm-slider").fill("240");
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("240");
     const bpms = await page.evaluate(() => ({
       clock: globalThis.__nbplay["clock-test-session"].clock.bpm,
       a: window.__models.a._state.bpm,
