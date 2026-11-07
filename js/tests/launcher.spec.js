@@ -128,8 +128,6 @@ async function installAudioRecorder(page) {
   });
 }
 
-const clockState = () => globalThis.__nbplay["launcher-session"].clock;
-
 test.describe("LauncherWidget", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/tests/fixtures/harness.html");

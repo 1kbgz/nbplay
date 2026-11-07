@@ -183,7 +183,7 @@ export function scheduleOscillator(
     osc.start(startTime);
     osc.stop(startTime + duration);
     return osc;
-  } catch (_) {
+  } catch {
     // Ignore if timing is in the past.
     return null;
   }
@@ -458,7 +458,7 @@ export function createAudioScheduler(
             try {
               osc.stop(0);
               osc.disconnect();
-            } catch (_) {
+            } catch {
               /* already stopped */
             }
           };

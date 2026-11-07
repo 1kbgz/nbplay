@@ -101,10 +101,10 @@ export function createAudioContext(
   if (!Ctor) return null;
   try {
     return new Ctor(options);
-  } catch (_) {
+  } catch {
     try {
       return new Ctor();
-    } catch (_) {
+    } catch {
       return null;
     }
   }
