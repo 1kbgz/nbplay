@@ -1801,7 +1801,7 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
         if path.suffix.lower() == ".wav":
             return self._read_wav_file(path)
         try:
-            import soundfile as sf  # ty: ignore[unresolved-import]
+            import soundfile as sf  # ty: ignore
         except ImportError as exc:
             raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
         data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
