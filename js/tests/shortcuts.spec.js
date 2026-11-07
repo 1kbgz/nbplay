@@ -276,9 +276,9 @@ test.describe("Keyboard shortcuts", () => {
     ).toBe(true);
 
     await page.keyboard.press("d");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(2);
+    await expect(page.locator("nbplay-clip")).toHaveCount(2);
     await page.keyboard.press("Delete");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
   });
 
   test("launcher: digits launch scenes, escape stops all", async ({ page }) => {

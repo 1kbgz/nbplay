@@ -301,7 +301,7 @@ test.describe("Session clock", () => {
     }));
     expect(state).toEqual({ transportBeat: 0, timelineBeat: 0, clockBeat: 0 });
     await expect(
-      page.locator(".nbplay-timeline-playhead").first(),
+      page.locator(".nbplay-ruler-playhead, .nbplay-lane-playhead").first(),
     ).toHaveAttribute("style", /left: 0%;/);
   });
 

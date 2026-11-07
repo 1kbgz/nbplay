@@ -1,6 +1,7 @@
 import { html, nothing } from "lit";
 import { NbplayElement, clamp, define } from "./base.ts";
 import type { ClipKind } from "./clip.ts";
+import "./clip.ts";
 import { beatLabel, capture, snapBeat } from "./ruler.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./toggle.ts";
@@ -56,6 +57,7 @@ export class NbplayLane extends NbplayElement {
     selected: { type: String },
     recording: { type: Boolean, reflect: true },
     showHeader: { type: Boolean, attribute: "show-header" },
+    width: { type: Number },
     disabled: { type: Boolean, reflect: true },
   };
 
@@ -73,6 +75,8 @@ export class NbplayLane extends NbplayElement {
   declare selected: string;
   declare recording: boolean;
   declare showHeader: boolean;
+  /** Fixed clip-area width in px (zoom); 0 fills the element. */
+  declare width: number;
   declare disabled: boolean;
 
   private seekFrame: number | null = null;
@@ -97,6 +101,7 @@ export class NbplayLane extends NbplayElement {
     this.selected = "";
     this.recording = false;
     this.showHeader = true;
+    this.width = 0;
     this.disabled = false;
   }
 
@@ -106,10 +111,14 @@ export class NbplayLane extends NbplayElement {
 
   render() {
     return html`${this.showHeader ? this.renderHeader() : nothing}
-      <div class="nbplay-lane-clips" @pointerdown=${this.onSeekDown}>
+      <div
+        class="nbplay-lane-clips"
+        style=${this.width > 0 ? `width: ${this.width}px;` : nothing}
+        @pointerdown=${this.onSeekDown}
+      >
         <div
           class="nbplay-lane-playhead"
-          style="left:${this.pct(this.beat)}%"
+          style="left: ${this.pct(this.beat)}%;"
         ></div>
         ${this.clips.map((clip) => this.renderClip(clip))}
       </div>`;
@@ -179,7 +188,7 @@ export class NbplayLane extends NbplayElement {
       .pattern=${Boolean(clip.pattern)}
       .muted=${Boolean(clip.muted)}
       .selected=${clip.id === this.selected}
-      style="left:${left}%;width:${width}%"
+      style="left: ${left}%; width: ${width}%;"
       @pointerdown=${(e: PointerEvent) => this.onClipDown(e, clip)}
     ></nbplay-clip>`;
   }

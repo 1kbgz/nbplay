@@ -35,10 +35,17 @@ nbplay-ruler .nbplay-ruler-loop-handle {
   top: 0;
   width: 10px;
   height: 100%;
-  margin-left: -5px;
   cursor: ew-resize;
   touch-action: none;
   z-index: 2;
+}
+/* Offset so a handle at either end stays inside the track (and a scroll
+   container clipping at the track edge). */
+nbplay-ruler .nbplay-ruler-loop-handle.start {
+  margin-left: -2px;
+}
+nbplay-ruler .nbplay-ruler-loop-handle.end {
+  margin-left: -8px;
 }
 nbplay-ruler .nbplay-ruler-loop-handle::after {
   content: "";
@@ -111,7 +118,7 @@ nbplay-lane .nbplay-lane-input {
 }
 nbplay-lane .nbplay-lane-clips {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   min-width: 0;
   background: var(--nbplay-chart-bg);
   background-image: linear-gradient(
@@ -219,4 +226,126 @@ nbplay-clip .nbplay-clip-handle::after {
   width: 2px;
   border-radius: 1px;
   background: color-mix(in srgb, var(--nbplay-fg) 50%, transparent);
+}
+
+nbplay-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-timeline:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-timeline nbplay-header .nbplay-header-actions {
+  flex-wrap: wrap;
+}
+nbplay-timeline .nbplay-timeline-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-timeline .nbplay-timeline-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-timeline .nbplay-timeline-field input[type="number"] {
+  width: 48px;
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-timeline .nbplay-timeline-field input[type="checkbox"] {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-timeline .nbplay-timeline-actions button {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 8px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-timeline .nbplay-timeline-actions button:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-timeline .nbplay-timeline-loop-btn.active {
+  background: var(--nbplay-accent-soft);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-accent-soft);
+}
+nbplay-timeline .nbplay-timeline-play.active {
+  background: var(--nbplay-success);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-success);
+}
+nbplay-timeline .nbplay-timeline-record.active {
+  background: var(--nbplay-error);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-error);
+}
+nbplay-timeline .nbplay-timeline-position {
+  min-width: 48px;
+  text-align: right;
+  font-family: var(--nbplay-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--nbplay-accent);
+}
+nbplay-timeline .nbplay-timeline-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-timeline .nbplay-timeline-ruler {
+  display: flex;
+  align-items: stretch;
+  min-width: 100%;
+}
+nbplay-timeline .nbplay-timeline-ruler-spacer {
+  flex: 0 0 150px;
+  background: var(--nbplay-bg-panel);
+  border-right: 1px solid var(--nbplay-border);
+  border-bottom: 1px solid var(--nbplay-border);
+}
+nbplay-timeline .nbplay-timeline-ruler nbplay-ruler {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+nbplay-timeline .nbplay-timeline-body nbplay-lane {
+  min-width: 100%;
+}
+nbplay-timeline .nbplay-timeline-empty {
+  padding: 12px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-faint);
+}
+nbplay-timeline .nbplay-timeline-status {
+  min-height: 1em;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-error);
 }

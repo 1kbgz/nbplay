@@ -1390,6 +1390,50 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-timeline",
+    title: "nbplay-timeline",
+    desc: "The tracking view on a private clock: ruler with loop brace, clip lanes with arm/monitor/mute/solo and a record source, clip move and trim, zoom. Focus it for Space, R, L, D and Delete.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "length", type: "number" },
+      { name: "pixelsPerBeat", type: "number" },
+      { name: "countInBars", type: "number" },
+    ],
+    variants: [
+      {
+        label: "two tracks",
+        props: {
+          length: 32,
+          tracks: [
+            {
+              name: "Vocals",
+              channel_index: 0,
+              armed: true,
+              input: "microphone",
+            },
+            { name: "Keys", channel_index: 1, input: "midi" },
+          ],
+          clips: [
+            { id: "a", name: "Take 1", track_index: 0, start: 0, duration: 8 },
+            { id: "b", name: "Take 2", track_index: 0, start: 10, duration: 6 },
+            {
+              id: "c",
+              name: "Chords",
+              track_index: 1,
+              start: 4,
+              duration: 8,
+              kind: "midi",
+              events: [{ beat: 0, duration: 1, note: 60, velocity: 100 }],
+            },
+          ],
+          selectedClipId: "b",
+          currentBeat: 6,
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(

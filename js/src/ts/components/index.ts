@@ -83,3 +83,9 @@ export {
 } from "./launcher.ts";
 export { NbplayMixer } from "./mixer.ts";
 export { NbplaySampler, type CaptureRequest } from "./sampler.ts";
+export {
+  NbplayTimeline,
+  type AudioClip,
+  type MidiEvent,
+  type TimelineTrack,
+} from "./timeline.ts";

@@ -28,6 +28,7 @@ export class NbplayRuler extends NbplayElement {
     loopStart: { type: Number, attribute: "loop-start" },
     loopEnd: { type: Number, attribute: "loop-end" },
     loopEnabled: { type: Boolean, attribute: "loop-enabled", reflect: true },
+    width: { type: Number },
     disabled: { type: Boolean, reflect: true },
   };
 
@@ -37,6 +38,8 @@ export class NbplayRuler extends NbplayElement {
   declare loopStart: number;
   declare loopEnd: number;
   declare loopEnabled: boolean;
+  /** Fixed track width in px (zoom); 0 fits the element. */
+  declare width: number;
   declare disabled: boolean;
 
   private seekFrame: number | null = null;
@@ -49,6 +52,7 @@ export class NbplayRuler extends NbplayElement {
     this.loopStart = 0;
     this.loopEnd = 0;
     this.loopEnabled = false;
+    this.width = 0;
     this.disabled = false;
   }
 
@@ -59,10 +63,14 @@ export class NbplayRuler extends NbplayElement {
   render() {
     const bars = Math.max(1, Math.ceil(this.length / this.beatsPerBar));
     const loop = this.loopEnabled && this.loopEnd > this.loopStart;
-    return html`<div class="nbplay-ruler-track" @pointerdown=${this.onSeekDown}>
+    return html`<div
+      class="nbplay-ruler-track"
+      style=${this.width > 0 ? `width: ${this.width}px;` : nothing}
+      @pointerdown=${this.onSeekDown}
+    >
       ${Array.from({ length: bars }, (_, i) => {
         const left = this.pct(i * this.beatsPerBar);
-        return html`<span class="nbplay-ruler-bar" style="left:${left}%"
+        return html`<span class="nbplay-ruler-bar" style="left: ${left}%;"
           >${i + 1}</span
         >`;
       })}
@@ -70,25 +78,25 @@ export class NbplayRuler extends NbplayElement {
         loop
           ? html`<div
                 class="nbplay-ruler-loop"
-                style="left:${this.pct(this.loopStart)}%;width:${this.pct(this.loopEnd) - this.pct(this.loopStart)}%"
+                style="left: ${this.pct(this.loopStart)}%; width: ${this.pct(this.loopEnd) - this.pct(this.loopStart)}%;"
               ></div>
               <div
                 class="nbplay-ruler-loop-handle start"
                 data-edge="start"
-                style="left:${this.pct(this.loopStart)}%"
+                style="left: ${this.pct(this.loopStart)}%;"
                 @pointerdown=${this.onHandleDown}
               ></div>
               <div
                 class="nbplay-ruler-loop-handle end"
                 data-edge="end"
-                style="left:${this.pct(this.loopEnd)}%"
+                style="left: ${this.pct(this.loopEnd)}%;"
                 @pointerdown=${this.onHandleDown}
               ></div>`
           : nothing
       }
       <div
         class="nbplay-ruler-playhead"
-        style="left:${this.pct(this.beat)}%"
+        style="left: ${this.pct(this.beat)}%;"
       ></div>
     </div>`;
   }

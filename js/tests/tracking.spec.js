@@ -139,8 +139,7 @@ test.describe("Tracking view", () => {
           page.evaluate(() => ({
             recording: window.__testModel._state.is_recording,
             tracks: window.__testModel._state.recording_tracks,
-            rows: document.querySelectorAll(".nbplay-timeline-row.recording")
-              .length,
+            rows: document.querySelectorAll("nbplay-lane[recording]").length,
           })),
         { timeout: 1000 },
       )
@@ -194,13 +193,13 @@ test.describe("Tracking view", () => {
 
   test("input selector writes the lane record source", async ({ page }) => {
     await renderWidget(page);
-    const select = page.locator(".nbplay-track-input").first();
+    const select = page.locator(".nbplay-lane-input").first();
     await expect(select).toHaveValue("microphone");
     await select.selectOption("channel");
     expect(
       await page.evaluate(() => window.__testModel._state.tracks[0].input),
     ).toBe("channel");
-    await expect(page.locator(".nbplay-track-input").first()).toHaveValue(
+    await expect(page.locator(".nbplay-lane-input").first()).toHaveValue(
       "channel",
     );
   });
@@ -209,24 +208,22 @@ test.describe("Tracking view", () => {
     page,
   }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-timeline-loop")).toHaveCount(0);
+    await expect(page.locator(".nbplay-ruler-loop")).toHaveCount(0);
 
     await page.locator(".nbplay-timeline-loop-btn").click();
     let loop = await page.evaluate(
       () => globalThis.__nbplay["tracking-session"].clock.loop,
     );
     expect(loop).toEqual({ enabled: true, startBeat: 0, endBeat: 16 });
-    await expect(page.locator(".nbplay-timeline-loop")).toHaveCount(1);
+    await expect(page.locator(".nbplay-ruler-loop")).toHaveCount(1);
     await expect(page.locator(".nbplay-timeline-loop-btn")).toHaveClass(
       /active/,
     );
 
     // Drag the end handle to the middle of the ruler (bar 3 of 4).
-    const ruler = page.locator(".nbplay-timeline-ruler-track");
+    const ruler = page.locator(".nbplay-ruler-track");
     const box = await ruler.boundingBox();
-    const endHandle = page.locator(
-      ".nbplay-timeline-loop-handle[data-edge=end]",
-    );
+    const endHandle = page.locator(".nbplay-ruler-loop-handle[data-edge=end]");
     const handleBox = await endHandle.boundingBox();
     await page.mouse.move(
       handleBox.x + handleBox.width / 2,
@@ -240,7 +237,7 @@ test.describe("Tracking view", () => {
       () => globalThis.__nbplay["tracking-session"].clock.loop,
     );
     expect(loop).toEqual({ enabled: true, startBeat: 0, endBeat: 8 });
-    await expect(page.locator(".nbplay-timeline-loop")).toHaveAttribute(
+    await expect(page.locator(".nbplay-ruler-loop")).toHaveAttribute(
       "style",
       /width: 50%/,
     );
@@ -250,7 +247,7 @@ test.describe("Tracking view", () => {
       () => globalThis.__nbplay["tracking-session"].clock.loop,
     );
     expect(loop.enabled).toBe(false);
-    await expect(page.locator(".nbplay-timeline-loop")).toHaveCount(0);
+    await expect(page.locator(".nbplay-ruler-loop")).toHaveCount(0);
   });
 
   test("zoom widens the lanes inside a shared scroll container", async ({
@@ -267,9 +264,8 @@ test.describe("Tracking view", () => {
       zoomed: document
         .querySelector(".nbplay-timeline-scroll")
         .classList.contains("zoomed"),
-      laneWidth: document.querySelector(".nbplay-timeline-lane").style.width,
-      rulerWidth: document.querySelector(".nbplay-timeline-ruler-track").style
-        .width,
+      laneWidth: document.querySelector(".nbplay-lane-clips").style.width,
+      rulerWidth: document.querySelector(".nbplay-ruler-track").style.width,
       scrollable:
         document.querySelector(".nbplay-timeline-scroll").scrollWidth >
         document.querySelector(".nbplay-timeline-scroll").clientWidth,
@@ -296,9 +292,9 @@ test.describe("Tracking view", () => {
         },
       ],
     });
-    const clip = page.locator(".nbplay-timeline-clip");
+    const clip = page.locator("nbplay-clip");
     const clipBox = await clip.boundingBox();
-    const lanes = page.locator(".nbplay-timeline-lane");
+    const lanes = page.locator(".nbplay-lane-clips");
     const laneBox = await lanes.first().boundingBox();
     const secondLaneBox = await lanes.nth(1).boundingBox();
     const beatPx = laneBox.width / 16;
@@ -341,12 +337,12 @@ test.describe("Tracking view", () => {
       ],
     });
     const laneBox = await page
-      .locator(".nbplay-timeline-lane")
+      .locator(".nbplay-lane-clips")
       .first()
       .boundingBox();
     const beatPx = laneBox.width / 16;
 
-    const endHandle = page.locator(".nbplay-timeline-clip-handle.end");
+    const endHandle = page.locator(".nbplay-clip-handle.end");
     let box = await endHandle.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
@@ -358,7 +354,7 @@ test.describe("Tracking view", () => {
     expect(clip.duration).toBeCloseTo(6, 5);
     expect(clip.start).toBe(4);
 
-    const startHandle = page.locator(".nbplay-timeline-clip-handle.start");
+    const startHandle = page.locator(".nbplay-clip-handle.start");
     box = await startHandle.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
@@ -401,7 +397,7 @@ test.describe("Tracking view", () => {
     ]);
     expect(state.length).toBe(10);
     expect(state.selected).not.toBe("clip-a");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(2);
+    await expect(page.locator("nbplay-clip")).toHaveCount(2);
   });
 
   test("export sends a clip's bytes to the kernel", async ({ page }) => {
