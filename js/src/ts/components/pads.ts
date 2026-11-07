@@ -289,6 +289,7 @@ export class NbplayPads extends NbplayElement {
           .min=${1}
           .max=${127}
           .step=${1}
+          .defaultValue=${100}
           @input=${onVelocity}
           @change=${onVelocity}
         ></nbplay-param>

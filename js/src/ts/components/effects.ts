@@ -12,6 +12,8 @@ export interface ParamSpec {
   min?: number;
   max?: number;
   step?: number;
+  /** Reset target for a double-click on the control. */
+  default?: number;
   options?: string[];
   kind: "number" | "select" | "text" | "bool";
 }
@@ -38,7 +40,15 @@ const FILTER_TYPES = [
 // Ranges match the Python EffectPlugin validation.
 export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
   gain: [
-    { key: "gain", label: "Gain", min: 0, max: 4, step: 0.01, kind: "number" },
+    {
+      key: "gain",
+      label: "Gain",
+      min: 0,
+      max: 4,
+      step: 0.01,
+      default: 1,
+      kind: "number",
+    },
   ],
   filter: [
     {
@@ -53,21 +63,47 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 20,
       max: 20000,
       step: 1,
+      default: 1200,
       kind: "number",
     },
-    { key: "q", label: "Q", min: 0.0001, max: 100, step: 0.01, kind: "number" },
+    {
+      key: "q",
+      label: "Q",
+      min: 0.0001,
+      max: 100,
+      step: 0.01,
+      default: 1,
+      kind: "number",
+    },
   ],
   delay: [
-    { key: "time", label: "Time", min: 0, max: 5, step: 0.001, kind: "number" },
+    {
+      key: "time",
+      label: "Time",
+      min: 0,
+      max: 5,
+      step: 0.001,
+      default: 0.25,
+      kind: "number",
+    },
     {
       key: "feedback",
       label: "Fdbk",
       min: 0,
       max: 0.95,
       step: 0.01,
+      default: 0.25,
       kind: "number",
     },
-    { key: "wet", label: "Wet", min: 0, max: 1, step: 0.01, kind: "number" },
+    {
+      key: "wet",
+      label: "Wet",
+      min: 0,
+      max: 1,
+      step: 0.01,
+      default: 0.35,
+      kind: "number",
+    },
   ],
   reverb: [
     {
@@ -76,6 +112,7 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 0.01,
       max: 10,
       step: 0.01,
+      default: 1.5,
       kind: "number",
     },
     {
@@ -84,9 +121,18 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 0.01,
       max: 12,
       step: 0.01,
+      default: 2,
       kind: "number",
     },
-    { key: "wet", label: "Wet", min: 0, max: 1, step: 0.01, kind: "number" },
+    {
+      key: "wet",
+      label: "Wet",
+      min: 0,
+      max: 1,
+      step: 0.01,
+      default: 0.25,
+      kind: "number",
+    },
   ],
   compressor: [
     {
@@ -95,15 +141,25 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: -100,
       max: 0,
       step: 0.5,
+      default: -24,
       kind: "number",
     },
-    { key: "knee", label: "Knee", min: 0, max: 40, step: 0.5, kind: "number" },
+    {
+      key: "knee",
+      label: "Knee",
+      min: 0,
+      max: 40,
+      step: 0.5,
+      default: 30,
+      kind: "number",
+    },
     {
       key: "ratio",
       label: "Ratio",
       min: 1,
       max: 20,
       step: 0.1,
+      default: 12,
       kind: "number",
     },
     {
@@ -112,6 +168,7 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 0,
       max: 1,
       step: 0.001,
+      default: 0.003,
       kind: "number",
     },
     {
@@ -120,6 +177,7 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 0,
       max: 1,
       step: 0.001,
+      default: 0.25,
       kind: "number",
     },
   ],
@@ -130,6 +188,7 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: -100,
       max: 0,
       step: 0.5,
+      default: -1,
       kind: "number",
     },
     {
@@ -138,6 +197,7 @@ export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
       min: 0,
       max: 1,
       step: 0.001,
+      default: 0.05,
       kind: "number",
     },
   ],

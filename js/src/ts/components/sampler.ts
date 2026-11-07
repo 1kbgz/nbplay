@@ -744,6 +744,7 @@ export class NbplaySampler extends NbplayElement {
     min: number,
     max: number,
     step: number,
+    defaultValue: number,
   ) {
     const on = (e: Event) => {
       e.stopPropagation();
@@ -760,6 +761,7 @@ export class NbplaySampler extends NbplayElement {
       .min=${min}
       .max=${max}
       .step=${step}
+      .defaultValue=${defaultValue}
       @input=${on}
       @change=${on}
     ></nbplay-param>`;
@@ -823,14 +825,14 @@ export class NbplaySampler extends NbplayElement {
           .release=${Number(this.release)}
         ></nbplay-envelope>
         <div class="nbplay-samp-env-controls">
-          ${this.param("nbplay-samp-attack", "Attack", "attack", "seconds", 0, 2, 0.001)}
-          ${this.param("nbplay-samp-decay", "Decay", "decay", "seconds", 0, 2, 0.001)}
-          ${this.param("nbplay-samp-sustain", "Sustain", "sustain", "percent", 0, 1, 0.01)}
-          ${this.param("nbplay-samp-release", "Release", "release", "seconds", 0, 5, 0.001)}
+          ${this.param("nbplay-samp-attack", "Attack", "attack", "seconds", 0, 2, 0.001, 0.005)}
+          ${this.param("nbplay-samp-decay", "Decay", "decay", "seconds", 0, 2, 0.001, 0.1)}
+          ${this.param("nbplay-samp-sustain", "Sustain", "sustain", "percent", 0, 1, 0.01, 0.8)}
+          ${this.param("nbplay-samp-release", "Release", "release", "seconds", 0, 5, 0.001, 0.1)}
         </div>
       </div>
       <div class="nbplay-samp-row">
-        ${this.param("nbplay-samp-max-voices", "Max Voices", "maxVoices", "int", 1, 32, 1)}
+        ${this.param("nbplay-samp-max-voices", "Max Voices", "maxVoices", "int", 1, 32, 1, 8)}
       </div>
       <div class="nbplay-samp-pads-section">
         <div class="nbplay-samp-pads-controls">
@@ -860,6 +862,7 @@ export class NbplaySampler extends NbplayElement {
             .min=${1}
             .max=${127}
             .step=${1}
+            .defaultValue=${100}
             @input=${this.onVelocity}
             @change=${this.onVelocity}
           ></nbplay-param>

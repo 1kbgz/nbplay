@@ -10,6 +10,7 @@ import { NbplayElement, clamp, define, quantize } from "./base.ts";
  * ignored, so a host that mirrors model state never fights the pointer.
  *
  * Fires `input` continuously and `change` on commit, both with `detail.value`.
+ * A double-click resets to `default-value` when one is set.
  */
 export class NbplaySlider extends NbplayElement {
   static properties = {
@@ -17,6 +18,7 @@ export class NbplaySlider extends NbplayElement {
     min: { type: Number },
     max: { type: Number },
     step: { type: Number },
+    defaultValue: { type: Number, attribute: "default-value" },
     orientation: { type: String, reflect: true },
     scale: { type: String },
     disabled: { type: Boolean, reflect: true },
@@ -27,6 +29,7 @@ export class NbplaySlider extends NbplayElement {
   declare min: number;
   declare max: number;
   declare step: number;
+  declare defaultValue: number | null;
   declare orientation: "horizontal" | "vertical";
   declare scale: "linear" | "log";
   declare disabled: boolean;
@@ -40,6 +43,7 @@ export class NbplaySlider extends NbplayElement {
     this.min = 0;
     this.max = 1;
     this.step = 0.01;
+    this.defaultValue = null;
     this.orientation = "horizontal";
     this.scale = "linear";
     this.disabled = false;
@@ -84,6 +88,7 @@ export class NbplaySlider extends NbplayElement {
       @pointerdown=${this.startDrag}
       @pointerup=${this.endDrag}
       @lostpointercapture=${this.endDrag}
+      @dblclick=${this.reset}
     />`;
   }
 
@@ -103,6 +108,18 @@ export class NbplaySlider extends NbplayElement {
   private onChange(e: Event): void {
     e.stopPropagation();
     this.endDrag();
+    this.emit("change", this.value);
+  }
+
+  /** Reset to `defaultValue`, emitting `input` and `change`, when one is set. */
+  reset(): void {
+    if (this.disabled || this.defaultValue === null) return;
+    this.endDrag();
+    const next = clamp(this.defaultValue, this.min, this.max);
+    if (next !== this.value) {
+      this.value = next;
+      this.emit("input", next);
+    }
     this.emit("change", this.value);
   }
 

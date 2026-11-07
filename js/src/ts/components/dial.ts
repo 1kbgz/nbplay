@@ -20,7 +20,8 @@ function arc(a0: number, a1: number, r: number): string {
 /**
  * `<nbplay-dial>`: a rotary control. Drag vertically (Shift for fine), scroll,
  * or use the arrow, Page, Home and End keys. Fires `input` while moving and
- * `change` on release, both with `detail.value`.
+ * `change` on release, both with `detail.value`. A double-click resets to
+ * `default-value` when one is set.
  */
 export class NbplayDial extends NbplayElement {
   static properties = {
@@ -28,6 +29,7 @@ export class NbplayDial extends NbplayElement {
     min: { type: Number },
     max: { type: Number },
     step: { type: Number },
+    defaultValue: { type: Number, attribute: "default-value" },
     disabled: { type: Boolean, reflect: true },
     dragging: { type: Boolean, reflect: true },
   };
@@ -36,6 +38,7 @@ export class NbplayDial extends NbplayElement {
   declare min: number;
   declare max: number;
   declare step: number;
+  declare defaultValue: number | null;
   declare disabled: boolean;
   declare dragging: boolean;
 
@@ -48,6 +51,7 @@ export class NbplayDial extends NbplayElement {
     this.min = 0;
     this.max = 1;
     this.step = 0.01;
+    this.defaultValue = null;
     this.disabled = false;
     this.dragging = false;
   }
@@ -62,6 +66,7 @@ export class NbplayDial extends NbplayElement {
     this.addEventListener("lostpointercapture", this.onPointerUp);
     this.addEventListener("wheel", this.onWheel, { passive: false });
     this.addEventListener("keydown", this.onKeydown);
+    this.addEventListener("dblclick", this.onDblclick);
   }
 
   disconnectedCallback(): void {
@@ -72,6 +77,7 @@ export class NbplayDial extends NbplayElement {
     this.removeEventListener("lostpointercapture", this.onPointerUp);
     this.removeEventListener("wheel", this.onWheel);
     this.removeEventListener("keydown", this.onKeydown);
+    this.removeEventListener("dblclick", this.onDblclick);
   }
 
   protected updated(): void {
@@ -110,6 +116,15 @@ export class NbplayDial extends NbplayElement {
     }
     if (commit) this.emit("change", this.value);
   }
+
+  /** Reset to `defaultValue`, emitting `input` and `change`, when one is set. */
+  reset(): void {
+    if (this.disabled || this.defaultValue === null) return;
+    this.dragging = false;
+    this.set(this.defaultValue, true);
+  }
+
+  private onDblclick = (): void => this.reset();
 
   private onPointerDown = (e: PointerEvent): void => {
     if (this.disabled || e.button !== 0) return;

@@ -107,6 +107,7 @@ export class NbplayEffectEditor extends NbplayElement {
         .min=${spec.min}
         .max=${spec.max}
         .step=${spec.step ?? 0.01}
+        .defaultValue=${spec.default ?? null}
         .precision=${precisionFor(spec.step ?? 0.01)}
         .disabled=${this.disabled}
         @input=${stop}

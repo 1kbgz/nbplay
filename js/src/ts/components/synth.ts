@@ -372,6 +372,7 @@ export class NbplaySynth extends NbplayElement {
           .min=${MIN_FREQ}
           .max=${MAX_FREQ}
           .step=${0.1}
+          .defaultValue=${440}
           .disabled=${noise}
           @input=${onFreq}
           @change=${onFreq}
@@ -384,6 +385,7 @@ export class NbplaySynth extends NbplayElement {
           .min=${0}
           .max=${1}
           .step=${0.01}
+          .defaultValue=${0.8}
           .precision=${2}
           @input=${onAmp}
           @change=${onAmp}

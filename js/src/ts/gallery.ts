@@ -38,13 +38,14 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-slider",
     title: "nbplay-slider",
-    desc: "Range control over a native input. Log scale for frequencies; writes are ignored while dragging.",
+    desc: "Range control over a native input. Log scale for frequencies; writes are ignored while dragging; double-click resets to defaultValue.",
     events: ["input", "change"],
     controls: [
       { name: "value", type: "number", step: 0.01 },
       { name: "min", type: "number" },
       { name: "max", type: "number" },
       { name: "step", type: "number", step: 0.001 },
+      { name: "defaultValue", type: "number", step: 0.01 },
       {
         name: "orientation",
         type: "select",
@@ -75,13 +76,14 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-dial",
     title: "nbplay-dial",
-    desc: "Rotary control. Drag vertically (Shift for fine), scroll, or use arrow, Page, Home and End keys.",
+    desc: "Rotary control. Drag vertically (Shift for fine), scroll, or use arrow, Page, Home and End keys; double-click resets to defaultValue.",
     events: ["input", "change"],
     controls: [
       { name: "value", type: "number", step: 0.01 },
       { name: "min", type: "number" },
       { name: "max", type: "number" },
       { name: "step", type: "number", step: 0.001 },
+      { name: "defaultValue", type: "number", step: 0.01 },
       { name: "disabled", type: "boolean" },
     ],
     variants: [
@@ -321,7 +323,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-param",
     title: "nbplay-param",
-    desc: "Label, slider or dial, and an editable readout kept in sync. A tempo control is a param with kind=bpm.",
+    desc: "Label, slider or dial, and an editable readout kept in sync. A tempo control is a param with kind=bpm; double-click the control to reset to defaultValue.",
     events: ["input", "change"],
     controls: [
       { name: "label", type: "text" },
@@ -329,6 +331,7 @@ const SECTIONS: Section[] = [
       { name: "min", type: "number" },
       { name: "max", type: "number" },
       { name: "step", type: "number", step: 0.001 },
+      { name: "defaultValue", type: "number", step: 0.01 },
       {
         name: "kind",
         type: "select",

@@ -46,6 +46,24 @@ test.describe("primitives", () => {
     await expect(page.locator("nbplay-slider")).toHaveJSProperty("value", 0.51);
   });
 
+  test("slider double-click resets to its default value", async ({ page }) => {
+    // The clicks themselves move the native range to the pointer; the reset
+    // then lands on the default, which is away from the center.
+    await mount(page, "nbplay-slider", {
+      value: 0.5,
+      min: 0,
+      max: 2,
+      defaultValue: 1.5,
+    });
+    await page.locator("nbplay-slider input[type=range]").dblclick();
+    await expect(page.locator("nbplay-slider")).toHaveJSProperty("value", 1.5);
+    const all = await events(page);
+    expect(all.slice(-2)).toEqual([
+      ["input", 1.5],
+      ["change", 1.5],
+    ]);
+  });
+
   test("slider log scale maps the native position to hertz", async ({
     page,
   }) => {
@@ -163,6 +181,20 @@ test.describe("primitives", () => {
       ["input", 0.9],
       ["change", 0.9],
     ]);
+  });
+
+  test("dial double-click resets to its default value", async ({ page }) => {
+    await mount(page, "nbplay-dial", {
+      value: 0.2,
+      min: 0,
+      max: 1,
+      step: 0.1,
+      defaultValue: 0.5,
+    });
+    await page.locator("nbplay-dial").dblclick();
+    await expect(page.locator("nbplay-dial")).toHaveJSProperty("value", 0.5);
+    const all = await events(page);
+    expect(all.at(-1)).toEqual(["change", 0.5]);
   });
 
   test("dial drag sweeps the range vertically", async ({ page }) => {

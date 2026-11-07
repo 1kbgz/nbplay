@@ -102,6 +102,7 @@ export class NbplayStrip extends NbplayElement {
                   .min=${-1}
                   .max=${1}
                   .step=${0.01}
+                  .defaultValue=${0}
                   .disabled=${this.disabled}
                   @input=${(e: Event) => this.forward(e, "input", "pan")}
                   @change=${(e: Event) => this.forward(e, "change", "pan")}
@@ -140,6 +141,7 @@ export class NbplayStrip extends NbplayElement {
                               .min=${0}
                               .max=${1}
                               .step=${0.01}
+                              .defaultValue=${0}
                               .disabled=${this.disabled}
                               @input=${(e: Event) => this.forwardSend(e, "input", index)}
                               @change=${(e: Event) => this.forwardSend(e, "change", index)}

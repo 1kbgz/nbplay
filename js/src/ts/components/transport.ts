@@ -424,6 +424,7 @@ export class NbplayTransport extends NbplayElement {
         .min=${MIN_BPM}
         .max=${MAX_BPM}
         .step=${1}
+        .defaultValue=${120}
         @input=${onTempo}
         @change=${onTempo}
       ></nbplay-param>

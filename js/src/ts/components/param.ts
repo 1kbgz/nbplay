@@ -9,7 +9,8 @@ import "./value.ts";
 /**
  * `<nbplay-param>`: a labelled parameter: label, a slider or dial, and an
  * editable readout, kept in sync. `kind` picks the readout preset, `scale`
- * the slider mapping. Fires `input` and `change` with `detail.value`.
+ * the slider mapping, `default-value` what a double-click on the control
+ * resets to. Fires `input` and `change` with `detail.value`.
  * A tempo control is `<nbplay-param label="BPM" kind="bpm" min="30" max="300" step="1">`.
  */
 export class NbplayParam extends NbplayElement {
@@ -19,6 +20,7 @@ export class NbplayParam extends NbplayElement {
     min: { type: Number },
     max: { type: Number },
     step: { type: Number },
+    defaultValue: { type: Number, attribute: "default-value" },
     scale: { type: String },
     kind: { type: String },
     control: { type: String, reflect: true },
@@ -33,6 +35,7 @@ export class NbplayParam extends NbplayElement {
   declare min: number;
   declare max: number;
   declare step: number;
+  declare defaultValue: number | null;
   declare scale: "linear" | "log";
   declare kind: ValueKind;
   declare control: "slider" | "dial";
@@ -48,6 +51,7 @@ export class NbplayParam extends NbplayElement {
     this.min = 0;
     this.max = 1;
     this.step = 0.01;
+    this.defaultValue = null;
     this.scale = "linear";
     this.kind = "float";
     this.control = "slider";
@@ -65,6 +69,7 @@ export class NbplayParam extends NbplayElement {
             .min=${this.min}
             .max=${this.max}
             .step=${this.step}
+            .defaultValue=${this.defaultValue}
             .disabled=${this.disabled}
             @input=${this.onInput}
             @change=${this.onChange}
@@ -74,6 +79,7 @@ export class NbplayParam extends NbplayElement {
             .min=${this.min}
             .max=${this.max}
             .step=${this.step}
+            .defaultValue=${this.defaultValue}
             .scale=${this.scale}
             .disabled=${this.disabled}
             @input=${this.onInput}

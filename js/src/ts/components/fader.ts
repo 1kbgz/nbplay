@@ -7,8 +7,9 @@ import "./value.ts";
 
 /**
  * `<nbplay-fader>`: a mixer fader: level meter, vertical gain slider (linear
- * 0..2) and an editable dB readout. `level`/`rms` feed the meter. Fires `input`
- * and `change` with the linear gain in `detail.value`.
+ * 0..2) and an editable dB readout. `level`/`rms` feed the meter. A
+ * double-click on the slider resets to `default-value` (unity by default).
+ * Fires `input` and `change` with the linear gain in `detail.value`.
  */
 export class NbplayFader extends NbplayElement {
   static properties = {
@@ -16,6 +17,7 @@ export class NbplayFader extends NbplayElement {
     min: { type: Number },
     max: { type: Number },
     step: { type: Number },
+    defaultValue: { type: Number, attribute: "default-value" },
     level: { type: Number },
     rms: { type: Number },
     label: { type: String },
@@ -27,6 +29,7 @@ export class NbplayFader extends NbplayElement {
   declare min: number;
   declare max: number;
   declare step: number;
+  declare defaultValue: number | null;
   declare level: number;
   declare rms: number;
   declare label: string;
@@ -39,6 +42,7 @@ export class NbplayFader extends NbplayElement {
     this.min = 0;
     this.max = 2;
     this.step = 0.01;
+    this.defaultValue = 1;
     this.level = 0;
     this.rms = 0;
     this.label = "";
@@ -56,6 +60,7 @@ export class NbplayFader extends NbplayElement {
           .min=${this.min}
           .max=${this.max}
           .step=${this.step}
+          .defaultValue=${this.defaultValue}
           .disabled=${this.disabled}
           @input=${this.onInput}
           @change=${this.onChange}
