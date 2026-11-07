@@ -19,6 +19,8 @@ VIEWS = {
     "pads": views.PadsView,
     "keyboard": views.KeyboardView,
     "midi_keyboard": views.MidiKeyboardView,
+    "settings": views.SettingsView,
+    "midi_output": views.MidiOutputView,
 }
 
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"

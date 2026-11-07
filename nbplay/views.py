@@ -21,15 +21,19 @@ from .models import (
     KeyboardStatus,
     MidiKeyboardConfig,
     MidiKeyboardStatus,
+    MidiOutputConfig,
+    MidiOutputStatus,
     MixerConfig,
     PadsConfig,
     PadsStatus,
+    SettingsConfig,
+    SettingsStatus,
     SynthConfig,
     SynthStatus,
     TransportConfig,
     TransportStatus,
 )
-from .widget import _normalize_effect
+from .widget import _clamp_int, _clamp_midi_note, _clamp_velocity, _normalize_effect
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
     raise ImportError("nbplay.views needs a spaday release with Widget(session=...) support")
@@ -39,8 +43,10 @@ __all__ = (
     "InstrumentView",
     "KeyboardView",
     "MidiKeyboardView",
+    "MidiOutputView",
     "MixerView",
     "PadsView",
+    "SettingsView",
     "SynthView",
     "TransportView",
 )
@@ -271,3 +277,59 @@ class MidiKeyboardView(InstrumentView):
         "control_change": "controlChange",
         "clock_bpm": "clockBpm",
     }
+
+
+class SettingsView(InstrumentView):
+    """Audio and MIDI device settings; the browser owns the port list and MIDI monitor."""
+
+    TAG = "nbplay-settings"
+    CONFIG_MODEL = SettingsConfig
+    STATUS_MODEL = SettingsStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "sample_rate": "sampleRate",
+        "channels": "channels",
+        "buffer_size": "bufferSize",
+        "audio_device": "audioDevice",
+        "midi_port": "midiPort",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"available_midi_ports": "availableMidiPorts", "midi_event": "midiEvent"}
+
+
+class MidiOutputView(InstrumentView):
+    """A Web MIDI output; sends are commands delivered to the owning view."""
+
+    TAG = "nbplay-midi-output"
+    CONFIG_MODEL = MidiOutputConfig
+    STATUS_MODEL = MidiOutputStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "midi_port": "midiPort",
+        "channel": "channel",
+        "forward_notes": "forwardNotes",
+        "send_clock": "sendClock",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"available_midi_ports": "availableMidiPorts"}
+
+    def _request(self, **message):
+        return self._command("request", message)
+
+    def note_on(self, note, velocity=100):
+        """Send a note-on on the output's channel."""
+        return self._request(kind="note_on", note=_clamp_midi_note(note), velocity=max(1, _clamp_velocity(velocity)))
+
+    def note_off(self, note):
+        """Send a note-off on the output's channel."""
+        return self._request(kind="note_off", note=_clamp_midi_note(note))
+
+    def control_change(self, controller, value):
+        """Send a control change (0-127) on the output's channel."""
+        return self._request(kind="control_change", controller=_clamp_int(controller, 0, 127), value=_clamp_int(value, 0, 127))
+
+    def send_raw(self, data):
+        """Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""
+        data = [_clamp_int(b, 0, 255) for b in data]
+        if not data:
+            raise ValueError("MIDI message must not be empty")
+        return self._request(kind="raw", data=data)
