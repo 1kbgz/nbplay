@@ -40,6 +40,10 @@ dependencies = [
 midi = [
     "mido",
 ]
+spaday = [
+    "spaday[widget]>=0.13.1",
+    "transports>=0.12.1",
+]
 develop = [
     "build",
     "bump-my-version",
@@ -65,6 +69,9 @@ develop = [
     "voila",
     "wheel",
 ]
+
+[project.entry-points."spaday.component_packages"]
+nbplay = "nbplay.components:package"
 
 [project.scripts]
 
