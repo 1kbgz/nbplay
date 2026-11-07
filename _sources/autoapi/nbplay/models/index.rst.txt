@@ -1,0 +1,133 @@
+nbplay.models
+=============
+
+.. py:module:: nbplay.models
+
+.. autoapi-nested-parse::
+
+   Pydantic models behind the transports-backed views (:mod:`nbplay.views`).
+
+   Each widget splits into a config model the kernel owns and validates, and a
+   status model the browser owns (hosted with ``owner="client"``), matching the
+   ``nbplay-set`` / ``nbplay-status`` split of the elements.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   nbplay.models.TransportConfig
+   nbplay.models.TransportStatus
+
+
+Module Contents
+---------------
+
+.. py:class:: TransportConfig(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Transport settings the kernel owns.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: time_signature_num
+      :type:  int
+
+
+   .. py:attribute:: time_signature_den
+      :type:  int
+
+
+   .. py:attribute:: loop_enabled
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: loop_start_bar
+      :type:  int
+
+
+   .. py:attribute:: loop_end_bar
+      :type:  int
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:method:: _validate_theme(value)
+      :classmethod:
+
+
+
+.. py:class:: TransportStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Transport state the browser clock owns.
+
+   Host it with ``owner="client"``: Python reads it, and moves the clock
+   through ``session.command`` rather than assignment.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: is_recording
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: current_beat
+      :type:  float
+      :value: 0.0
+
+
+
+   .. py:attribute:: bar_number
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: beat_in_bar
+      :type:  int
+      :value: 0
+
+
+

@@ -96,6 +96,11 @@
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/components/index.html">
+      <span class="fd-link-text">nbplay.components</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/history/index.html">
       <span class="fd-link-text">nbplay.history</span>
     </a>
@@ -111,8 +116,18 @@
     </a>
   </li>
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/models/index.html">
+      <span class="fd-link-text">nbplay.models</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/nbplay/index.html">
       <span class="fd-link-text">nbplay.nbplay</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/views/index.html">
+      <span class="fd-link-text">nbplay.views</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -126,6 +141,16 @@
   <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/test_all/index.html">
       <span class="fd-link-text">test_all</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/test_views/index.html">
+      <span class="fd-link-text">test_views</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/spaday_bridge/index.html">
+      <span class="fd-link-text">spaday_bridge</span>
     </a>
   </li>
 </ul>
@@ -268,6 +293,9 @@
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#padwidget">PadWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#transports-views-preview">Transports views (preview)</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#styling-system">Styling system</a>
@@ -1261,6 +1289,26 @@ oscillator. Trait/event pads update <code class="docutils literal notranslate"><
 future external controller layouts.</p>
 </section>
 </section>
+<section id="transports-views-preview">
+<h2>Transports views (preview)<a class="headerlink" href="#transports-views-preview" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">nbplay/views.py</span></code> is the parallel layer that will replace the traitlets widgets: the same elements
+on <a class="reference external" href="https://github.com/1kbgz/transports">transports</a> models rendered by
+<a class="reference external" href="https://github.com/1kbgz/spaday">spaday</a>. A view hosts two pydantic models from <code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code>
+in a <code class="docutils literal notranslate"><span class="pre">transports.Session</span></code>: a config model the kernel owns and validates (<code class="docutils literal notranslate"><span class="pre">TransportConfig</span></code>), and a
+status model the browser owns (<code class="docutils literal notranslate"><span class="pre">TransportStatus</span></code>, hosted with <code class="docutils literal notranslate"><span class="pre">owner=&quot;client&quot;</span></code>). The spaday tree is
+the instrument element with every config field bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> and every status field
+bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code>, so the element’s events write the wire store and the store writes
+the element’s properties. Kernel commands (<code class="docutils literal notranslate"><span class="pre">view.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">view.seek(beat)</span></code>) are
+<code class="docutils literal notranslate"><span class="pre">session.command(status_id,</span> <span class="pre">field,</span> <span class="pre">value)</span></code> calls; <code class="docutils literal notranslate"><span class="pre">&lt;nbplay-wire</span> <span class="pre">namespace=&quot;status&quot;&gt;</span></code>, a child of the
+instrument defined in <code class="docutils literal notranslate"><span class="pre">js/src/ts/spaday.ts</span></code>, requests the wire from the widget root, maps the
+status field to <code class="docutils literal notranslate"><span class="pre">element.command(...)</span></code> and acknowledges. The build writes that bundle and the
+stylesheet to <code class="docutils literal notranslate"><span class="pre">nbplay/static/spaday/</span></code>, which <code class="docutils literal notranslate"><span class="pre">nbplay.components.package</span></code> publishes as the spaday
+component package <code class="docutils literal notranslate"><span class="pre">nbplay</span></code> (also an installed entry point).</p>
+<p>Tests: <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_views.py</span></code> drives a view through a mocked comm; <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code>
+renders the spaday widget bundle against a real <code class="docutils literal notranslate"><span class="pre">TransportView</span></code> in a Python subprocess
+(<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>), set <code class="docutils literal notranslate"><span class="pre">NBPLAY_TEST_PYTHON</span></code> to a Python with <code class="docutils literal notranslate"><span class="pre">nbplay[spaday]</span></code>.
+Both skip when spaday lacks notebook session support.</p>
+</section>
 <section id="styling-system">
 <h2>Styling system<a class="headerlink" href="#styling-system" title="Link to this heading">¶</a></h2>
 <p>Implementation lives in <code class="docutils literal notranslate"><span class="pre">js/src/css/components/</span></code>: <code class="docutils literal notranslate"><span class="pre">tokens.css</span></code> defines the
@@ -1794,6 +1842,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#padwidget">PadWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#transports-views-preview">Transports views (preview)</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#styling-system">Styling system</a>

@@ -1,0 +1,35 @@
+spaday_bridge
+=============
+
+.. py:module:: spaday_bridge
+
+.. autoapi-nested-parse::
+
+   A real TransportView comm endpoint for the browser test, driven by JSON lines on stdin.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   spaday_bridge.codec
+   spaday_bridge.view
+   spaday_bridge.sent
+   spaday_bridge.request
+
+
+Module Contents
+---------------
+
+.. py:data:: codec
+
+.. py:data:: view
+
+.. py:data:: sent
+   :value: []
+
+
+.. py:data:: request
+

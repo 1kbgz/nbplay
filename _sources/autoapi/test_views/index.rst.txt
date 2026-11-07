@@ -1,0 +1,60 @@
+test_views
+==========
+
+.. py:module:: test_views
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   test_views.views
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   test_views.TestTransportModels
+   test_views.TestTransportView
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   test_views.messages
+   test_views.ready
+
+
+Module Contents
+---------------
+
+.. py:data:: views
+
+.. py:function:: messages(sent)
+
+.. py:function:: ready(view, name='owner')
+
+.. py:class:: TestTransportModels
+
+   .. py:method:: test_config_validates_like_the_widget()
+
+
+   .. py:method:: test_status_is_browser_owned()
+
+
+.. py:class:: TestTransportView
+
+   .. py:method:: test_hosts_config_and_status_and_binds_the_element()
+
+
+   .. py:method:: test_commands_reach_the_owning_view()
+
+
+   .. py:method:: test_config_assignment_syncs()
+
+

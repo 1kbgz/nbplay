@@ -846,6 +846,27 @@ Python helpers `configure_grid_for_actions()`, `set_base_note()`, and
 `transpose_pads()` provide global note/action setup for sampler slicing and
 future external controller layouts.
 
+## Transports views (preview)
+
+`nbplay/views.py` is the parallel layer that will replace the traitlets widgets: the same elements
+on [transports](https://github.com/1kbgz/transports) models rendered by
+[spaday](https://github.com/1kbgz/spaday). A view hosts two pydantic models from `nbplay/models.py`
+in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`), and a
+status model the browser owns (`TransportStatus`, hosted with `owner="client"`). The spaday tree is
+the instrument element with every config field bound two-way on `nbplay-set` and every status field
+bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
+the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are
+`session.command(status_id, field, value)` calls; `<nbplay-wire namespace="status">`, a child of the
+instrument defined in `js/src/ts/spaday.ts`, requests the wire from the widget root, maps the
+status field to `element.command(...)` and acknowledges. The build writes that bundle and the
+stylesheet to `nbplay/static/spaday/`, which `nbplay.components.package` publishes as the spaday
+component package `nbplay` (also an installed entry point).
+
+Tests: `nbplay/tests/test_views.py` drives a view through a mocked comm; `js/tests/spaday.spec.js`
+renders the spaday widget bundle against a real `TransportView` in a Python subprocess
+(`nbplay/tests/spaday_bridge.py`), set `NBPLAY_TEST_PYTHON` to a Python with `nbplay[spaday]`.
+Both skip when spaday lacks notebook session support.
+
 ## Styling system
 
 Implementation lives in `js/src/css/components/`: `tokens.css` defines the

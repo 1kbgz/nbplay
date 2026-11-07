@@ -1,0 +1,29 @@
+nbplay.components
+=================
+
+.. py:module:: nbplay.components
+
+.. autoapi-nested-parse::
+
+   The nbplay elements as a spaday component package.
+
+   Select it with ``packages="nbplay"`` (the installed entry point) or
+   ``packages="nbplay.components:package"``. The assets are the element bundle
+   with the ``nbplay-wire`` command bridge and the shared stylesheet, written
+   by the JavaScript build into ``nbplay/static/spaday/``.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   nbplay.components.package
+
+
+Module Contents
+---------------
+
+.. py:data:: package
+

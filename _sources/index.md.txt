@@ -77,6 +77,12 @@ session.play()   # or press play on any widget; they share the clock
 
 Song structure comes from named patterns: `session.add_pattern("verse", drums.sequencer)`, then `session.chain(drums, ["verse", "verse", "chorus"])` lays them out as clips on the track's timeline lane, and the sequencer stops looping on its own so the arrangement drives it.
 
+A preview of the next layer runs the same elements on [transports](https://github.com/1kbgz/transports)
+models rendered by [spaday](https://github.com/1kbgz/spaday): `pip install "nbplay[spaday]"`, then
+`from nbplay.views import TransportView`. The view hosts a validated config model and a browser-owned
+status model, and `view.play()` is a transports command delivered to the owning browser view. Only the
+transport is converted so far; it needs a spaday release with notebook session support.
+
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
 
 `MidiOutputWidget` sends what the session plays to a hardware synth or another app over Web MIDI, and `MidiLearn` maps hardware knobs to widget traits (`MidiLearn(midi_keyboard).learn(synth, "frequency", low=100, high=2000)`, then turn a knob). The session can lead external gear with MIDI clock (`send_clock` on the output widget) or follow a device's clock (`sync_clock` on the MIDI keyboard). Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
