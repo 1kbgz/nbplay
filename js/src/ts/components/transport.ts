@@ -2,7 +2,7 @@ import { html } from "lit";
 import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
 import {
-  bindClock,
+  bindElementClock,
   type ClockBinding,
   type ClockEvent,
   type SessionClock,
@@ -69,8 +69,7 @@ export class NbplayTransport extends NbplayElement {
   declare barNumber: number;
   declare beatInBar: number;
 
-  private binding: ClockBinding | null = null;
-  private sessionListeners: Array<() => void> = [];
+  private binding: (ClockBinding & { rebind(): void }) | null = null;
   private unbindShortcuts: (() => void) | null = null;
   private tickTimer: ReturnType<typeof setInterval> | null = null;
   private lastSyncedBeat = 0;
@@ -97,16 +96,7 @@ export class NbplayTransport extends NbplayElement {
   /** The clock this element follows; bound on first use. */
   clock(): SessionClock {
     if (!this.binding) {
-      const shim = {
-        get: (name: string) =>
-          name === "session_id" ? this.sessionId : undefined,
-        set: () => {},
-        save_changes: () => {},
-        on: (event: string, cb: () => void) => {
-          if (event === "change:session_id") this.sessionListeners.push(cb);
-        },
-      };
-      this.binding = bindClock(shim, this.onClockEvent, this.onRebind);
+      this.binding = bindElementClock(this, this.onClockEvent, this.onRebind);
       const clk = this.binding.clock();
       this.pushTempo(clk);
       this.pushLoop(clk);
@@ -141,7 +131,6 @@ export class NbplayTransport extends NbplayElement {
     this.removeEventListener("keydown", this.onUndoKey);
     this.binding?.dispose();
     this.binding = null;
-    this.sessionListeners = [];
   }
 
   private beatsPerBar(): number {
@@ -300,8 +289,7 @@ export class NbplayTransport extends NbplayElement {
   updated(changed: PropertyValues): void {
     if (!this.binding) return;
     if (changed.has("sessionId") && changed.get("sessionId") !== undefined) {
-      for (const cb of this.sessionListeners) cb();
-      this.clock();
+      this.binding.rebind();
       return;
     }
     const clk = this.clock();

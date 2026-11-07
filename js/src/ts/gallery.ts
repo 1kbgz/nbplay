@@ -1170,6 +1170,18 @@ const SECTIONS: Section[] = [
     ],
     variants: [{ label: "default", props: {}, wide: true }],
   },
+  {
+    tag: "nbplay-midi-keyboard",
+    title: "nbplay-midi-keyboard",
+    desc: "Web MIDI note input: port picker, device-clock follow with measured tempo, last-event monitor. Needs a browser with Web MIDI and a device.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "midiPort", type: "text" },
+      { name: "syncClock", type: "boolean" },
+      { name: "clockBpm", type: "number", step: 0.1 },
+    ],
+    variants: [{ label: "default", props: {}, wide: true }],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
