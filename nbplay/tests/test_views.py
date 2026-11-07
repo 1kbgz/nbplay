@@ -5,7 +5,7 @@ import pytest
 
 pytest.importorskip("transports")
 pytest.importorskip("spaday")
-views = pytest.importorskip("nbplay.views")
+views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 
 import transports
 from transports._buffers import join_buffers
