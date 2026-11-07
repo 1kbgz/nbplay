@@ -102,13 +102,19 @@ async function renderWidget(page, name, key, opts) {
       window.__models = window.__models || {};
       window.__models[key] = model;
       // Tag oscillator starts with the widget that scheduled them by
-      // wrapping the model's get(), which the scheduler calls per step.
-      const get = model.get.bind(model);
-      model.get = (k) => {
-        window.__currentWidget = key;
-        return get(k);
+      // wrapping the trait reads the scheduler makes per step: the model's
+      // get() for widgets, the element's scheduler shim for instruments.
+      const tag = (target) => {
+        const get = target.get.bind(target);
+        target.get = (k) => {
+          window.__currentWidget = key;
+          return get(k);
+        };
       };
+      tag(model);
       mod.default.render({ model, el });
+      const node = el.querySelector("nbplay-sequencer");
+      if (node) tag(node.shim);
     },
     { name, key, opts },
   );

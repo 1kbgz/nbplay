@@ -226,15 +226,15 @@ test.describe("Keyboard shortcuts", () => {
     await root.focus();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveCount(1);
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveAttribute(
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveCount(1);
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveAttribute(
       "data-step",
       "0",
     );
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowDown");
-    const cursor = page.locator(".nbplay-seq-cell.cursor");
+    const cursor = page.locator(".nbplay-step-grid-cell.cursor");
     await expect(cursor).toHaveAttribute("data-step", "2");
     await expect(cursor).toHaveAttribute("data-voice", "1");
 
@@ -254,7 +254,7 @@ test.describe("Keyboard shortcuts", () => {
     expect(await state(page, "current_step")).toBe(-1);
 
     await page.keyboard.press("Escape");
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveCount(0);
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveCount(0);
   });
 
   test("timeline: space plays, delete removes the selected clip", async ({

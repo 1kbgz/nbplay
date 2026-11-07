@@ -1209,6 +1209,42 @@ const SECTIONS: Section[] = [
     ],
     variants: [{ label: "default", props: {}, wide: true }],
   },
+  {
+    tag: "nbplay-sequencer",
+    title: "nbplay-sequencer",
+    desc: "The step sequencer on a private clock with a built-in oscillator: transport bar, resolution, bars, loop, step grid. Focus it for Space, arrows, Enter/X and Escape.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "bpm", type: "number" },
+      { name: "measures", type: "number" },
+      { name: "stepDuration", type: "number", step: 0.125 },
+      { name: "loopEnabled", type: "boolean" },
+      { name: "keyboardConnected", type: "boolean" },
+    ],
+    variants: [
+      {
+        label: "two voices",
+        props: {
+          voicesData: [
+            Array.from({ length: 16 }, (_, i) => ({
+              active: i % 4 === 0,
+              note: 36,
+              velocity: 110,
+            })),
+            Array.from({ length: 16 }, (_, i) => ({
+              active: i % 2 === 1,
+              note: 42,
+              velocity: 70 + (i % 4) * 10,
+            })),
+          ],
+          numVoices: 2,
+          length: 16,
+          stepDuration: 0.25,
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(

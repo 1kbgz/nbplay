@@ -1,0 +1,103 @@
+nbplay-sequencer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-sequencer:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-sequencer .nbplay-seq-transport {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-sequencer .nbplay-seq-btn {
+  width: 32px;
+  height: 32px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-sequencer .nbplay-seq-btn:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-sequencer .nbplay-seq-btn:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-sequencer .nbplay-seq-play.playing {
+  background: var(--nbplay-success);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-success);
+}
+nbplay-sequencer .nbplay-seq-rec[hidden] {
+  display: none;
+}
+nbplay-sequencer .nbplay-seq-rec.recording {
+  background: var(--nbplay-error);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-error);
+  animation: nbplay-seq-rec-pulse 1s ease-in-out infinite;
+}
+@keyframes nbplay-seq-rec-pulse {
+  50% {
+    filter: brightness(1.3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  nbplay-sequencer .nbplay-seq-rec.recording {
+    animation: none;
+  }
+}
+nbplay-sequencer .nbplay-seq-bpm nbplay-slider {
+  width: 100px;
+}
+nbplay-sequencer .nbplay-seq-field,
+nbplay-sequencer .nbplay-seq-loop-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-sequencer .nbplay-seq-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+nbplay-sequencer .nbplay-seq-dur-select,
+nbplay-sequencer .nbplay-seq-measures-input {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-sequencer .nbplay-seq-measures-input {
+  width: 48px;
+}
+nbplay-sequencer .nbplay-seq-loop-chk {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-sequencer .nbplay-seq-footer {
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}

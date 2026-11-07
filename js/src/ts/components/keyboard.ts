@@ -262,7 +262,7 @@ export class NbplayKeyboard extends NbplayElement {
     if (ae === this || this.contains(ae)) return true;
     const seq = ae.closest(".nbplay-sequencer");
     if (seq) {
-      if (seq.querySelector(".nbplay-seq-key-wait")) return true;
+      if (seq.querySelector(".nbplay-step-grid-cell.pending")) return true;
       if (seq.querySelector(".nbplay-seq-rec.recording")) return true;
     }
     return false;

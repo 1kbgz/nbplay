@@ -74,3 +74,4 @@ export {
   songPositionBytes,
   type SendRequest,
 } from "./midi-output.ts";
+export { NbplaySequencer } from "./sequencer.ts";
