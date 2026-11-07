@@ -317,6 +317,102 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("sequencer: kernel steps light the grid and a play command starts the clock", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("sequencer");
+    try {
+      await mount(page, kernel);
+      const seq = page.locator("#owner nbplay-sequencer");
+      await expect(seq).toBeVisible();
+      await expect(
+        page.locator("#owner .nbplay-step-grid-cell.active"),
+      ).toHaveCount(0);
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "set_step",
+          args: [0],
+          kwargs: { note: 48 },
+        }),
+      );
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "set_step",
+          args: [4],
+          kwargs: { note: 52 },
+        }),
+      );
+      await expect(
+        page.locator("#owner .nbplay-step-grid-cell.active"),
+      ).toHaveCount(2);
+
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "play" }),
+      );
+      await expect(seq).toHaveAttribute("is-playing", "");
+      await expect
+        .poll(async () => (await state(kernel)).status.is_playing)
+        .toBe(true);
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "stop" }),
+      );
+      await expect(seq).not.toHaveAttribute("is-playing");
+    } finally {
+      kernel.close();
+    }
+  });
+
+  test("sampler: a kernel sample reaches the element as bytes and pads follow the count", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("sampler");
+    try {
+      await mount(page, kernel);
+      const sampler = page.locator("#owner nbplay-sampler");
+      await expect(sampler).toBeVisible();
+      await expect(page.locator("#owner .nbplay-pad-cell")).toHaveCount(8);
+      const samples = Array.from({ length: 1000 }, (_, i) => Math.sin(i / 10));
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "load_sample",
+          args: [samples],
+          kwargs: { sample_rate: 22050, name: "sine" },
+        }),
+      );
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const el = document.querySelector("#owner nbplay-sampler");
+            return [
+              el.sampleLength,
+              el.sampleData?.byteLength ?? 0,
+              el.sampleName,
+            ];
+          }),
+        )
+        .toEqual([1000, 4000, "sine"]);
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "configure_pads",
+          kwargs: { pad_count: 4 },
+        }),
+      );
+      await expect(page.locator("#owner .nbplay-pad-cell")).toHaveCount(4);
+    } finally {
+      kernel.close();
+    }
+  });
+
   for (const [name, tag, field, prop, value] of [
     ["keyboard", "nbplay-keyboard", "velocity", "velocity", 64],
     ["midi_keyboard", "nbplay-midi-keyboard", "sync_clock", "syncClock", true],

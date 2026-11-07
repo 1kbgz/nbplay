@@ -26,6 +26,10 @@ from .models import (
     MixerConfig,
     PadsConfig,
     PadsStatus,
+    SamplerConfig,
+    SamplerStatus,
+    SequencerConfig,
+    SequencerStatus,
     SettingsConfig,
     SettingsStatus,
     SynthConfig,
@@ -33,7 +37,15 @@ from .models import (
     TransportConfig,
     TransportStatus,
 )
-from .widget import _clamp_int, _clamp_midi_note, _clamp_velocity, _normalize_effect
+from .widget import (
+    _clamp_int,
+    _clamp_midi_note,
+    _clamp_velocity,
+    _decimate_samples,
+    _normalize_effect,
+    _normalize_zone,
+    _pack_float32,
+)
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
     raise ImportError("nbplay.views needs a spaday release with Widget(session=...) support")
@@ -46,6 +58,8 @@ __all__ = (
     "MidiOutputView",
     "MixerView",
     "PadsView",
+    "SamplerView",
+    "SequencerView",
     "SettingsView",
     "SynthView",
     "TransportView",
@@ -333,3 +347,179 @@ class MidiOutputView(InstrumentView):
         if not data:
             raise ValueError("MIDI message must not be empty")
         return self._request(kind="raw", data=data)
+
+
+class SequencerView(InstrumentView):
+    """The step sequencer on a transports session.
+
+    Steps are edited through ``voices_data``; play state and the sounding
+    step belong to the browser scheduler.
+    """
+
+    TAG = "nbplay-sequencer"
+    CONFIG_MODEL = SequencerConfig
+    STATUS_MODEL = SequencerStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "voices_data": "voicesData",
+        "num_voices": "numVoices",
+        "length": "length",
+        "measures": "measures",
+        "step_duration": "stepDuration",
+        "time_signature_num": "timeSignatureNum",
+        "time_signature_den": "timeSignatureDen",
+        "bpm": "bpm",
+        "loop_enabled": "loopEnabled",
+        "keyboard_connected": "keyboardConnected",
+        "follow_transport": "followTransport",
+        "swing": "swing",
+        "groove": "groove",
+        "automation_lanes": "automationLanes",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "current_step": "currentStep"}
+
+    def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100):
+        """Set one step of one voice."""
+        voices = [list(steps) for steps in self.config.voices_data]
+        if 0 <= voice < len(voices) and 0 <= index < len(voices[voice]):
+            voices[voice][index] = {
+                "note": note,
+                "velocity": velocity,
+                "duration_ticks": duration_ticks,
+                "active": active,
+                "probability": probability,
+            }
+            self.config.voices_data = voices
+
+    def toggle_step(self, index, voice=0):
+        """Flip one step's active state."""
+        voices = [list(steps) for steps in self.config.voices_data]
+        if 0 <= voice < len(voices) and 0 <= index < len(voices[voice]):
+            voices[voice][index] = {**voices[voice][index], "active": not voices[voice][index]["active"]}
+            self.config.voices_data = voices
+
+    def clear(self):
+        """Deactivate every step."""
+        self.config.voices_data = [[{**step, "active": False} for step in steps] for steps in self.config.voices_data]
+
+    def play(self):
+        """Start playback in the owning view (the session clock when shared)."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop playback in the owning view."""
+        return self._command("is_playing", False)
+
+
+class SamplerView(InstrumentView):
+    """The sampler on a transports session.
+
+    Sample PCM travels as bytes; zones carry their own bytes. Capturing a
+    browser-side clip is a command the owning view decodes.
+    """
+
+    TAG = "nbplay-sampler"
+    CONFIG_MODEL = SamplerConfig
+    STATUS_MODEL = SamplerStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "sample_name": "sampleName",
+        "sample_rate": "sampleRate",
+        "sample_length": "sampleLength",
+        "root_note": "rootNote",
+        "waveform": "waveform",
+        "sample_data": "sampleData",
+        "attack": "attack",
+        "decay": "decay",
+        "sustain": "sustain",
+        "release": "release",
+        "max_voices": "maxVoices",
+        "pad_count": "padCount",
+        "pad_notes": "padNotes",
+        "pad_velocities": "padVelocities",
+        "pad_actions": "padActions",
+        "sample_slices": "sampleSlices",
+        "velocity": "velocity",
+        "velocity_sensitive": "velocitySensitive",
+        "zones": "zones",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "active_pads": "activePads",
+        "last_note_event": "lastNoteEvent",
+        "last_pad_event": "lastPadEvent",
+    }
+
+    def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
+        """Load mono float samples (or float32 bytes) as the main sample."""
+        samples = list(data) if not isinstance(data, (bytes, bytearray, memoryview)) else None
+        packed = _pack_float32(samples) if samples is not None else bytes(data)
+        if samples is None:
+            samples = memoryview(packed).cast("f").tolist()
+        config = self.config
+        config.sample_name = name
+        config.sample_rate = sample_rate
+        config.root_note = _clamp_midi_note(root_note)
+        config.sample_length = len(samples)
+        config.sample_data = packed
+        config.waveform = _pack_float32(_decimate_samples(samples))
+        return self
+
+    def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
+        """Set the pad count and per-pad notes, velocities or actions."""
+        config = self.config
+        if pad_count is None and pad_notes is not None:
+            pad_count = len(pad_notes)
+        if pad_count is not None:
+            config.pad_count = max(1, int(pad_count))
+        if pad_notes is not None:
+            config.pad_notes = list(pad_notes)
+        if pad_velocities is not None:
+            config.pad_velocities = list(pad_velocities)
+        if pad_actions is not None:
+            config.pad_actions = list(pad_actions)
+
+    def add_zone(self, data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None):
+        """Add a sample zone covering a note and velocity range; returns the zone."""
+        packed = bytes(data) if isinstance(data, (bytes, bytearray, memoryview)) else _pack_float32(list(data))
+        if root_note is None:
+            root_note = note_low if note_low == note_high else 60
+        zone = _normalize_zone(
+            {
+                "name": name or f"Zone {len(self.config.zones) + 1}",
+                "note_low": note_low,
+                "note_high": note_high,
+                "velocity_low": velocity_low,
+                "velocity_high": velocity_high,
+                "root_note": root_note,
+                "sample_rate": sample_rate,
+                "data": packed,
+            },
+            len(self.config.zones),
+        )
+        self.config.zones = [*self.config.zones, zone]
+        return zone
+
+    def capture(self, url, *, name="Take", note=None, offset=0.0, duration=0.0):
+        """Ask the owning view to decode a browser-side audio URL into a zone.
+
+        With ``note`` the zone answers to that one note and plays unpitched
+        there; otherwise it covers every note at the sampler's root note.
+        ``offset`` and ``duration`` are seconds into the source.
+        """
+        if note is not None:
+            note = _clamp_midi_note(note)
+            low, high, root = note, note, note
+        else:
+            low, high, root = 0, 127, self.config.root_note
+        return self._command(
+            "request",
+            {
+                "url": str(url),
+                "name": name,
+                "note_low": low,
+                "note_high": high,
+                "root_note": root,
+                "offset": float(offset),
+                "duration": float(duration),
+            },
+        )
