@@ -85,8 +85,9 @@ nbplay-effect-rack[disabled] {
 
 nbplay-effect-editor {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 10px;
   padding: 6px;
   background: var(--nbplay-bg-raised);
   border: 1px solid var(--nbplay-border);
@@ -99,7 +100,7 @@ nbplay-effect-editor .nbplay-effect-editor-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  flex: 1 1 100%;
 }
 nbplay-effect-editor label.nbplay-effect-editor-row > span {
   min-width: 56px;
@@ -107,8 +108,10 @@ nbplay-effect-editor label.nbplay-effect-editor-row > span {
   letter-spacing: 0.5px;
   color: var(--nbplay-fg-muted);
 }
-nbplay-effect-editor nbplay-param nbplay-slider {
-  flex: 1 1 auto;
+nbplay-effect-editor .nbplay-effect-editor-param {
+  --nbplay-dial-size: 36px;
+  flex: 0 0 auto;
+  min-width: 48px;
 }
 nbplay-effect-editor select,
 nbplay-effect-editor input[type="text"],

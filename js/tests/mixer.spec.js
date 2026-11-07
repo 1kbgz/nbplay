@@ -672,10 +672,8 @@ test.describe("MixerWidget", () => {
     await page.locator(`${STRIP} .nbplay-effect-rack-edit`).click();
     const editor = page.locator(`${STRIP} nbplay-effect-editor`);
     await expect(editor).toHaveCount(1);
-    await expect(editor.locator(".nbplay-effect-editor-row")).toHaveCount(3);
-    await expect(editor.locator("nbplay-param input[type=range]")).toHaveCount(
-      2,
-    );
+    await expect(editor.locator("[data-key]")).toHaveCount(3);
+    await expect(editor.locator("nbplay-param nbplay-dial")).toHaveCount(2);
     await expect(editor.locator("select[data-key]")).toHaveValue("lowpass");
 
     const before = await page.evaluateHandle(
@@ -711,8 +709,8 @@ test.describe("MixerWidget", () => {
     // The editor stays open with the new values; the chip label follows.
     await expect(editor).toHaveCount(1);
     await expect(
-      editor.locator('nbplay-param[data-key="frequency"] input[type=range]'),
-    ).toHaveValue("500");
+      editor.locator('nbplay-param[data-key="frequency"] nbplay-dial'),
+    ).toHaveJSProperty("value", 500);
     await expect(page.locator(`${STRIP} .nbplay-effect-rack-chip`)).toHaveText(
       "highpass 500Hz",
     );
@@ -780,10 +778,8 @@ test.describe("MixerWidget", () => {
     await page.locator(".nbplay-mixer-add-btn").click();
     await expect(page.locator(`${master} nbplay-effect-editor`)).toHaveCount(1);
     await expect(
-      page.locator(
-        `${master} nbplay-param[data-key="threshold"] input[type=range]`,
-      ),
-    ).toHaveValue("-6");
+      page.locator(`${master} nbplay-param[data-key="threshold"] nbplay-dial`),
+    ).toHaveJSProperty("value", -6);
 
     // Out-of-range values clamp to the plugin's bounds.
     await typeParam(page.locator(master), "threshold", "5");
@@ -814,9 +810,7 @@ test.describe("MixerWidget", () => {
     await page.locator(`${STRIP} .nbplay-effect-rack-edit`).click();
     const editor = page.locator(`${STRIP} nbplay-effect-editor`);
     await expect(editor.locator(".nbplay-effect-editor-row")).toHaveCount(3);
-    await expect(editor.locator("nbplay-param input[type=range]")).toHaveCount(
-      0,
-    );
+    await expect(editor.locator("nbplay-param nbplay-dial")).toHaveCount(0);
     await editor.locator('[data-key="depth"]').fill("2");
     await editor.locator('[data-key="mode"]').fill("square");
     await editor.locator('[data-key="mode"]').press("Enter");

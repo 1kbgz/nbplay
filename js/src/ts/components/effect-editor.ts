@@ -10,7 +10,7 @@ import "./param.ts";
 
 /**
  * `<nbplay-effect-editor>`: one row per parameter of an effect. Bounded
- * numbers get an `nbplay-param` slider, unbounded numbers a number input,
+ * numbers get an `nbplay-param` dial, unbounded numbers a number input,
  * `options` a select, booleans a checkbox, strings a text input. `specs`
  * overrides the built-in table (plugin effects infer specs from their fields).
  * Fires `change` with `{key, value}`.
@@ -100,7 +100,8 @@ export class NbplayEffectEditor extends NbplayElement {
     const num = Number(value);
     if (spec.min !== undefined && spec.max !== undefined) {
       return html`<nbplay-param
-        class="nbplay-effect-editor-row"
+        class="nbplay-effect-editor-param"
+        control="dial"
         data-key=${spec.key}
         .label=${spec.label}
         .value=${Number.isFinite(num) ? num : spec.min}

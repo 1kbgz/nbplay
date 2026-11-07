@@ -643,7 +643,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-effect-editor",
     title: "nbplay-effect-editor",
-    desc: "Parameter rows from the effect spec table: sliders for bounded numbers, selects, checkboxes, text.",
+    desc: "Parameter rows from the effect spec table: dials for bounded numbers, selects, checkboxes, text.",
     events: ["change"],
     controls: [{ name: "disabled", type: "boolean" }],
     variants: [

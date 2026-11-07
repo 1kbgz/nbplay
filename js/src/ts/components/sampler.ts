@@ -60,7 +60,7 @@ function fmtLen(sampleCount: number, rate: number): string {
 /**
  * `<nbplay-sampler>`: the sampler instrument. A header with a file input
  * and the sample name, an `nbplay-waveform` drop target, an info line, the
- * ADSR (`nbplay-envelope` and four `nbplay-param`s), max voices, trigger
+ * ADSR (`nbplay-envelope` and four `nbplay-param` dials), max voices, trigger
  * pads (`nbplay-pad-grid` in hold mode), and multi-sample zones
  * (`nbplay-zone-map`, `nbplay-zone-list`, file and microphone capture).
  * Playback runs on the sampler engine; with `sessionId` and
@@ -745,6 +745,7 @@ export class NbplaySampler extends NbplayElement {
     max: number,
     step: number,
     defaultValue: number,
+    control: "slider" | "dial" = "slider",
   ) {
     const on = (e: Event) => {
       e.stopPropagation();
@@ -757,6 +758,7 @@ export class NbplaySampler extends NbplayElement {
       class=${cls}
       .label=${label}
       .kind=${kind}
+      .control=${control}
       .value=${Number(this[prop])}
       .min=${min}
       .max=${max}
@@ -825,10 +827,10 @@ export class NbplaySampler extends NbplayElement {
           .release=${Number(this.release)}
         ></nbplay-envelope>
         <div class="nbplay-samp-env-controls">
-          ${this.param("nbplay-samp-attack", "Attack", "attack", "seconds", 0, 2, 0.001, 0.005)}
-          ${this.param("nbplay-samp-decay", "Decay", "decay", "seconds", 0, 2, 0.001, 0.1)}
-          ${this.param("nbplay-samp-sustain", "Sustain", "sustain", "percent", 0, 1, 0.01, 0.8)}
-          ${this.param("nbplay-samp-release", "Release", "release", "seconds", 0, 5, 0.001, 0.1)}
+          ${this.param("nbplay-samp-attack", "Attack", "attack", "seconds", 0, 2, 0.001, 0.005, "dial")}
+          ${this.param("nbplay-samp-decay", "Decay", "decay", "seconds", 0, 2, 0.001, 0.1, "dial")}
+          ${this.param("nbplay-samp-sustain", "Sustain", "sustain", "percent", 0, 1, 0.01, 0.8, "dial")}
+          ${this.param("nbplay-samp-release", "Release", "release", "seconds", 0, 5, 0.001, 0.1, "dial")}
         </div>
       </div>
       <div class="nbplay-samp-row">

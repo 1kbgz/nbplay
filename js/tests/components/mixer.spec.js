@@ -25,18 +25,18 @@ test.describe("mixer composites", () => {
     page,
   }) => {
     await mount(page, "nbplay-effect-editor", { effect: FILTER }, ["change"]);
-    await expect(
-      page.locator("nbplay-effect-editor .nbplay-effect-editor-row"),
-    ).toHaveCount(3);
+    await expect(page.locator("nbplay-effect-editor [data-key]")).toHaveCount(
+      3,
+    );
     await page
       .locator('nbplay-effect-editor select[data-key="filter_type"]')
       .selectOption("highpass");
     await page
       .locator(
-        'nbplay-effect-editor nbplay-param[data-key="frequency"] input[type=range]',
+        'nbplay-effect-editor nbplay-param[data-key="frequency"] nbplay-dial',
       )
       .focus();
-    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowUp");
     expect(await events(page)).toEqual([
       ["change", { key: "filter_type", value: "highpass" }],
       ["change", { key: "frequency", value: 1201 }],

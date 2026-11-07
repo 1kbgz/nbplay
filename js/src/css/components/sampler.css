@@ -59,16 +59,19 @@ nbplay-sampler .nbplay-samp-env-canvas {
 }
 nbplay-sampler .nbplay-samp-env-controls {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 8px;
   flex: 1 1 auto;
   min-width: 0;
 }
-nbplay-sampler .nbplay-samp-env-controls nbplay-param,
+nbplay-sampler .nbplay-samp-env-controls nbplay-param {
+  --nbplay-dial-size: 44px;
+}
 nbplay-sampler .nbplay-samp-row nbplay-param {
   display: flex;
 }
-nbplay-sampler .nbplay-samp-env-controls nbplay-slider,
 nbplay-sampler .nbplay-samp-row nbplay-slider {
   flex: 1 1 auto;
   min-width: 0;
