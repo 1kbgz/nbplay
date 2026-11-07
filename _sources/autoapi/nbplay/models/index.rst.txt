@@ -29,6 +29,10 @@ Classes
    nbplay.models.KeyboardStatus
    nbplay.models.MidiKeyboardConfig
    nbplay.models.MidiKeyboardStatus
+   nbplay.models.SettingsConfig
+   nbplay.models.SettingsStatus
+   nbplay.models.MidiOutputConfig
+   nbplay.models.MidiOutputStatus
 
 
 Module Contents
@@ -615,5 +619,160 @@ Module Contents
       :type:  float
       :value: 0.0
 
+
+
+.. py:class:: SettingsConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   Audio output and MIDI input selection.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: sample_rate
+      :type:  int
+
+
+   .. py:attribute:: channels
+      :type:  int
+
+
+   .. py:attribute:: buffer_size
+      :type:  int
+
+
+   .. py:attribute:: audio_device
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: midi_port
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+.. py:class:: SettingsStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Ports the browser enumerated and the last raw MIDI event; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: available_midi_ports
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: midi_event
+      :type:  bytes
+      :value: b''
+
+
+
+.. py:class:: MidiOutputConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The MIDI output port, channel and what it forwards.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: midi_port
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel
+      :type:  int
+
+
+   .. py:attribute:: forward_notes
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: send_clock
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+.. py:class:: MidiOutputStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Ports the browser enumerated; browser-owned.
+
+   ``request`` is never written by either side: it is the client-owned
+   field that ``session.command`` targets to deliver a send request.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: available_midi_ports
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: request
+      :type:  dict
 
 

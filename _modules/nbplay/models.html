@@ -619,9 +619,13 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"KeyboardStatus"</span><span class="p">,</span>
     <span class="s2">"MidiKeyboardConfig"</span><span class="p">,</span>
     <span class="s2">"MidiKeyboardStatus"</span><span class="p">,</span>
+    <span class="s2">"MidiOutputConfig"</span><span class="p">,</span>
+    <span class="s2">"MidiOutputStatus"</span><span class="p">,</span>
     <span class="s2">"MixerConfig"</span><span class="p">,</span>
     <span class="s2">"PadsConfig"</span><span class="p">,</span>
     <span class="s2">"PadsStatus"</span><span class="p">,</span>
+    <span class="s2">"SettingsConfig"</span><span class="p">,</span>
+    <span class="s2">"SettingsStatus"</span><span class="p">,</span>
     <span class="s2">"SynthConfig"</span><span class="p">,</span>
     <span class="s2">"SynthStatus"</span><span class="p">,</span>
     <span class="s2">"TransportConfig"</span><span class="p">,</span>
@@ -923,6 +927,62 @@ window.runMermaid = runMermaid;</script>
     <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">control_change</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">clock_bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span></div>
+
+
+
+<div class="viewcode-block" id="SettingsConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SettingsConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SettingsConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Audio output and MIDI input selection."""</span>
+
+    <span class="n">sample_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">192000</span><span class="p">)</span>
+    <span class="n">channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">buffer_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">8192</span><span class="p">)</span>
+    <span class="n">audio_device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">midi_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="SettingsStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SettingsStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SettingsStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Ports the browser enumerated and the last raw MIDI event; browser-owned."""</span>
+
+    <span class="n">available_midi_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">midi_event</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span></div>
+
+
+
+<div class="viewcode-block" id="MidiOutputConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiOutputConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The MIDI output port, channel and what it forwards."""</span>
+
+    <span class="n">midi_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">forward_notes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">send_clock</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="MidiOutputStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiOutputStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Ports the browser enumerated; browser-owned.</span>
+
+<span class="sd">    ``request`` is never written by either side: it is the client-owned</span>
+<span class="sd">    field that ``session.command`` targets to deliver a send request.</span>
+<span class="sd">    """</span>
+
+    <span class="n">available_midi_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">request</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 </pre></div>
 

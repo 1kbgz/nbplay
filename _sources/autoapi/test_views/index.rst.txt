@@ -21,6 +21,7 @@ Classes
    test_views.TestSynthView
    test_views.TestMixerView
    test_views.TestKeysViews
+   test_views.TestIoViews
    test_views.TestTransportView
 
 
@@ -72,6 +73,11 @@ Module Contents
 
 
    .. py:method:: test_keyboard_and_midi_keyboard_views()
+
+
+.. py:class:: TestIoViews
+
+   .. py:method:: test_settings_and_midi_output_views()
 
 
 .. py:class:: TestTransportView

@@ -365,6 +365,57 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.MidiKeyboardView.STATUS">MidiKeyboardView.STATUS</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.SettingsView">SettingsView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.TAG">SettingsView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.CONFIG_MODEL">SettingsView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.STATUS_MODEL">SettingsView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.CONFIG">SettingsView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.STATUS">SettingsView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.MidiOutputView">MidiOutputView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.TAG">MidiOutputView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.CONFIG_MODEL">MidiOutputView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.STATUS_MODEL">MidiOutputView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.CONFIG">MidiOutputView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.STATUS">MidiOutputView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView._request">MidiOutputView._request()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.note_on">MidiOutputView.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.note_off">MidiOutputView.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.control_change">MidiOutputView.control_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.send_raw">MidiOutputView.send_raw()</a>
+  </li>
 </ul>
 </div>
   </div>
@@ -429,6 +480,12 @@ layer to the traitlets widgets in <a class="reference internal" href="../widget/
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.MidiKeyboardView" title="nbplay.views.MidiKeyboardView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardView</span></code></a></p></td>
 <td><p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.views.SettingsView" title="nbplay.views.SettingsView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsView</span></code></a></p></td>
+<td><p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.MidiOutputView" title="nbplay.views.MidiOutputView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputView</span></code></a></p></td>
+<td><p>A Web MIDI output; sends are commands delivered to the owning view.</p></td>
 </tr>
 </tbody>
 </table>
@@ -766,6 +823,99 @@ graph from it. Edits in either place are validated by
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">SettingsView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SettingsView" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-settings'</span></em><a class="headerlink" href="#nbplay.views.SettingsView.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.views.SettingsView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.views.SettingsView.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.SettingsView.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.SettingsView.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.SettingsView.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">MidiOutputView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<p>A Web MIDI output; sends are commands delivered to the owning view.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-midi-output'</span></em><a class="headerlink" href="#nbplay.views.MidiOutputView.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.views.MidiOutputView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.views.MidiOutputView.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.MidiOutputView.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.MidiOutputView.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView._request">
+<span class="sig-name descname"><span class="pre">_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView._request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.note_on">
+<span class="sig-name descname"><span class="pre">note_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView.note_on" title="Link to this definition">¶</a></dt>
+<dd><p>Send a note-on on the output’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.note_off">
+<span class="sig-name descname"><span class="pre">note_off</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView.note_off" title="Link to this definition">¶</a></dt>
+<dd><p>Send a note-off on the output’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.control_change">
+<span class="sig-name descname"><span class="pre">control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView.control_change" title="Link to this definition">¶</a></dt>
+<dd><p>Send a control change (0-127) on the output’s channel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.MidiOutputView.send_raw">
+<span class="sig-name descname"><span class="pre">send_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiOutputView.send_raw" title="Link to this definition">¶</a></dt>
+<dd><p>Send raw MIDI bytes, for example <code class="docutils literal notranslate"><span class="pre">[0xC0,</span> <span class="pre">5]</span></code> for a program change.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -987,6 +1137,57 @@ graph from it. Edits in either place are validated by
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.MidiKeyboardView.STATUS">MidiKeyboardView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.SettingsView">SettingsView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.TAG">SettingsView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.CONFIG_MODEL">SettingsView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.STATUS_MODEL">SettingsView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.CONFIG">SettingsView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SettingsView.STATUS">SettingsView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.MidiOutputView">MidiOutputView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.TAG">MidiOutputView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.CONFIG_MODEL">MidiOutputView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.STATUS_MODEL">MidiOutputView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.CONFIG">MidiOutputView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.STATUS">MidiOutputView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView._request">MidiOutputView._request()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.note_on">MidiOutputView.note_on()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.note_off">MidiOutputView.note_off()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.control_change">MidiOutputView.control_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiOutputView.send_raw">MidiOutputView.send_raw()</a>
   </li>
 </ul>
 

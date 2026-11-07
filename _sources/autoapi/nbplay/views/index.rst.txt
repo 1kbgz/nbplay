@@ -37,6 +37,8 @@ Classes
    nbplay.views.PadsView
    nbplay.views.KeyboardView
    nbplay.views.MidiKeyboardView
+   nbplay.views.SettingsView
+   nbplay.views.MidiOutputView
 
 
 Module Contents
@@ -334,5 +336,86 @@ Module Contents
 
    .. py:attribute:: STATUS
       :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: SettingsView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   Audio and MIDI device settings; the browser owns the port list and MIDI monitor.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-settings'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: MidiOutputView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   A Web MIDI output; sends are commands delivered to the owning view.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-midi-output'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: _request(**message)
+
+
+   .. py:method:: note_on(note, velocity=100)
+
+      Send a note-on on the output's channel.
+
+
+
+   .. py:method:: note_off(note)
+
+      Send a note-off on the output's channel.
+
+
+
+   .. py:method:: control_change(controller, value)
+
+      Send a control change (0-127) on the output's channel.
+
+
+
+   .. py:method:: send_raw(data)
+
+      Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change.
+
 
 

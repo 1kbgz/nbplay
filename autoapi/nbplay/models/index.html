@@ -455,6 +455,72 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiKeyboardStatus.clock_bpm">MidiKeyboardStatus.clock_bpm</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SettingsConfig">SettingsConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.sample_rate">SettingsConfig.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.channels">SettingsConfig.channels</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.buffer_size">SettingsConfig.buffer_size</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.audio_device">SettingsConfig.audio_device</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.midi_port">SettingsConfig.midi_port</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.theme">SettingsConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig._theme">SettingsConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SettingsStatus">SettingsStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsStatus.available_midi_ports">SettingsStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsStatus.midi_event">SettingsStatus.midi_event</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiOutputConfig">MidiOutputConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.midi_port">MidiOutputConfig.midi_port</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.channel">MidiOutputConfig.channel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.forward_notes">MidiOutputConfig.forward_notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.send_clock">MidiOutputConfig.send_clock</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.session_id">MidiOutputConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.theme">MidiOutputConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig._theme">MidiOutputConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiOutputStatus">MidiOutputStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputStatus.available_midi_ports">MidiOutputStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputStatus.request">MidiOutputStatus.request</a>
+  </li>
 </ul>
 </div>
   </div>
@@ -517,6 +583,18 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardStatus" title="nbplay.models.MidiKeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardStatus</span></code></a></p></td>
 <td><p>Ports, held notes, control changes and the device clock; browser-owned.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SettingsConfig" title="nbplay.models.SettingsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></p></td>
+<td><p>Audio output and MIDI input selection.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SettingsStatus" title="nbplay.models.SettingsStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsStatus</span></code></a></p></td>
+<td><p>Ports the browser enumerated and the last raw MIDI event; browser-owned.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputConfig" title="nbplay.models.MidiOutputConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputConfig</span></code></a></p></td>
+<td><p>The MIDI output port, channel and what it forwards.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputStatus" title="nbplay.models.MidiOutputStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputStatus</span></code></a></p></td>
+<td><p>Ports the browser enumerated; browser-owned.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1051,6 +1129,142 @@ validated to form a valid model.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">SettingsConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SettingsConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SettingsConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>Audio output and MIDI input selection.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.sample_rate">
+<span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.channels">
+<span class="sig-name descname"><span class="pre">channels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.buffer_size">
+<span class="sig-name descname"><span class="pre">buffer_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.buffer_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.audio_device">
+<span class="sig-name descname"><span class="pre">audio_device</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.audio_device" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.midi_port">
+<span class="sig-name descname"><span class="pre">midi_port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.midi_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.SettingsConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.SettingsConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.SettingsStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">SettingsStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SettingsStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SettingsStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Ports the browser enumerated and the last raw MIDI event; browser-owned.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsStatus.available_midi_ports">
+<span class="sig-name descname"><span class="pre">available_midi_ports</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.SettingsStatus.available_midi_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SettingsStatus.midi_event">
+<span class="sig-name descname"><span class="pre">midi_event</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b''</span></em><a class="headerlink" href="#nbplay.models.SettingsStatus.midi_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">MidiOutputConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiOutputConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiOutputConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>The MIDI output port, channel and what it forwards.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.midi_port">
+<span class="sig-name descname"><span class="pre">midi_port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.midi_port" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.channel">
+<span class="sig-name descname"><span class="pre">channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.forward_notes">
+<span class="sig-name descname"><span class="pre">forward_notes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.forward_notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.send_clock">
+<span class="sig-name descname"><span class="pre">send_clock</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.send_clock" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.MidiOutputConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.MidiOutputConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">MidiOutputStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiOutputStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiOutputStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Ports the browser enumerated; browser-owned.</p>
+<p><code class="docutils literal notranslate"><span class="pre">request</span></code> is never written by either side: it is the client-owned
+field that <code class="docutils literal notranslate"><span class="pre">session.command</span></code> targets to deliver a send request.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputStatus.available_midi_ports">
+<span class="sig-name descname"><span class="pre">available_midi_ports</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiOutputStatus.available_midi_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiOutputStatus.request">
+<span class="sig-name descname"><span class="pre">request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#nbplay.models.MidiOutputStatus.request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -1362,6 +1576,72 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiKeyboardStatus.clock_bpm">MidiKeyboardStatus.clock_bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SettingsConfig">SettingsConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.sample_rate">SettingsConfig.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.channels">SettingsConfig.channels</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.buffer_size">SettingsConfig.buffer_size</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.audio_device">SettingsConfig.audio_device</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.midi_port">SettingsConfig.midi_port</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig.theme">SettingsConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsConfig._theme">SettingsConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SettingsStatus">SettingsStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsStatus.available_midi_ports">SettingsStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SettingsStatus.midi_event">SettingsStatus.midi_event</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiOutputConfig">MidiOutputConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.midi_port">MidiOutputConfig.midi_port</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.channel">MidiOutputConfig.channel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.forward_notes">MidiOutputConfig.forward_notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.send_clock">MidiOutputConfig.send_clock</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.session_id">MidiOutputConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig.theme">MidiOutputConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputConfig._theme">MidiOutputConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiOutputStatus">MidiOutputStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputStatus.available_midi_ports">MidiOutputStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiOutputStatus.request">MidiOutputStatus.request</a>
   </li>
 </ul>
 
