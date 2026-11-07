@@ -50,17 +50,25 @@ test.describe("KeyboardWidget", () => {
   // 2. Shows header
   test("shows header text and keyboard badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-kb-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("keyboard");
+    await expect(
+      page.locator(".nbplay-keyboard nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(
+      page.locator(".nbplay-keyboard .nbplay-header-badge"),
+    ).toHaveText("keyboard");
   });
 
   // 3. Renders four keyboard rows
   test("renders upper and lower keyboard sections", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-kb-upper")).toBeVisible();
-    await expect(page.locator(".nbplay-kb-lower")).toBeVisible();
+    await expect(
+      page.locator('.nbplay-keys-zone[data-zone="upper"]'),
+    ).toBeVisible();
+    await expect(
+      page.locator('.nbplay-keys-zone[data-zone="lower"]'),
+    ).toBeVisible();
     // Each section has sharp row + natural row
-    const rows = page.locator(".nbplay-kb-row");
+    const rows = page.locator(".nbplay-keys-row");
     await expect(rows).toHaveCount(4);
   });
 
@@ -79,8 +87,8 @@ test.describe("KeyboardWidget", () => {
   // 5. Has white and black keys
   test("renders white and black keys", async ({ page }) => {
     await renderWidget(page);
-    const whiteKeys = page.locator(".nbplay-kb-white");
-    const blackKeys = page.locator(".nbplay-kb-black");
+    const whiteKeys = page.locator(".nbplay-keys-white");
+    const blackKeys = page.locator(".nbplay-keys-black");
     // Upper: 10 white + 7 black, Lower: 9 white + 7 black
     expect(await whiteKeys.count()).toBeGreaterThanOrEqual(10);
     expect(await blackKeys.count()).toBeGreaterThanOrEqual(7);
@@ -236,7 +244,7 @@ test.describe("KeyboardWidget", () => {
     await renderWidget(page);
     // Click the first white key in upper natural row
     const firstKey = page
-      .locator('[data-zone="upper-natural"] .nbplay-kb-key')
+      .locator('[data-zone="upper"] .nbplay-keys-row-natural .nbplay-keys-key')
       .first();
     await firstKey.dispatchEvent("pointerdown");
     const noteEvent = await page.evaluate(
@@ -250,7 +258,7 @@ test.describe("KeyboardWidget", () => {
   }) => {
     await renderWidget(page);
     const firstKey = page
-      .locator('[data-zone="upper-natural"] .nbplay-kb-key')
+      .locator('[data-zone="upper"] .nbplay-keys-row-natural .nbplay-keys-key')
       .first();
     const box = await firstKey.boundingBox();
     const x = box.x + box.width / 2;

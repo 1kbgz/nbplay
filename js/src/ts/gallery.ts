@@ -1157,6 +1157,19 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-keyboard",
+    title: "nbplay-keyboard",
+    desc: "The musical-typing instrument on fallback sine voices. Click it, then play Q–P / Z–. rows; [ ] and ; ' shift octaves, - = nudge velocity, ` / Space hold sustains.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "upperOctave", type: "number" },
+      { name: "lowerOctave", type: "number" },
+      { name: "velocity", type: "number" },
+      { name: "sustainGlobal", type: "boolean" },
+    ],
+    variants: [{ label: "default", props: {}, wide: true }],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
