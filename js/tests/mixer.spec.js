@@ -789,6 +789,29 @@ test.describe("MixerWidget", () => {
     expect(effects[0].threshold).toBe(0);
   });
 
+  test("registered plugin types can be added from the effect select", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      globalThis.__nbplayPlugins = {
+        wobble: (ctx) => ctx.createGain(),
+      };
+    });
+    await renderWidget(page);
+    const strip = page.locator(STRIP).nth(0);
+    const options = strip.locator(".nbplay-effect-rack-type option");
+    await expect(options.first()).toHaveText("gain");
+    await expect(options.last()).toHaveText("wobble");
+    await strip.locator(".nbplay-effect-rack-type").selectOption("wobble");
+    await strip.locator(".nbplay-effect-rack-add-btn").click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.channels[0].effects),
+    ).toEqual([{ type: "wobble" }]);
+    await expect(strip.locator(".nbplay-effect-rack-chip")).toHaveText(
+      "wobble",
+    );
+  });
+
   test("custom plugin editors expose every JSON field", async ({ page }) => {
     await page.evaluate(() => {
       globalThis.__nbplayPlugins = {

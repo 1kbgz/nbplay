@@ -366,7 +366,9 @@ export function defaultEffect(type: string): EffectDescriptor {
   if (type === "limiter") return { type, threshold: -1, release: 0.05 };
   if (type === "delay") return { type, time: 0.25, feedback: 0.25, wet: 0.35 };
   if (type === "reverb") return { type, seconds: 1.5, decay: 2, wet: 0.25 };
-  return { type: "gain", gain: 1 };
+  if (type === "gain") return { type, gain: 1 };
+  // A registered plugin starts with no parameters; its editor infers fields.
+  return { type };
 }
 
 export function isEffectEnabled(effect: EffectDescriptor): boolean {

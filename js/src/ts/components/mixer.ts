@@ -3,12 +3,13 @@ import {
   type Channel,
   createAudioBus,
   defaultEffect,
+  getPluginRegistry,
   type MeterLevel,
   type ReturnBus,
   toggleEffectEnabled,
 } from "../mixer_bus.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
-import type { EffectDescriptor } from "./effects.ts";
+import { EFFECT_TYPES, type EffectDescriptor } from "./effects.ts";
 import type { NbplayMeter } from "./meter.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./header.ts";
@@ -340,6 +341,13 @@ export class NbplayMixer extends NbplayElement {
     const channels = this.channels || [];
     const returns = this.returns || [];
     const sendNames = returns.map((r) => r.name);
+    // Built-ins first, then plugins registered on the page.
+    const effectTypes = [
+      ...EFFECT_TYPES,
+      ...Object.keys(getPluginRegistry()).filter(
+        (t) => !EFFECT_TYPES.includes(t),
+      ),
+    ];
     const strip = (
       scope: Scope,
       index: number,
@@ -366,6 +374,7 @@ export class NbplayMixer extends NbplayElement {
         .sends=${props.sends ?? []}
         .sendNames=${scope === "channel" ? sendNames : []}
         .effects=${props.effects ?? []}
+        .effectTypes=${effectTypes}
         @input=${(e: Event) => this.onStripEdit(scope, index, e)}
         @change=${(e: Event) => this.onStripEdit(scope, index, e)}
         @nbplay-effect-add=${(e: Event) => this.onEffectAdd(scope, index, e)}
