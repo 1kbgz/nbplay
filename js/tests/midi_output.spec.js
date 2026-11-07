@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/midi_output.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/midi_output.js");
       const el = document.getElementById("root");

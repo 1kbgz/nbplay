@@ -128,7 +128,7 @@ async function render(page, name, opts) {
     async ({ name, opts }) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = `/dist/css/${name}.css`;
+      link.href = `/dist/css/components.css`;
       document.head.appendChild(link);
       const mod = await import(`/dist/widgets/${name}.js`);
       const el = document.getElementById("root");

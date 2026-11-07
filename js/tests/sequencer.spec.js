@@ -35,7 +35,7 @@ async function renderWidget(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/sequencer.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
     const mod = await import("/dist/widgets/sequencer.js");
@@ -1116,7 +1116,7 @@ test.describe("SequencerWidget", () => {
     await page.evaluate(async () => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sequencer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sequencer.js");

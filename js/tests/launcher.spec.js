@@ -83,7 +83,7 @@ async function renderLauncher(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/launcher.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
     const mod = await import("/dist/widgets/launcher.js");
     const el = document.createElement("div");

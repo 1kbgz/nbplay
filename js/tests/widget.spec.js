@@ -20,7 +20,7 @@ async function renderWidget(page, overrides = {}) {
       // Inject widget CSS
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/widget.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/widget.js");

@@ -50,7 +50,7 @@ async function renderWidget(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/timeline.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
     const mod = await import("/dist/widgets/timeline.js");
     const el = document.getElementById("root");

@@ -20,7 +20,7 @@ async function renderWidget(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/mixer.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
     const mod = await import("/dist/widgets/mixer.js");
@@ -1462,7 +1462,7 @@ test.describe("MixerWidget", () => {
       };
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/mixer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/mixer.js");
@@ -1523,7 +1523,7 @@ test.describe("MixerWidget", () => {
       };
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/mixer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/mixer.js");
@@ -1562,7 +1562,7 @@ test.describe("MixerWidget", () => {
       window.__nbplayPlugins = {};
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/mixer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/mixer.js");
@@ -1609,7 +1609,7 @@ test.describe("MixerWidget", () => {
       };
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/mixer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/mixer.js");
@@ -1661,7 +1661,7 @@ test.describe("MixerWidget", () => {
       };
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/mixer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/mixer.js");

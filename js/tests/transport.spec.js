@@ -23,7 +23,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/transport.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/transport.js");
@@ -621,7 +621,7 @@ test.describe("TransportWidget", () => {
     await page.evaluate(async () => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/transport.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/transport.js");

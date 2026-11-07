@@ -706,7 +706,7 @@ class SynthWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "widget.js"
-    _css = _STATIC / "widget.css"
+    _css = _STATIC / "nbplay.css"
 
     # Session routing (set by Session): the synth joins the bus as the
     # track's instrument so sequencers and clips play with its oscillator.
@@ -772,7 +772,7 @@ class SettingsWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "settings.js"
-    _css = _STATIC / "settings.css"
+    _css = _STATIC / "nbplay.css"
 
     sample_rate = traitlets.Int(44100).tag(sync=True)
     channels = traitlets.Int(1).tag(sync=True)
@@ -797,7 +797,7 @@ class MixerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "mixer.js"
-    _css = _STATIC / "mixer.css"
+    _css = _STATIC / "nbplay.css"
 
     # JSON-serialized list of channel dicts
     channels = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
@@ -1114,7 +1114,7 @@ class SequencerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "sequencer.js"
-    _css = _STATIC / "sequencer.css"
+    _css = _STATIC / "nbplay.css"
 
     # Timing / transport (the "SequencerBase" concerns)
     length = traitlets.Int(16).tag(sync=True)
@@ -1439,7 +1439,7 @@ class SamplerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "sampler.js"
-    _css = _STATIC / "sampler.css"
+    _css = _STATIC / "nbplay.css"
 
     # Sample info
     sample_name = traitlets.Unicode("(no sample)").tag(sync=True)
@@ -1979,7 +1979,7 @@ class TransportWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "transport.js"
-    _css = _STATIC / "transport.css"
+    _css = _STATIC / "nbplay.css"
 
     # Session routing (set by Session so the browser clock is shared)
     session_id = traitlets.Unicode("").tag(sync=True)
@@ -2079,7 +2079,7 @@ class TimelineWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "timeline.js"
-    _css = _STATIC / "timeline.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     bpm = traitlets.Float(120.0).tag(sync=True)
@@ -2527,7 +2527,7 @@ class LauncherWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "launcher.js"
-    _css = _STATIC / "launcher.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     bpm = traitlets.Float(120.0).tag(sync=True)
@@ -3108,7 +3108,7 @@ class KeyboardWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "keyboard.js"
-    _css = _STATIC / "keyboard.css"
+    _css = _STATIC / "nbplay.css"
 
     upper_octave = traitlets.Int(3).tag(sync=True)
     lower_octave = traitlets.Int(4).tag(sync=True)
@@ -3203,7 +3203,7 @@ class MidiKeyboardWidget(KeyboardWidget):
     """
 
     _esm = _STATIC / "midi_keyboard.js"
-    _css = _STATIC / "midi_keyboard.css"
+    _css = _STATIC / "nbplay.css"
 
     midi_port = traitlets.Unicode("").tag(sync=True)
     available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
@@ -3229,7 +3229,7 @@ class MidiOutputWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "midi_output.js"
-    _css = _STATIC / "midi_output.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     midi_port = traitlets.Unicode("").tag(sync=True)
@@ -3297,7 +3297,7 @@ class PadWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "pad.js"
-    _css = _STATIC / "pad.css"
+    _css = _STATIC / "nbplay.css"
 
     rows = traitlets.Int(4).tag(sync=True)
     cols = traitlets.Int(4).tag(sync=True)

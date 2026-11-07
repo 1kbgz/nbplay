@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}, zones = []) {
     async ({ opts, zones }) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sampler.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/sampler.js");
       const el = document.getElementById("root");

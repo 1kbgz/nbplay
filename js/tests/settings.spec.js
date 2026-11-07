@@ -5,7 +5,7 @@ test.describe("SettingsWidget", () => {
     await page.evaluate(async (overrides) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/settings.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/settings.js");
       const el = document.getElementById("root");
