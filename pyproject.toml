@@ -63,6 +63,8 @@ develop = [
     "pytest",
     "pytest-cov",
     "ruff",
+    "spaday[widget]>=0.13.1",
+    "transports>=0.12.1",
     "twine",
     "ty",
     "uv",
