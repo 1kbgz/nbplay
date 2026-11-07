@@ -28,6 +28,7 @@ Attributes
    nbplay.widget._PAD_MAX_COUNT
    nbplay.widget._TIMELINE_INPUTS
    nbplay.widget._CLIP_KINDS
+   nbplay.widget.THEMES
    nbplay.widget._LAUNCH_QUANTIZE
    nbplay.widget._SESSION_FORMAT
    nbplay.widget._SESSION_FORMAT_VERSION
@@ -48,6 +49,7 @@ Classes
    nbplay.widget.AudioClip
    nbplay.widget.TimelineTrack
    nbplay.widget.PadAction
+   nbplay.widget._Themed
    nbplay.widget.SynthWidget
    nbplay.widget.SettingsWidget
    nbplay.widget.MixerWidget
@@ -357,9 +359,32 @@ Module Contents
 
 .. py:function:: _normalize_sample_slices(slices, sample_length=0)
 
+.. py:data:: THEMES
+   :value: ('', 'light', 'dark', 'studio', 'flat', 'cube', 'one', 'grim', 'pro', 'fruit')
+
+
+.. py:class:: _Themed(*args: Any, **kwargs: Any)
+
+   Bases: :py:obj:`traitlets.HasTraits`
+
+
+   A widget with a ``theme`` trait.
+
+   ``theme`` names a theme set for the widget's own subtree (the browser
+   reflects it as ``data-nbplay-theme``). ``""`` follows the page, which in
+   Jupyter is the active JupyterLab theme; ``"light"`` and ``"dark"`` pin
+   the default theme's two sets; the rest are the shipped sets.
+
+
+   .. py:attribute:: theme
+
+
+   .. py:method:: _validate_theme(proposal)
+
+
 .. py:class:: SynthWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Interactive synthesizer widget for Jupyter environments.
@@ -415,9 +440,9 @@ Module Contents
 
 
 
-.. py:class:: SettingsWidget(*args: object, **kwargs: object)
+.. py:class:: SettingsWidget(*args: Any, **kwargs: Any)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Audio / MIDI configuration widget for Jupyter environments.
@@ -455,9 +480,9 @@ Module Contents
    .. py:attribute:: midi_event
 
 
-.. py:class:: MixerWidget(*args: object, **kwargs: object)
+.. py:class:: MixerWidget(*args: Any, **kwargs: Any)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Mixer console with per-channel faders, pan, mute/solo, and master fader.
@@ -706,7 +731,7 @@ Module Contents
 
 .. py:class:: SequencerWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Step sequencer widget with a grid-based pattern editor.
@@ -943,7 +968,7 @@ Module Contents
 
 .. py:class:: SamplerWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Sampler widget with waveform display, envelope, and trigger pads.
@@ -1268,7 +1293,7 @@ Module Contents
 
 .. py:class:: TransportWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Global transport controls: play/stop, BPM, time signature, bar/beat.
@@ -1376,7 +1401,7 @@ Module Contents
 
 .. py:class:: TimelineWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Multi-track clip timeline with browser recording controls.
@@ -1674,7 +1699,7 @@ Module Contents
 
 .. py:class:: LauncherWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Beats view: a clip launcher in the session-view style.
@@ -1962,7 +1987,7 @@ Module Contents
 
 .. py:class:: KeyboardWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Musical typing keyboard widget (Logic Pro style).
@@ -2101,9 +2126,9 @@ Module Contents
    .. py:attribute:: clock_bpm
 
 
-.. py:class:: MidiOutputWidget(*args: object, **kwargs: object)
+.. py:class:: MidiOutputWidget(*args: Any, **kwargs: Any)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    Send notes and control changes to a browser Web MIDI output port.
@@ -2183,7 +2208,7 @@ Module Contents
 
 .. py:class:: PadWidget(**kwargs)
 
-   Bases: :py:obj:`anywidget.AnyWidget`
+   Bases: :py:obj:`_Themed`, :py:obj:`anywidget.AnyWidget`
 
 
    On-screen trigger-pad grid.
@@ -2420,7 +2445,7 @@ Module Contents
    .. py:method:: __repr__()
 
 
-.. py:class:: Session(bpm=120.0, time_signature=(4, 4))
+.. py:class:: Session(bpm=120.0, time_signature=(4, 4), theme='')
 
    A collection of tracks with a shared transport and mixer.
 
@@ -2434,6 +2459,11 @@ Module Contents
 
    .. py:attribute:: _session_id
       :value: 'nbplay-00000000'
+
+
+
+   .. py:attribute:: _theme
+      :value: ''
 
 
 
@@ -2461,6 +2491,11 @@ Module Contents
 
 
    .. py:attribute:: patterns
+
+
+   .. py:property:: theme
+
+      Theme set applied to every widget in the session (see ``THEMES``).
 
 
    .. py:attribute:: history
@@ -2641,6 +2676,9 @@ Module Contents
 
       Rebuild a session from :meth:`to_dict` output plus binary resources.
 
+
+
+   .. py:method:: _widgets()
 
 
    .. py:method:: _remove_launcher_track(index)

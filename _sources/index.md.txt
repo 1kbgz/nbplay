@@ -56,7 +56,7 @@ silent until the browser provides those APIs.
 ```python
 import nbplay as nb
 
-session = nb.Session(bpm=120)
+session = nb.Session(bpm=120, theme="studio")   # or "flat", "cube", "one", "grim", "pro", "fruit"; "" follows Jupyter
 drums = session.add_track("Drums", nb.SequencerWidget(num_voices=2), nb.SamplerWidget())
 vocals = session.add_track("Vocals", armed=True)      # microphone lane
 keys = session.add_track("Keys", input="midi", armed=True)  # records note events

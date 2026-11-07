@@ -1438,9 +1438,34 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="n">THEMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"light"</span><span class="p">,</span> <span class="s2">"dark"</span><span class="p">,</span> <span class="s2">"studio"</span><span class="p">,</span> <span class="s2">"flat"</span><span class="p">,</span> <span class="s2">"cube"</span><span class="p">,</span> <span class="s2">"one"</span><span class="p">,</span> <span class="s2">"grim"</span><span class="p">,</span> <span class="s2">"pro"</span><span class="p">,</span> <span class="s2">"fruit"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="_Themed">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._Themed">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Themed</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">HasTraits</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A widget with a ``theme`` trait.</span>
+
+<span class="sd">    ``theme`` names a theme set for the widget's own subtree (the browser</span>
+<span class="sd">    reflects it as ``data-nbplay-theme``). ``""`` follows the page, which in</span>
+<span class="sd">    Jupyter is the active JupyterLab theme; ``"light"`` and ``"dark"`` pin</span>
+<span class="sd">    the default theme's two sets; the rest are the shipped sets.</span>
+<span class="sd">    """</span>
+
+    <span class="n">theme</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@traitlets</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proposal</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">proposal</span><span class="p">[</span><span class="s2">"value"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THEMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">TraitError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"theme must be one of </span><span class="si">{</span><span class="n">THEMES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+
 <div class="viewcode-block" id="SynthWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SynthWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SynthWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Interactive synthesizer widget for Jupyter environments.</span>
 
 <span class="sd">    Args:</span>
@@ -1451,7 +1476,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"widget.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"widget.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="c1"># Session routing (set by Session): the synth joins the bus as the</span>
     <span class="c1"># track's instrument so sequencers and clips play with its oscillator.</span>
@@ -1521,7 +1546,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="SettingsWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SettingsWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SettingsWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SettingsWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Audio / MIDI configuration widget for Jupyter environments.</span>
 
 <span class="sd">    Exposes sample rate, channel count, and buffer size selectors for the</span>
@@ -1529,7 +1554,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"settings.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"settings.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">44100</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">channels</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1546,7 +1571,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MixerWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MixerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MixerWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Mixer console with per-channel faders, pan, mute/solo, and master fader.</span>
 
 <span class="sd">    Channels are synced as a JSON list of dicts with keys</span>
@@ -1557,7 +1582,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"mixer.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"mixer.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="c1"># JSON-serialized list of channel dicts</span>
     <span class="n">channels</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">trait</span><span class="o">=</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Dict</span><span class="p">(),</span> <span class="n">default_value</span><span class="o">=</span><span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1954,7 +1979,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="SequencerWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SequencerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SequencerWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Step sequencer widget with a grid-based pattern editor.</span>
 
 <span class="sd">    Supports monophonic (``num_voices=1``) and polyphonic</span>
@@ -1967,7 +1992,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"sequencer.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"sequencer.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="c1"># Timing / transport (the "SequencerBase" concerns)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2337,7 +2362,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="SamplerWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SamplerWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SamplerWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Sampler widget with waveform display, envelope, and trigger pads.</span>
 
 <span class="sd">    Sample data is synced as binary Float32Array bytes for</span>
@@ -2346,7 +2371,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"sampler.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"sampler.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="c1"># Sample info</span>
     <span class="n">sample_name</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">"(no sample)"</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2745,7 +2770,7 @@ window.runMermaid = runMermaid;</script>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">".wav"</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_wav_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">soundfile</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sf</span>  <span class="c1"># ty: ignore[unresolved-import]</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">soundfile</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sf</span>  <span class="c1"># ty: ignore</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"MP3/OGG loading requires optional package 'soundfile'"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"float32"</span><span class="p">,</span> <span class="n">always_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2962,7 +2987,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="TransportWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TransportWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransportWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Global transport controls: play/stop, BPM, time signature, bar/beat.</span>
 
 <span class="sd">    Used as the master clock for a ``Session``. In the browser the transport</span>
@@ -2976,7 +3001,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"transport.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"transport.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="c1"># Session routing (set by Session so the browser clock is shared)</span>
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -3083,7 +3108,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="TimelineWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TimelineWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TimelineWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Multi-track clip timeline with browser recording controls.</span>
 
 <span class="sd">    Clips are synced as JSON metadata. Browser-recorded audio is kept</span>
@@ -3100,7 +3125,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"timeline.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"timeline.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">bpm</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">120.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -3598,7 +3623,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="LauncherWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LauncherWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LauncherWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Beats view: a clip launcher in the session-view style.</span>
 
 <span class="sd">    Tracks are rows, scenes are columns, and each filled slot holds a step</span>
@@ -3611,7 +3636,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"launcher.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"launcher.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">bpm</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mf">120.0</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -4056,6 +4081,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"timeline"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">_widget_state</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="n">_TIMELINE_STATE</span><span class="p">),</span> <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">tracks</span><span class="p">),</span> <span class="s2">"clips"</span><span class="p">:</span> <span class="n">clips</span><span class="p">},</span>
         <span class="s2">"launcher"</span><span class="p">:</span> <span class="n">_widget_state</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="p">(</span><span class="s2">"quantize"</span><span class="p">,</span> <span class="s2">"scenes"</span><span class="p">,</span> <span class="s2">"slots"</span><span class="p">)),</span>
         <span class="s2">"patterns"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">patterns</span><span class="p">),</span>
+        <span class="s2">"theme"</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">theme</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">resources</span><span class="p">)</span> <span class="k">if</span> <span class="n">resources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span></div>
 
@@ -4072,6 +4098,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">session</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
         <span class="n">bpm</span><span class="o">=</span><span class="n">transport</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bpm"</span><span class="p">,</span> <span class="mf">120.0</span><span class="p">),</span>
         <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="n">transport</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">transport</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"time_signature_den"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+        <span class="n">theme</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"loop_start_bar"</span><span class="p">,</span> <span class="s2">"loop_end_bar"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">transport</span><span class="p">:</span>
@@ -4258,7 +4285,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="KeyboardWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">KeyboardWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KeyboardWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Musical typing keyboard widget (Logic Pro style).</span>
 
 <span class="sd">    4-row QWERTY layout across two independent octave halves.</span>
@@ -4276,7 +4303,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"keyboard.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"keyboard.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">upper_octave</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">lower_octave</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -4386,7 +4413,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_keyboard.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_keyboard.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">midi_port</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">available_midi_ports</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(),</span> <span class="p">[])</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -4404,7 +4431,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="MidiOutputWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Send notes and control changes to a browser Web MIDI output port.</span>
 
 <span class="sd">    With a ``session_id`` the widget forwards every note the session plays</span>
@@ -4415,7 +4442,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_output.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"midi_output.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">session_id</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">midi_port</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Unicode</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -4486,7 +4513,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="PadWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PadWidget</span><span class="p">(</span><span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PadWidget</span><span class="p">(</span><span class="n">_Themed</span><span class="p">,</span> <span class="n">anywidget</span><span class="o">.</span><span class="n">AnyWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""On-screen trigger-pad grid.</span>
 
 <span class="sd">    A grid of clickable, velocity-sensitive pads that send MIDI notes</span>
@@ -4507,7 +4534,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="n">_esm</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"pad.js"</span>
-    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"pad.css"</span>
+    <span class="n">_css</span> <span class="o">=</span> <span class="n">_STATIC</span> <span class="o">/</span> <span class="s2">"nbplay.css"</span>
 
     <span class="n">rows</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -4862,8 +4889,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        time_signature: ``(numerator, denominator)`` tuple.</span>
 <span class="sd">    """</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">time_signature</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">theme</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"nbplay-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_theme</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span>
             <span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span><span class="p">,</span>
             <span class="n">bpm</span><span class="o">=</span><span class="n">bpm</span><span class="p">,</span>
@@ -4903,6 +4931,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Named patterns for the tracking view: name -&gt; {voices_data, step_duration}.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="n">theme</span>
         <span class="c1"># Undo/redo over every session widget's state; new tracks attach their</span>
         <span class="c1"># sequencer and sound source as they are added.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
@@ -5049,6 +5078,9 @@ window.runMermaid = runMermaid;</script>
             <span class="n">sound_source</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sound_source</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">):</span>
             <span class="n">sound_source</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="n">channel_idx</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">_Themed</span><span class="p">):</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theme</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">input</span> <span class="o">=</span> <span class="s2">"channel"</span> <span class="k">if</span> <span class="p">(</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sound_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"microphone"</span>
@@ -5335,6 +5367,30 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Rebuild a session from :meth:`to_dict` output plus binary resources."""</span>
         <span class="k">return</span> <span class="n">_session_from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">resources</span> <span class="ow">or</span> <span class="p">{})</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">theme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Theme set applied to every widget in the session (see ``THEMES``)."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theme</span>
+
+    <span class="nd">@theme</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">theme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THEMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"theme must be one of </span><span class="si">{</span><span class="n">THEMES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_theme</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">():</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Session._widgets">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._widgets">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">_Themed</span><span class="p">):</span>
+                    <span class="n">widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">widgets</span></div>
 
 
 <div class="viewcode-block" id="Session._remove_launcher_track">

@@ -404,6 +404,18 @@
     <a href="#nbplay.widget._normalize_sample_slices">_normalize_sample_slices()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.THEMES">THEMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget._Themed">_Themed</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget._Themed.theme">_Themed.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget._Themed._validate_theme">_Themed._validate_theme()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SynthWidget">SynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1655,6 +1667,9 @@
     <a href="#nbplay.widget.Session._session_id">Session._session_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._theme">Session._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.transport">Session.transport</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1677,6 +1692,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.patterns">Session.patterns</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.theme">Session.theme</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.history">Session.history</a>
@@ -1757,6 +1775,9 @@
     <a href="#nbplay.widget.Session.from_dict">Session.from_dict()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._widgets">Session._widgets()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session._remove_launcher_track">Session._remove_launcher_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1813,31 +1834,34 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._CLIP_KINDS" title="nbplay.widget._CLIP_KINDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_CLIP_KINDS</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._LAUNCH_QUANTIZE" title="nbplay.widget._LAUNCH_QUANTIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_LAUNCH_QUANTIZE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.THEMES" title="nbplay.widget.THEMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">THEMES</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT" title="nbplay.widget._SESSION_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._LAUNCH_QUANTIZE" title="nbplay.widget._LAUNCH_QUANTIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_LAUNCH_QUANTIZE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT_VERSION" title="nbplay.widget._SESSION_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT_VERSION</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT" title="nbplay.widget._SESSION_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SEQUENCER_STATE" title="nbplay.widget._SEQUENCER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SEQUENCER_STATE</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT_VERSION" title="nbplay.widget._SESSION_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT_VERSION</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SYNTH_STATE" title="nbplay.widget._SYNTH_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SYNTH_STATE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SEQUENCER_STATE" title="nbplay.widget._SEQUENCER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SEQUENCER_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_STATE" title="nbplay.widget._SAMPLER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_STATE</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SYNTH_STATE" title="nbplay.widget._SYNTH_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SYNTH_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_PAD_STATE" title="nbplay.widget._SAMPLER_PAD_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_PAD_STATE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_STATE" title="nbplay.widget._SAMPLER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._TIMELINE_STATE" title="nbplay.widget._TIMELINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_STATE</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_PAD_STATE" title="nbplay.widget._SAMPLER_PAD_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_PAD_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._TRANSPORT_STATE" title="nbplay.widget._TRANSPORT_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TRANSPORT_STATE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._TIMELINE_STATE" title="nbplay.widget._TIMELINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_STATE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._TRANSPORT_STATE" title="nbplay.widget._TRANSPORT_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TRANSPORT_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -1859,52 +1883,55 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.PadAction" title="nbplay.widget.PadAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadAction</span></code></a></p></td>
 <td><p>Validated pad action descriptor.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SynthWidget" title="nbplay.widget.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a></p></td>
+<td><p>A widget with a <code class="docutils literal notranslate"><span class="pre">theme</span></code> trait.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SynthWidget" title="nbplay.widget.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
 <td><p>Interactive synthesizer widget for Jupyter environments.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SettingsWidget" title="nbplay.widget.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SettingsWidget" title="nbplay.widget.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
 <td><p>Audio / MIDI configuration widget for Jupyter environments.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MixerWidget" title="nbplay.widget.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MixerWidget" title="nbplay.widget.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
 <td><p>Mixer console with per-channel faders, pan, mute/solo, and master fader.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.NoteComposer" title="nbplay.widget.NoteComposer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteComposer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.NoteComposer" title="nbplay.widget.NoteComposer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteComposer</span></code></a></p></td>
 <td><p>A single voice's per-step note/velocity/duration assignments.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
 <td><p>Step sequencer widget with a grid-based pattern editor.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
 <td><p>Sampler widget with waveform display, envelope, and trigger pads.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.TransportWidget" title="nbplay.widget.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.TransportWidget" title="nbplay.widget.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>Global transport controls: play/stop, BPM, time signature, bar/beat.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.TimelineWidget" title="nbplay.widget.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.TimelineWidget" title="nbplay.widget.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
 <td><p>Multi-track clip timeline with browser recording controls.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.LauncherWidget" title="nbplay.widget.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.LauncherWidget" title="nbplay.widget.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
 <td><p>Beats view: a clip launcher in the session-view style.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.KeyboardRoute" title="nbplay.widget.KeyboardRoute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardRoute</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.KeyboardRoute" title="nbplay.widget.KeyboardRoute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardRoute</span></code></a></p></td>
 <td><p>Validated route descriptor for keyboard → sampler mapping.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.KeyboardWidget" title="nbplay.widget.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.KeyboardWidget" title="nbplay.widget.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
 <td><p>Musical typing keyboard widget (Logic Pro style).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget" title="nbplay.widget.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget" title="nbplay.widget.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
 <td><p>Browser Web MIDI keyboard input widget.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MidiOutputWidget" title="nbplay.widget.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MidiOutputWidget" title="nbplay.widget.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
 <td><p>Send notes and control changes to a browser Web MIDI output port.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.PadWidget" title="nbplay.widget.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.PadWidget" title="nbplay.widget.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
 <td><p>On-screen trigger-pad grid.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional instrument.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>A collection of tracks with a shared transport and mixer.</p></td>
 </tr>
 </tbody>
@@ -2471,10 +2498,36 @@ API in the browser so latency stays minimal.</p>
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_normalize_sample_slices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_normalize_sample_slices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._normalize_sample_slices" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.widget.THEMES">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">THEMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('',</span> <span class="pre">'light',</span> <span class="pre">'dark',</span> <span class="pre">'studio',</span> <span class="pre">'flat',</span> <span class="pre">'cube',</span> <span class="pre">'one',</span> <span class="pre">'grim',</span> <span class="pre">'pro',</span> <span class="pre">'fruit')</span></em><a class="headerlink" href="#nbplay.widget.THEMES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.widget._Themed">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_Themed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_Themed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._Themed" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">traitlets.HasTraits</span></code></p>
+<p>A widget with a <code class="docutils literal notranslate"><span class="pre">theme</span></code> trait.</p>
+<p><code class="docutils literal notranslate"><span class="pre">theme</span></code> names a theme set for the widget’s own subtree (the browser
+reflects it as <code class="docutils literal notranslate"><span class="pre">data-nbplay-theme</span></code>). <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> follows the page, which in
+Jupyter is the active JupyterLab theme; <code class="docutils literal notranslate"><span class="pre">&quot;light&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;dark&quot;</span></code> pin
+the default theme’s two sets; the rest are the shipped sets.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget._Themed.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><a class="headerlink" href="#nbplay.widget._Themed.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget._Themed._validate_theme">
+<span class="sig-name descname"><span class="pre">_validate_theme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proposal</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.widget._Themed._validate_theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.SynthWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SynthWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SynthWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SynthWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Interactive synthesizer widget for Jupyter environments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2558,8 +2611,8 @@ the result as a binary Float32Array to the frontend.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.SettingsWidget">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SettingsWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SettingsWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SettingsWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SettingsWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SettingsWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SettingsWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Audio / MIDI configuration widget for Jupyter environments.</p>
 <p>Exposes sample rate, channel count, and buffer size selectors for the
 audio output, and a Web MIDI port selector with a live activity monitor.</p>
@@ -2613,8 +2666,8 @@ audio output, and a Web MIDI port selector with a live activity monitor.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.MixerWidget">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MixerWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MixerWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MixerWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MixerWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Mixer console with per-channel faders, pan, mute/solo, and master fader.</p>
 <p>Channels are synced as a JSON list of dicts with keys
 <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">pan</span></code>, <code class="docutils literal notranslate"><span class="pre">mute</span></code>, <code class="docutils literal notranslate"><span class="pre">solo</span></code>.</p>
@@ -2922,7 +2975,7 @@ has <em>N</em> composers sharing the same step clock.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SequencerWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Step sequencer widget with a grid-based pattern editor.</p>
 <p>Supports monophonic (<code class="docutils literal notranslate"><span class="pre">num_voices=1</span></code>) and polyphonic
 (<code class="docutils literal notranslate"><span class="pre">num_voices=N</span></code>) modes. Internally each voice is a
@@ -3244,7 +3297,7 @@ tempo is applied to <code class="docutils literal notranslate"><span class="pre"
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">SamplerWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SamplerWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SamplerWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Sampler widget with waveform display, envelope, and trigger pads.</p>
 <p>Sample data is synced as binary Float32Array bytes for
 waveform visualisation. Envelope parameters are synced
@@ -3702,7 +3755,7 @@ is not installed, or if WAV format is invalid.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">TransportWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Global transport controls: play/stop, BPM, time signature, bar/beat.</p>
 <p>Used as the master clock for a <code class="docutils literal notranslate"><span class="pre">Session</span></code>. In the browser the transport
 drives the shared session clock on <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[session_id]</span></code>;
@@ -3847,7 +3900,7 @@ trait, and assigning those traits from Python issues the same command.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">TimelineWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Multi-track clip timeline with browser recording controls.</p>
 <p>Clips are synced as JSON metadata. Browser-recorded audio is kept
 as an object URL in the frontend for immediate playback. Use
@@ -4219,7 +4272,7 @@ omitted the browser measures the audio and fills it in.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.LauncherWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">LauncherWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#LauncherWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.LauncherWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Beats view: a clip launcher in the session-view style.</p>
 <p>Tracks are rows, scenes are columns, and each filled slot holds a step
 pattern in the same <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> shape as <a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a>.
@@ -4597,7 +4650,7 @@ that slot. Returns a function that removes the binding.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.KeyboardWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">KeyboardWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#KeyboardWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.KeyboardWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Musical typing keyboard widget (Logic Pro style).</p>
 <p>4-row QWERTY layout across two independent octave halves.
 Triggers audio via Web Audio and emits note events for
@@ -4790,8 +4843,8 @@ selected browser MIDI input device.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.MidiOutputWidget">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MidiOutputWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MidiOutputWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiOutputWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiOutputWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>Send notes and control changes to a browser Web MIDI output port.</p>
 <p>With a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> the widget forwards every note the session plays
 (keyboards, sequencers, launcher slots, MIDI clips) to the selected
@@ -4890,7 +4943,7 @@ only messages sent from Python go out.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.PadWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">PadWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#PadWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.PadWidget" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget._Themed" title="nbplay.widget._Themed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_Themed</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code></p>
 <p>On-screen trigger-pad grid.</p>
 <p>A grid of clickable, velocity-sensitive pads that send MIDI notes
 through the session bus, using the same <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>
@@ -5212,7 +5265,7 @@ sequencer have nothing to link.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.widget.Session">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bpm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bpm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session" title="Link to this definition">¶</a></dt>
 <dd><p>A collection of tracks with a shared transport and mixer.</p>
 <p>Manages <code class="docutils literal notranslate"><span class="pre">traitlets.link</span></code> connections between the transport
 and all track sequencers, and assigns mixer channels for
@@ -5228,6 +5281,11 @@ audio routing.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session._session_id">
 <span class="sig-name descname"><span class="pre">_session_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-00000000'</span></em><a class="headerlink" href="#nbplay.widget.Session._session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.Session._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.widget.Session._theme" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -5269,6 +5327,12 @@ audio routing.</p>
 <dt class="sig sig-object py" id="nbplay.widget.Session.patterns">
 <span class="sig-name descname"><span class="pre">patterns</span></span><a class="headerlink" href="#nbplay.widget.Session.patterns" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.Session.theme">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">theme</span></span><a class="headerlink" href="#nbplay.widget.Session.theme" title="Link to this definition">¶</a></dt>
+<dd><p>Theme set applied to every widget in the session (see <code class="docutils literal notranslate"><span class="pre">THEMES</span></code>).</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session.history">
@@ -5465,6 +5529,11 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.from_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Rebuild a session from <a class="reference internal" href="#nbplay.widget.Session.to_dict" title="nbplay.widget.Session.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> output plus binary resources.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._widgets">
+<span class="sig-name descname"><span class="pre">_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._widgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._widgets" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session._remove_launcher_track">
@@ -5762,6 +5831,18 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget._normalize_sample_slices">_normalize_sample_slices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.THEMES">THEMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget._Themed">_Themed</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget._Themed.theme">_Themed.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget._Themed._validate_theme">_Themed._validate_theme()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SynthWidget">SynthWidget</a>
@@ -7015,6 +7096,9 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
     <a href="#nbplay.widget.Session._session_id">Session._session_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._theme">Session._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.transport">Session.transport</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -7037,6 +7121,9 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.patterns">Session.patterns</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.theme">Session.theme</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.history">Session.history</a>
@@ -7115,6 +7202,9 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.from_dict">Session.from_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._widgets">Session._widgets()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session._remove_launcher_track">Session._remove_launcher_track()</a>

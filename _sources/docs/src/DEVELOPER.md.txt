@@ -39,20 +39,20 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 
 ## Repository map
 
-| Path                                              | Responsibility                                                                                     |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                  |
-| `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                      |
-| `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O. |
-| `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                              |
-| `js/src/ts/`                                      | Browser anywidget renderers, one standalone ESM entry per widget.                                  |
-| `js/src/css/`                                     | One scoped stylesheet per widget, processed by lightningcss.                                       |
-| `js/src/rust/`                                    | wasm-bindgen browser bindings around selected Rust functionality.                                  |
-| `js/tests/`                                       | Playwright browser tests using a mock anywidget model and mock Web Audio context.                  |
-| `nbplay/tests/test_all.py`                        | Python, Rust-extension, widget, session, and example-notebook regression tests.                    |
-| `examples/`                                       | Executable tutorial notebooks used by users and docs builds.                                       |
-| `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                        |
-| `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration.                                          |
+| Path                                              | Responsibility                                                                                             |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                          |
+| `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                              |
+| `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.         |
+| `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                                      |
+| `js/src/ts/`                                      | Browser frontends: one anywidget adapter per widget, shared engines, and `components/` (Lit elements).     |
+| `js/src/css/`                                     | `components/` (tokens plus one stylesheet per element), theme sets, bundled by lightningcss into one file. |
+| `js/src/rust/`                                    | wasm-bindgen browser bindings around selected Rust functionality.                                          |
+| `js/tests/`                                       | Playwright browser tests using a mock anywidget model and mock Web Audio context.                          |
+| `nbplay/tests/test_all.py`                        | Python, Rust-extension, widget, session, and example-notebook regression tests.                            |
+| `examples/`                                       | Executable tutorial notebooks used by users and docs builds.                                               |
+| `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                                |
+| `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration.                                                  |
 
 Generated assets are copied into `nbplay/static/` and `nbplay/extension/` by the
 JavaScript build. These folders are ignored in Git but included in built wheels
@@ -128,6 +128,7 @@ the browser.
 ### JavaScript and frontend build
 
 - TypeScript with strict checking and ES modules.
+- Lit 3 for the light-DOM elements under `js/src/ts/components/`.
 - esbuild for widget and package bundling.
 - lightningcss for CSS bundling and modern CSS processing.
 - cpy for copying built assets into Python package folders.
@@ -152,10 +153,11 @@ the browser.
 
 ## Python widget layer
 
-All Python widget classes live in `nbplay/widget.py`. The `_esm` and `_css`
-attributes point to built files under `nbplay/static/`. The JavaScript build must
-run before a source checkout can render widgets from Python because those static
-files are generated.
+All Python widget classes live in `nbplay/widget.py`. `_esm` points to the
+widget's built module under `nbplay/static/` and `_css` to the one shared
+stylesheet, `nbplay/static/nbplay.css`. The JavaScript build must run before a
+source checkout can render widgets from Python because those static files are
+generated.
 
 ### Shared Python helpers
 
@@ -176,20 +178,20 @@ files are generated.
 
 ### Widget trait summary
 
-| Python class         | Browser entry      | CSS entry           | Key synced traits                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------- | ------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SynthWidget`        | `widget.js`        | `widget.css`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform`                                                                                                                                                                                                                                                                                                                                                                             |
-| `SettingsWidget`     | `settings.js`      | `settings.css`      | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event`                                                                                                                                                                                                                                                                                                                                                      |
-| `MixerWidget`        | `mixer.js`         | `mixer.css`         | `channels`, `master_gain`, `master_effects`, `session_id`                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `SequencerWidget`    | `sequencer.js`     | `sequencer.css`     | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data`                                                                                                                                                                                                  |
-| `SamplerWidget`      | `sampler.js`       | `sampler.css`       | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request`                                                                                                                                                  |
-| `TransportWidget`    | `transport.js`     | `transport.css`     | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`                                                                                                                                                                                                                                                                     |
-| `TimelineWidget`     | `timeline.js`      | `timeline.css`      | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
-| `LauncherWidget`     | `launcher.js`      | `launcher.css`      | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request`                                                                                                                                                                                                                                                                        |
-| `KeyboardWidget`     | `keyboard.js`      | `keyboard.css`      | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                                                                                  |
-| `MidiKeyboardWidget` | `midi_keyboard.js` | `midi_keyboard.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change`                                                                                                                                                                                                                                                                                                                                                                                   |
-| `MidiOutputWidget`   | `midi_output.js`   | `midi_output.css`   | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request`                                                                                                                                                                                                                                                                                                                                                                    |
-| `PadWidget`          | `pad.js`           | `pad.css`           | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                             |
+| Python class         | Browser entry      | CSS entry    | Key synced traits                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------- | ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SynthWidget`        | `widget.js`        | `nbplay.css` | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform`                                                                                                                                                                                                                                                                                                                                                                             |
+| `SettingsWidget`     | `settings.js`      | `nbplay.css` | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event`                                                                                                                                                                                                                                                                                                                                                      |
+| `MixerWidget`        | `mixer.js`         | `nbplay.css` | `channels`, `master_gain`, `master_effects`, `session_id`                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `SequencerWidget`    | `sequencer.js`     | `nbplay.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data`                                                                                                                                                                                                  |
+| `SamplerWidget`      | `sampler.js`       | `nbplay.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request`                                                                                                                                                  |
+| `TransportWidget`    | `transport.js`     | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`                                                                                                                                                                                                                                                                     |
+| `TimelineWidget`     | `timeline.js`      | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
+| `LauncherWidget`     | `launcher.js`      | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request`                                                                                                                                                                                                                                                                        |
+| `KeyboardWidget`     | `keyboard.js`      | `nbplay.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                                                                                  |
+| `MidiKeyboardWidget` | `midi_keyboard.js` | `nbplay.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change`                                                                                                                                                                                                                                                                                                                                                                                   |
+| `MidiOutputWidget`   | `midi_output.js`   | `nbplay.css` | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request`                                                                                                                                                                                                                                                                                                                                                                    |
+| `PadWidget`          | `pad.js`           | `nbplay.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                             |
 
 ### Non-rendered Python orchestration types
 
@@ -294,18 +296,51 @@ from `js/src/ts/index.ts` and re-exports the important bindings for consumers.
 
 ## TypeScript widget architecture
 
-Every browser widget file in `js/src/ts/` exports the anywidget shape:
+The browser side has two layers. Elements under `js/src/ts/components/` are Lit
+3 classes rendered into the light DOM (no shadow root), registered through
+`define(tag, cls)`, which skips a tag that another widget bundle already
+defined. They never touch the anywidget model: inputs are properties (scalars
+also reflect kebab-case attributes), and outputs are events. Primitives such as
+`nbplay-slider`, `nbplay-dial`, `nbplay-fader` and `nbplay-meter` emit `input`
+and `change` with `detail.value`; composites such as `nbplay-step-grid`,
+`nbplay-strip`, `nbplay-lane` and `nbplay-launcher-grid` emit `change` with
+structured detail and named intents (`nbplay-seek`, `nbplay-launch`, ...); and
+each widget is one instrument element (`nbplay-transport`, `nbplay-mixer`,
+`nbplay-timeline`, ...) that owns its audio engine, session bus binding, Web
+MIDI or recording, and emits `nbplay-set` (`{values}`, configuration the user
+edited), `nbplay-status` (`{values, save}`, browser-derived state such as play
+position) and `nbplay-request` (`{name}`, a nonce request such as undo). Kernel
+commands arrive through `element.command(cmd)`.
+
+Every widget file in `js/src/ts/` is then an adapter:
 
 ```ts
 function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
-  // build DOM, attach event listeners, sync model state
-  return () => {
-    // cleanup audio, timers, global listeners, and bus registrations
-  };
+  const node = document.createElement("nbplay-mixer") as NbplayMixer;
+  return bindInstrument(model, el, node, {
+    config: { channels: "channels", master_gain: "masterGain", session_id: "sessionId" },
+    status: {},
+    command: true,
+    onDisconnect: () => node.teardown(),
+  });
 }
 
 export default { render };
 ```
+
+`bindInstrument` in `js/src/ts/adapter.ts` writes `config` traits into
+properties, mirrors `nbplay-status` values into the model (saving only when
+`save` is set), saves `nbplay-set` values, forwards `nbplay-request` names as
+nonce traits, calls `node.command()` for the nonced `command` trait, and stops
+the element when the kernel disconnects. An element never emits status during
+construction or its first property assignment, which keeps the old rule that
+render must not call `save_changes()`. Non-visual engines the elements share
+live beside them: `voices.ts` (fallback sine voices), `midi_access.ts` (Web
+MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
+`sampler_engine.ts` (sample playback).
+
+The component gallery, `js/dist/gallery.html` after a build, renders every
+element with a property panel, an event log and a theme switch.
 
 The shared `AnyModel` type and helpers are in `js/src/ts/helpers.ts`:
 
@@ -382,8 +417,8 @@ Render order can vary in notebooks. SamplerWidget handles this by listening for
 
 ### SynthWidget
 
-Python class: `SynthWidget`. Browser file: `js/src/ts/widget.ts`. CSS file:
-`js/src/css/widget.css`.
+Python class: `SynthWidget`. Adapter: `js/src/ts/widget.ts`. Element:
+`js/src/ts/components/synth.ts`.
 
 SynthWidget exposes oscillator type, frequency, amplitude, sample rate, play
 state, and a binary waveform preview. Python renders the preview through the
@@ -412,8 +447,8 @@ change, and on `nbplay-bus-ready` when the mixer renders later.
 
 ### SettingsWidget
 
-Python class: `SettingsWidget`. Browser file: `js/src/ts/settings.ts`. CSS
-file: `js/src/css/settings.css`.
+Python class: `SettingsWidget`. Adapter: `js/src/ts/settings.ts`. Element:
+`js/src/ts/components/settings.ts`.
 
 SettingsWidget is a browser configuration panel for sample rate, channel count,
 buffer size, audio device label, MIDI port, available MIDI ports, and raw MIDI
@@ -429,8 +464,8 @@ monitoring surface for user configuration.
 
 ### MixerWidget
 
-Python class: `MixerWidget`. Browser file: `js/src/ts/mixer.ts`. CSS file:
-`js/src/css/mixer.css`.
+Python class: `MixerWidget`. Adapter: `js/src/ts/mixer.ts`. Element:
+`js/src/ts/components/mixer.ts`.
 
 MixerWidget owns a list of channel dictionaries with `name`, `gain`, `pan`,
 `mute`, `solo`, and optional browser `effects`, plus `master_gain` and
@@ -501,8 +536,8 @@ writes a `data-peak` attribute on each strip.
 
 ### SequencerWidget
 
-Python class: `SequencerWidget`. Browser file: `js/src/ts/sequencer.ts`. CSS
-file: `js/src/css/sequencer.css`.
+Python class: `SequencerWidget`. Adapter: `js/src/ts/sequencer.ts`. Element:
+`js/src/ts/components/sequencer.ts`.
 
 SequencerWidget models a pattern grid. Python owns one `NoteComposer` per voice
 and syncs them as `voices_data`. The grid can be configured by absolute length
@@ -544,8 +579,8 @@ tests.
 
 ### SamplerWidget
 
-Python class: `SamplerWidget`. Browser file: `js/src/ts/sampler.ts`. CSS file:
-`js/src/css/sampler.css`.
+Python class: `SamplerWidget`. Adapter: `js/src/ts/sampler.ts`. Element:
+`js/src/ts/components/sampler.ts`.
 
 SamplerWidget displays sample metadata, waveform bytes, ADSR controls, max
 voices, pad count, and per-pad MIDI notes/velocities/actions. Raw mono PCM is
@@ -603,8 +638,8 @@ The transport's play state and position are status. The browser clock writes `is
 
 ### TransportWidget
 
-Python class: `TransportWidget`. Browser file: `js/src/ts/transport.ts`. CSS
-file: `js/src/css/transport.css`.
+Python class: `TransportWidget`. Adapter: `js/src/ts/transport.ts`. Element:
+`js/src/ts/components/transport.ts`.
 
 TransportWidget is the global play/stop and tempo surface. It syncs BPM, play
 state, time signature, bar/beat position, and loop range. In a `Session`, tracks
@@ -631,8 +666,8 @@ stop, and seek the whole session.
 
 ### TimelineWidget
 
-Python class: `TimelineWidget`. Browser file: `js/src/ts/timeline.ts`. CSS
-file: `js/src/css/timeline.css`.
+Python class: `TimelineWidget`. Adapter: `js/src/ts/timeline.ts`. Element:
+`js/src/ts/components/timeline.ts`.
 
 TimelineWidget is the tracking view: multitrack clip lanes and the browser
 recorder. Python owns validated `TimelineTrack` and `AudioClip` metadata
@@ -699,8 +734,8 @@ the timeline reaches the validated maximum length.
 
 ### LauncherWidget
 
-Python class: `LauncherWidget`. Browser file: `js/src/ts/launcher.ts`. CSS
-file: `js/src/css/launcher.css`.
+Python class: `LauncherWidget`. Adapter: `js/src/ts/launcher.ts`. Element:
+`js/src/ts/components/launcher.ts`.
 
 LauncherWidget is the beats view: a clip-launcher grid with tracks as rows and
 scenes as columns. Each filled slot holds a pattern in the sequencer's
@@ -738,8 +773,8 @@ captured by timeline lanes with channel-tap inputs.
 
 ### KeyboardWidget
 
-Python class: `KeyboardWidget`. Browser file: `js/src/ts/keyboard.ts`. CSS
-file: `js/src/css/keyboard.css`.
+Python class: `KeyboardWidget`. Adapter: `js/src/ts/keyboard.ts`. Element:
+`js/src/ts/components/keyboard.ts`.
 
 KeyboardWidget is a four-row musical typing keyboard. The upper zone maps number
 row sharps and QWERTY-row naturals; the lower zone maps ASDF-row sharps and
@@ -766,8 +801,8 @@ dictionary form through `sampler_routing`.
 
 ### MidiKeyboardWidget
 
-Python class: `MidiKeyboardWidget`. Browser file: `js/src/ts/midi_keyboard.ts`.
-CSS file: `js/src/css/midi_keyboard.css`.
+Python class: `MidiKeyboardWidget`. Adapter: `js/src/ts/midi_keyboard.ts`.
+Element: `js/src/ts/components/midi-keyboard.ts`.
 
 MidiKeyboardWidget subclasses KeyboardWidget on the Python side so it shares the
 sequencer and sampler connection API. Its browser implementation is separate
@@ -797,8 +832,8 @@ The session can lead or follow external MIDI clock. As leader, `MidiOutputWidget
 
 ### PadWidget
 
-Python class: `PadWidget`. Browser file: `js/src/ts/pad.ts`.
-CSS file: `js/src/css/pad.css`.
+Python class: `PadWidget`. Adapter: `js/src/ts/pad.ts`.
+Element: `js/src/ts/components/pads.ts`.
 
 PadWidget renders an on-screen trigger grid with per-pad MIDI notes, velocities,
 and shared `pad_actions`. It uses the same `sampler_routing` and `KeyboardRoute`
@@ -813,19 +848,30 @@ future external controller layouts.
 
 ## Styling system
 
-The visual conventions are described in `DESIGN.md`. Implementation lives in
-`js/src/css/` with one stylesheet per widget plus `index.css`. CSS rules are
-scoped under widget root classes such as `.nbplay-synth`, `.nbplay-mixer`, and
-`.nbplay-midi-keyboard` to avoid leaking into the notebook.
+Implementation lives in `js/src/css/components/`: `tokens.css` defines the
+role-named `--nbplay-*` custom properties (background, foreground, accent,
+fill, indicator, state colors, meter ramp, chart colors, radius, control
+sizes, fonts) with values that resolve through JupyterLab's `--jp-*` variables
+and carry light and dark fallbacks, and every element has its own stylesheet
+scoped under its tag (`nbplay-fader .nbplay-fader-track`). Element CSS uses
+only `--nbplay-*` tokens, never `--jp-*` or hex values; canvas drawing reads
+them at runtime through `cssVar(el, "--nbplay-*", fallback)`. Semi-transparent
+colors use `color-mix()` rather than `rgba()`.
 
-Colors should come from JupyterLab CSS custom properties, usually `--jp-*`, with
-fallbacks. CSS uses `var(--jp-*, fallback)`. Canvas drawing reads theme values
-at runtime through `cssVar()`. Semi-transparent colors should use `color-mix()`
-instead of hard-coded `rgba()` values when editing CSS.
+A `data-nbplay-theme` attribute on any ancestor selects a theme set for that
+subtree. `light` and `dark` are the default theme's two sets; `studio`, `flat`,
+`cube`, `one`, `grim`, `pro` and `fruit` ship as `js/src/css/theme-*.css`, each
+redefining every token under `[data-nbplay-theme="<name>"]`. A new set copies
+one of these and changes values; it never adds selectors for individual
+elements. From Python, every widget has a `theme` trait (validated against
+`nbplay.THEMES`) that its element reflects as `data-nbplay-theme` on itself,
+and `Session(theme=...)` or `session.theme = ...` sets it on every widget in
+the session, including tracks added later; the value is saved with the
+session.
 
-The JS build runs `bundle_css("src/css")`, writes bundled CSS into
-`js/dist/css/`, and copies per-widget CSS files into `nbplay/static/` for the
-Python package.
+The JS build runs `bundle_css("src/css")`, which inlines the `@import`s of
+`components.css` into one file under `js/dist/css/`, and copies it to
+`nbplay/static/nbplay.css`, the stylesheet every Python widget loads.
 
 ## Build pipeline
 
@@ -1084,10 +1130,16 @@ make major
 ### Add a new widget
 
 1. Add a Python class in `nbplay/widget.py` extending `anywidget.AnyWidget`.
-1. Give it `_esm = _STATIC / "<name>.js"` and `_css = _STATIC / "<name>.css"`.
+1. Give it `_esm = _STATIC / "<name>.js"` and `_css = _STATIC / "nbplay.css"`.
 1. Define synced traits with `.tag(sync=True)` and keep defaults valid.
-1. Create `js/src/ts/<name>.ts` exporting `default { render }`.
-1. Create `js/src/css/<name>.css` scoped under a unique `.nbplay-*` root class.
+1. Create the element in `js/src/ts/components/<name>.ts`: extend
+   `NbplayElement`, compose existing primitives and composites, emit
+   `nbplay-set`, `nbplay-status` and `nbplay-request`, and `define("nbplay-<name>", ...)`.
+   Export it from `components/index.ts` and add a section to `gallery.ts`.
+1. Create `js/src/css/components/<name>.css` scoped under the tag and add it to
+   `js/src/css/components.css`.
+1. Create `js/src/ts/<name>.ts` whose `render()` returns `bindInstrument(...)`
+   with the trait map.
 1. Add `<name>` to `WIDGET_NAMES` in `js/build.mjs`.
 1. Re-export the widget from `nbplay/__init__.py`.
 1. Add Python widget tests and Playwright tests.
@@ -1097,7 +1149,8 @@ make major
 ### Modify an existing widget trait
 
 1. Update the Python trait default and validation/coercion logic.
-1. Update the TypeScript model reads, writes, and `change:<trait>` listeners.
+1. Add the trait to the adapter's `config` or `status` map in `js/src/ts/<widget>.ts`
+   and the matching property to the element.
 1. Update CSS if the trait changes layout or visible state.
 1. Update `nbplay/static` by rebuilding JS before testing Python rendering from
    source.

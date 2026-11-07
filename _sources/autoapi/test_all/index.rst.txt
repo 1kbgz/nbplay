@@ -1390,6 +1390,9 @@ Module Contents
 
 .. py:class:: TestSessionPersistence
 
+   .. py:method:: test_theme_round_trips(tmp_path)
+
+
    .. py:method:: _session()
 
 
@@ -1435,6 +1438,9 @@ Module Contents
 
 
 .. py:class:: TestSession
+
+   .. py:method:: test_theme_applies_to_every_widget()
+
 
    .. py:method:: test_defaults()
 
