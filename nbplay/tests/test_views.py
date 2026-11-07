@@ -248,6 +248,29 @@ class TestArrangementViews:
             view.close()
 
 
+class TestSession:
+    def test_views_share_the_session_and_follow_the_session_settings(self):
+        session = views.Session(bpm=100.0, time_signature=(3, 4), theme="flat")
+        try:
+            assert session.transport.session is not session.launcher.session
+            assert len({view.config.session_id for view in session.views}) == 1
+            assert session.timeline.config.bpm == 100.0 and session.launcher.config.time_signature_num == 3
+            seq, synth = views.SequencerView(autosync=False), views.SynthView(autosync=False)
+            track = session.add_track("Lead", seq, synth)
+            assert track.mixer_channel == 0 and seq.config.channel_index == 0 and synth.config.channel_index == 0
+            assert seq.config.session_id == session.session_id and synth.config.theme == "flat" and seq.config.bpm == 100.0
+            assert session.timeline.config.tracks[0]["input"] == "channel" and session.launcher.config.tracks[0]["name"] == "Lead"
+            session.add_track("Vocals", armed=True)
+            assert session.timeline.config.tracks[1]["input"] == "microphone" and session.timeline.config.tracks[1]["armed"] is True
+            session.bpm = 128.0
+            assert seq.config.bpm == 128.0 and session.timeline.config.bpm == 128.0
+            session.theme = "grim"
+            assert synth.config.theme == "grim" and session.mixer.config.theme == "grim"
+            assert isinstance(session.play(), int)
+        finally:
+            session.close()
+
+
 class TestTransportView:
     def test_hosts_config_and_status_and_binds_the_element(self):
         view = views.TransportView(bpm=100.0, theme="flat", autosync=False)

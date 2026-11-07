@@ -880,8 +880,16 @@ slots with the widget's helper and `LauncherView.launch`, `stop_track`, `launch_
 `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
 clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
 as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status
-commands, and clip export and import go through the config fields the element watches. The spaday
-tree is
+commands, and clip export and import go through the config fields the element watches.
+
+`nbplay.views.Session` creates transport, mixer, timeline and launcher views with one browser
+`session_id`, so the elements share a clock and an audio bus, and `add_track` adds a mixer channel, a
+timeline lane and a launcher row while routing the track's sequencer and sound source. Each view
+hosts its models in its own transports `Session`: transports grants a connection ownership of every
+client-owned field in the session it connects to, so views sharing one would fight over each
+other's status (the first attempt hung the page with "client does not own this field"). Kernel-side
+`bpm`, `time_signature` and `theme` properties write every view; browser-side the clock does the
+linking. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are

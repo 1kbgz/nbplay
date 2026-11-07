@@ -53,50 +53,67 @@ async function viewKernel(view) {
   };
 }
 
-/** Render the kernel's view in the harness page, relaying comm traffic. */
-async function mount(page, kernel) {
+/** Render the kernel's widgets in the harness page, relaying comm traffic per widget. */
+async function mount(page, kernel, names) {
   const { result: description } = await kernel.call({ op: "describe" });
+  const widgets = names
+    ? Object.fromEntries(names.map((n) => [n, description.widgets[n]]))
+    : { owner: description };
   fs.mkdirSync("dist/vendor", { recursive: true });
   fs.copyFileSync(description.widget_esm, "dist/vendor/spaday-widget.js");
   await page.exposeFunction("kernelMessage", (request) => kernel.call(request));
   await page.goto("/tests/fixtures/spaday.html");
   await page.waitForFunction(() => window.__widget);
-  await page.evaluate(async (description) => {
-    const { widget, fakeModel } = window.__widget;
-    const model = fakeModel(description);
-    let queue = Promise.resolve();
-    window.notebook = { model, delivered: 0 };
-    const deliver = (response) => {
-      for (const { content, buffers } of response.messages) {
-        window.notebook.delivered += 1;
-        model._emit(
-          "msg:custom",
-          content,
-          buffers.map((bytes) => new Uint8Array(bytes)),
-        );
-      }
-    };
-    window.notebook.deliver = deliver;
-    model.send = (content, _, buffers = []) => {
-      queue = queue
-        .then(() =>
-          window.kernelMessage({
-            op: "receive",
+  await page.evaluate(
+    async ({ widgets, named }) => {
+      const { widget, fakeModel } = window.__widget;
+      window.notebook = { models: {}, delivered: 0 };
+      let queue = Promise.resolve();
+      const deliver = (response) => {
+        for (const { widget: target, content, buffers } of response.messages) {
+          window.notebook.delivered += 1;
+          const model = window.notebook.models[named ? target : "owner"];
+          model?._emit(
+            "msg:custom",
             content,
-            buffers: buffers.map((b) =>
-              Array.from(new Uint8Array(b.buffer, b.byteOffset, b.byteLength)),
-            ),
-          }),
-        )
-        .then(deliver);
-    };
-    const el = document.createElement("div");
-    el.id = "owner";
-    document.body.appendChild(el);
-    await widget.render({ model, el });
-  }, description);
-  // The view's ready handshake and snapshots have arrived.
-  await page.waitForFunction(() => window.notebook.delivered > 0);
+            buffers.map((bytes) => new Uint8Array(bytes)),
+          );
+        }
+      };
+      window.notebook.deliver = deliver;
+      for (const [name, desc] of Object.entries(widgets)) {
+        const model = fakeModel(desc);
+        window.notebook.models[name] = model;
+        model.send = (content, _, buffers = []) => {
+          queue = queue
+            .then(() =>
+              window.kernelMessage({
+                op: "receive",
+                ...(named ? { widget: name } : {}),
+                content,
+                buffers: buffers.map((b) =>
+                  Array.from(
+                    new Uint8Array(b.buffer, b.byteOffset, b.byteLength),
+                  ),
+                ),
+              }),
+            )
+            .then(deliver);
+        };
+        const el = document.createElement("div");
+        el.id = name;
+        document.body.appendChild(el);
+        await widget.render({ model, el });
+      }
+      window.notebook.model = window.notebook.models.owner;
+    },
+    { widgets, named: Boolean(names) },
+  );
+  // The views' ready handshakes and snapshots have arrived.
+  await page.waitForFunction(
+    (count) => window.notebook.delivered >= count,
+    Object.keys(widgets).length,
+  );
 }
 
 const state = async (kernel) => (await kernel.call({ op: "state" })).result;
@@ -490,6 +507,77 @@ test.describe("views on transports", () => {
         await kernel.call({ op: "command", name: "stop" }),
       );
       await expect(timeline).not.toHaveAttribute("is-playing");
+    } finally {
+      kernel.close();
+    }
+  });
+
+  test("session: the shared clock plays every view and the kernel sees each status", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("session");
+    try {
+      await mount(page, kernel, ["transport", "sequencer", "synth"]);
+      const transport = page.locator("#transport nbplay-transport");
+      const sequencer = page.locator("#sequencer nbplay-sequencer");
+      await expect(transport).toBeVisible();
+      await expect(sequencer).toBeVisible();
+      await expect(page.locator("#synth nbplay-synth")).toBeVisible();
+      const ids = await page.evaluate(() => [
+        document.querySelector("#transport nbplay-transport").sessionId,
+        document.querySelector("#sequencer nbplay-sequencer").sessionId,
+        document.querySelector("#synth nbplay-synth").sessionId,
+      ]);
+      expect(new Set(ids).size).toBe(1);
+      expect(ids[0]).toMatch(/^nbplay-/);
+
+      // session.play() is a transport command; the sequencer follows the shared clock.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "play" }),
+      );
+      await expect(transport).toHaveAttribute("is-playing", "");
+      await expect(sequencer).toHaveAttribute("is-playing", "");
+      await expect
+        .poll(async () => {
+          const all = (await kernel.call({ op: "state" })).result;
+          return [
+            all.transport.status.is_playing,
+            all.sequencer.status.is_playing,
+          ];
+        })
+        .toEqual([true, true]);
+
+      // A tempo change from the kernel reaches the clock and every view.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "set",
+          widget: "transport",
+          field: "bpm",
+          value: 90,
+        }),
+      );
+      await expect(
+        page.locator("#transport .nbplay-transport-tempo .nbplay-value-text"),
+      ).toContainText("90");
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              globalThis.__nbplay[
+                document.querySelector("#transport nbplay-transport").sessionId
+              ].clock.bpm,
+          ),
+        )
+        .toBe(90);
+
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "stop" }),
+      );
+      await expect(transport).not.toHaveAttribute("is-playing");
+      await expect(sequencer).not.toHaveAttribute("is-playing");
     } finally {
       kernel.close();
     }

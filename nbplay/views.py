@@ -10,6 +10,7 @@ layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
 """
 
 import inspect
+import uuid
 from typing import ClassVar
 
 import transports
@@ -71,9 +72,11 @@ __all__ = (
     "PadsView",
     "SamplerView",
     "SequencerView",
+    "Session",
     "SettingsView",
     "SynthView",
     "TimelineView",
+    "Track",
     "TransportView",
 )
 
@@ -716,3 +719,121 @@ class TimelineView(InstrumentView):
     def record(self, on=True):
         """Start or stop recording the armed lanes."""
         return self._command("is_recording", bool(on))
+
+
+class Track:
+    """A session lane: a mixer channel plus an optional sequencer and sound source."""
+
+    def __init__(self, name, sequencer=None, sound_source=None, mixer_channel=0):
+        self.name = name
+        self.sequencer = sequencer
+        self.sound_source = sound_source
+        self.mixer_channel = mixer_channel
+
+    def __repr__(self):
+        return f"Track(name={self.name!r}, channel={self.mixer_channel})"
+
+
+class Session:
+    """Transport, mixer, timeline and launcher views sharing one browser session.
+
+    Every view carries the same ``session_id``, so the browser gives them
+    one audio bus and one clock, which keeps play state, position and tempo
+    consistent across them. Each view hosts its models in its own transports
+    ``Session``: transports grants a connection ownership of every
+    client-owned field in the session it connects to, so views that shared
+    one would fight over each other's status. In the kernel the :attr:`bpm`,
+    :attr:`time_signature` and :attr:`theme` properties write every view's
+    config. Undo, patterns, MIDI files and persistence stay with the
+    traitlets :class:`nbplay.widget.Session` for now.
+    """
+
+    def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
+        self._session_id = f"nbplay-{uuid.uuid4().hex[:8]}"
+        num, den = time_signature
+        common = {"session_id": self._session_id, "bpm": bpm, "time_signature_num": num, "theme": theme}
+        self.transport = TransportView(time_signature_den=den, **common)
+        self.mixer = MixerView(session_id=self._session_id, theme=theme)
+        self.timeline = TimelineView(time_signature_den=den, **common)
+        self.launcher = LauncherView(time_signature_den=den, **common)
+        self.tracks = []
+
+    @property
+    def session_id(self):
+        """The browser session id every view shares."""
+        return self._session_id
+
+    @property
+    def views(self):
+        """Every view in the session, including track instruments."""
+        views = [self.transport, self.mixer, self.timeline, self.launcher]
+        for track in self.tracks:
+            views.extend(view for view in (track.sequencer, track.sound_source) if isinstance(view, InstrumentView))
+        return views
+
+    @property
+    def bpm(self):
+        return self.transport.config.bpm
+
+    @bpm.setter
+    def bpm(self, value):
+        for view in self.views:
+            if "bpm" in view.CONFIG:
+                view.config.bpm = value
+
+    @property
+    def time_signature(self):
+        return (self.transport.config.time_signature_num, self.transport.config.time_signature_den)
+
+    @time_signature.setter
+    def time_signature(self, value):
+        num, den = value
+        for view in self.views:
+            if "time_signature_num" in view.CONFIG:
+                view.config.time_signature_num = num
+            if "time_signature_den" in view.CONFIG_MODEL.model_fields:
+                view.config.time_signature_den = den
+
+    @property
+    def theme(self):
+        return self.transport.config.theme
+
+    @theme.setter
+    def theme(self, value):
+        for view in self.views:
+            view.config.theme = value
+
+    def play(self):
+        """Start the shared clock."""
+        return self.transport.play()
+
+    def stop(self):
+        """Stop the shared clock."""
+        return self.transport.stop()
+
+    def seek(self, beat):
+        """Move the shared clock."""
+        return self.transport.seek(beat)
+
+    def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
+        """Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing."""
+        channel = self.mixer.add_channel(name)
+        for view in (sequencer, sound_source):
+            if isinstance(view, InstrumentView):
+                view.config.session_id = self._session_id
+                view.config.channel_index = channel
+                view.config.theme = self.theme
+                if "bpm" in view.CONFIG:
+                    view.config.bpm = self.bpm
+        if input is None:
+            input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
+        self.timeline.add_track(name, channel, armed=armed, input=input)
+        self.launcher.add_track(name, channel)
+        track = Track(name, sequencer, sound_source, channel)
+        self.tracks.append(track)
+        return track
+
+    def close(self):
+        """Close every view."""
+        for view in self.views:
+            view.close()
