@@ -1,0 +1,29 @@
+nbplay-position {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--nbplay-font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-chart-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  padding: 2px 10px;
+  user-select: none;
+}
+nbplay-position[format="bar.beat"] {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+nbplay-position .nbplay-position-bar {
+  color: var(--nbplay-success);
+}
+nbplay-position .nbplay-position-sep {
+  color: var(--nbplay-fg-faint);
+}
+nbplay-position .nbplay-position-beat {
+  color: var(--nbplay-info);
+}

@@ -1,0 +1,106 @@
+/* Design tokens for nbplay elements.
+ *
+ * Tokens are the whole styling contract: component CSS and canvas code read
+ * only `--nbplay-*`. Names describe the role a value plays, not a material.
+ *
+ * The default theme adapts to the host: inside Jupyter each color resolves
+ * through its `--jp-*` variable; outside Jupyter the fallback applies, light by
+ * default and dark under `:root[data-theme="dark"]` (the host-level attribute
+ * many pages set). nbplay's own switch is `data-nbplay-theme` on any element:
+ * `light` and `dark` are the default theme's two sets; `studio`, `flat`, and any
+ * further set is one CSS file redefining every token under
+ * `[data-nbplay-theme="<name>"]`. See theme-studio.css and theme-flat.css. */
+
+:root,
+[data-nbplay-theme="light"] {
+  /* surfaces */
+  --nbplay-bg: var(--jp-layout-color0, #faf9f6);
+  --nbplay-bg-panel: var(--jp-layout-color1, #f0efea);
+  --nbplay-bg-raised: var(--jp-layout-color2, #e6e4de);
+  --nbplay-bg-control: var(--jp-layout-color0, #ffffff);
+
+  /* text */
+  --nbplay-fg: var(--jp-ui-font-color0, #1c1b19);
+  --nbplay-fg-muted: var(--jp-ui-font-color2, #5f5d58);
+  --nbplay-fg-faint: var(--jp-ui-font-color3, #9a978f);
+  --nbplay-fg-inverse: var(--jp-ui-inverse-font-color0, #ffffff);
+
+  /* structure */
+  --nbplay-border: var(--jp-border-color1, #d8d5cc);
+  --nbplay-border-strong: var(--jp-border-color0, #c3c0b6);
+
+  /* accent: selections, active controls, fills */
+  --nbplay-accent: var(--jp-brand-color1, #c45a16);
+  --nbplay-accent-soft: var(--jp-brand-color2, #e8873f);
+  --nbplay-fill: var(--nbplay-accent);
+  --nbplay-indicator: var(--nbplay-fg);
+  --nbplay-focus: var(--nbplay-accent);
+
+  /* state colors */
+  --nbplay-success: var(--jp-success-color1, #2a9d4a);
+  --nbplay-warn: var(--jp-warn-color1, #c9a000);
+  --nbplay-error: var(--jp-error-color1, #d23b2f);
+  --nbplay-info: var(--jp-info-color1, #1f7fa8);
+
+  /* meters: a VU-style ramp; a theme can flatten it by repeating one color */
+  --nbplay-meter-low: var(--nbplay-success);
+  --nbplay-meter-mid: var(--nbplay-warn);
+  --nbplay-meter-high: var(--nbplay-error);
+  --nbplay-meter-rms: color-mix(in srgb, var(--nbplay-fg) 25%, transparent);
+
+  /* piano keys keep ivory and ebony whatever the surface */
+  --nbplay-key-white: #f2f1ec;
+  --nbplay-key-black: #1f1f22;
+
+  /* categorical palette: zones, voices, tracks (paletteColor(i)) */
+  --nbplay-palette-1: #1f7fa8;
+  --nbplay-palette-2: #c45a16;
+  --nbplay-palette-3: #2a9d4a;
+  --nbplay-palette-4: #8a5cc4;
+  --nbplay-palette-5: #c9a000;
+  --nbplay-palette-6: #d23b2f;
+
+  /* canvas displays (waveform, envelope) */
+  --nbplay-chart-bg: var(--nbplay-bg);
+  --nbplay-chart-grid: var(--nbplay-border);
+  --nbplay-chart-line: var(--nbplay-accent);
+
+  /* shape and type */
+  --nbplay-radius: 6px;
+  --nbplay-radius-control: 4px;
+  --nbplay-track-size: 4px;
+  --nbplay-thumb-size: 14px;
+  --nbplay-thumb-radius: 50%;
+  --nbplay-dial-stroke: 8;
+  --nbplay-control-height: 24px;
+  --nbplay-font: var(--jp-ui-font-family, system-ui, sans-serif);
+  --nbplay-font-mono: var(--jp-code-font-family, ui-monospace, monospace);
+  --nbplay-font-size: 12px;
+  --nbplay-font-size-small: 11px;
+}
+
+:root[data-theme="dark"],
+[data-nbplay-theme="dark"] {
+  --nbplay-bg: var(--jp-layout-color0, #121214);
+  --nbplay-bg-panel: var(--jp-layout-color1, #1b1b1e);
+  --nbplay-bg-raised: var(--jp-layout-color2, #26262b);
+  --nbplay-bg-control: var(--jp-layout-color2, #2e2e34);
+  --nbplay-fg: var(--jp-ui-font-color0, #e9e6df);
+  --nbplay-fg-muted: var(--jp-ui-font-color2, #a8a59c);
+  --nbplay-fg-faint: var(--jp-ui-font-color3, #6f6d66);
+  --nbplay-fg-inverse: var(--jp-ui-inverse-font-color0, #121214);
+  --nbplay-border: var(--jp-border-color1, #2f2f36);
+  --nbplay-border-strong: var(--jp-border-color0, #3f3f48);
+  --nbplay-accent: var(--jp-brand-color1, #f28c38);
+  --nbplay-accent-soft: var(--jp-brand-color2, #f7a965);
+  --nbplay-success: var(--jp-success-color1, #3ccf6a);
+  --nbplay-warn: var(--jp-warn-color1, #f0c93a);
+  --nbplay-error: var(--jp-error-color1, #f05042);
+  --nbplay-info: var(--jp-info-color1, #3fb4d8);
+  --nbplay-palette-1: #3fb4d8;
+  --nbplay-palette-2: #f28c38;
+  --nbplay-palette-3: #3ccf6a;
+  --nbplay-palette-4: #a98be0;
+  --nbplay-palette-5: #f0c93a;
+  --nbplay-palette-6: #f05042;
+}

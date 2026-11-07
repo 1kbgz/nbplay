@@ -1,0 +1,116 @@
+nbplay-key-rows {
+  display: block;
+  user-select: none;
+  font-family: var(--nbplay-font-mono);
+}
+nbplay-key-rows .nbplay-keys-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+}
+nbplay-key-rows .nbplay-keys-zone-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--nbplay-fg-faint);
+}
+nbplay-key-rows .nbplay-keys-row {
+  display: flex;
+  gap: 3px;
+}
+nbplay-key-rows .nbplay-keys-row-sharp {
+  padding-left: 18px;
+}
+nbplay-key-rows .nbplay-keys-gap {
+  width: 38px;
+  flex: 0 0 auto;
+}
+nbplay-key-rows .nbplay-keys-key {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    transform 0.05s,
+    background 0.08s;
+}
+nbplay-key-rows .nbplay-keys-white {
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+}
+nbplay-key-rows .nbplay-keys-black {
+  width: 34px;
+  height: 34px;
+  background: var(--nbplay-fg);
+  color: var(--nbplay-bg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-key-rows .nbplay-keys-key.pressed {
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-accent);
+  transform: scale(0.94);
+}
+nbplay-key-rows .nbplay-keys-key-label {
+  font-size: 11px;
+  font-weight: 700;
+}
+nbplay-key-rows .nbplay-keys-key-note {
+  font-size: 8px;
+  opacity: 0.6;
+}
+
+/* piano layout: whites in a row, blacks laid over them by white-key index */
+nbplay-key-rows .nbplay-keys-piano {
+  --nbplay-key-width: calc(100% / var(--nbplay-key-count, 14));
+  position: relative;
+  display: flex;
+  height: 110px;
+}
+nbplay-key-rows .nbplay-keys-piano .nbplay-keys-white {
+  background: var(--nbplay-key-white);
+  color: var(--nbplay-key-black);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-key-rows .nbplay-keys-piano .nbplay-keys-black {
+  background: var(--nbplay-key-black);
+  color: var(--nbplay-key-white);
+  border-color: var(--nbplay-key-black);
+}
+nbplay-key-rows .nbplay-keys-piano .nbplay-keys-key.pressed {
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-accent);
+  transform: none;
+}
+nbplay-key-rows .nbplay-keys-piano .nbplay-keys-key {
+  width: auto;
+  height: 100%;
+  flex: 1 1 0;
+  justify-content: flex-end;
+  padding-bottom: 4px;
+  border-radius: 0 0 var(--nbplay-radius-control) var(--nbplay-radius-control);
+}
+nbplay-key-rows .nbplay-keys-piano .nbplay-keys-black {
+  position: absolute;
+  top: 0;
+  left: calc((var(--nbplay-key-index) + 0.68) * var(--nbplay-key-width));
+  width: calc(var(--nbplay-key-width) * 0.64);
+  height: 62%;
+  flex: none;
+  z-index: 1;
+}
+nbplay-key-rows[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}

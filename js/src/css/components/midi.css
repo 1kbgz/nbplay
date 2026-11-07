@@ -1,0 +1,90 @@
+nbplay-midi-port {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size);
+  color: var(--nbplay-fg);
+}
+nbplay-midi-port .nbplay-midi-port-label {
+  font-size: var(--nbplay-font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-port .nbplay-midi-port-select {
+  min-width: 140px;
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-midi-port .nbplay-midi-port-refresh {
+  height: var(--nbplay-control-height);
+  min-width: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 6px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-midi-port .nbplay-midi-port-refresh:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-midi-port .nbplay-midi-port-status {
+  font-size: var(--nbplay-font-size-small);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--nbplay-bg-raised);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-port[status="connected"] .nbplay-midi-port-status {
+  background: color-mix(in srgb, var(--nbplay-success) 20%, transparent);
+  color: var(--nbplay-success);
+}
+nbplay-midi-port[status="error"] .nbplay-midi-port-status,
+nbplay-midi-port[status="unsupported"] .nbplay-midi-port-status {
+  background: color-mix(in srgb, var(--nbplay-error) 18%, transparent);
+  color: var(--nbplay-error);
+}
+nbplay-midi-port[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+nbplay-midi-log {
+  display: block;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-midi-log .nbplay-midi-log-label {
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-log .nbplay-midi-log-entries {
+  min-height: 3em;
+  padding: 4px 6px;
+  background: var(--nbplay-chart-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  white-space: pre;
+  overflow: hidden;
+}
+nbplay-midi-log .nbplay-midi-log-entry {
+  line-height: 1.5;
+}
+nbplay-midi-log .nbplay-midi-log-entry:first-child {
+  color: var(--nbplay-accent);
+}
+nbplay-midi-log .nbplay-midi-log-empty {
+  color: var(--nbplay-fg-faint);
+}

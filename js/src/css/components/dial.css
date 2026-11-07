@@ -1,0 +1,45 @@
+nbplay-dial {
+  --nbplay-dial-size: 48px;
+  display: inline-block;
+  width: var(--nbplay-dial-size);
+  height: var(--nbplay-dial-size);
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+  border-radius: 50%;
+}
+nbplay-dial:focus-visible {
+  box-shadow: 0 0 0 2px var(--nbplay-focus);
+}
+nbplay-dial[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+nbplay-dial .nbplay-dial-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+nbplay-dial .nbplay-dial-track {
+  fill: none;
+  stroke: var(--nbplay-border-strong);
+  stroke-width: var(--nbplay-dial-stroke);
+  stroke-linecap: round;
+}
+nbplay-dial .nbplay-dial-arc {
+  fill: none;
+  stroke: var(--nbplay-fill);
+  stroke-width: var(--nbplay-dial-stroke);
+  stroke-linecap: round;
+}
+nbplay-dial .nbplay-dial-cap {
+  fill: var(--nbplay-bg-control);
+  stroke: var(--nbplay-border);
+  stroke-width: 2;
+}
+nbplay-dial .nbplay-dial-indicator {
+  stroke: var(--nbplay-indicator);
+  stroke-width: 5;
+  stroke-linecap: round;
+}

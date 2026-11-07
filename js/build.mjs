@@ -34,6 +34,15 @@ const BUNDLES = [
     entryPoints: [`src/ts/${name}.ts`],
     outfile: `dist/widgets/${name}.js`,
   })),
+  // UI primitives on their own (future standalone package) and their gallery
+  {
+    entryPoints: ["src/ts/components/index.ts"],
+    outfile: "dist/components/index.js",
+  },
+  {
+    entryPoints: ["src/ts/gallery.ts"],
+    outfile: "dist/gallery/index.js",
+  },
 ];
 
 async function build() {
@@ -72,7 +81,9 @@ async function build() {
   await cpy("dist/**/*", "../nbplay/extension", {
     filter: (file) =>
       !file.relativePath.startsWith("esm/") &&
-      !file.relativePath.startsWith("dist/esm/"),
+      !file.relativePath.startsWith("dist/esm/") &&
+      !file.relativePath.startsWith("gallery") &&
+      !file.relativePath.startsWith("dist/gallery"),
   });
 
   // Copy per-widget JS/CSS to python static dir for anywidget

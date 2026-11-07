@@ -1,0 +1,131 @@
+nbplay-effect-rack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-effect-rack .nbplay-effect-rack-add {
+  display: flex;
+  gap: 4px;
+}
+nbplay-effect-rack .nbplay-effect-rack-type {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-effect-rack button {
+  font: inherit;
+  font-weight: 700;
+  height: var(--nbplay-control-height);
+  padding: 0 6px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-effect-rack button:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-effect-rack button:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-effect-rack .nbplay-effect-rack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+nbplay-effect-rack .nbplay-effect-rack-chip-row {
+  display: flex;
+  gap: 2px;
+}
+nbplay-effect-rack .nbplay-effect-rack-chip {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-accent);
+}
+nbplay-effect-rack .nbplay-effect-rack-chip.bypassed {
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-faint);
+  border-color: var(--nbplay-border);
+  text-decoration: line-through;
+}
+nbplay-effect-rack .nbplay-effect-rack-edit.active {
+  color: var(--nbplay-accent);
+  border-color: var(--nbplay-accent);
+}
+nbplay-effect-rack .nbplay-effect-rack-remove:hover {
+  color: var(--nbplay-error);
+  border-color: var(--nbplay-error);
+}
+nbplay-effect-rack nbplay-effect-editor {
+  margin: 2px 0 4px;
+}
+nbplay-effect-rack[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+nbplay-effect-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: var(--nbplay-bg-raised);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-effect-editor .nbplay-effect-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+nbplay-effect-editor label.nbplay-effect-editor-row > span {
+  min-width: 56px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-effect-editor nbplay-param nbplay-slider {
+  flex: 1 1 auto;
+}
+nbplay-effect-editor select,
+nbplay-effect-editor input[type="text"],
+nbplay-effect-editor input[type="number"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-effect-editor input[type="checkbox"] {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-effect-editor .nbplay-effect-editor-none {
+  color: var(--nbplay-fg-faint);
+}
