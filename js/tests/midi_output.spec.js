@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/midi_output.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/midi_output.js");
       const el = document.getElementById("root");
@@ -47,7 +47,7 @@ async function renderWidget(page, overrides = {}) {
 }
 
 async function connect(page) {
-  await page.locator(".nbplay-midi-out-select").selectOption("output-1");
+  await page.locator("nbplay-midi-port select").selectOption("output-1");
   // Selecting a port sends all-notes-off on the previous state; ignore it.
   await page.evaluate(() => {
     window.__midiOutput.sent.length = 0;
@@ -70,7 +70,7 @@ test.describe("MidiOutputWidget", () => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-midi-output")).toBeVisible();
     await expect(
-      page.locator(".nbplay-midi-out-select option").nth(1),
+      page.locator("nbplay-midi-port select option").nth(1),
     ).toHaveText("USB Synth");
     expect(
       await page.evaluate(() => window.__testModel._state.available_midi_ports),
@@ -79,7 +79,7 @@ test.describe("MidiOutputWidget", () => {
     expect(await page.evaluate(() => window.__testModel._state.midi_port)).toBe(
       "USB Synth",
     );
-    await expect(page.locator(".nbplay-midi-out-status")).toHaveText(
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText(
       "Connected",
     );
   });
@@ -89,8 +89,8 @@ test.describe("MidiOutputWidget", () => {
       navigator.requestMIDIAccess = undefined;
     });
     await renderWidget(page);
-    await expect(page.locator(".nbplay-midi-out-status")).toHaveText("Idle");
-    await expect(page.locator(".nbplay-midi-out-select option")).toHaveCount(1);
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText("Idle");
+    await expect(page.locator("nbplay-midi-port select option")).toHaveCount(1);
   });
 
   test("forwards document note events without a session", async ({ page }) => {

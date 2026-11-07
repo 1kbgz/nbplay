@@ -1,0 +1,67 @@
+nbplay-pad-grid {
+  display: block;
+  user-select: none;
+}
+nbplay-pad-grid .nbplay-pad-grid-cells {
+  display: grid;
+  gap: 6px;
+}
+nbplay-pad-grid .nbplay-pad-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 48px;
+  overflow: hidden;
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    transform 0.05s,
+    background 0.08s,
+    border-color 0.08s;
+}
+nbplay-pad-grid .nbplay-pad-cell:hover {
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-pad-grid .nbplay-pad-cell.active {
+  background: color-mix(
+    in srgb,
+    var(--nbplay-accent) 35%,
+    var(--nbplay-bg-control)
+  );
+  border-color: var(--nbplay-accent);
+  transform: scale(0.95);
+}
+nbplay-pad-grid .nbplay-pad-vel {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.35;
+}
+nbplay-pad-grid .nbplay-pad-vel .nbplay-bar-track {
+  background: transparent;
+  border-radius: 0;
+}
+nbplay-pad-grid .nbplay-pad-label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size);
+  font-weight: 600;
+  color: var(--nbplay-fg);
+}
+nbplay-pad-grid .nbplay-pad-label .nbplay-value-input {
+  width: 3.5em;
+  text-align: center;
+}
+nbplay-pad-grid[disabled] .nbplay-pad-cell {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

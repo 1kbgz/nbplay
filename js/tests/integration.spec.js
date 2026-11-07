@@ -71,7 +71,7 @@ async function renderMixer(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/mixer.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
     const mod = await import("/dist/widgets/mixer.js");
@@ -89,7 +89,7 @@ async function renderSampler(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sampler.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sampler.js");
@@ -109,7 +109,7 @@ async function renderKeyboard(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/keyboard.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/keyboard.js");
@@ -129,7 +129,7 @@ async function renderSequencer(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sequencer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sequencer.js");

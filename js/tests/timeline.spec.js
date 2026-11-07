@@ -75,10 +75,10 @@ test.describe("Pattern clips", () => {
         },
       ],
     });
-    const clip = page.locator(".nbplay-timeline-clip");
-    await expect(clip).toHaveClass(/midi/);
-    await expect(clip).toHaveClass(/pattern/);
-    await expect(clip.locator("small")).toContainText("pattern");
+    const clip = page.locator("nbplay-clip");
+    await expect(clip).toHaveAttribute("kind", "midi");
+    await expect(clip).toHaveAttribute("pattern", "");
+    await expect(clip.locator(".nbplay-clip-detail")).toContainText("pattern");
   });
 });
 
@@ -89,7 +89,7 @@ async function renderWidget(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/timeline.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
     const mod = await import("/dist/widgets/timeline.js");
@@ -148,30 +148,32 @@ test.describe("TimelineWidget", () => {
   test("renders timeline container and header", async ({ page }) => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-timeline")).toBeVisible();
-    await expect(page.locator(".nbplay-timeline-header h3")).toHaveText(
-      "nbplay",
-    );
-    await expect(page.locator(".nbplay-badge")).toHaveText("timeline");
+    await expect(
+      page.locator(".nbplay-timeline nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(
+      page.locator(".nbplay-timeline .nbplay-header-badge"),
+    ).toHaveText("timeline");
   });
 
   test("renders tracks and clips", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-timeline-row")).toHaveCount(2);
-    await expect(
-      page.locator(".nbplay-timeline-track-name").first(),
-    ).toHaveText("Vocals");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
-    await expect(page.locator(".nbplay-timeline-clip span")).toHaveText(
+    await expect(page.locator("nbplay-lane")).toHaveCount(2);
+    await expect(page.locator(".nbplay-lane-name").first()).toHaveText(
+      "Vocals",
+    );
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip .nbplay-clip-name")).toHaveText(
       "Take A",
     );
   });
 
   test("toggles track buttons into model state", async ({ page }) => {
     await renderWidget(page);
-    const row = page.locator(".nbplay-timeline-row").first();
-    await row.locator(".nbplay-track-arm").click();
-    await row.locator(".nbplay-track-mute").click();
-    await row.locator(".nbplay-track-solo").click();
+    const row = page.locator("nbplay-lane").first();
+    await row.locator("nbplay-toggle[variant=arm]").click();
+    await row.locator("nbplay-toggle[variant=mute]").click();
+    await row.locator("nbplay-toggle[variant=solo]").click();
 
     const state = await page.evaluate(
       () => window.__testModel._state.tracks[0],
@@ -183,7 +185,7 @@ test.describe("TimelineWidget", () => {
 
   test("selects and deletes a clip", async ({ page }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-timeline-clip").click();
+    await page.locator("nbplay-clip").click();
     expect(
       await page.evaluate(() => window.__testModel._state.selected_clip_id),
     ).toBe("clip-a");
@@ -235,7 +237,7 @@ test.describe("TimelineWidget", () => {
     ).toBe(true);
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
 
     const state = await page.evaluate(() => ({
       clip: window.__testModel._state.clips[0],
@@ -373,7 +375,7 @@ test.describe("TimelineWidget", () => {
     expect(state.stoppedTracks).toBe(0);
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
     expect(await page.evaluate(() => window.__stoppedTracks)).toBe(1);
   });
 
@@ -414,7 +416,7 @@ test.describe("TimelineWidget", () => {
       isRecording: window.__testModel._state.is_recording,
       playheadLeft: Number.parseFloat(
         document
-          .querySelector(".nbplay-timeline-playhead")
+          .querySelector(".nbplay-ruler-playhead, .nbplay-lane-playhead")
           .getAttribute("style")
           .match(/left:\s*([\d.]+)%/)?.[1] || "0",
       ),
@@ -504,7 +506,7 @@ test.describe("TimelineWidget", () => {
     await renderWidget(page, { current_beat: 4, length: 16 });
 
     await expect(
-      page.locator(".nbplay-timeline-playhead").first(),
+      page.locator(".nbplay-ruler-playhead, .nbplay-lane-playhead").first(),
     ).toHaveAttribute("style", /left: 25%;/);
   });
 
@@ -513,7 +515,7 @@ test.describe("TimelineWidget", () => {
   }) => {
     await renderWidget(page, { clips: [], current_beat: 0, length: 16 });
 
-    const ruler = page.locator(".nbplay-timeline-ruler-track");
+    const ruler = page.locator(".nbplay-ruler-track");
     const rulerBox = await ruler.boundingBox();
     expect(rulerBox).not.toBeNull();
     await page.mouse.click(
@@ -527,7 +529,7 @@ test.describe("TimelineWidget", () => {
     await page.evaluate(() => {
       window.__testModel._history.length = 0;
     });
-    const lane = page.locator(".nbplay-timeline-lane").first();
+    const lane = page.locator(".nbplay-lane-clips").first();
     const laneBox = await lane.boundingBox();
     expect(laneBox).not.toBeNull();
     await page.mouse.move(laneBox.x + laneBox.width * 0.25, laneBox.y + 12);
@@ -577,7 +579,7 @@ test.describe("TimelineWidget", () => {
       await page.evaluate(() => window.__testModel._state.current_beat),
     ).toBe(0);
     await expect(
-      page.locator(".nbplay-timeline-playhead").first(),
+      page.locator(".nbplay-ruler-playhead, .nbplay-lane-playhead").first(),
     ).toHaveAttribute("style", /left: 0%;/);
   });
 
@@ -588,10 +590,10 @@ test.describe("TimelineWidget", () => {
 
     const boxes = await page.evaluate(() => {
       const ruler = document
-        .querySelector(".nbplay-timeline-ruler-track")
+        .querySelector(".nbplay-ruler-track")
         .getBoundingClientRect();
       const lane = document
-        .querySelector(".nbplay-timeline-lane")
+        .querySelector(".nbplay-lane-clips")
         .getBoundingClientRect();
       return {
         leftDiff: Math.abs(ruler.left - lane.left),
@@ -613,9 +615,7 @@ test.describe("TimelineWidget", () => {
     expect(await page.evaluate(() => window.__testModel._state.length)).toBe(
       48,
     );
-    await expect(page.locator(".nbplay-timeline-ruler-track span")).toHaveCount(
-      12,
-    );
+    await expect(page.locator(".nbplay-ruler-track span")).toHaveCount(12);
   });
 
   test("auto-extends timeline while recording near the end", async ({
@@ -644,7 +644,7 @@ test.describe("TimelineWidget", () => {
       .toEqual({ extended: true, isRecording: true, isPlaying: true });
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
   });
 
   test("can disable recording auto-extension at timeline end", async ({
@@ -670,7 +670,7 @@ test.describe("TimelineWidget", () => {
         { timeout: 1000 },
       )
       .toEqual({ length: 1, isRecording: false });
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
   });
 
   test("auto-extension controls update model state", async ({ page }) => {
@@ -703,7 +703,7 @@ test.describe("TimelineWidget", () => {
     const state = await page.evaluate(() => ({
       left: Number.parseFloat(
         document
-          .querySelector(".nbplay-timeline-playhead")
+          .querySelector(".nbplay-ruler-playhead, .nbplay-lane-playhead")
           .getAttribute("style")
           .match(/left:\s*([\d.]+)%/)?.[1] || "0",
       ),
@@ -790,7 +790,7 @@ test.describe("TimelineWidget", () => {
       async (opts) => {
         const link = document.createElement("link");
         link.rel = "stylesheet";
-        link.href = "/dist/css/timeline.css";
+        link.href = "/dist/css/components.css";
         document.head.appendChild(link);
         const mod = await import("/dist/widgets/timeline.js");
         const el = document.getElementById("root");
@@ -819,8 +819,7 @@ test.describe("TimelineWidget", () => {
             isRecording: window.__testModel._state.is_recording,
             clockRecording:
               globalThis.__nbplay["timeline-session"].clock.recording,
-            rows: document.querySelectorAll(".nbplay-timeline-row.recording")
-              .length,
+            rows: document.querySelectorAll("nbplay-lane[recording]").length,
           })),
         { timeout: 2000 },
       )
@@ -830,7 +829,7 @@ test.describe("TimelineWidget", () => {
     );
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
   });
 
   test("external record state starts and stops recording", async ({ page }) => {
@@ -857,7 +856,7 @@ test.describe("TimelineWidget", () => {
     await page.evaluate(() => {
       globalThis.__nbplay["timeline-session"].clock.setRecording(false);
     });
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
 
     // A stale status write does not start recording.
     await page.evaluate(() => {

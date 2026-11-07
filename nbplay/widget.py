@@ -695,7 +695,29 @@ def _normalize_sample_slices(slices, sample_length=0):
     return normalized
 
 
-class SynthWidget(anywidget.AnyWidget):
+THEMES = ("", "light", "dark", "studio", "flat", "cube", "one", "grim", "pro", "fruit")
+
+
+class _Themed(traitlets.HasTraits):
+    """A widget with a ``theme`` trait.
+
+    ``theme`` names a theme set for the widget's own subtree (the browser
+    reflects it as ``data-nbplay-theme``). ``""`` follows the page, which in
+    Jupyter is the active JupyterLab theme; ``"light"`` and ``"dark"`` pin
+    the default theme's two sets; the rest are the shipped sets.
+    """
+
+    theme = traitlets.Unicode("").tag(sync=True)
+
+    @traitlets.validate("theme")
+    def _validate_theme(self, proposal):
+        value = proposal["value"]
+        if value not in THEMES:
+            raise traitlets.TraitError(f"theme must be one of {THEMES}, got {value!r}")
+        return value
+
+
+class SynthWidget(_Themed, anywidget.AnyWidget):
     """Interactive synthesizer widget for Jupyter environments.
 
     Args:
@@ -706,7 +728,7 @@ class SynthWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "widget.js"
-    _css = _STATIC / "widget.css"
+    _css = _STATIC / "nbplay.css"
 
     # Session routing (set by Session): the synth joins the bus as the
     # track's instrument so sequencers and clips play with its oscillator.
@@ -764,7 +786,7 @@ class SynthWidget(anywidget.AnyWidget):
         self.waveform = buf.tobytes()
 
 
-class SettingsWidget(anywidget.AnyWidget):
+class SettingsWidget(_Themed, anywidget.AnyWidget):
     """Audio / MIDI configuration widget for Jupyter environments.
 
     Exposes sample rate, channel count, and buffer size selectors for the
@@ -772,7 +794,7 @@ class SettingsWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "settings.js"
-    _css = _STATIC / "settings.css"
+    _css = _STATIC / "nbplay.css"
 
     sample_rate = traitlets.Int(44100).tag(sync=True)
     channels = traitlets.Int(1).tag(sync=True)
@@ -786,7 +808,7 @@ class SettingsWidget(anywidget.AnyWidget):
     midi_event = traitlets.Bytes(b"").tag(sync=True)
 
 
-class MixerWidget(anywidget.AnyWidget):
+class MixerWidget(_Themed, anywidget.AnyWidget):
     """Mixer console with per-channel faders, pan, mute/solo, and master fader.
 
     Channels are synced as a JSON list of dicts with keys
@@ -797,7 +819,7 @@ class MixerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "mixer.js"
-    _css = _STATIC / "mixer.css"
+    _css = _STATIC / "nbplay.css"
 
     # JSON-serialized list of channel dicts
     channels = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
@@ -1101,7 +1123,7 @@ class NoteComposer(traitlets.HasTraits):
         return f"NoteComposer(length={len(self.steps)}, active={active})"
 
 
-class SequencerWidget(anywidget.AnyWidget):
+class SequencerWidget(_Themed, anywidget.AnyWidget):
     """Step sequencer widget with a grid-based pattern editor.
 
     Supports monophonic (``num_voices=1``) and polyphonic
@@ -1114,7 +1136,7 @@ class SequencerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "sequencer.js"
-    _css = _STATIC / "sequencer.css"
+    _css = _STATIC / "nbplay.css"
 
     # Timing / transport (the "SequencerBase" concerns)
     length = traitlets.Int(16).tag(sync=True)
@@ -1430,7 +1452,7 @@ class SequencerWidget(anywidget.AnyWidget):
         return seq
 
 
-class SamplerWidget(anywidget.AnyWidget):
+class SamplerWidget(_Themed, anywidget.AnyWidget):
     """Sampler widget with waveform display, envelope, and trigger pads.
 
     Sample data is synced as binary Float32Array bytes for
@@ -1439,7 +1461,7 @@ class SamplerWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "sampler.js"
-    _css = _STATIC / "sampler.css"
+    _css = _STATIC / "nbplay.css"
 
     # Sample info
     sample_name = traitlets.Unicode("(no sample)").tag(sync=True)
@@ -1779,7 +1801,7 @@ class SamplerWidget(anywidget.AnyWidget):
         if path.suffix.lower() == ".wav":
             return self._read_wav_file(path)
         try:
-            import soundfile as sf  # ty: ignore[unresolved-import]
+            import soundfile as sf  # ty: ignore
         except ImportError as exc:
             raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
         data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
@@ -1965,7 +1987,7 @@ class SamplerWidget(anywidget.AnyWidget):
         return s
 
 
-class TransportWidget(anywidget.AnyWidget):
+class TransportWidget(_Themed, anywidget.AnyWidget):
     """Global transport controls: play/stop, BPM, time signature, bar/beat.
 
     Used as the master clock for a ``Session``. In the browser the transport
@@ -1979,7 +2001,7 @@ class TransportWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "transport.js"
-    _css = _STATIC / "transport.css"
+    _css = _STATIC / "nbplay.css"
 
     # Session routing (set by Session so the browser clock is shared)
     session_id = traitlets.Unicode("").tag(sync=True)
@@ -2062,7 +2084,7 @@ class TransportWidget(anywidget.AnyWidget):
         self._set_status(is_recording=bool(on), is_playing=self.is_playing or bool(on))
 
 
-class TimelineWidget(anywidget.AnyWidget):
+class TimelineWidget(_Themed, anywidget.AnyWidget):
     """Multi-track clip timeline with browser recording controls.
 
     Clips are synced as JSON metadata. Browser-recorded audio is kept
@@ -2079,7 +2101,7 @@ class TimelineWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "timeline.js"
-    _css = _STATIC / "timeline.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     bpm = traitlets.Float(120.0).tag(sync=True)
@@ -2514,7 +2536,7 @@ def _normalize_launcher_slot(slot):
     }
 
 
-class LauncherWidget(anywidget.AnyWidget):
+class LauncherWidget(_Themed, anywidget.AnyWidget):
     """Beats view: a clip launcher in the session-view style.
 
     Tracks are rows, scenes are columns, and each filled slot holds a step
@@ -2527,7 +2549,7 @@ class LauncherWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "launcher.js"
-    _css = _STATIC / "launcher.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     bpm = traitlets.Float(120.0).tag(sync=True)
@@ -2909,6 +2931,7 @@ def _session_to_dict(session, resources=None):
         "timeline": {**_widget_state(session.timeline, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.tracks), "clips": clips},
         "launcher": _widget_state(session.launcher, ("quantize", "scenes", "slots")),
         "patterns": _json_copy(session.patterns),
+        "theme": session.theme,
     }
     return (data, resources) if resources is not None else data
 
@@ -2922,6 +2945,7 @@ def _session_from_dict(cls, data, resources):
     session = cls(
         bpm=transport.get("bpm", 120.0),
         time_signature=(transport.get("time_signature_num", 4), transport.get("time_signature_den", 4)),
+        theme=data.get("theme", ""),
     )
     for name in ("loop_enabled", "loop_start_bar", "loop_end_bar"):
         if name in transport:
@@ -3090,7 +3114,7 @@ class KeyboardRoute:
         )
 
 
-class KeyboardWidget(anywidget.AnyWidget):
+class KeyboardWidget(_Themed, anywidget.AnyWidget):
     r"""Musical typing keyboard widget (Logic Pro style).
 
     4-row QWERTY layout across two independent octave halves.
@@ -3108,7 +3132,7 @@ class KeyboardWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "keyboard.js"
-    _css = _STATIC / "keyboard.css"
+    _css = _STATIC / "nbplay.css"
 
     upper_octave = traitlets.Int(3).tag(sync=True)
     lower_octave = traitlets.Int(4).tag(sync=True)
@@ -3203,7 +3227,7 @@ class MidiKeyboardWidget(KeyboardWidget):
     """
 
     _esm = _STATIC / "midi_keyboard.js"
-    _css = _STATIC / "midi_keyboard.css"
+    _css = _STATIC / "nbplay.css"
 
     midi_port = traitlets.Unicode("").tag(sync=True)
     available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
@@ -3218,7 +3242,7 @@ class MidiKeyboardWidget(KeyboardWidget):
     clock_bpm = traitlets.Float(0.0).tag(sync=True)
 
 
-class MidiOutputWidget(anywidget.AnyWidget):
+class MidiOutputWidget(_Themed, anywidget.AnyWidget):
     """Send notes and control changes to a browser Web MIDI output port.
 
     With a ``session_id`` the widget forwards every note the session plays
@@ -3229,7 +3253,7 @@ class MidiOutputWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "midi_output.js"
-    _css = _STATIC / "midi_output.css"
+    _css = _STATIC / "nbplay.css"
 
     session_id = traitlets.Unicode("").tag(sync=True)
     midi_port = traitlets.Unicode("").tag(sync=True)
@@ -3276,7 +3300,7 @@ def _positive_pad_dimension(value):
     return max(1, int(value))
 
 
-class PadWidget(anywidget.AnyWidget):
+class PadWidget(_Themed, anywidget.AnyWidget):
     """On-screen trigger-pad grid.
 
     A grid of clickable, velocity-sensitive pads that send MIDI notes
@@ -3297,7 +3321,7 @@ class PadWidget(anywidget.AnyWidget):
     """
 
     _esm = _STATIC / "pad.js"
-    _css = _STATIC / "pad.css"
+    _css = _STATIC / "nbplay.css"
 
     rows = traitlets.Int(4).tag(sync=True)
     cols = traitlets.Int(4).tag(sync=True)
@@ -3619,8 +3643,9 @@ class Session:
         time_signature: ``(numerator, denominator)`` tuple.
     """
 
-    def __init__(self, bpm=120.0, time_signature=(4, 4)):
+    def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
         self._session_id = f"nbplay-{uuid.uuid4().hex[:8]}"
+        self._theme = ""
         self.transport = TransportWidget(
             session_id=self._session_id,
             bpm=bpm,
@@ -3660,6 +3685,7 @@ class Session:
         self.tracks = []
         # Named patterns for the tracking view: name -> {voices_data, step_duration}.
         self.patterns = {}
+        self.theme = theme
         # Undo/redo over every session widget's state; new tracks attach their
         # sequencer and sound source as they are added.
         self.history = History()
@@ -3780,6 +3806,9 @@ class Session:
             sound_source.session_id = self._session_id
         if hasattr(sound_source, "channel_index"):
             sound_source.channel_index = channel_idx
+        for widget in (sequencer, sound_source):
+            if isinstance(widget, _Themed):
+                widget.theme = self._theme
         self.tracks.append(track)
         if input is None:
             input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
@@ -4024,6 +4053,27 @@ class Session:
     def from_dict(cls, data, resources=None):
         """Rebuild a session from :meth:`to_dict` output plus binary resources."""
         return _session_from_dict(cls, data, resources or {})
+
+    @property
+    def theme(self):
+        """Theme set applied to every widget in the session (see ``THEMES``)."""
+        return self._theme
+
+    @theme.setter
+    def theme(self, value):
+        if value not in THEMES:
+            raise ValueError(f"theme must be one of {THEMES}, got {value!r}")
+        self._theme = value
+        for widget in self._widgets():
+            widget.theme = value
+
+    def _widgets(self):
+        widgets = [self.transport, self.mixer, self.timeline, self.launcher]
+        for track in self.tracks:
+            for widget in (track.sequencer, track.sound_source):
+                if isinstance(widget, _Themed):
+                    widgets.append(widget)
+        return widgets
 
     def _remove_launcher_track(self, index):
         launcher = self.launcher

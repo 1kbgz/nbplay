@@ -1,0 +1,52 @@
+/* nbplay theme set "flat": light grey surfaces, black text and indicators, one
+ * saturated selection color, square corners, no gradients, meters in one color
+ * with a red peak band. Apply with data-nbplay-theme="flat" on <html> or on a
+ * widget root. Overrides every token, so it does not follow the Jupyter theme. */
+
+[data-nbplay-theme="flat"] {
+  --nbplay-bg: #d6d6d6;
+  --nbplay-bg-panel: #c7c7c7;
+  --nbplay-bg-raised: #b9b9b9;
+  --nbplay-bg-control: #adadad;
+  --nbplay-fg: #141414;
+  --nbplay-fg-muted: #3a3a3a;
+  --nbplay-fg-faint: #6b6b6b;
+  --nbplay-fg-inverse: #ffffff;
+  --nbplay-border: #9c9c9c;
+  --nbplay-border-strong: #7c7c7c;
+  --nbplay-accent: #ff9d00;
+  --nbplay-accent-soft: #ffb84d;
+  --nbplay-fill: #ff9d00;
+  --nbplay-indicator: #141414;
+  --nbplay-focus: #141414;
+  --nbplay-success: #3fb85a;
+  --nbplay-warn: #e0b000;
+  --nbplay-error: #e34b3b;
+  --nbplay-info: #2a8fd0;
+  --nbplay-meter-low: #3fb85a;
+  --nbplay-meter-mid: #3fb85a;
+  --nbplay-meter-high: #e34b3b;
+  --nbplay-meter-rms: color-mix(in srgb, #141414 20%, transparent);
+  --nbplay-palette-1: #2a8fd0;
+  --nbplay-palette-2: #ff9d00;
+  --nbplay-palette-3: #3fb85a;
+  --nbplay-palette-4: #8a5cc4;
+  --nbplay-palette-5: #e0b000;
+  --nbplay-palette-6: #e34b3b;
+  --nbplay-key-white: #f4f4f4;
+  --nbplay-key-black: #222222;
+  --nbplay-chart-bg: #e6e6e6;
+  --nbplay-chart-grid: #bdbdbd;
+  --nbplay-chart-line: #141414;
+  --nbplay-radius: 0px;
+  --nbplay-radius-control: 0px;
+  --nbplay-track-size: 6px;
+  --nbplay-thumb-size: 12px;
+  --nbplay-thumb-radius: 0;
+  --nbplay-dial-stroke: 10;
+  --nbplay-control-height: 22px;
+  --nbplay-font: system-ui, sans-serif;
+  --nbplay-font-mono: system-ui, sans-serif;
+  --nbplay-font-size: 11px;
+  --nbplay-font-size-small: 10px;
+}

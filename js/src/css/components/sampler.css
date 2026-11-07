@@ -1,0 +1,142 @@
+nbplay-sampler {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 640px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+}
+nbplay-sampler .nbplay-samp-file {
+  max-width: 180px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-sampler .nbplay-samp-name {
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-accent);
+}
+nbplay-sampler .nbplay-samp-waveform {
+  display: block;
+  height: 100px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-sampler .nbplay-samp-waveform.drag-over {
+  border-color: var(--nbplay-accent);
+}
+nbplay-sampler .nbplay-samp-info {
+  display: flex;
+  gap: 14px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-sampler .nbplay-samp-active-voices {
+  margin-left: auto;
+  color: var(--nbplay-accent);
+}
+nbplay-sampler .nbplay-samp-envelope {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+nbplay-sampler .nbplay-samp-env-canvas {
+  display: block;
+  flex: 0 0 200px;
+  height: 100px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-sampler .nbplay-samp-env-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+nbplay-sampler .nbplay-samp-env-controls nbplay-param {
+  --nbplay-dial-size: 44px;
+}
+nbplay-sampler .nbplay-samp-row nbplay-param {
+  display: flex;
+}
+nbplay-sampler .nbplay-samp-row nbplay-slider {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+nbplay-sampler .nbplay-samp-pads-controls,
+nbplay-sampler .nbplay-samp-zones-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-sampler .nbplay-samp-field,
+nbplay-sampler .nbplay-samp-vel-sense-label,
+nbplay-sampler .nbplay-samp-zone-file-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-sampler .nbplay-samp-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-sampler .nbplay-samp-pad-count,
+nbplay-sampler .nbplay-samp-zone-pad {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-sampler .nbplay-samp-pad-count {
+  width: 48px;
+}
+nbplay-sampler .nbplay-samp-vel-sense {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-sampler .nbplay-samp-zone-file {
+  max-width: 150px;
+}
+nbplay-sampler .nbplay-samp-zone-rec {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 10px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-sampler .nbplay-samp-zone-rec.recording {
+  background: var(--nbplay-error);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-error);
+}
+nbplay-sampler .nbplay-samp-zone-status {
+  color: var(--nbplay-fg-faint);
+}
+nbplay-sampler nbplay-zone-map {
+  margin-bottom: 8px;
+}

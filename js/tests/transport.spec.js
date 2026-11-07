@@ -23,7 +23,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/transport.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/transport.js");
@@ -41,6 +41,31 @@ async function renderWidget(page, overrides = {}) {
 test.describe("TransportWidget", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/tests/fixtures/harness.html");
+  });
+
+  test("theme trait selects a theme set on the element", async ({ page }) => {
+    await page.evaluate(() => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/nbplay.css";
+      document.head.appendChild(link);
+    });
+    await renderWidget(page, { theme: "studio" });
+    const root = page.locator("nbplay-transport");
+    await expect(root).toHaveAttribute("data-nbplay-theme", "studio");
+    const accent = () =>
+      page.evaluate(() =>
+        getComputedStyle(document.querySelector("nbplay-transport"))
+          .getPropertyValue("--nbplay-accent")
+          .trim(),
+      );
+    const studio = await accent();
+    await page.evaluate(() => {
+      window.__testModel.set("theme", "");
+      window.__testModel._trigger("change:theme");
+    });
+    await expect(root).not.toHaveAttribute("data-nbplay-theme");
+    expect(await accent()).not.toBe(studio);
   });
 
   // 1. Renders container
@@ -73,7 +98,7 @@ test.describe("TransportWidget", () => {
 
     await page.evaluate(() => window.__testModel._trigger("change:is_playing"));
     await expect(btn).toContainText("\u23F8");
-    await expect(btn).toHaveClass(/playing/);
+    await expect(btn).toHaveAttribute("active", "");
 
     // Click again → stopped
     await btn.click();
@@ -85,7 +110,7 @@ test.describe("TransportWidget", () => {
 
     await page.evaluate(() => window.__testModel._trigger("change:is_playing"));
     await expect(btn).toContainText("▶");
-    await expect(btn).not.toHaveClass(/playing/);
+    await expect(btn).not.toHaveAttribute("active", "");
   });
 
   // 4. Stop button resets position
@@ -120,8 +145,12 @@ test.describe("TransportWidget", () => {
       window.__testModel._trigger("change:bar_number");
       window.__testModel._trigger("change:beat_in_bar");
     });
-    await expect(page.locator(".nbplay-transport-bar")).toHaveText("001");
-    await expect(page.locator(".nbplay-transport-beat")).toHaveText("1");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("001");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-beat"),
+    ).toHaveText("1");
   });
 
   // 5. BPM display shows correct value
@@ -193,9 +222,9 @@ test.describe("TransportWidget", () => {
 
   test("BPM display shows correct value", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "120 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("120 BPM");
   });
 
   // 6. Time signature shows "4/4"
@@ -209,8 +238,12 @@ test.describe("TransportWidget", () => {
   // 7. Position display shows bar:beat (1-indexed, bar zero-padded)
   test("position display shows bar:beat", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-transport-bar")).toHaveText("001");
-    await expect(page.locator(".nbplay-transport-beat")).toHaveText("1");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("001");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-beat"),
+    ).toHaveText("1");
   });
 
   test("position display with non-zero values", async ({ page }) => {
@@ -222,8 +255,12 @@ test.describe("TransportWidget", () => {
       window.__testModel._trigger("change:bar_number");
       window.__testModel._trigger("change:beat_in_bar");
     });
-    await expect(page.locator(".nbplay-transport-bar")).toHaveText("004");
-    await expect(page.locator(".nbplay-transport-beat")).toHaveText("3");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("004");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-beat"),
+    ).toHaveText("3");
   });
 
   // 8. Loop toggle works
@@ -236,7 +273,7 @@ test.describe("TransportWidget", () => {
       () => window.__testModel._state.loop_enabled,
     );
     expect(initial).toBe(false);
-    await expect(loopBtn).not.toHaveClass(/active/);
+    await expect(loopBtn).not.toHaveAttribute("active", "");
 
     await loopBtn.click();
 
@@ -248,7 +285,7 @@ test.describe("TransportWidget", () => {
     await page.evaluate(() =>
       window.__testModel._trigger("change:loop_enabled"),
     );
-    await expect(loopBtn).toHaveClass(/active/);
+    await expect(loopBtn).toHaveAttribute("active", "");
 
     await loopBtn.click();
     const disabled = await page.evaluate(
@@ -259,7 +296,7 @@ test.describe("TransportWidget", () => {
     await page.evaluate(() =>
       window.__testModel._trigger("change:loop_enabled"),
     );
-    await expect(loopBtn).not.toHaveClass(/active/);
+    await expect(loopBtn).not.toHaveAttribute("active", "");
   });
 
   // 9. Loop range displays correctly
@@ -274,17 +311,17 @@ test.describe("TransportWidget", () => {
   // 10. Model change:bpm updates display
   test("model change:bpm updates BPM display", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "120 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("120 BPM");
 
     await page.evaluate(() => {
       window.__testModel.set("bpm", 90);
       window.__testModel._trigger("change:bpm");
     });
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "90 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("90 BPM");
   });
 
   // 11. Model change:is_playing updates button
@@ -308,27 +345,31 @@ test.describe("TransportWidget", () => {
       window.__testModel._trigger("change:command");
     });
     await expect(btn).toContainText("\u23F8");
-    await expect(btn).toHaveClass(/playing/);
+    await expect(btn).toHaveAttribute("active", "");
 
     await page.evaluate(() => {
       window.__testModel.set("command", { action: "stop", nonce: 2 });
       window.__testModel._trigger("change:command");
     });
     await expect(btn).toContainText("▶");
-    await expect(btn).not.toHaveClass(/playing/);
+    await expect(btn).not.toHaveAttribute("active", "");
   });
 
   // 12. Model change:bar_number updates position display
   test("model change:bar_number updates position display", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-transport-bar")).toHaveText("001");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("001");
 
     await page.evaluate(() => {
       window.__testModel.set("bar_number", 5);
       window.__testModel._trigger("change:bar_number");
     });
     // bar_number 5 → display "006"
-    await expect(page.locator(".nbplay-transport-bar")).toHaveText("006");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("006");
   });
 
   test("model change:beat_in_bar updates position display", async ({
@@ -341,7 +382,9 @@ test.describe("TransportWidget", () => {
       window.__testModel._trigger("change:beat_in_bar");
     });
     // beat_in_bar 3 → display "4"
-    await expect(page.locator(".nbplay-transport-beat")).toHaveText("4");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-beat"),
+    ).toHaveText("4");
   });
 
   test("record button arms recording and starts playback", async ({ page }) => {
@@ -355,7 +398,7 @@ test.describe("TransportWidget", () => {
     }));
     expect(state.is_recording).toBe(true);
     expect(state.is_playing).toBe(true);
-    await expect(recordBtn).toHaveClass(/recording/);
+    await expect(recordBtn).toHaveAttribute("active", "");
 
     await recordBtn.click();
     state = await page.evaluate(() => ({
@@ -364,7 +407,7 @@ test.describe("TransportWidget", () => {
     }));
     expect(state.is_recording).toBe(false);
     expect(state.is_playing).toBe(true);
-    await expect(recordBtn).not.toHaveClass(/recording/);
+    await expect(recordBtn).not.toHaveAttribute("active", "");
   });
 
   test("play clock advances current_beat continuously", async ({ page }) => {
@@ -408,10 +451,10 @@ test.describe("TransportWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmDisplay = page.locator(".nbplay-transport-bpm-val");
+    const bpmDisplay = page.locator(".nbplay-transport-tempo nbplay-value");
     await bpmDisplay.dblclick();
 
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("120");
 
@@ -420,9 +463,9 @@ test.describe("TransportWidget", () => {
 
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(140);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "140 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("140 BPM");
   });
 
   // 14. BPM double-click Escape cancels
@@ -430,17 +473,17 @@ test.describe("TransportWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmDisplay = page.locator(".nbplay-transport-bpm-val");
+    const bpmDisplay = page.locator(".nbplay-transport-tempo nbplay-value");
     await expect(bpmDisplay).toHaveText("120 BPM");
 
     await bpmDisplay.dblclick();
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await input.fill("200");
     await input.press("Escape");
 
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "120 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("120 BPM");
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(120);
   });
@@ -450,14 +493,16 @@ test.describe("TransportWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmDisplay = page.locator(".nbplay-transport-bpm-val");
+    const bpmDisplay = page.locator(".nbplay-transport-tempo nbplay-value");
     await bpmDisplay.dblclick();
 
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await input.fill("160");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-transport-bpm-val")).toBeVisible();
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toBeVisible();
 
     // Wait for any deferred blur handler
     await page.waitForTimeout(100);
@@ -484,13 +529,13 @@ test.describe("TransportWidget", () => {
       window.__testModel.set("loop_enabled", true);
       window.__testModel._trigger("change:loop_enabled");
     });
-    await expect(loopBtn).toHaveClass(/active/);
+    await expect(loopBtn).toHaveAttribute("active", "");
 
     await page.evaluate(() => {
       window.__testModel.set("loop_enabled", false);
       window.__testModel._trigger("change:loop_enabled");
     });
-    await expect(loopBtn).not.toHaveClass(/active/);
+    await expect(loopBtn).not.toHaveAttribute("active", "");
   });
 
   // 18. Model change:time_signature updates display
@@ -520,14 +565,14 @@ test.describe("TransportWidget", () => {
   // 19. BPM slider updates model and display
   test("BPM slider input updates model and display", async ({ page }) => {
     await renderWidget(page);
-    const slider = page.locator(".nbplay-transport-bpm-slider");
+    const slider = page.locator(".nbplay-transport-tempo input[type=range]");
     await slider.fill("90");
 
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(90);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "90 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("90 BPM");
   });
 
   // 20. Model change:loop_start_bar / loop_end_bar updates range
@@ -563,37 +608,37 @@ test.describe("TransportWidget", () => {
   // 21. BPM inline edit clamps to valid range
   test("BPM inline edit clamps to valid range", async ({ page }) => {
     await renderWidget(page);
-    const bpmDisplay = page.locator(".nbplay-transport-bpm-val");
+    const bpmDisplay = page.locator(".nbplay-transport-tempo nbplay-value");
     await bpmDisplay.dblclick();
 
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await input.fill("999");
     await input.press("Enter");
 
     // Should clamp to 300
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(300);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "300 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("300 BPM");
   });
 
   // 22. BPM inline edit rejects non-numeric input
   test("BPM inline edit rejects non-numeric input", async ({ page }) => {
     await renderWidget(page);
-    const bpmDisplay = page.locator(".nbplay-transport-bpm-val");
+    const bpmDisplay = page.locator(".nbplay-transport-tempo nbplay-value");
     await bpmDisplay.dblclick();
 
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await input.fill("abc");
     await input.press("Enter");
 
     // parse returns null for NaN → original value preserved
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(120);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "120 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("120 BPM");
   });
 
   // 23. Kernel disconnect stops playback
@@ -601,7 +646,7 @@ test.describe("TransportWidget", () => {
     await page.evaluate(async () => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/transport.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/transport.js");

@@ -20,7 +20,7 @@ async function renderWidget(page, overrides = {}) {
       // Inject widget CSS
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/widget.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/widget.js");
@@ -49,18 +49,22 @@ test.describe("SynthWidget", () => {
   // 2. Shows header with badge
   test("shows header text and synth badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("synth");
+    await expect(
+      page.locator(".nbplay-synth nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(page.locator(".nbplay-synth .nbplay-header-badge")).toHaveText(
+      "synth",
+    );
   });
 
   // 3. Oscillator buttons
   test("renders all four oscillator buttons", async ({ page }) => {
     await renderWidget(page);
-    const btns = page.locator(".nbplay-osc-btn");
+    const btns = page.locator(".nbplay-osc .nbplay-segmented-option");
     await expect(btns).toHaveCount(4);
     for (const type of ["sine", "square", "saw", "noise"]) {
       await expect(
-        page.locator(`.nbplay-osc-btn[data-type="${type}"]`),
+        page.locator(`.nbplay-osc [data-value="${type}"]`),
       ).toBeVisible();
     }
   });
@@ -68,18 +72,18 @@ test.describe("SynthWidget", () => {
   // 4. Default oscillator highlighted
   test("highlights the default oscillator button", async ({ page }) => {
     await renderWidget(page, { oscillator_type: "square" });
+    await expect(page.locator('.nbplay-osc [data-value="square"]')).toHaveClass(
+      /active/,
+    );
     await expect(
-      page.locator('.nbplay-osc-btn[data-type="square"]'),
-    ).toHaveClass(/active/);
-    await expect(
-      page.locator('.nbplay-osc-btn[data-type="sine"]'),
+      page.locator('.nbplay-osc [data-value="sine"]'),
     ).not.toHaveClass(/active/);
   });
 
   // 5. Click oscillator button updates model
   test("clicking oscillator button sets model and saves", async ({ page }) => {
     await renderWidget(page);
-    await page.locator('.nbplay-osc-btn[data-type="saw"]').click();
+    await page.locator('.nbplay-osc [data-value="saw"]').click();
 
     const result = await page.evaluate(() => ({
       type: window.__testModel._state.oscillator_type,
@@ -89,7 +93,7 @@ test.describe("SynthWidget", () => {
     expect(result.saved).toBe(true);
 
     // UI should reflect the change
-    await expect(page.locator('.nbplay-osc-btn[data-type="saw"]')).toHaveClass(
+    await expect(page.locator('.nbplay-osc [data-value="saw"]')).toHaveClass(
       /active/,
     );
   });
@@ -97,18 +101,24 @@ test.describe("SynthWidget", () => {
   // 6. Frequency display
   test("displays frequency formatted as Hz", async ({ page }) => {
     await renderWidget(page, { frequency: 440 });
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("440.0 Hz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "440.0 Hz",
+    );
   });
 
   test("displays frequency formatted as kHz when >= 1000", async ({ page }) => {
     await renderWidget(page, { frequency: 2000 });
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("2.00 kHz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "2.00 kHz",
+    );
   });
 
   // 7. Amplitude display
   test("displays amplitude to 2 decimal places", async ({ page }) => {
     await renderWidget(page, { amplitude: 0.75 });
-    await expect(page.locator(".nbplay-amp-val")).toHaveText("0.75");
+    await expect(page.locator(".nbplay-amp .nbplay-value-text")).toHaveText(
+      "0.75",
+    );
   });
 
   // 8. Play button toggle
@@ -164,33 +174,41 @@ test.describe("SynthWidget", () => {
     page,
   }) => {
     await renderWidget(page, { frequency: 440 });
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("440.0 Hz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "440.0 Hz",
+    );
 
     await page.evaluate(() => {
       window.__testModel.set("frequency", 1500);
       window.__testModel._trigger("change:frequency");
     });
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("1.50 kHz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "1.50 kHz",
+    );
   });
 
   test("model change:amplitude updates the amplitude label", async ({
     page,
   }) => {
     await renderWidget(page, { amplitude: 0.5 });
-    await expect(page.locator(".nbplay-amp-val")).toHaveText("0.50");
+    await expect(page.locator(".nbplay-amp .nbplay-value-text")).toHaveText(
+      "0.50",
+    );
 
     await page.evaluate(() => {
       window.__testModel.set("amplitude", 0.82);
       window.__testModel._trigger("change:amplitude");
     });
-    await expect(page.locator(".nbplay-amp-val")).toHaveText("0.82");
+    await expect(page.locator(".nbplay-amp .nbplay-value-text")).toHaveText(
+      "0.82",
+    );
   });
 
   test("model change:oscillator_type updates active button", async ({
     page,
   }) => {
     await renderWidget(page, { oscillator_type: "sine" });
-    await expect(page.locator('.nbplay-osc-btn[data-type="sine"]')).toHaveClass(
+    await expect(page.locator('.nbplay-osc [data-value="sine"]')).toHaveClass(
       /active/,
     );
 
@@ -198,11 +216,11 @@ test.describe("SynthWidget", () => {
       window.__testModel.set("oscillator_type", "noise");
       window.__testModel._trigger("change:oscillator_type");
     });
+    await expect(page.locator('.nbplay-osc [data-value="noise"]')).toHaveClass(
+      /active/,
+    );
     await expect(
-      page.locator('.nbplay-osc-btn[data-type="noise"]'),
-    ).toHaveClass(/active/);
-    await expect(
-      page.locator('.nbplay-osc-btn[data-type="sine"]'),
+      page.locator('.nbplay-osc [data-value="sine"]'),
     ).not.toHaveClass(/active/);
   });
 
@@ -212,14 +230,14 @@ test.describe("SynthWidget", () => {
   }) => {
     await renderWidget(page, { frequency: 440 });
 
-    const freqVal = page.locator(".nbplay-freq-val");
+    const freqVal = page.locator(".nbplay-freq .nbplay-value-text");
     await expect(freqVal).toHaveText("440.0 Hz");
 
     // Double-click to enter edit mode
     await freqVal.dblclick();
 
     // An input should appear in its place
-    const input = page.locator(".nbplay-inline-edit");
+    const input = page.locator(".nbplay-synth input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("440");
 
@@ -228,7 +246,9 @@ test.describe("SynthWidget", () => {
     await input.press("Enter");
 
     // The span should be restored with the new value
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("1.20 kHz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "1.20 kHz",
+    );
 
     const freq = await page.evaluate(() => window.__testModel._state.frequency);
     expect(freq).toBe(1200);
@@ -237,12 +257,14 @@ test.describe("SynthWidget", () => {
   test("double-click on freq label accepts kHz shorthand", async ({ page }) => {
     await renderWidget(page, { frequency: 440 });
 
-    await page.locator(".nbplay-freq-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-freq .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("2k");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("2.00 kHz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "2.00 kHz",
+    );
     const freq = await page.evaluate(() => window.__testModel._state.frequency);
     expect(freq).toBe(2000);
   });
@@ -252,14 +274,16 @@ test.describe("SynthWidget", () => {
   }) => {
     await renderWidget(page, { amplitude: 0.5 });
 
-    await page.locator(".nbplay-amp-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-amp .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await expect(input).toBeVisible();
 
     await input.fill("0.9");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-amp-val")).toHaveText("0.90");
+    await expect(page.locator(".nbplay-amp .nbplay-value-text")).toHaveText(
+      "0.90",
+    );
     const amp = await page.evaluate(() => window.__testModel._state.amplitude);
     expect(amp).toBe(0.9);
   });
@@ -270,13 +294,15 @@ test.describe("SynthWidget", () => {
   }) => {
     await renderWidget(page, { frequency: 440 });
 
-    await page.locator(".nbplay-freq-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-freq .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("9999");
     await input.press("Escape");
 
     // Label should be restored to original value
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("440.0 Hz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "440.0 Hz",
+    );
 
     // Model should NOT have been updated to 9999
     const freq = await page.evaluate(() => window.__testModel._state.frequency);
@@ -289,8 +315,8 @@ test.describe("SynthWidget", () => {
   }) => {
     await renderWidget(page, { frequency: 440 });
 
-    await page.locator(".nbplay-freq-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-freq .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("800");
 
     // Press Enter (commits and replaces input with span)
@@ -298,8 +324,10 @@ test.describe("SynthWidget", () => {
 
     // The span should be back — blur will fire on the now-detached input,
     // but the committed guard should prevent a second replaceWith error.
-    await expect(page.locator(".nbplay-freq-val")).toBeVisible();
-    await expect(page.locator(".nbplay-freq-val")).toHaveText("800.0 Hz");
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toBeVisible();
+    await expect(page.locator(".nbplay-freq .nbplay-value-text")).toHaveText(
+      "800.0 Hz",
+    );
 
     // Small wait to let any deferred blur handler execute
     await page.waitForTimeout(100);
@@ -317,8 +345,8 @@ test.describe("SynthWidget", () => {
     await renderWidget(page, { frequency: 440 });
 
     // Try setting below minimum (20)
-    await page.locator(".nbplay-freq-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-freq .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("5");
     await input.press("Enter");
 
@@ -329,8 +357,8 @@ test.describe("SynthWidget", () => {
   test("amplitude is clamped to 0–1 via inline edit", async ({ page }) => {
     await renderWidget(page, { amplitude: 0.5 });
 
-    await page.locator(".nbplay-amp-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-amp .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("5");
     await input.press("Enter");
 
@@ -341,8 +369,8 @@ test.describe("SynthWidget", () => {
   test("invalid inline edit input is ignored", async ({ page }) => {
     await renderWidget(page, { frequency: 440 });
 
-    await page.locator(".nbplay-freq-val").dblclick();
-    const input = page.locator(".nbplay-inline-edit");
+    await page.locator(".nbplay-freq .nbplay-value-text").dblclick();
+    const input = page.locator(".nbplay-synth input[type=text]");
     await input.fill("not-a-number");
     await input.press("Enter");
 
@@ -353,7 +381,7 @@ test.describe("SynthWidget", () => {
 
   test("noise oscillator disables frequency slider", async ({ page }) => {
     await renderWidget(page, { oscillator_type: "noise" });
-    await expect(page.locator(".nbplay-freq")).toBeDisabled();
+    await expect(page.locator(".nbplay-freq input[type=range]")).toBeDisabled();
   });
 
   test("sample rate info is displayed", async ({ page }) => {
@@ -425,6 +453,6 @@ test.describe("SynthWidget", () => {
 
   test("waveform canvas is rendered", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-waveform")).toBeVisible();
+    await expect(page.locator(".nbplay-synth nbplay-waveform")).toBeVisible();
   });
 });

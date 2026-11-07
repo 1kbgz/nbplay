@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}, zones = []) {
     async ({ opts, zones }) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sampler.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/sampler.js");
       const el = document.getElementById("root");
@@ -123,15 +123,15 @@ test.describe("Sampler zones", () => {
       { note_low: 36, note_high: 36, root_note: 36, length: 100 },
       { note_low: 48, note_high: 72, root_note: 60, length: 200 },
     ]);
-    await expect(page.locator(".nbplay-samp-zone-row")).toHaveCount(2);
-    await expect(page.locator(".nbplay-samp-zone-span")).toHaveCount(2);
-    await expect(page.locator(".nbplay-samp-zone-map")).not.toHaveClass(
+    await expect(page.locator(".nbplay-zone-list-row")).toHaveCount(2);
+    await expect(page.locator(".nbplay-zone-map-span")).toHaveCount(2);
+    await expect(page.locator(".nbplay-zone-map-track")).not.toHaveClass(
       /empty/,
     );
-    const second = page.locator(".nbplay-samp-zone-row").nth(1);
-    await expect(second.locator(".nbplay-samp-zone-low")).toHaveValue("48");
-    await expect(second.locator(".nbplay-samp-zone-high")).toHaveValue("72");
-    await expect(second.locator(".nbplay-samp-zone-root")).toHaveValue("60");
+    const second = page.locator(".nbplay-zone-list-row").nth(1);
+    await expect(
+      second.locator(".nbplay-zone-list-note .nbplay-value-text"),
+    ).toHaveText(["C3", "C5", "C4"]);
     await expect(
       page.locator(".nbplay-samp-zone-pad option").nth(1),
     ).toHaveText("Pad 1 (C2)");
@@ -150,7 +150,7 @@ test.describe("Sampler zones", () => {
       window.__testModel.set("sample_data", new DataView(samples.buffer));
       window.__testModel._trigger("change:sample_data");
     });
-    const pads = page.locator(".nbplay-samp-pad");
+    const pads = page.locator(".nbplay-pad-cell");
     await pads.nth(1).click({ position: { x: 4, y: 4 } }); // 38 → zone 1
     await pads.nth(2).click({ position: { x: 4, y: 4 } }); // 42 → zone 2
     await pads.nth(0).click({ position: { x: 4, y: 4 } }); // 36 → main sample
@@ -203,10 +203,13 @@ test.describe("Sampler zones", () => {
     await renderWidget(page, {}, [
       { note_low: 48, note_high: 60, root_note: 55, length: 10 },
     ]);
-    const row = page.locator(".nbplay-samp-zone-row").first();
-    await row.locator(".nbplay-samp-zone-low").fill("70");
-    await row.locator(".nbplay-samp-zone-low").press("Enter");
-    await row.locator(".nbplay-samp-zone-low").blur();
+    const row = page.locator(".nbplay-zone-list-row").first();
+    await row
+      .locator(".nbplay-zone-list-note .nbplay-value-text")
+      .first()
+      .dblclick();
+    await row.locator(".nbplay-zone-list-note input[type=text]").fill("70");
+    await row.locator(".nbplay-zone-list-note input[type=text]").press("Enter");
     expect(await zonesState(page)).toEqual([
       {
         name: "Zone 1",
@@ -217,12 +220,12 @@ test.describe("Sampler zones", () => {
         bytes: 40,
       },
     ]);
-    await row.locator(".nbplay-samp-zone-name").fill("Snare");
-    await row.locator(".nbplay-samp-zone-name").blur();
+    await row.locator(".nbplay-zone-list-name").fill("Snare");
+    await row.locator(".nbplay-zone-list-name").blur();
     expect((await zonesState(page))[0].name).toBe("Snare");
-    await row.locator(".nbplay-samp-zone-remove").click();
+    await row.locator(".nbplay-zone-list-remove").click();
     expect(await zonesState(page)).toEqual([]);
-    await expect(page.locator(".nbplay-samp-zone-map")).toHaveClass(/empty/);
+    await expect(page.locator(".nbplay-zone-map-track")).toHaveClass(/empty/);
   });
 
   test("a file adds a zone on the selected pad", async ({ page }) => {

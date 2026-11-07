@@ -1,0 +1,52 @@
+nbplay-midi-output {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: max-content;
+  min-width: 320px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+}
+nbplay-midi-output .nbplay-midi-out-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-midi-output .nbplay-midi-out-label {
+  min-width: 56px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-output .nbplay-midi-out-channel {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-midi-output .nbplay-midi-out-forward {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--nbplay-fg-muted);
+  cursor: pointer;
+}
+nbplay-midi-output .nbplay-midi-out-forward input {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-midi-output .nbplay-midi-out-count {
+  color: var(--nbplay-fg-faint);
+  font-variant-numeric: tabular-nums;
+}

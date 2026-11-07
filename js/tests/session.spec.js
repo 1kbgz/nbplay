@@ -102,13 +102,19 @@ async function renderWidget(page, name, key, opts) {
       window.__models = window.__models || {};
       window.__models[key] = model;
       // Tag oscillator starts with the widget that scheduled them by
-      // wrapping the model's get(), which the scheduler calls per step.
-      const get = model.get.bind(model);
-      model.get = (k) => {
-        window.__currentWidget = key;
-        return get(k);
+      // wrapping the trait reads the scheduler makes per step: the model's
+      // get() for widgets, the element's scheduler shim for instruments.
+      const tag = (target) => {
+        const get = target.get.bind(target);
+        target.get = (k) => {
+          window.__currentWidget = key;
+          return get(k);
+        };
       };
+      tag(model);
       mod.default.render({ model, el });
+      const node = el.querySelector("nbplay-sequencer");
+      if (node) tag(node.shim);
     },
     { name, key, opts },
   );
@@ -202,7 +208,7 @@ test.describe("Session clock", () => {
     await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 1);
 
     // Tempo change from the transport slider.
-    await page.locator(".nbplay-transport-bpm-slider").fill("240");
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("240");
     const bpms = await page.evaluate(() => ({
       clock: globalThis.__nbplay["clock-test-session"].clock.bpm,
       a: window.__models.a._state.bpm,
@@ -295,7 +301,7 @@ test.describe("Session clock", () => {
     }));
     expect(state).toEqual({ transportBeat: 0, timelineBeat: 0, clockBeat: 0 });
     await expect(
-      page.locator(".nbplay-timeline-playhead").first(),
+      page.locator(".nbplay-ruler-playhead, .nbplay-lane-playhead").first(),
     ).toHaveAttribute("style", /left: 0%;/);
   });
 

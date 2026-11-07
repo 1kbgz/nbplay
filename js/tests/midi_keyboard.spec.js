@@ -45,7 +45,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/midi_keyboard.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/midi_keyboard.js");
@@ -70,7 +70,7 @@ test.describe("MidiKeyboardWidget", () => {
     await renderWidget(page);
     await expect(page.locator(".nbplay-midi-keyboard")).toBeVisible();
     await expect(
-      page.locator(".nbplay-midi-kb-select option").nth(1),
+      page.locator("nbplay-midi-port select option").nth(1),
     ).toHaveText("USB Keys");
   });
 
@@ -81,8 +81,8 @@ test.describe("MidiKeyboardWidget", () => {
     await renderWidget(page);
 
     await expect(page.locator(".nbplay-midi-keyboard")).toBeVisible();
-    await expect(page.locator(".nbplay-midi-kb-status")).toHaveText("Idle");
-    await expect(page.locator(".nbplay-midi-kb-select option")).toHaveCount(1);
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText("Idle");
+    await expect(page.locator("nbplay-midi-port select option")).toHaveCount(1);
   });
 
   test("MIDI note state updates without Web Audio", async ({ page }) => {
@@ -91,7 +91,7 @@ test.describe("MidiKeyboardWidget", () => {
       window.webkitAudioContext = undefined;
     });
     await renderWidget(page);
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
 
     await page.evaluate(() => {
       window.__midiInput.send([0x90, 60, 96]);
@@ -107,7 +107,7 @@ test.describe("MidiKeyboardWidget", () => {
 
   test("control changes sync to the control_change trait", async ({ page }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
     await page.evaluate(() => {
       window.__midiInput.send([0xb3, 7, 100]);
       window.__midiInput.send([0xb3, 7, 100]);
@@ -126,7 +126,7 @@ test.describe("MidiKeyboardWidget", () => {
       globalThis.__nbplay = { "clk-session": { audioCtx: new AudioContext() } };
     });
     await renderWidget(page, { session_id: "clk-session", sync_clock: true });
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
     await expect(page.locator(".nbplay-midi-kb-clock-input")).toBeChecked();
 
     const state = await page.evaluate(() => {
@@ -175,13 +175,13 @@ test.describe("MidiKeyboardWidget", () => {
 
   test("selecting a MIDI port stores the port name", async ({ page }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
 
     const midiPort = await page.evaluate(
       () => window.__testModel._state.midi_port,
     );
     expect(midiPort).toBe("USB Keys");
-    await expect(page.locator(".nbplay-midi-kb-status")).toHaveText(
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText(
       "Connected",
     );
   });
@@ -190,7 +190,7 @@ test.describe("MidiKeyboardWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
 
     const received = await page.evaluate(async () => {
       return new Promise((resolve) => {
@@ -219,7 +219,7 @@ test.describe("MidiKeyboardWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
 
     await page.evaluate(() => {
       window.__midiInput.send([0x90, 60, 96]);
@@ -262,7 +262,7 @@ test.describe("MidiKeyboardWidget", () => {
       session_id: "test-session",
       sampler_routing: [{ channel_index: 0, match: "all" }],
     });
-    await page.locator(".nbplay-midi-kb-select").selectOption("input-1");
+    await page.locator("nbplay-midi-port select").selectOption("input-1");
 
     await page.evaluate(() => {
       window.__midiInput.send([0x90, 64, 110]);

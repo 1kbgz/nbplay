@@ -1,0 +1,211 @@
+nbplay-launcher-slot {
+  display: block;
+  min-width: 72px;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 32px;
+  padding: 0 6px;
+  overflow: hidden;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  font-weight: 700;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-button.empty {
+  color: var(--nbplay-fg-faint);
+  background: transparent;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-button:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-progress {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-progress .nbplay-bar-fill {
+  background: color-mix(in srgb, var(--nbplay-success) 35%, transparent);
+}
+nbplay-launcher-slot .nbplay-launcher-slot-name {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-launcher-slot .nbplay-launcher-slot-next {
+  position: relative;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--nbplay-warn);
+  color: var(--nbplay-fg-inverse);
+}
+nbplay-launcher-slot[active] .nbplay-launcher-slot-button {
+  border-color: var(--nbplay-success);
+  color: var(--nbplay-success);
+}
+nbplay-launcher-slot[queued] .nbplay-launcher-slot-button {
+  border-color: var(--nbplay-warn);
+  animation: nbplay-launcher-blink 0.8s step-end infinite;
+}
+nbplay-launcher-slot[selected] .nbplay-launcher-slot-button {
+  box-shadow: inset 0 0 0 2px var(--nbplay-accent);
+}
+nbplay-launcher-slot[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+@keyframes nbplay-launcher-blink {
+  50% {
+    border-color: var(--nbplay-border);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  nbplay-launcher-slot .nbplay-launcher-slot-button {
+    animation: none !important;
+  }
+}
+
+nbplay-launcher-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-x: auto;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-launcher-grid .nbplay-launcher-grid-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  width: max-content;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-corner,
+nbplay-launcher-grid .nbplay-launcher-grid-track {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 0 0 96px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-corner {
+  align-items: center;
+  color: var(--nbplay-fg-faint);
+}
+nbplay-launcher-grid .nbplay-launcher-grid-track-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-track small {
+  color: var(--nbplay-fg-muted);
+}
+nbplay-launcher-grid nbplay-launcher-slot {
+  flex: 0 0 96px;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-scene,
+nbplay-launcher-grid .nbplay-launcher-grid-stop-all,
+nbplay-launcher-grid .nbplay-launcher-grid-track-stop {
+  height: 32px;
+  font: inherit;
+  font-weight: 700;
+  padding: 0 8px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-scene {
+  flex: 0 0 96px;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-stop-all,
+nbplay-launcher-grid .nbplay-launcher-grid-track-stop {
+  flex: 0 0 auto;
+  min-width: 48px;
+}
+nbplay-launcher-grid button:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-launcher-grid button:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-launcher-grid .nbplay-launcher-grid-scene.active {
+  background: var(--nbplay-success);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-success);
+}
+nbplay-launcher-grid .nbplay-launcher-grid-scene.partial {
+  border-color: var(--nbplay-success);
+  color: var(--nbplay-success);
+}
+nbplay-launcher-grid .nbplay-launcher-grid-scene.queued,
+nbplay-launcher-grid .nbplay-launcher-grid-track-stop.queued {
+  border-color: var(--nbplay-warn);
+  color: var(--nbplay-warn);
+}
+nbplay-launcher-grid .nbplay-launcher-grid-empty {
+  padding: 8px;
+  color: var(--nbplay-fg-faint);
+}
+nbplay-launcher-grid[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+nbplay-launcher {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-launcher:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-launcher .nbplay-launcher-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-launcher .nbplay-launcher-quantize {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}

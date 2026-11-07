@@ -9,6 +9,7 @@ import pytest
 import traitlets
 
 from nbplay import (
+    THEMES,
     AudioBuffer,
     AudioClip,
     AudioFormat,
@@ -3537,6 +3538,14 @@ class TestHistory:
 
 
 class TestSessionPersistence:
+    def test_theme_round_trips(self, tmp_path):
+        s = Session(theme="pro")
+        s.add_track("Lead", SequencerWidget())
+        path = s.save(tmp_path / "themed.nbplay")
+        loaded = Session.load(path)
+        assert loaded.theme == "pro"
+        assert loaded.tracks[0].sequencer.theme == "pro"
+
     def _session(self):
         s = Session(bpm=132.0, time_signature=(3, 4))
         s.transport.loop_enabled = True
@@ -3821,6 +3830,24 @@ class TestTrack:
 
 
 class TestSession:
+    def test_theme_applies_to_every_widget(self):
+        w = SynthWidget()
+        assert w.theme == "" and "studio" in THEMES
+        w.theme = "studio"
+        with pytest.raises(traitlets.TraitError):
+            w.theme = "neon"
+        s = Session(theme="flat")
+        track = s.add_track("Lead", SequencerWidget(), SamplerWidget())
+        widgets = [s.transport, s.mixer, s.timeline, s.launcher, track.sequencer, track.sound_source]
+        assert all(x.theme == "flat" for x in widgets)
+        s.theme = "grim"
+        assert all(x.theme == "grim" for x in widgets)
+        with pytest.raises(ValueError):
+            s.theme = "neon"
+        assert s.theme == "grim"
+        s.theme = ""
+        assert all(x.theme == "" for x in widgets)
+
     def test_defaults(self):
         s = Session()
         assert isinstance(s.history, History)

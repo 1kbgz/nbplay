@@ -1,0 +1,351 @@
+nbplay-ruler {
+  display: block;
+  user-select: none;
+  font-family: var(--nbplay-font-mono);
+  font-size: 10px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-ruler .nbplay-ruler-track {
+  position: relative;
+  height: 22px;
+  background: var(--nbplay-bg-raised);
+  border-bottom: 1px solid var(--nbplay-border);
+  cursor: text;
+  touch-action: none;
+  overflow: hidden;
+}
+nbplay-ruler .nbplay-ruler-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding-left: 4px;
+  border-left: 1px solid var(--nbplay-border-strong);
+  line-height: 22px;
+  pointer-events: none;
+}
+nbplay-ruler .nbplay-ruler-loop {
+  position: absolute;
+  top: 0;
+  height: 5px;
+  background: var(--nbplay-accent);
+  pointer-events: none;
+}
+nbplay-ruler .nbplay-ruler-loop-handle {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 2;
+}
+/* Offset so a handle at either end stays inside the track (and a scroll
+   container clipping at the track edge). */
+nbplay-ruler .nbplay-ruler-loop-handle.start {
+  margin-left: -2px;
+}
+nbplay-ruler .nbplay-ruler-loop-handle.end {
+  margin-left: -8px;
+}
+nbplay-ruler .nbplay-ruler-loop-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 4px;
+  height: 100%;
+  background: var(--nbplay-accent);
+  border-radius: 2px;
+}
+nbplay-ruler .nbplay-ruler-playhead,
+nbplay-lane .nbplay-lane-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--nbplay-indicator);
+  pointer-events: none;
+  z-index: 3;
+}
+nbplay-ruler[disabled] .nbplay-ruler-track {
+  pointer-events: none;
+}
+
+nbplay-lane {
+  display: flex;
+  align-items: stretch;
+  min-height: 56px;
+  border-bottom: 1px solid var(--nbplay-border);
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-lane .nbplay-lane-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 150px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border-right: 1px solid var(--nbplay-border);
+}
+nbplay-lane .nbplay-lane-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-lane .nbplay-lane-buttons {
+  display: flex;
+  gap: 3px;
+}
+nbplay-lane .nbplay-lane-buttons .nbplay-toggle-button {
+  min-width: 22px;
+  height: 20px;
+  padding: 0;
+  font-size: 10px;
+}
+nbplay-lane .nbplay-lane-input {
+  height: 20px;
+  font: inherit;
+  padding: 0 2px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-lane .nbplay-lane-clips {
+  position: relative;
+  flex: 1 0 auto;
+  min-width: 0;
+  background: var(--nbplay-chart-bg);
+  background-image: linear-gradient(
+    to right,
+    var(--nbplay-chart-grid) 1px,
+    transparent 1px
+  );
+  background-size: calc(100% / var(--nbplay-lane-beats, 16)) 100%;
+  cursor: text;
+  touch-action: none;
+  overflow: hidden;
+}
+nbplay-lane[recording] .nbplay-lane-clips {
+  box-shadow: inset 0 0 0 1px var(--nbplay-error);
+}
+nbplay-lane[disabled] {
+  opacity: 0.5;
+}
+
+nbplay-clip {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: color-mix(
+    in srgb,
+    var(--nbplay-palette-1) 30%,
+    var(--nbplay-bg-raised)
+  );
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-palette-1);
+  border-radius: var(--nbplay-radius-control);
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  z-index: 1;
+}
+nbplay-clip[kind="midi"] {
+  background: color-mix(
+    in srgb,
+    var(--nbplay-palette-3) 30%,
+    var(--nbplay-bg-raised)
+  );
+  border-color: var(--nbplay-palette-3);
+}
+nbplay-clip[pattern] {
+  background: color-mix(
+    in srgb,
+    var(--nbplay-palette-2) 30%,
+    var(--nbplay-bg-raised)
+  );
+  border-color: var(--nbplay-palette-2);
+}
+nbplay-clip[selected] {
+  box-shadow: 0 0 0 2px var(--nbplay-accent);
+  z-index: 2;
+}
+nbplay-clip[muted] {
+  opacity: 0.45;
+}
+nbplay-clip[dragging] {
+  cursor: grabbing;
+  opacity: 0.85;
+}
+nbplay-clip .nbplay-clip-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-clip .nbplay-clip-detail {
+  font-size: 9px;
+  color: var(--nbplay-fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-clip .nbplay-clip-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+nbplay-clip .nbplay-clip-handle.start {
+  left: 0;
+}
+nbplay-clip .nbplay-clip-handle.end {
+  right: 0;
+}
+nbplay-clip .nbplay-clip-handle::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--nbplay-fg) 50%, transparent);
+}
+
+nbplay-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-timeline:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-timeline nbplay-header .nbplay-header-actions {
+  flex-wrap: wrap;
+}
+nbplay-timeline .nbplay-timeline-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-timeline .nbplay-timeline-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-timeline .nbplay-timeline-field input[type="number"] {
+  width: 48px;
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-timeline .nbplay-timeline-field input[type="checkbox"] {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-timeline .nbplay-timeline-actions button {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  font-weight: 700;
+  padding: 0 8px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-timeline .nbplay-timeline-actions button:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-timeline .nbplay-timeline-loop-btn.active {
+  background: var(--nbplay-accent-soft);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-accent-soft);
+}
+nbplay-timeline .nbplay-timeline-play.active {
+  background: var(--nbplay-success);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-success);
+}
+nbplay-timeline .nbplay-timeline-record.active {
+  background: var(--nbplay-error);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-error);
+}
+nbplay-timeline .nbplay-timeline-position {
+  min-width: 48px;
+  text-align: right;
+  font-family: var(--nbplay-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--nbplay-accent);
+}
+nbplay-timeline .nbplay-timeline-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-timeline .nbplay-timeline-ruler {
+  display: flex;
+  align-items: stretch;
+  min-width: 100%;
+}
+nbplay-timeline .nbplay-timeline-ruler-spacer {
+  flex: 0 0 150px;
+  background: var(--nbplay-bg-panel);
+  border-right: 1px solid var(--nbplay-border);
+  border-bottom: 1px solid var(--nbplay-border);
+}
+nbplay-timeline .nbplay-timeline-ruler nbplay-ruler {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+nbplay-timeline .nbplay-timeline-body nbplay-lane {
+  min-width: 100%;
+}
+nbplay-timeline .nbplay-timeline-empty {
+  padding: 12px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-faint);
+}
+nbplay-timeline .nbplay-timeline-status {
+  min-height: 1em;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-error);
+}

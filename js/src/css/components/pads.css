@@ -1,0 +1,39 @@
+nbplay-pads {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+}
+nbplay-pads .nbplay-pad-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+nbplay-pads .nbplay-pad-velocity nbplay-slider {
+  width: 120px;
+}
+nbplay-pads .nbplay-pad-vel-sense-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+  cursor: pointer;
+}
+nbplay-pads .nbplay-pad-vel-sense-chk {
+  accent-color: var(--nbplay-accent);
+}
+nbplay-pads .nbplay-pad-footer {
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}

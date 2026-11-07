@@ -35,7 +35,7 @@ async function renderWidget(page, overrides = {}) {
   await page.evaluate(async (opts) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/dist/css/sequencer.css";
+    link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
     const mod = await import("/dist/widgets/sequencer.js");
@@ -87,13 +87,15 @@ test.describe("SequencerWidget", () => {
   // 2. Shows header with badge
   test("shows header text and sequencer badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-badge")).toHaveText("sequencer");
+    await expect(
+      page.locator(".nbplay-sequencer .nbplay-header-badge"),
+    ).toHaveText("sequencer");
   });
 
   // 3. Correct number of step cells
   test("renders correct number of step cells", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(8);
   });
 
   test("explicit 8-step model displays matching bar and step controls", async ({
@@ -112,7 +114,7 @@ test.describe("SequencerWidget", () => {
       ],
     });
 
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(8);
     await expect(page.locator(".nbplay-seq-dur-select")).toHaveValue("0.5");
     await expect(page.locator(".nbplay-seq-length-val")).toHaveText("8 steps");
     await expect(page.locator(".nbplay-seq-info")).toContainText(
@@ -128,7 +130,7 @@ test.describe("SequencerWidget", () => {
   // 4. Active steps have .active class
   test("active steps have .active class", async ({ page }) => {
     await renderWidget(page);
-    const cells = page.locator(".nbplay-seq-cell");
+    const cells = page.locator(".nbplay-step-grid-cell");
     // Even indices (0,2,4,6) are active
     for (const i of [0, 2, 4, 6]) {
       await expect(cells.nth(i)).toHaveClass(/active/);
@@ -142,7 +144,7 @@ test.describe("SequencerWidget", () => {
   // 5. Click step toggles active state in model
   test("clicking step toggles active state in model", async ({ page }) => {
     await renderWidget(page);
-    const cell1 = page.locator(".nbplay-seq-cell").nth(1);
+    const cell1 = page.locator(".nbplay-step-grid-cell").nth(1);
 
     // Step 1 starts inactive
     await expect(cell1).not.toHaveClass(/active/);
@@ -172,7 +174,7 @@ test.describe("SequencerWidget", () => {
       window.__testModel.set("current_step", 0);
       window.__testModel._trigger("change:current_step");
     });
-    const cells = page.locator(".nbplay-seq-cell");
+    const cells = page.locator(".nbplay-step-grid-cell");
     await expect(cells.nth(0)).toHaveClass(/current/);
     // Other steps should not have .current
     await expect(cells.nth(1)).not.toHaveClass(/current/);
@@ -181,7 +183,9 @@ test.describe("SequencerWidget", () => {
   // 7. BPM display shows correct value
   test("BPM display shows correct value", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-seq-bpm-val")).toHaveText("120 BPM");
+    await expect(page.locator(".nbplay-seq-bpm .nbplay-value-text")).toHaveText(
+      "120 BPM",
+    );
   });
 
   // 8. Play button toggles is_playing
@@ -258,8 +262,8 @@ test.describe("SequencerWidget", () => {
       window.__testModel._trigger("change:voices_data");
     });
 
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(4);
-    const cells = page.locator(".nbplay-seq-cell");
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(4);
+    const cells = page.locator(".nbplay-step-grid-cell");
     for (let i = 0; i < 4; i++) {
       await expect(cells.nth(i)).toHaveClass(/active/);
     }
@@ -268,7 +272,7 @@ test.describe("SequencerWidget", () => {
   // 11. Model change:current_step moves highlight
   test("model change:current_step moves highlight", async ({ page }) => {
     await renderWidget(page);
-    const cells = page.locator(".nbplay-seq-cell");
+    const cells = page.locator(".nbplay-step-grid-cell");
 
     // Render resets current_step to -1; advance it to 0 first
     await page.evaluate(() => {
@@ -291,10 +295,10 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmVal = page.locator(".nbplay-seq-bpm-val");
+    const bpmVal = page.locator(".nbplay-seq-bpm .nbplay-value-text");
     await bpmVal.dblclick();
 
-    const input = page.locator(".nbplay-seq-inline-edit");
+    const input = page.locator(".nbplay-seq-bpm input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("120");
 
@@ -303,7 +307,9 @@ test.describe("SequencerWidget", () => {
 
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(140);
-    await expect(page.locator(".nbplay-seq-bpm-val")).toHaveText("140 BPM");
+    await expect(page.locator(".nbplay-seq-bpm .nbplay-value-text")).toHaveText(
+      "140 BPM",
+    );
   });
 
   // 13. BPM double-click Escape cancels
@@ -311,15 +317,17 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmVal = page.locator(".nbplay-seq-bpm-val");
+    const bpmVal = page.locator(".nbplay-seq-bpm .nbplay-value-text");
     await expect(bpmVal).toHaveText("120 BPM");
 
     await bpmVal.dblclick();
-    const input = page.locator(".nbplay-seq-inline-edit");
+    const input = page.locator(".nbplay-seq-bpm input[type=text]");
     await input.fill("200");
     await input.press("Escape");
 
-    await expect(page.locator(".nbplay-seq-bpm-val")).toHaveText("120 BPM");
+    await expect(page.locator(".nbplay-seq-bpm .nbplay-value-text")).toHaveText(
+      "120 BPM",
+    );
     const val = await page.evaluate(() => window.__testModel._state.bpm);
     expect(val).toBe(120);
   });
@@ -329,14 +337,16 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const bpmVal = page.locator(".nbplay-seq-bpm-val");
+    const bpmVal = page.locator(".nbplay-seq-bpm .nbplay-value-text");
     await bpmVal.dblclick();
 
-    const input = page.locator(".nbplay-seq-inline-edit");
+    const input = page.locator(".nbplay-seq-bpm input[type=text]");
     await input.fill("150");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-seq-bpm-val")).toBeVisible();
+    await expect(
+      page.locator(".nbplay-seq-bpm .nbplay-value-text"),
+    ).toBeVisible();
 
     // Wait for any deferred blur handler
     await page.waitForTimeout(100);
@@ -370,7 +380,7 @@ test.describe("SequencerWidget", () => {
   // 16. BPM slider is present and functional
   test("BPM slider is present and functional", async ({ page }) => {
     await renderWidget(page);
-    const slider = page.locator(".nbplay-seq-bpm-slider");
+    const slider = page.locator(".nbplay-seq-bpm input[type=range]");
     await expect(slider).toBeVisible();
     await expect(slider).toHaveValue("120");
   });
@@ -378,13 +388,17 @@ test.describe("SequencerWidget", () => {
   // 17. Model change:bpm updates display
   test("model change:bpm updates BPM display", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-seq-bpm-val")).toHaveText("120 BPM");
+    await expect(page.locator(".nbplay-seq-bpm .nbplay-value-text")).toHaveText(
+      "120 BPM",
+    );
 
     await page.evaluate(() => {
       window.__testModel.set("bpm", 180);
       window.__testModel._trigger("change:bpm");
     });
-    await expect(page.locator(".nbplay-seq-bpm-val")).toHaveText("180 BPM");
+    await expect(page.locator(".nbplay-seq-bpm .nbplay-value-text")).toHaveText(
+      "180 BPM",
+    );
   });
 
   // 18. Step duration select updates model
@@ -400,7 +414,7 @@ test.describe("SequencerWidget", () => {
       () => window.__testModel._state.step_duration,
     );
     expect(val).toBe(0.25);
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(16);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(16);
   });
 
   test("measure and step controls configure one measure of eighth notes", async ({
@@ -424,7 +438,7 @@ test.describe("SequencerWidget", () => {
 
     await page.locator(".nbplay-seq-dur-select").selectOption("0.5");
 
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(8);
     const state = await page.evaluate(() => ({
       length: window.__testModel._state.length,
       measures: window.__testModel._state.measures,
@@ -464,7 +478,7 @@ test.describe("SequencerWidget", () => {
 
     await page.locator(".nbplay-seq-measures-input").fill("4");
 
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(64);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(64);
     const state = await page.evaluate(() => ({
       length: window.__testModel._state.length,
       measures: window.__testModel._state.measures,
@@ -504,7 +518,7 @@ test.describe("SequencerWidget", () => {
       window.__testModel._trigger("change:time_signature_num");
     });
 
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(6);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(6);
     const state = await page.evaluate(() => ({
       length: window.__testModel._state.length,
       voiceLengths: window.__testModel._state.voices_data.map(
@@ -519,7 +533,7 @@ test.describe("SequencerWidget", () => {
   test("step cells display note names", async ({ page }) => {
     await renderWidget(page);
     // All steps have note=60 → C4
-    const cells = page.locator(".nbplay-seq-cell");
+    const cells = page.locator(".nbplay-step-grid-cell");
     for (let i = 0; i < 8; i++) {
       await expect(cells.nth(i)).toHaveText("C4");
     }
@@ -533,7 +547,7 @@ test.describe("SequencerWidget", () => {
       window.__testModel.set("current_step", 0);
       window.__testModel._trigger("change:current_step");
     });
-    const headers = page.locator(".nbplay-seq-header-cell");
+    const headers = page.locator(".nbplay-step-grid-head");
     await expect(headers).toHaveCount(8);
     // Step 0 is current_step, so first header cell has active-col
     await expect(headers.nth(0)).toHaveClass(/active-col/);
@@ -595,12 +609,12 @@ test.describe("SequencerWidget", () => {
     });
 
     // 2 voices × 4 steps = 8 step cells total
-    await expect(page.locator(".nbplay-seq-cell")).toHaveCount(8);
+    await expect(page.locator(".nbplay-step-grid-cell")).toHaveCount(8);
     // 2 velocity rows × 4 bars = 8 vel bars
-    await expect(page.locator(".nbplay-seq-vel-bar")).toHaveCount(8);
+    await expect(page.locator(".nbplay-step-grid-vel")).toHaveCount(8);
 
     // Voice 0 cells show C4, voice 1 cells show C5
-    const cells = page.locator(".nbplay-seq-cell");
+    const cells = page.locator(".nbplay-step-grid-cell");
     await expect(cells.nth(0)).toHaveText("C4");
     await expect(cells.nth(4)).toHaveText("C5");
 
@@ -656,6 +670,7 @@ test.describe("SequencerWidget", () => {
     await page.evaluate(() => {
       window.__testModel.set("is_playing", true);
       window.__testModel.set("current_step", 2);
+      window.__testModel._trigger("change:current_step");
     });
 
     // Dispatch a note event like the keyboard would
@@ -681,16 +696,16 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page, { keyboard_connected: true });
-    const cell = page.locator(".nbplay-seq-cell").first();
+    const cell = page.locator(".nbplay-step-grid-cell").first();
     await cell.dblclick();
     await expect(cell).toHaveText("♪?");
-    await expect(cell).toHaveClass(/nbplay-seq-key-wait/);
+    await expect(cell).toHaveClass(/pending/);
   });
 
   // 22. ♪? resolves when receiving note CustomEvent
   test("pending keyboard edit resolves on note event", async ({ page }) => {
     await renderWidget(page, { keyboard_connected: true });
-    const cell = page.locator(".nbplay-seq-cell").first();
+    const cell = page.locator(".nbplay-step-grid-cell").first();
     await cell.dblclick();
     await expect(cell).toHaveText("♪?");
 
@@ -725,7 +740,7 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page, { keyboard_connected: true });
-    const cell = page.locator(".nbplay-seq-cell").first();
+    const cell = page.locator(".nbplay-step-grid-cell").first();
     await cell.dblclick();
     await expect(cell).toHaveText("♪?");
 
@@ -737,7 +752,7 @@ test.describe("SequencerWidget", () => {
 
     // Cell should restore original note name
     await expect(cell).not.toHaveText("♪?");
-    await expect(cell).not.toHaveClass(/nbplay-seq-key-wait/);
+    await expect(cell).not.toHaveClass(/pending/);
   });
 
   // 25. Double-click step does NOT toggle active state
@@ -745,7 +760,7 @@ test.describe("SequencerWidget", () => {
     page,
   }) => {
     await renderWidget(page, { keyboard_connected: true });
-    const cell = page.locator(".nbplay-seq-cell").first();
+    const cell = page.locator(".nbplay-step-grid-cell").first();
     // Step 0 starts active (even indices)
     await expect(cell).toHaveClass(/active/);
 
@@ -794,7 +809,7 @@ test.describe("SequencerWidget", () => {
       num_voices: 2,
       keyboard_connected: true,
     });
-    const dots = page.locator(".nbplay-seq-voice-rec");
+    const dots = page.locator(".nbplay-step-grid-arm");
     await expect(dots).toHaveCount(2);
     await expect(dots.nth(0)).toBeVisible();
     await expect(dots.nth(1)).toBeVisible();
@@ -819,10 +834,8 @@ test.describe("SequencerWidget", () => {
       num_voices: 2,
       keyboard_connected: false,
     });
-    const dots = page.locator(".nbplay-seq-voice-rec");
-    await expect(dots).toHaveCount(2);
-    await expect(dots.nth(0)).toBeHidden();
-    await expect(dots.nth(1)).toBeHidden();
+    const dots = page.locator(".nbplay-step-grid-arm");
+    await expect(dots).toHaveCount(0);
   });
 
   // 29. Per-voice REC dot toggles individual voice recording
@@ -844,19 +857,19 @@ test.describe("SequencerWidget", () => {
       num_voices: 2,
       keyboard_connected: true,
     });
-    const dots = page.locator(".nbplay-seq-voice-rec");
+    const dots = page.locator(".nbplay-step-grid-arm");
 
     // Click voice 1 REC dot
     await dots.nth(1).click();
-    await expect(dots.nth(1)).toHaveClass(/recording/);
-    await expect(dots.nth(0)).not.toHaveClass(/recording/);
+    await expect(dots.nth(1)).toHaveAttribute("active", "");
+    await expect(dots.nth(0)).not.toHaveAttribute("active", "");
 
     // Global REC should also show recording (any voice armed)
     await expect(page.locator(".nbplay-seq-rec")).toHaveClass(/recording/);
 
     // Toggle it off
     await dots.nth(1).click();
-    await expect(dots.nth(1)).not.toHaveClass(/recording/);
+    await expect(dots.nth(1)).not.toHaveAttribute("active", "");
     await expect(page.locator(".nbplay-seq-rec")).not.toHaveClass(/recording/);
   });
 
@@ -879,19 +892,19 @@ test.describe("SequencerWidget", () => {
     });
 
     const recBtn = page.locator(".nbplay-seq-rec");
-    const dots = page.locator(".nbplay-seq-voice-rec");
+    const dots = page.locator(".nbplay-step-grid-arm");
 
     // Click global REC → arms all voices
     await recBtn.click();
     await expect(recBtn).toHaveClass(/recording/);
-    await expect(dots.nth(0)).toHaveClass(/recording/);
-    await expect(dots.nth(1)).toHaveClass(/recording/);
+    await expect(dots.nth(0)).toHaveAttribute("active", "");
+    await expect(dots.nth(1)).toHaveAttribute("active", "");
 
     // Click global REC again → disarms all
     await recBtn.click();
     await expect(recBtn).not.toHaveClass(/recording/);
-    await expect(dots.nth(0)).not.toHaveClass(/recording/);
-    await expect(dots.nth(1)).not.toHaveClass(/recording/);
+    await expect(dots.nth(0)).not.toHaveAttribute("active", "");
+    await expect(dots.nth(1)).not.toHaveAttribute("active", "");
   });
 
   // 31. Per-voice recording writes to armed voice
@@ -915,13 +928,14 @@ test.describe("SequencerWidget", () => {
     });
 
     // Arm only voice 1
-    const dots = page.locator(".nbplay-seq-voice-rec");
+    const dots = page.locator(".nbplay-step-grid-arm");
     await dots.nth(1).click();
 
     // Simulate play
     await page.evaluate(() => {
       window.__testModel.set("is_playing", true);
       window.__testModel.set("current_step", 1);
+      window.__testModel._trigger("change:current_step");
     });
 
     // Dispatch a note
@@ -976,6 +990,7 @@ test.describe("SequencerWidget", () => {
     await page.evaluate(() => {
       window.__testModel.set("is_playing", true);
       window.__testModel.set("current_step", 0);
+      window.__testModel._trigger("change:current_step");
     });
 
     // Dispatch a note
@@ -1101,7 +1116,7 @@ test.describe("SequencerWidget", () => {
     await page.evaluate(async () => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sequencer.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sequencer.js");

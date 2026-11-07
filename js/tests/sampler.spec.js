@@ -34,7 +34,7 @@ async function renderWidget(page, overrides = {}) {
     async (opts) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sampler.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sampler.js");
@@ -63,8 +63,12 @@ test.describe("SamplerWidget", () => {
   // 2. Shows header with badge
   test("shows header text and sampler badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("sampler");
+    await expect(
+      page.locator(".nbplay-sampler nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(
+      page.locator(".nbplay-sampler .nbplay-header-badge"),
+    ).toHaveText("sampler");
   });
 
   // 3. Shows sample name when set
@@ -102,7 +106,7 @@ test.describe("SamplerWidget", () => {
     });
 
     await page
-      .locator(".nbplay-samp-pad")
+      .locator(".nbplay-pad-cell")
       .first()
       .click({ position: { x: 4, y: 4 } });
 
@@ -116,26 +120,36 @@ test.describe("SamplerWidget", () => {
   test("displays ADSR values correctly", async ({ page }) => {
     await renderWidget(page);
     // attack=0.01 → fmtTime: 0.01 < 0.01 false, 0.01 < 1 true → "10 ms"
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("10 ms");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("10 ms");
     // decay=0.1 → "100 ms"
-    await expect(page.locator(".nbplay-samp-decay-val")).toHaveText("100 ms");
+    await expect(
+      page.locator(".nbplay-samp-decay .nbplay-value-text"),
+    ).toHaveText("100 ms");
     // sustain=0.7 → "70%"
-    await expect(page.locator(".nbplay-samp-sustain-val")).toHaveText("70%");
+    await expect(
+      page.locator(".nbplay-samp-sustain .nbplay-value-text"),
+    ).toHaveText("70%");
     // release=0.3 → "300 ms"
-    await expect(page.locator(".nbplay-samp-release-val")).toHaveText("300 ms");
+    await expect(
+      page.locator(".nbplay-samp-release .nbplay-value-text"),
+    ).toHaveText("300 ms");
   });
 
   // 7. Attack display formatting for very small value
   test("attack=0.001 displays as 1.0 ms", async ({ page }) => {
     await renderWidget(page, { attack: 0.001 });
     // fmtTime: 0.001 < 0.01 → (0.001*1000).toFixed(1) + " ms" = "1.0 ms"
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("1.0 ms");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("1.0 ms");
   });
 
   // 8. Trigger pads rendered (8 pads)
   test("renders 8 trigger pads", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-pad")).toHaveCount(8);
+    await expect(page.locator(".nbplay-pad-cell")).toHaveCount(8);
   });
 
   test("pad count control resizes trigger pads and preserves notes", async ({
@@ -147,7 +161,7 @@ test.describe("SamplerWidget", () => {
 
     await padCount.fill("4");
 
-    await expect(page.locator(".nbplay-samp-pad")).toHaveCount(4);
+    await expect(page.locator(".nbplay-pad-cell")).toHaveCount(4);
     const state = await page.evaluate(() => ({
       padCount: window.__testModel._state.pad_count,
       padNotes: window.__testModel._state.pad_notes,
@@ -183,7 +197,9 @@ test.describe("SamplerWidget", () => {
   // 9. Max voices display
   test("displays max voices value", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-voices-val")).toHaveText("4");
+    await expect(
+      page.locator(".nbplay-samp-max-voices .nbplay-value-text"),
+    ).toHaveText("4");
   });
 
   // 10. Model change updates sample name
@@ -201,14 +217,18 @@ test.describe("SamplerWidget", () => {
   // 11. Model change updates ADSR
   test("model change:attack updates attack label", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("10 ms");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("10 ms");
 
     await page.evaluate(() => {
       window.__testModel.set("attack", 1.5);
       window.__testModel._trigger("change:attack");
     });
     // 1.5 >= 1 → "1.50 s"
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("1.50 s");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("1.50 s");
   });
 
   // 12. Double-click edit attack
@@ -216,10 +236,10 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const attackVal = page.locator(".nbplay-samp-attack-val");
+    const attackVal = page.locator(".nbplay-samp-attack .nbplay-value-text");
     await attackVal.dblclick();
 
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("0.01");
 
@@ -229,7 +249,9 @@ test.describe("SamplerWidget", () => {
     const val = await page.evaluate(() => window.__testModel._state.attack);
     expect(val).toBe(0.1);
     // 0.1 → "100 ms"
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("100 ms");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("100 ms");
   });
 
   // 13. Double-click edit sustain
@@ -237,10 +259,10 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const sustainVal = page.locator(".nbplay-samp-sustain-val");
+    const sustainVal = page.locator(".nbplay-samp-sustain .nbplay-value-text");
     await sustainVal.dblclick();
 
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await expect(input).toBeVisible();
 
     await input.fill("0.5");
@@ -248,22 +270,26 @@ test.describe("SamplerWidget", () => {
 
     const val = await page.evaluate(() => window.__testModel._state.sustain);
     expect(val).toBe(0.5);
-    await expect(page.locator(".nbplay-samp-sustain-val")).toHaveText("50%");
+    await expect(
+      page.locator(".nbplay-samp-sustain .nbplay-value-text"),
+    ).toHaveText("50%");
   });
 
   // 14. Double-click edit Escape cancels
   test("Escape during inline edit cancels without update", async ({ page }) => {
     await renderWidget(page, { attack: 0.01 });
-    const attackVal = page.locator(".nbplay-samp-attack-val");
+    const attackVal = page.locator(".nbplay-samp-attack .nbplay-value-text");
     await expect(attackVal).toHaveText("10 ms");
 
     await attackVal.dblclick();
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await input.fill("0.5");
     await input.press("Escape");
 
     // Label restored, model unchanged
-    await expect(page.locator(".nbplay-samp-attack-val")).toHaveText("10 ms");
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toHaveText("10 ms");
     const val = await page.evaluate(() => window.__testModel._state.attack);
     expect(val).toBe(0.01);
   });
@@ -273,15 +299,17 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const attackVal = page.locator(".nbplay-samp-attack-val");
+    const attackVal = page.locator(".nbplay-samp-attack .nbplay-value-text");
     await attackVal.dblclick();
 
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await input.fill("0.2");
     await input.press("Enter");
 
     // The label should be back
-    await expect(page.locator(".nbplay-samp-attack-val")).toBeVisible();
+    await expect(
+      page.locator(".nbplay-samp-attack .nbplay-value-text"),
+    ).toBeVisible();
 
     // Wait for any deferred blur handler
     await page.waitForTimeout(100);
@@ -296,11 +324,13 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const voicesVal = page.locator(".nbplay-samp-voices-val");
+    const voicesVal = page.locator(
+      ".nbplay-samp-max-voices .nbplay-value-text",
+    );
     await expect(voicesVal).toHaveText("4");
 
     await voicesVal.dblclick();
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("4");
 
@@ -309,13 +339,15 @@ test.describe("SamplerWidget", () => {
 
     const val = await page.evaluate(() => window.__testModel._state.max_voices);
     expect(val).toBe(8);
-    await expect(page.locator(".nbplay-samp-voices-val")).toHaveText("8");
+    await expect(
+      page.locator(".nbplay-samp-max-voices .nbplay-value-text"),
+    ).toHaveText("8");
   });
 
   // 17. Waveform canvas present
   test("waveform canvas element exists", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-waveform")).toBeVisible();
+    await expect(page.locator(".nbplay-sampler nbplay-waveform")).toBeVisible();
   });
 
   // 18. Root note display
@@ -342,7 +374,7 @@ test.describe("SamplerWidget", () => {
 
   test("envelope canvas element exists", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-env-canvas")).toBeVisible();
+    await expect(page.locator(".nbplay-sampler nbplay-envelope")).toBeVisible();
   });
 
   test("model change:root_note updates root display and rebuilds pads", async ({
@@ -358,17 +390,17 @@ test.describe("SamplerWidget", () => {
     // C3 (MIDI 48)
     await expect(page.locator(".nbplay-samp-info-root")).toHaveText("C3");
     // Pads rebuilt — still 8
-    await expect(page.locator(".nbplay-samp-pad")).toHaveCount(8);
+    await expect(page.locator(".nbplay-pad-cell")).toHaveCount(8);
   });
 
   test("dblclick decay val, type 0.5, Enter → model updated", async ({
     page,
   }) => {
     await renderWidget(page);
-    const decayVal = page.locator(".nbplay-samp-decay-val");
+    const decayVal = page.locator(".nbplay-samp-decay .nbplay-value-text");
     await decayVal.dblclick();
 
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await input.fill("0.5");
     await input.press("Enter");
 
@@ -380,17 +412,19 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page);
-    const releaseVal = page.locator(".nbplay-samp-release-val");
+    const releaseVal = page.locator(".nbplay-samp-release .nbplay-value-text");
     await releaseVal.dblclick();
 
-    const input = page.locator(".nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-sampler input[type=text]");
     await input.fill("1.0");
     await input.press("Enter");
 
     const val = await page.evaluate(() => window.__testModel._state.release);
     expect(val).toBe(1.0);
     // 1.0 → "1.00 s"
-    await expect(page.locator(".nbplay-samp-release-val")).toHaveText("1.00 s");
+    await expect(
+      page.locator(".nbplay-samp-release .nbplay-value-text"),
+    ).toHaveText("1.00 s");
   });
 
   test("voices info shows count", async ({ page }) => {
@@ -402,13 +436,17 @@ test.describe("SamplerWidget", () => {
 
   test("model change:max_voices updates voices display", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-samp-voices-val")).toHaveText("4");
+    await expect(
+      page.locator(".nbplay-samp-max-voices .nbplay-value-text"),
+    ).toHaveText("4");
 
     await page.evaluate(() => {
       window.__testModel.set("max_voices", 12);
       window.__testModel._trigger("change:max_voices");
     });
-    await expect(page.locator(".nbplay-samp-voices-val")).toHaveText("12");
+    await expect(
+      page.locator(".nbplay-samp-max-voices .nbplay-value-text"),
+    ).toHaveText("12");
   });
 
   test("active voices counter element present", async ({ page }) => {
@@ -422,7 +460,7 @@ test.describe("SamplerWidget", () => {
 
   test("pad note text is inside a span", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await expect(noteSpan).toBeVisible();
     // First pad_note = 48 → C3
     await expect(noteSpan).toHaveText("C3");
@@ -445,11 +483,9 @@ test.describe("SamplerWidget", () => {
       ],
     });
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "S1",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("S1");
     await page
-      .locator(".nbplay-samp-pad")
+      .locator(".nbplay-pad-cell")
       .first()
       .click({ position: { x: 4, y: 4 } });
     const event = await page.evaluate(
@@ -468,11 +504,9 @@ test.describe("SamplerWidget", () => {
       ],
     });
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "Vel",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("Vel");
     await page
-      .locator(".nbplay-samp-pad")
+      .locator(".nbplay-pad-cell")
       .first()
       .click({ position: { x: 4, y: 4 } });
     const state = await page.evaluate(() => ({
@@ -487,115 +521,107 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await noteSpan.dblclick();
 
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await expect(input).toBeVisible();
     await expect(input).toHaveValue("C3");
   });
 
   test("edit pad note to D4, Enter → pad displays D4", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await noteSpan.dblclick();
 
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("D4");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "D4",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("D4");
   });
 
   test("edit pad note with MIDI number 69 → pad displays A4", async ({
     page,
   }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await noteSpan.dblclick();
 
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("69");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "A4",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("A4");
   });
 
   test("edit pad note with sharp D#3 → accepted", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await noteSpan.dblclick();
 
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("D#3");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "D#3",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("D#3");
   });
 
   test("edit pad note with flat Eb3 → accepted as D#3", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     await noteSpan.dblclick();
 
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("Eb3");
     await input.press("Enter");
 
     // Eb3 = MIDI 51 = D#3
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
-      "D#3",
-    );
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText("D#3");
   });
 
   test("Escape during pad note edit cancels without change", async ({
     page,
   }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     const origText = await noteSpan.textContent();
 
     await noteSpan.dblclick();
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("A5");
     await input.press("Escape");
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText(
       origText,
     );
   });
 
   test("invalid pad note input preserves original note", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
     const origText = await noteSpan.textContent();
 
     await noteSpan.dblclick();
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("xyz");
     await input.press("Enter");
 
-    await expect(page.locator(".nbplay-samp-pad-note").first()).toHaveText(
+    await expect(page.locator(".nbplay-pad-label").first()).toHaveText(
       origText,
     );
   });
 
   test("dblclick on second pad edits only that pad", async ({ page }) => {
     await renderWidget(page, { root_note: 60 });
-    const firstNote = page.locator(".nbplay-samp-pad-note").nth(0);
-    const secondNote = page.locator(".nbplay-samp-pad-note").nth(1);
+    const firstNote = page.locator(".nbplay-pad-label").nth(0);
+    const secondNote = page.locator(".nbplay-pad-label").nth(1);
     // First pad_note = 48 → C3
     await expect(firstNote).toHaveText("C3");
     const firstText = await firstNote.textContent();
 
     await secondNote.dblclick();
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await input.fill("G5");
     await input.press("Enter");
 
@@ -611,8 +637,8 @@ test.describe("SamplerWidget", () => {
     page,
   }) => {
     await renderWidget(page, { root_note: 60 });
-    const pad = page.locator(".nbplay-samp-pad").first();
-    const noteSpan = page.locator(".nbplay-samp-pad-note").first();
+    const pad = page.locator(".nbplay-pad-cell").first();
+    const noteSpan = page.locator(".nbplay-pad-label").first();
 
     // Double-click the note text
     await noteSpan.dblclick();
@@ -621,7 +647,7 @@ test.describe("SamplerWidget", () => {
     await expect(pad).not.toHaveClass(/\bactive\b/);
 
     // Inline edit should still open
-    const input = page.locator(".nbplay-samp-pad .nbplay-samp-inline-edit");
+    const input = page.locator(".nbplay-pad-cell input[type=text]");
     await expect(input).toBeVisible();
   });
 
@@ -926,7 +952,7 @@ test.describe("SamplerWidget", () => {
     const cleanup = await page.evaluate(async () => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/sampler.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
       const mod = await import("/dist/widgets/sampler.js");

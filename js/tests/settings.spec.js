@@ -5,7 +5,7 @@ test.describe("SettingsWidget", () => {
     await page.evaluate(async (overrides) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/dist/css/settings.css";
+      link.href = "/dist/css/components.css";
       document.head.appendChild(link);
       const mod = await import("/dist/widgets/settings.js");
       const el = document.getElementById("root");
@@ -35,8 +35,12 @@ test.describe("SettingsWidget", () => {
   // 2. Shows header with badge
   test("shows header text and settings badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("settings");
+    await expect(
+      page.locator(".nbplay-settings nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(
+      page.locator(".nbplay-settings .nbplay-header-badge"),
+    ).toHaveText("settings");
   });
 
   // 3. Sample rate dropdown has correct options
@@ -94,10 +98,10 @@ test.describe("SettingsWidget", () => {
       hasText: "MIDI Input",
     });
     await expect(midiTitle).toBeVisible();
-    await expect(page.locator(".nbplay-midi-select")).toBeVisible();
-    await expect(page.locator(".nbplay-refresh-btn")).toBeVisible();
-    await expect(page.locator(".nbplay-midi-status")).toBeVisible();
-    await expect(page.locator(".nbplay-midi-log")).toBeAttached();
+    await expect(page.locator("nbplay-midi-port select")).toBeVisible();
+    await expect(page.locator(".nbplay-midi-port-refresh")).toBeVisible();
+    await expect(page.locator(".nbplay-midi-port-status")).toBeVisible();
+    await expect(page.locator("nbplay-midi-log")).toBeAttached();
   });
 
   // 9. Model change:sample_rate updates dropdown
@@ -192,13 +196,13 @@ test.describe("SettingsWidget", () => {
   // 18. MIDI status shows Idle by default
   test("MIDI status shows Idle by default", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-midi-status")).toHaveText("Idle");
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText("Idle");
   });
 
   // 19. MIDI port select defaults to Not connected
   test("MIDI port select defaults to Not connected", async ({ page }) => {
     await renderWidget(page);
-    const select = page.locator(".nbplay-midi-select");
+    const select = page.locator("nbplay-midi-port select");
     const val = await select.inputValue();
     expect(val).toBe("");
     const texts = await select.locator("option").allTextContents();
@@ -213,8 +217,8 @@ test.describe("SettingsWidget", () => {
     });
     await renderWidget(page);
 
-    await expect(page.locator(".nbplay-midi-status")).toHaveText("Idle");
-    await expect(page.locator(".nbplay-midi-select option")).toHaveCount(1);
+    await expect(page.locator(".nbplay-midi-port-status")).toHaveText("Idle");
+    await expect(page.locator("nbplay-midi-port select option")).toHaveCount(1);
   });
 
   // 20. Model change:audio_device updates display

@@ -378,3 +378,31 @@ export function bindClock(
     },
   };
 }
+
+/**
+ * Bind an element to the clock named by its `sessionId` property. The
+ * element calls `rebind()` after `sessionId` changes; otherwise this is
+ * `bindClock` without a widget model.
+ */
+export function bindElementClock(
+  el: { sessionId: string },
+  listener: (event: ClockEvent) => void,
+  onRebind?: (clock: SessionClock) => void,
+): ClockBinding & { rebind(): void } {
+  const listeners: Array<() => void> = [];
+  const shim: AnyModel = {
+    get: (name) => (name === "session_id" ? el.sessionId : undefined),
+    set: () => {},
+    save_changes: () => {},
+    on: (event, cb) => {
+      if (event === "change:session_id") listeners.push(cb as () => void);
+    },
+  };
+  const binding = bindClock(shim, listener, onRebind);
+  return {
+    clock: binding.clock,
+    shared: binding.shared,
+    dispose: binding.dispose,
+    rebind: () => listeners.forEach((cb) => cb()),
+  };
+}
