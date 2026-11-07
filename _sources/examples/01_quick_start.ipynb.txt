@@ -89,6 +89,37 @@
     "\n",
     "tabs\n"
    ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2",
+   "metadata": {
+    "id": "2",
+    "language": "markdown"
+   },
+   "source": [
+    "## Themes\n",
+    "\n",
+    "Every widget has a `theme` trait. Empty follows the Jupyter theme; `light` and `dark` pin the default look; `studio`, `flat`, `cube`, `one`, `grim`, `pro` and `fruit` are complete sets. A `Session(theme=...)` sets all of its widgets at once; here the playground has no session, so a dropdown drives each widget's trait."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3",
+   "metadata": {
+    "id": "3",
+    "language": "python"
+   },
+   "outputs": [],
+   "source": [
+    "from nbplay import THEMES\n",
+    "\n",
+    "themed = [settings, transport, synth, sampler, seq, keyboard, midi_keyboard, pads, mixer, timeline]\n",
+    "theme = widgets.Dropdown(options=THEMES, value=\"\", description=\"Theme\")\n",
+    "theme_links = [traitlets.dlink((theme, \"value\"), (w, \"theme\")) for w in themed]\n",
+    "theme"
+   ]
   }
  ],
  "metadata": {

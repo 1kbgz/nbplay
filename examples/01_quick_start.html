@@ -153,7 +153,7 @@
     </button>
     <div id="fd-toc-mobile" hidden><ul class="fd-toc-list">
   <li class="fd-toc-item" data-depth="1">
-    <a href="#">01 Quick Start</a>
+    <a href="#themes">Themes</a>
   </li>
 </ul>
 </div>
@@ -236,6 +236,22 @@
 </div>
 </div>
 </div>
+<section id="themes">
+<h2>Themes<a class="headerlink" href="#themes" title="Link to this heading">¶</a></h2>
+<p>Every widget has a <code class="docutils literal notranslate"><span class="pre">theme</span></code> trait. Empty follows the Jupyter theme; <code class="docutils literal notranslate"><span class="pre">light</span></code> and <code class="docutils literal notranslate"><span class="pre">dark</span></code> pin the default look; <code class="docutils literal notranslate"><span class="pre">studio</span></code>, <code class="docutils literal notranslate"><span class="pre">flat</span></code>, <code class="docutils literal notranslate"><span class="pre">cube</span></code>, <code class="docutils literal notranslate"><span class="pre">one</span></code>, <code class="docutils literal notranslate"><span class="pre">grim</span></code>, <code class="docutils literal notranslate"><span class="pre">pro</span></code> and <code class="docutils literal notranslate"><span class="pre">fruit</span></code> are complete sets. A <code class="docutils literal notranslate"><span class="pre">Session(theme=...)</span></code> sets all of its widgets at once; here the playground has no session, so a dropdown drives each widget’s trait.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">THEMES</span>
+
+<span class="n">themed</span> <span class="o">=</span> <span class="p">[</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">keyboard</span><span class="p">,</span> <span class="n">midi_keyboard</span><span class="p">,</span> <span class="n">pads</span><span class="p">,</span> <span class="n">mixer</span><span class="p">,</span> <span class="n">timeline</span><span class="p">]</span>
+<span class="n">theme</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">THEMES</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Theme"</span><span class="p">)</span>
+<span class="n">theme_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="n">theme</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s2">"theme"</span><span class="p">))</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">themed</span><span class="p">]</span>
+<span class="n">theme</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 </section>
 
 
@@ -256,7 +272,7 @@
       <path class="fd-toc-thumb" fill="none" />
     </svg><ul class="fd-toc-list">
   <li class="fd-toc-item" data-depth="1">
-    <a href="#">01 Quick Start</a>
+    <a href="#themes">Themes</a>
   </li>
 </ul>
 
