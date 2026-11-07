@@ -10,7 +10,7 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
-from nbplay.models import SynthConfig, TransportConfig, TransportStatus
+from nbplay.models import MixerConfig, SynthConfig, TransportConfig, TransportStatus
 
 
 def messages(sent):
@@ -66,6 +66,38 @@ class TestSynthView:
             assert any(buffers for _, buffers in sent)
             command = view.play()
             assert isinstance(command, int)
+        finally:
+            view.close()
+
+
+class TestMixerView:
+    def test_config_normalizes_like_the_widget(self):
+        config = MixerConfig(channels=[{"name": "Drums", "gain": 5, "effects": [{"type": "gain", "gain": 9}]}], returns=[{"name": "Rev"}])
+        assert config.channels[0]["gain"] == 2.0
+        assert config.channels[0]["effects"] == [{"type": "gain", "gain": 4.0}]
+        assert config.channels[0]["sends"] == [0.0]
+        config.returns = []
+        assert config.channels[0]["sends"] == []
+        with pytest.raises(ValueError):
+            config.master_gain = 3
+
+    def test_view_builds_the_console_without_a_status_model(self):
+        view = views.MixerView(autosync=False)
+        try:
+            assert view.status is None and view.status_id is None
+            assert [w["namespace"] for w in view._wires] == ["config"]
+            assert "nbplay-wire" not in str(view._tree)
+            index = view.add_channel("Drums")
+            view.add_return("Rev")
+            view.add_channel_effect(index, {"type": "compressor", "threshold": -18})
+            view.add_master_effect({"type": "limiter"})
+            assert view.config.channels[0]["sends"] == [0.0]
+            assert view.config.channels[0]["effects"][0]["type"] == "compressor"
+            assert view.config.master_effects[0]["type"] == "limiter"
+            view.remove_channel(index)
+            assert view.config.channels == []
+            with pytest.raises(TypeError):
+                view._command("x", 1)
         finally:
             view.close()
 

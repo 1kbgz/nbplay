@@ -855,9 +855,13 @@ in a `transports.Session`: a config model the kernel owns and validates (`Transp
 `SynthConfig`), and a status model the browser owns (`TransportStatus`, `SynthStatus`, hosted with
 `owner="client"`). `InstrumentView` is the shared base: it hosts the models, builds the tree and the
 wires, and subclasses only name the element tag, the models and the trait-to-property maps.
-`SynthConfig` derives `waveform` in a pydantic after-validator (with `validate_assignment`), so a
-Python assignment and a validated browser edit both re-render the Rust preview, and the browser edit's
-authoritative patch already carries the new bytes. The spaday tree is
+The config models extend `_Validated`, whose `__setattr__` validates a copy through `model_validate`
+and assigns every field that changed: pydantic's own `validate_assignment` writes fields from inside
+pydantic-core where transports' observer cannot see them. Derived fields live in after-validators and
+write through `__dict__`: `SynthConfig` renders `waveform`, `MixerConfig` pads each channel's sends
+to the return count. A Python assignment and a validated browser edit therefore agree, and a browser
+edit's authoritative patch already carries the derived values. `MixerView` has no status model;
+`InstrumentView` skips the status wire and the `nbplay-wire` child when `STATUS_MODEL` is `None`. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are

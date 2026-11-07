@@ -7,11 +7,11 @@ status model the browser owns (hosted with ``owner="client"``), matching the
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
-from .widget import THEMES, render_waveform
+from .widget import THEMES, _normalize_effects, _normalize_mixer_channel, _normalize_return_bus, _pad_sends, render_waveform
 
-__all__ = ("SynthConfig", "SynthStatus", "TransportConfig", "TransportStatus")
+__all__ = ("MixerConfig", "SynthConfig", "SynthStatus", "TransportConfig", "TransportStatus")
 
 
 def _validate_theme(value):
@@ -20,7 +20,29 @@ def _validate_theme(value):
     return value
 
 
-class TransportConfig(BaseModel):
+class _Validated(BaseModel):
+    """A model that validates assignments through ``model_validate``.
+
+    Pydantic's own ``validate_assignment`` writes the field from inside
+    pydantic-core, where transports' observer cannot see it. Validating a
+    copy and assigning every field that changed keeps derived fields (a
+    padded send list, a rendered waveform) in step and keeps the hosted
+    model observable.
+    """
+
+    def __setattr__(self, name, value):
+        fields = type(self).model_fields
+        if name not in fields:
+            super().__setattr__(name, value)
+            return
+        fresh = type(self).model_validate({**self.model_dump(), name: value})
+        for field in fields:
+            new = getattr(fresh, field)
+            if new != getattr(self, field):
+                super().__setattr__(field, new)
+
+
+class TransportConfig(_Validated):
     """Transport settings the kernel owns."""
 
     bpm: float = Field(120.0, ge=30, le=300)
@@ -53,7 +75,7 @@ class TransportStatus(BaseModel):
 WAVEFORM_PARAMS = ("oscillator_type", "frequency", "amplitude", "sample_rate")
 
 
-class SynthConfig(BaseModel):
+class SynthConfig(_Validated):
     """Synth settings the kernel owns; ``waveform`` is derived.
 
     The preview is rendered by the Rust oscillators as part of validation,
@@ -61,8 +83,6 @@ class SynthConfig(BaseModel):
     edit is validated into the model, and a client edit's authoritative
     patch already carries the new bytes.
     """
-
-    model_config = ConfigDict(validate_assignment=True)
 
     oscillator_type: Literal["sine", "square", "saw", "noise"] = "sine"
     frequency: float = Field(440.0, ge=20, le=8000)
@@ -79,8 +99,7 @@ class SynthConfig(BaseModel):
     def _render(self):
         rendered = render_waveform(*(getattr(self, name) for name in WAVEFORM_PARAMS))
         if self.waveform != rendered:
-            # Re-validates once more and finds the bytes already current.
-            self.waveform = rendered
+            self.__dict__["waveform"] = rendered
         return self
 
 
@@ -88,3 +107,43 @@ class SynthStatus(BaseModel):
     """Whether the browser is sounding the synth's tone; browser-owned."""
 
     is_playing: bool = False
+
+
+class MixerConfig(_Validated):
+    """The mixer console the kernel owns: channels, returns, master.
+
+    Channels, returns and effects are the same dicts the traitlets widget
+    syncs, normalized and clamped by the same helpers; every channel carries
+    one send level per return. The mixer has no browser-owned status.
+    """
+
+    channels: list[dict] = []
+    returns: list[dict] = []
+    master_gain: float = Field(0.8, ge=0, le=2)
+    master_effects: list[dict] = []
+    session_id: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("channels")
+    @classmethod
+    def _channels(cls, value):
+        return [_normalize_mixer_channel(channel, index) for index, channel in enumerate(value or [])]
+
+    @field_validator("returns")
+    @classmethod
+    def _returns(cls, value):
+        return [_normalize_return_bus(bus, index) for index, bus in enumerate(value or [])]
+
+    @field_validator("master_effects")
+    @classmethod
+    def _master_effects(cls, value):
+        return _normalize_effects(value)
+
+    @model_validator(mode="after")
+    def _pad(self):
+        count = len(self.returns)
+        if any(len(channel["sends"]) != count for channel in self.channels):
+            self.__dict__["channels"] = [{**channel, "sends": _pad_sends(channel["sends"], count)} for channel in self.channels]
+        return self
