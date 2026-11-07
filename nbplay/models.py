@@ -25,9 +25,13 @@ __all__ = (
     "KeyboardStatus",
     "MidiKeyboardConfig",
     "MidiKeyboardStatus",
+    "MidiOutputConfig",
+    "MidiOutputStatus",
     "MixerConfig",
     "PadsConfig",
     "PadsStatus",
+    "SettingsConfig",
+    "SettingsStatus",
     "SynthConfig",
     "SynthStatus",
     "TransportConfig",
@@ -273,3 +277,47 @@ class MidiKeyboardStatus(BaseModel):
     last_note_event: dict = {}
     control_change: dict = {}
     clock_bpm: float = 0.0
+
+
+class SettingsConfig(_Validated):
+    """Audio output and MIDI input selection."""
+
+    sample_rate: int = Field(44100, ge=8000, le=192000)
+    channels: int = Field(1, ge=1, le=2)
+    buffer_size: int = Field(512, ge=32, le=8192)
+    audio_device: str = ""
+    midi_port: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+
+class SettingsStatus(BaseModel):
+    """Ports the browser enumerated and the last raw MIDI event; browser-owned."""
+
+    available_midi_ports: list[str] = []
+    midi_event: bytes = b""
+
+
+class MidiOutputConfig(_Validated):
+    """The MIDI output port, channel and what it forwards."""
+
+    midi_port: str = ""
+    channel: int = Field(0, ge=0, le=15)
+    forward_notes: bool = True
+    send_clock: bool = False
+    session_id: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+
+class MidiOutputStatus(BaseModel):
+    """Ports the browser enumerated; browser-owned.
+
+    ``request`` is never written by either side: it is the client-owned
+    field that ``session.command`` targets to deliver a send request.
+    """
+
+    available_midi_ports: list[str] = []
+    request: dict = {}

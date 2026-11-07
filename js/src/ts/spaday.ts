@@ -35,15 +35,25 @@ export function camel(name: string): string {
 
 const TAGS = ["Null", "Bool", "Int", "Float", "Str", "Bytes", "List", "Map"];
 
-/** A transports `Value` (`{"Bool": true}`) to its plain form. */
+/** A transports `Value` (`{"Bool": true}`, `{"Map": {...}}`) to its plain form. */
 export function untag(value: unknown): unknown {
   if (value === "Null") return null;
   if (typeof value === "object" && value !== null) {
     const keys = Object.keys(value);
     if (keys.length === 1 && TAGS.includes(keys[0])) {
-      return keys[0] === "Null"
-        ? null
-        : (value as Record<string, unknown>)[keys[0]];
+      const tag = keys[0];
+      const inner = (value as Record<string, unknown>)[tag];
+      if (tag === "Null") return null;
+      if (tag === "List") return (inner as unknown[]).map(untag);
+      if (tag === "Map") {
+        return Object.fromEntries(
+          Object.entries(inner as Record<string, unknown>).map(([k, v]) => [
+            k,
+            untag(v),
+          ]),
+        );
+      }
+      return inner;
     }
   }
   return value;
@@ -103,7 +113,13 @@ export class NbplayWire extends HTMLElement {
         return;
       const value = untag(command.value);
       if (typeof host.command === "function") {
-        const cmd = statusCommand(command.field, value);
+        // Status-field commands map onto the transport's actions; any other
+        // field carries the instrument's own command object (`request`).
+        const cmd =
+          statusCommand(command.field, value) ??
+          (value && typeof value === "object" && !Array.isArray(value)
+            ? (value as Record<string, unknown>)
+            : null);
         if (cmd) host.command(cmd);
       } else {
         // A property write is silent; report it like the element would so

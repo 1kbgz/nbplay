@@ -320,6 +320,8 @@ test.describe("views on transports", () => {
   for (const [name, tag, field, prop, value] of [
     ["keyboard", "nbplay-keyboard", "velocity", "velocity", 64],
     ["midi_keyboard", "nbplay-midi-keyboard", "sync_clock", "syncClock", true],
+    ["settings", "nbplay-settings", "sample_rate", "sampleRate", 48000],
+    ["midi_output", "nbplay-midi-output", "channel", "channel", 5],
   ]) {
     test(`${name}: kernel config reaches the element`, async ({ page }) => {
       const kernel = await viewKernel(name);
@@ -338,6 +340,35 @@ test.describe("views on transports", () => {
             ),
           )
           .toBe(value);
+        if (name === "midi_output") {
+          // A send request is a command the wire hands to the element.
+          await page.evaluate(() => {
+            const el = document.querySelector("#owner nbplay-midi-output");
+            el.__commands = [];
+            const original = el.command.bind(el);
+            el.command = (req) => {
+              el.__commands.push(req);
+              original(req);
+            };
+          });
+          await page.evaluate(
+            (response) => notebook.deliver(response),
+            await kernel.call({
+              op: "command",
+              name: "note_on",
+              args: [60, 90],
+            }),
+          );
+          await expect
+            .poll(() =>
+              page.evaluate(
+                () =>
+                  document.querySelector("#owner nbplay-midi-output")
+                    .__commands,
+              ),
+            )
+            .toEqual([{ kind: "note_on", note: 60, velocity: 90 }]);
+        }
       } finally {
         kernel.close();
       }

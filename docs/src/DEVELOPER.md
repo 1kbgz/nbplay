@@ -864,7 +864,12 @@ edit's authoritative patch already carries the derived values. `MixerView` has n
 `InstrumentView` skips the status wire and the `nbplay-wire` child when `STATUS_MODEL` is `None`.
 `PadsConfig` fits `pad_notes`, `pad_velocities` and `pad_actions` to the grid in its after-validator,
 as the widget's observers do; `PadsView`, `KeyboardView` and `MidiKeyboardView` are pure trait maps
-whose status (taps, held notes, ports, control changes, device clock) the browser owns. The spaday tree is
+whose status (taps, held notes, ports, control changes, device clock) the browser owns. `SettingsView`
+follows the same shape. `MidiOutputView` sends through commands: `note_on`, `note_off`,
+`control_change` and `send_raw` call `session.command(status_id, "request", {...})`; transports
+requires the target to be a client-owned field, so `MidiOutputStatus.request` exists only for that,
+and `nbplay-wire` hands any non-transport command object straight to `element.command()`, untagging
+nested transports values (`{"Map": {...}}`) first. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are

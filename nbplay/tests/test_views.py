@@ -130,6 +130,34 @@ class TestKeysViews:
                 view.close()
 
 
+class TestIoViews:
+    def test_settings_and_midi_output_views(self):
+        settings = views.SettingsView(sample_rate=48000, autosync=False)
+        try:
+            assert settings.config.sample_rate == 48000
+            assert settings._tree["bindings"]["midiEvent"]["field"] == "status.midi_event"
+            with pytest.raises(ValueError):
+                settings.config.channels = 3
+        finally:
+            settings.close()
+        out = views.MidiOutputView(channel=9, autosync=False)
+        sent = []
+        out.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        try:
+            out.note_on(200, 300)
+            out.send_raw([0xC0, 5])
+            with pytest.raises(ValueError):
+                out.send_raw([])
+            ready(out)
+            # Commands are delivered one at a time; the raw send follows the ack.
+            commands = [m for m in messages(sent) if m["t"] == "command"]
+            assert [c["field"] for c in commands] == ["request"]
+            assert commands[0]["value"]["Map"]["kind"] == {"Str": "note_on"}
+            assert commands[0]["value"]["Map"]["note"] == {"Int": 127}
+        finally:
+            out.close()
+
+
 class TestTransportView:
     def test_hosts_config_and_status_and_binds_the_element(self):
         view = views.TransportView(bpm=100.0, theme="flat", autosync=False)
