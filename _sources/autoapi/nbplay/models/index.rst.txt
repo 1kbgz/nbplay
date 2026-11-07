@@ -23,6 +23,12 @@ Classes
    nbplay.models.SynthConfig
    nbplay.models.SynthStatus
    nbplay.models.MixerConfig
+   nbplay.models.PadsConfig
+   nbplay.models.PadsStatus
+   nbplay.models.KeyboardConfig
+   nbplay.models.KeyboardStatus
+   nbplay.models.MidiKeyboardConfig
+   nbplay.models.MidiKeyboardStatus
 
 
 Module Contents
@@ -293,5 +299,321 @@ Module Contents
 
 
    .. py:method:: _pad()
+
+
+.. py:class:: PadsConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The trigger-pad grid the kernel owns.
+
+   ``pad_notes``, ``pad_velocities`` and ``pad_actions`` always cover the
+   ``rows`` by ``cols`` grid: the after-validator extends or trims them
+   the way the traitlets widget's observers do.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: rows
+      :type:  int
+
+
+   .. py:attribute:: cols
+      :type:  int
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:attribute:: velocity_sensitive
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: pad_notes
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: pad_velocities
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: pad_actions
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: sampler_routing
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _notes(value)
+      :classmethod:
+
+
+
+   .. py:method:: _velocities(value)
+      :classmethod:
+
+
+
+   .. py:method:: _fit_grid()
+
+
+.. py:class:: PadsStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   What the pads are doing in the browser; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: active_pads
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: last_note_event
+      :type:  dict
+
+
+   .. py:attribute:: last_pad_event
+      :type:  dict
+
+
+.. py:class:: KeyboardConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The QWERTY keyboard's octaves, velocity, sustain and routing.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: upper_octave
+      :type:  int
+
+
+   .. py:attribute:: lower_octave
+      :type:  int
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:attribute:: sustain_upper
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: sustain_lower
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: sustain_global
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: sampler_routing
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+.. py:class:: KeyboardStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Notes held in the browser; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: active_notes
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: last_note_event
+      :type:  dict
+
+
+.. py:class:: MidiKeyboardConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The Web MIDI keyboard's port, clock following and routing.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: midi_port
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: sync_clock
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: sampler_routing
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+.. py:class:: MidiKeyboardStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Ports, held notes, control changes and the device clock; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: available_midi_ports
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: active_notes
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: last_note_event
+      :type:  dict
+
+
+   .. py:attribute:: control_change
+      :type:  dict
+
+
+   .. py:attribute:: clock_bpm
+      :type:  float
+      :value: 0.0
+
 
 

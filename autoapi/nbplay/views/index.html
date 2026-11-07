@@ -311,6 +311,60 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.MixerView.add_master_effect">MixerView.add_master_effect()</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.PadsView">PadsView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.TAG">PadsView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.CONFIG_MODEL">PadsView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.STATUS_MODEL">PadsView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.CONFIG">PadsView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.STATUS">PadsView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.KeyboardView">KeyboardView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.TAG">KeyboardView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.CONFIG_MODEL">KeyboardView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.STATUS_MODEL">KeyboardView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.CONFIG">KeyboardView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.STATUS">KeyboardView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.MidiKeyboardView">MidiKeyboardView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.TAG">MidiKeyboardView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.CONFIG_MODEL">MidiKeyboardView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.STATUS_MODEL">MidiKeyboardView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.CONFIG">MidiKeyboardView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.STATUS">MidiKeyboardView.STATUS</a>
+  </li>
 </ul>
 </div>
   </div>
@@ -366,6 +420,15 @@ layer to the traitlets widgets in <a class="reference internal" href="../widget/
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.views.MixerView" title="nbplay.views.MixerView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerView</span></code></a></p></td>
 <td><p>The mixer console on a transports session.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.PadsView" title="nbplay.views.PadsView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadsView</span></code></a></p></td>
+<td><p>The trigger-pad grid on a transports session; the browser owns the taps.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.views.KeyboardView" title="nbplay.views.KeyboardView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardView</span></code></a></p></td>
+<td><p>The QWERTY musical-typing keyboard on a transports session.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.MidiKeyboardView" title="nbplay.views.MidiKeyboardView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardView</span></code></a></p></td>
+<td><p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p></td>
 </tr>
 </tbody>
 </table>
@@ -607,6 +670,102 @@ graph from it. Edits in either place are validated by
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.PadsView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">PadsView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<p>The trigger-pad grid on a transports session; the browser owns the taps.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-pads'</span></em><a class="headerlink" href="#nbplay.views.PadsView.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.views.PadsView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.views.PadsView.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.PadsView.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.PadsView.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">KeyboardView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.KeyboardView" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<p>The QWERTY musical-typing keyboard on a transports session.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-keyboard'</span></em><a class="headerlink" href="#nbplay.views.KeyboardView.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.views.KeyboardView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.views.KeyboardView.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.KeyboardView.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.KeyboardView.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.KeyboardView.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">MidiKeyboardView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiKeyboardView" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-midi-keyboard'</span></em><a class="headerlink" href="#nbplay.views.MidiKeyboardView.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.views.MidiKeyboardView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.views.MidiKeyboardView.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.MidiKeyboardView.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.MidiKeyboardView.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -774,6 +933,60 @@ graph from it. Edits in either place are validated by
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.MixerView.add_master_effect">MixerView.add_master_effect()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.PadsView">PadsView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.TAG">PadsView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.CONFIG_MODEL">PadsView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.STATUS_MODEL">PadsView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.CONFIG">PadsView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.STATUS">PadsView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.KeyboardView">KeyboardView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.TAG">KeyboardView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.CONFIG_MODEL">KeyboardView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.STATUS_MODEL">KeyboardView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.CONFIG">KeyboardView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.KeyboardView.STATUS">KeyboardView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.MidiKeyboardView">MidiKeyboardView</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.TAG">MidiKeyboardView.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.CONFIG_MODEL">MidiKeyboardView.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.STATUS_MODEL">MidiKeyboardView.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.CONFIG">MidiKeyboardView.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.MidiKeyboardView.STATUS">MidiKeyboardView.STATUS</a>
   </li>
 </ul>
 

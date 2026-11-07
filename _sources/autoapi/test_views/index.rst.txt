@@ -20,6 +20,7 @@ Classes
    test_views.TestTransportModels
    test_views.TestSynthView
    test_views.TestMixerView
+   test_views.TestKeysViews
    test_views.TestTransportView
 
 
@@ -63,6 +64,14 @@ Module Contents
 
 
    .. py:method:: test_view_builds_the_console_without_a_status_model()
+
+
+.. py:class:: TestKeysViews
+
+   .. py:method:: test_pads_config_fits_the_grid()
+
+
+   .. py:method:: test_keyboard_and_midi_keyboard_views()
 
 
 .. py:class:: TestTransportView

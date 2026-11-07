@@ -603,9 +603,30 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span><span class="p">,</span> <span class="n">model_validator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">THEMES</span><span class="p">,</span> <span class="n">_normalize_effects</span><span class="p">,</span> <span class="n">_normalize_mixer_channel</span><span class="p">,</span> <span class="n">_normalize_return_bus</span><span class="p">,</span> <span class="n">_pad_sends</span><span class="p">,</span> <span class="n">render_waveform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.widget</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">THEMES</span><span class="p">,</span>
+    <span class="n">_default_pad_notes</span><span class="p">,</span>
+    <span class="n">_normalize_effects</span><span class="p">,</span>
+    <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
+    <span class="n">_normalize_pad_actions</span><span class="p">,</span>
+    <span class="n">_normalize_return_bus</span><span class="p">,</span>
+    <span class="n">_pad_sends</span><span class="p">,</span>
+    <span class="n">render_waveform</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"MixerConfig"</span><span class="p">,</span> <span class="s2">"SynthConfig"</span><span class="p">,</span> <span class="s2">"SynthStatus"</span><span class="p">,</span> <span class="s2">"TransportConfig"</span><span class="p">,</span> <span class="s2">"TransportStatus"</span><span class="p">)</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"KeyboardConfig"</span><span class="p">,</span>
+    <span class="s2">"KeyboardStatus"</span><span class="p">,</span>
+    <span class="s2">"MidiKeyboardConfig"</span><span class="p">,</span>
+    <span class="s2">"MidiKeyboardStatus"</span><span class="p">,</span>
+    <span class="s2">"MixerConfig"</span><span class="p">,</span>
+    <span class="s2">"PadsConfig"</span><span class="p">,</span>
+    <span class="s2">"PadsStatus"</span><span class="p">,</span>
+    <span class="s2">"SynthConfig"</span><span class="p">,</span>
+    <span class="s2">"SynthStatus"</span><span class="p">,</span>
+    <span class="s2">"TransportConfig"</span><span class="p">,</span>
+    <span class="s2">"TransportStatus"</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -770,6 +791,138 @@ window.runMermaid = runMermaid;</script>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"channels"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">channel</span><span class="p">,</span> <span class="s2">"sends"</span><span class="p">:</span> <span class="n">_pad_sends</span><span class="p">(</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">],</span> <span class="n">count</span><span class="p">)}</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="PadsConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.PadsConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PadsConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The trigger-pad grid the kernel owns.</span>
+
+<span class="sd">    ``pad_notes``, ``pad_velocities`` and ``pad_actions`` always cover the</span>
+<span class="sd">    ``rows`` by ``cols`` grid: the after-validator extends or trims them</span>
+<span class="sd">    the way the traitlets widget's observers do.</span>
+<span class="sd">    """</span>
+
+    <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">127</span><span class="p">)</span>
+    <span class="n">velocity_sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">pad_notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pad_velocities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pad_actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sampler_routing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="PadsConfig._notes">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.PadsConfig._notes">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"pad_notes"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_notes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">or</span> <span class="p">[]]</span></div>
+
+
+<div class="viewcode-block" id="PadsConfig._velocities">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.PadsConfig._velocities">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"pad_velocities"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_velocities</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">or</span> <span class="p">[]]</span></div>
+
+
+<div class="viewcode-block" id="PadsConfig._fit_grid">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.PadsConfig._fit_grid">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span>
+        <span class="n">notes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_notes</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_default_pad_notes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">total</span><span class="p">:</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">last</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">notes</span><span class="p">)))</span>
+        <span class="n">notes</span> <span class="o">=</span> <span class="n">notes</span><span class="p">[:</span><span class="n">total</span><span class="p">]</span>
+        <span class="n">velocities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_velocities</span><span class="p">)</span>
+        <span class="n">velocities</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">velocities</span><span class="p">)))</span>
+        <span class="n">velocities</span> <span class="o">=</span> <span class="n">velocities</span><span class="p">[:</span><span class="n">total</span><span class="p">]</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="n">_normalize_pad_actions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_actions</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">notes</span><span class="p">,</span> <span class="n">velocities</span><span class="p">,</span> <span class="n">prefer_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"pad_notes"</span><span class="p">,</span> <span class="n">notes</span><span class="p">),</span> <span class="p">(</span><span class="s2">"pad_velocities"</span><span class="p">,</span> <span class="n">velocities</span><span class="p">),</span> <span class="p">(</span><span class="s2">"pad_actions"</span><span class="p">,</span> <span class="n">actions</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PadsStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.PadsStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PadsStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""What the pads are doing in the browser; browser-owned."""</span>
+
+    <span class="n">active_pads</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">last_pad_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="KeyboardConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.KeyboardConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KeyboardConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The QWERTY keyboard's octaves, velocity, sustain and routing."""</span>
+
+    <span class="n">upper_octave</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">lower_octave</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">127</span><span class="p">)</span>
+    <span class="n">sustain_upper</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sustain_lower</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sustain_global</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sampler_routing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="KeyboardStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.KeyboardStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KeyboardStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Notes held in the browser; browser-owned."""</span>
+
+    <span class="n">active_notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="MidiKeyboardConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiKeyboardConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiKeyboardConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The Web MIDI keyboard's port, clock following and routing."""</span>
+
+    <span class="n">midi_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">sync_clock</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sampler_routing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="MidiKeyboardStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiKeyboardStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiKeyboardStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Ports, held notes, control changes and the device clock; browser-owned."""</span>
+
+    <span class="n">available_midi_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">active_notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">control_change</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">clock_bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span></div>
 
 </pre></div>
 

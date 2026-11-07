@@ -34,6 +34,9 @@ Classes
    nbplay.views.TransportView
    nbplay.views.SynthView
    nbplay.views.MixerView
+   nbplay.views.PadsView
+   nbplay.views.KeyboardView
+   nbplay.views.MidiKeyboardView
 
 
 Module Contents
@@ -250,5 +253,86 @@ Module Contents
 
       Append an insert effect to the master bus.
 
+
+
+.. py:class:: PadsView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The trigger-pad grid on a transports session; the browser owns the taps.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-pads'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: KeyboardView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The QWERTY musical-typing keyboard on a transports session.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-keyboard'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: MidiKeyboardView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The Web MIDI keyboard on a transports session; ports and clock are browser-owned.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-midi-keyboard'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
 
 
