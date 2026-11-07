@@ -769,21 +769,29 @@ class SynthWidget(_Themed, anywidget.AnyWidget):
     def _update_waveform(self):
         """Re-render the waveform preview via the Rust oscillator and push
         the result as a binary Float32Array to the frontend."""
-        osc = self._make_oscillator()
+        self.waveform = render_waveform(self.oscillator_type, self.frequency, self.amplitude, self.sample_rate)
 
-        if self.oscillator_type == "noise":
-            frames = 1024
-        else:
-            # Show ~3 full cycles so the shape is always clearly visible.
-            cycles = 3
-            frames_per_cycle = self.sample_rate / max(self.frequency, 1.0)
-            frames = max(256, min(_PREVIEW_MAX_FRAMES, int(frames_per_cycle * cycles)))
 
-        samples = osc.render_to_buffer(frames)
+def render_waveform(oscillator_type, frequency, amplitude, sample_rate):
+    """The waveform preview for an oscillator as little-endian float32 bytes.
 
-        # Pack as little-endian float32 — arrives as an ArrayBuffer in JS.
-        buf = array.array("f", samples)
-        self.waveform = buf.tobytes()
+    About three cycles of the periodic oscillators, capped at
+    ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.
+    """
+    if oscillator_type == "square":
+        osc = SquareOscillator(frequency, amplitude, sample_rate)
+    elif oscillator_type == "saw":
+        osc = SawOscillator(frequency, amplitude, sample_rate)
+    elif oscillator_type == "noise":
+        osc = NoiseSource(amplitude)
+    else:
+        osc = SineOscillator(frequency, amplitude, sample_rate)
+    if oscillator_type == "noise":
+        frames = 1024
+    else:
+        frames_per_cycle = sample_rate / max(frequency, 1.0)
+        frames = max(256, min(_PREVIEW_MAX_FRAMES, int(frames_per_cycle * 3)))
+    return array.array("f", osc.render_to_buffer(frames)).tobytes()
 
 
 class SettingsWidget(_Themed, anywidget.AnyWidget):

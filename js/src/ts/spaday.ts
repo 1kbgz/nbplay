@@ -28,6 +28,11 @@ type Commandable = HTMLElement & {
   command?: (cmd: Record<string, unknown>) => void;
 };
 
+/** `is_playing` to `isPlaying`. */
+export function camel(name: string): string {
+  return name.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+}
+
 const TAGS = ["Null", "Bool", "Int", "Float", "Str", "Bytes", "List", "Map"];
 
 /** A transports `Value` (`{"Bool": true}`) to its plain form. */
@@ -63,9 +68,10 @@ export function statusCommand(
 
 /**
  * `<nbplay-wire namespace="status">`: placed inside an instrument element,
- * requests the named wire from the spaday widget root and forwards each
- * command for that model to the instrument's `command()` before
- * acknowledging it.
+ * requests the named wire from the spaday widget root and applies each
+ * command for that model to the instrument before acknowledging it: through
+ * `command()` when the element has one (the transport), otherwise by writing
+ * the field's camelCase property (the synth's `isPlaying`).
  */
 export class NbplayWire extends HTMLElement {
   private stop: (() => void) | null = null;
@@ -95,8 +101,22 @@ export class NbplayWire extends HTMLElement {
     this.stop = wire.client.onCommand((command) => {
       if (wire.link.modelId !== undefined && command.id !== wire.link.modelId)
         return;
-      const cmd = statusCommand(command.field, untag(command.value));
-      if (cmd) host.command?.(cmd);
+      const value = untag(command.value);
+      if (typeof host.command === "function") {
+        const cmd = statusCommand(command.field, value);
+        if (cmd) host.command(cmd);
+      } else {
+        // A property write is silent; report it like the element would so
+        // the status bindings re-read and the kernel sees the result.
+        const prop = camel(command.field);
+        (host as unknown as Record<string, unknown>)[prop] = value;
+        host.dispatchEvent(
+          new CustomEvent("nbplay-status", {
+            detail: { values: { [prop]: value }, save: true },
+            bubbles: true,
+          }),
+        );
+      }
       void wire.client.ackCommand(command);
     });
   }

@@ -851,14 +851,21 @@ future external controller layouts.
 `nbplay/views.py` is the parallel layer that will replace the traitlets widgets: the same elements
 on [transports](https://github.com/1kbgz/transports) models rendered by
 [spaday](https://github.com/1kbgz/spaday). A view hosts two pydantic models from `nbplay/models.py`
-in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`), and a
-status model the browser owns (`TransportStatus`, hosted with `owner="client"`). The spaday tree is
+in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`,
+`SynthConfig`), and a status model the browser owns (`TransportStatus`, `SynthStatus`, hosted with
+`owner="client"`). `InstrumentView` is the shared base: it hosts the models, builds the tree and the
+wires, and subclasses only name the element tag, the models and the trait-to-property maps.
+`SynthConfig` derives `waveform` in a pydantic after-validator (with `validate_assignment`), so a
+Python assignment and a validated browser edit both re-render the Rust preview, and the browser edit's
+authoritative patch already carries the new bytes. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are
 `session.command(status_id, field, value)` calls; `<nbplay-wire namespace="status">`, a child of the
 instrument defined in `js/src/ts/spaday.ts`, requests the wire from the widget root, maps the
-status field to `element.command(...)` and acknowledges. The build writes that bundle and the
+status field to `element.command(...)` when the element has one (the transport), or writes the
+field's camelCase property and reports it as `nbplay-status` (the synth's `isPlaying`), then
+acknowledges. The build writes that bundle and the
 stylesheet to `nbplay/static/spaday/`, which `nbplay.components.package` publishes as the spaday
 component package `nbplay` (also an installed entry point).
 

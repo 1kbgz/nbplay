@@ -1,4 +1,7 @@
-"""A real TransportView comm endpoint for the browser test, driven by JSON lines on stdin."""
+"""A real instrument view comm endpoint for the browser test, driven by JSON lines on stdin.
+
+``python spaday_bridge.py <view> [codec]`` where ``view`` is ``transport`` or ``synth``.
+"""
 
 import json
 import sys
@@ -7,10 +10,13 @@ from unittest.mock import Mock
 import transports
 from spaday.widget import _ESM
 
-from nbplay.views import TransportView
+from nbplay import views
 
-codec = sys.argv[1] if len(sys.argv) > 1 else "json"
-view = TransportView(bpm=120.0, autosync=False, codec=codec, update_interval=0.05)
+VIEWS = {"transport": views.TransportView, "synth": views.SynthView}
+
+name = sys.argv[1] if len(sys.argv) > 1 else "transport"
+codec = sys.argv[2] if len(sys.argv) > 2 else "json"
+view = VIEWS[name](autosync=False, codec=codec, update_interval=0.05)
 sent = []
 view.send = Mock(side_effect=lambda content, buffers=(): sent.append({"content": content, "buffers": [list(b) for b in buffers]}))
 try:
@@ -29,17 +35,20 @@ try:
             }
         elif op == "receive":
             view._msg_callbacks(view, request["content"], [memoryview(bytes(b)) for b in request.get("buffers", [])])
-        elif op == "set_bpm":
-            view.config.bpm = float(request["bpm"])
+            # A notebook kernel's autosync timer does this; the bridge flushes explicitly.
             transports.sync(view.server)
-        elif op in ("play", "stop"):
-            getattr(view, op)()
+        elif op == "set":
+            setattr(view.config, request["field"], request["value"])
             transports.sync(view.server)
-        elif op == "seek":
-            view.seek(request["beat"])
+        elif op == "command":
+            getattr(view, request["name"])(*request.get("args", []))
             transports.sync(view.server)
         elif op == "state":
-            result = {"bpm": view.config.bpm, "is_playing": view.status.is_playing, "current_beat": view.status.current_beat}
+            config = view.config.model_dump()
+            waveform = config.pop("waveform", None)
+            result = {"config": config, "status": view.status.model_dump()}
+            if waveform is not None:
+                result["waveform_bytes"] = len(waveform)
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)
         sent.clear()
 finally:

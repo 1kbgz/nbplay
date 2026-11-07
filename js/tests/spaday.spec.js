@@ -17,8 +17,12 @@ function available() {
   return probe.status === 0;
 }
 
-async function viewKernel() {
-  const child = spawn(PYTHON, ["../nbplay/tests/spaday_bridge.py", "json"]);
+async function viewKernel(view) {
+  const child = spawn(PYTHON, [
+    "../nbplay/tests/spaday_bridge.py",
+    view,
+    "json",
+  ]);
   const pending = [];
   let errors = "";
   child.stderr.on("data", (chunk) => {
@@ -49,56 +53,65 @@ async function viewKernel() {
   };
 }
 
-test.describe("TransportView on transports", () => {
+/** Render the kernel's view in the harness page, relaying comm traffic. */
+async function mount(page, kernel) {
+  const { result: description } = await kernel.call({ op: "describe" });
+  fs.mkdirSync("dist/vendor", { recursive: true });
+  fs.copyFileSync(description.widget_esm, "dist/vendor/spaday-widget.js");
+  await page.exposeFunction("kernelMessage", (request) => kernel.call(request));
+  await page.goto("/tests/fixtures/spaday.html");
+  await page.waitForFunction(() => window.__widget);
+  await page.evaluate(async (description) => {
+    const { widget, fakeModel } = window.__widget;
+    const model = fakeModel(description);
+    let queue = Promise.resolve();
+    window.notebook = { model, delivered: 0 };
+    const deliver = (response) => {
+      for (const { content, buffers } of response.messages) {
+        window.notebook.delivered += 1;
+        model._emit(
+          "msg:custom",
+          content,
+          buffers.map((bytes) => new Uint8Array(bytes)),
+        );
+      }
+    };
+    window.notebook.deliver = deliver;
+    model.send = (content, _, buffers = []) => {
+      queue = queue
+        .then(() =>
+          window.kernelMessage({
+            op: "receive",
+            content,
+            buffers: buffers.map((b) =>
+              Array.from(new Uint8Array(b.buffer, b.byteOffset, b.byteLength)),
+            ),
+          }),
+        )
+        .then(deliver);
+    };
+    const el = document.createElement("div");
+    el.id = "owner";
+    document.body.appendChild(el);
+    await widget.render({ model, el });
+  }, description);
+  // The view's ready handshake and snapshots have arrived.
+  await page.waitForFunction(() => window.notebook.delivered > 0);
+}
+
+const state = async (kernel) => (await kernel.call({ op: "state" })).result;
+
+test.describe("views on transports", () => {
+  // One kernel subprocess and one copied widget bundle at a time.
+  test.describe.configure({ mode: "serial" });
   test.skip(!available(), "spaday session support is not installed");
 
-  test("the kernel and the owning view share config, status and commands", async ({
+  test("transport: the kernel and the owning view share config, status and commands", async ({
     page,
   }) => {
-    const kernel = await viewKernel();
+    const kernel = await viewKernel("transport");
     try {
-      const { result: description } = await kernel.call({ op: "describe" });
-      fs.mkdirSync("dist/vendor", { recursive: true });
-      fs.copyFileSync(description.widget_esm, "dist/vendor/spaday-widget.js");
-      await page.exposeFunction("kernelMessage", (request) =>
-        kernel.call(request),
-      );
-      await page.goto("/tests/fixtures/spaday.html");
-      await page.waitForFunction(() => window.__widget);
-      await page.evaluate(async (description) => {
-        const { widget, fakeModel } = window.__widget;
-        const model = fakeModel(description);
-        let queue = Promise.resolve();
-        const deliver = (response) => {
-          for (const { content, buffers } of response.messages)
-            model._emit(
-              "msg:custom",
-              content,
-              buffers.map((bytes) => new Uint8Array(bytes)),
-            );
-        };
-        model.send = (content, _, buffers = []) => {
-          queue = queue
-            .then(() =>
-              window.kernelMessage({
-                op: "receive",
-                content,
-                buffers: buffers.map((b) =>
-                  Array.from(
-                    new Uint8Array(b.buffer, b.byteOffset, b.byteLength),
-                  ),
-                ),
-              }),
-            )
-            .then(deliver);
-        };
-        const el = document.createElement("div");
-        el.id = "owner";
-        document.body.appendChild(el);
-        await widget.render({ model, el });
-        window.notebook = { model, deliver };
-      }, description);
-
+      await mount(page, kernel);
       const transport = page.locator("#owner nbplay-transport");
       await expect(transport).toBeVisible();
       await expect(page.locator("#owner nbplay-wire")).toHaveCount(1);
@@ -110,7 +123,7 @@ test.describe("TransportView on transports", () => {
       // Kernel config assignment reaches the element.
       await page.evaluate(
         (response) => notebook.deliver(response),
-        await kernel.call({ op: "set_bpm", bpm: 140 }),
+        await kernel.call({ op: "set", field: "bpm", value: 140 }),
       );
       await expect(tempo).toContainText("140");
 
@@ -125,29 +138,75 @@ test.describe("TransportView on transports", () => {
           }),
         );
       });
-      await expect
-        .poll(async () => (await kernel.call({ op: "state" })).result.bpm)
-        .toBe(96);
+      await expect.poll(async () => (await state(kernel)).config.bpm).toBe(96);
 
       // The browser owns play state: pressing play updates the kernel's status.
       await page.locator("#owner .nbplay-transport-play").click();
       await expect(transport).toHaveAttribute("is-playing", "");
       await expect
-        .poll(
-          async () => (await kernel.call({ op: "state" })).result.is_playing,
-        )
+        .poll(async () => (await state(kernel)).status.is_playing)
         .toBe(true);
 
       // A kernel command moves the clock through nbplay-wire.
       await page.evaluate(
         (response) => notebook.deliver(response),
-        await kernel.call({ op: "stop" }),
+        await kernel.call({ op: "command", name: "stop" }),
       );
       await expect(transport).not.toHaveAttribute("is-playing");
       await expect
-        .poll(
-          async () => (await kernel.call({ op: "state" })).result.is_playing,
-        )
+        .poll(async () => (await state(kernel)).status.is_playing)
+        .toBe(false);
+    } finally {
+      kernel.close();
+    }
+  });
+
+  test("synth: the kernel renders the waveform for browser edits and plays on command", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("synth");
+    try {
+      await mount(page, kernel);
+      const synth = page.locator("#owner nbplay-synth");
+      await expect(synth).toBeVisible();
+      const waveformBytes = () =>
+        page.evaluate(
+          () =>
+            document.querySelector("#owner nbplay-synth").waveform
+              ?.byteLength ?? 0,
+        );
+      // 440 Hz: three cycles of 44.1 kHz float32 samples.
+      await expect.poll(waveformBytes).toBe(4 * Math.floor((44100 / 440) * 3));
+
+      // A browser edit is validated by the kernel, which re-renders the preview.
+      await page.evaluate(() => {
+        const el = document.querySelector("#owner nbplay-synth");
+        el.frequency = 110;
+        el.dispatchEvent(
+          new CustomEvent("nbplay-set", {
+            detail: { values: { frequency: 110 } },
+            bubbles: true,
+          }),
+        );
+      });
+      await expect
+        .poll(async () => (await state(kernel)).config.frequency)
+        .toBe(110);
+      await expect.poll(waveformBytes).toBe(4 * Math.floor((44100 / 110) * 3));
+
+      // A kernel command starts the tone; the browser owns the play state.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "play" }),
+      );
+      await expect(synth).toHaveAttribute("is-playing", "");
+      await expect
+        .poll(async () => (await state(kernel)).status.is_playing)
+        .toBe(true);
+      await page.locator("#owner .nbplay-play-btn").click();
+      await expect(synth).not.toHaveAttribute("is-playing");
+      await expect
+        .poll(async () => (await state(kernel)).status.is_playing)
         .toBe(false);
     } finally {
       kernel.close();
