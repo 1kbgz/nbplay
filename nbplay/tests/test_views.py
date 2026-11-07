@@ -10,7 +10,7 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
-from nbplay.models import TransportConfig, TransportStatus
+from nbplay.models import SynthConfig, TransportConfig, TransportStatus
 
 
 def messages(sent):
@@ -38,6 +38,36 @@ class TestTransportModels:
             status.is_playing = True
         assert status.is_playing is False
         assert session.command(mid, "is_playing", True) >= 0
+
+
+class TestSynthView:
+    def test_waveform_follows_the_oscillator_parameters(self):
+        with pytest.raises(ValueError):
+            SynthConfig.model_validate({"oscillator_type": "triangle"})
+        view = views.SynthView(frequency=220.0, autosync=False)
+        try:
+            first = view.config.waveform
+            assert len(first) == 4 * min(2048, int(44100 / 220 * 3))
+            view.config.frequency = 440.0
+            assert len(view.config.waveform) == 4 * int(44100 / 440 * 3)
+            view.config.oscillator_type = "noise"
+            assert len(view.config.waveform) == 4 * 1024
+            assert view._tree["tag"] == "nbplay-synth"
+            assert view._tree["bindings"]["waveform"]["field"] == "config.waveform"
+        finally:
+            view.close()
+
+    def test_waveform_bytes_travel_as_buffers(self):
+        view = views.SynthView(autosync=False)
+        sent = []
+        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        try:
+            ready(view)
+            assert any(buffers for _, buffers in sent)
+            command = view.play()
+            assert isinstance(command, int)
+        finally:
+            view.close()
 
 
 class TestTransportView:
