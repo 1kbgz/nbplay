@@ -10,7 +10,7 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
-from nbplay.models import MixerConfig, SynthConfig, TransportConfig, TransportStatus
+from nbplay.models import KeyboardConfig, MixerConfig, PadsConfig, SynthConfig, TransportConfig, TransportStatus
 
 
 def messages(sent):
@@ -100,6 +100,34 @@ class TestMixerView:
                 view._command("x", 1)
         finally:
             view.close()
+
+
+class TestKeysViews:
+    def test_pads_config_fits_the_grid(self):
+        config = PadsConfig(rows=2, cols=2)
+        assert config.pad_notes == [36, 37, 38, 39]
+        assert config.pad_velocities == [100] * 4
+        assert [a["note"] for a in config.pad_actions] == [36, 37, 38, 39]
+        config.rows = 3
+        assert config.pad_notes == [36, 37, 38, 39, 40, 41] and len(config.pad_actions) == 6
+        config.pad_notes = [60, 200, -5]
+        assert config.pad_notes == [60, 127, 0, 1, 2, 3]
+        assert [a["note"] for a in config.pad_actions][:3] == [60, 127, 0]
+        with pytest.raises(ValueError):
+            config.velocity = 0
+
+    def test_keyboard_and_midi_keyboard_views(self):
+        with pytest.raises(ValueError):
+            KeyboardConfig(upper_octave=12)
+        for cls, tag in ((views.PadsView, "nbplay-pads"), (views.KeyboardView, "nbplay-keyboard"), (views.MidiKeyboardView, "nbplay-midi-keyboard")):
+            view = cls(autosync=False)
+            try:
+                assert view._tree["tag"] == tag
+                assert view.status_id is not None
+                assert view._tree["bindings"]["lastNoteEvent"]["field"] == "status.last_note_event"
+                assert view._tree["bindings"]["theme"]["field"] == "config.theme"
+            finally:
+                view.close()
 
 
 class TestTransportView:

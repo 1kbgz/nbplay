@@ -279,4 +279,68 @@ test.describe("views on transports", () => {
       kernel.close();
     }
   });
+
+  test("pads: a browser tap becomes kernel status and kernel notes relabel the grid", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("pads");
+    try {
+      await mount(page, kernel);
+      const pads = page.locator("#owner nbplay-pads");
+      await expect(pads).toBeVisible();
+      await expect(page.locator("#owner .nbplay-pad-cell")).toHaveCount(16);
+
+      const cell = page.locator("#owner .nbplay-pad-cell").first();
+      const box = await cell.boundingBox();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.up();
+      await expect
+        .poll(async () => (await state(kernel)).status.last_note_event.note)
+        .toBe(36);
+
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "set", field: "pad_notes", value: [60] }),
+      );
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () => document.querySelector("#owner nbplay-pads").padNotes[0],
+          ),
+        )
+        .toBe(60);
+      // The kernel filled the rest of the grid from the new first note.
+      expect((await state(kernel)).config.pad_notes.length).toBe(16);
+    } finally {
+      kernel.close();
+    }
+  });
+
+  for (const [name, tag, field, prop, value] of [
+    ["keyboard", "nbplay-keyboard", "velocity", "velocity", 64],
+    ["midi_keyboard", "nbplay-midi-keyboard", "sync_clock", "syncClock", true],
+  ]) {
+    test(`${name}: kernel config reaches the element`, async ({ page }) => {
+      const kernel = await viewKernel(name);
+      try {
+        await mount(page, kernel);
+        await expect(page.locator(`#owner ${tag}`)).toBeVisible();
+        await page.evaluate(
+          (response) => notebook.deliver(response),
+          await kernel.call({ op: "set", field, value }),
+        );
+        await expect
+          .poll(() =>
+            page.evaluate(
+              ([tag, prop]) => document.querySelector(`#owner ${tag}`)[prop],
+              [tag, prop],
+            ),
+          )
+          .toBe(value);
+      } finally {
+        kernel.close();
+      }
+    });
+  }
 });

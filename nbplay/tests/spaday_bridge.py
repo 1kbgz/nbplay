@@ -12,7 +12,14 @@ from spaday.widget import _ESM
 
 from nbplay import views
 
-VIEWS = {"transport": views.TransportView, "synth": views.SynthView, "mixer": views.MixerView}
+VIEWS = {
+    "transport": views.TransportView,
+    "synth": views.SynthView,
+    "mixer": views.MixerView,
+    "pads": views.PadsView,
+    "keyboard": views.KeyboardView,
+    "midi_keyboard": views.MidiKeyboardView,
+}
 
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
 codec = sys.argv[2] if len(sys.argv) > 2 else "json"

@@ -16,13 +16,34 @@ import transports
 from pydantic import BaseModel
 from spaday import Widget, element
 
-from .models import MixerConfig, SynthConfig, SynthStatus, TransportConfig, TransportStatus
+from .models import (
+    KeyboardConfig,
+    KeyboardStatus,
+    MidiKeyboardConfig,
+    MidiKeyboardStatus,
+    MixerConfig,
+    PadsConfig,
+    PadsStatus,
+    SynthConfig,
+    SynthStatus,
+    TransportConfig,
+    TransportStatus,
+)
 from .widget import _normalize_effect
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
     raise ImportError("nbplay.views needs a spaday release with Widget(session=...) support")
 
-__all__ = ("PACKAGE", "InstrumentView", "MixerView", "SynthView", "TransportView")
+__all__ = (
+    "PACKAGE",
+    "InstrumentView",
+    "KeyboardView",
+    "MidiKeyboardView",
+    "MixerView",
+    "PadsView",
+    "SynthView",
+    "TransportView",
+)
 
 PACKAGE = "nbplay.components:package"
 
@@ -190,3 +211,63 @@ class MixerView(InstrumentView):
     def add_master_effect(self, effect):
         """Append an insert effect to the master bus."""
         self.config.master_effects = [*self.config.master_effects, _normalize_effect(effect)]
+
+
+_ROUTED = {"sampler_routing": "samplerRouting", "session_id": "sessionId", "channel_index": "channelIndex", "theme": "theme"}
+
+
+class PadsView(InstrumentView):
+    """The trigger-pad grid on a transports session; the browser owns the taps."""
+
+    TAG = "nbplay-pads"
+    CONFIG_MODEL = PadsConfig
+    STATUS_MODEL = PadsStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "rows": "rows",
+        "cols": "cols",
+        "velocity": "velocity",
+        "velocity_sensitive": "velocitySensitive",
+        "pad_notes": "padNotes",
+        "pad_velocities": "padVelocities",
+        "pad_actions": "padActions",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "active_pads": "activePads",
+        "last_note_event": "lastNoteEvent",
+        "last_pad_event": "lastPadEvent",
+    }
+
+
+class KeyboardView(InstrumentView):
+    """The QWERTY musical-typing keyboard on a transports session."""
+
+    TAG = "nbplay-keyboard"
+    CONFIG_MODEL = KeyboardConfig
+    STATUS_MODEL = KeyboardStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "upper_octave": "upperOctave",
+        "lower_octave": "lowerOctave",
+        "velocity": "velocity",
+        "sustain_upper": "sustainUpper",
+        "sustain_lower": "sustainLower",
+        "sustain_global": "sustainGlobal",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {"active_notes": "activeNotes", "last_note_event": "lastNoteEvent"}
+
+
+class MidiKeyboardView(InstrumentView):
+    """The Web MIDI keyboard on a transports session; ports and clock are browser-owned."""
+
+    TAG = "nbplay-midi-keyboard"
+    CONFIG_MODEL = MidiKeyboardConfig
+    STATUS_MODEL = MidiKeyboardStatus
+    CONFIG: ClassVar[dict[str, str]] = {"midi_port": "midiPort", "sync_clock": "syncClock", **_ROUTED}
+    STATUS: ClassVar[dict[str, str]] = {
+        "available_midi_ports": "availableMidiPorts",
+        "active_notes": "activeNotes",
+        "last_note_event": "lastNoteEvent",
+        "control_change": "controlChange",
+        "clock_bpm": "clockBpm",
+    }
