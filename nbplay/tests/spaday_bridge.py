@@ -12,6 +12,18 @@ from spaday.widget import _ESM
 
 from nbplay import views
 
+
+def _jsonable(value):
+    """Replace bytes with their length, recursively, so the state fits a JSON line."""
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return {"bytes": len(value)}
+    if isinstance(value, dict):
+        return {key: _jsonable(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_jsonable(item) for item in value]
+    return value
+
+
 VIEWS = {
     "transport": views.TransportView,
     "synth": views.SynthView,
@@ -23,6 +35,8 @@ VIEWS = {
     "midi_output": views.MidiOutputView,
     "sequencer": views.SequencerView,
     "sampler": views.SamplerView,
+    "launcher": views.LauncherView,
+    "timeline": views.TimelineView,
 }
 
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
@@ -56,12 +70,10 @@ try:
             getattr(view, request["name"])(*request.get("args", []), **request.get("kwargs", {}))
             transports.sync(view.server)
         elif op == "state":
-            config = view.config.model_dump()
-            for key in ("waveform", "sample_data", "zones"):
-                if key in config:
-                    value = config.pop(key)
-                    config[f"{key}_bytes"] = len(value)
-            result = {"config": config, "status": view.status.model_dump() if view.status is not None else None}
+            result = {
+                "config": _jsonable(view.config.model_dump()),
+                "status": _jsonable(view.status.model_dump()) if view.status is not None else None,
+            }
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)
         sent.clear()
 finally:

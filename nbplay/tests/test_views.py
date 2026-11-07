@@ -10,7 +10,18 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
-from nbplay.models import KeyboardConfig, MixerConfig, PadsConfig, SamplerConfig, SequencerConfig, SynthConfig, TransportConfig, TransportStatus
+from nbplay.models import (
+    KeyboardConfig,
+    LauncherConfig,
+    MixerConfig,
+    PadsConfig,
+    SamplerConfig,
+    SequencerConfig,
+    SynthConfig,
+    TimelineConfig,
+    TransportConfig,
+    TransportStatus,
+)
 
 
 def messages(sent):
@@ -194,6 +205,45 @@ class TestSequencerAndSamplerViews:
             zone = view.add_zone([0.1, 0.2], 40, 40)
             assert zone["root_note"] == 40 and len(view.config.zones) == 1 and view.config.zones[0]["data"] == zone["data"]
             assert isinstance(view.capture("blob:x", note=60, duration=1.5), int)
+        finally:
+            view.close()
+
+
+class TestArrangementViews:
+    def test_launcher_config_and_view(self):
+        with pytest.raises(ValueError):
+            LauncherConfig.model_validate({"quantize": "tick"})
+        view = views.LauncherView(autosync=False)
+        try:
+            track = view.add_track("Drums")
+            scene = view.add_scene()
+            slot = view.set_slot(track, scene, [{"note": 36, "active": True}, {"note": 38}])
+            assert slot["name"] == "Drums 1" and len(slot["voices_data"][0]) == 2
+            assert view.config.slots == [slot] and view.config.tracks[0]["channel_index"] == 0
+            with pytest.raises(IndexError):
+                view.set_slot(1, 0, [{"note": 36}])
+            assert isinstance(view.launch(track, scene), int)
+            assert isinstance(view.stop_all(), int)
+        finally:
+            view.close()
+
+    def test_timeline_config_and_view(self):
+        config = TimelineConfig(tracks=[{"name": "A"}], clips=[{"name": "c", "track_index": 5, "start": 0, "duration": 4}], current_beat=99)
+        assert config.clips[0]["track_index"] == 0 and config.current_beat == 16.0
+        view = views.TimelineView(autosync=False)
+        try:
+            lane = view.add_track("Vocals", armed=True)
+            clip = view.add_clip("Take", track_index=lane, start=12.0, duration=8.0)
+            assert view.config.selected_clip_id == clip["id"] and view.config.length == 20.0
+            midi = view.add_midi_clip("Riff", events=[{"beat": 1.0, "duration": 0.5, "note": 72, "velocity": 90}])
+            assert midi["kind"] == "midi" and midi["duration"] == 1.5
+            view.export_clip(clip["id"])
+            assert view.config.export_clip_id == clip["id"]
+            view.import_clip(clip["id"], b"abc", "audio/wav")
+            assert view.config.import_clip_request["blob_size"] == 3 and view.config.import_clip_data == b"abc"
+            view.seek(4.0)
+            assert view.config.current_beat == 4.0
+            assert isinstance(view.record(), int)
         finally:
             view.close()
 
