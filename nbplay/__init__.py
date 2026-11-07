@@ -37,6 +37,7 @@ except ImportError:  # pragma: no cover - only on wasm32 builds
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
 from nbplay.widget import (
+    THEMES,
     AudioClip,
     EffectPlugin,
     KeyboardRoute,

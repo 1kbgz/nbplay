@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-transport") as NbplayTransport;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       bpm: "bpm",
       time_signature_num: "timeSignatureNum",
       time_signature_den: "timeSignatureDen",

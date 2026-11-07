@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-settings") as NbplaySettings;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       sample_rate: "sampleRate",
       channels: "channels",
       buffer_size: "bufferSize",

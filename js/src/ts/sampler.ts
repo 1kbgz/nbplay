@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-sampler") as NbplaySampler;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       sample_name: "sampleName",
       sample_rate: "sampleRate",
       sample_length: "sampleLength",

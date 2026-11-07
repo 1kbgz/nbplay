@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-mixer") as NbplayMixer;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       channels: "channels",
       returns: "returns",
       master_gain: "masterGain",

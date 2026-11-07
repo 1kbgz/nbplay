@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-keyboard") as NbplayKeyboard;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       upper_octave: "upperOctave",
       lower_octave: "lowerOctave",
       velocity: "velocity",

@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-midi-output") as NbplayMidiOutput;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       midi_port: "midiPort",
       channel: "channel",
       forward_notes: "forwardNotes",

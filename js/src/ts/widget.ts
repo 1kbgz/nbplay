@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-synth") as NbplaySynth;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       oscillator_type: "oscillatorType",
       frequency: "frequency",
       amplitude: "amplitude",

@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-pads") as NbplayPads;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       rows: "rows",
       cols: "cols",
       velocity: "velocity",

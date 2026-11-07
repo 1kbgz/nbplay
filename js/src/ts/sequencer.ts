@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-sequencer") as NbplaySequencer;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       voices_data: "voicesData",
       num_voices: "numVoices",
       length: "length",

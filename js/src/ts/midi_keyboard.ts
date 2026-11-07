@@ -19,6 +19,7 @@ function render({
   ) as NbplayMidiKeyboard;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       midi_port: "midiPort",
       sync_clock: "syncClock",
       sampler_routing: "samplerRouting",

@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-timeline") as NbplayTimeline;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       tracks: "tracks",
       clips: "clips",
       length: "length",

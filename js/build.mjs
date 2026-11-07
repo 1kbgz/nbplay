@@ -89,8 +89,8 @@ async function build() {
   // Copy per-widget JS/CSS to python static dir for anywidget
   fs.mkdirSync("../nbplay/static", { recursive: true });
   await cpy("dist/widgets/*.js", "../nbplay/static");
-  // Every widget shares the one component stylesheet.
-  fs.copyFileSync("dist/css/components.css", "../nbplay/static/nbplay.css");
+  // Every widget shares one stylesheet: the elements plus the theme sets.
+  fs.copyFileSync("dist/css/nbplay.css", "../nbplay/static/nbplay.css");
 }
 
 await build();

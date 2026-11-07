@@ -1,0 +1,10 @@
+/* The stylesheet every nbplay widget loads: the element bundle plus the
+ * shipped theme sets, which apply only under data-nbplay-theme. */
+@import "./components.css";
+@import "./theme-studio.css";
+@import "./theme-flat.css";
+@import "./theme-cube.css";
+@import "./theme-one.css";
+@import "./theme-grim.css";
+@import "./theme-pro.css";
+@import "./theme-fruit.css";

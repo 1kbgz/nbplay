@@ -863,7 +863,11 @@ subtree. `light` and `dark` are the default theme's two sets; `studio`, `flat`,
 `cube`, `one`, `grim`, `pro` and `fruit` ship as `js/src/css/theme-*.css`, each
 redefining every token under `[data-nbplay-theme="<name>"]`. A new set copies
 one of these and changes values; it never adds selectors for individual
-elements.
+elements. From Python, every widget has a `theme` trait (validated against
+`nbplay.THEMES`) that its element reflects as `data-nbplay-theme` on itself,
+and `Session(theme=...)` or `session.theme = ...` sets it on every widget in
+the session, including tracks added later; the value is saved with the
+session.
 
 The JS build runs `bundle_css("src/css")`, which inlines the `@import`s of
 `components.css` into one file under `js/dist/css/`, and copies it to

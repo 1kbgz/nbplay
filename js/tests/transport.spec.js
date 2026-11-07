@@ -43,6 +43,31 @@ test.describe("TransportWidget", () => {
     await page.goto("/tests/fixtures/harness.html");
   });
 
+  test("theme trait selects a theme set on the element", async ({ page }) => {
+    await page.evaluate(() => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/dist/css/nbplay.css";
+      document.head.appendChild(link);
+    });
+    await renderWidget(page, { theme: "studio" });
+    const root = page.locator("nbplay-transport");
+    await expect(root).toHaveAttribute("data-nbplay-theme", "studio");
+    const accent = () =>
+      page.evaluate(() =>
+        getComputedStyle(document.querySelector("nbplay-transport"))
+          .getPropertyValue("--nbplay-accent")
+          .trim(),
+      );
+    const studio = await accent();
+    await page.evaluate(() => {
+      window.__testModel.set("theme", "");
+      window.__testModel._trigger("change:theme");
+    });
+    await expect(root).not.toHaveAttribute("data-nbplay-theme");
+    expect(await accent()).not.toBe(studio);
+  });
+
   // 1. Renders container
   test("renders .nbplay-transport container", async ({ page }) => {
     await renderWidget(page);

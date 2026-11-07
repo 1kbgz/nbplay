@@ -17,6 +17,7 @@ function render({
   const node = document.createElement("nbplay-launcher") as NbplayLauncher;
   return bindInstrument(model, el, node, {
     config: {
+      theme: "theme",
       tracks: "tracks",
       scenes: "scenes",
       slots: "slots",
