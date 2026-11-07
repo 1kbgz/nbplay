@@ -599,16 +599,46 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">``nbplay-set`` / ``nbplay-status`` split of the elements.</span>
 <span class="sd">"""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">THEMES</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span><span class="p">,</span> <span class="n">model_validator</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"TransportConfig"</span><span class="p">,</span> <span class="s2">"TransportStatus"</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">THEMES</span><span class="p">,</span> <span class="n">_normalize_effects</span><span class="p">,</span> <span class="n">_normalize_mixer_channel</span><span class="p">,</span> <span class="n">_normalize_return_bus</span><span class="p">,</span> <span class="n">_pad_sends</span><span class="p">,</span> <span class="n">render_waveform</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"MixerConfig"</span><span class="p">,</span> <span class="s2">"SynthConfig"</span><span class="p">,</span> <span class="s2">"SynthStatus"</span><span class="p">,</span> <span class="s2">"TransportConfig"</span><span class="p">,</span> <span class="s2">"TransportStatus"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THEMES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"theme must be one of </span><span class="si">{</span><span class="n">THEMES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Validated</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A model that validates assignments through ``model_validate``.</span>
+
+<span class="sd">    Pydantic's own ``validate_assignment`` writes the field from inside</span>
+<span class="sd">    pydantic-core, where transports' observer cannot see it. Validating a</span>
+<span class="sd">    copy and assigning every field that changed keeps derived fields (a</span>
+<span class="sd">    padded send list, a rendered waveform) in step and keeps the hosted</span>
+<span class="sd">    model observable.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">fresh</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_validate</span><span class="p">({</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fresh</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TransportConfig">
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TransportConfig">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TransportConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransportConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Transport settings the kernel owns."""</span>
 
     <span class="n">bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
@@ -620,15 +650,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
 
-<div class="viewcode-block" id="TransportConfig._validate_theme">
-<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TransportConfig._validate_theme">[docs]</a>
-    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)</span>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_theme</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THEMES</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"theme must be one of </span><span class="si">{</span><span class="n">THEMES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">value</span></div>
-</div>
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
 
 
 
@@ -646,6 +668,108 @@ window.runMermaid = runMermaid;</script>
     <span class="n">current_beat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">bar_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">beat_in_bar</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+
+<span class="c1">#: Config fields whose change re-renders the synth waveform preview.</span>
+<span class="n">WAVEFORM_PARAMS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SynthConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SynthConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SynthConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Synth settings the kernel owns; ``waveform`` is derived.</span>
+
+<span class="sd">    The preview is rendered by the Rust oscillators as part of validation,</span>
+<span class="sd">    so it follows the parameters whether Python assigns them or a browser</span>
+<span class="sd">    edit is validated into the model, and a client edit's authoritative</span>
+<span class="sd">    patch already carries the new bytes.</span>
+<span class="sd">    """</span>
+
+    <span class="n">oscillator_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"sine"</span><span class="p">,</span> <span class="s2">"square"</span><span class="p">,</span> <span class="s2">"saw"</span><span class="p">,</span> <span class="s2">"noise"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"sine"</span>
+    <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+    <span class="n">amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sample_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">192000</span><span class="p">)</span>
+    <span class="n">waveform</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="SynthConfig._render">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SynthConfig._render">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rendered</span> <span class="o">=</span> <span class="n">render_waveform</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">WAVEFORM_PARAMS</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveform</span> <span class="o">!=</span> <span class="n">rendered</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"waveform"</span><span class="p">]</span> <span class="o">=</span> <span class="n">rendered</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SynthStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SynthStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SynthStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Whether the browser is sounding the synth's tone; browser-owned."""</span>
+
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="MixerConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MixerConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MixerConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The mixer console the kernel owns: channels, returns, master.</span>
+
+<span class="sd">    Channels, returns and effects are the same dicts the traitlets widget</span>
+<span class="sd">    syncs, normalized and clamped by the same helpers; every channel carries</span>
+<span class="sd">    one send level per return. The mixer has no browser-owned status.</span>
+<span class="sd">    """</span>
+
+    <span class="n">channels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">returns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">master_gain</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">master_effects</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="MixerConfig._channels">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MixerConfig._channels">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"channels"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_channels</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_mixer_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="p">[])]</span></div>
+
+
+<div class="viewcode-block" id="MixerConfig._returns">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MixerConfig._returns">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"returns"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_returns</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_return_bus</span><span class="p">(</span><span class="n">bus</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">bus</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="p">[])]</span></div>
+
+
+<div class="viewcode-block" id="MixerConfig._master_effects">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MixerConfig._master_effects">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"master_effects"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_master_effects</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_normalize_effects</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MixerConfig._pad">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MixerConfig._pad">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">returns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">])</span> <span class="o">!=</span> <span class="n">count</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"channels"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">channel</span><span class="p">,</span> <span class="s2">"sends"</span><span class="p">:</span> <span class="n">_pad_sends</span><span class="p">(</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">],</span> <span class="n">count</span><span class="p">)}</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
 
 </pre></div>
 

@@ -18,6 +18,8 @@ Classes
 .. autoapisummary::
 
    test_views.TestTransportModels
+   test_views.TestSynthView
+   test_views.TestMixerView
    test_views.TestTransportView
 
 
@@ -45,6 +47,22 @@ Module Contents
 
 
    .. py:method:: test_status_is_browser_owned()
+
+
+.. py:class:: TestSynthView
+
+   .. py:method:: test_waveform_follows_the_oscillator_parameters()
+
+
+   .. py:method:: test_waveform_bytes_travel_as_buffers()
+
+
+.. py:class:: TestMixerView
+
+   .. py:method:: test_config_normalizes_like_the_widget()
+
+
+   .. py:method:: test_view_builds_the_console_without_a_status_model()
 
 
 .. py:class:: TestTransportView

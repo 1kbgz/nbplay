@@ -851,14 +851,25 @@ future external controller layouts.
 `nbplay/views.py` is the parallel layer that will replace the traitlets widgets: the same elements
 on [transports](https://github.com/1kbgz/transports) models rendered by
 [spaday](https://github.com/1kbgz/spaday). A view hosts two pydantic models from `nbplay/models.py`
-in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`), and a
-status model the browser owns (`TransportStatus`, hosted with `owner="client"`). The spaday tree is
+in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`,
+`SynthConfig`), and a status model the browser owns (`TransportStatus`, `SynthStatus`, hosted with
+`owner="client"`). `InstrumentView` is the shared base: it hosts the models, builds the tree and the
+wires, and subclasses only name the element tag, the models and the trait-to-property maps.
+The config models extend `_Validated`, whose `__setattr__` validates a copy through `model_validate`
+and assigns every field that changed: pydantic's own `validate_assignment` writes fields from inside
+pydantic-core where transports' observer cannot see them. Derived fields live in after-validators and
+write through `__dict__`: `SynthConfig` renders `waveform`, `MixerConfig` pads each channel's sends
+to the return count. A Python assignment and a validated browser edit therefore agree, and a browser
+edit's authoritative patch already carries the derived values. `MixerView` has no status model;
+`InstrumentView` skips the status wire and the `nbplay-wire` child when `STATUS_MODEL` is `None`. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are
 `session.command(status_id, field, value)` calls; `<nbplay-wire namespace="status">`, a child of the
 instrument defined in `js/src/ts/spaday.ts`, requests the wire from the widget root, maps the
-status field to `element.command(...)` and acknowledges. The build writes that bundle and the
+status field to `element.command(...)` when the element has one (the transport), or writes the
+field's camelCase property and reports it as `nbplay-status` (the synth's `isPlaying`), then
+acknowledges. The build writes that bundle and the
 stylesheet to `nbplay/static/spaday/`, which `nbplay.components.package` publishes as the spaday
 component package `nbplay` (also an installed entry point).
 

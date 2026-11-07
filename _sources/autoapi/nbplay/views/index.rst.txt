@@ -30,7 +30,10 @@ Classes
 
 .. autoapisummary::
 
+   nbplay.views.InstrumentView
    nbplay.views.TransportView
+   nbplay.views.SynthView
+   nbplay.views.MixerView
 
 
 Module Contents
@@ -40,15 +43,31 @@ Module Contents
    :value: 'nbplay.components:package'
 
 
-.. py:class:: TransportView(session=None, *, config=None, **kwargs)
+.. py:class:: InstrumentView(session=None, *, config=None, **kwargs)
 
    Bases: :py:obj:`spaday.Widget`
 
 
-   The transport instrument on a transports session.
+   One instrument element on a config model and, usually, a status model.
 
-   Keyword arguments that name :class:`~nbplay.models.TransportConfig`
-   fields initialise the config; the rest go to :class:`spaday.Widget`.
+   Subclasses set ``TAG``, the model classes, and the trait-to-property
+   maps; an instrument with no browser-owned state leaves ``STATUS_MODEL``
+   as ``None``. Keyword arguments that name config fields initialise the
+   config; the rest go to :class:`spaday.Widget`.
+
+
+   .. py:attribute:: TAG
+      :type:  ClassVar[str]
+
+
+   .. py:attribute:: CONFIG_MODEL
+      :type:  ClassVar[type[pydantic.BaseModel]]
+
+
+   .. py:attribute:: STATUS_MODEL
+      :type:  ClassVar[type[pydantic.BaseModel] | None]
+      :value: None
+
 
 
    .. py:attribute:: CONFIG
@@ -72,6 +91,44 @@ Module Contents
 
 
    .. py:attribute:: status_id
+      :value: None
+
+
+
+   .. py:method:: _prepare()
+
+      Hook run after the models exist and before they are hosted.
+
+
+
+   .. py:method:: _command(field, value)
+
+
+.. py:class:: TransportView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The transport instrument on a transports session.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-transport'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
 
 
    .. py:method:: play()
@@ -95,6 +152,103 @@ Module Contents
    .. py:method:: record(on=True)
 
       Arm or disarm recording; arming also starts the clock.
+
+
+
+.. py:class:: SynthView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The synth instrument on a transports session.
+
+   :class:`~nbplay.models.SynthConfig` renders the waveform preview as
+   part of validation, so kernel and browser edits both refresh it.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-synth'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: play()
+
+      Start the tone in the owning view.
+
+
+
+   .. py:method:: stop()
+
+      Stop the tone in the owning view.
+
+
+
+.. py:class:: MixerView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The mixer console on a transports session.
+
+   The console is configuration only: faders, pans, mutes, sends and
+   effects live in the kernel model, and the browser builds the Web Audio
+   graph from it. Edits in either place are validated by
+   :class:`~nbplay.models.MixerConfig`.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-mixer'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_channel(name='Channel')
+
+      Append a channel strip and return its index.
+
+
+
+   .. py:method:: remove_channel(index)
+
+      Remove the channel at ``index``.
+
+
+
+   .. py:method:: add_return(name='Return', effects=(), gain=0.8)
+
+      Append a send/return bus and return its index; every channel gains a send.
+
+
+
+   .. py:method:: add_channel_effect(index, effect)
+
+      Append an insert effect to the channel at ``index``.
+
+
+
+   .. py:method:: add_master_effect(effect)
+
+      Append an insert effect to the master bus.
 
 
 

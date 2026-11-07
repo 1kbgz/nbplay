@@ -20,6 +20,9 @@ Classes
 
    nbplay.models.TransportConfig
    nbplay.models.TransportStatus
+   nbplay.models.SynthConfig
+   nbplay.models.SynthStatus
+   nbplay.models.MixerConfig
 
 
 Module Contents
@@ -27,7 +30,7 @@ Module Contents
 
 .. py:class:: TransportConfig(/, **data: Any)
 
-   Bases: :py:obj:`pydantic.BaseModel`
+   Bases: :py:obj:`_Validated`
 
 
    Transport settings the kernel owns.
@@ -78,9 +81,7 @@ Module Contents
 
 
 
-   .. py:method:: _validate_theme(value)
-      :classmethod:
-
+   .. py:attribute:: _theme
 
 
 .. py:class:: TransportStatus(/, **data: Any)
@@ -129,5 +130,168 @@ Module Contents
       :type:  int
       :value: 0
 
+
+
+.. py:class:: SynthConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   Synth settings the kernel owns; ``waveform`` is derived.
+
+   The preview is rendered by the Rust oscillators as part of validation,
+   so it follows the parameters whether Python assigns them or a browser
+   edit is validated into the model, and a client edit's authoritative
+   patch already carries the new bytes.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: oscillator_type
+      :type:  Literal['sine', 'square', 'saw', 'noise']
+      :value: 'sine'
+
+
+
+   .. py:attribute:: frequency
+      :type:  float
+
+
+   .. py:attribute:: amplitude
+      :type:  float
+
+
+   .. py:attribute:: sample_rate
+      :type:  int
+
+
+   .. py:attribute:: waveform
+      :type:  bytes
+      :value: b''
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _render()
+
+
+.. py:class:: SynthStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Whether the browser is sounding the synth's tone; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+.. py:class:: MixerConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The mixer console the kernel owns: channels, returns, master.
+
+   Channels, returns and effects are the same dicts the traitlets widget
+   syncs, normalized and clamped by the same helpers; every channel carries
+   one send level per return. The mixer has no browser-owned status.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: channels
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: returns
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: master_gain
+      :type:  float
+
+
+   .. py:attribute:: master_effects
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _channels(value)
+      :classmethod:
+
+
+
+   .. py:method:: _returns(value)
+      :classmethod:
+
+
+
+   .. py:method:: _master_effects(value)
+      :classmethod:
+
+
+
+   .. py:method:: _pad()
 
 

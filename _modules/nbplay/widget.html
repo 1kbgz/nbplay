@@ -1550,22 +1550,33 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_waveform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Re-render the waveform preview via the Rust oscillator and push</span>
 <span class="sd">        the result as a binary Float32Array to the frontend."""</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_oscillator</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="mi">1024</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Show ~3 full cycles so the shape is always clearly visible.</span>
-            <span class="n">cycles</span> <span class="o">=</span> <span class="mi">3</span>
-            <span class="n">frames_per_cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_PREVIEW_MAX_FRAMES</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">frames_per_cycle</span> <span class="o">*</span> <span class="n">cycles</span><span class="p">)))</span>
-
-        <span class="n">samples</span> <span class="o">=</span> <span class="n">osc</span><span class="o">.</span><span class="n">render_to_buffer</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span>
-
-        <span class="c1"># Pack as little-endian float32 — arrives as an ArrayBuffer in JS.</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"f"</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">waveform</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveform</span> <span class="o">=</span> <span class="n">render_waveform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oscillator_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span><span class="p">)</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="render_waveform">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.render_waveform">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_waveform</span><span class="p">(</span><span class="n">oscillator_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The waveform preview for an oscillator as little-endian float32 bytes.</span>
+
+<span class="sd">    About three cycles of the periodic oscillators, capped at</span>
+<span class="sd">    ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"square"</span><span class="p">:</span>
+        <span class="n">osc</span> <span class="o">=</span> <span class="n">SquareOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"saw"</span><span class="p">:</span>
+        <span class="n">osc</span> <span class="o">=</span> <span class="n">SawOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
+        <span class="n">osc</span> <span class="o">=</span> <span class="n">NoiseSource</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">osc</span> <span class="o">=</span> <span class="n">SineOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="mi">1024</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frames_per_cycle</span> <span class="o">=</span> <span class="n">sample_rate</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_PREVIEW_MAX_FRAMES</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">frames_per_cycle</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"f"</span><span class="p">,</span> <span class="n">osc</span><span class="o">.</span><span class="n">render_to_buffer</span><span class="p">(</span><span class="n">frames</span><span class="p">))</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
 
 
 

@@ -483,6 +483,9 @@
     <a href="#nbplay.widget.SynthWidget._update_waveform">SynthWidget._update_waveform()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.render_waveform">render_waveform()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -2080,40 +2083,43 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_sample_slices" title="nbplay.widget._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._slot_voices" title="nbplay.widget._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.render_waveform" title="nbplay.widget.render_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_waveform</span></code></a>(oscillator_type, frequency, amplitude, ...)</p></td>
+<td><p>The waveform preview for an oscillator as little-endian float32 bytes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._slot_voices" title="nbplay.widget._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
 <td><p>Coerce a pattern into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> (list of voices, each a list of step dicts).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._normalize_launcher_slot" title="nbplay.widget._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._normalize_launcher_slot" title="nbplay.widget._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._json_copy" title="nbplay.widget._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._json_copy" title="nbplay.widget._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._default_pad_notes" title="nbplay.widget._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._default_pad_notes" title="nbplay.widget._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
 <td><p>Default pad notes starting at MIDI 36 (C2), ascending chromatically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._positive_pad_dimension" title="nbplay.widget._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._positive_pad_dimension" title="nbplay.widget._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
 <td><p>Clamp pad grid dimensions to at least one row/column.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._build_route" title="nbplay.widget._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._build_route" title="nbplay.widget._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
 <td><p>Build a <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> from kwargs.</p></td>
 </tr>
 </tbody>
@@ -2632,6 +2638,14 @@ the default theme’s two sets; the rest are the shipped sets.</p>
 the result as a binary Float32Array to the frontend.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.widget.render_waveform">
+<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">render_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscillator_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#render_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.render_waveform" title="Link to this definition">¶</a></dt>
+<dd><p>The waveform preview for an oscillator as little-endian float32 bytes.</p>
+<p>About three cycles of the periodic oscillators, capped at
+<code class="docutils literal notranslate"><span class="pre">_PREVIEW_MAX_FRAMES</span></code>; 1024 frames of noise.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -5910,6 +5924,9 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SynthWidget._update_waveform">SynthWidget._update_waveform()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.render_waveform">render_waveform()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>

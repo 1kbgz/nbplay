@@ -111,6 +111,7 @@ Functions
    nbplay.widget._normalize_zone
    nbplay.widget._normalize_zones
    nbplay.widget._normalize_sample_slices
+   nbplay.widget.render_waveform
    nbplay.widget._slot_voices
    nbplay.widget._normalize_launcher_slot
    nbplay.widget._json_copy
@@ -438,6 +439,14 @@ Module Contents
       Re-render the waveform preview via the Rust oscillator and push
       the result as a binary Float32Array to the frontend.
 
+
+
+.. py:function:: render_waveform(oscillator_type, frequency, amplitude, sample_rate)
+
+   The waveform preview for an oscillator as little-endian float32 bytes.
+
+   About three cycles of the periodic oscillators, capped at
+   ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.
 
 
 .. py:class:: SettingsWidget(*args: Any, **kwargs: Any)
