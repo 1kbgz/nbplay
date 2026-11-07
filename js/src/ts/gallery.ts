@@ -1197,6 +1197,18 @@ const SECTIONS: Section[] = [
       { label: "default", props: { audioDevice: "USB Audio" }, wide: true },
     ],
   },
+  {
+    tag: "nbplay-midi-output",
+    title: "nbplay-midi-output",
+    desc: "Sends session notes and kernel requests to a Web MIDI output; can lead an external device with MIDI clock from the session clock.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "channel", type: "number" },
+      { name: "forwardNotes", type: "boolean" },
+      { name: "sendClock", type: "boolean" },
+    ],
+    variants: [{ label: "default", props: {}, wide: true }],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(

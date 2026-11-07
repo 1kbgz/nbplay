@@ -69,3 +69,8 @@ export { NbplaySynth, type OscillatorType } from "./synth.ts";
 export { NbplayKeyboard } from "./keyboard.ts";
 export { NbplayMidiKeyboard } from "./midi-keyboard.ts";
 export { NbplaySettings } from "./settings.ts";
+export {
+  NbplayMidiOutput,
+  songPositionBytes,
+  type SendRequest,
+} from "./midi-output.ts";

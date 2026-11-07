@@ -12,8 +12,8 @@ export interface InstrumentSpec {
   config: Record<string, string>;
   /** Model trait → element property for browser-owned status. */
   status: Record<string, string>;
-  /** Forward the `command` trait to `element.command()`. */
-  command?: boolean;
+  /** Forward a nonce-stamped request trait (`command` when `true`) to `element.command()`. */
+  command?: boolean | string;
   /** Runs when the kernel goes away (after the disconnect delay). */
   onDisconnect?: () => void;
 }
@@ -99,18 +99,16 @@ export function bindInstrument(
   }
 
   if (spec.command) {
+    const trait = spec.command === true ? "command" : spec.command;
     let lastNonce = Number(
-      (model.get("command") as { nonce?: number } | undefined)?.nonce ?? -1,
+      (model.get(trait) as { nonce?: number } | undefined)?.nonce ?? -1,
     );
     if (!Number.isFinite(lastNonce)) lastNonce = -1;
-    model.on("change:command", () => {
-      const cmd = (model.get("command") || {}) as {
-        action?: string;
-        nonce?: number;
-      };
+    model.on(`change:${trait}`, () => {
+      const cmd = (model.get(trait) || {}) as { nonce?: number };
       const nonce = Number(cmd.nonce);
       // Nonces are monotonic: an older command arriving late is ignored.
-      if (!cmd.action || !Number.isFinite(nonce) || nonce <= lastNonce) return;
+      if (!Number.isFinite(nonce) || nonce <= lastNonce) return;
       lastNonce = nonce;
       (node as Commandable).command?.(cmd as never);
     });
