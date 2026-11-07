@@ -126,7 +126,7 @@ nbplay-lane .nbplay-lane-clips {
     var(--nbplay-chart-grid) 1px,
     transparent 1px
   );
-  background-size: calc(100% / 16) 100%;
+  background-size: calc(100% / var(--nbplay-lane-beats, 16)) 100%;
   cursor: text;
   touch-action: none;
   overflow: hidden;

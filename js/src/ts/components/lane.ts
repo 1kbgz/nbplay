@@ -113,7 +113,7 @@ export class NbplayLane extends NbplayElement {
     return html`${this.showHeader ? this.renderHeader() : nothing}
       <div
         class="nbplay-lane-clips"
-        style=${this.width > 0 ? `width: ${this.width}px;` : nothing}
+        style="--nbplay-lane-beats: ${Math.max(1, this.length)};${this.width > 0 ? ` width: ${this.width}px;` : ""}"
         @pointerdown=${this.onSeekDown}
       >
         <div
