@@ -68,9 +68,11 @@ export class NbplayMidiPort extends NbplayElement {
         <option value="" ?selected=${!this.value}>${this.emptyText}</option>
         ${this.ports.map(
           (p) =>
-            html`<option value=${p.id} ?selected=${p.id === this.value}>
-              ${p.name}
-            </option>`,
+            html`<option
+              value=${p.id}
+              ?selected=${p.id === this.value}
+              .textContent=${p.name}
+            ></option>`,
         )}
       </select>
       <button

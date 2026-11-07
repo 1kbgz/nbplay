@@ -1182,6 +1182,21 @@ const SECTIONS: Section[] = [
     ],
     variants: [{ label: "default", props: {}, wide: true }],
   },
+  {
+    tag: "nbplay-settings",
+    title: "nbplay-settings",
+    desc: "Audio output settings and a MIDI input picker with an activity log of incoming messages.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "sampleRate", type: "number" },
+      { name: "channels", type: "number" },
+      { name: "bufferSize", type: "number" },
+      { name: "audioDevice", type: "text" },
+    ],
+    variants: [
+      { label: "default", props: { audioDevice: "USB Audio" }, wide: true },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
