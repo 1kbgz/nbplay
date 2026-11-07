@@ -9,9 +9,30 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from .widget import THEMES, _normalize_effects, _normalize_mixer_channel, _normalize_return_bus, _pad_sends, render_waveform
+from .widget import (
+    THEMES,
+    _default_pad_notes,
+    _normalize_effects,
+    _normalize_mixer_channel,
+    _normalize_pad_actions,
+    _normalize_return_bus,
+    _pad_sends,
+    render_waveform,
+)
 
-__all__ = ("MixerConfig", "SynthConfig", "SynthStatus", "TransportConfig", "TransportStatus")
+__all__ = (
+    "KeyboardConfig",
+    "KeyboardStatus",
+    "MidiKeyboardConfig",
+    "MidiKeyboardStatus",
+    "MixerConfig",
+    "PadsConfig",
+    "PadsStatus",
+    "SynthConfig",
+    "SynthStatus",
+    "TransportConfig",
+    "TransportStatus",
+)
 
 
 def _validate_theme(value):
@@ -147,3 +168,108 @@ class MixerConfig(_Validated):
         if any(len(channel["sends"]) != count for channel in self.channels):
             self.__dict__["channels"] = [{**channel, "sends": _pad_sends(channel["sends"], count)} for channel in self.channels]
         return self
+
+
+class PadsConfig(_Validated):
+    """The trigger-pad grid the kernel owns.
+
+    ``pad_notes``, ``pad_velocities`` and ``pad_actions`` always cover the
+    ``rows`` by ``cols`` grid: the after-validator extends or trims them
+    the way the traitlets widget's observers do.
+    """
+
+    rows: int = Field(4, ge=1)
+    cols: int = Field(4, ge=1)
+    velocity: int = Field(100, ge=1, le=127)
+    velocity_sensitive: bool = True
+    pad_notes: list[int] = []
+    pad_velocities: list[int] = []
+    pad_actions: list[dict] = []
+    sampler_routing: list[dict] = []
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("pad_notes")
+    @classmethod
+    def _notes(cls, value):
+        return [max(0, min(127, int(n))) for n in value or []]
+
+    @field_validator("pad_velocities")
+    @classmethod
+    def _velocities(cls, value):
+        return [max(1, min(127, int(v))) for v in value or []]
+
+    @model_validator(mode="after")
+    def _fit_grid(self):
+        total = self.rows * self.cols
+        notes = list(self.pad_notes) or _default_pad_notes(self.rows, self.cols)
+        if len(notes) < total:
+            last = notes[-1]
+            notes.extend(last + 1 + i for i in range(total - len(notes)))
+        notes = notes[:total]
+        velocities = list(self.pad_velocities)
+        velocities.extend(self.velocity for _ in range(total - len(velocities)))
+        velocities = velocities[:total]
+        actions = _normalize_pad_actions(self.pad_actions, total, notes, velocities, prefer_defaults=True)
+        for name, value in (("pad_notes", notes), ("pad_velocities", velocities), ("pad_actions", actions)):
+            if getattr(self, name) != value:
+                self.__dict__[name] = value
+        return self
+
+
+class PadsStatus(BaseModel):
+    """What the pads are doing in the browser; browser-owned."""
+
+    active_pads: list[int] = []
+    last_note_event: dict = {}
+    last_pad_event: dict = {}
+
+
+class KeyboardConfig(_Validated):
+    """The QWERTY keyboard's octaves, velocity, sustain and routing."""
+
+    upper_octave: int = Field(3, ge=0, le=9)
+    lower_octave: int = Field(4, ge=0, le=9)
+    velocity: int = Field(100, ge=1, le=127)
+    sustain_upper: bool = False
+    sustain_lower: bool = False
+    sustain_global: bool = False
+    sampler_routing: list[dict] = []
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+
+class KeyboardStatus(BaseModel):
+    """Notes held in the browser; browser-owned."""
+
+    active_notes: list[int] = []
+    last_note_event: dict = {}
+
+
+class MidiKeyboardConfig(_Validated):
+    """The Web MIDI keyboard's port, clock following and routing."""
+
+    midi_port: str = ""
+    sync_clock: bool = False
+    sampler_routing: list[dict] = []
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+
+class MidiKeyboardStatus(BaseModel):
+    """Ports, held notes, control changes and the device clock; browser-owned."""
+
+    available_midi_ports: list[str] = []
+    active_notes: list[int] = []
+    last_note_event: dict = {}
+    control_change: dict = {}
+    clock_bpm: float = 0.0

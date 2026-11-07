@@ -68,9 +68,9 @@ Song structure comes from named patterns: `session.add_pattern("verse", drums.se
 
 A preview of the next layer runs the same elements on [transports](https://github.com/1kbgz/transports)
 models rendered by [spaday](https://github.com/1kbgz/spaday): `pip install "nbplay[spaday]"`, then
-`from nbplay.views import TransportView, SynthView, MixerView`. A view hosts a validated config model
-and, where the browser owns state, a status model; `view.play()` is a transports command delivered to
-the owning browser view. The transport, synth and mixer are converted so far; it needs a spaday
+`from nbplay.views import TransportView, SynthView, MixerView, PadsView, KeyboardView, MidiKeyboardView`. A view hosts a validated config model and, where the browser owns state, a status
+model; `view.play()` is a transports command delivered to the owning browser view. The sequencer,
+sampler, settings, MIDI output, launcher and timeline are still traitlets-only; it needs a spaday
 release with notebook session support.
 
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
