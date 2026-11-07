@@ -273,7 +273,7 @@ test.describe("PadWidget", () => {
         triggerNote(n, v) {
           this.triggered.push({ note: n, velocity: v });
         },
-        releaseNote(n) {},
+        releaseNote() {},
       };
       globalThis.__nbplay = {
         "test-session": {
