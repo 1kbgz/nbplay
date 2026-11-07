@@ -75,3 +75,9 @@ export {
   type SendRequest,
 } from "./midi-output.ts";
 export { NbplaySequencer } from "./sequencer.ts";
+export {
+  NbplayLauncher,
+  type LaunchRequest,
+  type LauncherSlotData,
+  type LauncherTrackSpec,
+} from "./launcher.ts";

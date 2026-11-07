@@ -174,3 +174,38 @@ nbplay-launcher-grid[disabled] {
   opacity: 0.5;
   pointer-events: none;
 }
+
+nbplay-launcher {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-launcher:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-launcher .nbplay-launcher-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-launcher .nbplay-launcher-quantize {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}

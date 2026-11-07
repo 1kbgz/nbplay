@@ -1245,6 +1245,71 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-launcher",
+    title: "nbplay-launcher",
+    desc: "The beats view on a private clock: tracks × scenes of step patterns, quantized launches, scene and stop controls. Focus it for Space, 1–9 and Escape.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "quantize", type: "select", options: ["bar", "beat", "none"] },
+      { name: "bpm", type: "number" },
+    ],
+    variants: [
+      {
+        label: "2 tracks × 2 scenes",
+        props: {
+          tracks: [
+            { name: "Drums", channel_index: -1 },
+            { name: "Bass", channel_index: -1 },
+          ],
+          scenes: ["Intro", "Drop"],
+          slots: [
+            {
+              track_index: 0,
+              scene_index: 0,
+              name: "Kick",
+              voices_data: [
+                Array.from({ length: 8 }, (_, i) => ({
+                  active: i % 2 === 0,
+                  note: 36,
+                  velocity: 100,
+                })),
+              ],
+              step_duration: 0.5,
+            },
+            {
+              track_index: 1,
+              scene_index: 0,
+              name: "Root",
+              voices_data: [
+                Array.from({ length: 8 }, () => ({
+                  active: true,
+                  note: 40,
+                  velocity: 90,
+                })),
+              ],
+              step_duration: 0.5,
+            },
+            {
+              track_index: 0,
+              scene_index: 1,
+              name: "Snare",
+              voices_data: [
+                Array.from({ length: 8 }, (_, i) => ({
+                  active: i % 4 === 2,
+                  note: 38,
+                  velocity: 110,
+                })),
+              ],
+              step_duration: 0.5,
+            },
+          ],
+          quantize: "beat",
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
