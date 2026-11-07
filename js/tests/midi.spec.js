@@ -258,7 +258,7 @@ test.describe("MIDI clips", () => {
       const bus = (window.__nbplay = window.__nbplay || {});
       window.__scheduled = [];
       bus[sessionId] = {
-        ...(bus[sessionId] || {}),
+        ...bus[sessionId],
         audioCtx: ctx,
         channels: [{ gain: ctx.createGain() }],
         instruments: {
