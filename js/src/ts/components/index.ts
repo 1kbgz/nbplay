@@ -65,3 +65,4 @@ export {
 export { NbplayZoneList, type ZoneRow } from "./zone-list.ts";
 export { NbplayTransport, type TransportCommand } from "./transport.ts";
 export { NbplayPads } from "./pads.ts";
+export { NbplaySynth, type OscillatorType } from "./synth.ts";

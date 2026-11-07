@@ -1133,6 +1133,30 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-synth",
+    title: "nbplay-synth",
+    desc: "The synth instrument: waveform preview, oscillator type, log frequency, amplitude, play/stop on a private AudioContext.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      {
+        name: "oscillatorType",
+        type: "select",
+        options: ["sine", "square", "saw", "noise"],
+      },
+      { name: "frequency", type: "number", step: 0.1 },
+      { name: "amplitude", type: "number", step: 0.01 },
+      { name: "sampleRate", type: "number" },
+      { name: "isPlaying", type: "boolean" },
+    ],
+    variants: [
+      {
+        label: "sine 440",
+        props: { waveform: sineBurst(512), amplitude: 0.5 },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
