@@ -1111,6 +1111,28 @@ const SECTIONS: Section[] = [
     ],
     variants: [{ label: "standalone", props: { bpm: 120 }, wide: true }],
   },
+  {
+    tag: "nbplay-pads",
+    title: "nbplay-pads",
+    desc: "The pad instrument on fallback sine voices: velocity control, velocity-sensitive switch, pad grid, info line. Tap pads, drag for velocity, scroll for note, double-click a label to rename.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "rows", type: "number" },
+      { name: "cols", type: "number" },
+      { name: "velocity", type: "number" },
+      { name: "velocitySensitive", type: "boolean" },
+    ],
+    variants: [
+      {
+        label: "4 × 4",
+        props: {
+          padVelocities: Array.from({ length: 16 }, (_, i) => 60 + i * 4),
+          style: "width: 320px",
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(

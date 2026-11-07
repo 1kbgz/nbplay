@@ -52,8 +52,12 @@ test.describe("PadWidget", () => {
   // 2. Shows header with badge
   test("shows header and pads badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-pad-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("pads");
+    await expect(
+      page.locator(".nbplay-pad nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(page.locator(".nbplay-pad .nbplay-header-badge")).toHaveText(
+      "pads",
+    );
   });
 
   // 3. Grid renders correct number of cells
@@ -172,7 +176,9 @@ test.describe("PadWidget", () => {
       .locator(".nbplay-pad-label")
       .dblclick();
 
-    await expect(page.locator(".nbplay-pad-inline-edit")).toBeVisible();
+    await expect(
+      page.locator(".nbplay-pad-cell input[type=text]"),
+    ).toBeVisible();
     await page.waitForTimeout(350);
 
     const state = await page.evaluate(() => ({
@@ -188,7 +194,7 @@ test.describe("PadWidget", () => {
   // 7. Velocity slider
   test("velocity slider changes model", async ({ page }) => {
     await renderWidget(page);
-    await page.locator(".nbplay-pad-vel-slider").fill("50");
+    await page.locator(".nbplay-pad-velocity input[type=range]").fill("50");
     const vel = await page.evaluate(() => window.__testModel._state.velocity);
     expect(vel).toBe(50);
   });
@@ -203,7 +209,7 @@ test.describe("PadWidget", () => {
     );
     expect(vels[0]).toBe(105);
 
-    await page.locator(".nbplay-pad-vel-slider").fill("64");
+    await page.locator(".nbplay-pad-velocity input[type=range]").fill("64");
 
     const state = await page.evaluate(() => ({
       velocity: window.__testModel._state.velocity,
@@ -317,7 +323,7 @@ test.describe("PadWidget", () => {
   // 13. Velocity bar renders in each pad cell
   test("velocity bars are present in pad cells", async ({ page }) => {
     await renderWidget(page);
-    const bars = page.locator(".nbplay-pad-vel-bar");
+    const bars = page.locator(".nbplay-pad-cell nbplay-bar");
     await expect(bars).toHaveCount(16);
   });
 
