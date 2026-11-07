@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Components Test Harness</title>
+    <link rel="stylesheet" href="/dist/css/components.css" />
+    <script>
+      // Tests await this so an import failure is reported instead of hanging.
+      window.__components = import("/dist/components/index.js");
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

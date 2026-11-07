@@ -173,9 +173,9 @@ test.describe("Keyboard shortcuts", () => {
     expect(await state(page, "bpm")).toBe(121);
     await page.keyboard.press("Shift+ArrowDown");
     expect(await state(page, "bpm")).toBe(111);
-    await expect(page.locator(".nbplay-transport-bpm-val")).toHaveText(
-      "111 BPM",
-    );
+    await expect(
+      page.locator(".nbplay-transport-tempo nbplay-value"),
+    ).toHaveText("111 BPM");
 
     await page.keyboard.press("l");
     expect(await state(page, "loop_enabled")).toBe(true);
@@ -200,8 +200,8 @@ test.describe("Keyboard shortcuts", () => {
     page,
   }) => {
     await render(page, "transport", TRANSPORT);
-    await page.locator(".nbplay-transport-bpm-val").dblclick();
-    const input = page.locator("input.nbplay-transport-inline-edit");
+    await page.locator(".nbplay-transport-tempo nbplay-value").dblclick();
+    const input = page.locator(".nbplay-transport-tempo input[type=text]");
     await input.fill("140");
     await page.keyboard.press("Space");
     expect(await state(page, "is_playing")).toBe(false);
@@ -213,7 +213,7 @@ test.describe("Keyboard shortcuts", () => {
     page,
   }) => {
     await render(page, "transport", TRANSPORT);
-    await page.locator(".nbplay-transport-play").focus();
+    await page.locator(".nbplay-transport-play button").focus();
     await page.keyboard.press("Space");
     expect(await state(page, "is_playing")).toBe(true);
   });
@@ -226,15 +226,15 @@ test.describe("Keyboard shortcuts", () => {
     await root.focus();
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveCount(1);
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveAttribute(
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveCount(1);
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveAttribute(
       "data-step",
       "0",
     );
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowDown");
-    const cursor = page.locator(".nbplay-seq-cell.cursor");
+    const cursor = page.locator(".nbplay-step-grid-cell.cursor");
     await expect(cursor).toHaveAttribute("data-step", "2");
     await expect(cursor).toHaveAttribute("data-voice", "1");
 
@@ -254,7 +254,7 @@ test.describe("Keyboard shortcuts", () => {
     expect(await state(page, "current_step")).toBe(-1);
 
     await page.keyboard.press("Escape");
-    await expect(page.locator(".nbplay-seq-cell.cursor")).toHaveCount(0);
+    await expect(page.locator(".nbplay-step-grid-cell.cursor")).toHaveCount(0);
   });
 
   test("timeline: space plays, delete removes the selected clip", async ({
@@ -276,9 +276,9 @@ test.describe("Keyboard shortcuts", () => {
     ).toBe(true);
 
     await page.keyboard.press("d");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(2);
+    await expect(page.locator("nbplay-clip")).toHaveCount(2);
     await page.keyboard.press("Delete");
-    await expect(page.locator(".nbplay-timeline-clip")).toHaveCount(1);
+    await expect(page.locator("nbplay-clip")).toHaveCount(1);
   });
 
   test("launcher: digits launch scenes, escape stops all", async ({ page }) => {

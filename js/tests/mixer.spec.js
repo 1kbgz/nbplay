@@ -34,6 +34,18 @@ async function renderWidget(page, overrides = {}) {
 /** Selector for channel strips (excludes master). */
 const STRIP = ".nbplay-mixer-strip:not(.nbplay-master-strip)";
 
+/** Type a value into a bounded parameter's readout (an nbplay-param). */
+async function typeParam(scope, key, value) {
+  await scope
+    .locator(`nbplay-param[data-key="${key}"] .nbplay-value-text`)
+    .dblclick();
+  const input = scope.locator(
+    `nbplay-param[data-key="${key}"] input[type=text]`,
+  );
+  await input.fill(value);
+  await input.press("Enter");
+}
+
 // Tests
 
 test.describe("MixerWidget", () => {
@@ -50,8 +62,12 @@ test.describe("MixerWidget", () => {
   // 2. Shows header with badge
   test("shows header text and mixer badge", async ({ page }) => {
     await renderWidget(page);
-    await expect(page.locator(".nbplay-mixer-header h3")).toHaveText("nbplay");
-    await expect(page.locator(".nbplay-badge")).toHaveText("mixer");
+    await expect(
+      page.locator(".nbplay-mixer nbplay-header .nbplay-header-title"),
+    ).toHaveText("nbplay");
+    await expect(page.locator(".nbplay-mixer .nbplay-header-badge")).toHaveText(
+      "mixer",
+    );
   });
 
   // 3. Renders correct number of channels
@@ -71,13 +87,13 @@ test.describe("MixerWidget", () => {
   // 5. Gain display in dB
   test("gain=1.0 displays as +0.0 dB", async ({ page }) => {
     await renderWidget(page);
-    const labels = page.locator(`${STRIP} .nbplay-strip-gain-label`);
+    const labels = page.locator(`${STRIP} nbplay-fader .nbplay-value-text`);
     await expect(labels.nth(0)).toHaveText("+0.0 dB");
   });
 
   test("gain=0.5 displays as -6.0 dB", async ({ page }) => {
     await renderWidget(page);
-    const labels = page.locator(`${STRIP} .nbplay-strip-gain-label`);
+    const labels = page.locator(`${STRIP} nbplay-fader .nbplay-value-text`);
     // Bass channel has gain 0.5
     await expect(labels.nth(1)).toHaveText("-6.0 dB");
   });
@@ -87,7 +103,7 @@ test.describe("MixerWidget", () => {
     await renderWidget(page, {
       channels: [{ name: "Silent", gain: 0, pan: 0, mute: false, solo: false }],
     });
-    const label = page.locator(`${STRIP} .nbplay-strip-gain-label`);
+    const label = page.locator(`${STRIP} nbplay-fader .nbplay-value-text`);
     // fmtGain uses the minus sign "−" (U+2212)
     await expect(label).toHaveText("−∞ dB");
   });
@@ -97,14 +113,16 @@ test.describe("MixerWidget", () => {
     await renderWidget(page, {
       channels: [{ name: "Hot", gain: 2.0, pan: 0, mute: false, solo: false }],
     });
-    const label = page.locator(`${STRIP} .nbplay-strip-gain-label`);
+    const label = page.locator(`${STRIP} nbplay-fader .nbplay-value-text`);
     await expect(label).toHaveText("+6.0 dB");
   });
 
   // 8. Master gain display
   test("master gain 0.85 displays correct dB value", async ({ page }) => {
     await renderWidget(page);
-    const label = page.locator(".nbplay-master-strip .nbplay-strip-gain-label");
+    const label = page.locator(
+      ".nbplay-master-strip nbplay-fader .nbplay-value-text",
+    );
     // 20*log10(0.85) ≈ -1.4 dB
     await expect(label).toHaveText("-1.4 dB");
   });
@@ -112,7 +130,9 @@ test.describe("MixerWidget", () => {
   // 9. Pan display
   test("pan=0 displays as C", async ({ page }) => {
     await renderWidget(page);
-    const panLabels = page.locator(`${STRIP} .nbplay-strip-pan-label`);
+    const panLabels = page.locator(
+      `${STRIP} .nbplay-strip-pan .nbplay-value-text`,
+    );
     // Lead has pan=0
     await expect(panLabels.nth(0)).toHaveText("C");
   });
@@ -123,7 +143,7 @@ test.describe("MixerWidget", () => {
         { name: "Right", gain: 1, pan: 0.3, mute: false, solo: false },
       ],
     });
-    const label = page.locator(`${STRIP} .nbplay-strip-pan-label`);
+    const label = page.locator(`${STRIP} .nbplay-strip-pan .nbplay-value-text`);
     await expect(label).toHaveText("R30");
   });
 
@@ -133,17 +153,20 @@ test.describe("MixerWidget", () => {
         { name: "Left", gain: 1, pan: -0.5, mute: false, solo: false },
       ],
     });
-    const label = page.locator(`${STRIP} .nbplay-strip-pan-label`);
+    const label = page.locator(`${STRIP} .nbplay-strip-pan .nbplay-value-text`);
     await expect(label).toHaveText("L50");
   });
 
   // 10. Mute button toggle
   test("clicking mute button toggles channel mute state", async ({ page }) => {
     await renderWidget(page);
-    const muteBtn = page.locator(`${STRIP}`).nth(0).locator(".nbplay-mute-btn");
+    const muteBtn = page
+      .locator(`${STRIP}`)
+      .nth(0)
+      .locator("nbplay-toggle[variant=mute]");
 
     // Initially not muted
-    await expect(muteBtn).not.toHaveClass(/active/);
+    await expect(muteBtn).not.toHaveAttribute("active", "");
 
     await muteBtn.click();
 
@@ -151,7 +174,7 @@ test.describe("MixerWidget", () => {
       () => window.__testModel._state.channels[0].mute,
     );
     expect(muted).toBe(true);
-    await expect(muteBtn).toHaveClass(/active/);
+    await expect(muteBtn).toHaveAttribute("active", "");
 
     // Click again to unmute
     await muteBtn.click();
@@ -164,9 +187,12 @@ test.describe("MixerWidget", () => {
   // 11. Solo button toggle
   test("clicking solo button toggles channel solo state", async ({ page }) => {
     await renderWidget(page);
-    const soloBtn = page.locator(`${STRIP}`).nth(0).locator(".nbplay-solo-btn");
+    const soloBtn = page
+      .locator(`${STRIP}`)
+      .nth(0)
+      .locator("nbplay-toggle[variant=solo]");
 
-    await expect(soloBtn).not.toHaveClass(/active/);
+    await expect(soloBtn).not.toHaveAttribute("active", "");
 
     await soloBtn.click();
 
@@ -174,7 +200,7 @@ test.describe("MixerWidget", () => {
       () => window.__testModel._state.channels[0].solo,
     );
     expect(soloed).toBe(true);
-    await expect(soloBtn).toHaveClass(/active/);
+    await expect(soloBtn).toHaveAttribute("active", "");
 
     await soloBtn.click();
     const unsoloed = await page.evaluate(
@@ -189,7 +215,7 @@ test.describe("MixerWidget", () => {
     const fader = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-fader");
+      .locator("nbplay-fader input[type=range]");
 
     await fader.fill("1.5");
     await fader.dispatchEvent("input");
@@ -203,7 +229,10 @@ test.describe("MixerWidget", () => {
   // 13. Pan slider updates model
   test("pan slider input updates model", async ({ page }) => {
     await renderWidget(page);
-    const pan = page.locator(`${STRIP}`).nth(0).locator(".nbplay-strip-pan");
+    const pan = page
+      .locator(`${STRIP}`)
+      .nth(0)
+      .locator(".nbplay-strip-pan input[type=range]");
 
     await pan.fill("0.6");
     await pan.dispatchEvent("input");
@@ -229,7 +258,7 @@ test.describe("MixerWidget", () => {
     const names = page.locator(`${STRIP} .nbplay-strip-name`);
     await expect(names.nth(0)).toHaveText("Vox");
 
-    const labels = page.locator(`${STRIP} .nbplay-strip-gain-label`);
+    const labels = page.locator(`${STRIP} nbplay-fader .nbplay-value-text`);
     // 20*log10(0.25) ≈ -12.0 dB
     await expect(labels.nth(0)).toHaveText("-12.0 dB");
   });
@@ -243,7 +272,9 @@ test.describe("MixerWidget", () => {
       window.__testModel._trigger("change:master_gain");
     });
 
-    const label = page.locator(".nbplay-master-strip .nbplay-strip-gain-label");
+    const label = page.locator(
+      ".nbplay-master-strip nbplay-fader .nbplay-value-text",
+    );
     await expect(label).toHaveText("+0.0 dB");
   });
 
@@ -255,10 +286,10 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await expect(input).toBeVisible();
 
     await input.fill("-3");
@@ -278,10 +309,10 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("-12 dB");
     await input.press("Enter");
 
@@ -299,10 +330,10 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("+6");
     await input.press("Enter");
 
@@ -320,17 +351,20 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await expect(gainLabel).toHaveText("+0.0 dB");
 
     await gainLabel.dblclick();
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("-20");
     await input.press("Escape");
 
     // Label restored, model unchanged
     await expect(
-      page.locator(`${STRIP}`).nth(0).locator(".nbplay-strip-gain-label"),
+      page
+        .locator(`${STRIP}`)
+        .nth(0)
+        .locator("nbplay-fader .nbplay-value-text"),
     ).toHaveText("+0.0 dB");
     const gain = await page.evaluate(
       () => window.__testModel._state.channels[0].gain,
@@ -346,16 +380,19 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("-6");
     await input.press("Enter");
 
     // The label should be back
     await expect(
-      page.locator(`${STRIP}`).nth(0).locator(".nbplay-strip-gain-label"),
+      page
+        .locator(`${STRIP}`)
+        .nth(0)
+        .locator("nbplay-fader .nbplay-value-text"),
     ).toBeVisible();
 
     // Wait for any deferred blur handler
@@ -379,12 +416,12 @@ test.describe("MixerWidget", () => {
     const panLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-pan-label");
+      .locator(".nbplay-strip-pan .nbplay-value-text");
     await expect(panLabel).toHaveText("C");
 
     await panLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await expect(input).toBeVisible();
 
     // Pan label edit accepts raw numeric values
@@ -426,7 +463,10 @@ test.describe("MixerWidget", () => {
 
   test("mute and solo save_changes to model", async ({ page }) => {
     await renderWidget(page);
-    const muteBtn = page.locator(`${STRIP}`).nth(0).locator(".nbplay-mute-btn");
+    const muteBtn = page
+      .locator(`${STRIP}`)
+      .nth(0)
+      .locator("nbplay-toggle[variant=mute]");
     await muteBtn.click();
 
     const saved = await page.evaluate(() =>
@@ -440,10 +480,10 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("-inf");
     await input.press("Enter");
 
@@ -458,10 +498,10 @@ test.describe("MixerWidget", () => {
     const gainLabel = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-gain-label");
+      .locator("nbplay-fader .nbplay-value-text");
     await gainLabel.dblclick();
 
-    const input = page.locator(".nbplay-mixer-inline-edit");
+    const input = page.locator(".nbplay-mixer input[type=text]");
     await input.fill("not-a-number");
     await input.press("Enter");
 
@@ -474,7 +514,9 @@ test.describe("MixerWidget", () => {
 
   test("pan=−0.2 for Bass channel displays as L20", async ({ page }) => {
     await renderWidget(page);
-    const panLabels = page.locator(`${STRIP} .nbplay-strip-pan-label`);
+    const panLabels = page.locator(
+      `${STRIP} .nbplay-strip-pan .nbplay-value-text`,
+    );
     // Bass has pan = -0.2
     await expect(panLabels.nth(1)).toHaveText("L20");
   });
@@ -536,7 +578,7 @@ test.describe("MixerWidget", () => {
     const chips = page
       .locator(`${STRIP}`)
       .nth(0)
-      .locator(".nbplay-strip-fx-chip");
+      .locator(".nbplay-effect-rack-chip");
     await expect(chips).toHaveCount(2);
     await expect(chips.nth(0)).toHaveText("compressor");
     await expect(chips.nth(1)).toHaveText("reverb");
@@ -545,8 +587,8 @@ test.describe("MixerWidget", () => {
   test("adding a channel effect updates model", async ({ page }) => {
     await renderWidget(page);
     const strip = page.locator(STRIP).nth(0);
-    await strip.locator(".nbplay-strip-fx-select").selectOption("limiter");
-    await strip.locator(".nbplay-strip-fx-add-btn").click();
+    await strip.locator(".nbplay-effect-rack-type").selectOption("limiter");
+    await strip.locator(".nbplay-effect-rack-add-btn").click();
 
     const effects = await page.evaluate(
       () => window.__testModel._state.channels[0].effects,
@@ -554,7 +596,9 @@ test.describe("MixerWidget", () => {
     expect(effects).toEqual([
       { type: "limiter", threshold: -1, release: 0.05 },
     ]);
-    await expect(strip.locator(".nbplay-strip-fx-chip")).toHaveText("limiter");
+    await expect(strip.locator(".nbplay-effect-rack-chip")).toHaveText(
+      "limiter",
+    );
   });
 
   test("clicking a channel effect chip bypasses it and × removes it", async ({
@@ -575,7 +619,7 @@ test.describe("MixerWidget", () => {
         },
       ],
     });
-    const chips = page.locator(`${STRIP} .nbplay-strip-fx-chip`);
+    const chips = page.locator(`${STRIP} .nbplay-effect-rack-chip`);
     await expect(chips).toHaveCount(2);
 
     await chips.first().click();
@@ -599,7 +643,7 @@ test.describe("MixerWidget", () => {
     expect(effects[0]).toEqual({ type: "gain", gain: 0.5 });
     await expect(chips.first()).not.toHaveClass(/bypassed/);
 
-    await page.locator(`${STRIP} .nbplay-strip-fx-remove`).first().click();
+    await page.locator(`${STRIP} .nbplay-effect-rack-remove`).first().click();
     effects = await page.evaluate(
       () => window.__testModel._state.channels[0].effects,
     );
@@ -624,23 +668,21 @@ test.describe("MixerWidget", () => {
         },
       ],
     });
-    await expect(page.locator(`${STRIP} .nbplay-strip-fx-editor`)).toHaveCount(
-      0,
-    );
-    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
-    const editor = page.locator(`${STRIP} .nbplay-strip-fx-editor`);
+    await expect(page.locator(`${STRIP} nbplay-effect-editor`)).toHaveCount(0);
+    await page.locator(`${STRIP} .nbplay-effect-rack-edit`).click();
+    const editor = page.locator(`${STRIP} nbplay-effect-editor`);
     await expect(editor).toHaveCount(1);
-    await expect(editor.locator(".nbplay-fx-param-row")).toHaveCount(3);
-    await expect(editor.locator(".nbplay-fx-param-range")).toHaveCount(2);
-    await expect(editor.locator("select.nbplay-fx-param")).toHaveValue(
-      "lowpass",
+    await expect(editor.locator(".nbplay-effect-editor-row")).toHaveCount(3);
+    await expect(editor.locator("nbplay-param input[type=range]")).toHaveCount(
+      2,
     );
+    await expect(editor.locator("select[data-key]")).toHaveValue("lowpass");
 
     const before = await page.evaluateHandle(
       () => window.__nbplay["test-session"].channels[0].effects[0].input,
     );
-    await editor.locator('.nbplay-fx-param[data-key="frequency"]').fill("500");
-    await editor.locator("select.nbplay-fx-param").selectOption("highpass");
+    await typeParam(editor, "frequency", "500");
+    await editor.locator("select[data-key]").selectOption("highpass");
 
     const state = await page.evaluate(() => {
       const node = window.__nbplay["test-session"].channels[0].effects[0].input;
@@ -669,16 +711,14 @@ test.describe("MixerWidget", () => {
     // The editor stays open with the new values; the chip label follows.
     await expect(editor).toHaveCount(1);
     await expect(
-      editor.locator('.nbplay-fx-param-range[data-key="frequency"]'),
+      editor.locator('nbplay-param[data-key="frequency"] input[type=range]'),
     ).toHaveValue("500");
-    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveText(
+    await expect(page.locator(`${STRIP} .nbplay-effect-rack-chip`)).toHaveText(
       "highpass 500Hz",
     );
 
-    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
-    await expect(page.locator(`${STRIP} .nbplay-strip-fx-editor`)).toHaveCount(
-      0,
-    );
+    await page.locator(`${STRIP} .nbplay-effect-rack-edit`).click();
+    await expect(page.locator(`${STRIP} nbplay-effect-editor`)).toHaveCount(0);
   });
 
   test("a strip widens while its parameter editor is open", async ({
@@ -700,11 +740,11 @@ test.describe("MixerWidget", () => {
     const closed = await strip.evaluate(
       (el) => el.getBoundingClientRect().width,
     );
-    await strip.locator(".nbplay-strip-fx-edit").click();
+    await strip.locator(".nbplay-effect-rack-edit").click();
     await expect(strip).toHaveClass(/editing/);
     const open = await strip.evaluate((el) => el.getBoundingClientRect().width);
     expect(open).toBeGreaterThan(closed * 2);
-    const editor = strip.locator(".nbplay-strip-fx-editor");
+    const editor = strip.locator("nbplay-effect-editor");
     const fits = await editor.evaluate(
       (el) => el.scrollWidth <= el.clientWidth + 1,
     );
@@ -713,7 +753,7 @@ test.describe("MixerWidget", () => {
     // Adding a channel rebuilds the strips; the width follows the open editor.
     await page.locator(".nbplay-mixer-add-btn").click();
     await expect(page.locator(STRIP).first()).toHaveClass(/editing/);
-    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).first().click();
+    await page.locator(`${STRIP} .nbplay-effect-rack-edit`).first().click();
     await expect(page.locator(STRIP).first()).not.toHaveClass(/editing/);
   });
 
@@ -724,9 +764,9 @@ test.describe("MixerWidget", () => {
       master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
     });
     const master = ".nbplay-master-strip";
-    await page.locator(`${master} .nbplay-strip-fx-edit`).click();
-    const editor = page.locator(`${master} .nbplay-strip-fx-editor`);
-    await editor.locator('.nbplay-fx-param[data-key="threshold"]').fill("-6");
+    await page.locator(`${master} .nbplay-effect-rack-edit`).click();
+    const editor = page.locator(`${master} nbplay-effect-editor`);
+    await typeParam(editor, "threshold", "-6");
     let effects = await page.evaluate(
       () => window.__testModel._state.master_effects,
     );
@@ -738,17 +778,15 @@ test.describe("MixerWidget", () => {
 
     // Adding a channel rebuilds every strip; the open editor comes back.
     await page.locator(".nbplay-mixer-add-btn").click();
-    await expect(page.locator(`${master} .nbplay-strip-fx-editor`)).toHaveCount(
-      1,
-    );
+    await expect(page.locator(`${master} nbplay-effect-editor`)).toHaveCount(1);
     await expect(
-      page.locator(`${master} .nbplay-fx-param[data-key="threshold"]`),
+      page.locator(
+        `${master} nbplay-param[data-key="threshold"] input[type=range]`,
+      ),
     ).toHaveValue("-6");
 
     // Out-of-range values clamp to the plugin's bounds.
-    await page
-      .locator(`${master} .nbplay-fx-param[data-key="threshold"]`)
-      .fill("5");
+    await typeParam(page.locator(master), "threshold", "5");
     effects = await page.evaluate(
       () => window.__testModel._state.master_effects,
     );
@@ -773,14 +811,16 @@ test.describe("MixerWidget", () => {
         },
       ],
     });
-    await page.locator(`${STRIP} .nbplay-strip-fx-edit`).click();
-    const editor = page.locator(`${STRIP} .nbplay-strip-fx-editor`);
-    await expect(editor.locator(".nbplay-fx-param-row")).toHaveCount(3);
-    await expect(editor.locator(".nbplay-fx-param-range")).toHaveCount(0);
-    await editor.locator('.nbplay-fx-param[data-key="depth"]').fill("2");
-    await editor.locator('.nbplay-fx-param[data-key="mode"]').fill("square");
-    await editor.locator('.nbplay-fx-param[data-key="mode"]').press("Enter");
-    await editor.locator('.nbplay-fx-param[data-key="sync"]').uncheck();
+    await page.locator(`${STRIP} .nbplay-effect-rack-edit`).click();
+    const editor = page.locator(`${STRIP} nbplay-effect-editor`);
+    await expect(editor.locator(".nbplay-effect-editor-row")).toHaveCount(3);
+    await expect(editor.locator("nbplay-param input[type=range]")).toHaveCount(
+      0,
+    );
+    await editor.locator('[data-key="depth"]').fill("2");
+    await editor.locator('[data-key="mode"]').fill("square");
+    await editor.locator('[data-key="mode"]').press("Enter");
+    await editor.locator('[data-key="sync"]').uncheck();
     const effect = await page.evaluate(
       () => window.__testModel._state.channels[0].effects[0],
     );
@@ -828,12 +868,12 @@ test.describe("MixerWidget", () => {
       page.locator(".nbplay-return-strip .nbplay-strip-name"),
     ).toHaveText("Verb");
     await expect(
-      page.locator(".nbplay-return-strip .nbplay-strip-gain-label"),
+      page.locator(".nbplay-return-strip nbplay-fader .nbplay-value-text"),
     ).toHaveText("-0.9 dB");
     await expect(
-      page.locator(".nbplay-return-strip .nbplay-strip-fx-chip"),
+      page.locator(".nbplay-return-strip .nbplay-effect-rack-chip"),
     ).toHaveText("reverb");
-    const sends = page.locator(`${STRIP} .nbplay-strip-send-level`);
+    const sends = page.locator(`${STRIP} .nbplay-strip-send input[type=range]`);
     await expect(sends).toHaveCount(2);
     await expect(sends.first()).toHaveValue("0.3");
 
@@ -876,10 +916,14 @@ test.describe("MixerWidget", () => {
       ],
       returns: [{ name: "Verb", gain: 0.8, effects: [] }],
     });
-    const send = page.locator(`${STRIP} .nbplay-strip-send-level`).first();
+    const send = page
+      .locator(`${STRIP} .nbplay-strip-send input[type=range]`)
+      .first();
     await send.fill("0.6");
     await send.dispatchEvent("input");
-    const fader = page.locator(".nbplay-return-strip .nbplay-strip-fader");
+    const fader = page.locator(
+      ".nbplay-return-strip nbplay-fader input[type=range]",
+    );
     await fader.fill("1.2");
     await fader.dispatchEvent("input");
     await fader.dispatchEvent("change");
@@ -922,13 +966,15 @@ test.describe("MixerWidget", () => {
     expect(state.busSends).toEqual([1, 1]);
     await expect(page.locator(".nbplay-return-strip")).toHaveCount(1);
 
-    await page.locator(".nbplay-return-strip .nbplay-strip-fx-add-btn").click();
+    await page
+      .locator(".nbplay-return-strip .nbplay-effect-rack-add-btn")
+      .click();
     await expect(
-      page.locator(".nbplay-return-strip .nbplay-strip-fx-chip"),
+      page.locator(".nbplay-return-strip .nbplay-effect-rack-chip"),
     ).toHaveCount(1);
-    await page.locator(".nbplay-return-strip .nbplay-strip-fx-edit").click();
+    await page.locator(".nbplay-return-strip .nbplay-effect-rack-edit").click();
     await expect(
-      page.locator(".nbplay-return-strip .nbplay-strip-fx-editor"),
+      page.locator(".nbplay-return-strip nbplay-effect-editor"),
     ).toHaveCount(1);
 
     await page.locator(".nbplay-return-strip .nbplay-strip-remove").click();
@@ -950,8 +996,8 @@ test.describe("MixerWidget", () => {
   test("adding a master effect updates model", async ({ page }) => {
     await renderWidget(page);
     const master = page.locator(".nbplay-master-strip");
-    await master.locator(".nbplay-strip-fx-select").selectOption("compressor");
-    await master.locator(".nbplay-strip-fx-add-btn").click();
+    await master.locator(".nbplay-effect-rack-type").selectOption("compressor");
+    await master.locator(".nbplay-effect-rack-add-btn").click();
 
     const effects = await page.evaluate(
       () => window.__testModel._state.master_effects,
@@ -966,7 +1012,7 @@ test.describe("MixerWidget", () => {
         release: 0.25,
       },
     ]);
-    await expect(master.locator(".nbplay-strip-fx-chip")).toHaveText(
+    await expect(master.locator(".nbplay-effect-rack-chip")).toHaveText(
       "compressor",
     );
   });
@@ -977,7 +1023,7 @@ test.describe("MixerWidget", () => {
     await renderWidget(page, {
       master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
     });
-    const chip = page.locator(".nbplay-master-strip .nbplay-strip-fx-chip");
+    const chip = page.locator(".nbplay-master-strip .nbplay-effect-rack-chip");
     await chip.click();
     let effects = await page.evaluate(
       () => window.__testModel._state.master_effects,
@@ -990,7 +1036,9 @@ test.describe("MixerWidget", () => {
     );
     expect(effects[0].enabled).toBeUndefined();
 
-    await page.locator(".nbplay-master-strip .nbplay-strip-fx-remove").click();
+    await page
+      .locator(".nbplay-master-strip .nbplay-effect-rack-remove")
+      .click();
     expect(
       await page.evaluate(() => window.__testModel._state.master_effects),
     ).toEqual([]);
@@ -1269,8 +1317,13 @@ test.describe("MixerWidget", () => {
             return {
               stripPeaks: [...strips].map((s) => s.dataset.peak),
               masterPeak: master?.dataset.peak,
-              fill: strips[0]?.querySelector(".nbplay-strip-meter-fill")?.style
-                .height,
+              fill: Math.round(
+                parseFloat(
+                  strips[0]
+                    ?.querySelector(".nbplay-meter-fill")
+                    ?.style.getPropertyValue("--nbplay-meter-fill"),
+                ),
+              ),
               analysers: window.__analysers?.length,
             };
           }),
@@ -1279,7 +1332,7 @@ test.describe("MixerWidget", () => {
       .toEqual({
         stripPeaks: ["0.500", "0.500"],
         masterPeak: "0.500",
-        fill: "90%",
+        fill: 90,
         analysers: 3,
       });
 
@@ -1288,11 +1341,15 @@ test.describe("MixerWidget", () => {
     });
     await expect
       .poll(async () =>
-        page.evaluate(
-          () => document.querySelector(".nbplay-strip-meter-fill").style.height,
+        page.evaluate(() =>
+          parseFloat(
+            document
+              .querySelector(".nbplay-meter-fill")
+              .style.getPropertyValue("--nbplay-meter-fill"),
+          ),
         ),
       )
-      .toBe("0%");
+      .toBe(0);
   });
 
   test("shrinking channel count disconnects removed audio nodes", async ({
@@ -1337,7 +1394,7 @@ test.describe("MixerWidget", () => {
     await expect(page.locator(`${STRIP} .nbplay-strip-name`)).toHaveText(
       '<img src=x onerror="window.__xssName=1">',
     );
-    await expect(page.locator(`${STRIP} .nbplay-strip-fx-chip`)).toHaveText(
+    await expect(page.locator(`${STRIP} .nbplay-effect-rack-chip`)).toHaveText(
       '<img src=x onerror="window.__xssEffect=1">',
     );
     const result = await page.evaluate(() => ({

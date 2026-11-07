@@ -1,0 +1,81 @@
+nbplay-synth {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  user-select: none;
+}
+nbplay-synth nbplay-header {
+  margin-bottom: 0;
+}
+nbplay-synth .nbplay-synth-waveform {
+  display: block;
+  height: 128px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-synth .nbplay-synth-params {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+nbplay-synth .nbplay-synth-params nbplay-param {
+  display: flex;
+}
+nbplay-synth .nbplay-synth-params .nbplay-param-label {
+  min-width: 80px;
+}
+nbplay-synth .nbplay-synth-params nbplay-slider {
+  flex: 1 1 auto;
+}
+nbplay-synth .nbplay-synth-params nbplay-value {
+  min-width: 72px;
+  text-align: right;
+}
+nbplay-synth .nbplay-synth-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--nbplay-border);
+}
+nbplay-synth .nbplay-play-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 22px;
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+  border: 1px solid var(--nbplay-accent);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+nbplay-synth .nbplay-play-btn:hover {
+  background: var(--nbplay-accent-soft);
+  border-color: var(--nbplay-accent-soft);
+}
+nbplay-synth .nbplay-play-btn:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-synth .nbplay-play-btn.playing {
+  background: var(--nbplay-error);
+  border-color: var(--nbplay-error);
+}
+nbplay-synth .nbplay-info {
+  margin-left: auto;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-faint);
+}

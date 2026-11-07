@@ -1,0 +1,61 @@
+nbplay-transport {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size);
+  color: var(--nbplay-fg-muted);
+  user-select: none;
+  outline: none;
+}
+nbplay-transport:focus-visible {
+  border-color: var(--nbplay-focus);
+}
+nbplay-transport .nbplay-transport-controls .nbplay-transport-stop,
+nbplay-transport .nbplay-transport-controls .nbplay-toggle-button {
+  width: 36px;
+  height: 36px;
+  min-width: 0;
+  padding: 0;
+  font-size: 16px;
+}
+nbplay-transport .nbplay-transport-timesig {
+  padding: 4px 8px;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-transport .nbplay-transport-timesig-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-transport .nbplay-transport-position {
+  padding: 4px 12px;
+  background: var(--nbplay-chart-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  font-size: 18px;
+}
+nbplay-transport .nbplay-transport-loop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+nbplay-transport .nbplay-transport-loop-btn .nbplay-toggle-button {
+  width: 28px;
+  height: 28px;
+  min-width: 0;
+  padding: 0;
+  font-size: 14px;
+}
+nbplay-transport .nbplay-transport-loop-range {
+  font-size: var(--nbplay-font-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--nbplay-fg-faint);
+}

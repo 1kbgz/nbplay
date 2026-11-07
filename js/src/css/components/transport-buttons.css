@@ -1,0 +1,33 @@
+nbplay-transport-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+nbplay-transport-buttons .nbplay-transport-stop {
+  font-family: var(--nbplay-font-mono);
+  font-size: 14px;
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-transport-buttons .nbplay-transport-stop:hover {
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-transport-buttons .nbplay-transport-stop:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-transport-buttons .nbplay-transport-stop:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+nbplay-transport-buttons nbplay-toggle .nbplay-toggle-button {
+  width: 36px;
+  height: 32px;
+  font-size: 14px;
+}

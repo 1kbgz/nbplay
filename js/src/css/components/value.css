@@ -1,0 +1,25 @@
+nbplay-value {
+  display: inline-block;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size);
+  color: var(--nbplay-fg);
+  line-height: 1.4;
+  user-select: none;
+}
+nbplay-value .nbplay-value-text {
+  cursor: default;
+}
+nbplay-value:not([editable="false"]) .nbplay-value-text {
+  cursor: pointer;
+}
+nbplay-value .nbplay-value-input {
+  font: inherit;
+  width: 5em;
+  min-width: 48px;
+  padding: 1px 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-accent);
+  border-radius: var(--nbplay-radius-control);
+  outline: none;
+}

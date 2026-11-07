@@ -1,0 +1,32 @@
+nbplay-fader {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 56px;
+}
+nbplay-fader .nbplay-fader-label {
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  font-weight: 600;
+  color: var(--nbplay-fg-muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+nbplay-fader .nbplay-fader-body {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  height: 120px;
+}
+nbplay-fader nbplay-meter {
+  height: 100%;
+}
+nbplay-fader nbplay-slider {
+  height: 100%;
+}
+nbplay-fader nbplay-value {
+  font-size: var(--nbplay-font-size-small);
+}

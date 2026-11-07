@@ -1,0 +1,29 @@
+nbplay-param {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size);
+  color: var(--nbplay-fg);
+}
+nbplay-param[control="dial"] {
+  flex-direction: column;
+  gap: 4px;
+}
+nbplay-param .nbplay-param-label {
+  min-width: 56px;
+  font-size: var(--nbplay-font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-param[control="dial"] .nbplay-param-label {
+  min-width: 0;
+}
+nbplay-param nbplay-value {
+  min-width: 64px;
+}
+nbplay-param[control="dial"] nbplay-value {
+  min-width: 0;
+  text-align: center;
+}

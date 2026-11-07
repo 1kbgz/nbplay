@@ -1,0 +1,48 @@
+nbplay-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+}
+nbplay-segmented .nbplay-segmented-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-segmented .nbplay-segmented-group {
+  display: inline-flex;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-segmented .nbplay-segmented-option {
+  height: var(--nbplay-control-height);
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 700;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 0;
+  border-right: 1px solid var(--nbplay-border);
+  cursor: pointer;
+}
+nbplay-segmented .nbplay-segmented-option:last-child {
+  border-right: 0;
+}
+nbplay-segmented .nbplay-segmented-option:hover {
+  color: var(--nbplay-fg);
+}
+nbplay-segmented .nbplay-segmented-option:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: -2px;
+}
+nbplay-segmented .nbplay-segmented-option.active {
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+}
+nbplay-segmented .nbplay-segmented-option:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

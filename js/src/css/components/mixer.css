@@ -1,0 +1,57 @@
+nbplay-mixer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-mixer .nbplay-mixer-add-btn,
+nbplay-mixer .nbplay-mixer-add-return-btn {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  padding: 0 8px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-mixer .nbplay-mixer-add-btn:hover,
+nbplay-mixer .nbplay-mixer-add-return-btn:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-mixer .nbplay-mixer-console {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+nbplay-mixer nbplay-strip {
+  flex: 0 0 auto;
+}
+/* A strip with an open effect editor widens so the parameter rows fit. */
+nbplay-mixer nbplay-strip.editing {
+  width: 236px;
+}
+nbplay-mixer nbplay-strip.editing nbplay-effect-editor nbplay-slider {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+nbplay-mixer nbplay-strip.editing nbplay-effect-editor .nbplay-param-label {
+  min-width: 44px;
+}
+nbplay-mixer nbplay-strip.editing nbplay-effect-editor nbplay-value {
+  min-width: 48px;
+}

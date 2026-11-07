@@ -1,0 +1,51 @@
+/* nbplay theme set "pro": slate charcoal panels, teal accent, blue-grey text, sharp corners, thin tracks. Apply with
+ * data-nbplay-theme="pro" on <html> or on a widget root. Overrides every token,
+ * so it does not follow the Jupyter theme. */
+
+[data-nbplay-theme="pro"] {
+  --nbplay-bg: #1b1f22;
+  --nbplay-bg-panel: #23282c;
+  --nbplay-bg-raised: #2d3337;
+  --nbplay-bg-control: #363d42;
+  --nbplay-fg: #dfe5e8;
+  --nbplay-fg-muted: #9aa6ad;
+  --nbplay-fg-faint: #64707a;
+  --nbplay-fg-inverse: #0f1316;
+  --nbplay-border: #30373c;
+  --nbplay-border-strong: #48525a;
+  --nbplay-accent: #3fb8c8;
+  --nbplay-accent-soft: #6fd0dc;
+  --nbplay-fill: #3fb8c8;
+  --nbplay-indicator: #e8f6f8;
+  --nbplay-focus: #6fd0dc;
+  --nbplay-success: #4fc27a;
+  --nbplay-warn: #e8c04a;
+  --nbplay-error: #e55a5a;
+  --nbplay-info: #3fb8c8;
+  --nbplay-meter-low: #4fc27a;
+  --nbplay-meter-mid: #e8c04a;
+  --nbplay-meter-high: #e55a5a;
+  --nbplay-meter-rms: color-mix(in srgb, #e8f6f8 22%, transparent);
+  --nbplay-palette-1: #3fb8c8;
+  --nbplay-palette-2: #e8954a;
+  --nbplay-palette-3: #4fc27a;
+  --nbplay-palette-4: #a68ce8;
+  --nbplay-palette-5: #e8c04a;
+  --nbplay-palette-6: #e55a5a;
+  --nbplay-key-white: #e6eaec;
+  --nbplay-key-black: #121618;
+  --nbplay-chart-bg: #15191c;
+  --nbplay-chart-grid: #2a3034;
+  --nbplay-chart-line: #3fb8c8;
+  --nbplay-radius: 2px;
+  --nbplay-radius-control: 1px;
+  --nbplay-track-size: 3px;
+  --nbplay-thumb-size: 12px;
+  --nbplay-thumb-radius: 1px;
+  --nbplay-dial-stroke: 7;
+  --nbplay-control-height: 22px;
+  --nbplay-font: system-ui, sans-serif;
+  --nbplay-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --nbplay-font-size: 11px;
+  --nbplay-font-size-small: 10px;
+}

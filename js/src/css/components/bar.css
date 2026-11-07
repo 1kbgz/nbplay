@@ -1,0 +1,47 @@
+nbplay-bar {
+  display: inline-block;
+  width: 10px;
+  height: 40px;
+  user-select: none;
+}
+nbplay-bar[orientation="horizontal"] {
+  width: 120px;
+  height: 6px;
+}
+nbplay-bar[editable~="drag"] {
+  cursor: ns-resize;
+  touch-action: none;
+}
+nbplay-bar[editable~="drag"][orientation="horizontal"] {
+  cursor: ew-resize;
+}
+nbplay-bar[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+nbplay-bar .nbplay-bar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--nbplay-bg-control);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-bar .nbplay-bar-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: max(2%, var(--nbplay-bar-fill, 0%));
+  background: var(--nbplay-fill);
+  transition: height 0.1s;
+}
+nbplay-bar[orientation="horizontal"] .nbplay-bar-fill {
+  top: 0;
+  height: 100%;
+  width: max(2%, var(--nbplay-bar-fill, 0%));
+  transition: width 0.1s;
+}
+nbplay-bar[dragging] .nbplay-bar-fill {
+  transition: none;
+}

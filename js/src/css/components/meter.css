@@ -1,0 +1,60 @@
+nbplay-meter {
+  display: inline-block;
+  width: 8px;
+  height: 120px;
+}
+nbplay-meter[orientation="horizontal"] {
+  width: 120px;
+  height: 8px;
+}
+nbplay-meter .nbplay-meter-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--nbplay-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-meter .nbplay-meter-fill,
+nbplay-meter .nbplay-meter-rms {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--nbplay-meter-fill, 0%);
+  transition: height 0.08s linear;
+}
+nbplay-meter[orientation="horizontal"] .nbplay-meter-fill,
+nbplay-meter[orientation="horizontal"] .nbplay-meter-rms {
+  top: 0;
+  height: 100%;
+  width: var(--nbplay-meter-fill, 0%);
+  transition: width 0.08s linear;
+}
+nbplay-meter .nbplay-meter-fill {
+  background: linear-gradient(
+    to top,
+    var(--nbplay-meter-low) 0%,
+    var(--nbplay-meter-low) 70%,
+    var(--nbplay-meter-mid) 70%,
+    var(--nbplay-meter-mid) 95%,
+    var(--nbplay-meter-high) 95%
+  );
+}
+nbplay-meter[orientation="horizontal"] .nbplay-meter-fill {
+  background: linear-gradient(
+    to right,
+    var(--nbplay-meter-low) 0%,
+    var(--nbplay-meter-low) 70%,
+    var(--nbplay-meter-mid) 70%,
+    var(--nbplay-meter-mid) 95%,
+    var(--nbplay-meter-high) 95%
+  );
+}
+nbplay-meter .nbplay-meter-rms {
+  background: var(--nbplay-meter-rms);
+}
+nbplay-meter[hot] .nbplay-meter-fill {
+  filter: brightness(1.4);
+}

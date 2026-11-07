@@ -42,11 +42,11 @@ test.describe("Voila host", () => {
 
     // Launch a slot while playing: it becomes active on the next bar.
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
     await expect(
-      page.locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
-    ).toHaveClass(/active/, { timeout: 15 * 1000 });
+      page.locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
+    ).toHaveAttribute("active", "", { timeout: 15 * 1000 });
 
     // Kernel -> browser: a plain ipywidgets button calls session.stop().
     await page.locator("button.nbplay-voila-stop").click();

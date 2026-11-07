@@ -1,0 +1,62 @@
+nbplay-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: max-content;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+  outline: none;
+}
+nbplay-keyboard:focus-visible,
+nbplay-keyboard:focus {
+  border-color: var(--nbplay-focus);
+}
+nbplay-keyboard .nbplay-kb-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+}
+nbplay-keyboard .nbplay-kb-vel {
+  color: var(--nbplay-accent);
+}
+nbplay-keyboard .nbplay-kb-vel-bar {
+  width: 100%;
+  height: 4px;
+}
+nbplay-keyboard .nbplay-kb-sustain-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+nbplay-keyboard .nbplay-kb-sustain-row > span {
+  padding: 2px 8px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: 999px;
+  color: var(--nbplay-fg-faint);
+}
+nbplay-keyboard .nbplay-kb-sustain-row > span.active {
+  background: var(--nbplay-accent);
+  border-color: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+}
+nbplay-keyboard .nbplay-kb-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--nbplay-font-mono);
+  font-size: 10px;
+  color: var(--nbplay-fg-faint);
+}

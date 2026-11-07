@@ -137,16 +137,22 @@ test.describe("LauncherWidget", () => {
 
   test("renders tracks, scenes, and slots", async ({ page }) => {
     await renderLauncher(page);
-    await expect(page.locator(".nbplay-launcher-scene")).toHaveCount(2);
-    await expect(page.locator(".nbplay-launcher-row[data-track]")).toHaveCount(
-      2,
-    );
-    await expect(page.locator(".nbplay-launcher-slot.filled")).toHaveCount(3);
-    await expect(page.locator(".nbplay-launcher-slot.empty")).toHaveCount(1);
+    await expect(page.locator(".nbplay-launcher-grid-scene")).toHaveCount(2);
     await expect(
-      page.locator(".nbplay-launcher-slot.filled").first(),
+      page.locator(".nbplay-launcher-grid-row[data-track]"),
+    ).toHaveCount(2);
+    await expect(
+      page.locator(".nbplay-launcher-slot-button.filled"),
+    ).toHaveCount(3);
+    await expect(
+      page.locator(".nbplay-launcher-slot-button.empty"),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".nbplay-launcher-slot-button.filled").first(),
     ).toHaveText("Kick");
-    await expect(page.locator(".nbplay-badge")).toHaveText("launcher");
+    await expect(
+      page.locator(".nbplay-launcher .nbplay-header-badge"),
+    ).toHaveText("launcher");
   });
 
   test("launching from a stopped session starts the clock immediately", async ({
@@ -155,7 +161,7 @@ test.describe("LauncherWidget", () => {
     await installAudioRecorder(page);
     await renderLauncher(page);
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
 
     const state = await page.evaluate(() => ({
@@ -171,15 +177,15 @@ test.describe("LauncherWidget", () => {
     expect(state.queued).toEqual([-2, -2]);
     expect(state.selected).toEqual({ track_index: 0, scene_index: 0 });
     await expect(
-      page.locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
-    ).toHaveClass(/active/);
+      page.locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]'),
+    ).toHaveAttribute("active", "");
     await page.waitForFunction(() => window.__oscStarts.length >= 1);
   });
 
   test("launches quantize to the next bar while playing", async ({ page }) => {
     await renderLauncher(page, { bpm: 6000 });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
 
     // Queue the second scene on track 0: it waits for the bar boundary.
@@ -188,7 +194,7 @@ test.describe("LauncherWidget", () => {
         globalThis.__nbplay["launcher-session"].clock.beat();
     });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="1"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="1"]')
       .click();
     const queued = await page.evaluate(
       () => window.__testModel._state.queued_slots,
@@ -219,20 +225,20 @@ test.describe("LauncherWidget", () => {
     page,
   }) => {
     await renderLauncher(page, { quantize: "none" });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     let active = await page.evaluate(
       () => window.__testModel._state.active_slots,
     );
     expect(active).toEqual([0, 0]);
 
-    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="1"]').click();
     active = await page.evaluate(() => window.__testModel._state.active_slots);
     expect(active).toEqual([1, -1]);
 
-    await page.locator(".nbplay-launcher-stop-all").click();
+    await page.locator(".nbplay-launcher-grid-stop-all").click();
     active = await page.evaluate(() => window.__testModel._state.active_slots);
     expect(active).toEqual([-1, -1]);
-    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+    await expect(page.locator("nbplay-launcher-slot[active]")).toHaveCount(0);
   });
 
   test("track stop button and Python launch requests", async ({ page }) => {
@@ -251,7 +257,11 @@ test.describe("LauncherWidget", () => {
       await page.evaluate(() => window.__testModel._state.active_slots),
     ).toEqual([-1, 0]);
 
-    await page.locator('.nbplay-launcher-track-stop[data-track="1"]').click();
+    await page
+      .locator(
+        '.nbplay-launcher-grid-row[data-track="1"] .nbplay-launcher-grid-track-stop',
+      )
+      .click();
     expect(
       await page.evaluate(() => window.__testModel._state.active_slots),
     ).toEqual([-1, -1]);
@@ -278,7 +288,7 @@ test.describe("LauncherWidget", () => {
     await installAudioRecorder(page);
     await renderTransport(page);
     await renderLauncher(page, { quantize: "none" });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     await page.waitForFunction(() => window.__oscStarts.length >= 4);
 
     const state = await page.evaluate(() => {
@@ -307,14 +317,14 @@ test.describe("LauncherWidget", () => {
     page,
   }) => {
     await renderLauncher(page, { bpm: 6000 });
-    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="1"]').click();
     await expect
       .poll(async () =>
         page.evaluate(() => window.__testModel._state.active_slots),
       )
       .toEqual([1, -1]);
     await expect(
-      page.locator('.nbplay-launcher-scene[data-scene="1"]'),
+      page.locator('.nbplay-launcher-grid-scene[data-scene="1"]'),
     ).toHaveClass(/active/);
 
     // Queue Intro while Drop plays: the header and both cells show it as next.
@@ -322,13 +332,13 @@ test.describe("LauncherWidget", () => {
       window.__launchBeat =
         globalThis.__nbplay["launcher-session"].clock.beat();
     });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     const marked = await page.evaluate(() => ({
       queued: window.__testModel._state.queued_slots,
       header: document
-        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .querySelector('.nbplay-launcher-grid-scene[data-scene="0"]')
         .classList.contains("queued"),
-      next: document.querySelectorAll(".nbplay-launcher-next").length,
+      next: document.querySelectorAll(".nbplay-launcher-slot-next").length,
     }));
     if (marked.queued[0] === 0) {
       expect(marked.header).toBe(true);
@@ -341,12 +351,12 @@ test.describe("LauncherWidget", () => {
       .toEqual([0, 0]);
     const after = await page.evaluate(() => ({
       queued: window.__testModel._state.queued_slots,
-      next: document.querySelectorAll(".nbplay-launcher-next").length,
+      next: document.querySelectorAll(".nbplay-launcher-slot-next").length,
       activeHeader: document
-        .querySelector('.nbplay-launcher-scene[data-scene="0"]')
+        .querySelector('.nbplay-launcher-grid-scene[data-scene="0"]')
         .classList.contains("active"),
       oldHeader: document
-        .querySelector('.nbplay-launcher-scene[data-scene="1"]')
+        .querySelector('.nbplay-launcher-grid-scene[data-scene="1"]')
         .classList.contains("active"),
     }));
     expect(after).toEqual({
@@ -362,7 +372,7 @@ test.describe("LauncherWidget", () => {
   }) => {
     await renderLauncher(page, { quantize: "none" });
     await renderTransport(page);
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     expect(
       await page.evaluate(() => window.__testModel._state.active_slots),
     ).toEqual([0, 0]);
@@ -375,7 +385,7 @@ test.describe("LauncherWidget", () => {
         playing: window.__testModel._state.is_playing,
       })),
     ).toEqual({ active: [-1, -1], queued: [-2, -2], playing: false });
-    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+    await expect(page.locator("nbplay-launcher-slot[active]")).toHaveCount(0);
 
     // Play alone brings nothing back.
     await page.locator(".nbplay-transport-play").click();
@@ -386,7 +396,7 @@ test.describe("LauncherWidget", () => {
 
     // A single slot click starts the clock with only that slot playing.
     await page
-      .locator('.nbplay-launcher-slot[data-track="1"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="1"][data-scene="0"]')
       .click();
     expect(
       await page.evaluate(() => ({
@@ -402,7 +412,7 @@ test.describe("LauncherWidget", () => {
     await installAudioRecorder(page);
     await renderLauncher(page, { quantize: "none", bpm: 600 });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
     await page.waitForFunction(() => window.__oscStarts.length >= 2);
 
@@ -447,7 +457,7 @@ test.describe("LauncherWidget", () => {
     await page.evaluate(() => {
       globalThis.__nbplay["launcher-session"].clock.setLoop(true, 0, 4);
     });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     expect(
       await page.evaluate(() => window.__testModel._state.active_slots),
     ).toEqual([0, 0]);
@@ -457,7 +467,7 @@ test.describe("LauncherWidget", () => {
       globalThis.__nbplay["launcher-session"].clock.seek(3.95);
     });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="1"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="1"]')
       .click();
     await expect
       .poll(
@@ -472,7 +482,7 @@ test.describe("LauncherWidget", () => {
       globalThis.__nbplay["launcher-session"].clock.seek(2);
     });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
     await page.evaluate(() => {
       globalThis.__nbplay["launcher-session"].clock.seek(1);
@@ -496,7 +506,7 @@ test.describe("LauncherWidget", () => {
     await page.evaluate(() => {
       globalThis.__nbplay["launcher-session"].clock.seek(1);
     });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     expect(
       await page.evaluate(() => ({
         active: window.__testModel._state.active_slots,
@@ -510,9 +520,9 @@ test.describe("LauncherWidget", () => {
   }) => {
     await renderLauncher(page);
     await page
-      .locator('.nbplay-launcher-slot[data-track="1"][data-scene="1"]')
+      .locator('nbplay-launcher-slot[data-track="1"][data-scene="1"]')
       .click();
-    await page.locator(".nbplay-launcher-stop-all").click();
+    await page.locator(".nbplay-launcher-grid-stop-all").click();
     expect(
       await page.evaluate(() => ({
         playing: globalThis.__nbplay["launcher-session"].clock.playing,
@@ -526,12 +536,12 @@ test.describe("LauncherWidget", () => {
   }) => {
     await renderLauncher(page, { quantize: "none" });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
-    const intro = page.locator('.nbplay-launcher-scene[data-scene="0"]');
+    const intro = page.locator('.nbplay-launcher-grid-scene[data-scene="0"]');
     await expect(intro).toHaveClass(/partial/);
     await expect(intro).not.toHaveClass(/active/);
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     await expect(intro).toHaveClass(/active/);
     await expect(intro).not.toHaveClass(/partial/);
 
@@ -543,18 +553,20 @@ test.describe("LauncherWidget", () => {
       globalThis.__nbplay["launcher-session"].clock.setTempo(1);
       globalThis.__nbplay["launcher-session"].clock.seek(0.5);
     });
-    await page.locator('.nbplay-launcher-scene[data-scene="1"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="1"]').click();
     await expect(
-      page.locator('.nbplay-launcher-scene[data-scene="1"]'),
+      page.locator('.nbplay-launcher-grid-scene[data-scene="1"]'),
     ).toHaveClass(/queued/);
     const emptyCell = page.locator(
-      '.nbplay-launcher-slot[data-track="1"][data-scene="1"]',
+      'nbplay-launcher-slot[data-track="1"][data-scene="1"]',
     );
-    await expect(emptyCell).toHaveClass(/queued/);
-    await expect(emptyCell.locator(".nbplay-launcher-next")).toHaveText("stop");
+    await expect(emptyCell).toHaveAttribute("queued", "");
+    await expect(emptyCell.locator(".nbplay-launcher-slot-next")).toHaveText(
+      "stop",
+    );
     await expect(
       page.locator(
-        '.nbplay-launcher-slot[data-track="0"][data-scene="1"] .nbplay-launcher-next',
+        'nbplay-launcher-slot[data-track="0"][data-scene="1"] .nbplay-launcher-slot-next',
       ),
     ).toHaveText("next");
   });
@@ -563,7 +575,7 @@ test.describe("LauncherWidget", () => {
     page,
   }) => {
     await renderLauncher(page, { quantize: "none" });
-    await page.locator('.nbplay-launcher-scene[data-scene="0"]').click();
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
     await page.evaluate(() => {
       const model = window.__testModel;
       model.set("tracks", model._state.tracks.slice(1));
@@ -581,7 +593,7 @@ test.describe("LauncherWidget", () => {
         queued: window.__testModel._state.queued_slots,
       })),
     ).toEqual({ active: [-1], queued: [-2] });
-    await expect(page.locator(".nbplay-launcher-slot.active")).toHaveCount(0);
+    await expect(page.locator("nbplay-launcher-slot[active]")).toHaveCount(0);
   });
 
   test("stopping cancels notes already handed to the audio clock", async ({
@@ -613,13 +625,13 @@ test.describe("LauncherWidget", () => {
     });
     await renderLauncher(page, { quantize: "none", bpm: 600 });
     await page
-      .locator('.nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
       .click();
     await page.waitForFunction(() => window.__oscs.length >= 2);
     const result = await page.evaluate(() => {
       const ctx = globalThis.__nbplay["launcher-session"].audioCtx;
       const now = ctx.currentTime;
-      document.querySelector(".nbplay-launcher-stop-all").click();
+      document.querySelector(".nbplay-launcher-grid-stop-all").click();
       const future = window.__oscs.filter((entry) => entry.start > now);
       return {
         future: future.length,

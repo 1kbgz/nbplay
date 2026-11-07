@@ -1,0 +1,51 @@
+/* nbplay theme set "fruit": warm dark panels, lime accent, orange indicators, rounded controls, bright meters. Apply with
+ * data-nbplay-theme="fruit" on <html> or on a widget root. Overrides every token,
+ * so it does not follow the Jupyter theme. */
+
+[data-nbplay-theme="fruit"] {
+  --nbplay-bg: #1f1d1b;
+  --nbplay-bg-panel: #2a2724;
+  --nbplay-bg-raised: #35312d;
+  --nbplay-bg-control: #403b36;
+  --nbplay-fg: #ece7e0;
+  --nbplay-fg-muted: #b0a89e;
+  --nbplay-fg-faint: #766e65;
+  --nbplay-fg-inverse: #151311;
+  --nbplay-border: #3b3733;
+  --nbplay-border-strong: #54504a;
+  --nbplay-accent: #8ed14b;
+  --nbplay-accent-soft: #b0e37a;
+  --nbplay-fill: #8ed14b;
+  --nbplay-indicator: #f2a93b;
+  --nbplay-focus: #b0e37a;
+  --nbplay-success: #8ed14b;
+  --nbplay-warn: #f2a93b;
+  --nbplay-error: #f05a4a;
+  --nbplay-info: #4fb8e0;
+  --nbplay-meter-low: #8ed14b;
+  --nbplay-meter-mid: #f2a93b;
+  --nbplay-meter-high: #f05a4a;
+  --nbplay-meter-rms: color-mix(in srgb, #f2a93b 25%, transparent);
+  --nbplay-palette-1: #4fb8e0;
+  --nbplay-palette-2: #f2a93b;
+  --nbplay-palette-3: #8ed14b;
+  --nbplay-palette-4: #c48ef0;
+  --nbplay-palette-5: #f2d64b;
+  --nbplay-palette-6: #f05a4a;
+  --nbplay-key-white: #efe9df;
+  --nbplay-key-black: #191614;
+  --nbplay-chart-bg: #171513;
+  --nbplay-chart-grid: #302c28;
+  --nbplay-chart-line: #8ed14b;
+  --nbplay-radius: 8px;
+  --nbplay-radius-control: 6px;
+  --nbplay-track-size: 5px;
+  --nbplay-thumb-size: 15px;
+  --nbplay-thumb-radius: 50%;
+  --nbplay-dial-stroke: 8;
+  --nbplay-control-height: 24px;
+  --nbplay-font: system-ui, sans-serif;
+  --nbplay-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --nbplay-font-size: 12px;
+  --nbplay-font-size-small: 11px;
+}
