@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>nbplay spaday view harness</title>
+    <script type="module">
+      // The spaday notebook widget bundle, copied from the installed spaday
+      // package by the spec, plus a fake anywidget model: get / set /
+      // save_changes / on / off / send. Comm traffic is relayed to a real
+      // TransportView in a Python subprocess by the spec.
+      import widget from "/dist/vendor/spaday-widget.js";
+
+      function fakeModel(state) {
+        const listeners = {};
+        const sent = [];
+        return {
+          _sent: sent,
+          _emit: (event, ...args) =>
+            (listeners[event] || []).forEach((cb) => cb(...args)),
+          get: (k) => state[k],
+          set: (k, v) => {
+            state[k] = v;
+            (listeners["change:" + k] || []).forEach((f) => f());
+          },
+          save_changes: () => {},
+          on: (ev, cb) => (listeners[ev] = (listeners[ev] || []).concat(cb)),
+          off: (ev, cb) =>
+            (listeners[ev] = (listeners[ev] || []).filter((f) => f !== cb)),
+          send: (content) => sent.push(content),
+        };
+      }
+
+      window.__widget = { widget, fakeModel };
+    </script>
+  </head>
+  <body></body>
+</html>

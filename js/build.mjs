@@ -43,6 +43,11 @@ const BUNDLES = [
     entryPoints: ["src/ts/gallery.ts"],
     outfile: "dist/gallery/index.js",
   },
+  // The spaday component package: every element plus the nbplay-wire bridge
+  {
+    entryPoints: ["src/ts/spaday.ts"],
+    outfile: "dist/spaday/index.js",
+  },
 ];
 
 async function build() {
@@ -91,6 +96,10 @@ async function build() {
   await cpy("dist/widgets/*.js", "../nbplay/static");
   // Every widget shares one stylesheet: the elements plus the theme sets.
   fs.copyFileSync("dist/css/nbplay.css", "../nbplay/static/nbplay.css");
+  // The spaday component package assets (nbplay.components:package)
+  fs.mkdirSync("../nbplay/static/spaday", { recursive: true });
+  fs.copyFileSync("dist/spaday/index.js", "../nbplay/static/spaday/index.js");
+  fs.copyFileSync("dist/css/nbplay.css", "../nbplay/static/spaday/nbplay.css");
 }
 
 await build();
