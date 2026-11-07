@@ -12,7 +12,7 @@ from spaday.widget import _ESM
 
 from nbplay import views
 
-VIEWS = {"transport": views.TransportView, "synth": views.SynthView}
+VIEWS = {"transport": views.TransportView, "synth": views.SynthView, "mixer": views.MixerView}
 
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
 codec = sys.argv[2] if len(sys.argv) > 2 else "json"
@@ -31,6 +31,7 @@ try:
                 "_packages": view._packages,
                 "config_id": view.config_id,
                 "status_id": view.status_id,
+                "has_status": view.status is not None,
                 "widget_esm": str(_ESM),
             }
         elif op == "receive":
@@ -46,7 +47,7 @@ try:
         elif op == "state":
             config = view.config.model_dump()
             waveform = config.pop("waveform", None)
-            result = {"config": config, "status": view.status.model_dump()}
+            result = {"config": config, "status": view.status.model_dump() if view.status is not None else None}
             if waveform is not None:
                 result["waveform_bytes"] = len(waveform)
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)

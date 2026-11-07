@@ -212,4 +212,71 @@ test.describe("views on transports", () => {
       kernel.close();
     }
   });
+
+  test("mixer: kernel and browser edits meet in one validated console", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("mixer");
+    try {
+      await mount(page, kernel);
+      const mixer = page.locator("#owner nbplay-mixer");
+      await expect(mixer).toBeVisible();
+      await expect(page.locator("#owner .nbplay-master-strip")).toBeVisible();
+      const strips = page.locator(
+        "#owner .nbplay-mixer-strip:not(.nbplay-master-strip)",
+      );
+      await expect(strips).toHaveCount(0);
+
+      // Kernel edits build the console.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "add_channel",
+          args: ["Drums"],
+        }),
+      );
+      await expect(strips).toHaveCount(1);
+      await expect(strips.first().locator(".nbplay-strip-name")).toHaveText(
+        "Drums",
+      );
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "add_master_effect",
+          args: [{ type: "limiter", threshold: -3 }],
+        }),
+      );
+      await expect(
+        page.locator("#owner .nbplay-master-strip .nbplay-effect-rack-chip"),
+      ).toHaveText("limiter");
+
+      // A browser edit is clamped by the kernel model and echoed back.
+      await page.evaluate(() => {
+        const el = document.querySelector("#owner nbplay-mixer");
+        const channels = [{ ...el.channels[0], gain: 5 }];
+        el.channels = channels;
+        el.dispatchEvent(
+          new CustomEvent("nbplay-set", {
+            detail: { values: { channels } },
+            bubbles: true,
+          }),
+        );
+      });
+      await expect
+        .poll(async () => (await state(kernel)).config.channels[0].gain)
+        .toBe(2);
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              document.querySelector("#owner nbplay-mixer").channels[0].gain,
+          ),
+        )
+        .toBe(2);
+    } finally {
+      kernel.close();
+    }
+  });
 });
