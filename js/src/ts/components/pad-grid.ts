@@ -167,7 +167,9 @@ export class NbplayPadGrid extends NbplayElement {
       dragging: false,
       cell,
     };
-    if (this.hold) this.noteOn(index, this.tapVelocity(e, cell, index));
+    // A press on the label is for editing; it never sounds the pad.
+    if (this.hold && !onLabel)
+      this.noteOn(index, this.tapVelocity(e, cell, index));
   }
 
   private onPointerMove = (e: PointerEvent): void => {

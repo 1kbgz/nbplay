@@ -107,9 +107,12 @@ export function bindInstrument(
     model.on(`change:${trait}`, () => {
       const cmd = (model.get(trait) || {}) as { nonce?: number };
       const nonce = Number(cmd.nonce);
-      // Nonces are monotonic: an older command arriving late is ignored.
-      if (!Number.isFinite(nonce) || nonce <= lastNonce) return;
-      lastNonce = nonce;
+      // Nonces are monotonic: an older command arriving late is ignored. A
+      // request without one is applied as it comes.
+      if (Number.isFinite(nonce)) {
+        if (nonce <= lastNonce) return;
+        lastNonce = nonce;
+      }
       (node as Commandable).command?.(cmd as never);
     });
   }

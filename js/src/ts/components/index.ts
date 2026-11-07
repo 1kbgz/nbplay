@@ -82,3 +82,4 @@ export {
   type LauncherTrackSpec,
 } from "./launcher.ts";
 export { NbplayMixer } from "./mixer.ts";
+export { NbplaySampler, type CaptureRequest } from "./sampler.ts";

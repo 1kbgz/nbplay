@@ -1363,6 +1363,33 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-sampler",
+    title: "nbplay-sampler",
+    desc: "The sampler instrument: drop or pick an audio file, shape the ADSR, play the pads (hold to sustain), and build multi-sample zones from files or the microphone.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "rootNote", type: "number" },
+      { name: "maxVoices", type: "number" },
+      { name: "velocity", type: "number" },
+      { name: "velocitySensitive", type: "boolean" },
+    ],
+    variants: [
+      {
+        label: "click sample",
+        props: {
+          sampleName: "click.wav",
+          sampleLength: 1024,
+          waveform: sineBurst(1024),
+          sampleData: sineBurst(1024),
+          padCount: 8,
+          padNotes: [48, 52, 55, 59, 60, 64, 67, 71],
+          zones: [],
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
