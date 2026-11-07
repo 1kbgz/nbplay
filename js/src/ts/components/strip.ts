@@ -166,6 +166,13 @@ export class NbplayStrip extends NbplayElement {
             value,
           });
         }}
+        @nbplay-effect-editing=${(e: Event) => {
+          // The host widens an editing strip; the event also bubbles for it.
+          this.classList.toggle(
+            "editing",
+            (e as CustomEvent).detail.index >= 0,
+          );
+        }}
       ></nbplay-effect-rack>
       ${
         this.kind === "master"

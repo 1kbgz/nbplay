@@ -81,3 +81,4 @@ export {
   type LauncherSlotData,
   type LauncherTrackSpec,
 } from "./launcher.ts";
+export { NbplayMixer } from "./mixer.ts";

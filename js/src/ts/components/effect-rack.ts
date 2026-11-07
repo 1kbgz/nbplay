@@ -15,7 +15,8 @@ import "./effect-editor.ts";
  * `nbplay-effect-editor`, × removes). `types` lists the addable types.
  * Events: `nbplay-effect-add` `{type}`, `nbplay-effect-remove` `{index}`,
  * `change` `{index, field, value}` for bypass (`field: "enabled"`) and for
- * parameter edits (`field` is the parameter key).
+ * parameter edits (`field` is the parameter key); `nbplay-effect-editing`
+ * `{index}` when an inline editor opens (-1 when it closes).
  */
 export class NbplayEffectRack extends NbplayElement {
   static properties = {
@@ -84,7 +85,10 @@ export class NbplayEffectRack extends NbplayElement {
           class="nbplay-effect-rack-edit ${open ? "active" : ""}"
           title="Edit effect"
           ?disabled=${this.disabled}
-          @click=${() => (this.editing = open ? -1 : index)}
+          @click=${() => {
+            this.editing = open ? -1 : index;
+            this.emitDetail("nbplay-effect-editing", { index: this.editing });
+          }}
         >
           ✎
         </button>

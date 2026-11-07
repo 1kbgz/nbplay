@@ -1310,6 +1310,59 @@ const SECTIONS: Section[] = [
       },
     ],
   },
+  {
+    tag: "nbplay-mixer",
+    title: "nbplay-mixer",
+    desc: "The mixer instrument: channel strips with pan, mute/solo, sends and insert effects, return buses and the master. Without a session id there is no audio graph, only the console.",
+    events: ["nbplay-set"],
+    controls: [{ name: "masterGain", type: "number", step: 0.01 }],
+    variants: [
+      {
+        label: "two channels, one return",
+        props: {
+          channels: [
+            {
+              name: "Drums",
+              gain: 0.9,
+              pan: -0.2,
+              mute: false,
+              solo: false,
+              sends: [0.3],
+              effects: [
+                {
+                  type: "compressor",
+                  threshold: -18,
+                  knee: 20,
+                  ratio: 3,
+                  attack: 0.01,
+                  release: 0.2,
+                },
+              ],
+            },
+            {
+              name: "Bass",
+              gain: 0.7,
+              pan: 0.1,
+              mute: false,
+              solo: false,
+              sends: [0],
+              effects: [],
+            },
+          ],
+          returns: [
+            {
+              name: "Rev",
+              gain: 0.8,
+              effects: [{ type: "reverb", seconds: 2, decay: 3, wet: 1 }],
+            },
+          ],
+          masterGain: 0.85,
+          masterEffects: [{ type: "limiter", threshold: -1, release: 0.05 }],
+        },
+        wide: true,
+      },
+    ],
+  },
 ];
 
 function el<K extends keyof HTMLElementTagNameMap>(
