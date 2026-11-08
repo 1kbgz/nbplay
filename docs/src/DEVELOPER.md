@@ -867,8 +867,11 @@ to the return count. A Python assignment and a validated browser edit therefore 
 edit's authoritative patch already carries the derived values. `MixerView` has no status model;
 `InstrumentView` skips the status wire and the `nbplay-wire` child when `STATUS_MODEL` is `None`.
 `PadsConfig` fits `pad_notes`, `pad_velocities` and `pad_actions` to the grid in its after-validator,
-as the widget's observers do; `PadsView`, `KeyboardView` and `MidiKeyboardView` are pure trait maps
-whose status (taps, held notes, ports, control changes, device clock) the browser owns. `SettingsView`
+as the widget's observers do; `PadsView`, `KeyboardView` and `MidiKeyboardView` own their status
+(taps, held notes, ports, control changes, device clock) in the browser, and `connect_sampler` /
+`disconnect_sampler` edit `sampler_routing` with the shared `KeyboardRoute` builder, the keyboards'
+`connect_sequencer` sets the sequencer's `keyboard_connected`, and the pads' grid helpers
+(`configure_grid_for_actions`, `set_base_note`, `transpose_pads`) size and relabel the grid. `SettingsView`
 follows the same shape. `MidiOutputView` sends through commands: `note_on`, `note_off`,
 `control_change` and `send_raw` call `session.command(status_id, "request", {...})`; transports
 requires the target to be a client-owned field, so `MidiOutputStatus.request` exists only for that,
