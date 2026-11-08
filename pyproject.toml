@@ -57,7 +57,7 @@ develop = [
     "jupyterlite-core[contents]",
     "jupyterlite-pyodide-kernel",
     "mdformat",
-    "mdformat-frontmatter",
+    "mdformat-myst",
     "mdformat-tables>=1",
     "mido",
     "pytest",
