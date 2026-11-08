@@ -112,6 +112,60 @@ class TestMixerView:
         finally:
             view.close()
 
+    def test_strip_send_and_effect_setters(self):
+        view = views.MixerView(autosync=False)
+        try:
+            drums = view.add_channel("Drums")
+            keys = view.add_channel("Keys")
+            view.set_channel_gain(drums, 5)
+            view.set_channel_pan(drums, -2)
+            view.set_channel_mute(drums, 1)
+            view.set_channel_solo(keys, True)
+            channel = view.config.channels[drums]
+            assert (channel["gain"], channel["pan"], channel["mute"]) == (2.0, -1.0, True)
+            assert view.config.channels[keys]["solo"] is True
+            view.set_channel_effects(drums, [{"type": "gain", "gain": 9}, {"type": "limiter"}])
+            view.set_channel_effect_enabled(drums, 1, False)
+            assert view.config.channels[drums]["effects"] == [
+                {"type": "gain", "gain": 4.0},
+                {"type": "limiter", "threshold": -1.0, "release": 0.05, "enabled": False},
+            ]
+            view.set_channel_effect_enabled(drums, 1)
+            assert "enabled" not in view.config.channels[drums]["effects"][1]
+            view.clear_channel_effects(drums)
+            assert view.config.channels[drums]["effects"] == []
+            view.set_master_effects([{"type": "compressor"}, {"type": "limiter"}])
+            view.set_master_effect_enabled(0, False)
+            assert view.config.master_effects[0]["enabled"] is False
+            view.clear_master_effects()
+            assert view.config.master_effects == []
+
+            verb = view.add_return("Verb")
+            delay = view.add_return("Delay", effects=[{"type": "delay"}])
+            view.set_return_gain(verb, 3)
+            view.add_return_effect(verb, {"type": "reverb", "wet": 2})
+            view.set_return_effect_enabled(verb, 0, False)
+            assert view.config.returns[verb]["gain"] == 2.0
+            assert view.config.returns[verb]["effects"][0]["wet"] == 1.0 and view.config.returns[verb]["effects"][0]["enabled"] is False
+            view.set_return_effects(delay, [])
+            assert view.config.returns[delay]["effects"] == []
+            view.set_send(drums, verb, 0.5)
+            view.set_send(drums, delay, 7)
+            assert view.config.channels[drums]["sends"] == [0.5, 1.0]
+            with pytest.raises(IndexError):
+                view.set_send(drums, 2, 0.1)
+            view.remove_return(verb)
+            assert [r["name"] for r in view.config.returns] == ["Delay"]
+            assert view.config.channels[drums]["sends"] == [1.0] and view.config.channels[keys]["sends"] == [0.0]
+
+            mixer = view.to_mixer()
+            assert len(mixer) == 2
+            assert mixer.get_channel(drums).gain == 2.0 and mixer.get_channel(drums).mute is True
+            assert mixer.get_channel(keys).solo is True
+            assert mixer.master_gain == pytest.approx(0.8)
+        finally:
+            view.close()
+
 
 class TestKeysViews:
     def test_pads_config_fits_the_grid(self):
@@ -189,6 +243,57 @@ class TestSequencerAndSamplerViews:
             assert isinstance(view.play(), int)
         finally:
             view.close()
+
+    def test_sequencer_grid_follows_measures_and_step_duration(self):
+        config = SequencerConfig(measures=2)
+        assert config.length == 16
+        config.measures = 2
+        assert config.length == 32 and len(config.voices_data[0]) == 32
+        config.step_duration = 1.0
+        assert config.length == 8
+        config.time_signature_num = 3
+        assert config.length == 6
+        config.length = 5
+        assert config.length == 5 and config.measures == 2
+        view = views.SequencerView(length=8, autosync=False)
+        try:
+            assert view.config.step_duration == 0.5
+            view.configure_grid(measures=2, step_duration=0.25)
+            assert view.config.length == 32
+            view.steps = [{"note": 48, "active": True}]
+            assert view.steps[0]["note"] == 48 and view.steps[0]["active"] is True and len(view.steps) == 32
+        finally:
+            view.close()
+
+    def test_sequencer_rust_and_midi_exports(self, tmp_path):
+        pytest.importorskip("mido")
+        view = views.SequencerView(length=8, num_voices=2, step_duration=0.5, bpm=132.0, autosync=False)
+        other = views.SequencerView(autosync=False)
+        try:
+            view.set_step(0, note=60, velocity=90)
+            view.set_step(0, note=64, velocity=80, voice=1)
+            view.set_step(3, note=67, duration_ticks=2)
+            pattern = view.to_pattern()
+            assert len(pattern) == 8 and pattern.get_step(3).note == 67 and pattern.get_step(1).active is False
+            assert view.to_pattern(voice=2) is None and view.to_step_sequencer(voice=2) is None
+            sequencer = view.to_step_sequencer(channel=3, voice=1)
+            assert sequencer.step_duration == 0.5
+
+            path = tmp_path / "pattern.mid"
+            midi = view.to_midi(path, name="Lead")
+            assert path.exists() and [t.name for t in midi.tracks[1:]] == ["Lead"]
+            other.load_midi(path)
+            assert other.config.bpm == pytest.approx(132.0)
+            assert other.config.step_duration == 0.25 and other.config.length == 7 and other.config.num_voices == 2
+            notes = sorted((i, st["note"], st["duration_ticks"]) for v in other.config.voices_data for i, st in enumerate(v) if st["active"])
+            assert notes == [(0, 60, 2), (0, 64, 2), (6, 67, 4)]
+            other.load_midi(path, step_duration=0.5, max_voices=1)
+            assert other.config.num_voices == 1 and other.config.length == 4
+            with pytest.raises(IndexError):
+                other.load_midi(path, track=5)
+        finally:
+            view.close()
+            other.close()
 
     def test_sampler_config_and_view(self):
         config = SamplerConfig(pad_count=3)

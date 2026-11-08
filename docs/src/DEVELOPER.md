@@ -873,9 +873,14 @@ follows the same shape. `MidiOutputView` sends through commands: `note_on`, `not
 `control_change` and `send_raw` call `session.command(status_id, "request", {...})`; transports
 requires the target to be a client-owned field, so `MidiOutputStatus.request` exists only for that,
 and `nbplay-wire` hands any non-transport command object straight to `element.command()`, untagging
-nested transports values (`{"Map": {...}}`) first. `SequencerConfig` keeps `voices_data` at
+nested transports values (`{"Map": {...}}`) first. `_Validated.update(**fields)` validates several fields at once, so
+`MixerView.remove_return` drops a bus and every channel's send to it in one step and
+`SequencerView.load_midi` replaces tempo, grid and steps together; `SequencerConfig.update` also
+recomputes `length` when a grid field (measures, step duration, meter) changes without an explicit
+length, as the widget's observers do. `SequencerConfig` keeps `voices_data` at
 `num_voices` lists of `length` normalized steps in its after-validator, standing in for the widget's
-`NoteComposer`s; `SequencerView.set_step`, `toggle_step` and `clear` edit that list, and `play` and
+`NoteComposer`s; `SequencerView.set_step`, `toggle_step` and `clear` edit that list, `to_pattern`,
+`to_step_sequencer`, `to_midi` and `load_midi` match the widget, and `play` and
 `stop` are `is_playing` commands the wire writes onto the element. `SamplerConfig` treats
 `pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
 whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated

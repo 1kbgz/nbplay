@@ -10,6 +10,7 @@ layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
 """
 
 import inspect
+import os
 import uuid
 from typing import ClassVar
 
@@ -26,11 +27,14 @@ from .descriptors import (
     _decimate_samples,
     _normalize_audio_clip,
     _normalize_effect,
+    _normalize_effects,
     _normalize_launcher_slot,
     _normalize_midi_events,
     _normalize_zone,
     _pack_float32,
+    _set_effect_enabled,
     _slot_voices,
+    _step_duration_for_length,
 )
 from .models import (
     KeyboardConfig,
@@ -232,20 +236,125 @@ class MixerView(InstrumentView):
             del channels[index]
             self.config.channels = channels
 
+    def _update_channel(self, index, **fields):
+        channels = list(self.config.channels)
+        if 0 <= index < len(channels):
+            channels[index] = {**channels[index], **fields}
+            self.config.channels = channels
+
+    def set_channel_gain(self, index, gain):
+        self._update_channel(index, gain=gain)
+
+    def set_channel_pan(self, index, pan):
+        self._update_channel(index, pan=pan)
+
+    def set_channel_mute(self, index, mute):
+        self._update_channel(index, mute=bool(mute))
+
+    def set_channel_solo(self, index, solo):
+        self._update_channel(index, solo=bool(solo))
+
+    def set_channel_effects(self, index, effects):
+        """Replace the insert chain of the channel at ``index``."""
+        self._update_channel(index, effects=_normalize_effects(effects))
+
+    def add_channel_effect(self, index, effect):
+        """Append an insert effect to the channel at ``index``."""
+        if 0 <= index < len(self.config.channels):
+            self._update_channel(index, effects=[*self.config.channels[index]["effects"], _normalize_effect(effect)])
+
+    def set_channel_effect_enabled(self, index, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one channel insert effect."""
+        if 0 <= index < len(self.config.channels):
+            effects = list(self.config.channels[index]["effects"])
+            if 0 <= effect_index < len(effects):
+                effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+                self._update_channel(index, effects=effects)
+
+    def clear_channel_effects(self, index):
+        """Remove every insert effect from the channel at ``index``."""
+        self.set_channel_effects(index, [])
+
+    def set_master_effects(self, effects):
+        """Replace the master bus insert chain."""
+        self.config.master_effects = _normalize_effects(effects)
+
+    def add_master_effect(self, effect):
+        """Append an insert effect to the master bus."""
+        self.config.master_effects = [*self.config.master_effects, _normalize_effect(effect)]
+
+    def set_master_effect_enabled(self, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one master insert effect."""
+        effects = list(self.config.master_effects)
+        if 0 <= effect_index < len(effects):
+            effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+            self.config.master_effects = effects
+
+    def clear_master_effects(self):
+        """Remove every insert effect from the master bus."""
+        self.config.master_effects = []
+
     def add_return(self, name="Return", effects=(), gain=0.8):
         """Append a send/return bus and return its index; every channel gains a send."""
         self.config.returns = [*self.config.returns, {"name": name, "gain": gain, "effects": list(effects)}]
         return len(self.config.returns) - 1
 
-    def add_channel_effect(self, index, effect):
-        """Append an insert effect to the channel at ``index``."""
-        channels = list(self.config.channels)
-        channels[index] = {**channels[index], "effects": [*channels[index]["effects"], _normalize_effect(effect)]}
-        self.config.channels = channels
+    def remove_return(self, index):
+        """Remove a return bus and every channel's send to it."""
+        returns = list(self.config.returns)
+        if 0 <= index < len(returns):
+            del returns[index]
+            channels = [{**ch, "sends": [level for i, level in enumerate(ch["sends"]) if i != index]} for ch in self.config.channels]
+            self.config.update(returns=returns, channels=channels)
 
-    def add_master_effect(self, effect):
-        """Append an insert effect to the master bus."""
-        self.config.master_effects = [*self.config.master_effects, _normalize_effect(effect)]
+    def _update_return(self, index, **fields):
+        returns = list(self.config.returns)
+        if 0 <= index < len(returns):
+            returns[index] = {**returns[index], **fields}
+            self.config.returns = returns
+
+    def set_return_gain(self, index, gain):
+        self._update_return(index, gain=gain)
+
+    def set_return_effects(self, index, effects):
+        """Replace a return bus's effect chain."""
+        self._update_return(index, effects=_normalize_effects(effects))
+
+    def add_return_effect(self, index, effect):
+        """Append an effect to a return bus's chain."""
+        if 0 <= index < len(self.config.returns):
+            self._update_return(index, effects=[*self.config.returns[index]["effects"], _normalize_effect(effect)])
+
+    def set_return_effect_enabled(self, index, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one return bus effect."""
+        if 0 <= index < len(self.config.returns):
+            effects = list(self.config.returns[index]["effects"])
+            if 0 <= effect_index < len(effects):
+                effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+                self._update_return(index, effects=effects)
+
+    def set_send(self, channel_index, return_index, level):
+        """Set a channel's post-fader send level (0 to 1) to a return bus."""
+        if not 0 <= return_index < len(self.config.returns):
+            raise IndexError(f"return index out of range: {return_index}")
+        if 0 <= channel_index < len(self.config.channels):
+            sends = list(self.config.channels[channel_index]["sends"])
+            sends[return_index] = level
+            self._update_channel(channel_index, sends=sends)
+
+    def to_mixer(self):
+        """A Rust ``Mixer`` with this console's channels and master gain."""
+        from nbplay import Mixer
+
+        mixer = Mixer()
+        for channel in self.config.channels:
+            index = mixer.add_channel(channel["name"])
+            mixer.set_channel_gain(index, channel["gain"])
+            mixer.set_channel_pan(index, channel["pan"])
+            mixer.set_channel_mute(index, channel["mute"])
+            mixer.set_channel_solo(index, channel["solo"])
+        mixer.master_gain = self.config.master_gain
+        return mixer
 
 
 _ROUTED = {"sampler_routing": "samplerRouting", "session_id": "sessionId", "channel_index": "channelIndex", "theme": "theme"}
@@ -393,6 +502,32 @@ class SequencerView(InstrumentView):
     }
     STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "current_step": "currentStep"}
 
+    def __init__(self, session=None, *, config=None, **kwargs):
+        # An explicit step count without a step duration fills the measures, as in the widget.
+        if config is None and "length" in kwargs and "step_duration" not in kwargs:
+            kwargs["step_duration"] = _step_duration_for_length(
+                kwargs["length"], kwargs.get("measures", 1), kwargs.get("time_signature_num", 4), kwargs.get("time_signature_den", 4)
+            )
+        super().__init__(session, config=config, **kwargs)
+
+    def configure_grid(self, measures=None, step_duration=None):
+        """Set the grid from a measure count and a step duration in beats; the length follows."""
+        fields = {}
+        if measures is not None:
+            fields["measures"] = measures
+        if step_duration is not None:
+            fields["step_duration"] = step_duration
+        self.config.update(**fields)
+
+    @property
+    def steps(self):
+        """Voice 0's steps."""
+        return self.config.voices_data[0]
+
+    @steps.setter
+    def steps(self, value):
+        self.config.voices_data = [list(value), *self.config.voices_data[1:]]
+
     def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100):
         """Set one step of one voice."""
         voices = [list(steps) for steps in self.config.voices_data]
@@ -416,6 +551,62 @@ class SequencerView(InstrumentView):
     def clear(self):
         """Deactivate every step."""
         self.config.voices_data = [[{**step, "active": False} for step in steps] for steps in self.config.voices_data]
+
+    def to_pattern(self, voice=0):
+        """A Rust ``Pattern`` of one voice, or ``None`` when ``voice`` is out of range."""
+        from nbplay import Pattern, Step
+
+        if not 0 <= voice < len(self.config.voices_data):
+            return None
+        steps = self.config.voices_data[voice]
+        pattern = Pattern(len(steps))
+        for index, data in enumerate(steps):
+            step = Step(data["note"], data["velocity"], data["duration_ticks"])
+            step.active = data["active"]
+            pattern.set_step(index, step)
+        pattern.loop_enabled = self.config.loop_enabled
+        return pattern
+
+    def to_step_sequencer(self, channel=0, voice=0):
+        """A Rust ``StepSequencer`` of one voice on a MIDI channel, or ``None`` when ``voice`` is out of range."""
+        from nbplay import StepSequencer
+
+        pattern = self.to_pattern(voice)
+        if pattern is None:
+            return None
+        sequencer = StepSequencer(pattern, channel)
+        sequencer.step_duration = self.config.step_duration
+        return sequencer
+
+    def to_midi(self, path=None, name="Sequencer"):
+        """The pattern as a ``mido.MidiFile``, written to ``path`` when given."""
+        from nbplay.midi import build_midi, steps_to_events
+
+        config = self.config
+        midi = build_midi(
+            [{"name": name, "events": steps_to_events(config.voices_data, config.step_duration)}],
+            bpm=config.bpm,
+            time_signature=(config.time_signature_num, config.time_signature_den),
+        )
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def load_midi(self, source, track=None, step_duration=None, max_voices=8):
+        """Replace the pattern with the notes of a MIDI file; see ``SequencerWidget.load_midi``."""
+        from nbplay.midi import events_to_voices, read_midi
+
+        data = read_midi(source)
+        tracks = data["tracks"]
+        if track is not None:
+            if not 0 <= track < len(tracks):
+                raise IndexError(f"MIDI track index out of range: {track}")
+            tracks = [tracks[track]]
+        events = [event for item in tracks for event in item["events"]]
+        step = self.config.step_duration if step_duration is None else float(step_duration)
+        voices, length = events_to_voices(events, step, max_voices=max_voices)
+        self.config.update(bpm=data["bpm"], step_duration=step, num_voices=len(voices), length=length, voices_data=voices)
+        return self
 
     def play(self):
         """Start playback in the owning view (the session clock when shared)."""
