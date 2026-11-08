@@ -2,6 +2,7 @@ import base64
 import json
 import struct
 import wave
+import zipfile
 from unittest.mock import Mock
 
 import pytest
@@ -842,6 +843,130 @@ class TestSessionArrangement:
         finally:
             session.close()
             loaded.close()
+
+
+def arranged_session():
+    session = views.Session(bpm=132.0, time_signature=(3, 4), theme="pro")
+    session.transport.config.update(loop_enabled=True, loop_end_bar=8)
+    seq = views.SequencerView(length=8, num_voices=2, step_duration=0.5, swing=15, autosync=False)
+    seq.set_step(0, note=60, velocity=90)
+    seq.set_step(3, note=67, velocity=70, voice=1)
+    synth = views.SynthView(oscillator_type="saw", frequency=220.0, amplitude=0.3, autosync=False)
+    lead = session.add_track("Lead", seq, synth)
+    sampler = views.SamplerView(pad_count=4, attack=0.02, release=0.4, autosync=False)
+    sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=48, name="Blip")
+    sampler.configure_pads(pad_notes=[48, 50, 52, 53])
+    sampler.add_zone([0.25, -0.25], 36, 36, sample_rate=8000, name="Kick")
+    drums = session.add_track("Drums", sound_source=sampler, armed=True)
+    session.add_track("Vocals")
+    session.mixer.set_channel_gain(lead.mixer_channel, 0.6)
+    session.mixer.add_channel_effect(lead.mixer_channel, {"type": "filter", "filter_type": "lowpass", "frequency": 2000, "q": 0.8})
+    session.mixer.config.master_gain = 0.7
+    session.mixer.add_master_effect({"type": "limiter", "threshold": -2})
+    session.mixer.add_return("Verb", effects=[{"type": "reverb", "wet": 1.0}], gain=0.9)
+    session.mixer.set_send(lead.mixer_channel, 0, 0.35)
+    session.timeline.config.update(length=32, count_in_bars=1, pixels_per_beat=24)
+    take = session.timeline.add_clip("Take", track_index=2, start=4.0, duration=2.5, offset=0.5, audio_url="blob:take")
+    browser_writes(session.timeline, exported_clip={"id": take["id"], "blob_type": "audio/wav"}, exported_clip_data=b"RIFF-take")
+    session.launcher.add_scene("Intro")
+    session.launcher.add_scene("Drop")
+    session.launcher.set_slot(drums.mixer_channel, 1, [{"note": 36, "active": True}, {"note": 38, "active": True}], name="Kit")
+    session.launcher.config.quantize = "beat"
+    session.add_pattern("hook", [{"note": 60, "active": True}], step_duration=1.0)
+    session.chain("Lead", ["hook"], start=8.0)
+    return session
+
+
+class TestSessionPersistence:
+    def test_to_dict_is_json_safe(self):
+        session = arranged_session()
+        try:
+            data = session.to_dict()
+            json.dumps(data)
+            assert data["format"] == "nbplay-session" and data["transport"]["bpm"] == 132.0
+            assert [t["name"] for t in data["tracks"]] == ["Lead", "Drums", "Vocals"]
+            assert data["tracks"][0]["sound_source"]["type"] == "SynthWidget" and data["tracks"][1]["sequencer"] is None
+            assert "audio_url" not in data["timeline"]["clips"][0] and "sample_file" not in data["tracks"][1]["sound_source"]
+            keys = views.KeyboardView(autosync=False)
+            session.add_track("Keys", sound_source=keys)
+            with pytest.raises(ValueError, match="cannot save sound source"):
+                session.to_dict()
+        finally:
+            session.close()
+
+    def test_save_and_load_round_trip(self, tmp_path):
+        session = arranged_session()
+        loaded = None
+        try:
+            take = session.timeline.config.clips[0]
+            path = session.save(tmp_path / "song.nbplay")
+            with zipfile.ZipFile(path) as archive:
+                names = set(archive.namelist())
+            assert {"session.json", "samples/track-1.f32", "samples/track-1-zone-0.f32", f"clips/{take['id']}.bin"} <= names
+            loaded = views.Session.load(path)
+            assert loaded.bpm == 132.0 and loaded.time_signature == (3, 4) and loaded.theme == "pro"
+            assert loaded.transport.config.loop_enabled is True and loaded.transport.config.loop_end_bar == 8
+            assert [t.name for t in loaded.tracks] == ["Lead", "Drums", "Vocals"]
+            seq = loaded.tracks[0].sequencer
+            assert seq.config.num_voices == 2 and seq.config.swing == 15.0 and seq.config.follow_transport is False
+            assert seq.config.voices_data == session.tracks[0].sequencer.config.voices_data and seq.config.theme == "pro"
+            assert seq.config.session_id == loaded.session_id and seq.config.channel_index == 0
+            synth = loaded.tracks[0].sound_source
+            assert isinstance(synth, views.SynthView) and synth.config.oscillator_type == "saw" and synth.config.frequency == 220.0
+            sampler = loaded.tracks[1].sound_source
+            assert isinstance(sampler, views.SamplerView) and loaded.tracks[1].sequencer is None
+            assert sampler.get_sample_data() == pytest.approx([0.0, 0.5, -0.5, 0.25]) and sampler.config.sample_name == "Blip"
+            assert sampler.config.pad_notes == [48, 50, 52, 53] and sampler.config.attack == 0.02
+            assert sampler.zone_samples(0) == pytest.approx([0.25, -0.25]) and sampler.config.zones[0]["name"] == "Kick"
+            mixer = loaded.mixer.config
+            assert mixer.channels[0]["gain"] == 0.6 and mixer.channels[0]["effects"][0]["type"] == "filter" and mixer.channels[0]["sends"] == [0.35]
+            assert mixer.master_gain == 0.7 and mixer.returns[0]["name"] == "Verb"
+            timeline = loaded.timeline.config
+            assert timeline.length == 32 and timeline.count_in_bars == 1 and timeline.pixels_per_beat == 24
+            assert timeline.tracks[1]["armed"] is True and timeline.selected_clip_id == ""
+            restored = next(c for c in timeline.clips if c["name"] == "Take")
+            assert restored["id"] == take["id"] and restored["offset"] == 0.5 and restored["blob_type"] == "audio/wav"
+            assert timeline.import_clip_data == b"RIFF-take" and timeline.import_clip_request["id"] == take["id"]
+            hook = [c for c in timeline.clips if c.get("pattern") == "hook"]
+            assert len(hook) == 1 and hook[0]["start"] == 8.0 and loaded.patterns == session.patterns
+            launcher = loaded.launcher.config
+            assert launcher.scenes == ["Intro", "Drop"] and launcher.quantize == "beat" and launcher.slots[0]["name"] == "Kit"
+            assert len(loaded.history) == 0
+        finally:
+            session.close()
+            if loaded is not None:
+                loaded.close()
+
+    def test_archives_move_between_the_widget_and_view_sessions(self, tmp_path):
+        from nbplay import SamplerWidget, SequencerWidget, SynthWidget
+        from nbplay.widget import Session as WidgetSession
+
+        widgets = WidgetSession(bpm=96.0, theme="flat")
+        seq = SequencerWidget(length=4)
+        seq.set_step(1, note=50, active=True)
+        widgets.add_track("Lead", seq, SynthWidget(oscillator_type="square"))
+        sampler = SamplerWidget()
+        sampler.load_sample([0.1, 0.2], sample_rate=8000, root_note=40, name="Blip")
+        widgets.add_track("Drums", sound_source=sampler)
+        widgets.add_pattern("a", seq)
+        widgets.chain("Lead", ["a"])
+        path = widgets.save(tmp_path / "widgets.nbplay")
+
+        session = views.Session.load(path)
+        try:
+            assert session.bpm == 96.0 and session.theme == "flat" and [t.name for t in session.tracks] == ["Lead", "Drums"]
+            assert session.tracks[0].sequencer.config.voices_data[0][1]["note"] == 50
+            assert session.tracks[0].sound_source.config.oscillator_type == "square"
+            assert session.tracks[1].sound_source.get_sample_data() == pytest.approx([0.1, 0.2])
+            assert session.timeline.config.clips[0]["pattern"] == "a" and session.patterns == widgets.patterns
+            back = session.save(tmp_path / "views.nbplay")
+        finally:
+            session.close()
+        again = WidgetSession.load(back)
+        assert again.transport.bpm == 96.0 and [t.name for t in again.tracks] == ["Lead", "Drums"]
+        assert again.tracks[0].sequencer.voices_data[0][1]["note"] == 50
+        assert again.tracks[1].sound_source.get_sample_data() == pytest.approx([0.1, 0.2])
+        assert again.timeline.clips[0]["pattern"] == "a"
 
 
 class TestHistoryAndMidiLearnOnViews:

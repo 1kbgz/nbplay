@@ -914,7 +914,10 @@ other's status (the first attempt hung the page with "client does not own this f
 linking. `remove_track` drops the mixer channel, the lane and the launcher row and shifts the later
 tracks' channel indices; `add_pattern`, `chain` and `update_pattern` lay named patterns out as
 pattern clips (one undo step each, with the clip events rebuilt in place on update); `export_midi` and
-`import_midi` match the widget session. `examples/15_transports_views.ipynb` is the session walkthrough on the views; the notebook
+`import_midi` match the widget session. `save`, `load`, `to_dict` and `from_dict` write and read the
+`.nbplay` archive described below with the format constants from `descriptors.py`; the sound source
+type names stay `SynthWidget` and `SamplerWidget` in `session.json`, so a widget session and a views
+session open each other's files. `examples/15_transports_views.ipynb` is the session walkthrough on the views; the notebook
 runner in `test_all.py` skips a notebook that imports `nbplay.views` when the installed spaday has no
 session support, which is the case until spaday ships a release after 0.13.1. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
