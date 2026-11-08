@@ -14,6 +14,8 @@ import transports
 from transports._buffers import join_buffers
 
 from nbplay.descriptors import PadAction
+from nbplay.history import History
+from nbplay.midi_learn import MidiLearn
 from nbplay.models import (
     KeyboardConfig,
     LauncherConfig,
@@ -720,6 +722,99 @@ class TestSession:
             assert isinstance(session.play(), int)
         finally:
             session.close()
+
+    def test_session_undo_covers_views_but_not_track_structure(self):
+        session = views.Session()
+        seq, synth = views.SequencerView(length=4, autosync=False), views.SynthView(autosync=False)
+        try:
+            track = session.add_track("Lead", seq, synth)
+            assert len(session.history) == 0
+            session.mixer.set_channel_gain(track.mixer_channel, 0.3)
+            session.history.mark()
+            seq.set_step(1, note=64)
+            session.history.mark()
+            synth.config.oscillator_type = "square"
+            session.history.mark()
+            session.bpm = 99.0
+            session.history.mark()
+            session.timeline.add_clip("Take", track_index=0, start=0.0, duration=2.0)
+            assert len(session.history) == 5
+            assert session.undo() and session.timeline.config.clips == []
+            assert session.undo() and session.bpm == 120.0 and seq.config.bpm == 120.0 and session.launcher.config.bpm == 120.0
+            assert session.undo() and synth.config.oscillator_type == "sine"
+            assert session.undo() and seq.config.voices_data[0][1]["active"] is False
+            assert session.undo() and session.mixer.config.channels[0]["gain"] == 0.8
+            assert session.undo() is False
+            assert session.redo() and session.mixer.config.channels[0]["gain"] == 0.3
+            session.history.clear()
+            session.add_track("Keys")
+            assert len(session.history) == 0
+        finally:
+            session.close()
+
+    def test_lane_and_channel_mute_solo_mirror_each_other(self):
+        session = views.Session()
+        try:
+            session.add_track("Drums")
+            session.add_track("Keys")
+            session.timeline.config.tracks = [{**session.timeline.config.tracks[0], "muted": True}, session.timeline.config.tracks[1]]
+            assert [c["mute"] for c in session.mixer.config.channels] == [True, False]
+            session.mixer.set_channel_solo(1, True)
+            session.mixer.set_channel_mute(0, False)
+            assert [(t["muted"], t["solo"]) for t in session.timeline.config.tracks] == [(False, False), (False, True)]
+        finally:
+            session.close()
+
+
+class TestHistoryAndMidiLearnOnViews:
+    def test_history_tracks_config_fields_and_skips_transient_ones(self):
+        view = views.TransportView(autosync=False)
+        history = History(group_window=0)
+        try:
+            history.attach(view)
+            view.config.session_id = "nbplay-x"
+            assert len(history) == 0
+            view.config.bpm = 100.0
+            view.config.loop_enabled = True
+            assert history.steps == [[(view.config, "bpm")], [(view.config, "loop_enabled")]]
+            assert history.undo() and view.config.loop_enabled is False
+            assert history.undo() and view.config.bpm == 120.0
+            assert history.redo() and view.config.bpm == 100.0
+            history.detach(view)
+            view.config.bpm = 90.0
+            assert len(history) == 0
+        finally:
+            view.close()
+
+    def test_midi_learn_maps_controllers_to_view_fields(self):
+        source = views.MidiKeyboardView(autosync=False)
+        synth = views.SynthView(autosync=False)
+        transport = views.TransportView(autosync=False)
+        keys = views.KeyboardView(autosync=False)
+        try:
+            with pytest.raises(TypeError):
+                MidiLearn(synth)
+            learn = MidiLearn(source)
+            learn.map(74, synth, "frequency", low=100.0, high=1000.0)
+            learn.map(21, transport, "loop_enabled")
+            learn.map(20, keys, "upper_octave", low=0, high=9)
+            with pytest.raises(ValueError):
+                learn.map(1, synth, "missing")
+            with pytest.raises(TypeError):
+                learn.map(1, synth, "oscillator_type")
+            browser_writes(source, control_change={"controller": 74, "value": 127, "channel": 0, "seq": 1})
+            browser_writes(source, control_change={"controller": 21, "value": 64, "channel": 0, "seq": 2})
+            browser_writes(source, control_change={"controller": 20, "value": 127, "channel": 0, "seq": 3})
+            assert synth.config.frequency == 1000.0 and transport.config.loop_enabled is True and keys.config.upper_octave == 9
+            learn.learn(synth, "amplitude", low=0.0, high=0.5)
+            browser_writes(source, control_change={"controller": 11, "value": 127, "channel": 0, "seq": 4})
+            assert learn.mappings[11]["name"] == "amplitude" and synth.config.amplitude == 0.5
+            learn.close()
+            browser_writes(source, control_change={"controller": 74, "value": 0, "channel": 0, "seq": 5})
+            assert synth.config.frequency == 1000.0
+        finally:
+            for view in (source, synth, transport, keys):
+                view.close()
 
 
 class TestTransportView:

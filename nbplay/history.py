@@ -1,7 +1,7 @@
-"""Undo and redo for widget state.
+"""Undo and redo for widget and view state.
 
-``History`` watches the synced traits of a set of widgets and records every
-change as an undo step. Changes that land within a short window of each
+``History`` watches the synced traits of a set of widgets, or the config
+fields of transports views, and records every change as an undo step. Changes that land within a short window of each
 other (a fader drag, a method that writes several traits) share one step,
 ``transaction()`` groups anything explicitly, and a notebook cell boundary
 always ends a step. Transient traits such as play state, playhead position,
@@ -11,6 +11,7 @@ meters, and request nonces are ignored.
 from __future__ import annotations
 
 import contextlib
+import functools
 import time
 
 # Synced traits that describe the moment rather than the document.
@@ -69,6 +70,7 @@ class History:
         self._undo = []
         self._redo = []
         self._widgets = []
+        self._removers = {}
         self._paused = 0
         self._applying = False
         self._transaction = None
@@ -82,22 +84,40 @@ class History:
             name for name in widget.trait_names() if widget.trait_metadata(name, "sync") and name not in TRANSIENT_TRAITS and not name.startswith("_")
         ]
 
+    @staticmethod
+    def _is_view(widget):
+        return hasattr(getattr(widget, "config", None), "on_change")
+
+    @classmethod
+    def _target(cls, widget):
+        """The object whose attributes a step sets: a widget, or a view's config model."""
+        return widget.config if cls._is_view(widget) else widget
+
     def attach(self, widget):
-        """Start recording changes to ``widget``'s synced traits."""
-        if widget is None or widget in self._widgets or not hasattr(widget, "trait_names"):
+        """Start recording changes to ``widget``'s synced traits, or to a view's config fields."""
+        if widget is None or widget in self._widgets:
             return
-        names = self.tracked_traits(widget)
-        if not names:
+        if self._is_view(widget):
+            self._removers[widget] = widget.config.on_change(functools.partial(self._on_model_change, widget.config))
+        elif hasattr(widget, "trait_names"):
+            names = self.tracked_traits(widget)
+            if not names:
+                return
+            widget.observe(self._on_change, names=names)
+        else:
             return
-        widget.observe(self._on_change, names=names)
         self._widgets.append(widget)
 
     def detach(self, widget):
         if widget in self._widgets:
-            widget.unobserve(self._on_change, names=self.tracked_traits(widget))
+            if self._is_view(widget):
+                self._removers.pop(widget)()
+            else:
+                widget.unobserve(self._on_change, names=self.tracked_traits(widget))
             self._widgets.remove(widget)
-            self._undo = [group for group in (self._without(group, widget) for group in self._undo) if group]
-            self._redo = [group for group in (self._without(group, widget) for group in self._redo) if group]
+            target = self._target(widget)
+            self._undo = [group for group in (self._without(group, target) for group in self._undo) if group]
+            self._redo = [group for group in (self._without(group, target) for group in self._redo) if group]
 
     @staticmethod
     def _without(group, widget):
@@ -106,9 +126,17 @@ class History:
     # Recording
 
     def _on_change(self, change):
+        self._record(change["owner"], change["name"], change["old"], change["new"])
+
+    def _on_model_change(self, model, changes):
+        for name, (old, new) in changes.items():
+            if name not in TRANSIENT_TRAITS and not name.startswith("_"):
+                self._record(model, name, old, new)
+
+    def _record(self, owner, name, old, new):
         if self._applying or self._paused:
             return
-        entry = (change["owner"], change["name"], change["old"], change["new"])
+        entry = (owner, name, old, new)
         if self._transaction is not None:
             self._transaction.append(entry)
             return
@@ -215,7 +243,7 @@ class History:
 
     @property
     def steps(self):
-        """Undo steps, oldest first, as lists of ``(widget, trait)`` pairs."""
+        """Undo steps, oldest first, as lists of ``(widget, trait)`` or ``(config, field)`` pairs."""
         return [[(widget, name) for widget, name, _, _ in group] for group in self._undo]
 
     def __len__(self):
