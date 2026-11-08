@@ -222,6 +222,14 @@ class TestArrangementViews:
             assert view.config.slots == [slot] and view.config.tracks[0]["channel_index"] == 0
             with pytest.raises(IndexError):
                 view.set_slot(1, 0, [{"note": 36}])
+            sequencer = views.SequencerView(autosync=False, length=4)
+            try:
+                sequencer.set_step(2, note=42)
+                from_view = view.set_slot(track, scene, sequencer, name="From view")
+            finally:
+                sequencer.close()
+            assert from_view["voices_data"] == sequencer.config.voices_data
+            assert view.config.slots == [from_view]
             assert isinstance(view.launch(track, scene), int)
             assert isinstance(view.stop_all(), int)
         finally:

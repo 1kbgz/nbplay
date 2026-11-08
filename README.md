@@ -73,7 +73,8 @@ and, where the browser owns state, a status model; `session.play()`, `launcher.l
 `midi_out.note_on(60)` is a transports command delivered to the owning browser view. `Session` gives
 its transport, mixer, timeline, launcher and tracks one browser session id, so they share a clock and
 an audio bus; undo, patterns, MIDI files and saving stay with the traitlets widgets for now, and the
-layer needs a spaday release with notebook session support.
+layer needs a spaday release with notebook session support. `examples/15_transports_views.ipynb`
+builds a two-track session on the views.
 
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
 
