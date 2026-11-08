@@ -887,11 +887,15 @@ whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM 
 preview, the zone, trim, fade, normalize, slice and Rust export methods match the widget, and
 `capture` (or `capture_clip` with a `TimelineView` clip) is a `request` command the owning view
 decodes. Audio file decoding for both layers is in `nbplay/audio_files.py`. `LauncherConfig` normalizes
-slots with the shared `_normalize_launcher_slot` and `LauncherView.launch`, `stop_track`, `launch_scene` and
-`stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
+slots with the shared `_normalize_launcher_slot`; `LauncherView.set_slot` takes a `SequencerView`'s grid,
+swing and groove, `slot_to_sequencer` loads a slot back into one, and `launch`, `stop_track`,
+`launch_scene` and `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
 clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
 as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status
-commands, and clip export and import go through the config fields the element watches.
+commands, the lane and clip edits (`remove_track`, `arm_track`, `add_pattern_clip`, `move_clip`,
+`duplicate_clip`, `resize_clip`, `remove_clip`, MIDI clip export and import) match the widget, and clip
+audio export and import go through the config fields the element watches. `export_all_clips` and
+`bind_slot_editor` wait on a kernel-side observer for browser writes (see below).
 
 `nbplay.views.Session` creates transport, mixer, timeline and launcher views with one browser
 `session_id`, so the elements share a clock and an audio bus, and `add_track` adds a mixer channel, a

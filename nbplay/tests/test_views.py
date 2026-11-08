@@ -429,6 +429,45 @@ class TestArrangementViews:
         finally:
             view.close()
 
+    def test_launcher_slots_round_trip_through_a_sequencer_view(self):
+        view = views.LauncherView(autosync=False)
+        sequencer = views.SequencerView(length=4, num_voices=2, step_duration=0.5, swing=20.0, groove=[5.0, -5.0], autosync=False)
+        editor = views.SequencerView(autosync=False)
+        try:
+            drums = view.add_track("Drums")
+            view.add_track("Keys")
+            a = view.add_scene("A")
+            b = view.add_scene()
+            sequencer.set_step(1, note=38, voice=1)
+            slot = view.set_slot(drums, a, sequencer)
+            assert (slot["step_duration"], slot["swing"], slot["groove"]) == (0.5, 20.0, [5.0, -5.0])
+            assert view.get_slot(drums, a) == slot and view.get_slot(drums, b) is None
+            replaced = view.set_slot(drums, a, [{"note": 36, "active": True}], step_duration=1.0)
+            assert view.config.slots == [replaced] and replaced["step_duration"] == 1.0
+            view.set_slot(drums, b, sequencer, swing=5.0)
+            assert view.config.slots[1]["swing"] == 5.0
+            view.slot_to_sequencer(drums, b, editor)
+            assert editor.config.num_voices == 2 and editor.config.length == 4 and editor.config.step_duration == 0.5
+            assert editor.config.voices_data == sequencer.config.voices_data and editor.config.groove == [5.0, -5.0]
+            with pytest.raises(ValueError, match="no slot"):
+                view.slot_to_sequencer(1, a, editor)
+            with pytest.raises(ValueError, match="no slot"):
+                view.launch(1, a)
+            with pytest.raises(IndexError):
+                view.launch(drums, 5)
+            with pytest.raises(IndexError):
+                view.stop_track(7)
+            with pytest.raises(IndexError):
+                view.launch_scene(2)
+            assert isinstance(view.launch_scene(b), int) and isinstance(view.stop_track(drums), int)
+            view.config.selected_slot = {"track_index": drums, "scene_index": b}
+            view.clear_slot(drums, b)
+            assert [s["scene_index"] for s in view.config.slots] == [a] and view.config.selected_slot == {}
+        finally:
+            view.close()
+            sequencer.close()
+            editor.close()
+
     def test_timeline_config_and_view(self):
         config = TimelineConfig(tracks=[{"name": "A"}], clips=[{"name": "c", "track_index": 5, "start": 0, "duration": 4}], current_beat=99)
         assert config.clips[0]["track_index"] == 0 and config.current_beat == 16.0
@@ -441,13 +480,71 @@ class TestArrangementViews:
             assert midi["kind"] == "midi" and midi["duration"] == 1.5
             view.export_clip(clip["id"])
             assert view.config.export_clip_id == clip["id"]
-            view.import_clip(clip["id"], b"abc", "audio/wav")
-            assert view.config.import_clip_request["blob_size"] == 3 and view.config.import_clip_data == b"abc"
+            with pytest.raises(ValueError, match="clip not found"):
+                view.export_clip("missing")
+            with pytest.raises(ValueError, match="no exported clip data"):
+                view.write_exported_clip("take.webm")
+            imported = view.import_clip(b"abc", "Import", track_index=lane, start=2.0, blob_type="audio/wav")
+            assert imported["source"] == "import" and imported["blob_size"] == 3 and imported["duration"] == 4.0
+            assert view.config.import_clip_request == {**imported, "measure_duration": True} and view.config.import_clip_data == b"abc"
+            with pytest.raises(ValueError):
+                view.import_clip(b"")
             view.seek(4.0)
             assert view.config.current_beat == 4.0
             assert isinstance(view.record(), int)
         finally:
             view.close()
+
+    def test_timeline_lane_and_clip_edits(self, tmp_path):
+        pytest.importorskip("mido")
+        view = views.TimelineView(autosync=False)
+        sequencer = views.SequencerView(length=4, autosync=False)
+        try:
+            mic = view.add_track("Mic")
+            keys = view.add_track("Keys", channel_index=3)
+            drums = view.add_track("Drums", channel_index=4)
+            view.arm_track(keys)
+            view.arm_track(drums, exclusive=True)
+            assert [t["armed"] for t in view.config.tracks] == [False, False, True]
+            with pytest.raises(IndexError):
+                view.arm_track(9)
+            take = view.add_clip("Take", track_index=mic, start=0.0, duration=2.0)
+            sequencer.set_step(0, note=60)
+            sequencer.set_step(2, note=64, duration_ticks=2)
+            riff = view.add_pattern_clip("riff", sequencer, track_index=keys, start=4.0, step_duration=0.5, repeat=2)
+            assert riff["pattern"] == "riff" and riff["duration"] == 4.0
+            assert [(e["beat"], e["note"]) for e in riff["events"]] == [(0.0, 60), (1.0, 64), (2.0, 60), (3.0, 64)]
+            sequence = view.clip_to_event_sequence(riff["id"])
+            assert len(sequence) == 4
+            with pytest.raises(ValueError, match="not a MIDI clip"):
+                view.clip_to_event_sequence(take["id"])
+            path = tmp_path / "riff.mid"
+            view.export_midi_clip(riff["id"], path)
+            added = view.import_midi(path, track_index=drums, start=8.0)
+            assert len(added) == 1 and added[0]["track_index"] == drums and added[0]["start"] == 8.0
+            assert [e["note"] for e in added[0]["events"]] == [60, 64, 60, 64]
+
+            view.move_clip(take["id"], track_index=keys, start=1.0)
+            view.resize_clip(take["id"], 3.0)
+            moved = view.config.clips[0]
+            assert (moved["track_index"], moved["start"], moved["duration"]) == (keys, 1.0, 3.0)
+            copy = view.duplicate_clip(take["id"])
+            assert copy["start"] == 4.0 and copy["id"] != take["id"] and view.config.selected_clip_id == copy["id"]
+            view.remove_clip(copy["id"])
+            assert view.config.selected_clip_id == "" and len(view.config.clips) == 3
+            with pytest.raises(ValueError, match="clip not found"):
+                view.move_clip("missing", start=0.0)
+
+            view.remove_track(mic)
+            assert [t["name"] for t in view.config.tracks] == ["Keys", "Drums"]
+            assert [t["channel_index"] for t in view.config.tracks] == [2, 3]
+            assert sorted(c["track_index"] for c in view.config.clips) == [0, 0, 1]
+            view.remove_track(0)
+            assert [c["name"] for c in view.config.clips] == ["riff"] and view.config.clips[0]["track_index"] == 0
+            view.remove_track(5)
+        finally:
+            view.close()
+            sequencer.close()
 
 
 class TestSession:
