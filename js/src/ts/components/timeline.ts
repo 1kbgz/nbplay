@@ -1769,7 +1769,7 @@ export class NbplayTimeline extends NbplayElement {
             title="Toggle loop range"
             @click=${() => this.toggleLoop()}
           >
-            Loop
+            ↻
           </button>
           <button
             type="button"
@@ -1777,29 +1777,23 @@ export class NbplayTimeline extends NbplayElement {
             title="Reset playhead"
             @click=${() => this.seekToBeat(0)}
           >
-            Reset
+            ⏮
           </button>
           <button
             type="button"
             class="nbplay-timeline-play ${playing ? "active" : ""}"
-            title="Play timeline"
+            title=${playing ? "Stop timeline" : "Play timeline"}
             @click=${() => this.togglePlay()}
           >
-            ${playing ? "Stop" : "Play"}
+            ${playing ? "■" : "▶"}
           </button>
           <button
             type="button"
             class="nbplay-timeline-record ${recording ? "active" : ""}"
-            title="Record armed tracks"
+            title=${recording ? "Stop recording" : "Record armed tracks"}
             @click=${() => this.toggleRecord()}
           >
-            ${
-              recording && countdown > 0
-                ? `Count ${Math.ceil(countdown)}`
-                : recording
-                  ? "Stop Rec"
-                  : "Rec"
-            }
+            ${recording && countdown > 0 ? Math.ceil(countdown) : "●"}
           </button>
           <button
             type="button"
@@ -1807,7 +1801,7 @@ export class NbplayTimeline extends NbplayElement {
             title="Duplicate selected clip"
             @click=${() => this.duplicateSelectedClip()}
           >
-            Dup
+            ⧉
           </button>
           <button
             type="button"
@@ -1815,7 +1809,7 @@ export class NbplayTimeline extends NbplayElement {
             title="Delete selected clip"
             @click=${() => this.removeSelectedClip()}
           >
-            Delete
+            ✕
           </button>
         </div>
         <div class="nbplay-timeline-position">${beatLabel(beat, bpb)}</div>
