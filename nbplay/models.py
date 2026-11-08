@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from .widget import (
+from .descriptors import (
     THEMES,
     _clamp_midi_note,
     _clamp_velocity,

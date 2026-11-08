@@ -17,6 +17,21 @@ import transports
 from pydantic import BaseModel
 from spaday import Widget, element
 
+from .descriptors import (
+    AudioClip,
+    TimelineTrack,
+    _clamp_int,
+    _clamp_midi_note,
+    _clamp_velocity,
+    _decimate_samples,
+    _normalize_audio_clip,
+    _normalize_effect,
+    _normalize_launcher_slot,
+    _normalize_midi_events,
+    _normalize_zone,
+    _pack_float32,
+    _slot_voices,
+)
 from .models import (
     KeyboardConfig,
     KeyboardStatus,
@@ -41,21 +56,6 @@ from .models import (
     TimelineStatus,
     TransportConfig,
     TransportStatus,
-)
-from .widget import (
-    AudioClip,
-    TimelineTrack,
-    _clamp_int,
-    _clamp_midi_note,
-    _clamp_velocity,
-    _decimate_samples,
-    _normalize_audio_clip,
-    _normalize_effect,
-    _normalize_launcher_slot,
-    _normalize_midi_events,
-    _normalize_zone,
-    _pack_float32,
-    _slot_voices,
 )
 
 if "session" not in inspect.signature(Widget.__init__).parameters:

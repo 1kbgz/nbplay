@@ -34,27 +34,29 @@ except ImportError:  # pragma: no cover - only on wasm32 builds
     AudioOutput = None
     MidiInput = None
 
-from nbplay.history import History
-from nbplay.midi_learn import MidiLearn
-from nbplay.widget import (
+from nbplay.descriptors import (
     THEMES,
     AudioClip,
     EffectPlugin,
     KeyboardRoute,
+    PadAction,
+    TimelineTrack,
+)
+from nbplay.history import History
+from nbplay.midi_learn import MidiLearn
+from nbplay.widget import (
     KeyboardWidget,
     LauncherWidget,
     MidiKeyboardWidget,
     MidiOutputWidget,
     MixerWidget,
     NoteComposer,
-    PadAction,
     PadWidget,
     SamplerWidget,
     SequencerWidget,
     Session,
     SettingsWidget,
     SynthWidget,
-    TimelineTrack,
     TimelineWidget,
     Track,
     TransportWidget,

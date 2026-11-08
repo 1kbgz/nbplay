@@ -22,7 +22,7 @@ def _mido():
 
 
 def _normalize_events(events):
-    from nbplay.widget import _normalize_midi_events
+    from nbplay.descriptors import _normalize_midi_events
 
     return _normalize_midi_events(events)
 
@@ -34,7 +34,7 @@ def steps_to_events(voices_data, step_duration=0.25):
     ``duration_ticks`` counts steps, so a duration of 2 at eighth-note
     resolution is one beat.
     """
-    from nbplay.widget import _steps_to_events
+    from nbplay.descriptors import _steps_to_events
 
     return _steps_to_events(voices_data, step_duration)
 
@@ -46,7 +46,7 @@ def events_to_voices(events, step_duration=0.25, length=None, max_voices=8):
     when two notes land on the same step they go to separate voices, up to
     ``max_voices``, and anything beyond that is dropped.
     """
-    from nbplay.widget import _default_step, _default_steps
+    from nbplay.descriptors import _default_step, _default_steps
 
     step_duration = max(0.001, float(step_duration))
     normalized = _normalize_events(events)
