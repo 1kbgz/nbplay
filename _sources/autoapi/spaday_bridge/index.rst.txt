@@ -24,8 +24,21 @@ Attributes
    spaday_bridge.request
 
 
+Functions
+---------
+
+.. autoapisummary::
+
+   spaday_bridge._jsonable
+
+
 Module Contents
 ---------------
+
+.. py:function:: _jsonable(value)
+
+   Replace bytes with their length, recursively, so the state fits a JSON line.
+
 
 .. py:data:: VIEWS
 

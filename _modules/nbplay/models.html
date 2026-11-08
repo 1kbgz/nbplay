@@ -609,11 +609,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_clamp_velocity</span><span class="p">,</span>
     <span class="n">_default_pad_notes</span><span class="p">,</span>
     <span class="n">_default_steps</span><span class="p">,</span>
+    <span class="n">_normalize_audio_clips</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
+    <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
     <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
     <span class="n">_normalize_pad_actions</span><span class="p">,</span>
     <span class="n">_normalize_return_bus</span><span class="p">,</span>
     <span class="n">_normalize_sample_slices</span><span class="p">,</span>
+    <span class="n">_normalize_timeline_tracks</span><span class="p">,</span>
     <span class="n">_normalize_zones</span><span class="p">,</span>
     <span class="n">_pad_sends</span><span class="p">,</span>
     <span class="n">_resize_pad_notes</span><span class="p">,</span>
@@ -624,6 +627,8 @@ window.runMermaid = runMermaid;</script>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"KeyboardConfig"</span><span class="p">,</span>
     <span class="s2">"KeyboardStatus"</span><span class="p">,</span>
+    <span class="s2">"LauncherConfig"</span><span class="p">,</span>
+    <span class="s2">"LauncherStatus"</span><span class="p">,</span>
     <span class="s2">"MidiKeyboardConfig"</span><span class="p">,</span>
     <span class="s2">"MidiKeyboardStatus"</span><span class="p">,</span>
     <span class="s2">"MidiOutputConfig"</span><span class="p">,</span>
@@ -639,6 +644,8 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"SettingsStatus"</span><span class="p">,</span>
     <span class="s2">"SynthConfig"</span><span class="p">,</span>
     <span class="s2">"SynthStatus"</span><span class="p">,</span>
+    <span class="s2">"TimelineConfig"</span><span class="p">,</span>
+    <span class="s2">"TimelineStatus"</span><span class="p">,</span>
     <span class="s2">"TransportConfig"</span><span class="p">,</span>
     <span class="s2">"TransportStatus"</span><span class="p">,</span>
 <span class="p">)</span>
@@ -1172,6 +1179,129 @@ window.runMermaid = runMermaid;</script>
     <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">last_pad_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">request</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="LauncherConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.LauncherConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LauncherConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The clip launcher's tracks, scenes and slots."""</span>
+
+    <span class="n">tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">scenes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">slots</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">quantize</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"bar"</span><span class="p">,</span> <span class="s2">"beat"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"bar"</span>
+    <span class="n">bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">time_signature_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">time_signature_den</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">selected_slot</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="LauncherConfig._tracks">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.LauncherConfig._tracks">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"tracks"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tracks</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Track </span><span class="si">{</span><span class="n">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)),</span> <span class="s2">"channel_index"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel_index"</span><span class="p">,</span> <span class="n">index</span><span class="p">)))}</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="LauncherConfig._slots">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.LauncherConfig._slots">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"slots"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_slots</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_launcher_slot</span><span class="p">(</span><span class="n">slot</span><span class="p">)</span> <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">value</span> <span class="ow">or</span> <span class="p">[]]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LauncherStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.LauncherStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LauncherStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Play state and slot state from the browser scheduler; browser-owned.</span>
+
+<span class="sd">    ``request`` is the client-owned target of launch commands.</span>
+<span class="sd">    """</span>
+
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">active_slots</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">queued_slots</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">request</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="TimelineConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TimelineConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TimelineConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The arrangement: lanes, clips and recording settings the kernel owns.</span>
+
+<span class="sd">    ``current_beat`` is configuration here as in the widget: a standalone</span>
+<span class="sd">    timeline restores and seeks from it, and a session's position lives in</span>
+<span class="sd">    the transport.</span>
+<span class="sd">    """</span>
+
+    <span class="n">tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">clips</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">16.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+    <span class="n">selected_clip_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">time_signature_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">time_signature_den</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">count_in_bars</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">auto_extend_recording</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">recording_extend_bars</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+    <span class="n">pixels_per_beat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+    <span class="n">current_beat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">export_clip_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">import_clip_request</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">import_clip_data</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="TimelineConfig._tracks">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TimelineConfig._tracks">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"tracks"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tracks</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_normalize_timeline_tracks</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TimelineConfig._fit">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TimelineConfig._fit">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">clips</span> <span class="o">=</span> <span class="n">_normalize_audio_clips</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">clips</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"clips"</span><span class="p">]</span> <span class="o">=</span> <span class="n">clips</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_beat</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"current_beat"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TimelineStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.TimelineStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TimelineStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Play, record and transfer state from the browser; browser-owned."""</span>
+
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_recording</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">recording_track</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">recording_tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">recording_countdown_beats</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">recording_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">recorded_clip</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exported_clip</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exported_clip_data</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span></div>
 
 </pre></div>
 

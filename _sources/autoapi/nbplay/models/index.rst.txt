@@ -37,6 +37,10 @@ Classes
    nbplay.models.SequencerStatus
    nbplay.models.SamplerConfig
    nbplay.models.SamplerStatus
+   nbplay.models.LauncherConfig
+   nbplay.models.LauncherStatus
+   nbplay.models.TimelineConfig
+   nbplay.models.TimelineStatus
 
 
 Module Contents
@@ -1098,5 +1102,303 @@ Module Contents
 
    .. py:attribute:: request
       :type:  dict
+
+
+.. py:class:: LauncherConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The clip launcher's tracks, scenes and slots.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: tracks
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: scenes
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: slots
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: quantize
+      :type:  Literal['bar', 'beat', 'none']
+      :value: 'bar'
+
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: time_signature_num
+      :type:  int
+
+
+   .. py:attribute:: time_signature_den
+      :type:  int
+
+
+   .. py:attribute:: selected_slot
+      :type:  dict
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _tracks(value)
+      :classmethod:
+
+
+
+   .. py:method:: _slots(value)
+      :classmethod:
+
+
+
+.. py:class:: LauncherStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Play state and slot state from the browser scheduler; browser-owned.
+
+   ``request`` is the client-owned target of launch commands.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: active_slots
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: queued_slots
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: request
+      :type:  dict
+
+
+.. py:class:: TimelineConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The arrangement: lanes, clips and recording settings the kernel owns.
+
+   ``current_beat`` is configuration here as in the widget: a standalone
+   timeline restores and seeks from it, and a session's position lives in
+   the transport.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: tracks
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: clips
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: length
+      :type:  float
+
+
+   .. py:attribute:: selected_clip_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: time_signature_num
+      :type:  int
+
+
+   .. py:attribute:: time_signature_den
+      :type:  int
+
+
+   .. py:attribute:: count_in_bars
+      :type:  float
+
+
+   .. py:attribute:: auto_extend_recording
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: recording_extend_bars
+      :type:  float
+
+
+   .. py:attribute:: pixels_per_beat
+      :type:  float
+
+
+   .. py:attribute:: current_beat
+      :type:  float
+
+
+   .. py:attribute:: export_clip_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: import_clip_request
+      :type:  dict
+
+
+   .. py:attribute:: import_clip_data
+      :type:  bytes
+      :value: b''
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _tracks(value)
+      :classmethod:
+
+
+
+   .. py:method:: _fit()
+
+
+.. py:class:: TimelineStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Play, record and transfer state from the browser; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: is_recording
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: recording_track
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: recording_tracks
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: recording_countdown_beats
+      :type:  float
+      :value: 0.0
+
+
+
+   .. py:attribute:: recording_error
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: recorded_clip
+      :type:  dict
+
+
+   .. py:attribute:: exported_clip
+      :type:  dict
+
+
+   .. py:attribute:: exported_clip_data
+      :type:  bytes
+      :value: b''
+
 
 

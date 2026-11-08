@@ -41,6 +41,8 @@ Classes
    nbplay.views.MidiOutputView
    nbplay.views.SequencerView
    nbplay.views.SamplerView
+   nbplay.views.LauncherView
+   nbplay.views.TimelineView
 
 
 Module Contents
@@ -536,6 +538,163 @@ Module Contents
       With ``note`` the zone answers to that one note and plays unpitched
       there; otherwise it covers every note at the sampler's root note.
       ``offset`` and ``duration`` are seconds into the source.
+
+
+
+.. py:class:: LauncherView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The clip launcher on a transports session.
+
+   Slots hold step patterns in the sequencer's ``voices_data`` shape; the
+   browser owns play and slot state, and launches are commands.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-launcher'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_track(name='Track', channel_index=None)
+
+      Append a track row and return its index.
+
+
+
+   .. py:method:: add_scene(name=None)
+
+      Append a scene column and return its index.
+
+
+
+   .. py:method:: set_slot(track_index, scene_index, pattern, *, name=None, step_duration=0.25, swing=0.0, groove=None)
+
+      Fill a slot with a pattern (step dicts, voices, or a sequencer) and return it.
+
+
+
+   .. py:method:: launch(track_index, scene_index)
+
+      Launch a slot on the next quantization boundary.
+
+
+
+   .. py:method:: stop_track(track_index)
+
+      Stop a track's playing slot.
+
+
+
+   .. py:method:: launch_scene(scene_index)
+
+      Launch every slot in a scene.
+
+
+
+   .. py:method:: stop_all()
+
+      Stop every playing slot.
+
+
+
+.. py:class:: TimelineView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The tracking view on a transports session.
+
+   Lanes and clips are kernel configuration; play, record and transfer
+   state belong to the browser. Clip audio export and import go through
+   the config fields the element watches.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-timeline'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False, input='microphone')
+
+      Append a lane and return its index.
+
+
+
+   .. py:method:: add_clip(name='Clip', track_index=0, start=0.0, duration=4.0, **kwargs)
+
+      Append a clip, select it, and grow the timeline to fit it.
+
+
+
+   .. py:method:: add_midi_clip(name='MIDI', track_index=0, start=0.0, events=(), duration=None, **kwargs)
+
+      Append a MIDI clip; ``duration`` defaults to the end of the last event.
+
+
+
+   .. py:method:: export_clip(clip_id)
+
+      Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``.
+
+
+
+   .. py:method:: import_clip(clip_id, data, blob_type='audio/webm', *, measure_duration=False)
+
+      Hand clip audio bytes to the browser; it attaches them to the clip.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move a standalone timeline's playhead (a session seeks through its transport).
+
+
+
+   .. py:method:: play()
+
+      Start playback in the owning view.
+
+
+
+   .. py:method:: stop()
+
+      Stop playback in the owning view.
+
+
+
+   .. py:method:: record(on=True)
+
+      Start or stop recording the armed lanes.
 
 
 

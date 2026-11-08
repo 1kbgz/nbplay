@@ -23,6 +23,7 @@ Classes
    test_views.TestKeysViews
    test_views.TestIoViews
    test_views.TestSequencerAndSamplerViews
+   test_views.TestArrangementViews
    test_views.TestTransportView
 
 
@@ -87,6 +88,14 @@ Module Contents
 
 
    .. py:method:: test_sampler_config_and_view()
+
+
+.. py:class:: TestArrangementViews
+
+   .. py:method:: test_launcher_config_and_view()
+
+
+   .. py:method:: test_timeline_config_and_view()
 
 
 .. py:class:: TestTransportView
