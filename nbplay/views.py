@@ -28,6 +28,7 @@ from .descriptors import (
     _clamp_int,
     _clamp_midi_note,
     _clamp_velocity,
+    _clip_id,
     _decimate_samples,
     _normalize_audio_clip,
     _normalize_effect,
@@ -36,9 +37,11 @@ from .descriptors import (
     _normalize_midi_events,
     _normalize_zone,
     _pack_float32,
+    _positive_number,
     _set_effect_enabled,
     _slot_voices,
     _step_duration_for_length,
+    _steps_to_events,
     _unpack_float32,
 )
 from .models import (
@@ -926,39 +929,105 @@ class LauncherView(InstrumentView):
         self.config.scenes = [*self.config.scenes, str(name) if name is not None else f"Scene {index + 1}"]
         return index
 
-    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=0.25, swing=0.0, groove=None):
-        """Fill a slot with a pattern (step dicts, voices, or a sequencer) and return it."""
-        tracks, scenes = self.config.tracks, self.config.scenes
-        if not 0 <= track_index < len(tracks) or not 0 <= scene_index < len(scenes):
-            raise IndexError(f"slot out of range: track {track_index}, scene {scene_index}")
+    def _check_indices(self, track_index, scene_index=None):
+        track_index = int(track_index)
+        if not 0 <= track_index < len(self.config.tracks):
+            raise IndexError(f"track index out of range: {track_index}")
+        if scene_index is None:
+            return track_index, None
+        scene_index = int(scene_index)
+        if not 0 <= scene_index < len(self.config.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        return track_index, scene_index
+
+    def _find_slot(self, track_index, scene_index):
+        for position, slot in enumerate(self.config.slots):
+            if slot["track_index"] == track_index and slot["scene_index"] == scene_index:
+                return position
+        return -1
+
+    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None):
+        """Fill a slot with a pattern and return it.
+
+        ``pattern`` may be a :class:`SequencerView` (whose grid, swing and
+        groove fill the unspecified arguments), a list of step dicts, or a
+        list of voices.
+        """
+        track_index, scene_index = self._check_indices(track_index, scene_index)
         if isinstance(pattern, SequencerView):
-            pattern = pattern.config.voices_data
+            config = pattern.config
+            step_duration = config.step_duration if step_duration is None else step_duration
+            swing = config.swing if swing == 0.0 else swing
+            groove = list(config.groove) if groove is None else groove
+            pattern = config.voices_data
         slot = _normalize_launcher_slot(
             {
                 "track_index": track_index,
                 "scene_index": scene_index,
-                "name": name if name is not None else f"{tracks[track_index]['name']} {scene_index + 1}",
+                "name": name if name is not None else f"{self.config.tracks[track_index]['name']} {scene_index + 1}",
                 "voices_data": _slot_voices(pattern),
-                "step_duration": step_duration,
+                "step_duration": 0.25 if step_duration is None else step_duration,
                 "swing": swing,
                 "groove": groove or [],
             }
         )
+        slots = list(self.config.slots)
+        position = self._find_slot(track_index, scene_index)
+        if position >= 0:
+            slots[position] = slot
+        else:
+            slots.append(slot)
+        self.config.slots = slots
+        return slot
+
+    def get_slot(self, track_index, scene_index):
+        """The slot at ``(track_index, scene_index)``, or ``None``."""
+        position = self._find_slot(int(track_index), int(scene_index))
+        return dict(self.config.slots[position]) if position >= 0 else None
+
+    def clear_slot(self, track_index, scene_index):
+        """Empty a slot."""
+        track_index, scene_index = self._check_indices(track_index, scene_index)
         slots = [s for s in self.config.slots if not (s["track_index"] == track_index and s["scene_index"] == scene_index)]
-        self.config.slots = [*slots, slot]
+        fields = {"slots": slots}
+        if self.config.selected_slot == {"track_index": track_index, "scene_index": scene_index}:
+            fields["selected_slot"] = {}
+        self.config.update(**fields)
+
+    def slot_to_sequencer(self, track_index, scene_index, sequencer):
+        """Load a slot's pattern, grid, swing and groove into a :class:`SequencerView`."""
+        slot = self.get_slot(track_index, scene_index)
+        if slot is None:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        voices = [list(voice) for voice in slot["voices_data"]]
+        sequencer.config.update(
+            step_duration=slot["step_duration"],
+            swing=slot["swing"],
+            groove=list(slot["groove"]),
+            num_voices=max(1, len(voices)),
+            length=max(len(voice) for voice in voices),
+            voices_data=voices,
+        )
         return slot
 
     def launch(self, track_index, scene_index):
         """Launch a slot on the next quantization boundary."""
-        return self._command("request", {"action": "launch", "track_index": int(track_index), "scene_index": int(scene_index)})
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        if self._find_slot(track_index, scene_index) < 0:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        return self._command("request", {"action": "launch", "track_index": track_index, "scene_index": scene_index})
 
     def stop_track(self, track_index):
         """Stop a track's playing slot."""
-        return self._command("request", {"action": "stop", "track_index": int(track_index)})
+        track_index, _ = self._check_indices(track_index)
+        return self._command("request", {"action": "stop", "track_index": track_index})
 
     def launch_scene(self, scene_index):
-        """Launch every slot in a scene."""
-        return self._command("request", {"action": "scene", "scene_index": int(scene_index)})
+        """Launch every slot in a scene; tracks with no slot there stop."""
+        scene_index = int(scene_index)
+        if not 0 <= scene_index < len(self.config.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        return self._command("request", {"action": "scene", "scene_index": scene_index})
 
     def stop_all(self):
         """Stop every playing slot."""
@@ -1019,6 +1088,61 @@ class TimelineView(InstrumentView):
         self.config.tracks = [*self.config.tracks, track]
         return index
 
+    def remove_track(self, index):
+        """Remove a lane, dropping its clips and shifting later lanes."""
+        index = int(index)
+        tracks = self.config.tracks
+        if not 0 <= index < len(tracks):
+            return
+        removed_channel = tracks[index]["channel_index"]
+        next_tracks = []
+        for i, track in enumerate(tracks):
+            if i == index:
+                continue
+            item = dict(track)
+            if removed_channel >= 0 and item["channel_index"] > removed_channel:
+                item["channel_index"] -= 1
+            next_tracks.append(item)
+        next_clips = []
+        for clip in self.config.clips:
+            if clip["track_index"] == index:
+                continue
+            next_clips.append({**clip, "track_index": clip["track_index"] - 1} if clip["track_index"] > index else clip)
+        self.config.update(tracks=next_tracks, clips=next_clips)
+
+    def arm_track(self, index, armed=True, *, exclusive=False):
+        """Arm or disarm a lane; ``exclusive`` disarms every other lane."""
+        index = int(index)
+        if not 0 <= index < len(self.config.tracks):
+            raise IndexError(f"track index out of range: {index}")
+        tracks = []
+        for i, track in enumerate(self.config.tracks):
+            if i == index:
+                tracks.append({**track, "armed": bool(armed)})
+            elif exclusive:
+                tracks.append({**track, "armed": False})
+            else:
+                tracks.append(track)
+        self.config.tracks = tracks
+
+    def _find_clip(self, clip_id):
+        clip_id = str(clip_id)
+        for clip in self.config.clips:
+            if clip["id"] == clip_id:
+                return clip
+        raise ValueError(f"clip not found: {clip_id}")
+
+    def _midi_clip(self, clip_id):
+        clip = self._find_clip(clip_id)
+        if clip["kind"] != "midi":
+            raise ValueError(f"clip {clip_id} is not a MIDI clip")
+        return clip
+
+    def _append_clip(self, clip):
+        config = self.config
+        config.update(clips=[*config.clips, clip], selected_clip_id=clip["id"], length=max(config.length, clip["start"] + clip["duration"]))
+        return clip
+
     def add_clip(self, name="Clip", track_index=0, start=0.0, duration=4.0, **kwargs):
         """Append a clip, select it, and grow the timeline to fit it."""
         clip = _normalize_audio_clip(
@@ -1026,11 +1150,7 @@ class TimelineView(InstrumentView):
             len(self.config.clips),
             len(self.config.tracks),
         )
-        config = self.config
-        config.clips = [*config.clips, clip]
-        config.selected_clip_id = clip["id"]
-        config.length = max(config.length, clip["start"] + clip["duration"])
-        return clip
+        return self._append_clip(clip)
 
     def add_midi_clip(self, name="MIDI", track_index=0, start=0.0, events=(), duration=None, **kwargs):
         """Append a MIDI clip; ``duration`` defaults to the end of the last event."""
@@ -1039,19 +1159,122 @@ class TimelineView(InstrumentView):
             duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
         return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
 
+    def add_pattern_clip(self, name, pattern, track_index=0, start=0.0, step_duration=0.25, repeat=1, duration=None, **kwargs):
+        """Append a MIDI clip that plays ``pattern`` (a :class:`SequencerView`, step dicts or voices) ``repeat`` times."""
+        if isinstance(pattern, SequencerView):
+            pattern = pattern.config.voices_data
+        voices = _slot_voices(pattern)
+        step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
+        length = max(len(voice) for voice in voices) * step_duration
+        base = _steps_to_events(voices, step_duration)
+        repeat = max(1, int(repeat))
+        events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+        if duration is None:
+            duration = length * repeat
+        return self.add_midi_clip(name, track_index=track_index, start=start, events=events, duration=duration, pattern=name, **kwargs)
+
+    def export_midi_clip(self, clip_id, path=None):
+        """One MIDI clip as a ``mido.MidiFile``, written to ``path`` when given."""
+        from nbplay.midi import build_midi
+
+        clip = self._midi_clip(clip_id)
+        config = self.config
+        midi = build_midi(
+            [{"name": clip["name"], "events": clip["events"]}],
+            bpm=config.bpm,
+            time_signature=(config.time_signature_num, config.time_signature_den),
+        )
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def import_midi(self, source, track_index=0, start=0.0):
+        """Add one MIDI clip per MIDI track with notes, all on one lane at ``start``; returns the clips."""
+        from nbplay.midi import read_midi
+
+        return [self.add_midi_clip(item["name"], track_index=track_index, start=start, events=item["events"]) for item in read_midi(source)["tracks"]]
+
+    def clip_to_event_sequence(self, clip_id):
+        """A MIDI clip's events as a Rust ``EventSequence``."""
+        from nbplay import EventSequence, NoteEvent
+
+        sequence = EventSequence()
+        for event in self._midi_clip(clip_id)["events"]:
+            sequence.add_event(NoteEvent(event["beat"], event["duration"], event["note"], event["velocity"]))
+        return sequence
+
+    def remove_clip(self, clip_id):
+        """Remove a clip by id."""
+        clip_id = str(clip_id)
+        fields = {"clips": [clip for clip in self.config.clips if clip["id"] != clip_id]}
+        if self.config.selected_clip_id == clip_id:
+            fields["selected_clip_id"] = ""
+        self.config.update(**fields)
+
+    def _edit_clip(self, clip_id, **fields):
+        clip = self._find_clip(clip_id)
+        self.config.clips = [{**item, **fields} if item is clip else item for item in self.config.clips]
+
+    def move_clip(self, clip_id, *, track_index=None, start=None):
+        """Move a clip to another lane or beat position."""
+        fields = {}
+        if track_index is not None:
+            fields["track_index"] = int(track_index)
+        if start is not None:
+            fields["start"] = start
+        self._edit_clip(clip_id, **fields)
+
+    def resize_clip(self, clip_id, duration):
+        """Set a clip's duration in beats."""
+        self._edit_clip(clip_id, duration=duration)
+
+    def duplicate_clip(self, clip_id):
+        """Copy a clip onto the same lane right after the original; returns the copy."""
+        clip = self._find_clip(clip_id)
+        copy = _normalize_audio_clip(
+            {**clip, "id": _clip_id(), "start": clip["start"] + clip["duration"]}, len(self.config.clips), len(self.config.tracks)
+        )
+        return self._append_clip(copy)
+
     def export_clip(self, clip_id):
         """Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``."""
+        self._find_clip(clip_id)
         self.config.export_clip_id = str(clip_id)
 
-    def import_clip(self, clip_id, data, blob_type="audio/webm", *, measure_duration=False):
-        """Hand clip audio bytes to the browser; it attaches them to the clip."""
-        self.config.import_clip_data = bytes(data)
-        self.config.import_clip_request = {
-            "id": str(clip_id),
-            "blob_type": blob_type,
-            "blob_size": len(data),
-            "measure_duration": bool(measure_duration),
-        }
+    def write_exported_clip(self, path):
+        """Write the most recently exported clip's bytes to ``path``; returns the clip."""
+        if not self.status.exported_clip_data:
+            raise ValueError("no exported clip data; call export_clip() and wait for the browser")
+        with open(path, "wb") as handle:
+            handle.write(self.status.exported_clip_data)
+        return self.status.exported_clip
+
+    def import_clip(self, data, name="Import", track_index=0, start=0.0, duration=None, blob_type="audio/webm", **kwargs):
+        """Add a clip backed by audio bytes (or a file path); the browser attaches a playable URL.
+
+        When ``duration`` is omitted the browser measures the audio and fills it in.
+        """
+        if isinstance(data, (str, os.PathLike)):
+            with open(data, "rb") as handle:
+                data = handle.read()
+        data = bytes(data)
+        if not data:
+            raise ValueError("import_clip requires non-empty audio bytes")
+        clip = self.add_clip(
+            name,
+            track_index=track_index,
+            start=start,
+            duration=duration if duration is not None else 4.0,
+            source="import",
+            blob_type=blob_type,
+            blob_size=len(data),
+            **kwargs,
+        )
+        # Bytes first, then the descriptor: the browser acts on the
+        # descriptor change and expects the matching bytes to be present.
+        self.config.import_clip_data = data
+        self.config.import_clip_request = {**clip, "measure_duration": duration is None}
+        return clip
 
     def seek(self, beat):
         """Move a standalone timeline's playhead (a session seeks through its transport)."""
