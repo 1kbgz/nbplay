@@ -19,6 +19,8 @@ from spaday import Widget, element
 from .models import (
     KeyboardConfig,
     KeyboardStatus,
+    LauncherConfig,
+    LauncherStatus,
     MidiKeyboardConfig,
     MidiKeyboardStatus,
     MidiOutputConfig,
@@ -34,17 +36,25 @@ from .models import (
     SettingsStatus,
     SynthConfig,
     SynthStatus,
+    TimelineConfig,
+    TimelineStatus,
     TransportConfig,
     TransportStatus,
 )
 from .widget import (
+    AudioClip,
+    TimelineTrack,
     _clamp_int,
     _clamp_midi_note,
     _clamp_velocity,
     _decimate_samples,
+    _normalize_audio_clip,
     _normalize_effect,
+    _normalize_launcher_slot,
+    _normalize_midi_events,
     _normalize_zone,
     _pack_float32,
+    _slot_voices,
 )
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
@@ -54,6 +64,7 @@ __all__ = (
     "PACKAGE",
     "InstrumentView",
     "KeyboardView",
+    "LauncherView",
     "MidiKeyboardView",
     "MidiOutputView",
     "MixerView",
@@ -62,6 +73,7 @@ __all__ = (
     "SequencerView",
     "SettingsView",
     "SynthView",
+    "TimelineView",
     "TransportView",
 )
 
@@ -523,3 +535,184 @@ class SamplerView(InstrumentView):
                 "duration": float(duration),
             },
         )
+
+
+class LauncherView(InstrumentView):
+    """The clip launcher on a transports session.
+
+    Slots hold step patterns in the sequencer's ``voices_data`` shape; the
+    browser owns play and slot state, and launches are commands.
+    """
+
+    TAG = "nbplay-launcher"
+    CONFIG_MODEL = LauncherConfig
+    STATUS_MODEL = LauncherStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "tracks": "tracks",
+        "scenes": "scenes",
+        "slots": "slots",
+        "quantize": "quantize",
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "selected_slot": "selectedSlot",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "is_playing": "isPlaying",
+        "active_slots": "activeSlots",
+        "queued_slots": "queuedSlots",
+    }
+
+    def add_track(self, name="Track", channel_index=None):
+        """Append a track row and return its index."""
+        index = len(self.config.tracks)
+        self.config.tracks = [*self.config.tracks, {"name": name, "channel_index": index if channel_index is None else channel_index}]
+        return index
+
+    def add_scene(self, name=None):
+        """Append a scene column and return its index."""
+        index = len(self.config.scenes)
+        self.config.scenes = [*self.config.scenes, str(name) if name is not None else f"Scene {index + 1}"]
+        return index
+
+    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=0.25, swing=0.0, groove=None):
+        """Fill a slot with a pattern (step dicts, voices, or a sequencer) and return it."""
+        tracks, scenes = self.config.tracks, self.config.scenes
+        if not 0 <= track_index < len(tracks) or not 0 <= scene_index < len(scenes):
+            raise IndexError(f"slot out of range: track {track_index}, scene {scene_index}")
+        slot = _normalize_launcher_slot(
+            {
+                "track_index": track_index,
+                "scene_index": scene_index,
+                "name": name if name is not None else f"{tracks[track_index]['name']} {scene_index + 1}",
+                "voices_data": _slot_voices(pattern),
+                "step_duration": step_duration,
+                "swing": swing,
+                "groove": groove or [],
+            }
+        )
+        slots = [s for s in self.config.slots if not (s["track_index"] == track_index and s["scene_index"] == scene_index)]
+        self.config.slots = [*slots, slot]
+        return slot
+
+    def launch(self, track_index, scene_index):
+        """Launch a slot on the next quantization boundary."""
+        return self._command("request", {"action": "launch", "track_index": int(track_index), "scene_index": int(scene_index)})
+
+    def stop_track(self, track_index):
+        """Stop a track's playing slot."""
+        return self._command("request", {"action": "stop", "track_index": int(track_index)})
+
+    def launch_scene(self, scene_index):
+        """Launch every slot in a scene."""
+        return self._command("request", {"action": "scene", "scene_index": int(scene_index)})
+
+    def stop_all(self):
+        """Stop every playing slot."""
+        return self._command("request", {"action": "stop_all"})
+
+
+class TimelineView(InstrumentView):
+    """The tracking view on a transports session.
+
+    Lanes and clips are kernel configuration; play, record and transfer
+    state belong to the browser. Clip audio export and import go through
+    the config fields the element watches.
+    """
+
+    TAG = "nbplay-timeline"
+    CONFIG_MODEL = TimelineConfig
+    STATUS_MODEL = TimelineStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "tracks": "tracks",
+        "clips": "clips",
+        "length": "length",
+        "selected_clip_id": "selectedClipId",
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "count_in_bars": "countInBars",
+        "auto_extend_recording": "autoExtendRecording",
+        "recording_extend_bars": "recordingExtendBars",
+        "pixels_per_beat": "pixelsPerBeat",
+        "current_beat": "currentBeat",
+        "export_clip_id": "exportClipId",
+        "import_clip_request": "importClipRequest",
+        "import_clip_data": "importClipData",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "is_playing": "isPlaying",
+        "is_recording": "isRecording",
+        "recording_track": "recordingTrack",
+        "recording_tracks": "recordingTracks",
+        "recording_countdown_beats": "recordingCountdownBeats",
+        "recording_error": "recordingError",
+        "recorded_clip": "recordedClip",
+        "exported_clip": "exportedClip",
+        "exported_clip_data": "exportedClipData",
+    }
+
+    def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False, input="microphone"):
+        """Append a lane and return its index."""
+        index = len(self.config.tracks)
+        track = TimelineTrack(
+            name=name,
+            channel_index=index if channel_index is None else channel_index,
+            armed=armed,
+            monitor=monitor,
+            input=input,
+        ).to_dict()
+        self.config.tracks = [*self.config.tracks, track]
+        return index
+
+    def add_clip(self, name="Clip", track_index=0, start=0.0, duration=4.0, **kwargs):
+        """Append a clip, select it, and grow the timeline to fit it."""
+        clip = _normalize_audio_clip(
+            AudioClip(name=name, track_index=track_index, start=start, duration=duration, **kwargs).to_dict(),
+            len(self.config.clips),
+            len(self.config.tracks),
+        )
+        config = self.config
+        config.clips = [*config.clips, clip]
+        config.selected_clip_id = clip["id"]
+        config.length = max(config.length, clip["start"] + clip["duration"])
+        return clip
+
+    def add_midi_clip(self, name="MIDI", track_index=0, start=0.0, events=(), duration=None, **kwargs):
+        """Append a MIDI clip; ``duration`` defaults to the end of the last event."""
+        normalized = _normalize_midi_events(events)
+        if duration is None:
+            duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
+        return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
+
+    def export_clip(self, clip_id):
+        """Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``."""
+        self.config.export_clip_id = str(clip_id)
+
+    def import_clip(self, clip_id, data, blob_type="audio/webm", *, measure_duration=False):
+        """Hand clip audio bytes to the browser; it attaches them to the clip."""
+        self.config.import_clip_data = bytes(data)
+        self.config.import_clip_request = {
+            "id": str(clip_id),
+            "blob_type": blob_type,
+            "blob_size": len(data),
+            "measure_duration": bool(measure_duration),
+        }
+
+    def seek(self, beat):
+        """Move a standalone timeline's playhead (a session seeks through its transport)."""
+        self.config.current_beat = float(beat)
+
+    def play(self):
+        """Start playback in the owning view."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop playback in the owning view."""
+        return self._command("is_playing", False)
+
+    def record(self, on=True):
+        """Start or stop recording the armed lanes."""
+        return self._command("is_recording", bool(on))

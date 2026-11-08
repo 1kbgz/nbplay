@@ -875,7 +875,13 @@ nested transports values (`{"Map": {...}}`) first. `SequencerConfig` keeps `voic
 `stop` are `is_playing` commands the wire writes onto the element. `SamplerConfig` treats
 `pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
 whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated
-preview, and `capture` is a `request` command the owning view decodes. The spaday tree is
+preview, and `capture` is a `request` command the owning view decodes. `LauncherConfig` normalizes
+slots with the widget's helper and `LauncherView.launch`, `stop_track`, `launch_scene` and
+`stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
+clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
+as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status
+commands, and clip export and import go through the config fields the element watches. The spaday
+tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status`, so the element's events write the wire store and the store writes
 the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are

@@ -15,11 +15,14 @@ from .widget import (
     _clamp_velocity,
     _default_pad_notes,
     _default_steps,
+    _normalize_audio_clips,
     _normalize_effects,
+    _normalize_launcher_slot,
     _normalize_mixer_channel,
     _normalize_pad_actions,
     _normalize_return_bus,
     _normalize_sample_slices,
+    _normalize_timeline_tracks,
     _normalize_zones,
     _pad_sends,
     _resize_pad_notes,
@@ -30,6 +33,8 @@ from .widget import (
 __all__ = (
     "KeyboardConfig",
     "KeyboardStatus",
+    "LauncherConfig",
+    "LauncherStatus",
     "MidiKeyboardConfig",
     "MidiKeyboardStatus",
     "MidiOutputConfig",
@@ -45,6 +50,8 @@ __all__ = (
     "SettingsStatus",
     "SynthConfig",
     "SynthStatus",
+    "TimelineConfig",
+    "TimelineStatus",
     "TransportConfig",
     "TransportStatus",
 )
@@ -486,3 +493,102 @@ class SamplerStatus(BaseModel):
     last_note_event: dict = {}
     last_pad_event: dict = {}
     request: dict = {}
+
+
+class LauncherConfig(_Validated):
+    """The clip launcher's tracks, scenes and slots."""
+
+    tracks: list[dict] = []
+    scenes: list[str] = []
+    slots: list[dict] = []
+    quantize: Literal["bar", "beat", "none"] = "bar"
+    bpm: float = Field(120.0, ge=30, le=300)
+    time_signature_num: int = Field(4, ge=1, le=16)
+    time_signature_den: int = Field(4, ge=1, le=16)
+    selected_slot: dict = {}
+    session_id: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("tracks")
+    @classmethod
+    def _tracks(cls, value):
+        return [
+            {"name": str(track.get("name", f"Track {index + 1}")), "channel_index": max(-1, int(track.get("channel_index", index)))}
+            for index, track in enumerate(value or [])
+        ]
+
+    @field_validator("slots")
+    @classmethod
+    def _slots(cls, value):
+        return [_normalize_launcher_slot(slot) for slot in value or []]
+
+
+class LauncherStatus(BaseModel):
+    """Play state and slot state from the browser scheduler; browser-owned.
+
+    ``request`` is the client-owned target of launch commands.
+    """
+
+    is_playing: bool = False
+    active_slots: list[int] = []
+    queued_slots: list[int] = []
+    request: dict = {}
+
+
+class TimelineConfig(_Validated):
+    """The arrangement: lanes, clips and recording settings the kernel owns.
+
+    ``current_beat`` is configuration here as in the widget: a standalone
+    timeline restores and seeks from it, and a session's position lives in
+    the transport.
+    """
+
+    tracks: list[dict] = []
+    clips: list[dict] = []
+    length: float = Field(16.0, ge=1, le=4096)
+    selected_clip_id: str = ""
+    bpm: float = Field(120.0, ge=30, le=300)
+    time_signature_num: int = Field(4, ge=1, le=16)
+    time_signature_den: int = Field(4, ge=1, le=16)
+    count_in_bars: float = Field(0.0, ge=0, le=8)
+    auto_extend_recording: bool = True
+    recording_extend_bars: float = Field(8.0, ge=1, le=256)
+    pixels_per_beat: float = Field(0.0, ge=0, le=400)
+    current_beat: float = Field(0.0, ge=0)
+    export_clip_id: str = ""
+    import_clip_request: dict = {}
+    import_clip_data: bytes = b""
+    session_id: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("tracks")
+    @classmethod
+    def _tracks(cls, value):
+        return _normalize_timeline_tracks(value)
+
+    @model_validator(mode="after")
+    def _fit(self):
+        clips = _normalize_audio_clips(self.clips, len(self.tracks))
+        if clips != self.clips:
+            self.__dict__["clips"] = clips
+        if self.current_beat > self.length:
+            self.__dict__["current_beat"] = self.length
+        return self
+
+
+class TimelineStatus(BaseModel):
+    """Play, record and transfer state from the browser; browser-owned."""
+
+    is_playing: bool = False
+    is_recording: bool = False
+    recording_track: int = -1
+    recording_tracks: list[int] = []
+    recording_countdown_beats: float = 0.0
+    recording_error: str = ""
+    recorded_clip: dict = {}
+    exported_clip: dict = {}
+    exported_clip_data: bytes = b""

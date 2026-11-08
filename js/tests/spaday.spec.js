@@ -413,6 +413,88 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("launcher: kernel tracks, scenes and slots build the grid", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("launcher");
+    try {
+      await mount(page, kernel);
+      await expect(page.locator("#owner nbplay-launcher")).toBeVisible();
+      for (const call of [
+        { op: "command", name: "add_track", args: ["Drums"] },
+        { op: "command", name: "add_scene", args: ["Intro"] },
+        {
+          op: "command",
+          name: "set_slot",
+          args: [0, 0, [{ note: 36, active: true }]],
+        },
+      ]) {
+        await page.evaluate(
+          (response) => notebook.deliver(response),
+          await kernel.call(call),
+        );
+      }
+      await expect(
+        page.locator("#owner .nbplay-launcher-grid-row[data-track]"),
+      ).toHaveCount(1);
+      await expect(
+        page.locator(
+          "#owner .nbplay-launcher-grid-row .nbplay-launcher-slot-button.filled",
+        ),
+      ).toHaveCount(1);
+      expect((await state(kernel)).config.slots[0].name).toBe("Drums 1");
+    } finally {
+      kernel.close();
+    }
+  });
+
+  test("timeline: kernel lanes and clips render and a play command starts the clock", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("timeline");
+    try {
+      await mount(page, kernel);
+      const timeline = page.locator("#owner nbplay-timeline");
+      await expect(timeline).toBeVisible();
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "add_track",
+          args: ["Vocals"],
+        }),
+      );
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "add_clip",
+          args: ["Take"],
+          kwargs: { track_index: 0, start: 4, duration: 8 },
+        }),
+      );
+      await expect(page.locator("#owner nbplay-lane")).toHaveCount(1);
+      await expect(
+        page.locator("#owner nbplay-clip .nbplay-clip-name"),
+      ).toHaveText("Take");
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "play" }),
+      );
+      await expect(timeline).toHaveAttribute("is-playing", "");
+      await expect
+        .poll(async () => (await state(kernel)).status.is_playing)
+        .toBe(true);
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "command", name: "stop" }),
+      );
+      await expect(timeline).not.toHaveAttribute("is-playing");
+    } finally {
+      kernel.close();
+    }
+  });
+
   for (const [name, tag, field, prop, value] of [
     ["keyboard", "nbplay-keyboard", "velocity", "velocity", 64],
     ["midi_keyboard", "nbplay-midi-keyboard", "sync_clock", "syncClock", true],
