@@ -15,6 +15,7 @@ from .descriptors import (
     _clamp_velocity,
     _default_pad_notes,
     _default_steps,
+    _measure_beats,
     _normalize_audio_clips,
     _normalize_effects,
     _normalize_launcher_slot,
@@ -74,15 +75,18 @@ class _Validated(BaseModel):
     """
 
     def __setattr__(self, name, value):
-        fields = type(self).model_fields
-        if name not in fields:
+        if name not in type(self).model_fields:
             super().__setattr__(name, value)
             return
-        fresh = type(self).model_validate({**self.model_dump(), name: value})
-        for field in fields:
+        self.update(**{name: value})
+
+    def update(self, **fields):
+        """Assign several fields in one validation, so derived fields see all of them."""
+        fresh = type(self).model_validate({**self.model_dump(), **fields})
+        for field in type(self).model_fields:
             new = getattr(fresh, field)
             if new != getattr(self, field):
-                super().__setattr__(field, new)
+                BaseModel.__setattr__(self, field, new)
 
 
 class TransportConfig(_Validated):
@@ -374,12 +378,16 @@ def _normalize_lanes(lanes):
     return normalized
 
 
+_GRID_FIELDS = frozenset({"measures", "step_duration", "time_signature_num", "time_signature_den"})
+
+
 class SequencerConfig(_Validated):
     """The step sequencer's pattern and grid.
 
     ``voices_data`` always holds ``num_voices`` lists of ``length``
     normalized steps; the after-validator resizes them, filling with
-    default steps, the way the widget's composers do.
+    default steps, the way the widget's composers do. Assigning a grid
+    field recomputes ``length`` from measures, meter and step duration.
     """
 
     voices_data: list[list[dict]] = []
@@ -411,6 +419,15 @@ class SequencerConfig(_Validated):
     @classmethod
     def _lanes(cls, value):
         return _normalize_lanes(value)
+
+    def update(self, **fields):
+        # A grid change (measures, step duration, meter) sets the length, as
+        # the widget's observers do; an explicit length wins.
+        if "length" not in fields and _GRID_FIELDS & fields.keys():
+            grid = {name: fields.get(name, getattr(self, name)) for name in _GRID_FIELDS}
+            beats = grid["measures"] * _measure_beats(grid["time_signature_num"], grid["time_signature_den"])
+            fields["length"] = max(1, round(beats / max(0.001, float(grid["step_duration"]))))
+        super().update(**fields)
 
     @model_validator(mode="after")
     def _fit_voices(self):
