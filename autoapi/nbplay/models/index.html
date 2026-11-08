@@ -103,6 +103,11 @@
     </a>
   </li>
   <li class="fd-tree-item">
+    <a class="fd-link" href="../descriptors/index.html">
+      <span class="fd-link-text">nbplay.descriptors</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../history/index.html">
       <span class="fd-link-text">nbplay.history</span>
     </a>
@@ -583,6 +588,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._lanes">SequencerConfig._lanes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.update">SequencerConfig.update()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._fit_voices">SequencerConfig._fit_voices()</a>
@@ -1611,7 +1619,8 @@ validated to form a valid model.</p>
 <p>The step sequencer’s pattern and grid.</p>
 <p><code class="docutils literal notranslate"><span class="pre">voices_data</span></code> always holds <code class="docutils literal notranslate"><span class="pre">num_voices</span></code> lists of <code class="docutils literal notranslate"><span class="pre">length</span></code>
 normalized steps; the after-validator resizes them, filling with
-default steps, the way the widget’s composers do.</p>
+default steps, the way the widget’s composers do. Assigning a grid
+field recomputes <code class="docutils literal notranslate"><span class="pre">length</span></code> from measures, meter and step duration.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -1715,6 +1724,12 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="nbplay.models.SequencerConfig._lanes">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_lanes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SequencerConfig._lanes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SequencerConfig._lanes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.SequencerConfig.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SequencerConfig.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SequencerConfig.update" title="Link to this definition">¶</a></dt>
+<dd><p>Assign several fields in one validation, so derived fields see all of them.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.models.SequencerConfig._fit_voices">
@@ -2628,6 +2643,9 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._lanes">SequencerConfig._lanes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.update">SequencerConfig.update()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._fit_voices">SequencerConfig._fit_voices()</a>

@@ -245,9 +245,24 @@ Module Contents
 
 
 
-   .. py:method:: add_return(name='Return', effects=(), gain=0.8)
+   .. py:method:: _update_channel(index, **fields)
 
-      Append a send/return bus and return its index; every channel gains a send.
+
+   .. py:method:: set_channel_gain(index, gain)
+
+
+   .. py:method:: set_channel_pan(index, pan)
+
+
+   .. py:method:: set_channel_mute(index, mute)
+
+
+   .. py:method:: set_channel_solo(index, solo)
+
+
+   .. py:method:: set_channel_effects(index, effects)
+
+      Replace the insert chain of the channel at ``index``.
 
 
 
@@ -257,9 +272,87 @@ Module Contents
 
 
 
+   .. py:method:: set_channel_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one channel insert effect.
+
+
+
+   .. py:method:: clear_channel_effects(index)
+
+      Remove every insert effect from the channel at ``index``.
+
+
+
+   .. py:method:: set_master_effects(effects)
+
+      Replace the master bus insert chain.
+
+
+
    .. py:method:: add_master_effect(effect)
 
       Append an insert effect to the master bus.
+
+
+
+   .. py:method:: set_master_effect_enabled(effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one master insert effect.
+
+
+
+   .. py:method:: clear_master_effects()
+
+      Remove every insert effect from the master bus.
+
+
+
+   .. py:method:: add_return(name='Return', effects=(), gain=0.8)
+
+      Append a send/return bus and return its index; every channel gains a send.
+
+
+
+   .. py:method:: remove_return(index)
+
+      Remove a return bus and every channel's send to it.
+
+
+
+   .. py:method:: _update_return(index, **fields)
+
+
+   .. py:method:: set_return_gain(index, gain)
+
+
+   .. py:method:: set_return_effects(index, effects)
+
+      Replace a return bus's effect chain.
+
+
+
+   .. py:method:: add_return_effect(index, effect)
+
+      Append an effect to a return bus's chain.
+
+
+
+   .. py:method:: set_return_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one return bus effect.
+
+
+
+   .. py:method:: set_send(channel_index, return_index, level)
+
+      Set a channel's post-fader send level (0 to 1) to a return bus.
+
+
+
+   .. py:method:: to_mixer()
+
+      A Rust ``Mixer`` with this console's channels and master gain.
 
 
 
@@ -455,6 +548,17 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:method:: configure_grid(measures=None, step_duration=None)
+
+      Set the grid from a measure count and a step duration in beats; the length follows.
+
+
+
+   .. py:property:: steps
+
+      Voice 0's steps.
+
+
    .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100)
 
       Set one step of one voice.
@@ -470,6 +574,30 @@ Module Contents
    .. py:method:: clear()
 
       Deactivate every step.
+
+
+
+   .. py:method:: to_pattern(voice=0)
+
+      A Rust ``Pattern`` of one voice, or ``None`` when ``voice`` is out of range.
+
+
+
+   .. py:method:: to_step_sequencer(channel=0, voice=0)
+
+      A Rust ``StepSequencer`` of one voice on a MIDI channel, or ``None`` when ``voice`` is out of range.
+
+
+
+   .. py:method:: to_midi(path=None, name='Sequencer')
+
+      The pattern as a ``mido.MidiFile``, written to ``path`` when given.
+
+
+
+   .. py:method:: load_midi(source, track=None, step_duration=None, max_voices=8)
+
+      Replace the pattern with the notes of a MIDI file; see ``SequencerWidget.load_midi``.
 
 
 

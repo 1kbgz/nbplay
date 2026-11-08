@@ -1,0 +1,443 @@
+nbplay.descriptors
+==================
+
+.. py:module:: nbplay.descriptors
+
+.. autoapi-nested-parse::
+
+   Validated descriptors and normalizers shared by the widgets and the views.
+
+   The traitlets widgets in :mod:`nbplay.widget` and the pydantic models in
+   :mod:`nbplay.models` accept the same dict shapes for effects, mixer channels,
+   timeline tracks and clips, pad actions, sampler zones and slices, launcher
+   slots and keyboard routes. The descriptor classes (:class:`EffectPlugin`,
+   :class:`AudioClip`, :class:`TimelineTrack`, :class:`PadAction`,
+   :class:`KeyboardRoute`) are the notebook-facing way to build them, and the
+   ``_normalize_*`` functions are what both layers run on assignment.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   nbplay.descriptors._PREVIEW_MAX_FRAMES
+   nbplay.descriptors._DEFAULT_PAD_NOTES
+   nbplay.descriptors._PAD_MAX_COUNT
+   nbplay.descriptors._TIMELINE_INPUTS
+   nbplay.descriptors._CLIP_KINDS
+   nbplay.descriptors.THEMES
+   nbplay.descriptors._LAUNCH_QUANTIZE
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   nbplay.descriptors.EffectPlugin
+   nbplay.descriptors.AudioClip
+   nbplay.descriptors.TimelineTrack
+   nbplay.descriptors.PadAction
+   nbplay.descriptors.KeyboardRoute
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.descriptors._default_step
+   nbplay.descriptors._default_steps
+   nbplay.descriptors._clamp_int
+   nbplay.descriptors._clamp_midi_note
+   nbplay.descriptors._clamp_velocity
+   nbplay.descriptors._pack_float32
+   nbplay.descriptors._unpack_float32
+   nbplay.descriptors._decimate_samples
+   nbplay.descriptors._resize_number_list
+   nbplay.descriptors._measure_beats
+   nbplay.descriptors._step_duration_for_length
+   nbplay.descriptors._resize_pad_notes
+   nbplay.descriptors._resize_pad_velocities
+   nbplay.descriptors._safe_trait_name
+   nbplay.descriptors._json_safe_effect_value
+   nbplay.descriptors._freeze_effect_value
+   nbplay.descriptors._normalize_effect
+   nbplay.descriptors._normalize_effects
+   nbplay.descriptors._set_effect_enabled
+   nbplay.descriptors._clamped_number
+   nbplay.descriptors._normalize_mixer_channel
+   nbplay.descriptors._normalize_return_bus
+   nbplay.descriptors._pad_sends
+   nbplay.descriptors._clip_id
+   nbplay.descriptors._positive_number
+   nbplay.descriptors._nonnegative_number
+   nbplay.descriptors._normalize_midi_event
+   nbplay.descriptors._normalize_midi_events
+   nbplay.descriptors._steps_to_events
+   nbplay.descriptors._normalize_timeline_track
+   nbplay.descriptors._normalize_timeline_tracks
+   nbplay.descriptors._normalize_audio_clip
+   nbplay.descriptors._normalize_audio_clips
+   nbplay.descriptors._normalize_pad_action
+   nbplay.descriptors._normalize_pad_actions
+   nbplay.descriptors._normalize_zone
+   nbplay.descriptors._normalize_zones
+   nbplay.descriptors._normalize_sample_slices
+   nbplay.descriptors.render_waveform
+   nbplay.descriptors._slot_voices
+   nbplay.descriptors._normalize_launcher_slot
+   nbplay.descriptors._default_pad_notes
+   nbplay.descriptors._positive_pad_dimension
+   nbplay.descriptors._build_route
+
+
+Module Contents
+---------------
+
+.. py:data:: _PREVIEW_MAX_FRAMES
+   :value: 2048
+
+
+.. py:function:: _default_step()
+
+.. py:function:: _default_steps(length)
+
+.. py:data:: _DEFAULT_PAD_NOTES
+   :value: [48, 52, 55, 59, 60, 64, 67, 71]
+
+
+.. py:data:: _PAD_MAX_COUNT
+   :value: 128
+
+
+.. py:function:: _clamp_int(value, low, high)
+
+.. py:function:: _clamp_midi_note(value)
+
+.. py:function:: _clamp_velocity(value)
+
+.. py:function:: _pack_float32(samples)
+
+.. py:function:: _unpack_float32(data)
+
+.. py:function:: _decimate_samples(samples, max_points=2048)
+
+.. py:function:: _resize_number_list(values, count, fill, clamp)
+
+.. py:function:: _measure_beats(time_signature_num, time_signature_den)
+
+.. py:function:: _step_duration_for_length(length, measures=1, time_signature_num=4, time_signature_den=4)
+
+.. py:function:: _resize_pad_notes(notes, pad_count)
+
+.. py:function:: _resize_pad_velocities(velocities, pad_count, velocity=100)
+
+.. py:function:: _safe_trait_name(value)
+
+.. py:class:: EffectPlugin(type, enabled=True, **params)
+
+   Validated Web Audio effect descriptor for mixer insert chains.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: _FILTER_TYPES
+
+
+   .. py:attribute:: type
+
+
+   .. py:attribute:: enabled
+      :value: True
+
+
+
+   .. py:attribute:: params
+
+
+   .. py:method:: _param(params, *names, default=None)
+      :staticmethod:
+
+
+
+   .. py:method:: _number(params, *names, default, low, high)
+      :classmethod:
+
+
+
+   .. py:method:: _normalize_params(type, params)
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+   .. py:method:: __hash__()
+
+
+.. py:function:: _json_safe_effect_value(value, path='effect param')
+
+.. py:function:: _freeze_effect_value(value)
+
+.. py:function:: _normalize_effect(effect)
+
+.. py:function:: _normalize_effects(effects)
+
+.. py:function:: _set_effect_enabled(effect, enabled)
+
+.. py:function:: _clamped_number(value, low, high, name)
+
+.. py:function:: _normalize_mixer_channel(channel, index=0)
+
+.. py:function:: _normalize_return_bus(bus, index=0)
+
+.. py:function:: _pad_sends(sends, count)
+
+.. py:function:: _clip_id()
+
+.. py:function:: _positive_number(value, name, minimum=0.001, maximum=4096.0)
+
+.. py:function:: _nonnegative_number(value, name, maximum=4096.0)
+
+.. py:data:: _TIMELINE_INPUTS
+
+.. py:data:: _CLIP_KINDS
+
+.. py:function:: _normalize_midi_event(event, index=0)
+
+.. py:function:: _normalize_midi_events(events)
+
+.. py:function:: _steps_to_events(voices_data, step_duration=0.25)
+
+   Expand sequencer voices (lists of step dicts) into MIDI events in beats.
+
+
+.. py:function:: _normalize_timeline_track(track, index=0)
+
+.. py:function:: _normalize_timeline_tracks(tracks)
+
+.. py:function:: _normalize_audio_clip(clip, index=0, track_count=None)
+
+.. py:function:: _normalize_audio_clips(clips, track_count=None)
+
+.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None, kind='audio', events=None, pattern=None)
+
+   Serializable audio clip descriptor for timeline lanes.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:class:: TimelineTrack(*, name='Track', channel_index=0, armed=False, muted=False, solo=False, input='microphone', monitor=False)
+
+   Serializable track-lane descriptor for ``TimelineWidget``.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:class:: PadAction(*, type='note', note=60, velocity=None, trait=None, value=None, label=None, slice_index=None)
+
+   Validated pad action descriptor.
+
+   ``type="note"`` is the current playback path. ``type="trait"`` and
+   ``type="event"`` provide a stable synced shape for future controller pads.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: type
+      :value: 'note'
+
+
+
+   .. py:attribute:: note
+
+
+   .. py:attribute:: velocity
+      :value: None
+
+
+
+   .. py:attribute:: trait
+      :value: None
+
+
+
+   .. py:attribute:: value
+      :value: None
+
+
+
+   .. py:attribute:: label
+      :value: ''
+
+
+
+   .. py:attribute:: slice_index
+      :value: None
+
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:function:: _normalize_pad_action(action, default_note=60, default_velocity=100, prefer_defaults=False)
+
+.. py:function:: _normalize_pad_actions(actions, pad_count, pad_notes=None, pad_velocities=None, prefer_defaults=False)
+
+.. py:function:: _normalize_zone(zone, index=0)
+
+.. py:function:: _normalize_zones(zones)
+
+.. py:function:: _normalize_sample_slices(slices, sample_length=0)
+
+.. py:data:: THEMES
+   :value: ('', 'light', 'dark', 'studio', 'flat', 'cube', 'one', 'grim', 'pro', 'fruit')
+
+
+.. py:function:: render_waveform(oscillator_type, frequency, amplitude, sample_rate)
+
+   The waveform preview for an oscillator as little-endian float32 bytes.
+
+   About three cycles of the periodic oscillators, capped at
+   ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.
+
+
+.. py:data:: _LAUNCH_QUANTIZE
+   :value: ('bar', 'beat', 'none')
+
+
+.. py:function:: _slot_voices(pattern)
+
+   Coerce a pattern into ``voices_data`` (list of voices, each a list of step dicts).
+
+
+.. py:function:: _normalize_launcher_slot(slot)
+
+.. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
+
+   Validated route descriptor for keyboard → sampler mapping.
+
+   Determines which MIDI notes a ``KeyboardWidget`` or
+   ``MidiKeyboardWidget`` routes to a specific sampler.
+
+   :param channel_index: The sampler's channel index on the session bus (≥ 0).
+   :param match: One of ``"all"``, ``"zone"``, ``"octave"``, ``"note"``, ``"notes"``.
+   :param zone: Required when *match="zone"*. ``"upper"`` or ``"lower"``.
+   :param octave: Required when *match="octave"*. MIDI octave 0–9.
+   :param note: Required when *match="note"*. Single MIDI note 0–127.
+   :param notes: Required when *match="notes"*. Non-empty list of MIDI notes 0–127.
+
+
+   .. py:attribute:: _VALID_MATCHES
+
+
+   .. py:attribute:: _VALID_ZONES
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: match
+      :value: 'all'
+
+
+
+   .. py:attribute:: zone
+      :value: None
+
+
+
+   .. py:attribute:: octave
+      :value: None
+
+
+
+   .. py:attribute:: note
+      :value: None
+
+
+
+   .. py:attribute:: notes
+      :value: None
+
+
+
+   .. py:method:: to_dict() -> dict
+
+      Serialize to the dict format stored in ``sampler_routing``.
+
+      :returns: Dict with keys ``channel_index``, ``match``, and optional fields.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+
+   .. py:method:: __hash__() -> int
+
+
+.. py:function:: _default_pad_notes(rows=4, cols=4)
+
+   Default pad notes starting at MIDI 36 (C2), ascending chromatically.
+
+
+.. py:function:: _positive_pad_dimension(value)
+
+   Clamp pad grid dimensions to at least one row/column.
+
+
+.. py:function:: _build_route(channel_index, zone=None, octave=None, note=None, notes=None)
+
+   Build a ``KeyboardRoute`` from kwargs.
+
+   Shared by ``KeyboardWidget`` and ``PadWidget``.
+
+   :param channel_index: Sampler channel index.
+   :param zone: ``None``, ``"all"``, ``"upper"``, or ``"lower"``.
+                Invalid values raise ``ValueError``.
+   :param octave: MIDI octave (0–9).
+   :param note: Single MIDI note (0–127).
+   :param notes: Non-empty list of MIDI notes.
+
+   :returns: A validated ``KeyboardRoute``.
+
+

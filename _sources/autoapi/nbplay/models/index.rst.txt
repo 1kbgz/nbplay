@@ -793,7 +793,8 @@ Module Contents
 
    ``voices_data`` always holds ``num_voices`` lists of ``length``
    normalized steps; the after-validator resizes them, filling with
-   default steps, the way the widget's composers do.
+   default steps, the way the widget's composers do. Assigning a grid
+   field recomputes ``length`` from measures, meter and step duration.
 
    Create a new model by parsing and validating input data from keyword arguments.
 
@@ -899,6 +900,12 @@ Module Contents
 
    .. py:method:: _lanes(value)
       :classmethod:
+
+
+
+   .. py:method:: update(**fields)
+
+      Assign several fields in one validation, so derived fields see all of them.
 
 
 

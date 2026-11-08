@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nbplay.descriptors &#8212; nbplay v0.3.0</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fuma.css?v=ca04d621" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fuma-code.css?v=a950e949" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/fonts/fuma-fonts.css?v=c2892c73" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/custom.css?v=88c24c6a" />
+    <script src="../../../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-searchlite-index="searchlite-index.json" defer="defer" src="../../../_static/searchlite.js?v=a5320898"></script>
+    <script defer="defer" src="../../../_static/fuma.js?v=9c325f6c"></script>
+    <script src="../../../_static/js/custom.js?v=956e5d78"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="nbplay.history" href="../history/index.html" />
+    <link rel="prev" title="nbplay.components" href="../components/index.html" />
+    <script>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem("fuma-theme");
+          if (stored) {
+            root.classList.add(stored === "dark" ? "dark" : "light");
+            root.style.colorScheme = stored === "dark" ? "dark" : "light";
+          }
+          if (localStorage.getItem("fuma-sidebar") === "collapsed") root.dataset.sidebarCollapsed = "true";
+          if (localStorage.getItem("fuma-toc") === "collapsed") root.dataset.tocCollapsed = "true";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+<body class="fd-body" data-layout="docs" data-toc-style="normal" data-open-level="0">
+<div id="fd-layout"><header id="fd-subnav">
+  <div class="fd-subnav-inner">
+    <button type="button" class="fd-icon-button fd-sidebar-toggle" aria-controls="fd-sidebar" aria-expanded="false" aria-label="Toggle navigation" title="Toggle navigation">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+    </button><a class="fd-brand" href="../../../index.html"><span class="fd-brand-name">nbplay v0.3.0</span>
+</a>
+
+    <div class="fd-nav-actions">
+      <button type="button" class="fd-icon-button" data-fd-search-open aria-label="Search" title="Search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+      <a class="fd-icon-button" href="https://github.com/1kbgz/nbplay" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+      <button type="button" class="fd-icon-button fd-theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon fd-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon fd-icon-dark"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside id="fd-sidebar" aria-label="Documentation">
+  <div class="fd-sidebar-header">
+    <div class="fd-sidebar-brand-row"><a class="fd-brand" href="../../../index.html"><span class="fd-brand-name">nbplay v0.3.0</span>
+</a>
+      <button type="button" class="fd-icon-button fd-sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+    </div>
+    <button type="button" class="fd-search-trigger" data-fd-search-open title="Search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Search</span><kbd class="fd-kbd">/</kbd>
+    </button>
+  </div>
+
+  <nav class="fd-sidebar-nav">
+    <div class="fd-sidebar-group">
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <details class="fd-folder" open>
+      <summary class="fd-folder-summary" title="Toggle section: API Reference">
+        <a class="fd-link" href="../../index.html">
+          <span class="fd-link-text">API Reference</span>
+        </a>
+        <span class="fd-folder-marker" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg></span>
+      </summary>
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <details class="fd-folder" open>
+      <summary class="fd-folder-summary" title="Toggle section: nbplay">
+        <a class="fd-link" href="../index.html">
+          <span class="fd-link-text">nbplay</span>
+        </a>
+        <span class="fd-folder-marker" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg></span>
+      </summary>
+      
+<ul class="fd-tree">
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../components/index.html">
+      <span class="fd-link-text">nbplay.components</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link fd-current" href="#">
+      <span class="fd-link-text">nbplay.descriptors</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../history/index.html">
+      <span class="fd-link-text">nbplay.history</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../midi/index.html">
+      <span class="fd-link-text">nbplay.midi</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../midi_learn/index.html">
+      <span class="fd-link-text">nbplay.midi_learn</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../models/index.html">
+      <span class="fd-link-text">nbplay.models</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../nbplay/index.html">
+      <span class="fd-link-text">nbplay.nbplay</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../views/index.html">
+      <span class="fd-link-text">nbplay.views</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../widget/index.html">
+      <span class="fd-link-text">nbplay.widget</span>
+    </a>
+  </li>
+</ul>
+    </details>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../test_all/index.html">
+      <span class="fd-link-text">test_all</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../test_views/index.html">
+      <span class="fd-link-text">test_views</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../spaday_bridge/index.html">
+      <span class="fd-link-text">spaday_bridge</span>
+    </a>
+  </li>
+</ul>
+    </details>
+  </li>
+</ul>
+    </div>
+  </nav>
+
+  <div class="fd-sidebar-footer">
+    <div class="fd-toolbar">
+      <a class="fd-toolbar-item" href="https://github.com/1kbgz/nbplay" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+      <div class="fd-theme-switch" role="group" aria-label="Theme">
+        <button type="button" class="fd-theme-option" data-fd-theme="light" aria-label="Light theme" title="Light theme"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></button>
+        <button type="button" class="fd-theme-option" data-fd-theme="dark" aria-label="Dark theme" title="Dark theme"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9"/></svg></button>
+      </div>
+    </div>
+  </div>
+</aside>
+<button type="button" id="fd-sidebar-restore" class="fd-icon-button" aria-label="Expand sidebar" title="Expand sidebar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+<div class="fd-sidebar-scrim" hidden></div>
+  <div id="fd-toc-popover">
+    <button type="button" class="fd-toc-trigger" aria-expanded="false" aria-controls="fd-toc-mobile" title="On this page">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span>On this page</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div id="fd-toc-mobile" hidden><ul class="fd-toc-list">
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#attributes">Attributes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#classes">Classes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#functions">Functions</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#module-contents">Module Contents</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._PREVIEW_MAX_FRAMES">_PREVIEW_MAX_FRAMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_step">_default_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_steps">_default_steps()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DEFAULT_PAD_NOTES">_DEFAULT_PAD_NOTES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._PAD_MAX_COUNT">_PAD_MAX_COUNT</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_int">_clamp_int()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_midi_note">_clamp_midi_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_velocity">_clamp_velocity()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._pack_float32">_pack_float32()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._unpack_float32">_unpack_float32()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._decimate_samples">_decimate_samples()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_number_list">_resize_number_list()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._measure_beats">_measure_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._step_duration_for_length">_step_duration_for_length()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_pad_notes">_resize_pad_notes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_pad_velocities">_resize_pad_velocities()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._safe_trait_name">_safe_trait_name()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.EffectPlugin">EffectPlugin</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._VALID_TYPES">EffectPlugin._VALID_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._FILTER_TYPES">EffectPlugin._FILTER_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.type">EffectPlugin.type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.enabled">EffectPlugin.enabled</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.params">EffectPlugin.params</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._param">EffectPlugin._param()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._number">EffectPlugin._number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._normalize_params">EffectPlugin._normalize_params()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.to_dict">EffectPlugin.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__repr__">EffectPlugin.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__eq__">EffectPlugin.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__hash__">EffectPlugin.__hash__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._json_safe_effect_value">_json_safe_effect_value()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._freeze_effect_value">_freeze_effect_value()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_effect">_normalize_effect()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_effects">_normalize_effects()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._set_effect_enabled">_set_effect_enabled()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamped_number">_clamped_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_mixer_channel">_normalize_mixer_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_return_bus">_normalize_return_bus()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._pad_sends">_pad_sends()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clip_id">_clip_id()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._positive_number">_positive_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._nonnegative_number">_nonnegative_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._TIMELINE_INPUTS">_TIMELINE_INPUTS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._CLIP_KINDS">_CLIP_KINDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_event">_normalize_midi_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_events">_normalize_midi_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._steps_to_events">_steps_to_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_timeline_track">_normalize_timeline_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_timeline_tracks">_normalize_timeline_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_audio_clip">_normalize_audio_clip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_audio_clips">_normalize_audio_clips()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.AudioClip">AudioClip</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip._data">AudioClip._data</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.to_dict">AudioClip.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.__repr__">AudioClip.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.__eq__">AudioClip.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.TimelineTrack">TimelineTrack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack._data">TimelineTrack._data</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.to_dict">TimelineTrack.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.__repr__">TimelineTrack.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.__eq__">TimelineTrack.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.PadAction">PadAction</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction._VALID_TYPES">PadAction._VALID_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.type">PadAction.type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.note">PadAction.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.velocity">PadAction.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.trait">PadAction.trait</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.value">PadAction.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.label">PadAction.label</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.slice_index">PadAction.slice_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.to_dict">PadAction.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.__repr__">PadAction.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.__eq__">PadAction.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_pad_action">_normalize_pad_action()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_pad_actions">_normalize_pad_actions()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_zone">_normalize_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_zones">_normalize_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_sample_slices">_normalize_sample_slices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.THEMES">THEMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.render_waveform">render_waveform()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._LAUNCH_QUANTIZE">_LAUNCH_QUANTIZE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._slot_voices">_slot_voices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_launcher_slot">_normalize_launcher_slot()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.KeyboardRoute">KeyboardRoute</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute._VALID_MATCHES">KeyboardRoute._VALID_MATCHES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute._VALID_ZONES">KeyboardRoute._VALID_ZONES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.channel_index">KeyboardRoute.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.match">KeyboardRoute.match</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.zone">KeyboardRoute.zone</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.octave">KeyboardRoute.octave</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.note">KeyboardRoute.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.notes">KeyboardRoute.notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.to_dict">KeyboardRoute.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__repr__">KeyboardRoute.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__eq__">KeyboardRoute.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__hash__">KeyboardRoute.__hash__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_pad_notes">_default_pad_notes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._positive_pad_dimension">_positive_pad_dimension()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._build_route">_build_route()</a>
+  </li>
+</ul>
+</div>
+  </div>
+
+  <main id="fd-main">
+    <article class="fd-page">
+<nav class="fd-breadcrumbs" aria-label="Breadcrumbs">
+  <ol>
+    <li>
+      <a href="../../index.html">API Reference</a>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+    </li>
+    <li>
+      <a href="../index.html">nbplay</a>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+    </li>
+    <li aria-current="page">nbplay.descriptors</li>
+  </ol>
+</nav>
+      <div class="fd-prose">
+  <section id="module-nbplay.descriptors">
+<span id="nbplay-descriptors"></span><h1>nbplay.descriptors<a class="headerlink" href="#module-nbplay.descriptors" title="Link to this heading">¶</a></h1>
+<p>Validated descriptors and normalizers shared by the widgets and the views.</p>
+<p>The traitlets widgets in <a class="reference internal" href="../widget/index.html#module-nbplay.widget" title="nbplay.widget"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nbplay.widget</span></code></a> and the pydantic models in
+<a class="reference internal" href="../models/index.html#module-nbplay.models" title="nbplay.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nbplay.models</span></code></a> accept the same dict shapes for effects, mixer channels,
+timeline tracks and clips, pad actions, sampler zones and slices, launcher
+slots and keyboard routes. The descriptor classes (<a class="reference internal" href="#nbplay.descriptors.EffectPlugin" title="nbplay.descriptors.EffectPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">EffectPlugin</span></code></a>,
+<a class="reference internal" href="#nbplay.descriptors.AudioClip" title="nbplay.descriptors.AudioClip"><code class="xref py py-class docutils literal notranslate"><span class="pre">AudioClip</span></code></a>, <a class="reference internal" href="#nbplay.descriptors.TimelineTrack" title="nbplay.descriptors.TimelineTrack"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimelineTrack</span></code></a>, <a class="reference internal" href="#nbplay.descriptors.PadAction" title="nbplay.descriptors.PadAction"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadAction</span></code></a>,
+<a class="reference internal" href="#nbplay.descriptors.KeyboardRoute" title="nbplay.descriptors.KeyboardRoute"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyboardRoute</span></code></a>) are the notebook-facing way to build them, and the
+<code class="docutils literal notranslate"><span class="pre">_normalize_*</span></code> functions are what both layers run on assignment.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._PREVIEW_MAX_FRAMES" title="nbplay.descriptors._PREVIEW_MAX_FRAMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PREVIEW_MAX_FRAMES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._DEFAULT_PAD_NOTES" title="nbplay.descriptors._DEFAULT_PAD_NOTES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DEFAULT_PAD_NOTES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._PAD_MAX_COUNT" title="nbplay.descriptors._PAD_MAX_COUNT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PAD_MAX_COUNT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._TIMELINE_INPUTS" title="nbplay.descriptors._TIMELINE_INPUTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_INPUTS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._CLIP_KINDS" title="nbplay.descriptors._CLIP_KINDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_CLIP_KINDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors.THEMES" title="nbplay.descriptors.THEMES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">THEMES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._LAUNCH_QUANTIZE" title="nbplay.descriptors._LAUNCH_QUANTIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_LAUNCH_QUANTIZE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.EffectPlugin" title="nbplay.descriptors.EffectPlugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EffectPlugin</span></code></a></p></td>
+<td><p>Validated Web Audio effect descriptor for mixer insert chains.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors.AudioClip" title="nbplay.descriptors.AudioClip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioClip</span></code></a></p></td>
+<td><p>Serializable audio clip descriptor for timeline lanes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.TimelineTrack" title="nbplay.descriptors.TimelineTrack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineTrack</span></code></a></p></td>
+<td><p>Serializable track-lane descriptor for <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors.PadAction" title="nbplay.descriptors.PadAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadAction</span></code></a></p></td>
+<td><p>Validated pad action descriptor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.KeyboardRoute" title="nbplay.descriptors.KeyboardRoute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardRoute</span></code></a></p></td>
+<td><p>Validated route descriptor for keyboard → sampler mapping.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._default_step" title="nbplay.descriptors._default_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_step</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._default_steps" title="nbplay.descriptors._default_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_steps</span></code></a>(length)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._clamp_int" title="nbplay.descriptors._clamp_int"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clamp_int</span></code></a>(value, low, high)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._clamp_midi_note" title="nbplay.descriptors._clamp_midi_note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clamp_midi_note</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._clamp_velocity" title="nbplay.descriptors._clamp_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clamp_velocity</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._pack_float32" title="nbplay.descriptors._pack_float32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_pack_float32</span></code></a>(samples)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._unpack_float32" title="nbplay.descriptors._unpack_float32"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_unpack_float32</span></code></a>(data)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._decimate_samples" title="nbplay.descriptors._decimate_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_decimate_samples</span></code></a>(samples[, max_points])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._resize_number_list" title="nbplay.descriptors._resize_number_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_resize_number_list</span></code></a>(values, count, fill, clamp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._measure_beats" title="nbplay.descriptors._measure_beats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_measure_beats</span></code></a>(time_signature_num, time_signature_den)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._step_duration_for_length" title="nbplay.descriptors._step_duration_for_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_step_duration_for_length</span></code></a>(length[, measures, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._resize_pad_notes" title="nbplay.descriptors._resize_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_resize_pad_notes</span></code></a>(notes, pad_count)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._resize_pad_velocities" title="nbplay.descriptors._resize_pad_velocities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_resize_pad_velocities</span></code></a>(velocities, pad_count[, velocity])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._safe_trait_name" title="nbplay.descriptors._safe_trait_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_safe_trait_name</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._json_safe_effect_value" title="nbplay.descriptors._json_safe_effect_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_safe_effect_value</span></code></a>(value[, path])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._freeze_effect_value" title="nbplay.descriptors._freeze_effect_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_freeze_effect_value</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_effect" title="nbplay.descriptors._normalize_effect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_effect</span></code></a>(effect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_effects" title="nbplay.descriptors._normalize_effects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_effects</span></code></a>(effects)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._set_effect_enabled" title="nbplay.descriptors._set_effect_enabled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_set_effect_enabled</span></code></a>(effect, enabled)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._clamped_number" title="nbplay.descriptors._clamped_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clamped_number</span></code></a>(value, low, high, name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_mixer_channel" title="nbplay.descriptors._normalize_mixer_channel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_mixer_channel</span></code></a>(channel[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_return_bus" title="nbplay.descriptors._normalize_return_bus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_return_bus</span></code></a>(bus[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._pad_sends" title="nbplay.descriptors._pad_sends"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_pad_sends</span></code></a>(sends, count)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._clip_id" title="nbplay.descriptors._clip_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_clip_id</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._positive_number" title="nbplay.descriptors._positive_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_number</span></code></a>(value, name[, minimum, maximum])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._nonnegative_number" title="nbplay.descriptors._nonnegative_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_nonnegative_number</span></code></a>(value, name[, maximum])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_midi_event" title="nbplay.descriptors._normalize_midi_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_midi_event</span></code></a>(event[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_midi_events" title="nbplay.descriptors._normalize_midi_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_midi_events</span></code></a>(events)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._steps_to_events" title="nbplay.descriptors._steps_to_events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_steps_to_events</span></code></a>(voices_data[, step_duration])</p></td>
+<td><p>Expand sequencer voices (lists of step dicts) into MIDI events in beats.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_timeline_track" title="nbplay.descriptors._normalize_timeline_track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_track</span></code></a>(track[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_timeline_tracks" title="nbplay.descriptors._normalize_timeline_tracks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_timeline_tracks</span></code></a>(tracks)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_audio_clip" title="nbplay.descriptors._normalize_audio_clip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clip</span></code></a>(clip[, index, track_count])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_audio_clips" title="nbplay.descriptors._normalize_audio_clips"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_audio_clips</span></code></a>(clips[, track_count])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_pad_action" title="nbplay.descriptors._normalize_pad_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_action</span></code></a>(action[, default_note, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_pad_actions" title="nbplay.descriptors._normalize_pad_actions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_pad_actions</span></code></a>(actions, pad_count[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_zone" title="nbplay.descriptors._normalize_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zone</span></code></a>(zone[, index])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_zones" title="nbplay.descriptors._normalize_zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_zones</span></code></a>(zones)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_sample_slices" title="nbplay.descriptors._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.render_waveform" title="nbplay.descriptors.render_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_waveform</span></code></a>(oscillator_type, frequency, amplitude, ...)</p></td>
+<td><p>The waveform preview for an oscillator as little-endian float32 bytes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._slot_voices" title="nbplay.descriptors._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
+<td><p>Coerce a pattern into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> (list of voices, each a list of step dicts).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_launcher_slot" title="nbplay.descriptors._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._default_pad_notes" title="nbplay.descriptors._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
+<td><p>Default pad notes starting at MIDI 36 (C2), ascending chromatically.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._positive_pad_dimension" title="nbplay.descriptors._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
+<td><p>Clamp pad grid dimensions to at least one row/column.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._build_route" title="nbplay.descriptors._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
+<td><p>Build a <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> from kwargs.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._PREVIEW_MAX_FRAMES">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_PREVIEW_MAX_FRAMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2048</span></em><a class="headerlink" href="#nbplay.descriptors._PREVIEW_MAX_FRAMES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._default_step">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_default_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_default_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._default_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._default_steps">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_default_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_default_steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._default_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._DEFAULT_PAD_NOTES">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_DEFAULT_PAD_NOTES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[48,</span> <span class="pre">52,</span> <span class="pre">55,</span> <span class="pre">59,</span> <span class="pre">60,</span> <span class="pre">64,</span> <span class="pre">67,</span> <span class="pre">71]</span></em><a class="headerlink" href="#nbplay.descriptors._DEFAULT_PAD_NOTES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._PAD_MAX_COUNT">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_PAD_MAX_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#nbplay.descriptors._PAD_MAX_COUNT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._clamp_int">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_clamp_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_clamp_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._clamp_int" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._clamp_midi_note">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_clamp_midi_note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_clamp_midi_note"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._clamp_midi_note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._clamp_velocity">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_clamp_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_clamp_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._clamp_velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._pack_float32">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_pack_float32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_pack_float32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._pack_float32" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._unpack_float32">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_unpack_float32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_unpack_float32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._unpack_float32" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._decimate_samples">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_decimate_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_decimate_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._decimate_samples" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._resize_number_list">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_resize_number_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_resize_number_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._resize_number_list" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._measure_beats">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_measure_beats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_signature_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature_den</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_measure_beats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._measure_beats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._step_duration_for_length">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_step_duration_for_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature_den</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_step_duration_for_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._step_duration_for_length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._resize_pad_notes">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_resize_pad_notes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">notes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_resize_pad_notes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._resize_pad_notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._resize_pad_velocities">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_resize_pad_velocities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_resize_pad_velocities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._resize_pad_velocities" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._safe_trait_name">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_safe_trait_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_safe_trait_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._safe_trait_name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">EffectPlugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin" title="Link to this definition">¶</a></dt>
+<dd><p>Validated Web Audio effect descriptor for mixer insert chains.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin._VALID_TYPES">
+<span class="sig-name descname"><span class="pre">_VALID_TYPES</span></span><a class="headerlink" href="#nbplay.descriptors.EffectPlugin._VALID_TYPES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin._FILTER_TYPES">
+<span class="sig-name descname"><span class="pre">_FILTER_TYPES</span></span><a class="headerlink" href="#nbplay.descriptors.EffectPlugin._FILTER_TYPES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.type">
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.enabled" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.params">
+<span class="sig-name descname"><span class="pre">params</span></span><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin._param">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin._param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin._param" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin._number">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin._number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin._number" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin._normalize_params">
+<span class="sig-name descname"><span class="pre">_normalize_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin._normalize_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin._normalize_params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.__eq__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.EffectPlugin.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#EffectPlugin.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.EffectPlugin.__hash__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._json_safe_effect_value">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_json_safe_effect_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'effect</span> <span class="pre">param'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_json_safe_effect_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._json_safe_effect_value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._freeze_effect_value">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_freeze_effect_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_freeze_effect_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._freeze_effect_value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_effect">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_effect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_effects">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_effects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effects</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_effects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_effects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._set_effect_enabled">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_set_effect_enabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_set_effect_enabled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._set_effect_enabled" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._clamped_number">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_clamped_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_clamped_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._clamped_number" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_mixer_channel">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_mixer_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_mixer_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_mixer_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_return_bus">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_return_bus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_return_bus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_return_bus" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._pad_sends">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_pad_sends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sends</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_pad_sends"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._pad_sends" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._clip_id">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_clip_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_clip_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._clip_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._positive_number">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_positive_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_positive_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._positive_number" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._nonnegative_number">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_nonnegative_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_nonnegative_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._nonnegative_number" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._TIMELINE_INPUTS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_TIMELINE_INPUTS</span></span><a class="headerlink" href="#nbplay.descriptors._TIMELINE_INPUTS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._CLIP_KINDS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_CLIP_KINDS</span></span><a class="headerlink" href="#nbplay.descriptors._CLIP_KINDS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_midi_event">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_midi_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_midi_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_midi_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_midi_events">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_midi_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_midi_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_midi_events" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._steps_to_events">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_steps_to_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voices_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_steps_to_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._steps_to_events" title="Link to this definition">¶</a></dt>
+<dd><p>Expand sequencer voices (lists of step dicts) into MIDI events in beats.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_timeline_track">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_timeline_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_timeline_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_timeline_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_timeline_tracks">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_timeline_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_timeline_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_timeline_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_audio_clip">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_audio_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_audio_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_audio_clip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_audio_clips">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_audio_clips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clips</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_audio_clips"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_audio_clips" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.descriptors.AudioClip">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">AudioClip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recorded</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audio_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'recording'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blob_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'audio'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#AudioClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.AudioClip" title="Link to this definition">¶</a></dt>
+<dd><p>Serializable audio clip descriptor for timeline lanes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.AudioClip._data">
+<span class="sig-name descname"><span class="pre">_data</span></span><a class="headerlink" href="#nbplay.descriptors.AudioClip._data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.AudioClip.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#AudioClip.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.AudioClip.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.AudioClip.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#AudioClip.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.AudioClip.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.AudioClip.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#AudioClip.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.AudioClip.__eq__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.descriptors.TimelineTrack">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">TimelineTrack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Track'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'microphone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#TimelineTrack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.TimelineTrack" title="Link to this definition">¶</a></dt>
+<dd><p>Serializable track-lane descriptor for <code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.TimelineTrack._data">
+<span class="sig-name descname"><span class="pre">_data</span></span><a class="headerlink" href="#nbplay.descriptors.TimelineTrack._data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.TimelineTrack.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#TimelineTrack.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.TimelineTrack.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.TimelineTrack.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#TimelineTrack.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.TimelineTrack.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.TimelineTrack.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#TimelineTrack.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.TimelineTrack.__eq__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">PadAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'note'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#PadAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.PadAction" title="Link to this definition">¶</a></dt>
+<dd><p>Validated pad action descriptor.</p>
+<p><code class="docutils literal notranslate"><span class="pre">type=&quot;note&quot;</span></code> is the current playback path. <code class="docutils literal notranslate"><span class="pre">type=&quot;trait&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">type=&quot;event&quot;</span></code> provide a stable synced shape for future controller pads.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction._VALID_TYPES">
+<span class="sig-name descname"><span class="pre">_VALID_TYPES</span></span><a class="headerlink" href="#nbplay.descriptors.PadAction._VALID_TYPES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'note'</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.note">
+<span class="sig-name descname"><span class="pre">note</span></span><a class="headerlink" href="#nbplay.descriptors.PadAction.note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.trait">
+<span class="sig-name descname"><span class="pre">trait</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.trait" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.value" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.label" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.slice_index">
+<span class="sig-name descname"><span class="pre">slice_index</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.PadAction.slice_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#PadAction.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.PadAction.to_dict" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#PadAction.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.PadAction.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.PadAction.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#PadAction.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.PadAction.__eq__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_pad_action">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_pad_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_pad_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_pad_action" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_pad_actions">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_pad_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_pad_actions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_pad_actions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_zone">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zone</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_zone" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_zones">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_zones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_sample_slices">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_sample_slices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_sample_slices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_sample_slices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors.THEMES">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">THEMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('',</span> <span class="pre">'light',</span> <span class="pre">'dark',</span> <span class="pre">'studio',</span> <span class="pre">'flat',</span> <span class="pre">'cube',</span> <span class="pre">'one',</span> <span class="pre">'grim',</span> <span class="pre">'pro',</span> <span class="pre">'fruit')</span></em><a class="headerlink" href="#nbplay.descriptors.THEMES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors.render_waveform">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">render_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscillator_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#render_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.render_waveform" title="Link to this definition">¶</a></dt>
+<dd><p>The waveform preview for an oscillator as little-endian float32 bytes.</p>
+<p>About three cycles of the periodic oscillators, capped at
+<code class="docutils literal notranslate"><span class="pre">_PREVIEW_MAX_FRAMES</span></code>; 1024 frames of noise.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._LAUNCH_QUANTIZE">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_LAUNCH_QUANTIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('bar',</span> <span class="pre">'beat',</span> <span class="pre">'none')</span></em><a class="headerlink" href="#nbplay.descriptors._LAUNCH_QUANTIZE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._slot_voices">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_slot_voices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_slot_voices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._slot_voices" title="Link to this definition">¶</a></dt>
+<dd><p>Coerce a pattern into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> (list of voices, each a list of step dicts).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_launcher_slot">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_launcher_slot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_launcher_slot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_launcher_slot" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">KeyboardRoute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#KeyboardRoute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute" title="Link to this definition">¶</a></dt>
+<dd><p>Validated route descriptor for keyboard → sampler mapping.</p>
+<p>Determines which MIDI notes a <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> or
+<code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code> routes to a specific sampler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel_index</strong> – The sampler’s channel index on the session bus (≥ 0).</p></li>
+<li><p><strong>match</strong> – One of <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;zone&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;octave&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;note&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;notes&quot;</span></code>.</p></li>
+<li><p><strong>zone</strong> – Required when <em>match=”zone”</em>. <code class="docutils literal notranslate"><span class="pre">&quot;upper&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;lower&quot;</span></code>.</p></li>
+<li><p><strong>octave</strong> – Required when <em>match=”octave”</em>. MIDI octave 0–9.</p></li>
+<li><p><strong>note</strong> – Required when <em>match=”note”</em>. Single MIDI note 0–127.</p></li>
+<li><p><strong>notes</strong> – Required when <em>match=”notes”</em>. Non-empty list of MIDI notes 0–127.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute._VALID_MATCHES">
+<span class="sig-name descname"><span class="pre">_VALID_MATCHES</span></span><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute._VALID_MATCHES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute._VALID_ZONES">
+<span class="sig-name descname"><span class="pre">_VALID_ZONES</span></span><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute._VALID_ZONES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.match">
+<span class="sig-name descname"><span class="pre">match</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'all'</span></em><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.match" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.zone">
+<span class="sig-name descname"><span class="pre">zone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.zone" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.octave">
+<span class="sig-name descname"><span class="pre">octave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.octave" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.note">
+<span class="sig-name descname"><span class="pre">note</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.note" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.notes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#KeyboardRoute.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize to the dict format stored in <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict with keys <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">match</span></code>, and optional fields.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#KeyboardRoute.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#KeyboardRoute.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.__eq__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.descriptors.KeyboardRoute.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#KeyboardRoute.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.KeyboardRoute.__hash__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._default_pad_notes">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_default_pad_notes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_default_pad_notes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._default_pad_notes" title="Link to this definition">¶</a></dt>
+<dd><p>Default pad notes starting at MIDI 36 (C2), ascending chromatically.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._positive_pad_dimension">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_positive_pad_dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_positive_pad_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._positive_pad_dimension" title="Link to this definition">¶</a></dt>
+<dd><p>Clamp pad grid dimensions to at least one row/column.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._build_route">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_build_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zone</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_build_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._build_route" title="Link to this definition">¶</a></dt>
+<dd><p>Build a <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> from kwargs.</p>
+<p>Shared by <code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>channel_index</strong> – Sampler channel index.</p></li>
+<li><p><strong>zone</strong> – <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;upper&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;lower&quot;</span></code>.
+Invalid values raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><strong>octave</strong> – MIDI octave (0–9).</p></li>
+<li><p><strong>note</strong> – Single MIDI note (0–127).</p></li>
+<li><p><strong>notes</strong> – Non-empty list of MIDI notes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A validated <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+<nav class="fd-pagination" aria-label="Pagination">
+  <a class="fd-pagination-card fd-pagination-prev" href="../components/index.html" title="Previous: nbplay.components">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m15 18-6-6 6-6"/></svg>
+    <span class="fd-pagination-text">
+      <span class="fd-pagination-label">Previous</span>
+      <span class="fd-pagination-title">nbplay.components</span>
+    </span>
+  </a>
+  <a class="fd-pagination-card fd-pagination-next" href="../history/index.html" title="Next: nbplay.history">
+    <span class="fd-pagination-text">
+      <span class="fd-pagination-label">Next</span>
+      <span class="fd-pagination-title">nbplay.history</span>
+    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m9 18 6-6-6-6"/></svg>
+  </a>
+</nav>
+<footer id="fd-footer">
+  <p class="fd-footer-meta"><span>&#169; the nbplay authors</span><span>Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.</span>
+  </p>
+</footer>
+    </article>
+  </main>
+<nav id="fd-toc" aria-label="On this page">
+  <div class="fd-toc-header">
+    <p class="fd-toc-title"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>On this page</p>
+    <button type="button" class="fd-icon-button fd-toc-collapse" aria-label="Collapse page navigation" title="Collapse page navigation" aria-controls="fd-toc" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg></button>
+  </div>
+  <div class="fd-toc-body"><svg class="fd-toc-rail" aria-hidden="true" preserveAspectRatio="none">
+      <path class="fd-toc-track" fill="none" />
+      <path class="fd-toc-thumb" fill="none" />
+    </svg><ul class="fd-toc-list">
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#attributes">Attributes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#classes">Classes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#functions">Functions</a>
+  </li>
+  <li class="fd-toc-item" data-depth="1">
+    <a href="#module-contents">Module Contents</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._PREVIEW_MAX_FRAMES">_PREVIEW_MAX_FRAMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_step">_default_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_steps">_default_steps()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DEFAULT_PAD_NOTES">_DEFAULT_PAD_NOTES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._PAD_MAX_COUNT">_PAD_MAX_COUNT</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_int">_clamp_int()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_midi_note">_clamp_midi_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamp_velocity">_clamp_velocity()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._pack_float32">_pack_float32()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._unpack_float32">_unpack_float32()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._decimate_samples">_decimate_samples()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_number_list">_resize_number_list()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._measure_beats">_measure_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._step_duration_for_length">_step_duration_for_length()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_pad_notes">_resize_pad_notes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._resize_pad_velocities">_resize_pad_velocities()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._safe_trait_name">_safe_trait_name()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.EffectPlugin">EffectPlugin</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._VALID_TYPES">EffectPlugin._VALID_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._FILTER_TYPES">EffectPlugin._FILTER_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.type">EffectPlugin.type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.enabled">EffectPlugin.enabled</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.params">EffectPlugin.params</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._param">EffectPlugin._param()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._number">EffectPlugin._number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin._normalize_params">EffectPlugin._normalize_params()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.to_dict">EffectPlugin.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__repr__">EffectPlugin.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__eq__">EffectPlugin.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.EffectPlugin.__hash__">EffectPlugin.__hash__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._json_safe_effect_value">_json_safe_effect_value()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._freeze_effect_value">_freeze_effect_value()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_effect">_normalize_effect()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_effects">_normalize_effects()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._set_effect_enabled">_set_effect_enabled()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clamped_number">_clamped_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_mixer_channel">_normalize_mixer_channel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_return_bus">_normalize_return_bus()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._pad_sends">_pad_sends()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._clip_id">_clip_id()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._positive_number">_positive_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._nonnegative_number">_nonnegative_number()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._TIMELINE_INPUTS">_TIMELINE_INPUTS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._CLIP_KINDS">_CLIP_KINDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_event">_normalize_midi_event()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_events">_normalize_midi_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._steps_to_events">_steps_to_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_timeline_track">_normalize_timeline_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_timeline_tracks">_normalize_timeline_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_audio_clip">_normalize_audio_clip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_audio_clips">_normalize_audio_clips()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.AudioClip">AudioClip</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip._data">AudioClip._data</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.to_dict">AudioClip.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.__repr__">AudioClip.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.AudioClip.__eq__">AudioClip.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.TimelineTrack">TimelineTrack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack._data">TimelineTrack._data</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.to_dict">TimelineTrack.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.__repr__">TimelineTrack.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.TimelineTrack.__eq__">TimelineTrack.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.PadAction">PadAction</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction._VALID_TYPES">PadAction._VALID_TYPES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.type">PadAction.type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.note">PadAction.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.velocity">PadAction.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.trait">PadAction.trait</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.value">PadAction.value</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.label">PadAction.label</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.slice_index">PadAction.slice_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.to_dict">PadAction.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.__repr__">PadAction.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.PadAction.__eq__">PadAction.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_pad_action">_normalize_pad_action()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_pad_actions">_normalize_pad_actions()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_zone">_normalize_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_zones">_normalize_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_sample_slices">_normalize_sample_slices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.THEMES">THEMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.render_waveform">render_waveform()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._LAUNCH_QUANTIZE">_LAUNCH_QUANTIZE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._slot_voices">_slot_voices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_launcher_slot">_normalize_launcher_slot()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.KeyboardRoute">KeyboardRoute</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute._VALID_MATCHES">KeyboardRoute._VALID_MATCHES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute._VALID_ZONES">KeyboardRoute._VALID_ZONES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.channel_index">KeyboardRoute.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.match">KeyboardRoute.match</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.zone">KeyboardRoute.zone</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.octave">KeyboardRoute.octave</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.note">KeyboardRoute.note</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.notes">KeyboardRoute.notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.to_dict">KeyboardRoute.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__repr__">KeyboardRoute.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__eq__">KeyboardRoute.__eq__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.descriptors.KeyboardRoute.__hash__">KeyboardRoute.__hash__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_pad_notes">_default_pad_notes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._positive_pad_dimension">_positive_pad_dimension()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._build_route">_build_route()</a>
+  </li>
+</ul>
+
+  </div>
+  <div class="fd-toc-actions">
+    <a class="fd-toc-action" href="https://github.com/1kbgz/nbplay/edit/HEAD/autoapi/nbplay/descriptors/index.rst" target="_blank" rel="noopener" title="Edit this page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg><span>Edit this page</span></a>
+    <a class="fd-toc-action" href="../../../_sources/autoapi/nbplay/descriptors/index.rst.txt" rel="nofollow" title="View source"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg><span>View source</span></a>
+  </div>
+</nav>
+<button type="button" id="fd-toc-restore" class="fd-icon-button" aria-label="Expand page navigation" title="Expand page navigation" aria-controls="fd-toc" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg></button>
+</div>
+<dialog id="fd-search-dialog" aria-label="Search">
+  <form class="fd-search-panel" method="dialog" role="search">
+    <div class="fd-search-field">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="fd-search-input" autocomplete="off" spellcheck="false" placeholder="Search documentation..." aria-label="Search" />
+      <kbd class="fd-kbd">Esc</kbd>
+    </div>
+    <div id="fd-search-results" role="listbox" aria-label="Search results"></div>
+    <p id="fd-search-empty" class="fd-search-empty" hidden>No results found.</p>
+  </form>
+</dialog>
+  </body>
+</html>

@@ -101,6 +101,11 @@
     </a>
   </li>
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/descriptors/index.html">
+      <span class="fd-link-text">nbplay.descriptors</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/history/index.html">
       <span class="fd-link-text">nbplay.history</span>
     </a>
@@ -426,37 +431,40 @@ package builds WebAssembly bindings for browser-facing Rust helpers.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code></p></td>
 <td><p>Python anywidget classes, session orchestration, and notebook-facing helper APIs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/descriptors.py</span></code></p></td>
+<td><p>Descriptor classes and <code class="docutils literal notranslate"><span class="pre">_normalize_*</span></code> helpers shared by the widgets, the pydantic models and the views.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code></p></td>
 <td><p>Public Python exports for Rust/PyO3 types and widget classes.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rust/src/</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rust/src/</span></code></p></td>
 <td><p>Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rust/python/</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rust/python/</span></code></p></td>
 <td><p>PyO3 wrapper classes exposed as the <code class="docutils literal notranslate"><span class="pre">nbplay.nbplay</span></code> native extension.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code></p></td>
 <td><p>Browser frontends: one anywidget adapter per widget, shared engines, and <code class="docutils literal notranslate"><span class="pre">components/</span></code> (Lit elements).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/css/</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/css/</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">components/</span></code> (tokens plus one stylesheet per element), theme sets, bundled by lightningcss into one file.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/rust/</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/rust/</span></code></p></td>
 <td><p>wasm-bindgen browser bindings around selected Rust functionality.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/tests/</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/tests/</span></code></p></td>
 <td><p>Playwright browser tests using a mock anywidget model and mock Web Audio context.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code></p></td>
 <td><p>Python, Rust-extension, widget, session, and example-notebook regression tests.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">examples/</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">examples/</span></code></p></td>
 <td><p>Executable tutorial notebooks used by users and docs builds.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/</span></code></p></td>
 <td><p>CI for build/test/dist and docs publishing.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code></p></td>
 <td><p>Python, Rust, and JavaScript package/build configuration.</p></td>
 </tr>
 </tbody>
@@ -574,6 +582,8 @@ source checkout can render widgets from Python because those static files are
 generated.</p>
 <section id="shared-python-helpers">
 <h3>Shared Python helpers<a class="headerlink" href="#shared-python-helpers" title="Link to this heading">¶</a></h3>
+<p>These live in <code class="docutils literal notranslate"><span class="pre">nbplay/descriptors.py</span></code>, which imports neither traitlets nor pydantic, so
+<code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/views.py</span></code> use them without importing the widget module.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">_default_step()</span></code> and <code class="docutils literal notranslate"><span class="pre">_default_steps(length)</span></code> build the sequencer’s default
 inactive step dictionaries.</p></li>
@@ -1312,14 +1322,19 @@ follows the same shape. <code class="docutils literal notranslate"><span class="
 <code class="docutils literal notranslate"><span class="pre">control_change</span></code> and <code class="docutils literal notranslate"><span class="pre">send_raw</span></code> call <code class="docutils literal notranslate"><span class="pre">session.command(status_id,</span> <span class="pre">&quot;request&quot;,</span> <span class="pre">{...})</span></code>; transports
 requires the target to be a client-owned field, so <code class="docutils literal notranslate"><span class="pre">MidiOutputStatus.request</span></code> exists only for that,
 and <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> hands any non-transport command object straight to <code class="docutils literal notranslate"><span class="pre">element.command()</span></code>, untagging
-nested transports values (<code class="docutils literal notranslate"><span class="pre">{&quot;Map&quot;:</span> <span class="pre">{...}}</span></code>) first. <code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code> keeps <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> at
+nested transports values (<code class="docutils literal notranslate"><span class="pre">{&quot;Map&quot;:</span> <span class="pre">{...}}</span></code>) first. <code class="docutils literal notranslate"><span class="pre">_Validated.update(**fields)</span></code> validates several fields at once, so
+<code class="docutils literal notranslate"><span class="pre">MixerView.remove_return</span></code> drops a bus and every channel’s send to it in one step and
+<code class="docutils literal notranslate"><span class="pre">SequencerView.load_midi</span></code> replaces tempo, grid and steps together; <code class="docutils literal notranslate"><span class="pre">SequencerConfig.update</span></code> also
+recomputes <code class="docutils literal notranslate"><span class="pre">length</span></code> when a grid field (measures, step duration, meter) changes without an explicit
+length, as the widget’s observers do. <code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code> keeps <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> at
 <code class="docutils literal notranslate"><span class="pre">num_voices</span></code> lists of <code class="docutils literal notranslate"><span class="pre">length</span></code> normalized steps in its after-validator, standing in for the widget’s
-<code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>s; <code class="docutils literal notranslate"><span class="pre">SequencerView.set_step</span></code>, <code class="docutils literal notranslate"><span class="pre">toggle_step</span></code> and <code class="docutils literal notranslate"><span class="pre">clear</span></code> edit that list, and <code class="docutils literal notranslate"><span class="pre">play</span></code> and
+<code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>s; <code class="docutils literal notranslate"><span class="pre">SequencerView.set_step</span></code>, <code class="docutils literal notranslate"><span class="pre">toggle_step</span></code> and <code class="docutils literal notranslate"><span class="pre">clear</span></code> edit that list, <code class="docutils literal notranslate"><span class="pre">to_pattern</span></code>,
+<code class="docutils literal notranslate"><span class="pre">to_step_sequencer</span></code>, <code class="docutils literal notranslate"><span class="pre">to_midi</span></code> and <code class="docutils literal notranslate"><span class="pre">load_midi</span></code> match the widget, and <code class="docutils literal notranslate"><span class="pre">play</span></code> and
 <code class="docutils literal notranslate"><span class="pre">stop</span></code> are <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> commands the wire writes onto the element. <code class="docutils literal notranslate"><span class="pre">SamplerConfig</span></code> treats
 <code class="docutils literal notranslate"><span class="pre">pad_count</span></code> as authoritative for the pad lists, bounds slices by <code class="docutils literal notranslate"><span class="pre">sample_length</span></code> and normalizes zones,
 whose float32 bytes travel inside the list; <code class="docutils literal notranslate"><span class="pre">SamplerView.load_sample</span></code> packs PCM and the decimated
 preview, and <code class="docutils literal notranslate"><span class="pre">capture</span></code> is a <code class="docutils literal notranslate"><span class="pre">request</span></code> command the owning view decodes. <code class="docutils literal notranslate"><span class="pre">LauncherConfig</span></code> normalizes
-slots with the widget’s helper and <code class="docutils literal notranslate"><span class="pre">LauncherView.launch</span></code>, <code class="docutils literal notranslate"><span class="pre">stop_track</span></code>, <code class="docutils literal notranslate"><span class="pre">launch_scene</span></code> and
+slots with the shared <code class="docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code> and <code class="docutils literal notranslate"><span class="pre">LauncherView.launch</span></code>, <code class="docutils literal notranslate"><span class="pre">stop_track</span></code>, <code class="docutils literal notranslate"><span class="pre">launch_scene</span></code> and
 <code class="docutils literal notranslate"><span class="pre">stop_all</span></code> are <code class="docutils literal notranslate"><span class="pre">request</span></code> commands carrying the element’s <code class="docutils literal notranslate"><span class="pre">LaunchRequest</span></code>. <code class="docutils literal notranslate"><span class="pre">TimelineConfig</span></code> keeps
 clips within the lane count and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> within <code class="docutils literal notranslate"><span class="pre">length</span></code>; <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> stays configuration,
 as in the widget, so <code class="docutils literal notranslate"><span class="pre">TimelineView.seek</span></code> assigns it while <code class="docutils literal notranslate"><span class="pre">play</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code> and <code class="docutils literal notranslate"><span class="pre">record</span></code> are status

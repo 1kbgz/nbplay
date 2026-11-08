@@ -70,6 +70,9 @@ Module Contents
    .. py:method:: test_view_builds_the_console_without_a_status_model()
 
 
+   .. py:method:: test_strip_send_and_effect_setters()
+
+
 .. py:class:: TestKeysViews
 
    .. py:method:: test_pads_config_fits_the_grid()
@@ -86,6 +89,12 @@ Module Contents
 .. py:class:: TestSequencerAndSamplerViews
 
    .. py:method:: test_sequencer_config_fits_voices()
+
+
+   .. py:method:: test_sequencer_grid_follows_measures_and_step_duration()
+
+
+   .. py:method:: test_sequencer_rust_and_midi_exports(tmp_path)
 
 
    .. py:method:: test_sampler_config_and_view()

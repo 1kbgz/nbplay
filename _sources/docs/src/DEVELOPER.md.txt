@@ -42,6 +42,7 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 | Path                                              | Responsibility                                                                                             |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                          |
+| `nbplay/descriptors.py`                           | Descriptor classes and `_normalize_*` helpers shared by the widgets, the pydantic models and the views.    |
 | `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                              |
 | `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.         |
 | `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                                      |
@@ -160,6 +161,9 @@ source checkout can render widgets from Python because those static files are
 generated.
 
 ### Shared Python helpers
+
+These live in `nbplay/descriptors.py`, which imports neither traitlets nor pydantic, so
+`nbplay/models.py` and `nbplay/views.py` use them without importing the widget module.
 
 - `_default_step()` and `_default_steps(length)` build the sequencer's default
   inactive step dictionaries.
@@ -869,14 +873,19 @@ follows the same shape. `MidiOutputView` sends through commands: `note_on`, `not
 `control_change` and `send_raw` call `session.command(status_id, "request", {...})`; transports
 requires the target to be a client-owned field, so `MidiOutputStatus.request` exists only for that,
 and `nbplay-wire` hands any non-transport command object straight to `element.command()`, untagging
-nested transports values (`{"Map": {...}}`) first. `SequencerConfig` keeps `voices_data` at
+nested transports values (`{"Map": {...}}`) first. `_Validated.update(**fields)` validates several fields at once, so
+`MixerView.remove_return` drops a bus and every channel's send to it in one step and
+`SequencerView.load_midi` replaces tempo, grid and steps together; `SequencerConfig.update` also
+recomputes `length` when a grid field (measures, step duration, meter) changes without an explicit
+length, as the widget's observers do. `SequencerConfig` keeps `voices_data` at
 `num_voices` lists of `length` normalized steps in its after-validator, standing in for the widget's
-`NoteComposer`s; `SequencerView.set_step`, `toggle_step` and `clear` edit that list, and `play` and
+`NoteComposer`s; `SequencerView.set_step`, `toggle_step` and `clear` edit that list, `to_pattern`,
+`to_step_sequencer`, `to_midi` and `load_midi` match the widget, and `play` and
 `stop` are `is_playing` commands the wire writes onto the element. `SamplerConfig` treats
 `pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
 whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated
 preview, and `capture` is a `request` command the owning view decodes. `LauncherConfig` normalizes
-slots with the widget's helper and `LauncherView.launch`, `stop_track`, `launch_scene` and
+slots with the shared `_normalize_launcher_slot` and `LauncherView.launch`, `stop_track`, `launch_scene` and
 `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
 clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
 as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status

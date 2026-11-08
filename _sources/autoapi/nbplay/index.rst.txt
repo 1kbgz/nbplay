@@ -11,6 +11,7 @@ Submodules
    :maxdepth: 1
 
    /autoapi/nbplay/components/index
+   /autoapi/nbplay/descriptors/index
    /autoapi/nbplay/history/index
    /autoapi/nbplay/midi/index
    /autoapi/nbplay/midi_learn/index
@@ -27,6 +28,7 @@ Attributes
 
    nbplay.__version__
    nbplay.AudioOutput
+   nbplay.THEMES
 
 
 Classes
@@ -58,6 +60,11 @@ Classes
    nbplay.StepSequencer
    nbplay.TransportClock
    nbplay.Velocity
+   nbplay.AudioClip
+   nbplay.EffectPlugin
+   nbplay.KeyboardRoute
+   nbplay.PadAction
+   nbplay.TimelineTrack
    nbplay.History
    nbplay.MidiLearn
 
@@ -587,6 +594,210 @@ Package Contents
 
 .. py:data:: AudioOutput
    :value: None
+
+
+.. py:data:: THEMES
+   :value: ('', 'light', 'dark', 'studio', 'flat', 'cube', 'one', 'grim', 'pro', 'fruit')
+
+
+.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None, kind='audio', events=None, pattern=None)
+
+   Serializable audio clip descriptor for timeline lanes.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:class:: EffectPlugin(type, enabled=True, **params)
+
+   Validated Web Audio effect descriptor for mixer insert chains.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: _FILTER_TYPES
+
+
+   .. py:attribute:: type
+
+
+   .. py:attribute:: enabled
+      :value: True
+
+
+
+   .. py:attribute:: params
+
+
+   .. py:method:: _param(params, *names, default=None)
+      :staticmethod:
+
+
+
+   .. py:method:: _number(params, *names, default, low, high)
+      :classmethod:
+
+
+
+   .. py:method:: _normalize_params(type, params)
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+   .. py:method:: __hash__()
+
+
+.. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
+
+   Validated route descriptor for keyboard → sampler mapping.
+
+   Determines which MIDI notes a ``KeyboardWidget`` or
+   ``MidiKeyboardWidget`` routes to a specific sampler.
+
+   :param channel_index: The sampler's channel index on the session bus (≥ 0).
+   :param match: One of ``"all"``, ``"zone"``, ``"octave"``, ``"note"``, ``"notes"``.
+   :param zone: Required when *match="zone"*. ``"upper"`` or ``"lower"``.
+   :param octave: Required when *match="octave"*. MIDI octave 0–9.
+   :param note: Required when *match="note"*. Single MIDI note 0–127.
+   :param notes: Required when *match="notes"*. Non-empty list of MIDI notes 0–127.
+
+
+   .. py:attribute:: _VALID_MATCHES
+
+
+   .. py:attribute:: _VALID_ZONES
+
+
+   .. py:attribute:: channel_index
+
+
+   .. py:attribute:: match
+      :value: 'all'
+
+
+
+   .. py:attribute:: zone
+      :value: None
+
+
+
+   .. py:attribute:: octave
+      :value: None
+
+
+
+   .. py:attribute:: note
+      :value: None
+
+
+
+   .. py:attribute:: notes
+      :value: None
+
+
+
+   .. py:method:: to_dict() -> dict
+
+      Serialize to the dict format stored in ``sampler_routing``.
+
+      :returns: Dict with keys ``channel_index``, ``match``, and optional fields.
+
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: __eq__(other: object) -> bool
+
+
+   .. py:method:: __hash__() -> int
+
+
+.. py:class:: PadAction(*, type='note', note=60, velocity=None, trait=None, value=None, label=None, slice_index=None)
+
+   Validated pad action descriptor.
+
+   ``type="note"`` is the current playback path. ``type="trait"`` and
+   ``type="event"`` provide a stable synced shape for future controller pads.
+
+
+   .. py:attribute:: _VALID_TYPES
+
+
+   .. py:attribute:: type
+      :value: 'note'
+
+
+
+   .. py:attribute:: note
+
+
+   .. py:attribute:: velocity
+      :value: None
+
+
+
+   .. py:attribute:: trait
+      :value: None
+
+
+
+   .. py:attribute:: value
+      :value: None
+
+
+
+   .. py:attribute:: label
+      :value: ''
+
+
+
+   .. py:attribute:: slice_index
+      :value: None
+
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
+
+
+.. py:class:: TimelineTrack(*, name='Track', channel_index=0, armed=False, muted=False, solo=False, input='microphone', monitor=False)
+
+   Serializable track-lane descriptor for ``TimelineWidget``.
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: to_dict()
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __eq__(other)
 
 
 .. py:class:: History(limit=100, group_window=0.3)

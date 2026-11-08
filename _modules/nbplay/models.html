@@ -507,6 +507,11 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/descriptors/index.html">
+      <span class="fd-link-text">nbplay.descriptors</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/history/index.html">
       <span class="fd-link-text">nbplay.history</span>
     </a>
@@ -603,12 +608,13 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span><span class="p">,</span> <span class="n">model_validator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.widget</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">THEMES</span><span class="p">,</span>
     <span class="n">_clamp_midi_note</span><span class="p">,</span>
     <span class="n">_clamp_velocity</span><span class="p">,</span>
     <span class="n">_default_pad_notes</span><span class="p">,</span>
     <span class="n">_default_steps</span><span class="p">,</span>
+    <span class="n">_measure_beats</span><span class="p">,</span>
     <span class="n">_normalize_audio_clips</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
     <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
@@ -668,15 +674,18 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             <span class="k">return</span>
-        <span class="n">fresh</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_validate</span><span class="p">({</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Assign several fields in one validation, so derived fields see all of them."""</span>
+        <span class="n">fresh</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_validate</span><span class="p">({</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="o">**</span><span class="n">fields</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
             <span class="n">new</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fresh</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">new</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
-                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+                <span class="n">BaseModel</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TransportConfig">
@@ -1037,6 +1046,9 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="n">normalized</span>
 
 
+<span class="n">_GRID_FIELDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"measures"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">})</span>
+
+
 <div class="viewcode-block" id="SequencerConfig">
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SequencerConfig">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SequencerConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
@@ -1044,7 +1056,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    ``voices_data`` always holds ``num_voices`` lists of ``length``</span>
 <span class="sd">    normalized steps; the after-validator resizes them, filling with</span>
-<span class="sd">    default steps, the way the widget's composers do.</span>
+<span class="sd">    default steps, the way the widget's composers do. Assigning a grid</span>
+<span class="sd">    field recomputes ``length`` from measures, meter and step duration.</span>
 <span class="sd">    """</span>
 
     <span class="n">voices_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1081,6 +1094,18 @@ window.runMermaid = runMermaid;</script>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lanes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_normalize_lanes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SequencerConfig.update">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SequencerConfig.update">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+        <span class="c1"># A grid change (measures, step duration, meter) sets the length, as</span>
+        <span class="c1"># the widget's observers do; an explicit length wins.</span>
+        <span class="k">if</span> <span class="s2">"length"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">and</span> <span class="n">_GRID_FIELDS</span> <span class="o">&amp;</span> <span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_GRID_FIELDS</span><span class="p">}</span>
+            <span class="n">beats</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="s2">"measures"</span><span class="p">]</span> <span class="o">*</span> <span class="n">_measure_beats</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s2">"time_signature_num"</span><span class="p">],</span> <span class="n">grid</span><span class="p">[</span><span class="s2">"time_signature_den"</span><span class="p">])</span>
+            <span class="n">fields</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">beats</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">]))))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SequencerConfig._fit_voices">
