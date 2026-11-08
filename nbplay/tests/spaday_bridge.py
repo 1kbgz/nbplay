@@ -1,6 +1,11 @@
-"""A real instrument view comm endpoint for the browser test, driven by JSON lines on stdin.
+"""Real view comm endpoints for the browser test, driven by JSON lines on stdin.
 
-``python spaday_bridge.py <view> [codec]`` where ``view`` is ``transport`` or ``synth``.
+``python spaday_bridge.py <view> [codec]`` serves one instrument view, where
+``view`` names an entry of ``VIEWS``; ``python spaday_bridge.py session``
+serves a :class:`nbplay.views.Session` with one sequencer-and-synth track,
+exposing every widget by name. Requests carry an optional ``widget`` name;
+without one they address the only widget, or the session itself for
+``command``.
 """
 
 import json
@@ -11,18 +16,6 @@ import transports
 from spaday.widget import _ESM
 
 from nbplay import views
-
-
-def _jsonable(value):
-    """Replace bytes with their length, recursively, so the state fits a JSON line."""
-    if isinstance(value, (bytes, bytearray, memoryview)):
-        return {"bytes": len(value)}
-    if isinstance(value, dict):
-        return {key: _jsonable(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_jsonable(item) for item in value]
-    return value
-
 
 VIEWS = {
     "transport": views.TransportView,
@@ -39,42 +32,107 @@ VIEWS = {
     "timeline": views.TimelineView,
 }
 
+
+def _jsonable(value):
+    """Replace bytes with their length, recursively, so the state fits a JSON line."""
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return {"bytes": len(value)}
+    if isinstance(value, dict):
+        return {key: _jsonable(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_jsonable(item) for item in value]
+    return value
+
+
+def _describe(view):
+    return {
+        "_tree": view._tree,
+        "_wires": view._wires,
+        "_packages": view._packages,
+        "config_id": view.config_id,
+        "status_id": view.status_id,
+        "has_status": view.status is not None,
+        "widget_esm": str(_ESM),
+    }
+
+
+def _state(view):
+    return {
+        "config": _jsonable(view.config.model_dump()),
+        "status": _jsonable(view.status.model_dump()) if view.status is not None else None,
+    }
+
+
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
 codec = sys.argv[2] if len(sys.argv) > 2 else "json"
-view = VIEWS[name](autosync=False, codec=codec, update_interval=0.05)
+options = {"autosync": False, "codec": codec, "update_interval": 0.05}
+if name == "session":
+    session = views.Session(bpm=120.0)
+    sequencer = views.SequencerView(length=8, **options)
+    synth = views.SynthView(**options)
+    session.add_track("Lead", sequencer, synth)
+    widgets = {
+        "transport": session.transport,
+        "mixer": session.mixer,
+        "timeline": session.timeline,
+        "launcher": session.launcher,
+        "sequencer": sequencer,
+        "synth": synth,
+    }
+    for view in session.views:
+        view._autosync = False
+    target = session
+else:
+    session = None
+    widgets = {name: VIEWS[name](**options)}
+    target = widgets[name]
 sent = []
-view.send = Mock(side_effect=lambda content, buffers=(): sent.append({"content": content, "buffers": [list(b) for b in buffers]}))
+
+
+def sync_all():
+    for view in widgets.values():
+        transports.sync(view.server)
+
+
+for widget_name, view in widgets.items():
+    view.send = Mock(
+        side_effect=lambda content, buffers=(), _name=widget_name: sent.append(
+            {"widget": _name, "content": content, "buffers": [list(b) for b in buffers]}
+        )
+    )
+
+
+def pick(request):
+    return widgets[request["widget"]] if "widget" in request else next(iter(widgets.values()))
+
+
 try:
     for line in sys.stdin:
         request = json.loads(line)
         op = request["op"]
         result = None
         if op == "describe":
-            result = {
-                "_tree": view._tree,
-                "_wires": view._wires,
-                "_packages": view._packages,
-                "config_id": view.config_id,
-                "status_id": view.status_id,
-                "has_status": view.status is not None,
-                "widget_esm": str(_ESM),
-            }
+            result = {"widgets": {widget_name: _describe(view) for widget_name, view in widgets.items()}}
+            result.update(_describe(next(iter(widgets.values()))))
         elif op == "receive":
+            view = pick(request)
             view._msg_callbacks(view, request["content"], [memoryview(bytes(b)) for b in request.get("buffers", [])])
             # A notebook kernel's autosync timer does this; the bridge flushes explicitly.
-            transports.sync(view.server)
+            sync_all()
         elif op == "set":
-            setattr(view.config, request["field"], request["value"])
-            transports.sync(view.server)
+            setattr(pick(request).config, request["field"], request["value"])
+            sync_all()
         elif op == "command":
-            getattr(view, request["name"])(*request.get("args", []), **request.get("kwargs", {}))
-            transports.sync(view.server)
+            owner = widgets[request["widget"]] if "widget" in request else target
+            getattr(owner, request["name"])(*request.get("args", []), **request.get("kwargs", {}))
+            sync_all()
         elif op == "state":
-            result = {
-                "config": _jsonable(view.config.model_dump()),
-                "status": _jsonable(view.status.model_dump()) if view.status is not None else None,
-            }
+            if "widget" in request or session is None:
+                result = _state(pick(request))
+            else:
+                result = {widget_name: _state(view) for widget_name, view in widgets.items()}
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)
         sent.clear()
 finally:
-    view.close()
+    for view in widgets.values():
+        view.close()
