@@ -16,7 +16,6 @@ import math
 import os
 import pathlib
 import uuid
-import wave
 import zipfile
 
 import anywidget
@@ -31,6 +30,7 @@ from nbplay import (
     SquareOscillator,
     __version__,
 )
+from nbplay.audio_files import decode_audio_file
 from nbplay.descriptors import (
     _DEFAULT_PAD_NOTES,
     _LAUNCH_QUANTIZE,
@@ -1025,7 +1025,7 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
     def add_zone_file(self, path, note_low=0, note_high=127, **kwargs):
         """Add a zone from an audio file (WAV via stdlib, others via ``soundfile``)."""
         path = pathlib.Path(path)
-        samples, sample_rate = self._decode_audio_file(path)
+        samples, sample_rate = decode_audio_file(path)
         kwargs.setdefault("name", path.name)
         return self.add_zone(samples, note_low, note_high, sample_rate=sample_rate, **kwargs)
 
@@ -1117,33 +1117,6 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
         """Return decoded mono PCM sample data as floats."""
         return _unpack_float32(self.sample_data)
 
-    def _read_wav_file(self, path):
-        with wave.open(str(path), "rb") as wav:
-            channels = wav.getnchannels()
-            sample_width = wav.getsampwidth()
-            sample_rate = wav.getframerate()
-            frames = wav.getnframes()
-            raw = wav.readframes(frames)
-
-        max_values = {1: 128.0, 2: 32768.0, 3: 8388608.0, 4: 2147483648.0}
-        if sample_width not in max_values:
-            raise ValueError(f"unsupported WAV sample width: {sample_width}")
-
-        samples = []
-        frame_width = sample_width * channels
-        for frame_start in range(0, len(raw), frame_width):
-            total = 0.0
-            for channel in range(channels):
-                start = frame_start + channel * sample_width
-                chunk = raw[start : start + sample_width]
-                if sample_width == 1:
-                    value = chunk[0] - 128
-                else:
-                    value = int.from_bytes(chunk, "little", signed=True)
-                total += value / max_values[sample_width]
-            samples.append(total / channels)
-        return samples, sample_rate
-
     def load_audio_file(self, path, root_note=69, name=None):
         """Load a local audio file into the sampler.
 
@@ -1163,19 +1136,9 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
                 is not installed, or if WAV format is invalid.
         """
         path = pathlib.Path(path)
-        samples, sample_rate = self._decode_audio_file(path)
+        samples, sample_rate = decode_audio_file(path)
         self.load_sample(samples, sample_rate=sample_rate, root_note=root_note, name=name or path.name)
         return self
-
-    def _decode_audio_file(self, path):
-        if path.suffix.lower() == ".wav":
-            return self._read_wav_file(path)
-        try:
-            import soundfile as sf  # ty: ignore
-        except ImportError as exc:
-            raise ValueError("MP3/OGG loading requires optional package 'soundfile'") from exc
-        data, sample_rate = sf.read(path, dtype="float32", always_2d=True)
-        return [float(sum(frame) / len(frame)) for frame in data], sample_rate
 
     def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
         """Configure sampler trigger pads.

@@ -884,7 +884,9 @@ length, as the widget's observers do. `SequencerConfig` keeps `voices_data` at
 `stop` are `is_playing` commands the wire writes onto the element. `SamplerConfig` treats
 `pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
 whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated
-preview, and `capture` is a `request` command the owning view decodes. `LauncherConfig` normalizes
+preview, the zone, trim, fade, normalize, slice and Rust export methods match the widget, and
+`capture` (or `capture_clip` with a `TimelineView` clip) is a `request` command the owning view
+decodes. Audio file decoding for both layers is in `nbplay/audio_files.py`. `LauncherConfig` normalizes
 slots with the shared `_normalize_launcher_slot` and `LauncherView.launch`, `stop_track`, `launch_scene` and
 `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
 clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,

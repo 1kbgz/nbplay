@@ -1,4 +1,6 @@
 import json
+import struct
+import wave
 from unittest.mock import Mock
 
 import pytest
@@ -312,6 +314,93 @@ class TestSequencerAndSamplerViews:
             assert isinstance(view.capture("blob:x", note=60, duration=1.5), int)
         finally:
             view.close()
+
+    def test_sampler_edits_slices_and_files(self, tmp_path):
+        path = tmp_path / "tone.wav"
+        with wave.open(str(path), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(8000)
+            handle.writeframes(struct.pack("<4h", 0, 32767, -32768, 0))
+        view = views.SamplerView(velocity=90, autosync=False)
+        try:
+            view.load_audio_file(path, root_note=60)
+            assert view.config.sample_name == "tone.wav" and view.config.sample_rate == 8000 and view.config.root_note == 60
+            assert view.config.sample_length == 4 and view.get_sample_data()[1] == pytest.approx(32767 / 32768)
+            view.load_sample([0.25, -0.5, 0.75, -1.0])
+            view.trim_sample(1, 4)
+            assert view.config.sample_length == 3 and view.get_sample_data() == pytest.approx([-0.5, 0.75, -1.0])
+            view.normalize_sample(0.5)
+            assert max(abs(s) for s in view.get_sample_data()) == pytest.approx(0.5)
+            view.reverse_sample()
+            assert view.get_sample_data()[0] == pytest.approx(-0.5)
+            view.fade_sample(fade_in=2, fade_out=2)
+            assert view.get_sample_data()[0] == 0.0 and view.get_sample_data()[-1] == 0.0
+            assert len(view.config.waveform) == 12
+            with pytest.raises(ValueError):
+                view.trim_sample(3, 3)
+
+            view.load_sample([0.1] * 100)
+            slices = view.slice_sample(4, start_note=36)
+            assert [(s["start"], s["end"], s["note"]) for s in slices] == [(0, 25, 36), (25, 50, 37), (50, 75, 38), (75, 100, 39)]
+            assert view.config.pad_count == 4 and view.config.pad_notes == [36, 37, 38, 39]
+            assert view.config.pad_actions[0] == {"type": "note", "note": 36, "velocity": 90, "slice": 0, "label": "S1"}
+            assert view.config.sample_slices == slices
+            sampler = view.to_sampler()
+            assert sampler.max_voices == 8
+            with pytest.raises(ValueError):
+                views.SamplerView(autosync=False).slice_sample(2)
+        finally:
+            view.close()
+
+    def test_sampler_zones_and_capture(self, tmp_path):
+        path = tmp_path / "hit.wav"
+        with wave.open(str(path), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(8000)
+            handle.writeframes(struct.pack("<3h", 0, 16384, -16384))
+        view = views.SamplerView(pad_notes=[36, 38, 42, 46], autosync=False)
+        timeline = views.TimelineView(bpm=120.0, autosync=False)
+        sent = []
+        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        try:
+            assert view.zone_for(60) is None
+            low = view.add_zone([0.1, 0.2, 0.3], 0, 59, sample_rate=22050, name="Low")
+            high = view.add_zone(struct.pack("<2f", 0.5, -0.5), 60, 127, root_note=72)
+            hit = view.add_zone_file(path, 36, 36)
+            assert low["root_note"] == 60 and high["name"] == "Zone 2" and high["length"] == 2
+            assert hit["name"] == "hit.wav" and hit["sample_rate"] == 8000 and hit["root_note"] == 36
+            assert view.zone_samples(2) == pytest.approx([0.0, 0.5, -0.5])
+            assert view.zone_for(48)["id"] == low["id"] and view.zone_for(72)["id"] == high["id"]
+            view.set_zone(2, note_low=40, note_high=38, name="Kick")
+            assert (view.config.zones[2]["note_low"], view.config.zones[2]["note_high"], view.config.zones[2]["name"]) == (38, 40, "Kick")
+            view.load_sample([0.0, 0.1], root_note=60)
+            sample_map = view.to_sample_map()
+            assert len(sample_map) == 4 and sample_map.find_sample(72, 100).root_note == 72
+            view.remove_zone(0)
+            assert [z["name"] for z in view.config.zones] == ["Zone 2", "Kick"]
+            view.clear_zones()
+            assert view.config.zones == [] and view.to_sample_map().find_sample(90, 100).root_note == 60
+
+            timeline.add_track("Mic")
+            clip = timeline.add_clip("Take 1", start=0.0, duration=2.0, offset=0.5, audio_url="blob:take")
+            view.capture_clip(timeline, clip["id"], pad=1)
+            view.capture_clip(timeline, clip["id"], name="Vox")
+            ready(view)
+            commands = [m for m in messages(sent) if m["t"] == "command"]
+            request = commands[0]["value"]["Map"]
+            assert request["url"] == {"Str": "blob:take"} and request["name"] == {"Str": "Take 1"}
+            assert request["note_low"] == request["root_note"] == {"Int": 38}
+            assert request["offset"] == {"Float": 0.25} and request["duration"] == {"Float": 1.0}
+            with pytest.raises(ValueError, match="clip not found"):
+                view.capture_clip(timeline, "missing")
+            midi = timeline.add_midi_clip("Riff", events=[])
+            with pytest.raises(ValueError, match="no audio"):
+                view.capture_clip(timeline, midi["id"])
+        finally:
+            view.close()
+            timeline.close()
 
 
 class TestArrangementViews:
