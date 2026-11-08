@@ -643,9 +643,54 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:method:: _set_sample_data(samples, **fields)
+
+
+   .. py:method:: get_sample_data()
+
+      The main sample as floats.
+
+
+
    .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
 
       Load mono float samples (or float32 bytes) as the main sample.
+
+
+
+   .. py:method:: load_audio_file(path, root_note=69, name=None)
+
+      Load an audio file (WAV through the stdlib, others through ``soundfile``) as the main sample.
+
+
+
+   .. py:method:: trim_sample(start=0, end=None)
+
+      Keep the frames in ``[start, end)``.
+
+
+
+   .. py:method:: normalize_sample(target=1.0)
+
+      Scale the sample so its peak reaches ``target``.
+
+
+
+   .. py:method:: reverse_sample()
+
+      Reverse the sample.
+
+
+
+   .. py:method:: fade_sample(fade_in=0, fade_out=0)
+
+      Apply linear fades of the given frame counts.
+
+
+
+   .. py:method:: slice_sample(count, start_note=36)
+
+      Cut the sample into ``count`` equal slices on ascending notes and put them on the pads.
 
 
 
@@ -658,6 +703,61 @@ Module Contents
    .. py:method:: add_zone(data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None)
 
       Add a sample zone covering a note and velocity range; returns the zone.
+
+
+
+   .. py:method:: add_zone_file(path, note_low=0, note_high=127, **kwargs)
+
+      Add a zone from an audio file (WAV through the stdlib, others through ``soundfile``).
+
+
+
+   .. py:method:: set_zone(index, **fields)
+
+      Update fields of one zone (range, root note, name); returns the zone.
+
+
+
+   .. py:method:: remove_zone(index)
+
+      Remove the zone at ``index``.
+
+
+
+   .. py:method:: clear_zones()
+
+
+   .. py:method:: zone_for(note, velocity=100)
+
+      The first zone answering to ``note`` at ``velocity``, or ``None``.
+
+
+
+   .. py:method:: zone_samples(index)
+
+      One zone's PCM as floats.
+
+
+
+   .. py:method:: to_sample_map()
+
+      A Rust ``SampleMap``: the zones in order, then the main sample as the fallback.
+
+
+
+   .. py:method:: to_sampler()
+
+      A Rust ``Sampler`` with the main sample, envelope and polyphony.
+
+
+
+   .. py:method:: capture_clip(timeline, clip_id, pad=None, note=None, name=None)
+
+      Turn a timeline audio clip into a zone, decoded by the owning browser view.
+
+      With ``pad`` (index) or ``note`` the zone answers to that one note and
+      plays unpitched there; otherwise it covers every note. The clip's
+      trim (``offset`` and ``duration``, in beats) is honoured.
 
 
 

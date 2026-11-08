@@ -100,6 +100,12 @@ Module Contents
    .. py:method:: test_sampler_config_and_view()
 
 
+   .. py:method:: test_sampler_edits_slices_and_files(tmp_path)
+
+
+   .. py:method:: test_sampler_zones_and_capture(tmp_path)
+
+
 .. py:class:: TestArrangementViews
 
    .. py:method:: test_launcher_config_and_view()

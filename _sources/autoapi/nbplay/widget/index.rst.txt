@@ -880,9 +880,6 @@ Module Contents
 
 
 
-   .. py:method:: _read_wav_file(path)
-
-
    .. py:method:: load_audio_file(path, root_note=69, name=None)
 
       Load a local audio file into the sampler.
@@ -899,9 +896,6 @@ Module Contents
       :raises ValueError: If format is unsupported and ``soundfile``
           is not installed, or if WAV format is invalid.
 
-
-
-   .. py:method:: _decode_audio_file(path)
 
 
    .. py:method:: configure_pads(pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None)

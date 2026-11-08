@@ -10,6 +10,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /autoapi/nbplay/audio_files/index
    /autoapi/nbplay/components/index
    /autoapi/nbplay/descriptors/index
    /autoapi/nbplay/history/index

@@ -502,6 +502,11 @@ window.runMermaid = runMermaid;</script>
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/audio_files/index.html">
+      <span class="fd-link-text">nbplay.audio_files</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/components/index.html">
       <span class="fd-link-text">nbplay.components</span>
     </a>
@@ -615,7 +620,6 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">wave</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">anywidget</span>
@@ -630,6 +634,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">SquareOscillator</span><span class="p">,</span>
     <span class="n">__version__</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.audio_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode_audio_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_DEFAULT_PAD_NOTES</span><span class="p">,</span>
     <span class="n">_LAUNCH_QUANTIZE</span><span class="p">,</span>
@@ -1814,7 +1819,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_zone_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">note_low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">note_high</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a zone from an audio file (WAV via stdlib, others via ``soundfile``)."""</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_audio_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">decode_audio_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_zone</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">note_low</span><span class="p">,</span> <span class="n">note_high</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -1934,36 +1939,6 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">_unpack_float32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SamplerWidget._read_wav_file">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._read_wav_file">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_read_wav_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">with</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">wav</span><span class="p">:</span>
-            <span class="n">channels</span> <span class="o">=</span> <span class="n">wav</span><span class="o">.</span><span class="n">getnchannels</span><span class="p">()</span>
-            <span class="n">sample_width</span> <span class="o">=</span> <span class="n">wav</span><span class="o">.</span><span class="n">getsampwidth</span><span class="p">()</span>
-            <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">wav</span><span class="o">.</span><span class="n">getframerate</span><span class="p">()</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="n">wav</span><span class="o">.</span><span class="n">getnframes</span><span class="p">()</span>
-            <span class="n">raw</span> <span class="o">=</span> <span class="n">wav</span><span class="o">.</span><span class="n">readframes</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span>
-
-        <span class="n">max_values</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mf">128.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mf">32768.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">8388608.0</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mf">2147483648.0</span><span class="p">}</span>
-        <span class="k">if</span> <span class="n">sample_width</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">max_values</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unsupported WAV sample width: </span><span class="si">{</span><span class="n">sample_width</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">frame_width</span> <span class="o">=</span> <span class="n">sample_width</span> <span class="o">*</span> <span class="n">channels</span>
-        <span class="k">for</span> <span class="n">frame_start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">),</span> <span class="n">frame_width</span><span class="p">):</span>
-            <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">frame_start</span> <span class="o">+</span> <span class="n">channel</span> <span class="o">*</span> <span class="n">sample_width</span>
-                <span class="n">chunk</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="n">sample_width</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">sample_width</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">128</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="s2">"little"</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">total</span> <span class="o">+=</span> <span class="n">value</span> <span class="o">/</span> <span class="n">max_values</span><span class="p">[</span><span class="n">sample_width</span><span class="p">]</span>
-            <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="n">channels</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span></div>
-
-
 <div class="viewcode-block" id="SamplerWidget.load_audio_file">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_audio_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1985,22 +1960,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">                is not installed, or if WAV format is invalid.</span>
 <span class="sd">        """</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_audio_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">decode_audio_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="n">sample_rate</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="n">root_note</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
-
-
-<div class="viewcode-block" id="SamplerWidget._decode_audio_file">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._decode_audio_file">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_decode_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">".wav"</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_wav_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">soundfile</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sf</span>  <span class="c1"># ty: ignore</span>
-        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"MP3/OGG loading requires optional package 'soundfile'"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-        <span class="n">data</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"float32"</span><span class="p">,</span> <span class="n">always_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">sample_rate</span></div>
 
 
 <div class="viewcode-block" id="SamplerWidget.configure_pads">

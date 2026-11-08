@@ -1,0 +1,36 @@
+nbplay.audio_files
+==================
+
+.. py:module:: nbplay.audio_files
+
+.. autoapi-nested-parse::
+
+   Decode audio files into mono float samples for the samplers.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.audio_files.read_wav
+   nbplay.audio_files.decode_audio_file
+
+
+Module Contents
+---------------
+
+.. py:function:: read_wav(path)
+
+   Mono float samples and the sample rate of a WAV file, through the stdlib.
+
+
+.. py:function:: decode_audio_file(path)
+
+   Mono float samples and the sample rate of an audio file.
+
+   WAV goes through the stdlib; other formats need the optional
+   ``soundfile`` package.
+
+

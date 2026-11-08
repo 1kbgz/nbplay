@@ -98,6 +98,11 @@
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="../audio_files/index.html">
+      <span class="fd-link-text">nbplay.audio_files</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../components/index.html">
       <span class="fd-link-text">nbplay.components</span>
     </a>
@@ -548,13 +553,64 @@
     <a href="#nbplay.views.SamplerView.STATUS">SamplerView.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView._set_sample_data">SamplerView._set_sample_data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.get_sample_data">SamplerView.get_sample_data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.load_sample">SamplerView.load_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.load_audio_file">SamplerView.load_audio_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.trim_sample">SamplerView.trim_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.normalize_sample">SamplerView.normalize_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.reverse_sample">SamplerView.reverse_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.fade_sample">SamplerView.fade_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.slice_sample">SamplerView.slice_sample()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.configure_pads">SamplerView.configure_pads()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.add_zone">SamplerView.add_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.add_zone_file">SamplerView.add_zone_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.set_zone">SamplerView.set_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.remove_zone">SamplerView.remove_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.clear_zones">SamplerView.clear_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.zone_for">SamplerView.zone_for()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.zone_samples">SamplerView.zone_samples()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.to_sample_map">SamplerView.to_sample_map()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.to_sampler">SamplerView.to_sampler()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.capture_clip">SamplerView.capture_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.capture">SamplerView.capture()</a>
@@ -1470,9 +1526,56 @@ browser-side clip is a command the owning view decodes.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView._set_sample_data">
+<span class="sig-name descname"><span class="pre">_set_sample_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView._set_sample_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.get_sample_data">
+<span class="sig-name descname"><span class="pre">get_sample_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.get_sample_data" title="Link to this definition">¶</a></dt>
+<dd><p>The main sample as floats.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.SamplerView.load_sample">
 <span class="sig-name descname"><span class="pre">load_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">69</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Sample'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.load_sample" title="Link to this definition">¶</a></dt>
 <dd><p>Load mono float samples (or float32 bytes) as the main sample.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.load_audio_file">
+<span class="sig-name descname"><span class="pre">load_audio_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">69</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.load_audio_file" title="Link to this definition">¶</a></dt>
+<dd><p>Load an audio file (WAV through the stdlib, others through <code class="docutils literal notranslate"><span class="pre">soundfile</span></code>) as the main sample.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.trim_sample">
+<span class="sig-name descname"><span class="pre">trim_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.trim_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Keep the frames in <code class="docutils literal notranslate"><span class="pre">[start,</span> <span class="pre">end)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.normalize_sample">
+<span class="sig-name descname"><span class="pre">normalize_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.normalize_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Scale the sample so its peak reaches <code class="docutils literal notranslate"><span class="pre">target</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.reverse_sample">
+<span class="sig-name descname"><span class="pre">reverse_sample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.reverse_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Reverse the sample.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.fade_sample">
+<span class="sig-name descname"><span class="pre">fade_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fade_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fade_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.fade_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Apply linear fades of the given frame counts.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.slice_sample">
+<span class="sig-name descname"><span class="pre">slice_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">36</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.slice_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Cut the sample into <code class="docutils literal notranslate"><span class="pre">count</span></code> equal slices on ascending notes and put them on the pads.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1485,6 +1588,62 @@ browser-side clip is a command the owning view decodes.</p>
 <dt class="sig sig-object py" id="nbplay.views.SamplerView.add_zone">
 <span class="sig-name descname"><span class="pre">add_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.add_zone" title="Link to this definition">¶</a></dt>
 <dd><p>Add a sample zone covering a note and velocity range; returns the zone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.add_zone_file">
+<span class="sig-name descname"><span class="pre">add_zone_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.add_zone_file" title="Link to this definition">¶</a></dt>
+<dd><p>Add a zone from an audio file (WAV through the stdlib, others through <code class="docutils literal notranslate"><span class="pre">soundfile</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.set_zone">
+<span class="sig-name descname"><span class="pre">set_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.set_zone" title="Link to this definition">¶</a></dt>
+<dd><p>Update fields of one zone (range, root note, name); returns the zone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.remove_zone">
+<span class="sig-name descname"><span class="pre">remove_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.remove_zone" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the zone at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.clear_zones">
+<span class="sig-name descname"><span class="pre">clear_zones</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.clear_zones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.zone_for">
+<span class="sig-name descname"><span class="pre">zone_for</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.zone_for" title="Link to this definition">¶</a></dt>
+<dd><p>The first zone answering to <code class="docutils literal notranslate"><span class="pre">note</span></code> at <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.zone_samples">
+<span class="sig-name descname"><span class="pre">zone_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.zone_samples" title="Link to this definition">¶</a></dt>
+<dd><p>One zone’s PCM as floats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.to_sample_map">
+<span class="sig-name descname"><span class="pre">to_sample_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.to_sample_map" title="Link to this definition">¶</a></dt>
+<dd><p>A Rust <code class="docutils literal notranslate"><span class="pre">SampleMap</span></code>: the zones in order, then the main sample as the fallback.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.to_sampler">
+<span class="sig-name descname"><span class="pre">to_sampler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.to_sampler" title="Link to this definition">¶</a></dt>
+<dd><p>A Rust <code class="docutils literal notranslate"><span class="pre">Sampler</span></code> with the main sample, envelope and polyphony.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.capture_clip">
+<span class="sig-name descname"><span class="pre">capture_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.capture_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Turn a timeline audio clip into a zone, decoded by the owning browser view.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">pad</span></code> (index) or <code class="docutils literal notranslate"><span class="pre">note</span></code> the zone answers to that one note and
+plays unpitched there; otherwise it covers every note. The clip’s
+trim (<code class="docutils literal notranslate"><span class="pre">offset</span></code> and <code class="docutils literal notranslate"><span class="pre">duration</span></code>, in beats) is honoured.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2196,13 +2355,64 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
     <a href="#nbplay.views.SamplerView.STATUS">SamplerView.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView._set_sample_data">SamplerView._set_sample_data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.get_sample_data">SamplerView.get_sample_data()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.load_sample">SamplerView.load_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.load_audio_file">SamplerView.load_audio_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.trim_sample">SamplerView.trim_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.normalize_sample">SamplerView.normalize_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.reverse_sample">SamplerView.reverse_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.fade_sample">SamplerView.fade_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.slice_sample">SamplerView.slice_sample()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.configure_pads">SamplerView.configure_pads()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.add_zone">SamplerView.add_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.add_zone_file">SamplerView.add_zone_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.set_zone">SamplerView.set_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.remove_zone">SamplerView.remove_zone()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.clear_zones">SamplerView.clear_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.zone_for">SamplerView.zone_for()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.zone_samples">SamplerView.zone_samples()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.to_sample_map">SamplerView.to_sample_map()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.to_sampler">SamplerView.to_sampler()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.capture_clip">SamplerView.capture_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.capture">SamplerView.capture()</a>
