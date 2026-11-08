@@ -43,6 +43,8 @@ Classes
    nbplay.views.SamplerView
    nbplay.views.LauncherView
    nbplay.views.TimelineView
+   nbplay.views.Track
+   nbplay.views.Session
 
 
 Module Contents
@@ -695,6 +697,118 @@ Module Contents
    .. py:method:: record(on=True)
 
       Start or stop recording the armed lanes.
+
+
+
+.. py:class:: Track(name, sequencer=None, sound_source=None, mixer_channel=0)
+
+   A session lane: a mixer channel plus an optional sequencer and sound source.
+
+
+   .. py:attribute:: name
+
+
+   .. py:attribute:: sequencer
+      :value: None
+
+
+
+   .. py:attribute:: sound_source
+      :value: None
+
+
+
+   .. py:attribute:: mixer_channel
+      :value: 0
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:class:: Session(bpm=120.0, time_signature=(4, 4), theme='')
+
+   Transport, mixer, timeline and launcher views sharing one browser session.
+
+   Every view carries the same ``session_id``, so the browser gives them
+   one audio bus and one clock, which keeps play state, position and tempo
+   consistent across them. Each view hosts its models in its own transports
+   ``Session``: transports grants a connection ownership of every
+   client-owned field in the session it connects to, so views that shared
+   one would fight over each other's status. In the kernel the :attr:`bpm`,
+   :attr:`time_signature` and :attr:`theme` properties write every view's
+   config. Undo, patterns, MIDI files and persistence stay with the
+   traitlets :class:`nbplay.widget.Session` for now.
+
+
+   .. py:attribute:: _session_id
+      :value: 'nbplay-00000000'
+
+
+
+   .. py:attribute:: transport
+
+
+   .. py:attribute:: mixer
+
+
+   .. py:attribute:: timeline
+
+
+   .. py:attribute:: launcher
+
+
+   .. py:attribute:: tracks
+      :value: []
+
+
+
+   .. py:property:: session_id
+
+      The browser session id every view shares.
+
+
+   .. py:property:: views
+
+      Every view in the session, including track instruments.
+
+
+   .. py:property:: bpm
+
+
+   .. py:property:: time_signature
+
+
+   .. py:property:: theme
+
+
+   .. py:method:: play()
+
+      Start the shared clock.
+
+
+
+   .. py:method:: stop()
+
+      Stop the shared clock.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move the shared clock.
+
+
+
+   .. py:method:: add_track(name, sequencer=None, sound_source=None, *, input=None, armed=False)
+
+      Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing.
+
+
+
+   .. py:method:: close()
+
+      Close every view.
 
 
 

@@ -1323,8 +1323,15 @@ slots with the widget’s helper and <code class="docutils literal notranslate">
 <code class="docutils literal notranslate"><span class="pre">stop_all</span></code> are <code class="docutils literal notranslate"><span class="pre">request</span></code> commands carrying the element’s <code class="docutils literal notranslate"><span class="pre">LaunchRequest</span></code>. <code class="docutils literal notranslate"><span class="pre">TimelineConfig</span></code> keeps
 clips within the lane count and <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> within <code class="docutils literal notranslate"><span class="pre">length</span></code>; <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> stays configuration,
 as in the widget, so <code class="docutils literal notranslate"><span class="pre">TimelineView.seek</span></code> assigns it while <code class="docutils literal notranslate"><span class="pre">play</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code> and <code class="docutils literal notranslate"><span class="pre">record</span></code> are status
-commands, and clip export and import go through the config fields the element watches. The spaday
-tree is
+commands, and clip export and import go through the config fields the element watches.</p>
+<p><code class="docutils literal notranslate"><span class="pre">nbplay.views.Session</span></code> creates transport, mixer, timeline and launcher views with one browser
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code>, so the elements share a clock and an audio bus, and <code class="docutils literal notranslate"><span class="pre">add_track</span></code> adds a mixer channel, a
+timeline lane and a launcher row while routing the track’s sequencer and sound source. Each view
+hosts its models in its own transports <code class="docutils literal notranslate"><span class="pre">Session</span></code>: transports grants a connection ownership of every
+client-owned field in the session it connects to, so views sharing one would fight over each
+other’s status (the first attempt hung the page with “client does not own this field”). Kernel-side
+<code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature</span></code> and <code class="docutils literal notranslate"><span class="pre">theme</span></code> properties write every view; browser-side the clock does the
+linking. The spaday tree is
 the instrument element with every config field bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> and every status field
 bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code>, so the element’s events write the wire store and the store writes
 the element’s properties. Kernel commands (<code class="docutils literal notranslate"><span class="pre">view.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">view.seek(beat)</span></code>) are

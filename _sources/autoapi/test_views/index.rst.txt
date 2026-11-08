@@ -24,6 +24,7 @@ Classes
    test_views.TestIoViews
    test_views.TestSequencerAndSamplerViews
    test_views.TestArrangementViews
+   test_views.TestSession
    test_views.TestTransportView
 
 
@@ -96,6 +97,11 @@ Module Contents
 
 
    .. py:method:: test_timeline_config_and_view()
+
+
+.. py:class:: TestSession
+
+   .. py:method:: test_views_share_the_session_and_follow_the_session_settings()
 
 
 .. py:class:: TestTransportView

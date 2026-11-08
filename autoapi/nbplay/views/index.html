@@ -563,6 +563,75 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.record">TimelineView.record()</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.Track">Track</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.name">Track.name</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.sequencer">Track.sequencer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.sound_source">Track.sound_source</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.mixer_channel">Track.mixer_channel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.__repr__">Track.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.Session">Session</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._session_id">Session._session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.transport">Session.transport</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.mixer">Session.mixer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.timeline">Session.timeline</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.launcher">Session.launcher</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.tracks">Session.tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.session_id">Session.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.views">Session.views</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.bpm">Session.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.time_signature">Session.time_signature</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.theme">Session.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.play">Session.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.stop">Session.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.seek">Session.seek()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.add_track">Session.add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.close">Session.close()</a>
+  </li>
 </ul>
 </div>
   </div>
@@ -645,6 +714,12 @@ layer to the traitlets widgets in <a class="reference internal" href="../widget/
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.TimelineView" title="nbplay.views.TimelineView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineView</span></code></a></p></td>
 <td><p>The tracking view on a transports session.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.views.Track" title="nbplay.views.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<td><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.views.Session" title="nbplay.views.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<td><p>Transport, mixer, timeline and launcher views sharing one browser session.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1365,6 +1440,139 @@ the config fields the element watches.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.Track">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">Track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Track" title="Link to this definition">¶</a></dt>
+<dd><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Track.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#nbplay.views.Track.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Track.sequencer">
+<span class="sig-name descname"><span class="pre">sequencer</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.views.Track.sequencer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Track.sound_source">
+<span class="sig-name descname"><span class="pre">sound_source</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.views.Track.sound_source" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Track.mixer_channel">
+<span class="sig-name descname"><span class="pre">mixer_channel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nbplay.views.Track.mixer_channel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Track.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Track.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.views.Session">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bpm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">120.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session" title="Link to this definition">¶</a></dt>
+<dd><p>Transport, mixer, timeline and launcher views sharing one browser session.</p>
+<p>Every view carries the same <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, so the browser gives them
+one audio bus and one clock, which keeps play state, position and tempo
+consistent across them. Each view hosts its models in its own transports
+<code class="docutils literal notranslate"><span class="pre">Session</span></code>: transports grants a connection ownership of every
+client-owned field in the session it connects to, so views that shared
+one would fight over each other’s status. In the kernel the <a class="reference internal" href="#nbplay.views.Session.bpm" title="nbplay.views.Session.bpm"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bpm</span></code></a>,
+<a class="reference internal" href="#nbplay.views.Session.time_signature" title="nbplay.views.Session.time_signature"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_signature</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.theme" title="nbplay.views.Session.theme"><code class="xref py py-attr docutils literal notranslate"><span class="pre">theme</span></code></a> properties write every view’s
+config. Undo, patterns, MIDI files and persistence stay with the
+traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session._session_id">
+<span class="sig-name descname"><span class="pre">_session_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-00000000'</span></em><a class="headerlink" href="#nbplay.views.Session._session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.transport">
+<span class="sig-name descname"><span class="pre">transport</span></span><a class="headerlink" href="#nbplay.views.Session.transport" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.mixer">
+<span class="sig-name descname"><span class="pre">mixer</span></span><a class="headerlink" href="#nbplay.views.Session.mixer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.timeline">
+<span class="sig-name descname"><span class="pre">timeline</span></span><a class="headerlink" href="#nbplay.views.Session.timeline" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.launcher">
+<span class="sig-name descname"><span class="pre">launcher</span></span><a class="headerlink" href="#nbplay.views.Session.launcher" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.tracks">
+<span class="sig-name descname"><span class="pre">tracks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.views.Session.tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.Session.session_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">session_id</span></span><a class="headerlink" href="#nbplay.views.Session.session_id" title="Link to this definition">¶</a></dt>
+<dd><p>The browser session id every view shares.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.Session.views">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">views</span></span><a class="headerlink" href="#nbplay.views.Session.views" title="Link to this definition">¶</a></dt>
+<dd><p>Every view in the session, including track instruments.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.Session.bpm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bpm</span></span><a class="headerlink" href="#nbplay.views.Session.bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.Session.time_signature">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_signature</span></span><a class="headerlink" href="#nbplay.views.Session.time_signature" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.Session.theme">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">theme</span></span><a class="headerlink" href="#nbplay.views.Session.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.play">
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.play" title="Link to this definition">¶</a></dt>
+<dd><p>Start the shared clock.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.stop" title="Link to this definition">¶</a></dt>
+<dd><p>Stop the shared clock.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.seek">
+<span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.seek" title="Link to this definition">¶</a></dt>
+<dd><p>Move the shared clock.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.add_track">
+<span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.add_track" title="Link to this definition">¶</a></dt>
+<dd><p>Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments’ routing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.close" title="Link to this definition">¶</a></dt>
+<dd><p>Close every view.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -1784,6 +1992,75 @@ the config fields the element watches.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.record">TimelineView.record()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.Track">Track</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.name">Track.name</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.sequencer">Track.sequencer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.sound_source">Track.sound_source</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.mixer_channel">Track.mixer_channel</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Track.__repr__">Track.__repr__()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.views.Session">Session</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._session_id">Session._session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.transport">Session.transport</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.mixer">Session.mixer</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.timeline">Session.timeline</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.launcher">Session.launcher</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.tracks">Session.tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.session_id">Session.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.views">Session.views</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.bpm">Session.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.time_signature">Session.time_signature</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.theme">Session.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.play">Session.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.stop">Session.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.seek">Session.seek()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.add_track">Session.add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.close">Session.close()</a>
   </li>
 </ul>
 
