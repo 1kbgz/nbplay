@@ -229,9 +229,7 @@ test.describe("TimelineWidget", () => {
     });
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
-      "Stop Rec",
-    );
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("●");
     expect(
       await page.evaluate(() => window.__testModel._state.is_recording),
     ).toBe(true);
@@ -289,9 +287,7 @@ test.describe("TimelineWidget", () => {
     });
 
     await page.locator(".nbplay-timeline-record").click();
-    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
-      "Stop Rec",
-    );
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("●");
     await page.locator(".nbplay-timeline-record").click();
 
     expect(await page.evaluate(() => window.__getUserMediaCalls)).toBe(1);
@@ -824,9 +820,7 @@ test.describe("TimelineWidget", () => {
         { timeout: 2000 },
       )
       .toEqual({ isRecording: true, clockRecording: true, rows: 1 });
-    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
-      "Stop Rec",
-    );
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("●");
 
     await page.locator(".nbplay-timeline-record").click();
     await expect(page.locator("nbplay-clip")).toHaveCount(1);
@@ -846,9 +840,7 @@ test.describe("TimelineWidget", () => {
       clock.setRecording(true);
       clock.play();
     });
-    await expect(page.locator(".nbplay-timeline-record")).toHaveText(
-      "Stop Rec",
-    );
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("●");
     expect(
       await page.evaluate(() => window.__testModel._state.is_recording),
     ).toBe(true);
@@ -863,7 +855,7 @@ test.describe("TimelineWidget", () => {
       window.__testModel.set("is_recording", true);
       window.__testModel.save_changes();
     });
-    await expect(page.locator(".nbplay-timeline-record")).toHaveText("Rec");
+    await expect(page.locator(".nbplay-timeline-record")).toHaveText("●");
   });
 
   test("stops and flushes playhead at timeline end", async ({ page }) => {

@@ -276,10 +276,11 @@ nbplay-timeline .nbplay-timeline-field input[type="checkbox"] {
   accent-color: var(--nbplay-accent);
 }
 nbplay-timeline .nbplay-timeline-actions button {
+  width: 32px;
   height: var(--nbplay-control-height);
   font: inherit;
-  font-weight: 700;
-  padding: 0 8px;
+  font-size: 14px;
+  padding: 0;
   background: var(--nbplay-bg-control);
   color: var(--nbplay-fg-muted);
   border: 1px solid var(--nbplay-border);

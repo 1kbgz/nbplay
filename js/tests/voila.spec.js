@@ -24,7 +24,7 @@ test.describe("Voila host", () => {
     // Browser -> browser (shared clock) and browser -> kernel.
     await page.locator(".nbplay-transport-play").click();
     await expect(page.locator(".nbplay-seq-play")).toContainText("⏸");
-    await expect(page.locator(".nbplay-timeline-play")).toHaveText("Stop");
+    await expect(page.locator(".nbplay-timeline-play")).toHaveText("■");
     await expect(page.locator("#nbplay-kernel-state")).toHaveText(
       "kernel: playing",
       { timeout: 15 * 1000 },

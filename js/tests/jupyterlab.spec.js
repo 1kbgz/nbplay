@@ -62,7 +62,7 @@ test.describe("JupyterLab host", () => {
 
     await page.locator(".nbplay-transport-play").click();
     await expect(page.locator(".nbplay-seq-play")).toContainText("\u23F8");
-    await expect(page.locator(".nbplay-timeline-play")).toHaveText("Stop");
+    await expect(page.locator(".nbplay-timeline-play")).toHaveText("■");
     await expect(page.locator("#nbplay-kernel-state")).toHaveText(
       "kernel: playing",
       { timeout: 15 * 1000 },

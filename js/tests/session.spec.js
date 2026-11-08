@@ -258,7 +258,7 @@ test.describe("Session clock", () => {
       timeline: window.__models.timeline._state.is_playing,
     }));
     expect(state).toEqual({ seq: true, timeline: true });
-    await expect(page.locator(".nbplay-timeline-play")).toHaveText("Stop");
+    await expect(page.locator(".nbplay-timeline-play")).toHaveText("■");
     await expect(page.locator(".nbplay-seq-play")).toContainText("⏸");
 
     // Stopping from the timeline stops the whole session.
