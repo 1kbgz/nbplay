@@ -813,9 +813,37 @@ Module Contents
 
 
 
-   .. py:method:: set_slot(track_index, scene_index, pattern, *, name=None, step_duration=0.25, swing=0.0, groove=None)
+   .. py:method:: _check_indices(track_index, scene_index=None)
 
-      Fill a slot with a pattern (step dicts, voices, or a sequencer) and return it.
+
+   .. py:method:: _find_slot(track_index, scene_index)
+
+
+   .. py:method:: set_slot(track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None)
+
+      Fill a slot with a pattern and return it.
+
+      ``pattern`` may be a :class:`SequencerView` (whose grid, swing and
+      groove fill the unspecified arguments), a list of step dicts, or a
+      list of voices.
+
+
+
+   .. py:method:: get_slot(track_index, scene_index)
+
+      The slot at ``(track_index, scene_index)``, or ``None``.
+
+
+
+   .. py:method:: clear_slot(track_index, scene_index)
+
+      Empty a slot.
+
+
+
+   .. py:method:: slot_to_sequencer(track_index, scene_index, sequencer)
+
+      Load a slot's pattern, grid, swing and groove into a :class:`SequencerView`.
 
 
 
@@ -833,7 +861,7 @@ Module Contents
 
    .. py:method:: launch_scene(scene_index)
 
-      Launch every slot in a scene.
+      Launch every slot in a scene; tracks with no slot there stop.
 
 
 
@@ -880,6 +908,27 @@ Module Contents
 
 
 
+   .. py:method:: remove_track(index)
+
+      Remove a lane, dropping its clips and shifting later lanes.
+
+
+
+   .. py:method:: arm_track(index, armed=True, *, exclusive=False)
+
+      Arm or disarm a lane; ``exclusive`` disarms every other lane.
+
+
+
+   .. py:method:: _find_clip(clip_id)
+
+
+   .. py:method:: _midi_clip(clip_id)
+
+
+   .. py:method:: _append_clip(clip)
+
+
    .. py:method:: add_clip(name='Clip', track_index=0, start=0.0, duration=4.0, **kwargs)
 
       Append a clip, select it, and grow the timeline to fit it.
@@ -892,15 +941,74 @@ Module Contents
 
 
 
+   .. py:method:: add_pattern_clip(name, pattern, track_index=0, start=0.0, step_duration=0.25, repeat=1, duration=None, **kwargs)
+
+      Append a MIDI clip that plays ``pattern`` (a :class:`SequencerView`, step dicts or voices) ``repeat`` times.
+
+
+
+   .. py:method:: export_midi_clip(clip_id, path=None)
+
+      One MIDI clip as a ``mido.MidiFile``, written to ``path`` when given.
+
+
+
+   .. py:method:: import_midi(source, track_index=0, start=0.0)
+
+      Add one MIDI clip per MIDI track with notes, all on one lane at ``start``; returns the clips.
+
+
+
+   .. py:method:: clip_to_event_sequence(clip_id)
+
+      A MIDI clip's events as a Rust ``EventSequence``.
+
+
+
+   .. py:method:: remove_clip(clip_id)
+
+      Remove a clip by id.
+
+
+
+   .. py:method:: _edit_clip(clip_id, **fields)
+
+
+   .. py:method:: move_clip(clip_id, *, track_index=None, start=None)
+
+      Move a clip to another lane or beat position.
+
+
+
+   .. py:method:: resize_clip(clip_id, duration)
+
+      Set a clip's duration in beats.
+
+
+
+   .. py:method:: duplicate_clip(clip_id)
+
+      Copy a clip onto the same lane right after the original; returns the copy.
+
+
+
    .. py:method:: export_clip(clip_id)
 
       Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``.
 
 
 
-   .. py:method:: import_clip(clip_id, data, blob_type='audio/webm', *, measure_duration=False)
+   .. py:method:: write_exported_clip(path)
 
-      Hand clip audio bytes to the browser; it attaches them to the clip.
+      Write the most recently exported clip's bytes to ``path``; returns the clip.
+
+
+
+   .. py:method:: import_clip(data, name='Import', track_index=0, start=0.0, duration=None, blob_type='audio/webm', **kwargs)
+
+      Add a clip backed by audio bytes (or a file path); the browser attaches a playable URL.
+
+      When ``duration`` is omitted the browser measures the audio and fills it in.
 
 
 
