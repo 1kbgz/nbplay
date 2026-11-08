@@ -42,6 +42,7 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 | Path                                              | Responsibility                                                                                             |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                          |
+| `nbplay/descriptors.py`                           | Descriptor classes and `_normalize_*` helpers shared by the widgets, the pydantic models and the views.    |
 | `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                              |
 | `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.         |
 | `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                                      |
@@ -160,6 +161,9 @@ source checkout can render widgets from Python because those static files are
 generated.
 
 ### Shared Python helpers
+
+These live in `nbplay/descriptors.py`, which imports neither traitlets nor pydantic, so
+`nbplay/models.py` and `nbplay/views.py` use them without importing the widget module.
 
 - `_default_step()` and `_default_steps(length)` build the sequencer's default
   inactive step dictionaries.
@@ -876,7 +880,7 @@ nested transports values (`{"Map": {...}}`) first. `SequencerConfig` keeps `voic
 `pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
 whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated
 preview, and `capture` is a `request` command the owning view decodes. `LauncherConfig` normalizes
-slots with the widget's helper and `LauncherView.launch`, `stop_track`, `launch_scene` and
+slots with the shared `_normalize_launcher_slot` and `LauncherView.launch`, `stop_track`, `launch_scene` and
 `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
 clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
 as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status

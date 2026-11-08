@@ -3309,8 +3309,8 @@ class TestMidiFiles:
         assert read_midi(path.read_bytes())["tracks"][0]["events"] == events
 
     def test_events_to_voices_edge_cases(self, tmp_path):
+        from nbplay.descriptors import _default_steps
         from nbplay.midi import events_to_voices, read_midi, write_midi
-        from nbplay.widget import _default_steps
 
         voices, length = events_to_voices([], step_duration=0.25)
         assert length == 1
