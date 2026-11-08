@@ -11,6 +11,7 @@ layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
 
 import inspect
 import os
+import pathlib
 import uuid
 from typing import ClassVar
 
@@ -18,8 +19,11 @@ import transports
 from pydantic import BaseModel
 from spaday import Widget, element
 
+from .audio_files import decode_audio_file
 from .descriptors import (
+    _PAD_MAX_COUNT,
     AudioClip,
+    PadAction,
     TimelineTrack,
     _clamp_int,
     _clamp_midi_note,
@@ -35,6 +39,7 @@ from .descriptors import (
     _set_effect_enabled,
     _slot_voices,
     _step_duration_for_length,
+    _unpack_float32,
 )
 from .models import (
     KeyboardConfig,
@@ -655,20 +660,89 @@ class SamplerView(InstrumentView):
         "last_pad_event": "lastPadEvent",
     }
 
+    def _set_sample_data(self, samples, **fields):
+        self.config.update(
+            sample_length=len(samples), sample_data=_pack_float32(samples), waveform=_pack_float32(_decimate_samples(samples)), **fields
+        )
+
+    def get_sample_data(self):
+        """The main sample as floats."""
+        return _unpack_float32(self.config.sample_data)
+
     def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
         """Load mono float samples (or float32 bytes) as the main sample."""
-        samples = list(data) if not isinstance(data, (bytes, bytearray, memoryview)) else None
-        packed = _pack_float32(samples) if samples is not None else bytes(data)
-        if samples is None:
-            samples = memoryview(packed).cast("f").tolist()
-        config = self.config
-        config.sample_name = name
-        config.sample_rate = sample_rate
-        config.root_note = _clamp_midi_note(root_note)
-        config.sample_length = len(samples)
-        config.sample_data = packed
-        config.waveform = _pack_float32(_decimate_samples(samples))
+        samples = _unpack_float32(bytes(data)) if isinstance(data, (bytes, bytearray, memoryview)) else list(data)
+        self._set_sample_data(samples, sample_name=name, sample_rate=sample_rate, root_note=_clamp_midi_note(root_note))
         return self
+
+    def load_audio_file(self, path, root_note=69, name=None):
+        """Load an audio file (WAV through the stdlib, others through ``soundfile``) as the main sample."""
+        path = pathlib.Path(path)
+        samples, sample_rate = decode_audio_file(path)
+        return self.load_sample(samples, sample_rate=sample_rate, root_note=root_note, name=name or path.name)
+
+    def trim_sample(self, start=0, end=None):
+        """Keep the frames in ``[start, end)``."""
+        samples = self.get_sample_data()
+        end = len(samples) if end is None else min(len(samples), int(end))
+        start = max(0, int(start))
+        if end <= start:
+            raise ValueError("trim range must contain at least one frame")
+        self._set_sample_data(samples[start:end])
+        return self
+
+    def normalize_sample(self, target=1.0):
+        """Scale the sample so its peak reaches ``target``."""
+        samples = self.get_sample_data()
+        peak = max((abs(s) for s in samples), default=0.0)
+        if peak:
+            gain = max(0.0, min(1.0, float(target))) / peak
+            self._set_sample_data([s * gain for s in samples])
+        return self
+
+    def reverse_sample(self):
+        """Reverse the sample."""
+        self._set_sample_data(list(reversed(self.get_sample_data())))
+        return self
+
+    def fade_sample(self, fade_in=0, fade_out=0):
+        """Apply linear fades of the given frame counts."""
+        samples = self.get_sample_data()
+        total = len(samples)
+        fade_in = max(0, min(total, int(fade_in)))
+        fade_out = max(0, min(total, int(fade_out)))
+        for i in range(fade_in):
+            samples[i] *= i / max(1, fade_in - 1)
+        for i in range(fade_out):
+            samples[total - fade_out + i] *= 1.0 - i / max(1, fade_out - 1)
+        self._set_sample_data(samples)
+        return self
+
+    def slice_sample(self, count, start_note=36):
+        """Cut the sample into ``count`` equal slices on ascending notes and put them on the pads."""
+        count = max(1, min(_PAD_MAX_COUNT, int(count)))
+        length = self.config.sample_length
+        if length <= 0:
+            raise ValueError("load a sample before slicing")
+        step = length / count
+        slices = [
+            {
+                "index": i,
+                "note": _clamp_midi_note(start_note + i),
+                "start": int(i * step),
+                "end": length if i == count - 1 else int((i + 1) * step),
+                "label": f"S{i + 1}",
+            }
+            for i in range(count)
+        ]
+        velocity = self.config.velocity
+        self.config.update(
+            sample_slices=slices,
+            pad_count=count,
+            pad_notes=[s["note"] for s in slices],
+            pad_actions=[PadAction(note=s["note"], velocity=velocity, label=s["label"], slice_index=s["index"]).to_dict() for s in slices],
+        )
+        return slices
 
     def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
         """Set the pad count and per-pad notes, velocities or actions."""
@@ -704,6 +778,88 @@ class SamplerView(InstrumentView):
         )
         self.config.zones = [*self.config.zones, zone]
         return zone
+
+    def add_zone_file(self, path, note_low=0, note_high=127, **kwargs):
+        """Add a zone from an audio file (WAV through the stdlib, others through ``soundfile``)."""
+        path = pathlib.Path(path)
+        samples, sample_rate = decode_audio_file(path)
+        kwargs.setdefault("name", path.name)
+        return self.add_zone(samples, note_low, note_high, sample_rate=sample_rate, **kwargs)
+
+    def set_zone(self, index, **fields):
+        """Update fields of one zone (range, root note, name); returns the zone."""
+        zones = list(self.config.zones)
+        zones[index] = _normalize_zone({**zones[index], **fields}, index)
+        self.config.zones = zones
+        return zones[index]
+
+    def remove_zone(self, index):
+        """Remove the zone at ``index``."""
+        zones = list(self.config.zones)
+        del zones[index]
+        self.config.zones = zones
+
+    def clear_zones(self):
+        self.config.zones = []
+
+    def zone_for(self, note, velocity=100):
+        """The first zone answering to ``note`` at ``velocity``, or ``None``."""
+        note = _clamp_midi_note(note)
+        velocity = _clamp_velocity(velocity)
+        for zone in self.config.zones:
+            if zone["note_low"] <= note <= zone["note_high"] and zone["velocity_low"] <= velocity <= zone["velocity_high"]:
+                return zone
+        return None
+
+    def zone_samples(self, index):
+        """One zone's PCM as floats."""
+        return _unpack_float32(self.config.zones[index]["data"])
+
+    def to_sample_map(self):
+        """A Rust ``SampleMap``: the zones in order, then the main sample as the fallback."""
+        from nbplay import AudioSample, SampleMap, SampleMapping
+
+        sample_map = SampleMap()
+        for zone in self.config.zones:
+            sample = AudioSample(_unpack_float32(zone["data"]), zone["sample_rate"], zone["root_note"])
+            sample_map.add_mapping(SampleMapping(sample, zone["note_low"], zone["note_high"], zone["velocity_low"], zone["velocity_high"]))
+        if self.config.sample_length:
+            sample = AudioSample(self.get_sample_data(), self.config.sample_rate, self.config.root_note)
+            sample_map.add_mapping(SampleMapping(sample, 0, 127, 0, 127))
+        return sample_map
+
+    def to_sampler(self):
+        """A Rust ``Sampler`` with the main sample, envelope and polyphony."""
+        from nbplay import AudioSample, Envelope, Sampler
+
+        config = self.config
+        sampler = Sampler(AudioSample(self.get_sample_data(), config.sample_rate, config.root_note), config.sample_rate, config.max_voices)
+        sampler.set_envelope(Envelope(config.attack, config.decay, config.sustain, config.release))
+        return sampler
+
+    def capture_clip(self, timeline, clip_id, pad=None, note=None, name=None):
+        """Turn a timeline audio clip into a zone, decoded by the owning browser view.
+
+        With ``pad`` (index) or ``note`` the zone answers to that one note and
+        plays unpitched there; otherwise it covers every note. The clip's
+        trim (``offset`` and ``duration``, in beats) is honoured.
+        """
+        clip_id = str(clip_id)
+        clip = next((item for item in timeline.config.clips if item["id"] == clip_id), None)
+        if clip is None:
+            raise ValueError(f"clip not found: {clip_id}")
+        if clip["kind"] == "midi" or not clip["audio_url"]:
+            raise ValueError(f"clip {clip_id} has no audio in the browser")
+        if pad is not None:
+            note = self.config.pad_notes[pad]
+        seconds_per_beat = 60.0 / max(1e-6, float(timeline.config.bpm))
+        return self.capture(
+            clip["audio_url"],
+            name=name or clip["name"] or "Take",
+            note=note,
+            offset=clip["offset"] * seconds_per_beat,
+            duration=clip["duration"] * seconds_per_beat,
+        )
 
     def capture(self, url, *, name="Take", note=None, offset=0.0, duration=0.0):
         """Ask the owning view to decode a browser-side audio URL into a zone.
