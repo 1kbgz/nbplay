@@ -584,6 +584,8 @@ class LauncherView(InstrumentView):
         tracks, scenes = self.config.tracks, self.config.scenes
         if not 0 <= track_index < len(tracks) or not 0 <= scene_index < len(scenes):
             raise IndexError(f"slot out of range: track {track_index}, scene {scene_index}")
+        if isinstance(pattern, SequencerView):
+            pattern = pattern.config.voices_data
         slot = _normalize_launcher_slot(
             {
                 "track_index": track_index,
