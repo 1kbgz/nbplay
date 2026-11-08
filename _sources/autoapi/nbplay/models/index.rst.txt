@@ -33,6 +33,10 @@ Classes
    nbplay.models.SettingsStatus
    nbplay.models.MidiOutputConfig
    nbplay.models.MidiOutputStatus
+   nbplay.models.SequencerConfig
+   nbplay.models.SequencerStatus
+   nbplay.models.SamplerConfig
+   nbplay.models.SamplerStatus
 
 
 Module Contents
@@ -770,6 +774,326 @@ Module Contents
       :type:  list[str]
       :value: []
 
+
+
+   .. py:attribute:: request
+      :type:  dict
+
+
+.. py:class:: SequencerConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The step sequencer's pattern and grid.
+
+   ``voices_data`` always holds ``num_voices`` lists of ``length``
+   normalized steps; the after-validator resizes them, filling with
+   default steps, the way the widget's composers do.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: voices_data
+      :type:  list[list[dict]]
+      :value: []
+
+
+
+   .. py:attribute:: num_voices
+      :type:  int
+
+
+   .. py:attribute:: length
+      :type:  int
+
+
+   .. py:attribute:: measures
+      :type:  int
+
+
+   .. py:attribute:: step_duration
+      :type:  float
+
+
+   .. py:attribute:: time_signature_num
+      :type:  int
+
+
+   .. py:attribute:: time_signature_den
+      :type:  int
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: loop_enabled
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: keyboard_connected
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: follow_transport
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: swing
+      :type:  float
+
+
+   .. py:attribute:: groove
+      :type:  list[float]
+      :value: []
+
+
+
+   .. py:attribute:: automation_lanes
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _groove(value)
+      :classmethod:
+
+
+
+   .. py:method:: _lanes(value)
+      :classmethod:
+
+
+
+   .. py:method:: _fit_voices()
+
+
+.. py:class:: SequencerStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Play state and the sounding step from the browser scheduler; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: current_step
+      :type:  int
+      :value: -1
+
+
+
+.. py:class:: SamplerConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The sampler's sample, envelope, pads, slices and zones.
+
+   ``pad_count`` is authoritative for the pad lists, as the widget's
+   ``pad_count`` observer is; slices are bounded by ``sample_length`` and
+   zones carry their own float32 bytes.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: sample_name
+      :type:  str
+      :value: '(no sample)'
+
+
+
+   .. py:attribute:: sample_rate
+      :type:  int
+
+
+   .. py:attribute:: root_note
+      :type:  int
+
+
+   .. py:attribute:: sample_length
+      :type:  int
+
+
+   .. py:attribute:: waveform
+      :type:  bytes
+      :value: b''
+
+
+
+   .. py:attribute:: sample_data
+      :type:  bytes
+      :value: b''
+
+
+
+   .. py:attribute:: attack
+      :type:  float
+
+
+   .. py:attribute:: decay
+      :type:  float
+
+
+   .. py:attribute:: sustain
+      :type:  float
+
+
+   .. py:attribute:: release
+      :type:  float
+
+
+   .. py:attribute:: max_voices
+      :type:  int
+
+
+   .. py:attribute:: pad_count
+      :type:  int
+
+
+   .. py:attribute:: pad_notes
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: pad_velocities
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: pad_actions
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: sample_slices
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:attribute:: velocity_sensitive
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: zones
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _fit()
+
+
+.. py:class:: SamplerStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Taps and note events from the browser; browser-owned.
+
+   ``request`` is the client-owned target of capture commands.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: active_pads
+      :type:  list[int]
+      :value: []
+
+
+
+   .. py:attribute:: last_note_event
+      :type:  dict
+
+
+   .. py:attribute:: last_pad_event
+      :type:  dict
 
 
    .. py:attribute:: request

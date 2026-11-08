@@ -39,6 +39,8 @@ Classes
    nbplay.views.MidiKeyboardView
    nbplay.views.SettingsView
    nbplay.views.MidiOutputView
+   nbplay.views.SequencerView
+   nbplay.views.SamplerView
 
 
 Module Contents
@@ -416,6 +418,124 @@ Module Contents
    .. py:method:: send_raw(data)
 
       Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change.
+
+
+
+.. py:class:: SequencerView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The step sequencer on a transports session.
+
+   Steps are edited through ``voices_data``; play state and the sounding
+   step belong to the browser scheduler.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-sequencer'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100)
+
+      Set one step of one voice.
+
+
+
+   .. py:method:: toggle_step(index, voice=0)
+
+      Flip one step's active state.
+
+
+
+   .. py:method:: clear()
+
+      Deactivate every step.
+
+
+
+   .. py:method:: play()
+
+      Start playback in the owning view (the session clock when shared).
+
+
+
+   .. py:method:: stop()
+
+      Stop playback in the owning view.
+
+
+
+.. py:class:: SamplerView(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentView`
+
+
+   The sampler on a transports session.
+
+   Sample PCM travels as bytes; zones carry their own bytes. Capturing a
+   browser-side clip is a command the owning view decodes.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-sampler'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
+
+      Load mono float samples (or float32 bytes) as the main sample.
+
+
+
+   .. py:method:: configure_pads(pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None)
+
+      Set the pad count and per-pad notes, velocities or actions.
+
+
+
+   .. py:method:: add_zone(data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None)
+
+      Add a sample zone covering a note and velocity range; returns the zone.
+
+
+
+   .. py:method:: capture(url, *, name='Take', note=None, offset=0.0, duration=0.0)
+
+      Ask the owning view to decode a browser-side audio URL into a zone.
+
+      With ``note`` the zone answers to that one note and plays unpitched
+      there; otherwise it covers every note at the sampler's root note.
+      ``offset`` and ``duration`` are seconds into the source.
 
 
 

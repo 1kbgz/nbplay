@@ -22,6 +22,7 @@ Classes
    test_views.TestMixerView
    test_views.TestKeysViews
    test_views.TestIoViews
+   test_views.TestSequencerAndSamplerViews
    test_views.TestTransportView
 
 
@@ -78,6 +79,14 @@ Module Contents
 .. py:class:: TestIoViews
 
    .. py:method:: test_settings_and_midi_output_views()
+
+
+.. py:class:: TestSequencerAndSamplerViews
+
+   .. py:method:: test_sequencer_config_fits_voices()
+
+
+   .. py:method:: test_sampler_config_and_view()
 
 
 .. py:class:: TestTransportView
