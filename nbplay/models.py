@@ -11,12 +11,19 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .widget import (
     THEMES,
+    _clamp_midi_note,
+    _clamp_velocity,
     _default_pad_notes,
+    _default_steps,
     _normalize_effects,
     _normalize_mixer_channel,
     _normalize_pad_actions,
     _normalize_return_bus,
+    _normalize_sample_slices,
+    _normalize_zones,
     _pad_sends,
+    _resize_pad_notes,
+    _resize_pad_velocities,
     render_waveform,
 )
 
@@ -30,6 +37,10 @@ __all__ = (
     "MixerConfig",
     "PadsConfig",
     "PadsStatus",
+    "SamplerConfig",
+    "SamplerStatus",
+    "SequencerConfig",
+    "SequencerStatus",
     "SettingsConfig",
     "SettingsStatus",
     "SynthConfig",
@@ -320,4 +331,158 @@ class MidiOutputStatus(BaseModel):
     """
 
     available_midi_ports: list[str] = []
+    request: dict = {}
+
+
+def _normalize_step(step):
+    if not isinstance(step, dict):
+        step = {}
+    return {
+        "note": _clamp_midi_note(step.get("note", 60)),
+        "velocity": _clamp_velocity(step.get("velocity", 100)),
+        "duration_ticks": max(1, int(step.get("duration_ticks", 1))),
+        "active": bool(step.get("active", False)),
+        "probability": max(0.0, min(100.0, float(step.get("probability", 100)))),
+    }
+
+
+def _normalize_lanes(lanes):
+    normalized = []
+    for lane in lanes or []:
+        if not isinstance(lane, dict):
+            continue
+        trait = str(lane.get("trait", "")).strip()
+        if not trait or not all(ch.isalnum() or ch == "_" for ch in trait):
+            continue
+        points = []
+        for point in lane.get("points", []):
+            if not isinstance(point, dict):
+                continue
+            try:
+                points.append({"step": max(0, int(point["step"])), "value": float(point["value"])})
+            except (KeyError, TypeError, ValueError):
+                continue
+        if points:
+            normalized.append({"trait": trait, "points": sorted(points, key=lambda p: p["step"])})
+    return normalized
+
+
+class SequencerConfig(_Validated):
+    """The step sequencer's pattern and grid.
+
+    ``voices_data`` always holds ``num_voices`` lists of ``length``
+    normalized steps; the after-validator resizes them, filling with
+    default steps, the way the widget's composers do.
+    """
+
+    voices_data: list[list[dict]] = []
+    num_voices: int = Field(1, ge=1, le=16)
+    length: int = Field(16, ge=1, le=256)
+    measures: int = Field(1, ge=1)
+    step_duration: float = Field(0.25, gt=0)
+    time_signature_num: int = Field(4, ge=1, le=16)
+    time_signature_den: int = Field(4, ge=1, le=16)
+    bpm: float = Field(120.0, ge=30, le=300)
+    loop_enabled: bool = True
+    keyboard_connected: bool = False
+    follow_transport: bool = True
+    swing: float = Field(0.0, ge=0, le=100)
+    groove: list[float] = []
+    automation_lanes: list[dict] = []
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("groove")
+    @classmethod
+    def _groove(cls, value):
+        return [max(-50.0, min(50.0, float(v))) for v in value or []]
+
+    @field_validator("automation_lanes")
+    @classmethod
+    def _lanes(cls, value):
+        return _normalize_lanes(value)
+
+    @model_validator(mode="after")
+    def _fit_voices(self):
+        voices = []
+        for index in range(self.num_voices):
+            steps = [_normalize_step(step) for step in (self.voices_data[index] if index < len(self.voices_data) else [])]
+            steps = steps[: self.length] + _default_steps(max(0, self.length - len(steps)))
+            voices.append(steps)
+        if voices != self.voices_data:
+            self.__dict__["voices_data"] = voices
+        return self
+
+
+class SequencerStatus(BaseModel):
+    """Play state and the sounding step from the browser scheduler; browser-owned."""
+
+    is_playing: bool = False
+    current_step: int = -1
+
+
+class SamplerConfig(_Validated):
+    """The sampler's sample, envelope, pads, slices and zones.
+
+    ``pad_count`` is authoritative for the pad lists, as the widget's
+    ``pad_count`` observer is; slices are bounded by ``sample_length`` and
+    zones carry their own float32 bytes.
+    """
+
+    sample_name: str = "(no sample)"
+    sample_rate: int = Field(44100, ge=8000, le=192000)
+    root_note: int = Field(69, ge=0, le=127)
+    sample_length: int = Field(0, ge=0)
+    waveform: bytes = b""
+    sample_data: bytes = b""
+    attack: float = Field(0.005, ge=0, le=2)
+    decay: float = Field(0.1, ge=0, le=2)
+    sustain: float = Field(0.8, ge=0, le=1)
+    release: float = Field(0.1, ge=0, le=5)
+    max_voices: int = Field(8, ge=1, le=32)
+    pad_count: int = Field(8, ge=1, le=128)
+    pad_notes: list[int] = []
+    pad_velocities: list[int] = []
+    pad_actions: list[dict] = []
+    sample_slices: list[dict] = []
+    velocity: int = Field(100, ge=1, le=127)
+    velocity_sensitive: bool = True
+    zones: list[dict] = []
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @model_validator(mode="after")
+    def _fit(self):
+        notes = _resize_pad_notes(self.pad_notes, self.pad_count)
+        velocities = _resize_pad_velocities(self.pad_velocities, self.pad_count, self.velocity)
+        actions = _normalize_pad_actions(self.pad_actions, self.pad_count, notes, velocities, prefer_defaults=True)
+        slices = _normalize_sample_slices(self.sample_slices, self.sample_length)
+        zones = _normalize_zones(self.zones)
+        for name, value in (
+            ("pad_notes", notes),
+            ("pad_velocities", velocities),
+            ("pad_actions", actions),
+            ("sample_slices", slices),
+            ("zones", zones),
+        ):
+            if getattr(self, name) != value:
+                self.__dict__[name] = value
+        return self
+
+
+class SamplerStatus(BaseModel):
+    """Taps and note events from the browser; browser-owned.
+
+    ``request`` is the client-owned target of capture commands.
+    """
+
+    active_pads: list[int] = []
+    last_note_event: dict = {}
+    last_pad_event: dict = {}
     request: dict = {}

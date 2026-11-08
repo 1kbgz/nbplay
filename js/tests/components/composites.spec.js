@@ -178,7 +178,8 @@ test.describe("composites", () => {
     const cell = page.locator('nbplay-pad-grid [data-index="1"]');
     const box = await cell.boundingBox();
     await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.9);
-    await page.waitForTimeout(50);
+    // The note-off follows on the next animation frame.
+    await expect.poll(async () => (await events(page)).length).toBe(2);
     const all = await events(page);
     expect(all[0][0]).toBe("nbplay-note-on");
     expect(all[0][1].index).toBe(1);

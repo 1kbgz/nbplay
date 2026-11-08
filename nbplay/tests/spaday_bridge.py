@@ -21,6 +21,8 @@ VIEWS = {
     "midi_keyboard": views.MidiKeyboardView,
     "settings": views.SettingsView,
     "midi_output": views.MidiOutputView,
+    "sequencer": views.SequencerView,
+    "sampler": views.SamplerView,
 }
 
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
@@ -51,14 +53,15 @@ try:
             setattr(view.config, request["field"], request["value"])
             transports.sync(view.server)
         elif op == "command":
-            getattr(view, request["name"])(*request.get("args", []))
+            getattr(view, request["name"])(*request.get("args", []), **request.get("kwargs", {}))
             transports.sync(view.server)
         elif op == "state":
             config = view.config.model_dump()
-            waveform = config.pop("waveform", None)
+            for key in ("waveform", "sample_data", "zones"):
+                if key in config:
+                    value = config.pop(key)
+                    config[f"{key}_bytes"] = len(value)
             result = {"config": config, "status": view.status.model_dump() if view.status is not None else None}
-            if waveform is not None:
-                result["waveform_bytes"] = len(waveform)
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)
         sent.clear()
 finally:

@@ -10,7 +10,7 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
-from nbplay.models import KeyboardConfig, MixerConfig, PadsConfig, SynthConfig, TransportConfig, TransportStatus
+from nbplay.models import KeyboardConfig, MixerConfig, PadsConfig, SamplerConfig, SequencerConfig, SynthConfig, TransportConfig, TransportStatus
 
 
 def messages(sent):
@@ -156,6 +156,46 @@ class TestIoViews:
             assert commands[0]["value"]["Map"]["note"] == {"Int": 127}
         finally:
             out.close()
+
+
+class TestSequencerAndSamplerViews:
+    def test_sequencer_config_fits_voices(self):
+        config = SequencerConfig(length=4, num_voices=2)
+        assert [len(v) for v in config.voices_data] == [4, 4]
+        assert config.voices_data[0][0] == {"note": 60, "velocity": 100, "duration_ticks": 1, "active": False, "probability": 100.0}
+        config.voices_data = [[{"note": 200, "velocity": 0, "active": True}]]
+        assert config.voices_data[0][0]["note"] == 127 and config.voices_data[0][0]["velocity"] == 1
+        assert [len(v) for v in config.voices_data] == [4, 4]
+        config.length = 2
+        assert [len(v) for v in config.voices_data] == [2, 2]
+        view = views.SequencerView(length=8, autosync=False)
+        try:
+            view.set_step(2, note=48, active=True)
+            view.toggle_step(3)
+            assert view.config.voices_data[0][2]["note"] == 48 and view.config.voices_data[0][3]["active"] is True
+            view.clear()
+            assert not any(step["active"] for step in view.config.voices_data[0])
+            assert isinstance(view.play(), int)
+        finally:
+            view.close()
+
+    def test_sampler_config_and_view(self):
+        config = SamplerConfig(pad_count=3)
+        assert config.pad_notes == [48, 49, 50] and config.pad_velocities == [100] * 3 and len(config.pad_actions) == 3
+        config.pad_count = 2
+        assert len(config.pad_notes) == 2 and len(config.pad_actions) == 2
+        view = views.SamplerView(autosync=False)
+        try:
+            view.load_sample([0.0, 0.5, -0.5, 1.5], sample_rate=22050, root_note=200, name="click")
+            assert view.config.sample_length == 4 and view.config.root_note == 127
+            assert len(view.config.sample_data) == 16 and len(view.config.waveform) == 16
+            view.configure_pads(pad_notes=[60, 64])
+            assert view.config.pad_count == 2 and view.config.pad_notes == [60, 64]
+            zone = view.add_zone([0.1, 0.2], 40, 40)
+            assert zone["root_note"] == 40 and len(view.config.zones) == 1 and view.config.zones[0]["data"] == zone["data"]
+            assert isinstance(view.capture("blob:x", note=60, duration=1.5), int)
+        finally:
+            view.close()
 
 
 class TestTransportView:
