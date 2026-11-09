@@ -12,6 +12,7 @@ views = pytest.importorskip("nbplay.views", exc_type=ImportError)
 import transports
 from transports._buffers import join_buffers
 
+from nbplay.descriptors import PadAction
 from nbplay.models import (
     KeyboardConfig,
     LauncherConfig,
@@ -195,6 +196,68 @@ class TestKeysViews:
                 assert view._tree["bindings"]["theme"]["field"] == "config.theme"
             finally:
                 view.close()
+
+    def test_keyboards_route_to_samplers_and_record_into_sequencers(self):
+        keys = views.KeyboardView(autosync=False)
+        midi = views.MidiKeyboardView(autosync=False)
+        pads = views.PadsView(autosync=False)
+        drums = views.SamplerView(channel_index=2, autosync=False)
+        bass = views.SamplerView(channel_index=5, autosync=False)
+        loose = views.SamplerView(autosync=False)
+        sequencer = views.SequencerView(autosync=False)
+        try:
+            keys.connect_sequencer(sequencer)
+            assert sequencer.config.keyboard_connected is True
+            keys.disconnect_sequencer(sequencer)
+            assert sequencer.config.keyboard_connected is False
+            keys.connect_sampler(drums, zone="lower")
+            keys.connect_sampler(bass, octave=3)
+            keys.connect_sampler(drums, notes=[36, 38])
+            assert keys.config.sampler_routing == [
+                {"channel_index": 5, "match": "octave", "octave": 3},
+                {"channel_index": 2, "match": "notes", "notes": [36, 38]},
+            ]
+            keys.disconnect_sampler(bass)
+            assert [r["channel_index"] for r in keys.config.sampler_routing] == [2]
+            with pytest.raises(ValueError):
+                keys.connect_sampler(loose)
+            midi.connect_sampler(drums)
+            assert midi.config.sampler_routing == [{"channel_index": 2, "match": "all"}]
+            pads.connect_sampler(drums, note=36)
+            assert pads.config.sampler_routing == [{"channel_index": 2, "match": "note", "note": 36}]
+            with pytest.raises(ValueError, match="zone"):
+                pads.connect_sampler(drums, zone="upper")
+            pads.disconnect_sampler(drums)
+            assert pads.config.sampler_routing == []
+        finally:
+            for view in (keys, midi, pads, drums, bass, loose, sequencer):
+                view.close()
+
+    def test_pads_grid_helpers_and_sampler_slices(self):
+        pads = views.PadsView(velocity=90, autosync=False)
+        sampler = views.SamplerView(channel_index=1, autosync=False)
+        try:
+            pads.configure_grid_for_actions(notes=[60, 62, 64, 65, 67])
+            assert (
+                (pads.config.rows, pads.config.cols) == (2, 4)
+                and pads.config.pad_notes[:5] == [60, 62, 64, 65, 67]
+                and len(pads.config.pad_notes) == 8
+            )
+            pads.configure_grid_for_actions(actions=[PadAction(note=40, label="Kick"), {"type": "note", "note": 41}], cols=2)
+            assert (pads.config.rows, pads.config.cols) == (1, 2) and pads.config.pad_notes == [40, 41]
+            assert pads.config.pad_actions[0] == {"type": "note", "note": 40, "velocity": 90, "label": "Kick"}
+            pads.set_base_note(48)
+            assert pads.config.pad_notes == [48, 49]
+            pads.transpose_pads(-12)
+            assert pads.config.pad_notes == [36, 37]
+            sampler.load_sample([0.1] * 100)
+            assert sampler.map_slices_to_pads(pads, count=4) is pads
+            assert (pads.config.rows, pads.config.cols) == (1, 4) and pads.config.pad_notes == [36, 37, 38, 39]
+            assert pads.config.pad_actions[3] == {"type": "note", "note": 39, "velocity": 90, "slice": 3, "label": "S4"}
+            assert pads.config.sampler_routing == [{"channel_index": 1, "match": "all"}]
+        finally:
+            pads.close()
+            sampler.close()
 
 
 class TestIoViews:

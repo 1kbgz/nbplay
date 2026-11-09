@@ -25,6 +25,7 @@ from .descriptors import (
     AudioClip,
     PadAction,
     TimelineTrack,
+    _build_route,
     _clamp_int,
     _clamp_midi_note,
     _clamp_velocity,
@@ -368,7 +369,33 @@ class MixerView(InstrumentView):
 _ROUTED = {"sampler_routing": "samplerRouting", "session_id": "sessionId", "channel_index": "channelIndex", "theme": "theme"}
 
 
-class PadsView(InstrumentView):
+class _NoteSource(InstrumentView):
+    """A view that plays notes into samplers through ``sampler_routing``."""
+
+    def connect_sampler(self, sampler, *, zone=None, octave=None, note=None, notes=None):
+        """Route notes to ``sampler`` (a :class:`SamplerView` on the session bus); see :class:`KeyboardRoute`."""
+        channel = sampler.config.channel_index
+        route = _build_route(channel, zone=zone, octave=octave, note=note, notes=notes).to_dict()
+        self.config.sampler_routing = [*(r for r in self.config.sampler_routing if r.get("channel_index") != channel), route]
+
+    def disconnect_sampler(self, sampler):
+        """Drop the route to ``sampler``."""
+        channel = sampler.config.channel_index
+        self.config.sampler_routing = [r for r in self.config.sampler_routing if r.get("channel_index") != channel]
+
+
+class _Keys(_NoteSource):
+    """A keyboard view: it can also record into sequencers."""
+
+    def connect_sequencer(self, sequencer):
+        """Let ``sequencer`` (a :class:`SequencerView`) record this keyboard."""
+        sequencer.config.keyboard_connected = True
+
+    def disconnect_sequencer(self, sequencer):
+        sequencer.config.keyboard_connected = False
+
+
+class PadsView(_NoteSource):
     """The trigger-pad grid on a transports session; the browser owns the taps."""
 
     TAG = "nbplay-pads"
@@ -390,8 +417,50 @@ class PadsView(InstrumentView):
         "last_pad_event": "lastPadEvent",
     }
 
+    def configure_grid_for_actions(self, notes=None, velocities=None, actions=None, rows=None, cols=None):
+        """Size the grid for the given notes, velocities or actions and apply them."""
+        config = self.config
+        count = max(1, max(len(actions or []), len(notes or []), len(velocities or [])) or len(config.pad_notes))
+        if cols is None:
+            cols = min(4, count)
+        if rows is None:
+            rows = max(1, (count + cols - 1) // cols)
+        fields = {"rows": max(1, int(rows)), "cols": max(1, int(cols))}
+        if notes is None and actions is not None:
+            notes = [
+                a.get("note", config.pad_notes[i] if i < len(config.pad_notes) else 60) if isinstance(a, dict) else a.note
+                for i, a in enumerate(actions)
+            ]
+        if notes is not None:
+            fields["pad_notes"] = list(notes)
+        if velocities is not None:
+            fields["pad_velocities"] = list(velocities)
+        if actions is not None:
+            fields["pad_actions"] = [a.to_dict() if isinstance(a, PadAction) else a for a in actions]
+        config.update(**fields)
+        return self
 
-class KeyboardView(InstrumentView):
+    def set_base_note(self, note):
+        """Lay the pads out chromatically from ``note``."""
+        start = _clamp_midi_note(note)
+        self.config.pad_notes = [_clamp_midi_note(start + i) for i in range(self.config.rows * self.config.cols)]
+        return self
+
+    def transpose_pads(self, semitones):
+        """Shift every pad note by ``semitones``."""
+        delta = int(semitones)
+        self.config.pad_notes = [_clamp_midi_note(note + delta) for note in self.config.pad_notes]
+        return self
+
+    def connect_sampler(self, sampler, **kwargs):
+        """Route the pads to ``sampler``; pads have no zones, so ``zone`` must be ``None`` or ``"all"``."""
+        zone = kwargs.get("zone")
+        if zone is not None and zone != "all":
+            raise ValueError(f"PadsView does not support zone routing (got zone={zone!r}). Use match='all', 'octave', 'note', or 'notes'.")
+        super().connect_sampler(sampler, **kwargs)
+
+
+class KeyboardView(_Keys):
     """The QWERTY musical-typing keyboard on a transports session."""
 
     TAG = "nbplay-keyboard"
@@ -409,7 +478,7 @@ class KeyboardView(InstrumentView):
     STATUS: ClassVar[dict[str, str]] = {"active_notes": "activeNotes", "last_note_event": "lastNoteEvent"}
 
 
-class MidiKeyboardView(InstrumentView):
+class MidiKeyboardView(_Keys):
     """The Web MIDI keyboard on a transports session; ports and clock are browser-owned."""
 
     TAG = "nbplay-midi-keyboard"
@@ -746,6 +815,20 @@ class SamplerView(InstrumentView):
             pad_actions=[PadAction(note=s["note"], velocity=velocity, label=s["label"], slice_index=s["index"]).to_dict() for s in slices],
         )
         return slices
+
+    def map_slices_to_pads(self, pads, count=None, start_note=36):
+        """Put the slices on a :class:`PadsView` (slicing first when needed) and route the pads here."""
+        slices = self.config.sample_slices
+        if count is not None or not slices:
+            slices = self.slice_sample(count or pads.config.rows * pads.config.cols, start_note=start_note)
+        velocity = pads.config.velocity
+        pads.configure_grid_for_actions(
+            notes=[s["note"] for s in slices],
+            actions=[PadAction(note=s["note"], velocity=velocity, label=s.get("label"), slice_index=s["index"]) for s in slices],
+        )
+        if self.config.channel_index >= 0:
+            pads.connect_sampler(self)
+        return pads
 
     def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
         """Set the pad count and per-pad notes, velocities or actions."""
