@@ -396,6 +396,18 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.PadsView.STATUS">PadsView.STATUS</a>
   </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.configure_grid_for_actions">PadsView.configure_grid_for_actions()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.set_base_note">PadsView.set_base_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.transpose_pads">PadsView.transpose_pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.connect_sampler">PadsView.connect_sampler()</a>
+  </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.views.KeyboardView">KeyboardView</a>
   </li>
@@ -578,6 +590,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.slice_sample">SamplerView.slice_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.map_slices_to_pads">SamplerView.map_slices_to_pads()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.configure_pads">SamplerView.configure_pads()</a>
@@ -1267,7 +1282,7 @@ graph from it. Edits in either place are validated by
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.views.PadsView">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">PadsView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_NoteSource</span></code></p>
 <p>The trigger-pad grid on a transports session; the browser owns the taps.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.PadsView.TAG">
@@ -1294,12 +1309,36 @@ graph from it. Edits in either place are validated by
 <span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.PadsView.STATUS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.configure_grid_for_actions">
+<span class="sig-name descname"><span class="pre">configure_grid_for_actions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView.configure_grid_for_actions" title="Link to this definition">¶</a></dt>
+<dd><p>Size the grid for the given notes, velocities or actions and apply them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.set_base_note">
+<span class="sig-name descname"><span class="pre">set_base_note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">note</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView.set_base_note" title="Link to this definition">¶</a></dt>
+<dd><p>Lay the pads out chromatically from <code class="docutils literal notranslate"><span class="pre">note</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.transpose_pads">
+<span class="sig-name descname"><span class="pre">transpose_pads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">semitones</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView.transpose_pads" title="Link to this definition">¶</a></dt>
+<dd><p>Shift every pad note by <code class="docutils literal notranslate"><span class="pre">semitones</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.PadsView.connect_sampler">
+<span class="sig-name descname"><span class="pre">connect_sampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampler</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.PadsView.connect_sampler" title="Link to this definition">¶</a></dt>
+<dd><p>Route the pads to <code class="docutils literal notranslate"><span class="pre">sampler</span></code>; pads have no zones, so <code class="docutils literal notranslate"><span class="pre">zone</span></code> must be <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.views.KeyboardView">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">KeyboardView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.KeyboardView" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Keys</span></code></p>
 <p>The QWERTY musical-typing keyboard on a transports session.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.KeyboardView.TAG">
@@ -1331,7 +1370,7 @@ graph from it. Edits in either place are validated by
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.views.</span></span><span class="sig-name descname"><span class="pre">MidiKeyboardView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.MidiKeyboardView" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nbplay.views.InstrumentView" title="nbplay.views.InstrumentView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentView</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Keys</span></code></p>
 <p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.MidiKeyboardView.TAG">
@@ -1636,6 +1675,12 @@ browser-side clip is a command the owning view decodes.</p>
 <dt class="sig sig-object py" id="nbplay.views.SamplerView.slice_sample">
 <span class="sig-name descname"><span class="pre">slice_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">36</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.slice_sample" title="Link to this definition">¶</a></dt>
 <dd><p>Cut the sample into <code class="docutils literal notranslate"><span class="pre">count</span></code> equal slices on ascending notes and put them on the pads.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.SamplerView.map_slices_to_pads">
+<span class="sig-name descname"><span class="pre">map_slices_to_pads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">36</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.SamplerView.map_slices_to_pads" title="Link to this definition">¶</a></dt>
+<dd><p>Put the slices on a <a class="reference internal" href="#nbplay.views.PadsView" title="nbplay.views.PadsView"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadsView</span></code></a> (slicing first when needed) and route the pads here.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2376,6 +2421,18 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.PadsView.STATUS">PadsView.STATUS</a>
   </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.configure_grid_for_actions">PadsView.configure_grid_for_actions()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.set_base_note">PadsView.set_base_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.transpose_pads">PadsView.transpose_pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.PadsView.connect_sampler">PadsView.connect_sampler()</a>
+  </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.views.KeyboardView">KeyboardView</a>
   </li>
@@ -2558,6 +2615,9 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.slice_sample">SamplerView.slice_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.SamplerView.map_slices_to_pads">SamplerView.map_slices_to_pads()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.SamplerView.configure_pads">SamplerView.configure_pads()</a>

@@ -81,6 +81,12 @@ Module Contents
    .. py:method:: test_keyboard_and_midi_keyboard_views()
 
 
+   .. py:method:: test_keyboards_route_to_samplers_and_record_into_sequencers()
+
+
+   .. py:method:: test_pads_grid_helpers_and_sampler_slices()
+
+
 .. py:class:: TestIoViews
 
    .. py:method:: test_settings_and_midi_output_views()

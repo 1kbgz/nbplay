@@ -358,7 +358,7 @@ Module Contents
 
 .. py:class:: PadsView(session=None, *, config=None, **kwargs)
 
-   Bases: :py:obj:`InstrumentView`
+   Bases: :py:obj:`_NoteSource`
 
 
    The trigger-pad grid on a transports session; the browser owns the taps.
@@ -383,9 +383,33 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:method:: configure_grid_for_actions(notes=None, velocities=None, actions=None, rows=None, cols=None)
+
+      Size the grid for the given notes, velocities or actions and apply them.
+
+
+
+   .. py:method:: set_base_note(note)
+
+      Lay the pads out chromatically from ``note``.
+
+
+
+   .. py:method:: transpose_pads(semitones)
+
+      Shift every pad note by ``semitones``.
+
+
+
+   .. py:method:: connect_sampler(sampler, **kwargs)
+
+      Route the pads to ``sampler``; pads have no zones, so ``zone`` must be ``None`` or ``"all"``.
+
+
+
 .. py:class:: KeyboardView(session=None, *, config=None, **kwargs)
 
-   Bases: :py:obj:`InstrumentView`
+   Bases: :py:obj:`_Keys`
 
 
    The QWERTY musical-typing keyboard on a transports session.
@@ -412,7 +436,7 @@ Module Contents
 
 .. py:class:: MidiKeyboardView(session=None, *, config=None, **kwargs)
 
-   Bases: :py:obj:`InstrumentView`
+   Bases: :py:obj:`_Keys`
 
 
    The Web MIDI keyboard on a transports session; ports and clock are browser-owned.
@@ -691,6 +715,12 @@ Module Contents
    .. py:method:: slice_sample(count, start_note=36)
 
       Cut the sample into ``count`` equal slices on ascending notes and put them on the pads.
+
+
+
+   .. py:method:: map_slices_to_pads(pads, count=None, start_note=36)
+
+      Put the slices on a :class:`PadsView` (slicing first when needed) and route the pads here.
 
 
 
