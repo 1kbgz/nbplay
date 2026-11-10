@@ -940,6 +940,18 @@
     <a href="#nbplay.views.Session.import_midi">Session.import_midi()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.to_dict">Session.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.save">Session.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.load">Session.load()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.from_dict">Session.from_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>
   </li>
 </ul>
@@ -2289,8 +2301,9 @@ config, <a class="reference internal" href="#nbplay.views.Session.history" title
 <a class="reference internal" href="#nbplay.views.Session.undo" title="nbplay.views.Session.undo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">undo()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.redo" title="nbplay.views.Session.redo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">redo()</span></code></a>, and lane mute and solo mirror the mixer
 channels. <a class="reference internal" href="#nbplay.views.Session.add_pattern" title="nbplay.views.Session.add_pattern"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_pattern()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.chain" title="nbplay.views.Session.chain"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chain()</span></code></a> lay named patterns out
 as clips, and <a class="reference internal" href="#nbplay.views.Session.export_midi" title="nbplay.views.Session.export_midi"><code class="xref py py-meth docutils literal notranslate"><span class="pre">export_midi()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.import_midi" title="nbplay.views.Session.import_midi"><code class="xref py py-meth docutils literal notranslate"><span class="pre">import_midi()</span></code></a> move the
-arrangement through <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files. Persistence stays with the
-traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
+arrangement through <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files, and <a class="reference internal" href="#nbplay.views.Session.save" title="nbplay.views.Session.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.load" title="nbplay.views.Session.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a>
+read and write the same <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive as the traitlets
+<a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.Session._session_id">
 <span class="sig-name descname"><span class="pre">_session_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-00000000'</span></em><a class="headerlink" href="#nbplay.views.Session._session_id" title="Link to this definition">¶</a></dt>
@@ -2466,6 +2479,35 @@ clip becomes one MIDI track at its timeline position.</p>
 <span class="sig-name descname"><span class="pre">import_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.import_midi" title="Link to this definition">¶</a></dt>
 <dd><p>Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.</p>
 <p>With <code class="docutils literal notranslate"><span class="pre">apply_tempo</span></code> the file’s tempo and time signature are applied.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>The session as a JSON-safe dict (no binary payloads); see <a class="reference internal" href="#nbplay.views.Session.save" title="nbplay.views.Session.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.save" title="Link to this definition">¶</a></dt>
+<dd><p>Write the session to a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> zip archive; returns the path.</p>
+<p>The archive holds <code class="docutils literal notranslate"><span class="pre">session.json</span></code> plus <code class="docutils literal notranslate"><span class="pre">samples/</span></code> (sampler PCM as
+little-endian float32) and <code class="docutils literal notranslate"><span class="pre">clips/</span></code> (timeline clip audio that has
+arrived from the browser; call <code class="docutils literal notranslate"><span class="pre">session.timeline.export_all_clips()</span></code>
+first and wait for <code class="docutils literal notranslate"><span class="pre">pending_exports</span></code> to reach zero). The widget
+session reads the same archive.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.load">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.load" title="Link to this definition">¶</a></dt>
+<dd><p>Rebuild a session from an archive written by <a class="reference internal" href="#nbplay.views.Session.save" title="nbplay.views.Session.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> (of either session class).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.from_dict">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Rebuild a session from <a class="reference internal" href="#nbplay.views.Session.to_dict" title="nbplay.views.Session.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> output plus binary resources.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3261,6 +3303,18 @@ clip becomes one MIDI track at its timeline position.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.import_midi">Session.import_midi()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.to_dict">Session.to_dict()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.save">Session.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.load">Session.load()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.from_dict">Session.from_dict()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>

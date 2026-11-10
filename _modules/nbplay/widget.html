@@ -639,6 +639,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_DEFAULT_PAD_NOTES</span><span class="p">,</span>
     <span class="n">_LAUNCH_QUANTIZE</span><span class="p">,</span>
     <span class="n">_PAD_MAX_COUNT</span><span class="p">,</span>
+    <span class="n">_SAMPLER_PAD_STATE</span><span class="p">,</span>
+    <span class="n">_SAMPLER_STATE</span><span class="p">,</span>
+    <span class="n">_SEQUENCER_STATE</span><span class="p">,</span>
+    <span class="n">_SESSION_FORMAT</span><span class="p">,</span>
+    <span class="n">_SESSION_FORMAT_VERSION</span><span class="p">,</span>
+    <span class="n">_SYNTH_STATE</span><span class="p">,</span>
+    <span class="n">_TIMELINE_STATE</span><span class="p">,</span>
+    <span class="n">_TRANSPORT_STATE</span><span class="p">,</span>
     <span class="n">THEMES</span><span class="p">,</span>
     <span class="n">AudioClip</span><span class="p">,</span>
     <span class="n">PadAction</span><span class="p">,</span>
@@ -652,6 +660,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_decimate_samples</span><span class="p">,</span>
     <span class="n">_default_pad_notes</span><span class="p">,</span>
     <span class="n">_default_steps</span><span class="p">,</span>
+    <span class="n">_json_copy</span><span class="p">,</span>
     <span class="n">_measure_beats</span><span class="p">,</span>
     <span class="n">_nonnegative_number</span><span class="p">,</span>
     <span class="n">_normalize_audio_clip</span><span class="p">,</span>
@@ -3055,47 +3064,6 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"LauncherWidget(tracks=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span><span class="si">}</span><span class="s2">, scenes=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scenes</span><span class="p">)</span><span class="si">}</span><span class="s2">, slots=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slots</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span></div>
 </div>
-
-
-
-<span class="n">_SESSION_FORMAT</span> <span class="o">=</span> <span class="s2">"nbplay-session"</span>
-<span class="n">_SESSION_FORMAT_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">_SEQUENCER_STATE</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">"num_voices"</span><span class="p">,</span>
-    <span class="s2">"length"</span><span class="p">,</span>
-    <span class="s2">"measures"</span><span class="p">,</span>
-    <span class="s2">"step_duration"</span><span class="p">,</span>
-    <span class="s2">"time_signature_num"</span><span class="p">,</span>
-    <span class="s2">"time_signature_den"</span><span class="p">,</span>
-    <span class="s2">"swing"</span><span class="p">,</span>
-    <span class="s2">"groove"</span><span class="p">,</span>
-    <span class="s2">"automation_lanes"</span><span class="p">,</span>
-    <span class="s2">"loop_enabled"</span><span class="p">,</span>
-    <span class="s2">"follow_transport"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
-<span class="n">_SAMPLER_STATE</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">"sample_name"</span><span class="p">,</span>
-    <span class="s2">"sample_rate"</span><span class="p">,</span>
-    <span class="s2">"root_note"</span><span class="p">,</span>
-    <span class="s2">"attack"</span><span class="p">,</span>
-    <span class="s2">"decay"</span><span class="p">,</span>
-    <span class="s2">"sustain"</span><span class="p">,</span>
-    <span class="s2">"release"</span><span class="p">,</span>
-    <span class="s2">"pad_count"</span><span class="p">,</span>
-    <span class="s2">"max_voices"</span><span class="p">,</span>
-    <span class="s2">"velocity"</span><span class="p">,</span>
-    <span class="s2">"velocity_sensitive"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">_SAMPLER_PAD_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"pad_notes"</span><span class="p">,</span> <span class="s2">"pad_velocities"</span><span class="p">,</span> <span class="s2">"pad_actions"</span><span class="p">,</span> <span class="s2">"sample_slices"</span><span class="p">)</span>
-<span class="n">_TIMELINE_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"length"</span><span class="p">,</span> <span class="s2">"count_in_bars"</span><span class="p">,</span> <span class="s2">"auto_extend_recording"</span><span class="p">,</span> <span class="s2">"recording_extend_bars"</span><span class="p">,</span> <span class="s2">"pixels_per_beat"</span><span class="p">)</span>
-<span class="n">_TRANSPORT_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"bpm"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"loop_start_bar"</span><span class="p">,</span> <span class="s2">"loop_end_bar"</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="_json_copy">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget._json_copy">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_json_copy</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
 
 
 

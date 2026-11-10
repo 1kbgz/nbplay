@@ -1189,8 +1189,9 @@ Module Contents
    :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
    channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
    as clips, and :meth:`export_midi` and :meth:`import_midi` move the
-   arrangement through ``.mid`` files. Persistence stays with the
-   traitlets :class:`nbplay.widget.Session` for now.
+   arrangement through ``.mid`` files, and :meth:`save` and :meth:`load`
+   read and write the same ``.nbplay`` archive as the traitlets
+   :class:`nbplay.widget.Session`.
 
 
    .. py:attribute:: _session_id
@@ -1343,6 +1344,40 @@ Module Contents
       Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.
 
       With ``apply_tempo`` the file's tempo and time signature are applied.
+
+
+
+   .. py:method:: to_dict()
+
+      The session as a JSON-safe dict (no binary payloads); see :meth:`save`.
+
+
+
+   .. py:method:: save(path)
+
+      Write the session to a ``.nbplay`` zip archive; returns the path.
+
+      The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
+      little-endian float32) and ``clips/`` (timeline clip audio that has
+      arrived from the browser; call ``session.timeline.export_all_clips()``
+      first and wait for ``pending_exports`` to reach zero). The widget
+      session reads the same archive.
+
+
+
+   .. py:method:: load(path)
+      :classmethod:
+
+
+      Rebuild a session from an archive written by :meth:`save` (of either session class).
+
+
+
+   .. py:method:: from_dict(data, resources=None)
+      :classmethod:
+
+
+      Rebuild a session from :meth:`to_dict` output plus binary resources.
 
 
 

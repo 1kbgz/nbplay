@@ -616,6 +616,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
 
@@ -1696,6 +1697,48 @@ window.runMermaid = runMermaid;</script>
             <span class="k">return</span> <span class="n">KeyboardRoute</span><span class="p">(</span><span class="n">channel_index</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"zone must be None, 'all', 'upper', or 'lower', got </span><span class="si">{</span><span class="n">zone</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">KeyboardRoute</span><span class="p">(</span><span class="n">channel_index</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># The .nbplay archive: session.json plus samples/ and clips/ resources.</span>
+<span class="n">_SESSION_FORMAT</span> <span class="o">=</span> <span class="s2">"nbplay-session"</span>
+<span class="n">_SESSION_FORMAT_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">_SEQUENCER_STATE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"num_voices"</span><span class="p">,</span>
+    <span class="s2">"length"</span><span class="p">,</span>
+    <span class="s2">"measures"</span><span class="p">,</span>
+    <span class="s2">"step_duration"</span><span class="p">,</span>
+    <span class="s2">"time_signature_num"</span><span class="p">,</span>
+    <span class="s2">"time_signature_den"</span><span class="p">,</span>
+    <span class="s2">"swing"</span><span class="p">,</span>
+    <span class="s2">"groove"</span><span class="p">,</span>
+    <span class="s2">"automation_lanes"</span><span class="p">,</span>
+    <span class="s2">"loop_enabled"</span><span class="p">,</span>
+    <span class="s2">"follow_transport"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
+<span class="n">_SAMPLER_STATE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"sample_name"</span><span class="p">,</span>
+    <span class="s2">"sample_rate"</span><span class="p">,</span>
+    <span class="s2">"root_note"</span><span class="p">,</span>
+    <span class="s2">"attack"</span><span class="p">,</span>
+    <span class="s2">"decay"</span><span class="p">,</span>
+    <span class="s2">"sustain"</span><span class="p">,</span>
+    <span class="s2">"release"</span><span class="p">,</span>
+    <span class="s2">"pad_count"</span><span class="p">,</span>
+    <span class="s2">"max_voices"</span><span class="p">,</span>
+    <span class="s2">"velocity"</span><span class="p">,</span>
+    <span class="s2">"velocity_sensitive"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">_SAMPLER_PAD_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"pad_notes"</span><span class="p">,</span> <span class="s2">"pad_velocities"</span><span class="p">,</span> <span class="s2">"pad_actions"</span><span class="p">,</span> <span class="s2">"sample_slices"</span><span class="p">)</span>
+<span class="n">_TIMELINE_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"length"</span><span class="p">,</span> <span class="s2">"count_in_bars"</span><span class="p">,</span> <span class="s2">"auto_extend_recording"</span><span class="p">,</span> <span class="s2">"recording_extend_bars"</span><span class="p">,</span> <span class="s2">"pixels_per_beat"</span><span class="p">)</span>
+<span class="n">_TRANSPORT_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"bpm"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"loop_start_bar"</span><span class="p">,</span> <span class="s2">"loop_end_bar"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="_json_copy">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._json_copy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_json_copy</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
 
 </pre></div>
 

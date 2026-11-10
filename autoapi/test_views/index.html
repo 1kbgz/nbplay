@@ -337,6 +337,21 @@
     <a href="#test_views.TestSessionArrangement.test_midi_round_trip">TestSessionArrangement.test_midi_round_trip()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.arranged_session">arranged_session()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.TestSessionPersistence">TestSessionPersistence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_to_dict_is_json_safe">TestSessionPersistence.test_to_dict_is_json_safe()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_save_and_load_round_trip">TestSessionPersistence.test_save_and_load_round_trip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions">TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_views.TestHistoryAndMidiLearnOnViews">TestHistoryAndMidiLearnOnViews</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -419,10 +434,13 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestSessionArrangement" title="test_views.TestSessionArrangement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionArrangement</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestHistoryAndMidiLearnOnViews" title="test_views.TestHistoryAndMidiLearnOnViews"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearnOnViews</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestSessionPersistence" title="test_views.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestTransportView" title="test_views.TestTransportView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportView</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestHistoryAndMidiLearnOnViews" title="test_views.TestHistoryAndMidiLearnOnViews"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearnOnViews</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestTransportView" title="test_views.TestTransportView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportView</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -440,6 +458,9 @@
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_views.browser_writes" title="test_views.browser_writes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">browser_writes</span></code></a>(view, **values)</p></td>
 <td><p>A browser write to the view's status, as the server applies it after the ownership check.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_views.arranged_session" title="test_views.arranged_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arranged_session</span></code></a>()</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -672,6 +693,31 @@
 
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="test_views.arranged_session">
+<span class="sig-prename descclassname"><span class="pre">test_views.</span></span><span class="sig-name descname"><span class="pre">arranged_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_views.arranged_session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_views.TestSessionPersistence">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_views.</span></span><span class="sig-name descname"><span class="pre">TestSessionPersistence</span></span><a class="headerlink" href="#test_views.TestSessionPersistence" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestSessionPersistence.test_to_dict_is_json_safe">
+<span class="sig-name descname"><span class="pre">test_to_dict_is_json_safe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestSessionPersistence.test_to_dict_is_json_safe" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestSessionPersistence.test_save_and_load_round_trip">
+<span class="sig-name descname"><span class="pre">test_save_and_load_round_trip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestSessionPersistence.test_save_and_load_round_trip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions">
+<span class="sig-name descname"><span class="pre">test_archives_move_between_the_widget_and_view_sessions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="test_views.TestHistoryAndMidiLearnOnViews">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_views.</span></span><span class="sig-name descname"><span class="pre">TestHistoryAndMidiLearnOnViews</span></span><a class="headerlink" href="#test_views.TestHistoryAndMidiLearnOnViews" title="Link to this definition">¶</a></dt>
@@ -889,6 +935,21 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#test_views.TestSessionArrangement.test_midi_round_trip">TestSessionArrangement.test_midi_round_trip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.arranged_session">arranged_session()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.TestSessionPersistence">TestSessionPersistence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_to_dict_is_json_safe">TestSessionPersistence.test_to_dict_is_json_safe()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_save_and_load_round_trip">TestSessionPersistence.test_save_and_load_round_trip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions">TestSessionPersistence.test_archives_move_between_the_widget_and_view_sessions()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_views.TestHistoryAndMidiLearnOnViews">TestHistoryAndMidiLearnOnViews</a>

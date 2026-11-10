@@ -27,6 +27,7 @@ Classes
    test_views.TestObservers
    test_views.TestSession
    test_views.TestSessionArrangement
+   test_views.TestSessionPersistence
    test_views.TestHistoryAndMidiLearnOnViews
    test_views.TestTransportView
 
@@ -39,6 +40,7 @@ Functions
    test_views.messages
    test_views.ready
    test_views.browser_writes
+   test_views.arranged_session
 
 
 Module Contents
@@ -166,6 +168,19 @@ Module Contents
 
 
    .. py:method:: test_midi_round_trip(tmp_path)
+
+
+.. py:function:: arranged_session()
+
+.. py:class:: TestSessionPersistence
+
+   .. py:method:: test_to_dict_is_json_safe()
+
+
+   .. py:method:: test_save_and_load_round_trip(tmp_path)
+
+
+   .. py:method:: test_archives_move_between_the_widget_and_view_sessions(tmp_path)
 
 
 .. py:class:: TestHistoryAndMidiLearnOnViews

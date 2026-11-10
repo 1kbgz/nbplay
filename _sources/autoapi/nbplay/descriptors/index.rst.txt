@@ -29,6 +29,14 @@ Attributes
    nbplay.descriptors._CLIP_KINDS
    nbplay.descriptors.THEMES
    nbplay.descriptors._LAUNCH_QUANTIZE
+   nbplay.descriptors._SESSION_FORMAT
+   nbplay.descriptors._SESSION_FORMAT_VERSION
+   nbplay.descriptors._SEQUENCER_STATE
+   nbplay.descriptors._SYNTH_STATE
+   nbplay.descriptors._SAMPLER_STATE
+   nbplay.descriptors._SAMPLER_PAD_STATE
+   nbplay.descriptors._TIMELINE_STATE
+   nbplay.descriptors._TRANSPORT_STATE
 
 
 Classes
@@ -92,6 +100,7 @@ Functions
    nbplay.descriptors._default_pad_notes
    nbplay.descriptors._positive_pad_dimension
    nbplay.descriptors._build_route
+   nbplay.descriptors._json_copy
 
 
 Module Contents
@@ -440,4 +449,38 @@ Module Contents
 
    :returns: A validated ``KeyboardRoute``.
 
+
+.. py:data:: _SESSION_FORMAT
+   :value: 'nbplay-session'
+
+
+.. py:data:: _SESSION_FORMAT_VERSION
+   :value: 1
+
+
+.. py:data:: _SEQUENCER_STATE
+   :value: ('num_voices', 'length', 'measures', 'step_duration', 'time_signature_num',...
+
+
+.. py:data:: _SYNTH_STATE
+   :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+
+
+.. py:data:: _SAMPLER_STATE
+   :value: ('sample_name', 'sample_rate', 'root_note', 'attack', 'decay', 'sustain', 'release',...
+
+
+.. py:data:: _SAMPLER_PAD_STATE
+   :value: ('pad_notes', 'pad_velocities', 'pad_actions', 'sample_slices')
+
+
+.. py:data:: _TIMELINE_STATE
+   :value: ('length', 'count_in_bars', 'auto_extend_recording', 'recording_extend_bars', 'pixels_per_beat')
+
+
+.. py:data:: _TRANSPORT_STATE
+   :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar', 'loop_end_bar')
+
+
+.. py:function:: _json_copy(value)
 

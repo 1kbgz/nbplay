@@ -1105,33 +1105,6 @@
     <a href="#nbplay.widget.LauncherWidget.__repr__">LauncherWidget.__repr__()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SESSION_FORMAT">_SESSION_FORMAT</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SESSION_FORMAT_VERSION">_SESSION_FORMAT_VERSION</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SEQUENCER_STATE">_SEQUENCER_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SYNTH_STATE">_SYNTH_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SAMPLER_STATE">_SAMPLER_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SAMPLER_PAD_STATE">_SAMPLER_PAD_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._TIMELINE_STATE">_TIMELINE_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._TRANSPORT_STATE">_TRANSPORT_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._json_copy">_json_copy()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget._widget_state">_widget_state()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -1554,30 +1527,6 @@ API in the browser so latency stays minimal.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._STATIC" title="nbplay.widget._STATIC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_STATIC</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT" title="nbplay.widget._SESSION_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SESSION_FORMAT_VERSION" title="nbplay.widget._SESSION_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SESSION_FORMAT_VERSION</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SEQUENCER_STATE" title="nbplay.widget._SEQUENCER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SEQUENCER_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SYNTH_STATE" title="nbplay.widget._SYNTH_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SYNTH_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_STATE" title="nbplay.widget._SAMPLER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._SAMPLER_PAD_STATE" title="nbplay.widget._SAMPLER_PAD_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_PAD_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._TIMELINE_STATE" title="nbplay.widget._TIMELINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._TRANSPORT_STATE" title="nbplay.widget._TRANSPORT_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TRANSPORT_STATE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
 </tbody>
 </table>
 </section>
@@ -1640,25 +1589,22 @@ API in the browser so latency stays minimal.</p>
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._json_copy" title="nbplay.widget._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._widget_state" title="nbplay.widget._widget_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_widget_state</span></code></a>(widget, names)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_to_dict" title="nbplay.widget._sound_source_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_to_dict</span></code></a>(source, index, resources)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sound_source_from_dict" title="nbplay.widget._sound_source_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sound_source_from_dict</span></code></a>(entry, resources)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._sequencer_from_dict" title="nbplay.widget._sequencer_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_sequencer_from_dict</span></code></a>(state)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_to_dict" title="nbplay.widget._session_to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_to_dict</span></code></a>(session[, resources])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget._session_from_dict" title="nbplay.widget._session_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_session_from_dict</span></code></a>(cls, data, resources)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -3628,51 +3574,6 @@ that slot. Returns a function that removes the binding.</p>
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SESSION_FORMAT">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SESSION_FORMAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-session'</span></em><a class="headerlink" href="#nbplay.widget._SESSION_FORMAT" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SESSION_FORMAT_VERSION">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SESSION_FORMAT_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#nbplay.widget._SESSION_FORMAT_VERSION" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SEQUENCER_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SEQUENCER_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('num_voices',</span> <span class="pre">'length',</span> <span class="pre">'measures',</span> <span class="pre">'step_duration',</span> <span class="pre">'time_signature_num',...</span></em><a class="headerlink" href="#nbplay.widget._SEQUENCER_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SYNTH_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SYNTH_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate')</span></em><a class="headerlink" href="#nbplay.widget._SYNTH_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SAMPLER_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SAMPLER_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('sample_name',</span> <span class="pre">'sample_rate',</span> <span class="pre">'root_note',</span> <span class="pre">'attack',</span> <span class="pre">'decay',</span> <span class="pre">'sustain',</span> <span class="pre">'release',...</span></em><a class="headerlink" href="#nbplay.widget._SAMPLER_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._SAMPLER_PAD_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_SAMPLER_PAD_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pad_notes',</span> <span class="pre">'pad_velocities',</span> <span class="pre">'pad_actions',</span> <span class="pre">'sample_slices')</span></em><a class="headerlink" href="#nbplay.widget._SAMPLER_PAD_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._TIMELINE_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_TIMELINE_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('length',</span> <span class="pre">'count_in_bars',</span> <span class="pre">'auto_extend_recording',</span> <span class="pre">'recording_extend_bars',</span> <span class="pre">'pixels_per_beat')</span></em><a class="headerlink" href="#nbplay.widget._TIMELINE_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="nbplay.widget._TRANSPORT_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_TRANSPORT_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('bpm',</span> <span class="pre">'time_signature_num',</span> <span class="pre">'time_signature_den',</span> <span class="pre">'loop_enabled',</span> <span class="pre">'loop_start_bar',</span> <span class="pre">'loop_end_bar')</span></em><a class="headerlink" href="#nbplay.widget._TRANSPORT_STATE" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.widget._json_copy">
-<span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_json_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_json_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._json_copy" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.widget._widget_state">
 <span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">_widget_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#_widget_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget._widget_state" title="Link to this definition">¶</a></dt>
@@ -5519,33 +5420,6 @@ first and wait for <code class="docutils literal notranslate"><span class="pre">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.LauncherWidget.__repr__">LauncherWidget.__repr__()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SESSION_FORMAT">_SESSION_FORMAT</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SESSION_FORMAT_VERSION">_SESSION_FORMAT_VERSION</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SEQUENCER_STATE">_SEQUENCER_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SYNTH_STATE">_SYNTH_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SAMPLER_STATE">_SAMPLER_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._SAMPLER_PAD_STATE">_SAMPLER_PAD_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._TIMELINE_STATE">_TIMELINE_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._TRANSPORT_STATE">_TRANSPORT_STATE</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.widget._json_copy">_json_copy()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget._widget_state">_widget_state()</a>

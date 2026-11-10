@@ -23,14 +23,6 @@ Attributes
 .. autoapisummary::
 
    nbplay.widget._STATIC
-   nbplay.widget._SESSION_FORMAT
-   nbplay.widget._SESSION_FORMAT_VERSION
-   nbplay.widget._SEQUENCER_STATE
-   nbplay.widget._SYNTH_STATE
-   nbplay.widget._SAMPLER_STATE
-   nbplay.widget._SAMPLER_PAD_STATE
-   nbplay.widget._TIMELINE_STATE
-   nbplay.widget._TRANSPORT_STATE
 
 
 Classes
@@ -61,7 +53,6 @@ Functions
 
 .. autoapisummary::
 
-   nbplay.widget._json_copy
    nbplay.widget._widget_state
    nbplay.widget._sound_source_to_dict
    nbplay.widget._sound_source_from_dict
@@ -1567,40 +1558,6 @@ Module Contents
       Return a simple repr to avoid expensive ipywidgets trait serialization.
 
 
-
-.. py:data:: _SESSION_FORMAT
-   :value: 'nbplay-session'
-
-
-.. py:data:: _SESSION_FORMAT_VERSION
-   :value: 1
-
-
-.. py:data:: _SEQUENCER_STATE
-   :value: ('num_voices', 'length', 'measures', 'step_duration', 'time_signature_num',...
-
-
-.. py:data:: _SYNTH_STATE
-   :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
-
-
-.. py:data:: _SAMPLER_STATE
-   :value: ('sample_name', 'sample_rate', 'root_note', 'attack', 'decay', 'sustain', 'release',...
-
-
-.. py:data:: _SAMPLER_PAD_STATE
-   :value: ('pad_notes', 'pad_velocities', 'pad_actions', 'sample_slices')
-
-
-.. py:data:: _TIMELINE_STATE
-   :value: ('length', 'count_in_bars', 'auto_extend_recording', 'recording_extend_bars', 'pixels_per_beat')
-
-
-.. py:data:: _TRANSPORT_STATE
-   :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar', 'loop_end_bar')
-
-
-.. py:function:: _json_copy(value)
 
 .. py:function:: _widget_state(widget, names)
 
