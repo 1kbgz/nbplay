@@ -38,7 +38,8 @@ const COARSE_SYNC_MS = 250;
  * (play, stop, seek, record) and a throttled position while playing. A
  * status write that disagrees with the clock is corrected and re-reported.
  * `command()` moves the clock on behalf of the kernel. Ctrl/Cmd+Z and
- * Ctrl/Cmd+Shift+Z / Ctrl/Cmd+Y fire `nbplay-request` `{name: "undo" | "redo"}`.
+ * Ctrl/Cmd+Shift+Z / Ctrl/Cmd+Y bump `undoRequest` / `redoRequest` and fire
+ * `nbplay-request` `{name: "undo" | "redo"}`.
  */
 export class NbplayTransport extends NbplayElement {
   static properties = {
@@ -54,6 +55,8 @@ export class NbplayTransport extends NbplayElement {
     currentBeat: { attribute: false },
     barNumber: { attribute: false },
     beatInBar: { attribute: false },
+    undoRequest: { attribute: false },
+    redoRequest: { attribute: false },
   };
 
   declare sessionId: string;
@@ -68,6 +71,8 @@ export class NbplayTransport extends NbplayElement {
   declare currentBeat: number;
   declare barNumber: number;
   declare beatInBar: number;
+  declare undoRequest: number;
+  declare redoRequest: number;
 
   private binding: (ClockBinding & { rebind(): void }) | null = null;
   private unbindShortcuts: (() => void) | null = null;
@@ -387,9 +392,10 @@ export class NbplayTransport extends NbplayElement {
     if (key !== "z" && key !== "y") return;
     e.preventDefault();
     e.stopPropagation();
-    this.emitDetail("nbplay-request", {
-      name: key === "y" || e.shiftKey ? "redo" : "undo",
-    });
+    const name = key === "y" || e.shiftKey ? "redo" : "undo";
+    if (name === "redo") this.redoRequest = (this.redoRequest || 0) + 1;
+    else this.undoRequest = (this.undoRequest || 0) + 1;
+    this.emitDetail("nbplay-request", { name });
   };
 
   render() {

@@ -572,6 +572,19 @@ test.describe("views on transports", () => {
         )
         .toBe(90);
 
+      // Ctrl+Z with the transport focused asks the session to undo that change.
+      await page.locator("#transport .nbplay-transport").focus();
+      await page.keyboard.press("Control+z");
+      await expect(
+        page.locator("#transport .nbplay-transport-tempo .nbplay-value-text"),
+      ).toContainText("120");
+      await expect
+        .poll(
+          async () =>
+            (await kernel.call({ op: "state" })).result.transport.config.bpm,
+        )
+        .toBe(120);
+
       await page.evaluate(
         (response) => notebook.deliver(response),
         await kernel.call({ op: "command", name: "stop" }),

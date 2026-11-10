@@ -161,6 +161,8 @@ class InstrumentView(Widget):
     STATUS_MODEL: ClassVar[type[BaseModel] | None] = None
     CONFIG: ClassVar[dict[str, str]]
     STATUS: ClassVar[dict[str, str]] = {}
+    #: Status fields written back on an event other than ``nbplay-status``.
+    STATUS_EVENTS: ClassVar[dict[str, str]] = {}
 
     def __init__(self, session=None, *, config=None, **kwargs):
         fields = {name: kwargs.pop(name) for name in list(kwargs) if name in self.CONFIG_MODEL.model_fields}
@@ -180,7 +182,7 @@ class InstrumentView(Widget):
             wires.append({"model": self.status_id, "namespace": "status"})
             node.child(element("nbplay-wire", namespace="status"))
             for name, prop in self.STATUS.items():
-                node.bind(prop, f"status.{name}", mode="two-way", event="nbplay-status")
+                node.bind(prop, f"status.{name}", mode="two-way", event=self.STATUS_EVENTS.get(name, "nbplay-status"))
         # Config changes come through the model (Python assignments and browser
         # edits alike); status changes come as patches the browser submits.
         self._listeners = []
@@ -265,7 +267,10 @@ class TransportView(InstrumentView):
         "current_beat": "currentBeat",
         "bar_number": "barNumber",
         "beat_in_bar": "beatInBar",
+        "undo_request": "undoRequest",
+        "redo_request": "redoRequest",
     }
+    STATUS_EVENTS: ClassVar[dict[str, str]] = {"undo_request": "nbplay-request", "redo_request": "nbplay-request"}
 
     def play(self):
         """Start the clock in the owning view."""
@@ -1630,6 +1635,9 @@ class Session:
         for view in (self.transport, self.mixer, self.timeline, self.launcher):
             self.history.attach(view)
         self.history.bind_ipython()
+        # Ctrl/Cmd+Z in the browser bumps the transport's request counts.
+        self.transport.on_change(lambda view, name, old, new: self.undo(), names="undo_request")
+        self.transport.on_change(lambda view, name, old, new: self.redo(), names="redo_request")
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False
