@@ -7,7 +7,7 @@ status model the browser owns (hosted with ``owner="client"``), matching the
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 from .descriptors import (
     THEMES,
@@ -74,19 +74,41 @@ class _Validated(BaseModel):
     model observable.
     """
 
+    _listeners: list = PrivateAttr(default_factory=list)
+
     def __setattr__(self, name, value):
         if name not in type(self).model_fields:
             super().__setattr__(name, value)
             return
         self.update(**{name: value})
 
+    def on_change(self, listener):
+        """Call ``listener(changes)`` after each update with ``{field: (old, new)}``; returns a remover.
+
+        Browser edits reach the hosted model through assignment too, so a
+        listener sees both sides.
+        """
+        self._listeners.append(listener)
+
+        def unobserve():
+            if listener in self._listeners:
+                self._listeners.remove(listener)
+
+        return unobserve
+
     def update(self, **fields):
         """Assign several fields in one validation, so derived fields see all of them."""
         fresh = type(self).model_validate({**self.model_dump(), **fields})
+        changes = {}
         for field in type(self).model_fields:
             new = getattr(fresh, field)
-            if new != getattr(self, field):
+            old = getattr(self, field)
+            if new != old:
                 BaseModel.__setattr__(self, field, new)
+                changes[field] = (old, new)
+        if changes:
+            for listener in list(self._listeners):
+                listener(changes)
 
 
 class TransportConfig(_Validated):

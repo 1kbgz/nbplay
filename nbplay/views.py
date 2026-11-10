@@ -13,6 +13,7 @@ import inspect
 import os
 import pathlib
 import uuid
+import weakref
 from typing import ClassVar
 
 import transports
@@ -69,6 +70,7 @@ from .models import (
     TimelineStatus,
     TransportConfig,
     TransportStatus,
+    _Validated,
 )
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
@@ -95,6 +97,29 @@ __all__ = (
 
 PACKAGE = "nbplay.components:package"
 
+# transports gives a Session one patch callback; views sharing a Session share it.
+_PATCH_HOOKS = weakref.WeakKeyDictionary()
+
+
+def _on_session_patch(session, hook):
+    """Register ``hook(model_id, patch)`` for the patches a transports Session emits; returns a remover."""
+    hooks = _PATCH_HOOKS.get(session)
+    if hooks is None:
+        hooks = _PATCH_HOOKS[session] = []
+
+        def dispatch(mid, patch):
+            for item in hooks:
+                item(mid, patch)
+
+        session.on_patch(dispatch)
+    hooks.append(hook)
+
+    def remove():
+        if hook in hooks:
+            hooks.remove(hook)
+
+    return remove
+
 
 class InstrumentView(Widget):
     """One instrument element on a config model and, usually, a status model.
@@ -106,7 +131,7 @@ class InstrumentView(Widget):
     """
 
     TAG: ClassVar[str]
-    CONFIG_MODEL: ClassVar[type[BaseModel]]
+    CONFIG_MODEL: ClassVar[type[_Validated]]
     STATUS_MODEL: ClassVar[type[BaseModel] | None] = None
     CONFIG: ClassVar[dict[str, str]]
     STATUS: ClassVar[dict[str, str]] = {}
@@ -130,6 +155,12 @@ class InstrumentView(Widget):
             node.child(element("nbplay-wire", namespace="status"))
             for name, prop in self.STATUS.items():
                 node.bind(prop, f"status.{name}", mode="two-way", event="nbplay-status")
+        # Config changes come through the model (Python assignments and browser
+        # edits alike); status changes come as patches the browser submits.
+        self._listeners = []
+        self._status_mirror = self.status.model_dump() if self.status is not None else {}
+        self._unobserve_config = self.config.on_change(self._on_config_change)
+        self._unhook_patches = _on_session_patch(self.session, self._on_patch)
         super().__init__(node, session=self.session, wires=wires, packages=PACKAGE, **kwargs)
 
     def _prepare(self):
@@ -139,6 +170,51 @@ class InstrumentView(Widget):
         if self.status_id is None:
             raise TypeError(f"{type(self).__name__} has no browser-owned status to command")
         return self.session.command(self.status_id, field, value)
+
+    def on_change(self, listener, names=None):
+        """Call ``listener(view, name, old, new)`` when a config or status field changes; returns a remover.
+
+        ``names`` limits the fields. Changes made from Python and from the
+        browser both count.
+        """
+        wanted = None if names is None else frozenset([names] if isinstance(names, str) else names)
+        entry = (wanted, listener)
+        self._listeners.append(entry)
+
+        def unobserve():
+            if entry in self._listeners:
+                self._listeners.remove(entry)
+
+        return unobserve
+
+    def _notify(self, name, old, new):
+        for wanted, listener in list(self._listeners):
+            if wanted is None or name in wanted:
+                listener(self, name, old, new)
+
+    def _on_config_change(self, changes):
+        for name, (old, new) in changes.items():
+            self._notify(name, old, new)
+
+    def _on_patch(self, mid, patch):
+        if mid != self.status_id:
+            return
+        for op in patch.get("ops", []):
+            path = op.get("Set", {}).get("path") or []
+            name = path[0].get("Key") if path and isinstance(path[0], dict) else None
+            if name is None or name not in self._status_mirror:
+                continue
+            new = getattr(self.status, name)
+            old = self._status_mirror[name]
+            if new != old:
+                self._status_mirror[name] = new
+                self._notify(name, old, new)
+
+    def close(self):
+        self._unobserve_config()
+        self._unhook_patches()
+        self._listeners.clear()
+        super().close()
 
 
 class TransportView(InstrumentView):
@@ -1077,6 +1153,43 @@ class LauncherView(InstrumentView):
             fields["selected_slot"] = {}
         self.config.update(**fields)
 
+    def bind_slot_editor(self, sequencer):
+        """Edit whichever slot is selected in ``sequencer`` (a :class:`SequencerView`); returns an unbinder.
+
+        Selecting a slot, in the browser or by assigning ``config.selected_slot``,
+        loads it into the sequencer; the sequencer's step, grid, swing and
+        groove edits write back into that slot.
+        """
+        state = {"loading": False}
+
+        def load(*_):
+            selected = self.config.selected_slot
+            if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
+                return
+            state["loading"] = True
+            try:
+                self.slot_to_sequencer(selected["track_index"], selected["scene_index"], sequencer)
+            finally:
+                state["loading"] = False
+
+        def write_back(*_):
+            selected = self.config.selected_slot
+            if state["loading"] or not selected:
+                return
+            current = self.get_slot(selected["track_index"], selected["scene_index"])
+            if current is not None:
+                self.set_slot(selected["track_index"], selected["scene_index"], sequencer, name=current["name"])
+
+        stop_select = self.on_change(load, names="selected_slot")
+        stop_edit = sequencer.on_change(write_back, names=("voices_data", "step_duration", "swing", "groove"))
+        load()
+
+        def unbind():
+            stop_select()
+            stop_edit()
+
+        return unbind
+
     def slot_to_sequencer(self, track_index, scene_index, sequencer):
         """Load a slot's pattern, grid, swing and groove into a :class:`SequencerView`."""
         slot = self.get_slot(track_index, scene_index)
@@ -1157,6 +1270,52 @@ class TimelineView(InstrumentView):
         "exported_clip": "exportedClip",
         "exported_clip_data": "exportedClipData",
     }
+
+    def __init__(self, session=None, *, config=None, **kwargs):
+        super().__init__(session, config=config, **kwargs)
+        # Clip audio that has arrived from the browser, by clip id, so a
+        # session can be saved with its takes. See export_all_clips().
+        self._clip_audio = {}
+        self._export_queue = []
+        self.on_change(self._on_clip_exported, names="exported_clip_data")
+
+    def _on_clip_exported(self, view, name, old, data):
+        exported = self.status.exported_clip
+        clip_id = str(exported.get("id", ""))
+        if not data or not clip_id:
+            return
+        self._clip_audio[clip_id] = {"data": bytes(data), "blob_type": str(exported.get("blob_type", ""))}
+        if self.config.export_clip_id == clip_id:
+            self.config.export_clip_id = ""
+        while self._export_queue:
+            next_id = self._export_queue.pop(0)
+            if any(clip["id"] == next_id for clip in self.config.clips):
+                self.export_clip(next_id)
+                break
+
+    @property
+    def clip_audio(self):
+        """Clip audio bytes received from the browser, keyed by clip id."""
+        return {clip_id: dict(item) for clip_id, item in self._clip_audio.items()}
+
+    @property
+    def pending_exports(self):
+        """Number of clip exports still waiting on the browser."""
+        return len(self._export_queue) + (1 if self.config.export_clip_id else 0)
+
+    def export_all_clips(self, *, refresh=False):
+        """Ask the browser for every clip's audio, one clip at a time; returns the number queued.
+
+        The bytes accumulate in :attr:`clip_audio` as they arrive; wait for
+        :attr:`pending_exports` to reach zero before saving. Clips whose audio
+        is already cached are skipped unless ``refresh`` is true.
+        """
+        wanted = [clip["id"] for clip in self.config.clips if clip["audio_url"] and (refresh or clip["id"] not in self._clip_audio)]
+        if not wanted:
+            return 0
+        self._export_queue = wanted[1:]
+        self.export_clip(wanted[0])
+        return len(wanted)
 
     def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False, input="microphone"):
         """Append a lane and return its index."""

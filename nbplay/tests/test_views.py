@@ -1,3 +1,4 @@
+import base64
 import json
 import struct
 import wave
@@ -608,6 +609,94 @@ class TestArrangementViews:
         finally:
             view.close()
             sequencer.close()
+
+
+def browser_writes(view, **values):
+    """A browser write to the view's status, as the server applies it after the ownership check."""
+
+    def tagged(value):
+        if isinstance(value, bool):
+            return {"Bool": value}
+        if isinstance(value, int):
+            return {"Int": value}
+        if isinstance(value, float):
+            return {"Float": value}
+        if isinstance(value, str):
+            return {"Str": value}
+        if isinstance(value, bytes):
+            return {"Bytes": base64.b64encode(value).decode("ascii")}
+        if isinstance(value, list):
+            return {"List": [tagged(item) for item in value]}
+        return {"Map": {key: tagged(item) for key, item in value.items()}}
+
+    ops = [{"Set": {"path": [{"Key": name}], "value": tagged(value)}} for name, value in values.items()]
+    view.session._submit_owned(view.status_id, {"ops": ops})
+
+
+class TestObservers:
+    def test_config_and_status_changes_reach_observers(self):
+        view = views.TransportView(autosync=False)
+        seen = []
+        try:
+            stop = view.on_change(lambda v, name, old, new: seen.append((name, old, new)))
+            only_bpm = []
+            view.on_change(lambda v, name, old, new: only_bpm.append(new), names="bpm")
+            view.config.bpm = 140.0
+            browser_writes(view, is_playing=True, current_beat=2.5)
+            assert view.status.is_playing is True and view.status.current_beat == 2.5
+            browser_writes(view, is_playing=True)
+            assert seen == [("bpm", 120.0, 140.0), ("is_playing", False, True), ("current_beat", 0.0, 2.5)]
+            assert only_bpm == [140.0]
+            stop()
+            view.config.bpm = 90.0
+            assert len(seen) == 3 and only_bpm == [140.0, 90.0]
+        finally:
+            view.close()
+
+    def test_timeline_collects_exported_clips(self):
+        view = views.TimelineView(autosync=False)
+        try:
+            view.add_track("Mic")
+            first = view.add_clip("One", audio_url="blob:one")
+            second = view.add_clip("Two", start=4.0, audio_url="blob:two")
+            view.add_clip("Silent")
+            assert view.export_all_clips() == 2
+            assert view.pending_exports == 2 and view.config.export_clip_id == first["id"]
+            browser_writes(view, exported_clip={"id": first["id"], "blob_type": "audio/webm"}, exported_clip_data=b"one")
+            assert view.clip_audio == {first["id"]: {"data": b"one", "blob_type": "audio/webm"}}
+            assert view.pending_exports == 1 and view.config.export_clip_id == second["id"]
+            browser_writes(view, exported_clip={"id": second["id"], "blob_type": "audio/wav"}, exported_clip_data=b"two")
+            assert view.pending_exports == 0 and view.config.export_clip_id == ""
+            assert view.export_all_clips() == 0 and view.export_all_clips(refresh=True) == 2
+        finally:
+            view.close()
+
+    def test_launcher_slot_editor_follows_the_selection(self):
+        launcher = views.LauncherView(autosync=False)
+        editor = views.SequencerView(autosync=False)
+        try:
+            track = launcher.add_track("Drums")
+            scene = launcher.add_scene()
+            launcher.add_scene()
+            launcher.set_slot(track, scene, [{"note": 36, "active": True}, {"note": 38}], name="Beat", step_duration=0.5)
+            unbind = launcher.bind_slot_editor(editor)
+            assert editor.config.length == 16
+            launcher.config.selected_slot = {"track_index": track, "scene_index": scene}
+            assert editor.config.length == 2 and editor.config.step_duration == 0.5 and editor.steps[0]["note"] == 36
+            editor.set_step(1, note=42)
+            editor.config.swing = 15.0
+            slot = launcher.get_slot(track, scene)
+            assert slot["name"] == "Beat" and slot["voices_data"][0][1]["note"] == 42 and slot["swing"] == 15.0
+            launcher.config.selected_slot = {"track_index": track, "scene_index": 1}
+            editor.set_step(0, note=60)
+            assert launcher.get_slot(track, scene)["voices_data"][0][0]["note"] == 36 and launcher.get_slot(track, 1) is None
+            unbind()
+            launcher.config.selected_slot = {"track_index": track, "scene_index": scene}
+            editor.set_step(0, note=61)
+            assert launcher.get_slot(track, scene)["voices_data"][0][0]["note"] == 36
+        finally:
+            launcher.close()
+            editor.close()
 
 
 class TestSession:
