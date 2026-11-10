@@ -862,6 +862,24 @@
     <a href="#nbplay.views.Session.tracks">Session.tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.history">Session.history</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._mirroring_mute_solo">Session._mirroring_mute_solo</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._on_timeline_tracks">Session._on_timeline_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._on_mixer_channels">Session._on_mixer_channels()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.undo">Session.undo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.redo">Session.redo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.session_id">Session.session_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -887,6 +905,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.add_track">Session.add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._add_track">Session._add_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>
@@ -2228,8 +2249,10 @@ consistent across them. Each view hosts its models in its own transports
 client-owned field in the session it connects to, so views that shared
 one would fight over each other’s status. In the kernel the <a class="reference internal" href="#nbplay.views.Session.bpm" title="nbplay.views.Session.bpm"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bpm</span></code></a>,
 <a class="reference internal" href="#nbplay.views.Session.time_signature" title="nbplay.views.Session.time_signature"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_signature</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.theme" title="nbplay.views.Session.theme"><code class="xref py py-attr docutils literal notranslate"><span class="pre">theme</span></code></a> properties write every view’s
-config. Undo, patterns, MIDI files and persistence stay with the
-traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
+config, <a class="reference internal" href="#nbplay.views.Session.history" title="nbplay.views.Session.history"><code class="xref py py-attr docutils literal notranslate"><span class="pre">history</span></code></a> records every view’s config edits for
+<a class="reference internal" href="#nbplay.views.Session.undo" title="nbplay.views.Session.undo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">undo()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.redo" title="nbplay.views.Session.redo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">redo()</span></code></a>, and lane mute and solo mirror the mixer
+channels. Patterns, MIDI files and persistence stay with the traitlets
+<a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.Session._session_id">
 <span class="sig-name descname"><span class="pre">_session_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-00000000'</span></em><a class="headerlink" href="#nbplay.views.Session._session_id" title="Link to this definition">¶</a></dt>
@@ -2259,6 +2282,38 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
 <dt class="sig sig-object py" id="nbplay.views.Session.tracks">
 <span class="sig-name descname"><span class="pre">tracks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.views.Session.tracks" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.history">
+<span class="sig-name descname"><span class="pre">history</span></span><a class="headerlink" href="#nbplay.views.Session.history" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session._mirroring_mute_solo">
+<span class="sig-name descname"><span class="pre">_mirroring_mute_solo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.views.Session._mirroring_mute_solo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session._on_timeline_tracks">
+<span class="sig-name descname"><span class="pre">_on_timeline_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session._on_timeline_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session._on_mixer_channels">
+<span class="sig-name descname"><span class="pre">_on_mixer_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session._on_mixer_channels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.undo" title="Link to this definition">¶</a></dt>
+<dd><p>Revert the latest change to any view; False when nothing to undo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.redo" title="Link to this definition">¶</a></dt>
+<dd><p>Reapply the latest undone change; False when nothing to redo.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="nbplay.views.Session.session_id">
@@ -2310,6 +2365,11 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
 <span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.add_track" title="Link to this definition">¶</a></dt>
 <dd><p>Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments’ routing.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session._add_track">
+<span class="sig-name descname"><span class="pre">_add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session._add_track" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.Session.close">
@@ -3028,6 +3088,24 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
     <a href="#nbplay.views.Session.tracks">Session.tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.history">Session.history</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._mirroring_mute_solo">Session._mirroring_mute_solo</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._on_timeline_tracks">Session._on_timeline_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._on_mixer_channels">Session._on_mixer_channels()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.undo">Session.undo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.redo">Session.redo()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.session_id">Session.session_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3053,6 +3131,9 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.add_track">Session.add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._add_track">Session._add_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>

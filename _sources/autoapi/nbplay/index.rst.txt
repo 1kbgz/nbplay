@@ -831,6 +831,9 @@ Package Contents
 
 
 
+   .. py:attribute:: _removers
+
+
    .. py:attribute:: _paused
       :value: 0
 
@@ -856,9 +859,22 @@ Package Contents
 
 
 
+   .. py:method:: _is_view(widget)
+      :staticmethod:
+
+
+
+   .. py:method:: _target(widget)
+      :classmethod:
+
+
+      The object whose attributes a step sets: a widget, or a view's config model.
+
+
+
    .. py:method:: attach(widget)
 
-      Start recording changes to ``widget``'s synced traits.
+      Start recording changes to ``widget``'s synced traits, or to a view's config fields.
 
 
 
@@ -871,6 +887,12 @@ Package Contents
 
 
    .. py:method:: _on_change(change)
+
+
+   .. py:method:: _on_model_change(model, changes)
+
+
+   .. py:method:: _record(owner, name, old, new)
 
 
    .. py:method:: _push(stack, group)
@@ -929,7 +951,7 @@ Package Contents
 
    .. py:property:: steps
 
-      Undo steps, oldest first, as lists of ``(widget, trait)`` pairs.
+      Undo steps, oldest first, as lists of ``(widget, trait)`` or ``(config, field)`` pairs.
 
 
    .. py:method:: __len__()
@@ -937,10 +959,11 @@ Package Contents
 
 .. py:class:: MidiLearn(source)
 
-   Route MIDI control changes to widget traits.
+   Route MIDI control changes to widget traits or view config fields.
 
    :param source: A widget with a synced ``control_change`` trait
-                  (``MidiKeyboardWidget``).
+                  (``MidiKeyboardWidget``) or a view whose status has one
+                  (``MidiKeyboardView``).
 
    ``map()`` binds a controller number now; ``learn()`` binds the next
    controller the hardware sends, so you can call it and turn the knob.
@@ -1005,5 +1028,8 @@ Package Contents
 
 
    .. py:method:: _on_control_change(change)
+
+
+   .. py:method:: _handle(message)
 
 

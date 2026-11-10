@@ -22,15 +22,32 @@ Classes
    nbplay.midi_learn.MidiLearn
 
 
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.midi_learn._field_kind
+   nbplay.midi_learn._assign
+
+
 Module Contents
 ---------------
 
+.. py:function:: _field_kind(target, name)
+
+   ``bool``, ``int`` or ``float`` for a numeric trait of a widget or config field of a view.
+
+
+.. py:function:: _assign(target, name, value)
+
 .. py:class:: MidiLearn(source)
 
-   Route MIDI control changes to widget traits.
+   Route MIDI control changes to widget traits or view config fields.
 
    :param source: A widget with a synced ``control_change`` trait
-                  (``MidiKeyboardWidget``).
+                  (``MidiKeyboardWidget``) or a view whose status has one
+                  (``MidiKeyboardView``).
 
    ``map()`` binds a controller number now; ``learn()`` binds the next
    controller the hardware sends, so you can call it and turn the knob.
@@ -95,5 +112,8 @@ Module Contents
 
 
    .. py:method:: _on_control_change(change)
+
+
+   .. py:method:: _handle(message)
 
 

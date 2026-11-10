@@ -1179,8 +1179,10 @@ Module Contents
    client-owned field in the session it connects to, so views that shared
    one would fight over each other's status. In the kernel the :attr:`bpm`,
    :attr:`time_signature` and :attr:`theme` properties write every view's
-   config. Undo, patterns, MIDI files and persistence stay with the
-   traitlets :class:`nbplay.widget.Session` for now.
+   config, :attr:`history` records every view's config edits for
+   :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
+   channels. Patterns, MIDI files and persistence stay with the traitlets
+   :class:`nbplay.widget.Session` for now.
 
 
    .. py:attribute:: _session_id
@@ -1202,6 +1204,32 @@ Module Contents
 
    .. py:attribute:: tracks
       :value: []
+
+
+
+   .. py:attribute:: history
+
+
+   .. py:attribute:: _mirroring_mute_solo
+      :value: False
+
+
+
+   .. py:method:: _on_timeline_tracks(view, name, old, tracks)
+
+
+   .. py:method:: _on_mixer_channels(view, name, old, channels)
+
+
+   .. py:method:: undo()
+
+      Revert the latest change to any view; False when nothing to undo.
+
+
+
+   .. py:method:: redo()
+
+      Reapply the latest undone change; False when nothing to redo.
 
 
 
@@ -1246,6 +1274,9 @@ Module Contents
 
       Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing.
 
+
+
+   .. py:method:: _add_track(name, sequencer, sound_source, *, input, armed)
 
 
    .. py:method:: close()

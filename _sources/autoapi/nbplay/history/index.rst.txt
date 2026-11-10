@@ -5,10 +5,10 @@ nbplay.history
 
 .. autoapi-nested-parse::
 
-   Undo and redo for widget state.
+   Undo and redo for widget and view state.
 
-   ``History`` watches the synced traits of a set of widgets and records every
-   change as an undo step. Changes that land within a short window of each
+   ``History`` watches the synced traits of a set of widgets, or the config
+   fields of transports views, and records every change as an undo step. Changes that land within a short window of each
    other (a fader drag, a method that writes several traits) share one step,
    ``transaction()`` groups anything explicitly, and a notebook cell boundary
    always ends a step. Transient traits such as play state, playhead position,
@@ -67,6 +67,9 @@ Module Contents
 
 
 
+   .. py:attribute:: _removers
+
+
    .. py:attribute:: _paused
       :value: 0
 
@@ -92,9 +95,22 @@ Module Contents
 
 
 
+   .. py:method:: _is_view(widget)
+      :staticmethod:
+
+
+
+   .. py:method:: _target(widget)
+      :classmethod:
+
+
+      The object whose attributes a step sets: a widget, or a view's config model.
+
+
+
    .. py:method:: attach(widget)
 
-      Start recording changes to ``widget``'s synced traits.
+      Start recording changes to ``widget``'s synced traits, or to a view's config fields.
 
 
 
@@ -107,6 +123,12 @@ Module Contents
 
 
    .. py:method:: _on_change(change)
+
+
+   .. py:method:: _on_model_change(model, changes)
+
+
+   .. py:method:: _record(owner, name, old, new)
 
 
    .. py:method:: _push(stack, group)
@@ -165,7 +187,7 @@ Module Contents
 
    .. py:property:: steps
 
-      Undo steps, oldest first, as lists of ``(widget, trait)`` pairs.
+      Undo steps, oldest first, as lists of ``(widget, trait)`` or ``(config, field)`` pairs.
 
 
    .. py:method:: __len__()

@@ -26,6 +26,7 @@ Classes
    test_views.TestArrangementViews
    test_views.TestObservers
    test_views.TestSession
+   test_views.TestHistoryAndMidiLearnOnViews
    test_views.TestTransportView
 
 
@@ -147,6 +148,20 @@ Module Contents
 .. py:class:: TestSession
 
    .. py:method:: test_views_share_the_session_and_follow_the_session_settings()
+
+
+   .. py:method:: test_session_undo_covers_views_but_not_track_structure()
+
+
+   .. py:method:: test_lane_and_channel_mute_solo_mirror_each_other()
+
+
+.. py:class:: TestHistoryAndMidiLearnOnViews
+
+   .. py:method:: test_history_tracks_config_fields_and_skips_transient_ones()
+
+
+   .. py:method:: test_midi_learn_maps_controllers_to_view_fields()
 
 
 .. py:class:: TestTransportView
