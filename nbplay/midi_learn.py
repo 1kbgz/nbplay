@@ -13,9 +13,9 @@ import traitlets
 
 def _field_kind(target, name):
     """``bool``, ``int`` or ``float`` for a numeric trait of a widget or config field of a view."""
-    config = getattr(target, "config", None)
-    if hasattr(type(config), "model_fields"):
-        field = type(config).model_fields.get(name)
+    model_fields = getattr(type(getattr(target, "config", None)), "model_fields", None)
+    if model_fields is not None:
+        field = model_fields.get(name)
         if field is None:
             raise ValueError(f"{type(target).__name__} has no field {name!r}")
         if field.annotation in (bool, int, float):
