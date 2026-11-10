@@ -150,6 +150,18 @@ Module Contents
 
 
 
+   .. py:attribute:: undo_request
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: redo_request
+      :type:  int
+      :value: 0
+
+
+
 .. py:class:: SynthConfig(/, **data: Any)
 
    Bases: :py:obj:`_Validated`

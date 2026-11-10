@@ -89,6 +89,10 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:attribute:: STATUS_EVENTS
+      :type:  ClassVar[dict[str, str]]
+
+
    .. py:attribute:: config
 
 
@@ -174,6 +178,10 @@ Module Contents
 
 
    .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS_EVENTS
       :type:  ClassVar[dict[str, str]]
 
 

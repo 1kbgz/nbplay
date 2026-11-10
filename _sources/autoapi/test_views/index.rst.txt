@@ -156,6 +156,9 @@ Module Contents
    .. py:method:: test_session_undo_covers_views_but_not_track_structure()
 
 
+   .. py:method:: test_transport_shortcut_requests_undo_and_redo()
+
+
    .. py:method:: test_lane_and_channel_mute_solo_mirror_each_other()
 
 
