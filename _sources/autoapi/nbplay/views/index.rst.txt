@@ -872,6 +872,12 @@ Module Contents
 
 
 
+   .. py:method:: remove_track(index)
+
+      Remove a track row, dropping its slots and shifting later rows.
+
+
+
    .. py:method:: add_scene(name=None)
 
       Append a scene column and return its index.
@@ -1181,8 +1187,10 @@ Module Contents
    :attr:`time_signature` and :attr:`theme` properties write every view's
    config, :attr:`history` records every view's config edits for
    :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
-   channels. Patterns, MIDI files and persistence stay with the traitlets
-   :class:`nbplay.widget.Session` for now.
+   channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
+   as clips, and :meth:`export_midi` and :meth:`import_midi` move the
+   arrangement through ``.mid`` files. Persistence stays with the
+   traitlets :class:`nbplay.widget.Session` for now.
 
 
    .. py:attribute:: _session_id
@@ -1205,6 +1213,9 @@ Module Contents
    .. py:attribute:: tracks
       :value: []
 
+
+
+   .. py:attribute:: patterns
 
 
    .. py:attribute:: history
@@ -1277,6 +1288,62 @@ Module Contents
 
 
    .. py:method:: _add_track(name, sequencer, sound_source, *, input, armed)
+
+
+   .. py:method:: remove_track(index)
+
+      Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down.
+
+
+
+   .. py:method:: _track_index(track)
+
+
+   .. py:method:: add_pattern(name, pattern, step_duration=None)
+
+      Register a named pattern for chaining; returns its stored form.
+
+      ``pattern`` is a :class:`SequencerView` (whose step duration is used),
+      a list of step dicts, or a list of voices.
+
+
+
+   .. py:method:: remove_pattern(name)
+
+      Forget a pattern; clips already placed keep playing as MIDI clips.
+
+
+
+   .. py:method:: chain(track, names, start=0.0, repeat=1)
+
+      Place named patterns back to back on a track's lane; returns the clips.
+
+      A track with a sequencer stops following the transport so the
+      arrangement drives it. The whole chain is one undo step.
+
+
+
+   .. py:method:: update_pattern(name, pattern, step_duration=None)
+
+      Replace a pattern and regenerate every clip placed from it, as one undo step.
+
+
+
+   .. py:method:: export_midi(path=None)
+
+      The sequencer patterns and MIDI clips as one ``mido.MidiFile``, written to ``path`` when given.
+
+      Each sequencer track becomes one MIDI track from beat 0; each MIDI
+      clip becomes one MIDI track at its timeline position.
+
+
+
+   .. py:method:: import_midi(source, *, apply_tempo=True)
+
+      Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.
+
+      With ``apply_tempo`` the file's tempo and time signature are applied.
+
 
 
    .. py:method:: close()

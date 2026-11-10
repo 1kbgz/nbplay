@@ -26,6 +26,7 @@ Classes
    test_views.TestArrangementViews
    test_views.TestObservers
    test_views.TestSession
+   test_views.TestSessionArrangement
    test_views.TestHistoryAndMidiLearnOnViews
    test_views.TestTransportView
 
@@ -154,6 +155,17 @@ Module Contents
 
 
    .. py:method:: test_lane_and_channel_mute_solo_mirror_each_other()
+
+
+.. py:class:: TestSessionArrangement
+
+   .. py:method:: test_remove_track_shifts_channels_lanes_and_rows()
+
+
+   .. py:method:: test_patterns_chain_and_update_as_single_steps()
+
+
+   .. py:method:: test_midi_round_trip(tmp_path)
 
 
 .. py:class:: TestHistoryAndMidiLearnOnViews

@@ -1364,7 +1364,10 @@ hosts its models in its own transports <code class="docutils literal notranslate
 client-owned field in the session it connects to, so views sharing one would fight over each
 other’s status (the first attempt hung the page with “client does not own this field”). Kernel-side
 <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature</span></code> and <code class="docutils literal notranslate"><span class="pre">theme</span></code> properties write every view; browser-side the clock does the
-linking. <code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> is the session walkthrough on the views; the notebook
+linking. <code class="docutils literal notranslate"><span class="pre">remove_track</span></code> drops the mixer channel, the lane and the launcher row and shifts the later
+tracks’ channel indices; <code class="docutils literal notranslate"><span class="pre">add_pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">chain</span></code> and <code class="docutils literal notranslate"><span class="pre">update_pattern</span></code> lay named patterns out as
+pattern clips (one undo step each, with the clip events rebuilt in place on update); <code class="docutils literal notranslate"><span class="pre">export_midi</span></code> and
+<code class="docutils literal notranslate"><span class="pre">import_midi</span></code> match the widget session. <code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> is the session walkthrough on the views; the notebook
 runner in <code class="docutils literal notranslate"><span class="pre">test_all.py</span></code> skips a notebook that imports <code class="docutils literal notranslate"><span class="pre">nbplay.views</span></code> when the installed spaday has no
 session support, which is the case until spaday ships a release after 0.13.1. The spaday tree is
 the instrument element with every config field bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> and every status field

@@ -679,6 +679,9 @@
     <a href="#nbplay.views.LauncherView.add_track">LauncherView.add_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.LauncherView.remove_track">LauncherView.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.LauncherView.add_scene">LauncherView.add_scene()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -862,6 +865,9 @@
     <a href="#nbplay.views.Session.tracks">Session.tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.patterns">Session.patterns</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.history">Session.history</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -908,6 +914,30 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session._add_track">Session._add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.remove_track">Session.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._track_index">Session._track_index()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.add_pattern">Session.add_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.remove_pattern">Session.remove_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.chain">Session.chain()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.update_pattern">Session.update_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.export_midi">Session.export_midi()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.import_midi">Session.import_midi()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>
@@ -1918,6 +1948,12 @@ browser owns play and slot state, and launches are commands.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.LauncherView.remove_track">
+<span class="sig-name descname"><span class="pre">remove_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.LauncherView.remove_track" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a track row, dropping its slots and shifting later rows.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.LauncherView.add_scene">
 <span class="sig-name descname"><span class="pre">add_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.LauncherView.add_scene" title="Link to this definition">¶</a></dt>
 <dd><p>Append a scene column and return its index.</p>
@@ -2251,8 +2287,10 @@ one would fight over each other’s status. In the kernel the <a class="referenc
 <a class="reference internal" href="#nbplay.views.Session.time_signature" title="nbplay.views.Session.time_signature"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_signature</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.theme" title="nbplay.views.Session.theme"><code class="xref py py-attr docutils literal notranslate"><span class="pre">theme</span></code></a> properties write every view’s
 config, <a class="reference internal" href="#nbplay.views.Session.history" title="nbplay.views.Session.history"><code class="xref py py-attr docutils literal notranslate"><span class="pre">history</span></code></a> records every view’s config edits for
 <a class="reference internal" href="#nbplay.views.Session.undo" title="nbplay.views.Session.undo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">undo()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.redo" title="nbplay.views.Session.redo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">redo()</span></code></a>, and lane mute and solo mirror the mixer
-channels. Patterns, MIDI files and persistence stay with the traitlets
-<a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
+channels. <a class="reference internal" href="#nbplay.views.Session.add_pattern" title="nbplay.views.Session.add_pattern"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_pattern()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.chain" title="nbplay.views.Session.chain"><code class="xref py py-meth docutils literal notranslate"><span class="pre">chain()</span></code></a> lay named patterns out
+as clips, and <a class="reference internal" href="#nbplay.views.Session.export_midi" title="nbplay.views.Session.export_midi"><code class="xref py py-meth docutils literal notranslate"><span class="pre">export_midi()</span></code></a> and <a class="reference internal" href="#nbplay.views.Session.import_midi" title="nbplay.views.Session.import_midi"><code class="xref py py-meth docutils literal notranslate"><span class="pre">import_midi()</span></code></a> move the
+arrangement through <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files. Persistence stays with the
+traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.widget.Session</span></code></a> for now.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.Session._session_id">
 <span class="sig-name descname"><span class="pre">_session_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-00000000'</span></em><a class="headerlink" href="#nbplay.views.Session._session_id" title="Link to this definition">¶</a></dt>
@@ -2281,6 +2319,11 @@ channels. Patterns, MIDI files and persistence stay with the traitlets
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.Session.tracks">
 <span class="sig-name descname"><span class="pre">tracks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.views.Session.tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.Session.patterns">
+<span class="sig-name descname"><span class="pre">patterns</span></span><a class="headerlink" href="#nbplay.views.Session.patterns" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2370,6 +2413,60 @@ channels. Patterns, MIDI files and persistence stay with the traitlets
 <dt class="sig sig-object py" id="nbplay.views.Session._add_track">
 <span class="sig-name descname"><span class="pre">_add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound_source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session._add_track" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.remove_track">
+<span class="sig-name descname"><span class="pre">remove_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.remove_track" title="Link to this definition">¶</a></dt>
+<dd><p>Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session._track_index">
+<span class="sig-name descname"><span class="pre">_track_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session._track_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.add_pattern">
+<span class="sig-name descname"><span class="pre">add_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.add_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Register a named pattern for chaining; returns its stored form.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pattern</span></code> is a <a class="reference internal" href="#nbplay.views.SequencerView" title="nbplay.views.SequencerView"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerView</span></code></a> (whose step duration is used),
+a list of step dicts, or a list of voices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.remove_pattern">
+<span class="sig-name descname"><span class="pre">remove_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.remove_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Forget a pattern; clips already placed keep playing as MIDI clips.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.chain">
+<span class="sig-name descname"><span class="pre">chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.chain" title="Link to this definition">¶</a></dt>
+<dd><p>Place named patterns back to back on a track’s lane; returns the clips.</p>
+<p>A track with a sequencer stops following the transport so the
+arrangement drives it. The whole chain is one undo step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.update_pattern">
+<span class="sig-name descname"><span class="pre">update_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.update_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a pattern and regenerate every clip placed from it, as one undo step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.export_midi">
+<span class="sig-name descname"><span class="pre">export_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.export_midi" title="Link to this definition">¶</a></dt>
+<dd><p>The sequencer patterns and MIDI clips as one <code class="docutils literal notranslate"><span class="pre">mido.MidiFile</span></code>, written to <code class="docutils literal notranslate"><span class="pre">path</span></code> when given.</p>
+<p>Each sequencer track becomes one MIDI track from beat 0; each MIDI
+clip becomes one MIDI track at its timeline position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.Session.import_midi">
+<span class="sig-name descname"><span class="pre">import_midi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_tempo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.Session.import_midi" title="Link to this definition">¶</a></dt>
+<dd><p>Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">apply_tempo</span></code> the file’s tempo and time signature are applied.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.Session.close">
@@ -2905,6 +3002,9 @@ channels. Patterns, MIDI files and persistence stay with the traitlets
     <a href="#nbplay.views.LauncherView.add_track">LauncherView.add_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.LauncherView.remove_track">LauncherView.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.LauncherView.add_scene">LauncherView.add_scene()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3088,6 +3188,9 @@ channels. Patterns, MIDI files and persistence stay with the traitlets
     <a href="#nbplay.views.Session.tracks">Session.tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.patterns">Session.patterns</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.history">Session.history</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3134,6 +3237,30 @@ channels. Patterns, MIDI files and persistence stay with the traitlets
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session._add_track">Session._add_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.remove_track">Session.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session._track_index">Session._track_index()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.add_pattern">Session.add_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.remove_pattern">Session.remove_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.chain">Session.chain()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.update_pattern">Session.update_pattern()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.export_midi">Session.export_midi()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.Session.import_midi">Session.import_midi()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.Session.close">Session.close()</a>
