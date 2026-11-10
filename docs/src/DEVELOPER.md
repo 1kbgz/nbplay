@@ -911,7 +911,10 @@ hosts its models in its own transports `Session`: transports grants a connection
 client-owned field in the session it connects to, so views sharing one would fight over each
 other's status (the first attempt hung the page with "client does not own this field"). Kernel-side
 `bpm`, `time_signature` and `theme` properties write every view; browser-side the clock does the
-linking. `examples/15_transports_views.ipynb` is the session walkthrough on the views; the notebook
+linking. `remove_track` drops the mixer channel, the lane and the launcher row and shifts the later
+tracks' channel indices; `add_pattern`, `chain` and `update_pattern` lay named patterns out as
+pattern clips (one undo step each, with the clip events rebuilt in place on update); `export_midi` and
+`import_midi` match the widget session. `examples/15_transports_views.ipynb` is the session walkthrough on the views; the notebook
 runner in `test_all.py` skips a notebook that imports `nbplay.views` when the installed spaday has no
 session support, which is the case until spaday ships a release after 0.13.1. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field

@@ -766,6 +766,84 @@ class TestSession:
             session.close()
 
 
+class TestSessionArrangement:
+    def test_remove_track_shifts_channels_lanes_and_rows(self):
+        session = views.Session()
+        seq, sampler = views.SequencerView(autosync=False), views.SamplerView(autosync=False)
+        try:
+            session.add_track("Audio")
+            inst = session.add_track("Inst", seq, sampler)
+            session.launcher.add_scene()
+            session.launcher.set_slot(0, 0, [{"note": 36, "active": True}])
+            session.launcher.set_slot(1, 0, [{"note": 40, "active": True}])
+            session.launcher.config.selected_slot = {"track_index": 0, "scene_index": 0}
+            session.timeline.add_clip("Take", track_index=0)
+            session.timeline.add_clip("Riff", track_index=1)
+            session.history.clear()
+            session.remove_track(0)
+            assert session.tracks == [inst] and inst.mixer_channel == 0
+            assert seq.config.channel_index == 0 and sampler.config.channel_index == 0
+            assert [c["name"] for c in session.mixer.config.channels] == ["Inst"]
+            assert [t["name"] for t in session.timeline.config.tracks] == ["Inst"] and session.timeline.config.tracks[0]["channel_index"] == 0
+            assert [c["name"] for c in session.timeline.config.clips] == ["Riff"] and session.timeline.config.clips[0]["track_index"] == 0
+            assert session.launcher.config.selected_slot == {} and [s["track_index"] for s in session.launcher.config.slots] == [0]
+            assert len(session.history) == 0
+            session.remove_track(5)
+            session.remove_track(0)
+            assert session.tracks == [] and seq.config.session_id == "" and seq.config.channel_index == -1
+        finally:
+            session.close()
+
+    def test_patterns_chain_and_update_as_single_steps(self):
+        session = views.Session()
+        seq = views.SequencerView(length=4, step_duration=1.0, autosync=False)
+        try:
+            seq.set_step(0, note=36)
+            drums = session.add_track("Drums", seq, views.SamplerView(autosync=False))
+            session.history.clear()
+            entry = session.add_pattern("a", seq)
+            assert entry["step_duration"] == 1.0 and len(entry["voices_data"][0]) == 4
+            with pytest.raises(ValueError, match="unknown pattern"):
+                session.chain(drums, ["b"])
+            clips = session.chain("Drums", ["a", "a"], start=0.0)
+            assert len(clips) == 2 and clips[1]["start"] == 4.0 and clips[1]["pattern"] == "a"
+            assert len(session.history) == 1 and seq.config.follow_transport is False
+            session.update_pattern("a", [{"note": 40, "active": True}], step_duration=2.0)
+            assert len(session.history) == 2
+            assert [c["events"][0]["note"] for c in session.timeline.config.clips] == [40, 40]
+            assert session.undo() and session.timeline.config.clips[0]["events"][0]["note"] == 36
+            assert session.undo() and session.timeline.config.clips == [] and seq.config.follow_transport is True
+            assert session.redo() and len(session.timeline.config.clips) == 2
+            session.remove_pattern("a")
+            assert session.patterns == {}
+            with pytest.raises(IndexError):
+                session.chain(3, [])
+        finally:
+            session.close()
+
+    def test_midi_round_trip(self, tmp_path):
+        pytest.importorskip("mido")
+        session = views.Session(bpm=100.0, time_signature=(3, 4))
+        seq = views.SequencerView(length=4, step_duration=1.0, autosync=False)
+        loaded = views.Session()
+        try:
+            seq.set_step(0, note=60)
+            session.add_track("Lead", seq, views.SynthView(autosync=False))
+            keys = session.add_track("Keys", input="midi")
+            session.timeline.add_midi_clip("Riff", track_index=keys.mixer_channel, start=2.0, events=[{"beat": 0.5, "duration": 0.5, "note": 72}])
+            path = tmp_path / "song.mid"
+            midi = session.export_midi(path)
+            assert [t.name for t in midi.tracks[1:]] == ["Lead", "Riff"]
+            added = loaded.import_midi(path)
+            assert [t.name for t in added] == ["Lead", "Riff"] and loaded.bpm == 100.0 and loaded.time_signature == (3, 4)
+            clips = loaded.timeline.config.clips
+            assert clips[0]["events"][0]["note"] == 60 and clips[1]["events"][0]["beat"] == 2.5
+            assert loaded.timeline.config.tracks[1]["input"] == "midi" and len(loaded.history) == 0
+        finally:
+            session.close()
+            loaded.close()
+
+
 class TestHistoryAndMidiLearnOnViews:
     def test_history_tracks_config_fields_and_skips_transient_ones(self):
         view = views.TransportView(autosync=False)

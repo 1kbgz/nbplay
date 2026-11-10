@@ -10,6 +10,7 @@ layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
 """
 
 import inspect
+import math
 import os
 import pathlib
 import uuid
@@ -32,6 +33,8 @@ from .descriptors import (
     _clamp_velocity,
     _clip_id,
     _decimate_samples,
+    _default_steps,
+    _nonnegative_number,
     _normalize_audio_clip,
     _normalize_effect,
     _normalize_effects,
@@ -120,6 +123,16 @@ def _on_session_patch(session, hook):
             hooks.remove(hook)
 
     return remove
+
+
+def _pattern_events(voices, step_duration, repeat):
+    """MIDI events for ``voices`` played ``repeat`` times, and the total length in beats."""
+    step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
+    length = max(len(voice) for voice in voices) * step_duration
+    base = _steps_to_events(voices, step_duration)
+    repeat = max(1, int(repeat))
+    events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+    return events, length * repeat
 
 
 class InstrumentView(Widget):
@@ -1083,6 +1096,31 @@ class LauncherView(InstrumentView):
         self.config.tracks = [*self.config.tracks, {"name": name, "channel_index": index if channel_index is None else channel_index}]
         return index
 
+    def remove_track(self, index):
+        """Remove a track row, dropping its slots and shifting later rows."""
+        index = int(index)
+        tracks = self.config.tracks
+        if not 0 <= index < len(tracks):
+            return
+        removed_channel = tracks[index]["channel_index"]
+        next_tracks = []
+        for i, track in enumerate(tracks):
+            if i == index:
+                continue
+            item = dict(track)
+            if removed_channel >= 0 and item["channel_index"] > removed_channel:
+                item["channel_index"] -= 1
+            next_tracks.append(item)
+        slots = [
+            {**slot, "track_index": slot["track_index"] - 1} if slot["track_index"] > index else slot
+            for slot in self.config.slots
+            if slot["track_index"] != index
+        ]
+        fields = {"tracks": next_tracks, "slots": slots}
+        if self.config.selected_slot.get("track_index") == index:
+            fields["selected_slot"] = {}
+        self.config.update(**fields)
+
     def add_scene(self, name=None):
         """Append a scene column and return its index."""
         index = len(self.config.scenes)
@@ -1406,14 +1444,9 @@ class TimelineView(InstrumentView):
         """Append a MIDI clip that plays ``pattern`` (a :class:`SequencerView`, step dicts or voices) ``repeat`` times."""
         if isinstance(pattern, SequencerView):
             pattern = pattern.config.voices_data
-        voices = _slot_voices(pattern)
-        step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
-        length = max(len(voice) for voice in voices) * step_duration
-        base = _steps_to_events(voices, step_duration)
-        repeat = max(1, int(repeat))
-        events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+        events, total = _pattern_events(_slot_voices(pattern), step_duration, repeat)
         if duration is None:
-            duration = length * repeat
+            duration = total
         return self.add_midi_clip(name, track_index=track_index, start=start, events=events, duration=duration, pattern=name, **kwargs)
 
     def export_midi_clip(self, clip_id, path=None):
@@ -1561,8 +1594,10 @@ class Session:
     :attr:`time_signature` and :attr:`theme` properties write every view's
     config, :attr:`history` records every view's config edits for
     :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
-    channels. Patterns, MIDI files and persistence stay with the traitlets
-    :class:`nbplay.widget.Session` for now.
+    channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
+    as clips, and :meth:`export_midi` and :meth:`import_midi` move the
+    arrangement through ``.mid`` files. Persistence stays with the
+    traitlets :class:`nbplay.widget.Session` for now.
     """
 
     def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
@@ -1574,6 +1609,8 @@ class Session:
         self.timeline = TimelineView(time_signature_den=den, **common)
         self.launcher = LauncherView(time_signature_den=den, **common)
         self.tracks = []
+        # Named patterns for the tracking view: name -> {voices_data, step_duration}.
+        self.patterns = {}
         # Undo/redo over every view's config; new tracks attach their
         # sequencer and sound source as they are added.
         self.history = History()
@@ -1712,6 +1749,154 @@ class Session:
         self.history.attach(sequencer)
         self.history.attach(sound_source)
         return track
+
+    def remove_track(self, index):
+        """Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down."""
+        if not 0 <= index < len(self.tracks):
+            return
+        with self.history.paused():
+            track = self.tracks.pop(index)
+            self.history.detach(track.sequencer)
+            self.history.detach(track.sound_source)
+            for view in (track.sequencer, track.sound_source):
+                if isinstance(view, InstrumentView):
+                    view.config.update(session_id="", channel_index=-1)
+            self.mixer.remove_channel(track.mixer_channel)
+            self.timeline.remove_track(index)
+            self.launcher.remove_track(index)
+            for item in self.tracks:
+                if item.mixer_channel > track.mixer_channel:
+                    item.mixer_channel -= 1
+                    for view in (item.sequencer, item.sound_source):
+                        if isinstance(view, InstrumentView):
+                            view.config.channel_index -= 1
+
+    def _track_index(self, track):
+        if isinstance(track, Track):
+            return self.tracks.index(track)
+        if isinstance(track, str):
+            names = [item.name for item in self.tracks]
+            if track not in names:
+                raise ValueError(f"no track named {track!r}")
+            return names.index(track)
+        index = int(track)
+        if not 0 <= index < len(self.tracks):
+            raise IndexError(f"track index out of range: {index}")
+        return index
+
+    def add_pattern(self, name, pattern, step_duration=None):
+        """Register a named pattern for chaining; returns its stored form.
+
+        ``pattern`` is a :class:`SequencerView` (whose step duration is used),
+        a list of step dicts, or a list of voices.
+        """
+        if isinstance(pattern, SequencerView):
+            step_duration = pattern.config.step_duration if step_duration is None else step_duration
+            pattern = pattern.config.voices_data
+        voices = _slot_voices(pattern)
+        length = max(len(voice) for voice in voices)
+        entry = {
+            "voices_data": [[dict(step) for step in voice] + _default_steps(length - len(voice)) for voice in voices],
+            "step_duration": _positive_number(0.25 if step_duration is None else step_duration, "step_duration", minimum=0.001, maximum=16.0),
+        }
+        self.patterns[str(name)] = entry
+        return entry
+
+    def remove_pattern(self, name):
+        """Forget a pattern; clips already placed keep playing as MIDI clips."""
+        del self.patterns[str(name)]
+
+    def chain(self, track, names, start=0.0, repeat=1):
+        """Place named patterns back to back on a track's lane; returns the clips.
+
+        A track with a sequencer stops following the transport so the
+        arrangement drives it. The whole chain is one undo step.
+        """
+        index = self._track_index(track)
+        item = self.tracks[index]
+        missing = [name for name in names if str(name) not in self.patterns]
+        if missing:
+            raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
+        with self.history.transaction():
+            if item.sequencer is not None:
+                item.sequencer.config.follow_transport = False
+            clips = []
+            position = _nonnegative_number(start, "start")
+            for name in names:
+                pattern = self.patterns[str(name)]
+                clip = self.timeline.add_pattern_clip(
+                    str(name), pattern["voices_data"], track_index=index, start=position, step_duration=pattern["step_duration"], repeat=repeat
+                )
+                clips.append(clip)
+                position += clip["duration"]
+            self.timeline.config.length = max(self.timeline.config.length, math.ceil(position))
+            return clips
+
+    def update_pattern(self, name, pattern, step_duration=None):
+        """Replace a pattern and regenerate every clip placed from it, as one undo step."""
+        name = str(name)
+        entry = self.add_pattern(name, pattern, step_duration=step_duration)
+        with self.history.transaction():
+            clips = []
+            for clip in self.timeline.config.clips:
+                if clip.get("pattern") != name:
+                    clips.append(clip)
+                    continue
+                length = max(len(voice) for voice in entry["voices_data"]) * entry["step_duration"]
+                repeat = max(1, round(clip["duration"] / length)) if length > 0 else 1
+                events, _ = _pattern_events(entry["voices_data"], entry["step_duration"], repeat)
+                clips.append({**clip, "events": events})
+            self.timeline.config.clips = clips
+        return entry
+
+    def export_midi(self, path=None):
+        """The sequencer patterns and MIDI clips as one ``mido.MidiFile``, written to ``path`` when given.
+
+        Each sequencer track becomes one MIDI track from beat 0; each MIDI
+        clip becomes one MIDI track at its timeline position.
+        """
+        from nbplay.midi import build_midi, steps_to_events
+
+        tracks = []
+        for track in self.tracks:
+            if track.sequencer is not None:
+                config = track.sequencer.config
+                events = steps_to_events(config.voices_data, config.step_duration)
+                tracks.append({"name": track.name, "events": events, "channel": min(15, max(0, track.mixer_channel))})
+        lanes = self.timeline.config.tracks
+        for clip in self.timeline.config.clips:
+            if clip["kind"] == "midi" and clip["events"]:
+                offset = clip["offset"]
+                events = [
+                    {**event, "beat": clip["start"] + event["beat"] - offset}
+                    for event in clip["events"]
+                    if event["beat"] >= offset and event["beat"] - offset < clip["duration"]
+                ]
+                channel = lanes[clip["track_index"]]["channel_index"] if clip["track_index"] < len(lanes) else 0
+                tracks.append({"name": clip["name"], "events": events, "channel": min(15, max(0, channel))})
+        midi = build_midi(tracks, bpm=self.bpm, time_signature=self.time_signature)
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def import_midi(self, source, *, apply_tempo=True):
+        """Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.
+
+        With ``apply_tempo`` the file's tempo and time signature are applied.
+        """
+        from nbplay.midi import read_midi
+
+        data = read_midi(source)
+        added = []
+        with self.history.paused():
+            if apply_tempo:
+                self.bpm = data["bpm"]
+                self.time_signature = tuple(data["time_signature"])
+            for item in data["tracks"]:
+                track = self.add_track(item["name"], input="midi")
+                self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.config.tracks) - 1, start=0.0, events=item["events"])
+                added.append(track)
+        return added
 
     def close(self):
         """Close every view."""
