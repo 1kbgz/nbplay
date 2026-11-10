@@ -12,6 +12,7 @@ slots and keyboard routes. The descriptor classes (:class:`EffectPlugin`,
 from __future__ import annotations
 
 import array
+import json
 import math
 import uuid
 
@@ -886,3 +887,42 @@ def _build_route(channel_index, zone=None, octave=None, note=None, notes=None):
             return KeyboardRoute(channel_index, match="all")
         raise ValueError(f"zone must be None, 'all', 'upper', or 'lower', got {zone!r}")
     return KeyboardRoute(channel_index, match="all")
+
+
+# The .nbplay archive: session.json plus samples/ and clips/ resources.
+_SESSION_FORMAT = "nbplay-session"
+_SESSION_FORMAT_VERSION = 1
+_SEQUENCER_STATE = (
+    "num_voices",
+    "length",
+    "measures",
+    "step_duration",
+    "time_signature_num",
+    "time_signature_den",
+    "swing",
+    "groove",
+    "automation_lanes",
+    "loop_enabled",
+    "follow_transport",
+)
+_SYNTH_STATE = ("oscillator_type", "frequency", "amplitude", "sample_rate")
+_SAMPLER_STATE = (
+    "sample_name",
+    "sample_rate",
+    "root_note",
+    "attack",
+    "decay",
+    "sustain",
+    "release",
+    "pad_count",
+    "max_voices",
+    "velocity",
+    "velocity_sensitive",
+)
+_SAMPLER_PAD_STATE = ("pad_notes", "pad_velocities", "pad_actions", "sample_slices")
+_TIMELINE_STATE = ("length", "count_in_bars", "auto_extend_recording", "recording_extend_bars", "pixels_per_beat")
+_TRANSPORT_STATE = ("bpm", "time_signature_num", "time_signature_den", "loop_enabled", "loop_start_bar", "loop_end_bar")
+
+
+def _json_copy(value):
+    return json.loads(json.dumps(value))

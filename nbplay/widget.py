@@ -35,6 +35,14 @@ from nbplay.descriptors import (
     _DEFAULT_PAD_NOTES,
     _LAUNCH_QUANTIZE,
     _PAD_MAX_COUNT,
+    _SAMPLER_PAD_STATE,
+    _SAMPLER_STATE,
+    _SEQUENCER_STATE,
+    _SESSION_FORMAT,
+    _SESSION_FORMAT_VERSION,
+    _SYNTH_STATE,
+    _TIMELINE_STATE,
+    _TRANSPORT_STATE,
     THEMES,
     AudioClip,
     PadAction,
@@ -48,6 +56,7 @@ from nbplay.descriptors import (
     _decimate_samples,
     _default_pad_notes,
     _default_steps,
+    _json_copy,
     _measure_beats,
     _nonnegative_number,
     _normalize_audio_clip,
@@ -2074,44 +2083,6 @@ class LauncherWidget(_Themed, anywidget.AnyWidget):
 
     def __repr__(self):
         return f"LauncherWidget(tracks={len(self.tracks)}, scenes={len(self.scenes)}, slots={len(self.slots)})"
-
-
-_SESSION_FORMAT = "nbplay-session"
-_SESSION_FORMAT_VERSION = 1
-_SEQUENCER_STATE = (
-    "num_voices",
-    "length",
-    "measures",
-    "step_duration",
-    "time_signature_num",
-    "time_signature_den",
-    "swing",
-    "groove",
-    "automation_lanes",
-    "loop_enabled",
-    "follow_transport",
-)
-_SYNTH_STATE = ("oscillator_type", "frequency", "amplitude", "sample_rate")
-_SAMPLER_STATE = (
-    "sample_name",
-    "sample_rate",
-    "root_note",
-    "attack",
-    "decay",
-    "sustain",
-    "release",
-    "pad_count",
-    "max_voices",
-    "velocity",
-    "velocity_sensitive",
-)
-_SAMPLER_PAD_STATE = ("pad_notes", "pad_velocities", "pad_actions", "sample_slices")
-_TIMELINE_STATE = ("length", "count_in_bars", "auto_extend_recording", "recording_extend_bars", "pixels_per_beat")
-_TRANSPORT_STATE = ("bpm", "time_signature_num", "time_signature_den", "loop_enabled", "loop_start_bar", "loop_end_bar")
-
-
-def _json_copy(value):
-    return json.loads(json.dumps(value))
 
 
 def _widget_state(widget, names):

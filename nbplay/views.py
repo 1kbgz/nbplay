@@ -10,20 +10,31 @@ layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
 """
 
 import inspect
+import json
 import math
 import os
 import pathlib
 import uuid
 import weakref
+import zipfile
 from typing import ClassVar
 
 import transports
 from pydantic import BaseModel
 from spaday import Widget, element
 
+from . import __version__
 from .audio_files import decode_audio_file
 from .descriptors import (
     _PAD_MAX_COUNT,
+    _SAMPLER_PAD_STATE,
+    _SAMPLER_STATE,
+    _SEQUENCER_STATE,
+    _SESSION_FORMAT,
+    _SESSION_FORMAT_VERSION,
+    _SYNTH_STATE,
+    _TIMELINE_STATE,
+    _TRANSPORT_STATE,
     AudioClip,
     PadAction,
     TimelineTrack,
@@ -34,6 +45,7 @@ from .descriptors import (
     _clip_id,
     _decimate_samples,
     _default_steps,
+    _json_copy,
     _nonnegative_number,
     _normalize_audio_clip,
     _normalize_effect,
@@ -1596,8 +1608,9 @@ class Session:
     :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
     channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
     as clips, and :meth:`export_midi` and :meth:`import_midi` move the
-    arrangement through ``.mid`` files. Persistence stays with the
-    traitlets :class:`nbplay.widget.Session` for now.
+    arrangement through ``.mid`` files, and :meth:`save` and :meth:`load`
+    read and write the same ``.nbplay`` archive as the traitlets
+    :class:`nbplay.widget.Session`.
     """
 
     def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
@@ -1898,7 +1911,213 @@ class Session:
                 added.append(track)
         return added
 
+    def to_dict(self):
+        """The session as a JSON-safe dict (no binary payloads); see :meth:`save`."""
+        return _session_to_dict(self)
+
+    def save(self, path):
+        """Write the session to a ``.nbplay`` zip archive; returns the path.
+
+        The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
+        little-endian float32) and ``clips/`` (timeline clip audio that has
+        arrived from the browser; call ``session.timeline.export_all_clips()``
+        first and wait for ``pending_exports`` to reach zero). The widget
+        session reads the same archive.
+        """
+        data, resources = _session_to_dict(self, resources={})
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("session.json", json.dumps(data, indent=1))
+            for name, payload in resources.items():
+                archive.writestr(name, payload)
+        return path
+
+    @classmethod
+    def load(cls, path):
+        """Rebuild a session from an archive written by :meth:`save` (of either session class)."""
+        with zipfile.ZipFile(path) as archive:
+            data = json.loads(archive.read("session.json"))
+            resources = {name: archive.read(name) for name in archive.namelist() if name != "session.json"}
+        return cls.from_dict(data, resources)
+
+    @classmethod
+    def from_dict(cls, data, resources=None):
+        """Rebuild a session from :meth:`to_dict` output plus binary resources."""
+        return _session_from_dict(cls, data, resources or {})
+
     def close(self):
         """Close every view."""
         for view in self.views:
             view.close()
+
+
+def _dump(config, names):
+    return _json_copy(config.model_dump(include=set(names)))
+
+
+def _sound_source_to_dict(source, index, resources):
+    if source is None:
+        return None
+    if isinstance(source, SynthView):
+        return {"type": "SynthWidget", "state": _dump(source.config, _SYNTH_STATE)}
+    if isinstance(source, SamplerView):
+        config = source.config
+        entry = {"type": "SamplerWidget", "state": _dump(config, _SAMPLER_STATE + _SAMPLER_PAD_STATE)}
+        if config.sample_data:
+            if resources is not None:
+                name = f"samples/track-{index}.f32"
+                resources[name] = bytes(config.sample_data)
+                entry["sample_file"] = name
+            entry["sample_length"] = config.sample_length
+        if config.zones:
+            saved = []
+            for zone_index, zone in enumerate(config.zones):
+                item = {k: v for k, v in zone.items() if k != "data"}
+                if resources is not None:
+                    name = f"samples/track-{index}-zone-{zone_index}.f32"
+                    resources[name] = bytes(zone["data"])
+                    item["sample_file"] = name
+                saved.append(item)
+            entry["zones"] = saved
+        return entry
+    raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthView or SamplerView")
+
+
+def _sound_source_from_dict(entry, resources):
+    if entry is None:
+        return None
+    kind = entry.get("type")
+    state = dict(entry.get("state", {}))
+    if kind == "SynthWidget":
+        return SynthView(**{k: v for k, v in state.items() if k in _SYNTH_STATE})
+    if kind == "SamplerWidget":
+        sampler = SamplerView(**{k: v for k, v in state.items() if k in _SAMPLER_STATE})
+        sample_file = entry.get("sample_file")
+        if sample_file and sample_file in resources:
+            sampler.load_sample(
+                resources[sample_file],
+                sample_rate=state.get("sample_rate", 44100),
+                root_note=state.get("root_note", 69),
+                name=state.get("sample_name", "Sample"),
+            )
+        sampler.config.update(**{name: state[name] for name in _SAMPLER_PAD_STATE if name in state})
+        zones = []
+        for zone in entry.get("zones", []):
+            sample_file = zone.get("sample_file")
+            data = resources.get(sample_file, b"") if sample_file else b""
+            zones.append({**{k: v for k, v in zone.items() if k != "sample_file"}, "data": data})
+        if zones:
+            sampler.config.zones = zones
+        return sampler
+    raise ValueError(f"unknown sound source type in session data: {kind!r}")
+
+
+def _sequencer_from_dict(state):
+    if state is None:
+        return None
+    ctor = {k: state[k] for k in ("num_voices", "length", "measures", "step_duration", "time_signature_num", "time_signature_den") if k in state}
+    sequencer = SequencerView(**ctor)
+    fields = {name: state[name] for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport") if name in state}
+    if state.get("voices_data"):
+        fields["voices_data"] = _json_copy(state["voices_data"])
+    sequencer.config.update(**fields)
+    return sequencer
+
+
+def _session_to_dict(session, resources=None):
+    tracks = []
+    for index, track in enumerate(session.tracks):
+        sequencer = None
+        if track.sequencer is not None:
+            sequencer = _dump(track.sequencer.config, (*_SEQUENCER_STATE, "voices_data"))
+        tracks.append({"name": track.name, "sequencer": sequencer, "sound_source": _sound_source_to_dict(track.sound_source, index, resources)})
+    clips = []
+    cached = session.timeline.clip_audio
+    for clip in session.timeline.config.clips:
+        item = {k: v for k, v in clip.items() if k != "audio_url"}
+        audio = cached.get(clip["id"])
+        if audio and resources is not None:
+            name = f"clips/{clip['id']}.bin"
+            resources[name] = audio["data"]
+            item["audio_file"] = name
+            if audio.get("blob_type"):
+                item["blob_type"] = audio["blob_type"]
+        clips.append(_json_copy(item))
+    data = {
+        "format": _SESSION_FORMAT,
+        "version": _SESSION_FORMAT_VERSION,
+        "nbplay": __version__,
+        "transport": _dump(session.transport.config, _TRANSPORT_STATE),
+        "mixer": _dump(session.mixer.config, ("channels", "master_gain", "master_effects", "returns")),
+        "tracks": tracks,
+        "timeline": {**_dump(session.timeline.config, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.config.tracks), "clips": clips},
+        "launcher": _dump(session.launcher.config, ("quantize", "scenes", "slots")),
+        "patterns": _json_copy(session.patterns),
+        "theme": session.theme,
+    }
+    return (data, resources) if resources is not None else data
+
+
+def _session_from_dict(cls, data, resources):
+    if data.get("format") != _SESSION_FORMAT:
+        raise ValueError(f"not an nbplay session: format={data.get('format')!r}")
+    if int(data.get("version", 0)) > _SESSION_FORMAT_VERSION:
+        raise ValueError(f"session format version {data['version']} is newer than this nbplay supports")
+    transport = data.get("transport", {})
+    session = cls(
+        bpm=transport.get("bpm", 120.0),
+        time_signature=(transport.get("time_signature_num", 4), transport.get("time_signature_den", 4)),
+        theme=data.get("theme", ""),
+    )
+    session.transport.config.update(**{name: transport[name] for name in ("loop_enabled", "loop_start_bar", "loop_end_bar") if name in transport})
+
+    timeline_data = data.get("timeline", {})
+    saved_lanes = timeline_data.get("tracks", [])
+    for index, track in enumerate(data.get("tracks", [])):
+        lane = saved_lanes[index] if index < len(saved_lanes) else {}
+        session.add_track(
+            track.get("name", f"Track {index + 1}"),
+            _sequencer_from_dict(track.get("sequencer")),
+            _sound_source_from_dict(track.get("sound_source"), resources),
+            input=lane.get("input"),
+            armed=bool(lane.get("armed", False)),
+        )
+
+    mixer = data.get("mixer", {})
+    session.mixer.config.update(**{name: mixer[name] for name in ("returns", "channels", "master_gain", "master_effects") if name in mixer})
+
+    timeline = session.timeline
+    fields = {name: timeline_data[name] for name in _TIMELINE_STATE if name in timeline_data}
+    if saved_lanes:
+        fields["tracks"] = saved_lanes
+    timeline.config.update(**fields)
+    for clip in timeline_data.get("clips", []):
+        fields = {k: v for k, v in clip.items() if k != "audio_file"}
+        audio_file = clip.get("audio_file")
+        if audio_file and audio_file in resources:
+            timeline.import_clip(
+                resources[audio_file],
+                name=fields.pop("name", "Clip"),
+                track_index=fields.pop("track_index", 0),
+                start=fields.pop("start", 0.0),
+                duration=fields.pop("duration", 4.0),
+                blob_type=fields.pop("blob_type", "audio/webm"),
+                **{k: v for k, v in fields.items() if k not in ("blob_size", "source")},
+            )
+        else:
+            timeline.add_clip(
+                fields.pop("name", "Clip"),
+                track_index=fields.pop("track_index", 0),
+                start=fields.pop("start", 0.0),
+                duration=fields.pop("duration", 4.0),
+                **fields,
+            )
+    timeline.config.selected_clip_id = ""
+
+    launcher_data = data.get("launcher", {})
+    for name in launcher_data.get("scenes", []):
+        session.launcher.add_scene(name)
+    session.launcher.config.update(**{name: launcher_data[name] for name in ("slots", "quantize") if name in launcher_data})
+    for name, pattern in data.get("patterns", {}).items():
+        session.add_pattern(name, pattern.get("voices_data", []), step_duration=pattern.get("step_duration", 0.25))
+    session.history.clear()
+    return session
