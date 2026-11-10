@@ -11,12 +11,37 @@ from __future__ import annotations
 import traitlets
 
 
+def _field_kind(target, name):
+    """``bool``, ``int`` or ``float`` for a numeric trait of a widget or config field of a view."""
+    model_fields = getattr(type(getattr(target, "config", None)), "model_fields", None)
+    if model_fields is not None:
+        field = model_fields.get(name)
+        if field is None:
+            raise ValueError(f"{type(target).__name__} has no field {name!r}")
+        if field.annotation in (bool, int, float):
+            return field.annotation
+        raise TypeError(f"field {name!r} is not bool, int, or float")
+    trait = target.traits().get(name)
+    if trait is None:
+        raise ValueError(f"{type(target).__name__} has no trait {name!r}")
+    for kind, trait_type in ((bool, traitlets.Bool), (int, traitlets.Int), (float, traitlets.Float)):
+        if isinstance(trait, trait_type):
+            return kind
+    raise TypeError(f"trait {name!r} is not a Bool, Int, or Float trait")
+
+
+def _assign(target, name, value):
+    config = getattr(target, "config", None)
+    setattr(config if hasattr(type(config), "model_fields") else target, name, value)
+
+
 class MidiLearn:
-    """Route MIDI control changes to widget traits.
+    """Route MIDI control changes to widget traits or view config fields.
 
     Args:
         source: A widget with a synced ``control_change`` trait
-            (``MidiKeyboardWidget``).
+            (``MidiKeyboardWidget``) or a view whose status has one
+            (``MidiKeyboardView``).
 
     ``map()`` binds a controller number now; ``learn()`` binds the next
     controller the hardware sends, so you can call it and turn the knob.
@@ -26,31 +51,32 @@ class MidiLearn:
     """
 
     def __init__(self, source):
-        if "control_change" not in source.trait_names():
+        status = getattr(source, "status", None)
+        if hasattr(source, "on_change") and "control_change" in getattr(type(status), "model_fields", {}):
+            self._stop = source.on_change(lambda view, name, old, new: self._handle(new), names="control_change")
+        elif hasattr(source, "trait_names") and "control_change" in source.trait_names():
+            source.observe(self._on_control_change, names="control_change")
+            self._stop = lambda: source.unobserve(self._on_control_change, names="control_change")
+        else:
             raise TypeError("MidiLearn source needs a 'control_change' trait")
         self.source = source
         self.mappings = {}
         self._pending = None
-        source.observe(self._on_control_change, names="control_change")
 
     def map(self, controller, target, name, low=None, high=None, channel=None):
         """Bind ``controller`` (0-127) to ``target.<name>``; returns the mapping."""
         controller = int(controller)
         if not 0 <= controller <= 127:
             raise ValueError("controller must be 0-127")
-        trait = target.traits().get(name)
-        if trait is None:
-            raise ValueError(f"{type(target).__name__} has no trait {name!r}")
-        if isinstance(trait, traitlets.Bool):
+        kind = _field_kind(target, name)
+        if kind is bool:
             low, high = 0, 1
-        elif isinstance(trait, traitlets.Int):
+        elif kind is int:
             low = 0 if low is None else int(low)
             high = 127 if high is None else int(high)
-        elif isinstance(trait, traitlets.Float):
+        else:
             low = 0.0 if low is None else float(low)
             high = 1.0 if high is None else float(high)
-        else:
-            raise TypeError(f"trait {name!r} is not a Bool, Int, or Float trait")
         mapping = {
             "controller": controller,
             "target": target,
@@ -64,8 +90,7 @@ class MidiLearn:
 
     def learn(self, target, name, low=None, high=None):
         """Bind ``target.<name>`` to the next controller the hardware sends."""
-        if name not in target.traits():
-            raise ValueError(f"{type(target).__name__} has no trait {name!r}")
+        _field_kind(target, name)
         self._pending = (target, name, low, high)
 
     @property
@@ -87,7 +112,7 @@ class MidiLearn:
 
     def close(self):
         """Stop listening to the source."""
-        self.source.unobserve(self._on_control_change, names="control_change")
+        self._stop()
         self.clear()
 
     def apply(self, controller, value, channel=None):
@@ -98,19 +123,22 @@ class MidiLearn:
         if mapping["channel"] is not None and channel is not None and mapping["channel"] != int(channel):
             return None
         value = max(0, min(127, int(value)))
-        trait = mapping["target"].traits()[mapping["name"]]
-        if isinstance(trait, traitlets.Bool):
+        kind = _field_kind(mapping["target"], mapping["name"])
+        if kind is bool:
             result = value >= 64
         else:
             low, high = mapping["low"], mapping["high"]
             result = low + (high - low) * value / 127
-            if isinstance(trait, traitlets.Int):
+            if kind is int:
                 result = round(result)
-        setattr(mapping["target"], mapping["name"], result)
+        _assign(mapping["target"], mapping["name"], result)
         return result
 
     def _on_control_change(self, change):
-        message = change["new"] or {}
+        self._handle(change["new"])
+
+    def _handle(self, message):
+        message = message or {}
         if "controller" not in message:
             return
         controller = int(message["controller"])

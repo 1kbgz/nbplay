@@ -46,6 +46,7 @@ from .descriptors import (
     _steps_to_events,
     _unpack_float32,
 )
+from .history import History
 from .models import (
     KeyboardConfig,
     KeyboardStatus,
@@ -1558,8 +1559,10 @@ class Session:
     client-owned field in the session it connects to, so views that shared
     one would fight over each other's status. In the kernel the :attr:`bpm`,
     :attr:`time_signature` and :attr:`theme` properties write every view's
-    config. Undo, patterns, MIDI files and persistence stay with the
-    traitlets :class:`nbplay.widget.Session` for now.
+    config, :attr:`history` records every view's config edits for
+    :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
+    channels. Patterns, MIDI files and persistence stay with the traitlets
+    :class:`nbplay.widget.Session` for now.
     """
 
     def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
@@ -1571,6 +1574,63 @@ class Session:
         self.timeline = TimelineView(time_signature_den=den, **common)
         self.launcher = LauncherView(time_signature_den=den, **common)
         self.tracks = []
+        # Undo/redo over every view's config; new tracks attach their
+        # sequencer and sound source as they are added.
+        self.history = History()
+        for view in (self.transport, self.mixer, self.timeline, self.launcher):
+            self.history.attach(view)
+        self.history.bind_ipython()
+        # Lane mute/solo and mixer channel mute/solo are the same control
+        # from the user's side; keep them mirrored by channel index.
+        self._mirroring_mute_solo = False
+        self.timeline.on_change(self._on_timeline_tracks, names="tracks")
+        self.mixer.on_change(self._on_mixer_channels, names="channels")
+
+    def _on_timeline_tracks(self, view, name, old, tracks):
+        if self._mirroring_mute_solo:
+            return
+        channels = [dict(channel) for channel in self.mixer.config.channels]
+        changed = False
+        for track in tracks:
+            index = track["channel_index"]
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    if channels[index][channel_key] != track[lane_key]:
+                        channels[index][channel_key] = track[lane_key]
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.mixer.config.channels = channels
+            finally:
+                self._mirroring_mute_solo = False
+
+    def _on_mixer_channels(self, view, name, old, channels):
+        if self._mirroring_mute_solo:
+            return
+        tracks = [dict(track) for track in self.timeline.config.tracks]
+        changed = False
+        for track in tracks:
+            index = track["channel_index"]
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    if track[lane_key] != channels[index][channel_key]:
+                        track[lane_key] = channels[index][channel_key]
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.timeline.config.tracks = tracks
+            finally:
+                self._mirroring_mute_solo = False
+
+    def undo(self):
+        """Revert the latest change to any view; False when nothing to undo."""
+        return self.history.undo()
+
+    def redo(self):
+        """Reapply the latest undone change; False when nothing to redo."""
+        return self.history.redo()
 
     @property
     def session_id(self):
@@ -1631,6 +1691,10 @@ class Session:
 
     def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
         """Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing."""
+        with self.history.paused():
+            return self._add_track(name, sequencer, sound_source, input=input, armed=armed)
+
+    def _add_track(self, name, sequencer, sound_source, *, input, armed):
         channel = self.mixer.add_channel(name)
         for view in (sequencer, sound_source):
             if isinstance(view, InstrumentView):
@@ -1645,6 +1709,8 @@ class Session:
         self.launcher.add_track(name, channel)
         track = Track(name, sequencer, sound_source, channel)
         self.tracks.append(track)
+        self.history.attach(sequencer)
+        self.history.attach(sound_source)
         return track
 
     def close(self):
