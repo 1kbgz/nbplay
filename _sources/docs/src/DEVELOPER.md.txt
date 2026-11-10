@@ -897,8 +897,12 @@ clips within the lane count and `current_beat` within `length`; `current_beat` s
 as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status
 commands, the lane and clip edits (`remove_track`, `arm_track`, `add_pattern_clip`, `move_clip`,
 `duplicate_clip`, `resize_clip`, `remove_clip`, MIDI clip export and import) match the widget, and clip
-audio export and import go through the config fields the element watches. `export_all_clips` and
-`bind_slot_editor` wait on a kernel-side observer for browser writes (see below).
+audio export and import go through the config fields the element watches. `view.on_change(listener, names=None)` reports config and status changes as `listener(view, name, old, new)`, from Python and
+from the browser alike: config edits arrive through the hosted model's assignment path (`_Validated.update`
+notifies its own listeners), while browser status writes arrive as the patches transports hands to
+`Session.on_patch`, which the views share through one dispatcher per transports Session. On top of that,
+`TimelineView.export_all_clips` collects clip bytes into `clip_audio` as the browser exports them, and
+`LauncherView.bind_slot_editor` loads the selected slot into a `SequencerView` and writes its edits back.
 
 `nbplay.views.Session` creates transport, mixer, timeline and launcher views with one browser
 `session_id`, so the elements share a clock and an audio bus, and `add_track` adds a mixer channel, a

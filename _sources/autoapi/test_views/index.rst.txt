@@ -24,6 +24,7 @@ Classes
    test_views.TestIoViews
    test_views.TestSequencerAndSamplerViews
    test_views.TestArrangementViews
+   test_views.TestObservers
    test_views.TestSession
    test_views.TestTransportView
 
@@ -35,6 +36,7 @@ Functions
 
    test_views.messages
    test_views.ready
+   test_views.browser_writes
 
 
 Module Contents
@@ -124,6 +126,22 @@ Module Contents
 
 
    .. py:method:: test_timeline_lane_and_clip_edits(tmp_path)
+
+
+.. py:function:: browser_writes(view, **values)
+
+   A browser write to the view's status, as the server applies it after the ownership check.
+
+
+.. py:class:: TestObservers
+
+   .. py:method:: test_config_and_status_changes_reach_observers()
+
+
+   .. py:method:: test_timeline_collects_exported_clips()
+
+
+   .. py:method:: test_launcher_slot_editor_follows_the_selection()
 
 
 .. py:class:: TestSession

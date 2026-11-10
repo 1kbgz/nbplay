@@ -72,7 +72,7 @@ Module Contents
 
 
    .. py:attribute:: CONFIG_MODEL
-      :type:  ClassVar[type[pydantic.BaseModel]]
+      :type:  ClassVar[type[nbplay.models._Validated]]
 
 
    .. py:attribute:: STATUS_MODEL
@@ -106,6 +106,20 @@ Module Contents
 
 
 
+   .. py:attribute:: _listeners
+      :value: []
+
+
+
+   .. py:attribute:: _status_mirror
+
+
+   .. py:attribute:: _unobserve_config
+
+
+   .. py:attribute:: _unhook_patches
+
+
    .. py:method:: _prepare()
 
       Hook run after the models exist and before they are hosted.
@@ -113,6 +127,27 @@ Module Contents
 
 
    .. py:method:: _command(field, value)
+
+
+   .. py:method:: on_change(listener, names=None)
+
+      Call ``listener(view, name, old, new)`` when a config or status field changes; returns a remover.
+
+      ``names`` limits the fields. Changes made from Python and from the
+      browser both count.
+
+
+
+   .. py:method:: _notify(name, old, new)
+
+
+   .. py:method:: _on_config_change(changes)
+
+
+   .. py:method:: _on_patch(mid, patch)
+
+
+   .. py:method:: close()
 
 
 .. py:class:: TransportView(session=None, *, config=None, **kwargs)
@@ -871,6 +906,16 @@ Module Contents
 
 
 
+   .. py:method:: bind_slot_editor(sequencer)
+
+      Edit whichever slot is selected in ``sequencer`` (a :class:`SequencerView`); returns an unbinder.
+
+      Selecting a slot, in the browser or by assigning ``config.selected_slot``,
+      loads it into the sequencer; the sequencer's step, grid, swing and
+      groove edits write back into that slot.
+
+
+
    .. py:method:: slot_to_sequencer(track_index, scene_index, sequencer)
 
       Load a slot's pattern, grid, swing and groove into a :class:`SequencerView`.
@@ -930,6 +975,37 @@ Module Contents
 
    .. py:attribute:: STATUS
       :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: _clip_audio
+
+
+   .. py:attribute:: _export_queue
+      :value: []
+
+
+
+   .. py:method:: _on_clip_exported(view, name, old, data)
+
+
+   .. py:property:: clip_audio
+
+      Clip audio bytes received from the browser, keyed by clip id.
+
+
+   .. py:property:: pending_exports
+
+      Number of clip exports still waiting on the browser.
+
+
+   .. py:method:: export_all_clips(*, refresh=False)
+
+      Ask the browser for every clip's audio, one clip at a time; returns the number queued.
+
+      The bytes accumulate in :attr:`clip_audio` as they arrive; wait for
+      :attr:`pending_exports` to reach zero before saving. Clips whose audio
+      is already cached are skipped unless ``refresh`` is true.
+
 
 
    .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False, input='microphone')

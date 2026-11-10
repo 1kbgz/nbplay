@@ -298,6 +298,21 @@
     <a href="#test_views.TestArrangementViews.test_timeline_lane_and_clip_edits">TestArrangementViews.test_timeline_lane_and_clip_edits()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.browser_writes">browser_writes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.TestObservers">TestObservers</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_config_and_status_changes_reach_observers">TestObservers.test_config_and_status_changes_reach_observers()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_timeline_collects_exported_clips">TestObservers.test_timeline_collects_exported_clips()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_launcher_slot_editor_follows_the_selection">TestObservers.test_launcher_slot_editor_follows_the_selection()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_views.TestSession">TestSession</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -368,10 +383,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestArrangementViews" title="test_views.TestArrangementViews"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestArrangementViews</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestSession" title="test_views.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestObservers" title="test_views.TestObservers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestObservers</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestTransportView" title="test_views.TestTransportView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportView</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.TestSession" title="test_views.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_views.TestTransportView" title="test_views.TestTransportView"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportView</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -386,6 +404,9 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#test_views.ready" title="test_views.ready"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ready</span></code></a>(view[, name])</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_views.browser_writes" title="test_views.browser_writes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">browser_writes</span></code></a>(view, **values)</p></td>
+<td><p>A browser write to the view's status, as the server applies it after the ownership check.</p></td>
 </tr>
 </tbody>
 </table>
@@ -548,6 +569,32 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="test_views.TestArrangementViews.test_timeline_lane_and_clip_edits">
 <span class="sig-name descname"><span class="pre">test_timeline_lane_and_clip_edits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestArrangementViews.test_timeline_lane_and_clip_edits" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_views.browser_writes">
+<span class="sig-prename descclassname"><span class="pre">test_views.</span></span><span class="sig-name descname"><span class="pre">browser_writes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_views.browser_writes" title="Link to this definition">¶</a></dt>
+<dd><p>A browser write to the view’s status, as the server applies it after the ownership check.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_views.TestObservers">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_views.</span></span><span class="sig-name descname"><span class="pre">TestObservers</span></span><a class="headerlink" href="#test_views.TestObservers" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestObservers.test_config_and_status_changes_reach_observers">
+<span class="sig-name descname"><span class="pre">test_config_and_status_changes_reach_observers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestObservers.test_config_and_status_changes_reach_observers" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestObservers.test_timeline_collects_exported_clips">
+<span class="sig-name descname"><span class="pre">test_timeline_collects_exported_clips</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestObservers.test_timeline_collects_exported_clips" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_views.TestObservers.test_launcher_slot_editor_follows_the_selection">
+<span class="sig-name descname"><span class="pre">test_launcher_slot_editor_follows_the_selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_views.TestObservers.test_launcher_slot_editor_follows_the_selection" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -725,6 +772,21 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#test_views.TestArrangementViews.test_timeline_lane_and_clip_edits">TestArrangementViews.test_timeline_lane_and_clip_edits()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.browser_writes">browser_writes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_views.TestObservers">TestObservers</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_config_and_status_changes_reach_observers">TestObservers.test_config_and_status_changes_reach_observers()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_timeline_collects_exported_clips">TestObservers.test_timeline_collects_exported_clips()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_views.TestObservers.test_launcher_slot_editor_follows_the_selection">TestObservers.test_launcher_slot_editor_follows_the_selection()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_views.TestSession">TestSession</a>

@@ -235,10 +235,37 @@
     <a href="#nbplay.views.InstrumentView.status_id">InstrumentView.status_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._listeners">InstrumentView._listeners</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._status_mirror">InstrumentView._status_mirror</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._unobserve_config">InstrumentView._unobserve_config</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._unhook_patches">InstrumentView._unhook_patches</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.InstrumentView._prepare">InstrumentView._prepare()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.InstrumentView._command">InstrumentView._command()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView.on_change">InstrumentView.on_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._notify">InstrumentView._notify()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._on_config_change">InstrumentView._on_config_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._on_patch">InstrumentView._on_patch()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView.close">InstrumentView.close()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.views.TransportView">TransportView</a>
@@ -670,6 +697,9 @@
     <a href="#nbplay.views.LauncherView.clear_slot">LauncherView.clear_slot()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.LauncherView.bind_slot_editor">LauncherView.bind_slot_editor()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.LauncherView.slot_to_sequencer">LauncherView.slot_to_sequencer()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -701,6 +731,24 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.STATUS">TimelineView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._clip_audio">TimelineView._clip_audio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._export_queue">TimelineView._export_queue</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._on_clip_exported">TimelineView._on_clip_exported()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.clip_audio">TimelineView.clip_audio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.pending_exports">TimelineView.pending_exports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.export_all_clips">TimelineView.export_all_clips()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.add_track">TimelineView.add_track()</a>
@@ -958,7 +1006,7 @@ config; the rest go to <code class="xref py py-class docutils literal notranslat
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.views.InstrumentView.CONFIG_MODEL">
-<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">pydantic.BaseModel</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.InstrumentView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><span class="pre">nbplay.models._Validated</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.InstrumentView.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1001,6 +1049,26 @@ config; the rest go to <code class="xref py py-class docutils literal notranslat
 <span class="sig-name descname"><span class="pre">status_id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nbplay.views.InstrumentView.status_id" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._listeners">
+<span class="sig-name descname"><span class="pre">_listeners</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.views.InstrumentView._listeners" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._status_mirror">
+<span class="sig-name descname"><span class="pre">_status_mirror</span></span><a class="headerlink" href="#nbplay.views.InstrumentView._status_mirror" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._unobserve_config">
+<span class="sig-name descname"><span class="pre">_unobserve_config</span></span><a class="headerlink" href="#nbplay.views.InstrumentView._unobserve_config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._unhook_patches">
+<span class="sig-name descname"><span class="pre">_unhook_patches</span></span><a class="headerlink" href="#nbplay.views.InstrumentView._unhook_patches" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.InstrumentView._prepare">
 <span class="sig-name descname"><span class="pre">_prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView._prepare" title="Link to this definition">¶</a></dt>
@@ -1010,6 +1078,34 @@ config; the rest go to <code class="xref py py-class docutils literal notranslat
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.InstrumentView._command">
 <span class="sig-name descname"><span class="pre">_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView._command" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView.on_change">
+<span class="sig-name descname"><span class="pre">on_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listener</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView.on_change" title="Link to this definition">¶</a></dt>
+<dd><p>Call <code class="docutils literal notranslate"><span class="pre">listener(view,</span> <span class="pre">name,</span> <span class="pre">old,</span> <span class="pre">new)</span></code> when a config or status field changes; returns a remover.</p>
+<p><code class="docutils literal notranslate"><span class="pre">names</span></code> limits the fields. Changes made from Python and from the
+browser both count.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._notify">
+<span class="sig-name descname"><span class="pre">_notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView._notify" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._on_config_change">
+<span class="sig-name descname"><span class="pre">_on_config_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">changes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView._on_config_change" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView._on_patch">
+<span class="sig-name descname"><span class="pre">_on_patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView._on_patch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.InstrumentView.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.InstrumentView.close" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1838,6 +1934,15 @@ list of voices.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.LauncherView.bind_slot_editor">
+<span class="sig-name descname"><span class="pre">bind_slot_editor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.LauncherView.bind_slot_editor" title="Link to this definition">¶</a></dt>
+<dd><p>Edit whichever slot is selected in <code class="docutils literal notranslate"><span class="pre">sequencer</span></code> (a <a class="reference internal" href="#nbplay.views.SequencerView" title="nbplay.views.SequencerView"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerView</span></code></a>); returns an unbinder.</p>
+<p>Selecting a slot, in the browser or by assigning <code class="docutils literal notranslate"><span class="pre">config.selected_slot</span></code>,
+loads it into the sequencer; the sequencer’s step, grid, swing and
+groove edits write back into that slot.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.LauncherView.slot_to_sequencer">
 <span class="sig-name descname"><span class="pre">slot_to_sequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.LauncherView.slot_to_sequencer" title="Link to this definition">¶</a></dt>
 <dd><p>Load a slot’s pattern, grid, swing and groove into a <a class="reference internal" href="#nbplay.views.SequencerView" title="nbplay.views.SequencerView"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerView</span></code></a>.</p>
@@ -1901,6 +2006,42 @@ the config fields the element watches.</p>
 <dt class="sig sig-object py" id="nbplay.views.TimelineView.STATUS">
 <span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.views.TimelineView.STATUS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView._clip_audio">
+<span class="sig-name descname"><span class="pre">_clip_audio</span></span><a class="headerlink" href="#nbplay.views.TimelineView._clip_audio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView._export_queue">
+<span class="sig-name descname"><span class="pre">_export_queue</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.views.TimelineView._export_queue" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView._on_clip_exported">
+<span class="sig-name descname"><span class="pre">_on_clip_exported</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.TimelineView._on_clip_exported" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView.clip_audio">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clip_audio</span></span><a class="headerlink" href="#nbplay.views.TimelineView.clip_audio" title="Link to this definition">¶</a></dt>
+<dd><p>Clip audio bytes received from the browser, keyed by clip id.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView.pending_exports">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pending_exports</span></span><a class="headerlink" href="#nbplay.views.TimelineView.pending_exports" title="Link to this definition">¶</a></dt>
+<dd><p>Number of clip exports still waiting on the browser.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.views.TimelineView.export_all_clips">
+<span class="sig-name descname"><span class="pre">export_all_clips</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.views.TimelineView.export_all_clips" title="Link to this definition">¶</a></dt>
+<dd><p>Ask the browser for every clip’s audio, one clip at a time; returns the number queued.</p>
+<p>The bytes accumulate in <a class="reference internal" href="#nbplay.views.TimelineView.clip_audio" title="nbplay.views.TimelineView.clip_audio"><code class="xref py py-attr docutils literal notranslate"><span class="pre">clip_audio</span></code></a> as they arrive; wait for
+<a class="reference internal" href="#nbplay.views.TimelineView.pending_exports" title="nbplay.views.TimelineView.pending_exports"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pending_exports</span></code></a> to reach zero before saving. Clips whose audio
+is already cached are skipped unless <code class="docutils literal notranslate"><span class="pre">refresh</span></code> is true.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.views.TimelineView.add_track">
@@ -2260,10 +2401,37 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
     <a href="#nbplay.views.InstrumentView.status_id">InstrumentView.status_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._listeners">InstrumentView._listeners</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._status_mirror">InstrumentView._status_mirror</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._unobserve_config">InstrumentView._unobserve_config</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._unhook_patches">InstrumentView._unhook_patches</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.InstrumentView._prepare">InstrumentView._prepare()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.InstrumentView._command">InstrumentView._command()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView.on_change">InstrumentView.on_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._notify">InstrumentView._notify()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._on_config_change">InstrumentView._on_config_change()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView._on_patch">InstrumentView._on_patch()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.InstrumentView.close">InstrumentView.close()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.views.TransportView">TransportView</a>
@@ -2695,6 +2863,9 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
     <a href="#nbplay.views.LauncherView.clear_slot">LauncherView.clear_slot()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.LauncherView.bind_slot_editor">LauncherView.bind_slot_editor()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.LauncherView.slot_to_sequencer">LauncherView.slot_to_sequencer()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -2726,6 +2897,24 @@ traitlets <a class="reference internal" href="../widget/index.html#nbplay.widget
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.STATUS">TimelineView.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._clip_audio">TimelineView._clip_audio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._export_queue">TimelineView._export_queue</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView._on_clip_exported">TimelineView._on_clip_exported()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.clip_audio">TimelineView.clip_audio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.pending_exports">TimelineView.pending_exports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.views.TimelineView.export_all_clips">TimelineView.export_all_clips()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.views.TimelineView.add_track">TimelineView.add_track()</a>
