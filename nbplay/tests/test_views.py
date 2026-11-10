@@ -753,6 +753,22 @@ class TestSession:
         finally:
             session.close()
 
+    def test_transport_shortcut_requests_undo_and_redo(self):
+        session = views.Session()
+        try:
+            binding = session.transport._tree["bindings"]["undoRequest"]
+            assert binding["field"] == "status.undo_request" and binding["event"] == "nbplay-request"
+            session.bpm = 99.0
+            session.history.mark()
+            browser_writes(session.transport, undo_request=1)
+            assert session.bpm == 120.0
+            browser_writes(session.transport, redo_request=1)
+            assert session.bpm == 99.0
+            browser_writes(session.transport, redo_request=2)
+            assert session.bpm == 99.0 and len(session.history) == 1
+        finally:
+            session.close()
+
     def test_lane_and_channel_mute_solo_mirror_each_other(self):
         session = views.Session()
         try:

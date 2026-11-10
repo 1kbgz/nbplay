@@ -138,6 +138,9 @@ class TransportStatus(BaseModel):
     current_beat: float = 0.0
     bar_number: int = 0
     beat_in_bar: int = 0
+    #: Undo/redo shortcut counts; a session answers each bump.
+    undo_request: int = 0
+    redo_request: int = 0
 
 
 #: Config fields whose change re-renders the synth waveform preview.
