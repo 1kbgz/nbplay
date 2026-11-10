@@ -70,6 +70,7 @@ from .models import (
     TimelineStatus,
     TransportConfig,
     TransportStatus,
+    _Validated,
 )
 
 if "session" not in inspect.signature(Widget.__init__).parameters:
@@ -130,7 +131,7 @@ class InstrumentView(Widget):
     """
 
     TAG: ClassVar[str]
-    CONFIG_MODEL: ClassVar[type[BaseModel]]
+    CONFIG_MODEL: ClassVar[type[_Validated]]
     STATUS_MODEL: ClassVar[type[BaseModel] | None] = None
     CONFIG: ClassVar[dict[str, str]]
     STATUS: ClassVar[dict[str, str]] = {}
@@ -201,7 +202,7 @@ class InstrumentView(Widget):
         for op in patch.get("ops", []):
             path = op.get("Set", {}).get("path") or []
             name = path[0].get("Key") if path and isinstance(path[0], dict) else None
-            if name not in self._status_mirror:
+            if name is None or name not in self._status_mirror:
                 continue
             new = getattr(self.status, name)
             old = self._status_mirror[name]
