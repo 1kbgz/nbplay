@@ -6,14 +6,10 @@ import zipfile
 from unittest.mock import Mock
 
 import pytest
-
-pytest.importorskip("transports")
-pytest.importorskip("spaday")
-views = pytest.importorskip("nbplay.views", exc_type=ImportError)
-
 import transports
 from transports._buffers import join_buffers
 
+from nbplay import views
 from nbplay.descriptors import PadAction
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn

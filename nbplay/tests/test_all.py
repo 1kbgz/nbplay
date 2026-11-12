@@ -4286,8 +4286,6 @@ class TestDemoNotebook:
     def test_notebook_code_cells_run(self, notebook_path):
         """Execute every code cell top-to-bottom in an isolated namespace."""
         notebook = json.loads(notebook_path.read_text())
-        if "nbplay.views" in notebook_path.read_text():
-            pytest.importorskip("nbplay.views", exc_type=ImportError)
         ns: dict = {}
         for i, cell in enumerate(notebook["cells"]):
             if cell["cell_type"] != "code":

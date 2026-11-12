@@ -5,11 +5,9 @@ A view hosts a config model (kernel-owned, validated) and a status model
 element with spaday bindings: config fields bind two-way on ``nbplay-set``,
 status fields two-way on ``nbplay-status``, and an ``nbplay-wire`` child
 delivers ``session.command`` calls to the element. This is the parallel
-layer to the traitlets widgets in :mod:`nbplay.widget`; it needs
-``spaday[widget]`` with notebook session support and ``transports`` 0.12.
+layer to the traitlets widgets in :mod:`nbplay.widget`.
 """
 
-import inspect
 import json
 import math
 import os
@@ -88,9 +86,6 @@ from .models import (
     TransportStatus,
     _Validated,
 )
-
-if "session" not in inspect.signature(Widget.__init__).parameters:
-    raise ImportError("nbplay.views needs a spaday release with Widget(session=...) support")
 
 __all__ = (
     "PACKAGE",

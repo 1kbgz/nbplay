@@ -917,9 +917,7 @@ pattern clips (one undo step each, with the clip events rebuilt in place on upda
 `import_midi` match the widget session. `save`, `load`, `to_dict` and `from_dict` write and read the
 `.nbplay` archive described below with the format constants from `descriptors.py`; the sound source
 type names stay `SynthWidget` and `SamplerWidget` in `session.json`, so a widget session and a views
-session open each other's files. `examples/15_transports_views.ipynb` is the session walkthrough on the views; the notebook
-runner in `test_all.py` skips a notebook that imports `nbplay.views` when the installed spaday has no
-session support, which is the case until spaday ships a release after 0.13.1. The spaday tree is
+session open each other's files. `examples/15_transports_views.ipynb` is the session walkthrough on the views. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status` (or the event a view names in `STATUS_EVENTS`: the transport's
 `undo_request` and `redo_request` counts are written back on `nbplay-request`), so the element's
@@ -934,8 +932,7 @@ component package `nbplay` (also an installed entry point).
 
 Tests: `nbplay/tests/test_views.py` drives a view through a mocked comm; `js/tests/spaday.spec.js`
 renders the spaday widget bundle against a real `TransportView` in a Python subprocess
-(`nbplay/tests/spaday_bridge.py`), set `NBPLAY_TEST_PYTHON` to a Python with `nbplay[spaday]`.
-Both skip when spaday lacks notebook session support.
+(`nbplay/tests/spaday_bridge.py`); `NBPLAY_TEST_PYTHON` names the Python with nbplay installed.
 
 ## Styling system
 
