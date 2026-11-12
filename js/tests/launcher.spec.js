@@ -85,24 +85,24 @@ async function renderLauncher(page, overrides = {}) {
     link.rel = "stylesheet";
     link.href = "/dist/css/components.css";
     document.head.appendChild(link);
-    const mod = await import("/dist/widgets/launcher.js");
+    const mod = await import("/dist/tests/instruments.js");
     const el = document.createElement("div");
     document.getElementById("root").appendChild(el);
     const model = window.createMockModel({ ...opts });
     window.__testModel = model;
-    window.__cleanup = mod.default.render({ model, el });
+    window.__cleanup = mod.render("launcher", { model, el });
   }, opts);
 }
 
 async function renderTransport(page, overrides = {}) {
   await page.evaluate(
     async (opts) => {
-      const mod = await import("/dist/widgets/transport.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({ ...opts });
       window.__transportModel = model;
-      mod.default.render({ model, el });
+      mod.render("transport", { model, el });
     },
     { ...TRANSPORT_DEFAULTS, ...overrides },
   );

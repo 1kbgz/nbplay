@@ -74,12 +74,12 @@ async function renderMixer(page, overrides = {}) {
     link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
-    const mod = await import("/dist/widgets/mixer.js");
+    const mod = await import("/dist/tests/instruments.js");
     const el = document.createElement("div");
     document.getElementById("root").appendChild(el);
     const model = window.createMockModel({ ...opts });
     window.__mixerModel = model;
-    mod.default.render({ model, el });
+    mod.render("mixer", { model, el });
   }, opts);
 }
 
@@ -92,12 +92,12 @@ async function renderSampler(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/sampler.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({ ...opts });
       window.__samplerModel = model;
-      mod.default.render({ model, el });
+      mod.render("sampler", { model, el });
     },
     { ...SAMPLER_DEFAULTS, ...overrides },
   );
@@ -112,12 +112,12 @@ async function renderKeyboard(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/keyboard.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({ ...opts });
       window.__keyboardModel = model;
-      mod.default.render({ model, el });
+      mod.render("keyboard", { model, el });
     },
     { ...KEYBOARD_DEFAULTS, ...overrides },
   );
@@ -132,12 +132,12 @@ async function renderSequencer(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/sequencer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({ ...opts });
       window.__sequencerModel = model;
-      mod.default.render({ model, el });
+      mod.render("sequencer", { model, el });
     },
     { ...SEQUENCER_DEFAULTS, ...overrides },
   );
@@ -386,12 +386,12 @@ test.describe("Integration: Multiple Samplers (Split Keyboard)", () => {
     // Sampler 1 (lower) — render a second sampler
     await page.evaluate(
       async (opts) => {
-        const mod = await import("/dist/widgets/sampler.js");
+        const mod = await import("/dist/tests/instruments.js");
         const el = document.createElement("div");
         document.getElementById("root").appendChild(el);
         const model = window.createMockModel({ ...opts });
         window.__sampler2Model = model;
-        mod.default.render({ model, el });
+        mod.render("sampler", { model, el });
       },
       { ...SAMPLER_DEFAULTS, channel_index: 1 },
     );

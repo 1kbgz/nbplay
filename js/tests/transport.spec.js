@@ -26,11 +26,11 @@ async function renderWidget(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/transport.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({ ...opts });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("transport", { model, el });
     },
     { ...DEFAULTS, ...overrides },
   );
@@ -649,7 +649,7 @@ test.describe("TransportWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/transport.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const defaults = {
         bpm: 120,
@@ -667,7 +667,7 @@ test.describe("TransportWidget", () => {
       const model = window.createMockModel(defaults);
       model.comm = {};
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("transport", { model, el });
     });
 
     // Start playing

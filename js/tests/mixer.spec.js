@@ -23,11 +23,11 @@ async function renderWidget(page, overrides = {}) {
     link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
-    const mod = await import("/dist/widgets/mixer.js");
+    const mod = await import("/dist/tests/instruments.js");
     const el = document.getElementById("root");
     const model = window.createMockModel({ ...opts });
     window.__testModel = model;
-    window.__cleanup = mod.default.render({ model, el });
+    window.__cleanup = mod.render("mixer", { model, el });
   }, opts);
 }
 
@@ -1465,7 +1465,7 @@ test.describe("MixerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/mixer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         session_id: "test-session",
@@ -1483,7 +1483,7 @@ test.describe("MixerWidget", () => {
         ],
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("mixer", { model, el });
     });
 
     const result = await page.evaluate(() => ({
@@ -1526,7 +1526,7 @@ test.describe("MixerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/mixer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         session_id: "test-session",
@@ -1544,7 +1544,7 @@ test.describe("MixerWidget", () => {
         ],
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("mixer", { model, el });
     });
 
     const result = await page.evaluate(() => ({
@@ -1565,7 +1565,7 @@ test.describe("MixerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/mixer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         session_id: "test-session",
@@ -1583,7 +1583,7 @@ test.describe("MixerWidget", () => {
         ],
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("mixer", { model, el });
     });
 
     await expect(page.locator(".nbplay-mixer")).toBeVisible();
@@ -1612,7 +1612,7 @@ test.describe("MixerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/mixer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         session_id: "test-session",
@@ -1630,7 +1630,7 @@ test.describe("MixerWidget", () => {
         ],
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("mixer", { model, el });
     });
 
     await expect(page.locator(".nbplay-mixer")).toBeVisible();
@@ -1664,7 +1664,7 @@ test.describe("MixerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/mixer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         session_id: "test-session",
@@ -1682,7 +1682,7 @@ test.describe("MixerWidget", () => {
         ],
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("mixer", { model, el });
     });
 
     await expect(page.locator(".nbplay-mixer")).toBeVisible();

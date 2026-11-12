@@ -23,11 +23,11 @@ async function renderWidget(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/widget.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({ ...opts });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("widget", { model, el });
     },
     { ...DEFAULTS, ...overrides },
   );

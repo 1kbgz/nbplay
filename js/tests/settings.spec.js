@@ -7,7 +7,7 @@ test.describe("SettingsWidget", () => {
       link.rel = "stylesheet";
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
-      const mod = await import("/dist/widgets/settings.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({
         sample_rate: 44100,
@@ -18,7 +18,7 @@ test.describe("SettingsWidget", () => {
         ...overrides,
       });
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("settings", { model, el });
     }, overrides);
   }
 

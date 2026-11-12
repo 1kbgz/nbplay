@@ -36,7 +36,7 @@ async function renderWidget(page, overrides = {}, zones = []) {
       link.rel = "stylesheet";
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
-      const mod = await import("/dist/widgets/sampler.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       opts.zones = zones.map((zone, index) => ({
         id: `z${index}`,
@@ -49,7 +49,7 @@ async function renderWidget(page, overrides = {}, zones = []) {
       }));
       const model = window.createMockModel(opts);
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("sampler", { model, el });
     },
     { opts: { ...DEFAULTS, ...overrides }, zones },
   );

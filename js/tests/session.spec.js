@@ -95,7 +95,7 @@ async function installAudioRecorder(page) {
 async function renderWidget(page, name, key, opts) {
   await page.evaluate(
     async ({ name, key, opts }) => {
-      const mod = await import(`/dist/widgets/${name}.js`);
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({ ...opts });
@@ -112,7 +112,7 @@ async function renderWidget(page, name, key, opts) {
         };
       };
       tag(model);
-      mod.default.render({ model, el });
+      mod.render(name, { model, el });
       const node = el.querySelector("nbplay-sequencer");
       if (node) tag(node.shim);
     },

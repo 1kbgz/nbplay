@@ -38,11 +38,11 @@ async function renderWidget(page, overrides = {}) {
     link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
-    const mod = await import("/dist/widgets/sequencer.js");
+    const mod = await import("/dist/tests/instruments.js");
     const el = document.getElementById("root");
     const model = window.createMockModel({ ...opts });
     window.__testModel = model;
-    mod.default.render({ model, el });
+    mod.render("sequencer", { model, el });
   }, opts);
 }
 
@@ -1119,7 +1119,7 @@ test.describe("SequencerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/sequencer.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const defaults = {
         session_id: "",
@@ -1143,7 +1143,7 @@ test.describe("SequencerWidget", () => {
       // Set comm as a direct property so onKernelDisconnect sees it
       model.comm = {};
       window.__testModel = model;
-      mod.default.render({ model, el });
+      mod.render("sequencer", { model, el });
     });
 
     // Start playing
