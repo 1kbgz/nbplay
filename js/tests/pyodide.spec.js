@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// The static web app: no server. The session and its models run in Pyodide
+// The standalone Pyodide example: no server. The session and its models run in Pyodide
 // inside a Web Worker, and transports frames cross with postMessage. These
 // checks all go through Python: validation, session mirroring, and commands.
 
@@ -16,13 +16,13 @@ const set = (page, tag, values) =>
     { tag, values },
   );
 
-test.describe("static web app", () => {
+test.describe("standalone Pyodide example", () => {
   test("the Pyodide session validates edits, mirrors widgets and sends commands", async ({
     page,
   }) => {
     const errors = [];
     page.on("pageerror", (error) => errors.push(String(error)));
-    await page.goto("/app/index.html");
+    await page.goto("/index.html");
     await expect(page.locator("html")).toHaveAttribute("data-ready", "true", {
       timeout: 240 * 1000,
     });

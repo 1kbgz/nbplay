@@ -143,12 +143,19 @@ lite:  ## build the JupyterLite demo (needs the Pyodide wheel from make test-pyo
 test-lite: lite  ## build the JupyterLite demo and run a notebook in it
 	cd js; pnpm run test:lite
 
-.PHONY: standalone test-standalone
-standalone:  ## export the web app as a static site that runs in Pyodide (needs the Pyodide wheel from make test-pyodide)
-	python -m nbplay.app --export docs/html/app --wheel $(firstword $(wildcard dist/pyodide/*.whl))
+.PHONY: pyodide-example test-pyodide-example
+pyodide-example:  ## build the standalone Pyodide example into dist/app (needs the Pyodide wheel from make test-pyodide)
+	test -n "$(firstword $(wildcard dist/pyodide/nbplay-*.whl))"
+	rm -rf dist/app dist/pyodide-deps
+	mkdir -p dist/app dist/pyodide-deps
+	python -m pip download --no-deps --only-binary=:all: --platform pyemscripten_2026_0_wasm32 --python-version 314 --implementation cp --abi cp314 --dest dist/pyodide-deps "spaday==0.14.0" "transports==0.12.2"
+	python -m pip download --no-deps --only-binary=:all: --dest dist/pyodide-deps "spaday-regular-layout==0.3.3"
+	python js/examples/build_pyodide_example.py dist/app "$(firstword $(wildcard dist/pyodide/nbplay-*.whl))" dist/pyodide-deps
+	cp js/examples/pyodide.html dist/app/index.html
+	cp js/examples/pyodide-worker.js dist/app/
 
-test-standalone: standalone  ## export the static web app and drive it in a browser
-	cd js; pnpm run test:standalone
+test-pyodide-example: pyodide-example  ## run the standalone Pyodide example in Chromium
+	cd js; pnpm run test:pyodide
 
 .PHONY: test test-pyodide coverage tests
 test: test-py test-js test-rs  ## run all tests

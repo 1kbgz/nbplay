@@ -8,10 +8,9 @@ can rearrange.
 
 ``python -m nbplay.app`` serves a demo session on http://127.0.0.1:8020.
 
-The same page also runs with no server: :func:`export` writes a static site
-whose Python side (the session and its models) runs in Pyodide inside a Web
-Worker, with ``postMessage`` in place of the WebSockets
-(``python -m nbplay.app --export DIR --wheel nbplay-...wasm32.whl``).
+The same page also runs with no server: :class:`Standalone` is the Python side
+for a Pyodide Web Worker, with ``postMessage`` in place of the WebSockets
+(``js/examples/pyodide.html``, built by ``make pyodide-example``).
 """
 
 from __future__ import annotations
@@ -19,9 +18,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import shutil
-from importlib import import_module
-from pathlib import Path
 
 import transports
 from spaday import element
@@ -31,7 +27,7 @@ from .components import package as nbplay_package
 from .descriptors import THEMES
 from .widget import InstrumentWidget, SamplerWidget, SequencerWidget, Session, SynthWidget
 
-__all__ = ("Standalone", "build", "default_layout", "demo_session", "export", "panel_widgets")
+__all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_widgets")
 
 #: The page chrome follows the nbplay tokens: the document root carries the
 #: session theme, and regular-layout's own tokens map onto nbplay's.
@@ -255,12 +251,6 @@ class Standalone:
         self.servers = {name: transports.Server(widget.session) for name, widget in self.panels.items()}
         self._page = _page(self.panels, layout, title)
 
-    @classmethod
-    def load(cls, spec):
-        """Build from ``"module:function"``, a zero-argument callable returning the :class:`Session`."""
-        module, _, name = spec.partition(":")
-        return cls(getattr(import_module(module), name)())
-
     def page(self):
         """The tree, the page styles, and each panel's model-to-namespace wires."""
         return json.dumps(
@@ -296,48 +286,6 @@ class Standalone:
         return json.dumps(out)
 
 
-def export(directory, *, session="nbplay.app:demo_session", wheels=(), requirements=()):
-    """Write the app as a static site that runs its Python in Pyodide.
-
-    ``session`` names a zero-argument callable (``"module:function"``) that the
-    worker imports and calls for the :class:`Session`. ``wheels`` are local
-    wheel files to bundle and install first (the nbplay Pyodide wheel, until
-    one is on PyPI); ``requirements`` are further micropip requirements. The
-    site needs no server beyond static file hosting.
-    """
-    from spaday import bootstrap
-
-    out = Path(directory)
-    out.mkdir(parents=True, exist_ok=True)
-    source = Path(__file__).parent / "standalone"
-    for name in ("index.html", "worker.js"):
-        shutil.copyfile(source / name, out / name)
-    # The spaday and transports browser runtimes, at the paths spaday serves them under /js.
-    runtime = {key: f"js{path}" for key, path in bootstrap._ASSETS[bootstrap._layout()].items()}
-    for path in runtime.values():
-        target = out / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(bootstrap.bundles_dir() / path.removeprefix("js/"), target)
-    assets = []
-    for package in (nbplay_package, layout_package):
-        shutil.copytree(package.assets_dir, out / "components" / package.name, dirs_exist_ok=True)
-        assets.extend({"type": kind, "path": f"components/{package.name}/{path}"} for kind, path in package.assets)
-    (out / "wheels").mkdir(exist_ok=True)
-    bundled = []
-    for wheel in map(Path, wheels):
-        shutil.copyfile(wheel, out / "wheels" / wheel.name)
-        bundled.append(f"wheels/{wheel.name}")
-    config = {
-        "session": session,
-        "wheels": bundled,
-        "requirements": ["spaday-regular-layout", *requirements] if bundled else ["nbplay", "spaday-regular-layout", *requirements],
-        "runtime": runtime,
-        "assets": assets,
-    }
-    (out / "config.json").write_text(json.dumps(config, indent=2) + "\n")
-    return out
-
-
 def demo_session():
     """Two tracks: a saw lead on a sequencer and a sampler kit with a kick."""
     session = Session(bpm=120.0, theme="studio")
@@ -364,12 +312,7 @@ def main(argv=None):
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8020)
     parser.add_argument("--probes", action="store_true", help="add the JSON routes the browser tests use")
-    parser.add_argument("--export", metavar="DIR", help="write a static site that runs in Pyodide instead of serving")
-    parser.add_argument("--wheel", action="append", default=[], help="a wheel to bundle with --export (repeatable)")
     args = parser.parse_args(argv)
-    if args.export:
-        print(export(args.export, wheels=args.wheel))
-        return
     import uvicorn
 
     uvicorn.run(build(demo_session(), probes=args.probes), host=args.host, port=args.port)
