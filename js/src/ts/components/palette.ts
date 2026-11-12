@@ -56,7 +56,7 @@ export class NbplayPalette extends NbplayElement {
     return this.querySelector("dialog");
   }
 
-  private matches(): PaletteCommand[] {
+  private filtered(): PaletteCommand[] {
     const query = this.query.trim().toLowerCase();
     return this.commands.filter((c) =>
       (c.label ?? c.id).toLowerCase().includes(query),
@@ -72,7 +72,7 @@ export class NbplayPalette extends NbplayElement {
   };
 
   private onKey(e: KeyboardEvent): void {
-    const matches = this.matches();
+    const matches = this.filtered();
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       if (!matches.length) return;
@@ -96,7 +96,7 @@ export class NbplayPalette extends NbplayElement {
   }
 
   render() {
-    const matches = this.matches();
+    const matches = this.filtered();
     return html`<dialog
       class="nbplay-palette-dialog"
       @click=${(e: MouseEvent) => {
