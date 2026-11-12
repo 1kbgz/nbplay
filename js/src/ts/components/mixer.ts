@@ -1,3 +1,4 @@
+import { type PropertyValues } from "lit";
 import { html } from "lit";
 import {
   type Channel,
@@ -99,23 +100,39 @@ export class NbplayMixer extends NbplayElement {
     // Keep clicks inside the mixer from moving focus to the notebook, which
     // makes JupyterLab scroll the active cell into view mid-interaction.
     this.tabIndex = 0;
-    if (this.sessionId) {
-      this.bus.init(this.sessionId);
-      this.busReady = true;
-      this.syncBus();
-      this.bus.register(this.sessionId);
-      if (typeof requestAnimationFrame === "function") {
-        this.meterFrame = requestAnimationFrame(this.meterTick);
-      }
-    }
+    this.attach();
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.detach(this.sessionId);
+  }
+
+  updated(changed: PropertyValues): void {
+    // `sessionId` usually arrives after the element is connected (bindings
+    // apply once the tree is mounted), so the bus is built here as well.
+    if (!changed.has("sessionId")) return;
+    const previous = changed.get("sessionId") as string | undefined;
+    if (previous && previous !== this.sessionId) this.detach(previous);
+    this.attach();
+  }
+
+  private attach(): void {
+    if (this.busReady || !this.sessionId || !this.isConnected) return;
+    this.bus.init(this.sessionId);
+    this.busReady = true;
+    this.syncBus();
+    this.bus.register(this.sessionId);
+    if (typeof requestAnimationFrame === "function") {
+      this.meterFrame = requestAnimationFrame(this.meterTick);
+    }
+  }
+
+  private detach(sessionId: string): void {
     if (this.meterFrame !== null) cancelAnimationFrame(this.meterFrame);
     this.meterFrame = null;
     this.busReady = false;
-    if (this.sessionId) this.bus.destroy(this.sessionId);
+    if (sessionId) this.bus.destroy(sessionId);
   }
 
   private syncBus(): void {

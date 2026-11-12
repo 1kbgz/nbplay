@@ -86,18 +86,56 @@ test.describe("primitives", () => {
     expect(await events(page)).toEqual([["input", 8000]]);
   });
 
+  test("slider keeps the pointer's value through a drag", async ({ page }) => {
+    // A host that mirrors every `input` back into `value` (a bound model)
+    // must not pull the slider back to where the drag started.
+    await mount(page, "nbplay-slider", {
+      value: 0.5,
+      min: 0,
+      max: 2,
+      step: 0.01,
+    });
+    await page.evaluate(() => {
+      const el = document.querySelector("nbplay-slider");
+      el.addEventListener("input", (e) => {
+        el.value = e.detail.value;
+      });
+    });
+    const box = await page
+      .locator("nbplay-slider input[type=range]")
+      .boundingBox();
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2, {
+      steps: 4,
+    });
+    await page.mouse.up();
+    const value = await page.evaluate(
+      () => document.querySelector("nbplay-slider").value,
+    );
+    expect(value).toBeGreaterThan(1.5);
+    const all = await events(page);
+    expect(all.at(-1)).toEqual(["change", value]);
+  });
+
   test("slider ignores outside writes while dragging", async ({ page }) => {
     await mount(page, "nbplay-slider", { value: 0.5 });
+    const pointer = (type) =>
+      page.evaluate((type) => {
+        document
+          .querySelector("nbplay-slider input")
+          .dispatchEvent(new PointerEvent(type, { bubbles: true }));
+      }, type);
+    await pointer("pointerdown");
     await page.evaluate(async () => {
       const el = document.querySelector("nbplay-slider");
-      el.dragging = true;
       el.value = 0.9;
       await el.updateComplete;
     });
     await expect(page.locator("nbplay-slider")).toHaveJSProperty("value", 0.5);
+    await pointer("pointerup");
     await page.evaluate(async () => {
       const el = document.querySelector("nbplay-slider");
-      el.dragging = false;
       el.value = 0.9;
       await el.updateComplete;
     });

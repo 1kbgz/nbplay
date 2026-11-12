@@ -139,6 +139,42 @@ test.describe("mixer composites", () => {
     ]);
   });
 
+  test("mixer builds the session bus when sessionId arrives after mount", async ({
+    page,
+  }) => {
+    await mount(page, "nbplay-mixer", {
+      channels: [
+        { name: "A", gain: 0.8, pan: 0, mute: false, solo: false },
+        { name: "B", gain: 0.8, pan: 0, mute: false, solo: false },
+      ],
+      masterGain: 1,
+    });
+    expect(
+      await page.evaluate(() => Object.keys(globalThis.__nbplay || {})),
+    ).toEqual([]);
+    await page.evaluate(async () => {
+      const el = document.querySelector("nbplay-mixer");
+      el.sessionId = "late-session";
+      await el.updateComplete;
+    });
+    expect(
+      await page.evaluate(
+        () => globalThis.__nbplay["late-session"].channels.length,
+      ),
+    ).toBe(2);
+    await page.evaluate(async () => {
+      const el = document.querySelector("nbplay-mixer");
+      el.sessionId = "other-session";
+      await el.updateComplete;
+    });
+    expect(
+      await page.evaluate(() => [
+        globalThis.__nbplay["late-session"],
+        globalThis.__nbplay["other-session"].channels.length,
+      ]),
+    ).toEqual([undefined, 2]);
+  });
+
   test("return and master strips drop the channel-only parts", async ({
     page,
   }) => {
