@@ -7,6 +7,7 @@ export default defineConfig({
     "jupyterlab.spec.js",
     "jupyterlite.spec.js",
     "app.spec.js",
+    "standalone.spec.js",
   ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

@@ -7,26 +7,31 @@ namespace. The panels are a `regular-layout` split/tab tree that the browser
 can rearrange.
 
 ``python -m nbplay.app`` serves a demo session on http://127.0.0.1:8020.
+
+The same page also runs with no server: :func:`export` writes a static site
+whose Python side (the session and its models) runs in Pyodide inside a Web
+Worker, with ``postMessage`` in place of the WebSockets
+(``python -m nbplay.app --export DIR --wheel nbplay-...wasm32.whl``).
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import re
+import shutil
+from importlib import import_module
+from pathlib import Path
 
 import transports
 from spaday import element
-from spaday.backends.starlette import serve
 from spaday_regular_layout import RegularLayout, RegularLayoutFrame, package as layout_package
-from starlette.datastructures import MutableHeaders
-from starlette.responses import JSONResponse
-from starlette.routing import Route, WebSocketRoute
 
 from .components import package as nbplay_package
 from .descriptors import THEMES
 from .widget import InstrumentWidget, SamplerWidget, SequencerWidget, Session, SynthWidget
 
-__all__ = ("build", "default_layout", "demo_session", "panel_widgets")
+__all__ = ("Standalone", "build", "default_layout", "demo_session", "export", "panel_widgets")
 
 #: The page chrome follows the nbplay tokens: the document root carries the
 #: session theme, and regular-layout's own tokens map onto nbplay's.
@@ -72,6 +77,8 @@ class _NoCache:
         self.app = app
 
     async def __call__(self, scope, receive, send):
+        from starlette.datastructures import MutableHeaders
+
         if scope["type"] != "http" or not scope["path"].startswith(("/components/", "/js/")):
             return await self.app(scope, receive, send)
 
@@ -142,6 +149,17 @@ def _app_bar(title):
     )
 
 
+def _page(panels, layout, title):
+    """The top bar over the panel layout, each panel's element bound under its own namespace."""
+    frames = [RegularLayoutFrame(widget.tree(f"{name}."), name=name) for name, widget in panels.items()]
+    return (
+        element("div")
+        .classes("nbplay-app")
+        .child(_app_bar(title), RegularLayout(*frames, layout=layout or default_layout(list(panels))).classes("spa nbplay"))
+        .bind_root_attr("data-nbplay-theme", "transport.config.theme")
+    )
+
+
 def _jsonable(value):
     if isinstance(value, (bytes, bytearray, memoryview)):
         return {"bytes": len(value)}
@@ -154,6 +172,8 @@ def _jsonable(value):
 
 def _probe_routes(panels):
     """Test hooks: read every panel's models, call a widget method, assign a config field."""
+    from starlette.responses import JSONResponse
+    from starlette.routing import Route
 
     async def state(request):
         return JSONResponse(
@@ -192,23 +212,20 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
     :func:`panel_widgets`; ``probes`` adds the JSON routes the browser tests
     drive. Other keyword options go to :func:`spaday.backends.starlette.serve`.
     """
+    from spaday.backends.starlette import serve
+    from starlette.routing import WebSocketRoute
+
     panels = panel_widgets(session)
-    wires, routes, background, frames = [], [], [], []
+    wires, routes, background = [], [], []
     for name, widget in panels.items():
         url = f"/ws/{name}"
         server = transports.Server(widget.session)
         wires.extend(widget.wires(f"{name}.", url=url))
         routes.append(WebSocketRoute(url, transports.ws_endpoint(server)))
         background.append(transports.autosync(server))
-        frames.append(RegularLayoutFrame(widget.tree(f"{name}."), name=name))
     if probes:
         routes.extend(_probe_routes(panels))
-    page = (
-        element("div")
-        .classes("nbplay-app")
-        .child(_app_bar(title), RegularLayout(*frames, layout=layout or default_layout(list(panels))).classes("spa nbplay"))
-        .bind_root_attr("data-nbplay-theme", "transport.config.theme")
-    )
+    page = _page(panels, layout, title)
     app = serve(
         lambda: page,
         packages=[nbplay_package, layout_package],
@@ -221,6 +238,104 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
     )
     app.add_middleware(_NoCache)
     return app
+
+
+class Standalone:
+    """The Python side of the page with no server: what a Pyodide Web Worker runs.
+
+    Each panel's transports server talks to one in-browser connection; the
+    worker passes wire frames between this object and the page with
+    ``postMessage``. Every method takes and returns JSON text, the form that
+    crosses the worker boundary.
+    """
+
+    def __init__(self, session, *, layout=None, title="nbplay"):
+        self.session = session
+        self.panels = panel_widgets(session)
+        self.servers = {name: transports.Server(widget.session) for name, widget in self.panels.items()}
+        self._page = _page(self.panels, layout, title)
+
+    @classmethod
+    def load(cls, spec):
+        """Build from ``"module:function"``, a zero-argument callable returning the :class:`Session`."""
+        module, _, name = spec.partition(":")
+        return cls(getattr(import_module(module), name)())
+
+    def page(self):
+        """The tree, the page styles, and each panel's model-to-namespace wires."""
+        return json.dumps(
+            {
+                "tree": self._page.to_node(),
+                "style": APP_CSS,
+                "panels": {name: widget.wires(f"{name}.") for name, widget in self.panels.items()},
+            }
+        )
+
+    def open(self):
+        """Connect the page to every panel; the frames that bring it up to date, by panel."""
+        return json.dumps({name: list(server.open(name, "json", ownership=True)) for name, server in self.servers.items()})
+
+    def receive(self, panel, frame):
+        """Apply one frame from the page; the frames to send back, by panel.
+
+        A browser edit can change other widgets' models (the session mirrors
+        theme, mute and solo), so every server is flushed.
+        """
+        return self._flush({panel: list(self.servers[panel].recv(panel, frame).get(panel, []))})
+
+    def call(self, panel, method):
+        """Call a widget method (``"transport"``, ``"play"``) the way Python driving the session would; the frames to send."""
+        getattr(self.panels[panel], method)()
+        return self._flush({})
+
+    def _flush(self, out):
+        for name, server in self.servers.items():
+            frames = server.flush().get(name, [])
+            if frames:
+                out.setdefault(name, []).extend(frames)
+        return json.dumps(out)
+
+
+def export(directory, *, session="nbplay.app:demo_session", wheels=(), requirements=()):
+    """Write the app as a static site that runs its Python in Pyodide.
+
+    ``session`` names a zero-argument callable (``"module:function"``) that the
+    worker imports and calls for the :class:`Session`. ``wheels`` are local
+    wheel files to bundle and install first (the nbplay Pyodide wheel, until
+    one is on PyPI); ``requirements`` are further micropip requirements. The
+    site needs no server beyond static file hosting.
+    """
+    from spaday import bootstrap
+
+    out = Path(directory)
+    out.mkdir(parents=True, exist_ok=True)
+    source = Path(__file__).parent / "standalone"
+    for name in ("index.html", "worker.js"):
+        shutil.copyfile(source / name, out / name)
+    # The spaday and transports browser runtimes, at the paths spaday serves them under /js.
+    runtime = {key: f"js{path}" for key, path in bootstrap._ASSETS[bootstrap._layout()].items()}
+    for path in runtime.values():
+        target = out / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(bootstrap.bundles_dir() / path.removeprefix("js/"), target)
+    assets = []
+    for package in (nbplay_package, layout_package):
+        shutil.copytree(package.assets_dir, out / "components" / package.name, dirs_exist_ok=True)
+        assets.extend({"type": kind, "path": f"components/{package.name}/{path}"} for kind, path in package.assets)
+    (out / "wheels").mkdir(exist_ok=True)
+    bundled = []
+    for wheel in map(Path, wheels):
+        shutil.copyfile(wheel, out / "wheels" / wheel.name)
+        bundled.append(f"wheels/{wheel.name}")
+    config = {
+        "session": session,
+        "wheels": bundled,
+        "requirements": ["spaday-regular-layout", *requirements] if bundled else ["nbplay", "spaday-regular-layout", *requirements],
+        "runtime": runtime,
+        "assets": assets,
+    }
+    (out / "config.json").write_text(json.dumps(config, indent=2) + "\n")
+    return out
 
 
 def demo_session():
@@ -245,13 +360,18 @@ def demo_session():
 
 
 def main(argv=None):
-    import uvicorn
-
     parser = argparse.ArgumentParser(description="Serve the nbplay demo session as a web app")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8020)
     parser.add_argument("--probes", action="store_true", help="add the JSON routes the browser tests use")
+    parser.add_argument("--export", metavar="DIR", help="write a static site that runs in Pyodide instead of serving")
+    parser.add_argument("--wheel", action="append", default=[], help="a wheel to bundle with --export (repeatable)")
     args = parser.parse_args(argv)
+    if args.export:
+        print(export(args.export, wheels=args.wheel))
+        return
+    import uvicorn
+
     uvicorn.run(build(demo_session(), probes=args.probes), host=args.host, port=args.port)
 
 

@@ -52,7 +52,8 @@
     "test:rust": "cargo test -- --show-output",
     "test": "npm-run-all test:rust test:js test:hosts",
     "watch": "nodemon --watch src -e ts,css,html --exec \"pnpm build:debug\"",
-    "test:lite": "playwright test --config playwright.lite.config.js"
+    "test:lite": "playwright test --config playwright.lite.config.js",
+    "test:standalone": "playwright test --config playwright.standalone.config.js"
   },
   "dependencies": {
     "lit": "^3.3.3"

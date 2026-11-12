@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nbplay</title>
+    <style>
+      #nbplay-status {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font: 14px/1.4 system-ui, sans-serif;
+        white-space: pre-wrap;
+      }
+      #nbplay-status[hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nbplay-status">Starting…</div>
+    <div id="nbplay-root"></div>
+    <script type="module">
+      // The static nbplay app: the elements and the spaday store run here, the
+      // session and its models run in Pyodide inside worker.js, and transports
+      // wire frames cross between them with postMessage.
+      const status = document.querySelector("#nbplay-status");
+      const root = document.querySelector("#nbplay-root");
+      const fail = (error) => {
+        status.hidden = false;
+        status.textContent = `Unable to start\n${error}`;
+      };
+
+      try {
+        const config = await (await fetch("config.json")).json();
+        const url = (path) => new URL(path, location.href).href;
+        const loadAsset = (asset) =>
+          asset.type === "js"
+            ? import(url(asset.path))
+            : new Promise((resolve, reject) => {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = url(asset.path);
+                link.onload = resolve;
+                link.onerror = reject;
+                document.head.appendChild(link);
+              });
+        const [spaday, transports] = await Promise.all([
+          import(url(config.runtime.runtime)),
+          import(url(config.runtime.transports)),
+          ...config.assets.map(loadAsset),
+        ]);
+        await Promise.all([
+          spaday.init({ module_or_path: url(config.runtime.wasm) }),
+          transports.wasm.default({ module_or_path: url(config.runtime.transports_wasm) }),
+        ]);
+
+        const worker = new Worker("worker.js", { type: "module" });
+        const clients = {};
+        worker.addEventListener("message", ({ data }) => {
+          if (data.type === "status") status.textContent = data.message;
+          if (data.type === "error") fail(data.message);
+          if (data.type === "wires")
+            for (const [panel, frames] of Object.entries(data.wires)) for (const frame of frames) clients[panel].recv(frame);
+          if (data.type === "page") {
+            const { tree, style, panels } = data.page;
+            document.head.appendChild(Object.assign(document.createElement("style"), { textContent: style }));
+            const store = new spaday.Store();
+            const wires = [];
+            for (const [panel, specs] of Object.entries(panels)) {
+              // One managed client per panel, as with one WebSocket per panel when served.
+              const client = new transports.Client("json", { ownership: true });
+              clients[panel] = client;
+              for (const { model, namespace } of specs) {
+                const link = spaday.connectStore(store, client, undefined, transports, namespace, true, model);
+                wires.push({ client, link, store, namespace });
+              }
+              client.attach((frame) => worker.postMessage({ type: "wire", panel, frame }));
+            }
+            // nbplay-wire asks for its panel's client here to deliver kernel commands.
+            spaday.provideWires(root, wires);
+            spaday.mount(root, tree, store);
+            worker.postMessage({ type: "open" });
+            status.hidden = true;
+            document.documentElement.dataset.ready = "true";
+          }
+        });
+        worker.addEventListener("error", (event) => fail(event.message));
+        // Call a widget method in Python: nbplay.call("transport", "play").
+        globalThis.nbplay = { call: (panel, method) => worker.postMessage({ type: "call", panel, method }) };
+        worker.postMessage({ type: "start" });
+      } catch (error) {
+        fail(error);
+      }
+    </script>
+  </body>
+</html>

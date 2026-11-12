@@ -143,6 +143,13 @@ lite:  ## build the JupyterLite demo (needs the Pyodide wheel from make test-pyo
 test-lite: lite  ## build the JupyterLite demo and run a notebook in it
 	cd js; pnpm run test:lite
 
+.PHONY: standalone test-standalone
+standalone:  ## export the web app as a static site that runs in Pyodide (needs the Pyodide wheel from make test-pyodide)
+	python -m nbplay.app --export docs/html/app --wheel $(firstword $(wildcard dist/pyodide/*.whl))
+
+test-standalone: standalone  ## export the static web app and drive it in a browser
+	cd js; pnpm run test:standalone
+
 .PHONY: test test-pyodide coverage tests
 test: test-py test-js test-rs  ## run all tests
 
