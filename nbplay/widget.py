@@ -1,39 +1,28 @@
-"""nbplay SynthWidget — an ipywidgets-based synthesizer control panel.
+"""The nbplay widgets: instruments on transports models, rendered by spaday.
 
-Uses anywidget (built on ipywidgets) so it works in Jupyter Notebook,
-JupyterLab, VS Code, and Colab without installing a separate extension.
-
-Waveform preview data is rendered by the Rust backend and sent to the
-browser as a binary Float32Array over the widget comm protocol for
-low-latency visualisation.  Real-time audio playback uses the Web Audio
-API in the browser so latency stays minimal.
+A widget hosts a config model (kernel-owned, validated) and a status model
+(browser-owned) in a :class:`transports.Session`, and renders the instrument
+element with spaday bindings: config fields bind two-way on ``nbplay-set``,
+status fields two-way on ``nbplay-status``, and an ``nbplay-wire`` child
+delivers ``session.command`` calls to the element.
 """
-
-from __future__ import annotations
 
 import json
 import math
 import os
 import pathlib
 import uuid
+import weakref
 import zipfile
+from typing import ClassVar
 
-import anywidget
-import traitlets
+import transports
+from pydantic import BaseModel
+from spaday import Widget, element
 
-from nbplay import (
-    EventSequence,
-    NoiseSource,
-    NoteEvent,
-    SawOscillator,
-    SineOscillator,
-    SquareOscillator,
-    __version__,
-)
-from nbplay.audio_files import decode_audio_file
-from nbplay.descriptors import (
-    _DEFAULT_PAD_NOTES,
-    _LAUNCH_QUANTIZE,
+from . import __version__
+from .audio_files import decode_audio_file
+from .descriptors import (
     _PAD_MAX_COUNT,
     _SAMPLER_PAD_STATE,
     _SAMPLER_STATE,
@@ -43,7 +32,6 @@ from nbplay.descriptors import (
     _SYNTH_STATE,
     _TIMELINE_STATE,
     _TRANSPORT_STATE,
-    THEMES,
     AudioClip,
     PadAction,
     TimelineTrack,
@@ -51,973 +39,920 @@ from nbplay.descriptors import (
     _clamp_int,
     _clamp_midi_note,
     _clamp_velocity,
-    _clamped_number,
     _clip_id,
     _decimate_samples,
-    _default_pad_notes,
     _default_steps,
     _json_copy,
-    _measure_beats,
     _nonnegative_number,
     _normalize_audio_clip,
-    _normalize_audio_clips,
     _normalize_effect,
     _normalize_effects,
     _normalize_launcher_slot,
     _normalize_midi_events,
-    _normalize_mixer_channel,
-    _normalize_pad_actions,
-    _normalize_return_bus,
-    _normalize_sample_slices,
-    _normalize_timeline_track,
-    _normalize_timeline_tracks,
     _normalize_zone,
-    _normalize_zones,
     _pack_float32,
-    _pad_sends,
     _positive_number,
-    _positive_pad_dimension,
-    _resize_pad_notes,
-    _resize_pad_velocities,
     _set_effect_enabled,
     _slot_voices,
     _step_duration_for_length,
     _steps_to_events,
     _unpack_float32,
-    render_waveform,
 )
-from nbplay.history import History
+from .history import History
+from .models import (
+    KeyboardConfig,
+    KeyboardStatus,
+    LauncherConfig,
+    LauncherStatus,
+    MidiKeyboardConfig,
+    MidiKeyboardStatus,
+    MidiOutputConfig,
+    MidiOutputStatus,
+    MixerConfig,
+    PadsConfig,
+    PadsStatus,
+    SamplerConfig,
+    SamplerStatus,
+    SequencerConfig,
+    SequencerStatus,
+    SettingsConfig,
+    SettingsStatus,
+    SynthConfig,
+    SynthStatus,
+    TimelineConfig,
+    TimelineStatus,
+    TransportConfig,
+    TransportStatus,
+    _Validated,
+)
 
-_STATIC = pathlib.Path(__file__).parent / "static"
+__all__ = (
+    "PACKAGE",
+    "InstrumentWidget",
+    "KeyboardWidget",
+    "LauncherWidget",
+    "MidiKeyboardWidget",
+    "MidiOutputWidget",
+    "MixerWidget",
+    "PadWidget",
+    "SamplerWidget",
+    "SequencerWidget",
+    "Session",
+    "SettingsWidget",
+    "SynthWidget",
+    "TimelineWidget",
+    "Track",
+    "TransportWidget",
+)
+
+PACKAGE = "nbplay.components:package"
+
+# transports gives a Session one patch callback; widgets sharing a Session share it.
+_PATCH_HOOKS = weakref.WeakKeyDictionary()
 
 
-class _Themed(traitlets.HasTraits):
-    """A widget with a ``theme`` trait.
+def _on_session_patch(session, hook):
+    """Register ``hook(model_id, patch)`` for the patches a transports Session emits; returns a remover."""
+    hooks = _PATCH_HOOKS.get(session)
+    if hooks is None:
+        hooks = _PATCH_HOOKS[session] = []
 
-    ``theme`` names a theme set for the widget's own subtree (the browser
-    reflects it as ``data-nbplay-theme``). ``""`` follows the page, which in
-    Jupyter is the active JupyterLab theme; ``"light"`` and ``"dark"`` pin
-    the default theme's two sets; the rest are the shipped sets.
+        def dispatch(mid, patch):
+            for item in hooks:
+                item(mid, patch)
+
+        session.on_patch(dispatch)
+    hooks.append(hook)
+
+    def remove():
+        if hook in hooks:
+            hooks.remove(hook)
+
+    return remove
+
+
+def _pattern_events(voices, step_duration, repeat):
+    """MIDI events for ``voices`` played ``repeat`` times, and the total length in beats."""
+    step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
+    length = max(len(voice) for voice in voices) * step_duration
+    base = _steps_to_events(voices, step_duration)
+    repeat = max(1, int(repeat))
+    events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+    return events, length * repeat
+
+
+class InstrumentWidget(Widget):
+    """One instrument element on a config model and, usually, a status model.
+
+    Subclasses set ``TAG``, the model classes, and the trait-to-property
+    maps; an instrument with no browser-owned state leaves ``STATUS_MODEL``
+    as ``None``. Keyword arguments that name config fields initialise the
+    config; the rest go to :class:`spaday.Widget`.
     """
 
-    theme = traitlets.Unicode("").tag(sync=True)
+    TAG: ClassVar[str]
+    CONFIG_MODEL: ClassVar[type[_Validated]]
+    STATUS_MODEL: ClassVar[type[BaseModel] | None] = None
+    CONFIG: ClassVar[dict[str, str]]
+    STATUS: ClassVar[dict[str, str]] = {}
+    #: Status fields written back on an event other than ``nbplay-status``.
+    STATUS_EVENTS: ClassVar[dict[str, str]] = {}
 
-    @traitlets.validate("theme")
-    def _validate_theme(self, proposal):
-        value = proposal["value"]
-        if value not in THEMES:
-            raise traitlets.TraitError(f"theme must be one of {THEMES}, got {value!r}")
-        return value
+    def __init__(self, session=None, *, config=None, **kwargs):
+        fields = {name: kwargs.pop(name) for name in list(kwargs) if name in self.CONFIG_MODEL.model_fields}
+        self.config = config if config is not None else self.CONFIG_MODEL(**fields)
+        self.status = self.STATUS_MODEL() if self.STATUS_MODEL is not None else None
+        self.session = session if session is not None else transports.Session()
+        self._prepare()
+        self.config_id = self.session.host(self.config)
+        # Plain wire mappings: the released Wire requires a websocket url.
+        wires = [{"model": self.config_id, "namespace": "config"}]
+        node = element(self.TAG)
+        for name, prop in self.CONFIG.items():
+            node.bind(prop, f"config.{name}", mode="two-way", event="nbplay-set")
+        self.status_id = None
+        if self.status is not None:
+            self.status_id = self.session.host(self.status, owner="client")
+            wires.append({"model": self.status_id, "namespace": "status"})
+            node.child(element("nbplay-wire", namespace="status"))
+            for name, prop in self.STATUS.items():
+                node.bind(prop, f"status.{name}", mode="two-way", event=self.STATUS_EVENTS.get(name, "nbplay-status"))
+        # Config changes come through the model (Python assignments and browser
+        # edits alike); status changes come as patches the browser submits.
+        self._listeners = []
+        self._status_mirror = self.status.model_dump() if self.status is not None else {}
+        self._unobserve_config = self.config.on_change(self._on_config_change)
+        self._unhook_patches = _on_session_patch(self.session, self._on_patch)
+        super().__init__(node, session=self.session, wires=wires, packages=PACKAGE, **kwargs)
+
+    def _prepare(self):
+        """Hook run after the models exist and before they are hosted."""
+
+    def _command(self, field, value):
+        if self.status_id is None:
+            raise TypeError(f"{type(self).__name__} has no browser-owned status to command")
+        return self.session.command(self.status_id, field, value)
+
+    def on_change(self, listener, names=None):
+        """Call ``listener(widget, name, old, new)`` when a config or status field changes; returns a remover.
+
+        ``names`` limits the fields. Changes made from Python and from the
+        browser both count.
+        """
+        wanted = None if names is None else frozenset([names] if isinstance(names, str) else names)
+        entry = (wanted, listener)
+        self._listeners.append(entry)
+
+        def unobserve():
+            if entry in self._listeners:
+                self._listeners.remove(entry)
+
+        return unobserve
+
+    def _notify(self, name, old, new):
+        for wanted, listener in list(self._listeners):
+            if wanted is None or name in wanted:
+                listener(self, name, old, new)
+
+    def _on_config_change(self, changes):
+        for name, (old, new) in changes.items():
+            self._notify(name, old, new)
+
+    def _on_patch(self, mid, patch):
+        if mid != self.status_id:
+            return
+        for op in patch.get("ops", []):
+            path = op.get("Set", {}).get("path") or []
+            name = path[0].get("Key") if path and isinstance(path[0], dict) else None
+            if name is None or name not in self._status_mirror:
+                continue
+            new = getattr(self.status, name)
+            old = self._status_mirror[name]
+            if new != old:
+                self._status_mirror[name] = new
+                self._notify(name, old, new)
+
+    def close(self):
+        self._unobserve_config()
+        self._unhook_patches()
+        self._listeners.clear()
+        super().close()
 
 
-class SynthWidget(_Themed, anywidget.AnyWidget):
-    """Interactive synthesizer widget for Jupyter environments.
+class TransportWidget(InstrumentWidget):
+    """The transport instrument on a transports session."""
 
-    Args:
-        oscillator_type: One of ``"sine"``, ``"square"``, ``"saw"``, ``"noise"``.
-        frequency: Oscillator frequency in Hz (20–8000).
-        amplitude: Oscillator amplitude (0.0–1.0).
-        sample_rate: Sample rate used for the waveform preview.
+    TAG = "nbplay-transport"
+    CONFIG_MODEL = TransportConfig
+    STATUS_MODEL = TransportStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "time_signature_den": "timeSignatureDen",
+        "loop_enabled": "loopEnabled",
+        "loop_start_bar": "loopStartBar",
+        "loop_end_bar": "loopEndBar",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "is_playing": "isPlaying",
+        "is_recording": "isRecording",
+        "current_beat": "currentBeat",
+        "bar_number": "barNumber",
+        "beat_in_bar": "beatInBar",
+        "undo_request": "undoRequest",
+        "redo_request": "redoRequest",
+    }
+    STATUS_EVENTS: ClassVar[dict[str, str]] = {"undo_request": "nbplay-request", "redo_request": "nbplay-request"}
+
+    def play(self):
+        """Start the clock in the owning widget."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop the clock in the owning widget."""
+        return self._command("is_playing", False)
+
+    def seek(self, beat):
+        """Move the clock to ``beat``."""
+        return self._command("current_beat", float(beat))
+
+    def record(self, on=True):
+        """Arm or disarm recording; arming also starts the clock."""
+        return self._command("is_recording", bool(on))
+
+
+class SynthWidget(InstrumentWidget):
+    """The synth instrument on a transports session.
+
+    :class:`~nbplay.models.SynthConfig` renders the waveform preview as
+    part of validation, so kernel and browser edits both refresh it.
     """
 
-    _esm = _STATIC / "widget.js"
-    _css = _STATIC / "nbplay.css"
+    TAG = "nbplay-synth"
+    CONFIG_MODEL = SynthConfig
+    STATUS_MODEL = SynthStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "oscillator_type": "oscillatorType",
+        "frequency": "frequency",
+        "amplitude": "amplitude",
+        "sample_rate": "sampleRate",
+        "waveform": "waveform",
+        "session_id": "sessionId",
+        "channel_index": "channelIndex",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying"}
 
-    # Session routing (set by Session): the synth joins the bus as the
-    # track's instrument so sequencers and clips play with its oscillator.
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
+    def play(self):
+        """Start the tone in the owning widget."""
+        return self._command("is_playing", True)
 
-    oscillator_type = traitlets.Unicode("sine").tag(sync=True)
-    frequency = traitlets.Float(440.0).tag(sync=True)
-    amplitude = traitlets.Float(0.8).tag(sync=True)
-    sample_rate = traitlets.Int(44100).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-
-    # Binary waveform buffer (Float32Array packed as little-endian bytes).
-    # Sent over the widget binary-buffer path for minimal overhead.
-    waveform = traitlets.Bytes(b"").tag(sync=True)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._update_waveform()
-        self.observe(
-            self._on_param_change,
-            names=["oscillator_type", "frequency", "amplitude", "sample_rate"],
-        )
-
-    def _on_param_change(self, change):
-        self._update_waveform()
-
-    def _make_oscillator(self):
-        t = self.oscillator_type
-        if t == "square":
-            return SquareOscillator(self.frequency, self.amplitude, self.sample_rate)
-        if t == "saw":
-            return SawOscillator(self.frequency, self.amplitude, self.sample_rate)
-        if t == "noise":
-            return NoiseSource(self.amplitude)
-        return SineOscillator(self.frequency, self.amplitude, self.sample_rate)
-
-    def _update_waveform(self):
-        """Re-render the waveform preview via the Rust oscillator and push
-        the result as a binary Float32Array to the frontend."""
-        self.waveform = render_waveform(self.oscillator_type, self.frequency, self.amplitude, self.sample_rate)
+    def stop(self):
+        """Stop the tone in the owning widget."""
+        return self._command("is_playing", False)
 
 
-class SettingsWidget(_Themed, anywidget.AnyWidget):
-    """Audio / MIDI configuration widget for Jupyter environments.
+class MixerWidget(InstrumentWidget):
+    """The mixer console on a transports session.
 
-    Exposes sample rate, channel count, and buffer size selectors for the
-    audio output, and a Web MIDI port selector with a live activity monitor.
+    The console is configuration only: faders, pans, mutes, sends and
+    effects live in the kernel model, and the browser builds the Web Audio
+    graph from it. Edits in either place are validated by
+    :class:`~nbplay.models.MixerConfig`.
     """
 
-    _esm = _STATIC / "settings.js"
-    _css = _STATIC / "nbplay.css"
-
-    sample_rate = traitlets.Int(44100).tag(sync=True)
-    channels = traitlets.Int(1).tag(sync=True)
-    buffer_size = traitlets.Int(512).tag(sync=True)
-    audio_device = traitlets.Unicode("").tag(sync=True)
-
-    midi_port = traitlets.Unicode("").tag(sync=True)
-    available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
-
-    # Raw MIDI event bytes (timestamp f64 LE + MIDI bytes) from frontend.
-    midi_event = traitlets.Bytes(b"").tag(sync=True)
-
-
-class MixerWidget(_Themed, anywidget.AnyWidget):
-    """Mixer console with per-channel faders, pan, mute/solo, and master fader.
-
-    Channels are synced as a JSON list of dicts with keys
-    ``name``, ``gain``, ``pan``, ``mute``, ``solo``.
-
-    The ``Mixer`` Rust object can be used for offline rendering
-    via ``mix_down()``; this widget provides the interactive UI.
-    """
-
-    _esm = _STATIC / "mixer.js"
-    _css = _STATIC / "nbplay.css"
-
-    # JSON-serialized list of channel dicts
-    channels = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    master_gain = traitlets.Float(0.8).tag(sync=True)
-    master_effects = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    # Send/return buses: each has a name, gain, and its own insert chain and
-    # feeds the master; every channel carries one post-fader send level per
-    # return in ``sends``.
-    returns = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-
-    # Session routing (set by Session to enable shared AudioContext)
-    session_id = traitlets.Unicode("").tag(sync=True)
-
-    @traitlets.validate("channels")
-    def _validate_channels(self, proposal):
-        count = len(self.returns)
-        channels = []
-        for index, channel in enumerate(proposal["value"] or []):
-            normalized = _normalize_mixer_channel(channel, index)
-            normalized["sends"] = _pad_sends(normalized["sends"], count)
-            channels.append(normalized)
-        return channels
-
-    @traitlets.validate("returns")
-    def _validate_returns(self, proposal):
-        return [_normalize_return_bus(bus, index) for index, bus in enumerate(proposal["value"] or [])]
-
-    @traitlets.observe("returns")
-    def _on_returns_change(self, change):
-        count = len(change["new"])
-        if any(len(channel.get("sends", [])) != count for channel in self.channels):
-            self.channels = [{**channel, "sends": _pad_sends(channel.get("sends"), count)} for channel in self.channels]
-
-    @traitlets.validate("master_effects")
-    def _validate_master_effects(self, proposal):
-        return _normalize_effects(proposal["value"])
+    TAG = "nbplay-mixer"
+    CONFIG_MODEL = MixerConfig
+    CONFIG: ClassVar[dict[str, str]] = {
+        "channels": "channels",
+        "returns": "returns",
+        "master_gain": "masterGain",
+        "master_effects": "masterEffects",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
 
     def add_channel(self, name="Channel"):
-        """Add a new channel strip.
-
-        Args:
-            name: Display name for the channel.
-
-        Returns:
-            Index of the new channel.
-        """
-        ch = {"name": name, "gain": 0.8, "pan": 0.0, "mute": False, "solo": False, "effects": [], "sends": [0.0] * len(self.returns)}
-        self.channels = [*self.channels, ch]
-        return len(self.channels) - 1
+        """Append a channel strip and return its index."""
+        self.config.channels = [*self.config.channels, {"name": name}]
+        return len(self.config.channels) - 1
 
     def remove_channel(self, index):
-        """Remove a channel by index.
+        """Remove the channel at ``index``."""
+        channels = list(self.config.channels)
+        if 0 <= index < len(channels):
+            del channels[index]
+            self.config.channels = channels
 
-        Args:
-            index: Zero-based channel index.
-        """
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs.pop(index)
-            self.channels = chs
+    def _update_channel(self, index, **fields):
+        channels = list(self.config.channels)
+        if 0 <= index < len(channels):
+            channels[index] = {**channels[index], **fields}
+            self.config.channels = channels
 
     def set_channel_gain(self, index, gain):
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "gain": _clamped_number(gain, 0.0, 2.0, "gain")}
-            self.channels = chs
+        self._update_channel(index, gain=gain)
 
     def set_channel_pan(self, index, pan):
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "pan": _clamped_number(pan, -1.0, 1.0, "pan")}
-            self.channels = chs
+        self._update_channel(index, pan=pan)
 
     def set_channel_mute(self, index, mute):
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "mute": bool(mute)}
-            self.channels = chs
+        self._update_channel(index, mute=bool(mute))
 
     def set_channel_solo(self, index, solo):
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "solo": bool(solo)}
-            self.channels = chs
+        self._update_channel(index, solo=bool(solo))
 
     def set_channel_effects(self, index, effects):
-        """Replace a channel's browser insert effect chain."""
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            chs[index] = {**chs[index], "effects": _normalize_effects(effects)}
-            self.channels = chs
+        """Replace the insert chain of the channel at ``index``."""
+        self._update_channel(index, effects=_normalize_effects(effects))
+
+    def add_channel_effect(self, index, effect):
+        """Append an insert effect to the channel at ``index``."""
+        if 0 <= index < len(self.config.channels):
+            self._update_channel(index, effects=[*self.config.channels[index]["effects"], _normalize_effect(effect)])
 
     def set_channel_effect_enabled(self, index, effect_index, enabled=True):
         """Bypass (``False``) or re-enable one channel insert effect."""
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            effects = _normalize_effects(chs[index].get("effects", []))
+        if 0 <= index < len(self.config.channels):
+            effects = list(self.config.channels[index]["effects"])
             if 0 <= effect_index < len(effects):
                 effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
-                chs[index] = {**chs[index], "effects": effects}
-                self.channels = chs
-
-    def set_master_effect_enabled(self, effect_index, enabled=True):
-        """Bypass (``False``) or re-enable one master insert effect."""
-        effects = list(self.master_effects)
-        if 0 <= effect_index < len(effects):
-            effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
-            self.master_effects = effects
-
-    def add_channel_effect(self, index, effect):
-        """Append one effect descriptor to a channel insert chain."""
-        chs = list(self.channels)
-        if 0 <= index < len(chs):
-            effects = _normalize_effects(chs[index].get("effects", []))
-            effects.append(_normalize_effect(effect))
-            chs[index] = {**chs[index], "effects": effects}
-            self.channels = chs
+                self._update_channel(index, effects=effects)
 
     def clear_channel_effects(self, index):
-        """Remove all browser insert effects from a channel."""
+        """Remove every insert effect from the channel at ``index``."""
         self.set_channel_effects(index, [])
 
     def set_master_effects(self, effects):
-        """Replace the master bus browser insert effect chain."""
-        self.master_effects = _normalize_effects(effects)
+        """Replace the master bus insert chain."""
+        self.config.master_effects = _normalize_effects(effects)
 
     def add_master_effect(self, effect):
-        """Append one effect descriptor to the master bus effect chain."""
-        self.master_effects = [*self.master_effects, _normalize_effect(effect)]
+        """Append an insert effect to the master bus."""
+        self.config.master_effects = [*self.config.master_effects, _normalize_effect(effect)]
+
+    def set_master_effect_enabled(self, effect_index, enabled=True):
+        """Bypass (``False``) or re-enable one master insert effect."""
+        effects = list(self.config.master_effects)
+        if 0 <= effect_index < len(effects):
+            effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
+            self.config.master_effects = effects
 
     def clear_master_effects(self):
-        """Remove all browser insert effects from the master bus."""
-        self.master_effects = []
-
-    # Send/return buses
+        """Remove every insert effect from the master bus."""
+        self.config.master_effects = []
 
     def add_return(self, name="Return", effects=(), gain=0.8):
-        """Add a return bus with its own effect chain; returns its index.
-
-        Every channel gains a send level for it, starting at 0.
-        """
-        self.returns = [*self.returns, {"name": name, "gain": gain, "effects": list(effects)}]
-        return len(self.returns) - 1
+        """Append a send/return bus and return its index; every channel gains a send."""
+        self.config.returns = [*self.config.returns, {"name": name, "gain": gain, "effects": list(effects)}]
+        return len(self.config.returns) - 1
 
     def remove_return(self, index):
         """Remove a return bus and every channel's send to it."""
-        returns = list(self.returns)
+        returns = list(self.config.returns)
         if 0 <= index < len(returns):
-            returns.pop(index)
-            self.channels = [{**ch, "sends": [level for i, level in enumerate(ch.get("sends", [])) if i != index]} for ch in self.channels]
-            self.returns = returns
+            del returns[index]
+            channels = [{**ch, "sends": [level for i, level in enumerate(ch["sends"]) if i != index]} for ch in self.config.channels]
+            self.config.update(returns=returns, channels=channels)
 
     def _update_return(self, index, **fields):
-        returns = list(self.returns)
+        returns = list(self.config.returns)
         if 0 <= index < len(returns):
             returns[index] = {**returns[index], **fields}
-            self.returns = returns
+            self.config.returns = returns
 
     def set_return_gain(self, index, gain):
-        self._update_return(index, gain=_clamped_number(gain, 0.0, 2.0, "gain"))
+        self._update_return(index, gain=gain)
 
     def set_return_effects(self, index, effects):
         """Replace a return bus's effect chain."""
         self._update_return(index, effects=_normalize_effects(effects))
 
     def add_return_effect(self, index, effect):
-        """Append one effect descriptor to a return bus's chain."""
-        if 0 <= index < len(self.returns):
-            self._update_return(index, effects=[*self.returns[index]["effects"], _normalize_effect(effect)])
+        """Append an effect to a return bus's chain."""
+        if 0 <= index < len(self.config.returns):
+            self._update_return(index, effects=[*self.config.returns[index]["effects"], _normalize_effect(effect)])
 
     def set_return_effect_enabled(self, index, effect_index, enabled=True):
         """Bypass (``False``) or re-enable one return bus effect."""
-        if 0 <= index < len(self.returns):
-            effects = list(self.returns[index]["effects"])
+        if 0 <= index < len(self.config.returns):
+            effects = list(self.config.returns[index]["effects"])
             if 0 <= effect_index < len(effects):
                 effects[effect_index] = _set_effect_enabled(effects[effect_index], enabled)
                 self._update_return(index, effects=effects)
 
     def set_send(self, channel_index, return_index, level):
-        """Set a channel's post-fader send level (0-1) to a return bus."""
-        if not 0 <= return_index < len(self.returns):
+        """Set a channel's post-fader send level (0 to 1) to a return bus."""
+        if not 0 <= return_index < len(self.config.returns):
             raise IndexError(f"return index out of range: {return_index}")
-        chs = list(self.channels)
-        if 0 <= channel_index < len(chs):
-            sends = _pad_sends(chs[channel_index].get("sends"), len(self.returns))
-            sends[return_index] = _clamped_number(level, 0.0, 1.0, "send")
-            chs[channel_index] = {**chs[channel_index], "sends": sends}
-            self.channels = chs
+        if 0 <= channel_index < len(self.config.channels):
+            sends = list(self.config.channels[channel_index]["sends"])
+            sends[return_index] = level
+            self._update_channel(channel_index, sends=sends)
 
     def to_mixer(self):
-        """Build a Rust ``Mixer`` matching the current widget state.
+        """A Rust ``Mixer`` with this console's channels and master gain."""
+        from nbplay import Mixer
 
-        Returns:
-            A new ``nbplay.Mixer`` instance.
-        """
-        from nbplay import Mixer as RustMixer
-
-        m = RustMixer()
-        for ch in self.channels:
-            idx = m.add_channel(ch.get("name", "Channel"))
-            m.set_channel_gain(idx, ch.get("gain", 0.8))
-            m.set_channel_pan(idx, ch.get("pan", 0.0))
-            m.set_channel_mute(idx, ch.get("mute", False))
-            m.set_channel_solo(idx, ch.get("solo", False))
-        m.master_gain = self.master_gain
-        return m
+        mixer = Mixer()
+        for channel in self.config.channels:
+            index = mixer.add_channel(channel["name"])
+            mixer.set_channel_gain(index, channel["gain"])
+            mixer.set_channel_pan(index, channel["pan"])
+            mixer.set_channel_mute(index, channel["mute"])
+            mixer.set_channel_solo(index, channel["solo"])
+        mixer.master_gain = self.config.master_gain
+        return mixer
 
 
-class NoteComposer(traitlets.HasTraits):
-    """A single voice's per-step note/velocity/duration assignments.
+_ROUTED = {"sampler_routing": "samplerRouting", "session_id": "sessionId", "channel_index": "channelIndex", "theme": "theme"}
 
-    This is a lightweight traitlets object (not a rendered widget).
-    A monophonic sequencer has one composer; a polyphonic sequencer
-    has *N* composers sharing the same step clock.
 
-    Args:
-        length: Number of steps.
+class _NoteSource(InstrumentWidget):
+    """A widget that plays notes into samplers through ``sampler_routing``."""
+
+    def connect_sampler(self, sampler, *, zone=None, octave=None, note=None, notes=None):
+        """Route notes to ``sampler`` (a :class:`SamplerWidget` on the session bus); see :class:`KeyboardRoute`."""
+        channel = sampler.config.channel_index
+        route = _build_route(channel, zone=zone, octave=octave, note=note, notes=notes).to_dict()
+        self.config.sampler_routing = [*(r for r in self.config.sampler_routing if r.get("channel_index") != channel), route]
+
+    def disconnect_sampler(self, sampler):
+        """Drop the route to ``sampler``."""
+        channel = sampler.config.channel_index
+        self.config.sampler_routing = [r for r in self.config.sampler_routing if r.get("channel_index") != channel]
+
+
+class _Keys(_NoteSource):
+    """A keyboard widget: it can also record into sequencers."""
+
+    def connect_sequencer(self, sequencer):
+        """Let ``sequencer`` (a :class:`SequencerWidget`) record this keyboard."""
+        sequencer.config.keyboard_connected = True
+
+    def disconnect_sequencer(self, sequencer):
+        sequencer.config.keyboard_connected = False
+
+
+class PadWidget(_NoteSource):
+    """The trigger-pad grid on a transports session; the browser owns the taps."""
+
+    TAG = "nbplay-pads"
+    CONFIG_MODEL = PadsConfig
+    STATUS_MODEL = PadsStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "rows": "rows",
+        "cols": "cols",
+        "velocity": "velocity",
+        "velocity_sensitive": "velocitySensitive",
+        "pad_notes": "padNotes",
+        "pad_velocities": "padVelocities",
+        "pad_actions": "padActions",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "active_pads": "activePads",
+        "last_note_event": "lastNoteEvent",
+        "last_pad_event": "lastPadEvent",
+    }
+
+    def configure_grid_for_actions(self, notes=None, velocities=None, actions=None, rows=None, cols=None):
+        """Size the grid for the given notes, velocities or actions and apply them."""
+        config = self.config
+        count = max(1, max(len(actions or []), len(notes or []), len(velocities or [])) or len(config.pad_notes))
+        if cols is None:
+            cols = min(4, count)
+        if rows is None:
+            rows = max(1, (count + cols - 1) // cols)
+        fields = {"rows": max(1, int(rows)), "cols": max(1, int(cols))}
+        if notes is None and actions is not None:
+            notes = [
+                a.get("note", config.pad_notes[i] if i < len(config.pad_notes) else 60) if isinstance(a, dict) else a.note
+                for i, a in enumerate(actions)
+            ]
+        if notes is not None:
+            fields["pad_notes"] = list(notes)
+        if velocities is not None:
+            fields["pad_velocities"] = list(velocities)
+        if actions is not None:
+            fields["pad_actions"] = [a.to_dict() if isinstance(a, PadAction) else a for a in actions]
+        config.update(**fields)
+        return self
+
+    def set_base_note(self, note):
+        """Lay the pads out chromatically from ``note``."""
+        start = _clamp_midi_note(note)
+        self.config.pad_notes = [_clamp_midi_note(start + i) for i in range(self.config.rows * self.config.cols)]
+        return self
+
+    def transpose_pads(self, semitones):
+        """Shift every pad note by ``semitones``."""
+        delta = int(semitones)
+        self.config.pad_notes = [_clamp_midi_note(note + delta) for note in self.config.pad_notes]
+        return self
+
+    def connect_sampler(self, sampler, **kwargs):
+        """Route the pads to ``sampler``; pads have no zones, so ``zone`` must be ``None`` or ``"all"``."""
+        zone = kwargs.get("zone")
+        if zone is not None and zone != "all":
+            raise ValueError(f"PadWidget does not support zone routing (got zone={zone!r}). Use match='all', 'octave', 'note', or 'notes'.")
+        super().connect_sampler(sampler, **kwargs)
+
+
+class KeyboardWidget(_Keys):
+    """The QWERTY musical-typing keyboard on a transports session."""
+
+    TAG = "nbplay-keyboard"
+    CONFIG_MODEL = KeyboardConfig
+    STATUS_MODEL = KeyboardStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "upper_octave": "upperOctave",
+        "lower_octave": "lowerOctave",
+        "velocity": "velocity",
+        "sustain_upper": "sustainUpper",
+        "sustain_lower": "sustainLower",
+        "sustain_global": "sustainGlobal",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {"active_notes": "activeNotes", "last_note_event": "lastNoteEvent"}
+
+
+class MidiKeyboardWidget(_Keys):
+    """The Web MIDI keyboard on a transports session; ports and clock are browser-owned."""
+
+    TAG = "nbplay-midi-keyboard"
+    CONFIG_MODEL = MidiKeyboardConfig
+    STATUS_MODEL = MidiKeyboardStatus
+    CONFIG: ClassVar[dict[str, str]] = {"midi_port": "midiPort", "sync_clock": "syncClock", **_ROUTED}
+    STATUS: ClassVar[dict[str, str]] = {
+        "available_midi_ports": "availableMidiPorts",
+        "active_notes": "activeNotes",
+        "last_note_event": "lastNoteEvent",
+        "control_change": "controlChange",
+        "clock_bpm": "clockBpm",
+    }
+
+
+class SettingsWidget(InstrumentWidget):
+    """Audio and MIDI device settings; the browser owns the port list and MIDI monitor."""
+
+    TAG = "nbplay-settings"
+    CONFIG_MODEL = SettingsConfig
+    STATUS_MODEL = SettingsStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "sample_rate": "sampleRate",
+        "channels": "channels",
+        "buffer_size": "bufferSize",
+        "audio_device": "audioDevice",
+        "midi_port": "midiPort",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"available_midi_ports": "availableMidiPorts", "midi_event": "midiEvent"}
+
+
+class MidiOutputWidget(InstrumentWidget):
+    """A Web MIDI output; sends are commands delivered to the owning widget."""
+
+    TAG = "nbplay-midi-output"
+    CONFIG_MODEL = MidiOutputConfig
+    STATUS_MODEL = MidiOutputStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "midi_port": "midiPort",
+        "channel": "channel",
+        "forward_notes": "forwardNotes",
+        "send_clock": "sendClock",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"available_midi_ports": "availableMidiPorts"}
+
+    def _request(self, **message):
+        return self._command("request", message)
+
+    def note_on(self, note, velocity=100):
+        """Send a note-on on the output's channel."""
+        return self._request(kind="note_on", note=_clamp_midi_note(note), velocity=max(1, _clamp_velocity(velocity)))
+
+    def note_off(self, note):
+        """Send a note-off on the output's channel."""
+        return self._request(kind="note_off", note=_clamp_midi_note(note))
+
+    def control_change(self, controller, value):
+        """Send a control change (0-127) on the output's channel."""
+        return self._request(kind="control_change", controller=_clamp_int(controller, 0, 127), value=_clamp_int(value, 0, 127))
+
+    def send_raw(self, data):
+        """Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""
+        data = [_clamp_int(b, 0, 255) for b in data]
+        if not data:
+            raise ValueError("MIDI message must not be empty")
+        return self._request(kind="raw", data=data)
+
+
+class SequencerWidget(InstrumentWidget):
+    """The step sequencer on a transports session.
+
+    Steps are edited through ``voices_data``; play state and the sounding
+    step belong to the browser scheduler.
     """
 
-    steps = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
+    TAG = "nbplay-sequencer"
+    CONFIG_MODEL = SequencerConfig
+    STATUS_MODEL = SequencerStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "voices_data": "voicesData",
+        "num_voices": "numVoices",
+        "length": "length",
+        "measures": "measures",
+        "step_duration": "stepDuration",
+        "time_signature_num": "timeSignatureNum",
+        "time_signature_den": "timeSignatureDen",
+        "bpm": "bpm",
+        "loop_enabled": "loopEnabled",
+        "keyboard_connected": "keyboardConnected",
+        "follow_transport": "followTransport",
+        "swing": "swing",
+        "groove": "groove",
+        "automation_lanes": "automationLanes",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "current_step": "currentStep"}
 
-    def __init__(self, length=16, **kwargs):
-        super().__init__(**kwargs)
-        self._length = length
-        if not self.steps:
-            self.steps = _default_steps(length)
+    def __init__(self, session=None, *, config=None, **kwargs):
+        # An explicit step count without a step duration fills the measures, as in the widget.
+        if config is None and "length" in kwargs and "step_duration" not in kwargs:
+            kwargs["step_duration"] = _step_duration_for_length(
+                kwargs["length"], kwargs.get("measures", 1), kwargs.get("time_signature_num", 4), kwargs.get("time_signature_den", 4)
+            )
+        super().__init__(session, config=config, **kwargs)
 
-    def resize(self, length):
-        """Resize the step list, preserving existing steps where possible.
+    def configure_grid(self, measures=None, step_duration=None):
+        """Set the grid from a measure count and a step duration in beats; the length follows."""
+        fields = {}
+        if measures is not None:
+            fields["measures"] = measures
+        if step_duration is not None:
+            fields["step_duration"] = step_duration
+        self.config.update(**fields)
 
-        Args:
-            length: New step count (truncates or extends with defaults).
-        """
-        length = max(1, int(length))
-        current = [dict(step) for step in self.steps]
-        if len(current) < length:
-            current.extend(_default_steps(length - len(current)))
-        else:
-            current = current[:length]
-        self._length = length
-        self.steps = current
+    @property
+    def steps(self):
+        """Voice 0's steps."""
+        return self.config.voices_data[0]
 
-    def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, probability=100):
-        """Set a step at the given index.
+    @steps.setter
+    def steps(self, value):
+        self.config.voices_data = [list(value), *self.config.voices_data[1:]]
 
-        Args:
-            index: Zero-based step index.
-            note: MIDI note number (0–127).
-            velocity: MIDI velocity (1–127).
-            duration_ticks: Step duration in ticks.
-            active: Whether the step is active.
-            probability: Trigger probability (0–100).
-        """
-        steps = list(self.steps)
-        if 0 <= index < len(steps):
-            steps[index] = {
+    def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100):
+        """Set one step of one voice."""
+        voices = [list(steps) for steps in self.config.voices_data]
+        if 0 <= voice < len(voices) and 0 <= index < len(voices[voice]):
+            voices[voice][index] = {
                 "note": note,
                 "velocity": velocity,
                 "duration_ticks": duration_ticks,
                 "active": active,
-                "probability": max(0, min(100, float(probability))),
+                "probability": probability,
             }
-            self.steps = steps
-
-    def toggle_step(self, index):
-        """Toggle the active state of a step.
-
-        Args:
-            index: Zero-based step index.
-        """
-        steps = list(self.steps)
-        if 0 <= index < len(steps):
-            steps[index] = {**steps[index], "active": not steps[index]["active"]}
-            self.steps = steps
-
-    def clear(self):
-        """Deactivate all steps."""
-        self.steps = [{**s, "active": False} for s in self.steps]
-
-    def to_pattern(self, loop_enabled=True):
-        """Build a Rust ``Pattern`` from the current state.
-
-        Args:
-            loop_enabled: Whether the pattern should loop.
-
-        Returns:
-            A new ``nbplay.Pattern`` instance.
-        """
-        from nbplay import Pattern as RustPattern, Step as RustStep
-
-        p = RustPattern(len(self.steps))
-        for i, s in enumerate(self.steps):
-            step = RustStep(s["note"], s["velocity"], s.get("duration_ticks", 1))
-            step.active = s.get("active", False)
-            p.set_step(i, step)
-        p.loop_enabled = loop_enabled
-        return p
-
-    def __repr__(self):
-        active = sum(1 for s in self.steps if s["active"])
-        return f"NoteComposer(length={len(self.steps)}, active={active})"
-
-
-class SequencerWidget(_Themed, anywidget.AnyWidget):
-    """Step sequencer widget with a grid-based pattern editor.
-
-    Supports monophonic (``num_voices=1``) and polyphonic
-    (``num_voices=N``) modes. Internally each voice is a
-    ``NoteComposer``; the ``steps`` property aliases ``voices[0].steps``.
-
-    Args:
-        num_voices: Number of voices (1 = monophonic, N = polyphonic).
-        length: Number of steps.
-    """
-
-    _esm = _STATIC / "sequencer.js"
-    _css = _STATIC / "nbplay.css"
-
-    # Timing / transport (the "SequencerBase" concerns)
-    length = traitlets.Int(16).tag(sync=True)
-    measures = traitlets.Int(1).tag(sync=True)
-    time_signature_num = traitlets.Int(4).tag(sync=True)
-    time_signature_den = traitlets.Int(4).tag(sync=True)
-    bpm = traitlets.Float(120.0).tag(sync=True)
-    step_duration = traitlets.Float(0.25).tag(sync=True)
-    swing = traitlets.Float(0.0).tag(sync=True)
-    groove = traitlets.List(trait=traitlets.Float(), default_value=[]).tag(sync=True)
-    automation_lanes = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-    current_step = traitlets.Int(-1).tag(sync=True)
-    loop_enabled = traitlets.Bool(True).tag(sync=True)
-    # When false the sequencer ignores transport play (its own play button
-    # still works), so pattern clips on its lane can drive the track instead.
-    follow_transport = traitlets.Bool(True).tag(sync=True)
-    num_voices = traitlets.Int(1).tag(sync=True)
-
-    # Session routing (set by Session to route audio through mixer)
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
-
-    # Keyboard integration — set by KeyboardWidget.connect_sequencer()
-    keyboard_connected = traitlets.Bool(False).tag(sync=True)
-
-    # All voices' step data, synced to browser as list-of-lists.
-    # voices_data[i] == composers[i].steps
-    voices_data = traitlets.List(
-        trait=traitlets.List(trait=traitlets.Dict()),
-        default_value=[],
-    ).tag(sync=True)
-
-    def __init__(self, **kwargs):
-        num_voices = kwargs.pop("num_voices", 1)
-        explicit_length = "length" in kwargs
-        explicit_step_duration = "step_duration" in kwargs
-        length = kwargs.get("length", 16)
-        if explicit_length and not explicit_step_duration:
-            kwargs["step_duration"] = _step_duration_for_length(
-                length,
-                kwargs.get("measures", 1),
-                kwargs.get("time_signature_num", 4),
-                kwargs.get("time_signature_den", 4),
-            )
-        super().__init__(num_voices=num_voices, **kwargs)
-        self._composers = [NoteComposer(length=length) for _ in range(num_voices)]
-        self._syncing = False
-        self._configuring_grid = False
-        for i, c in enumerate(self._composers):
-            c.observe(self._on_composer_change, names=["steps"])
-        self.observe(self._on_voices_data_change, names=["voices_data"])
-        self.observe(self._on_num_voices_change, names=["num_voices"])
-        self.observe(self._on_length_change, names=["length"])
-        self.observe(
-            self._on_grid_config_change,
-            names=["measures", "step_duration", "time_signature_num", "time_signature_den"],
-        )
-        self._sync_voices_data()
-
-    @traitlets.validate("swing")
-    def _validate_swing(self, proposal):
-        return max(0.0, min(100.0, float(proposal["value"])))
-
-    @traitlets.validate("groove")
-    def _validate_groove(self, proposal):
-        return [max(-50.0, min(50.0, float(v))) for v in proposal["value"]]
-
-    @traitlets.validate("automation_lanes")
-    def _validate_automation_lanes(self, proposal):
-        lanes = []
-        for lane in proposal["value"]:
-            if not isinstance(lane, dict):
-                continue
-            trait = str(lane.get("trait", "")).strip()
-            if not trait or not all(ch.isalnum() or ch == "_" for ch in trait):
-                continue
-            points = []
-            for point in lane.get("points", []):
-                if not isinstance(point, dict):
-                    continue
-                try:
-                    step = max(0, int(point["step"]))
-                    value = float(point["value"])
-                except (KeyError, TypeError, ValueError):
-                    continue
-                points.append({"step": step, "value": value})
-            if points:
-                lanes.append({"trait": trait, "points": sorted(points, key=lambda p: p["step"])})
-        return lanes
-
-    def _on_composer_change(self, change):
-        """Keep voices_data in sync when any composer's steps change."""
-        if not self._syncing:
-            self._syncing = True
-            try:
-                self._sync_voices_data()
-            finally:
-                self._syncing = False
-
-    def _on_voices_data_change(self, change):
-        """When voices_data is set from the browser, update composers."""
-        if not self._syncing:
-            self._syncing = True
-            try:
-                for i, c in enumerate(self._composers):
-                    if i < len(self.voices_data):
-                        c.steps = list(self.voices_data[i])
-                if self.voices_data and len(self.voices_data[0]) != self.length:
-                    self.length = len(self.voices_data[0])
-            finally:
-                self._syncing = False
-
-    def _sync_voices_data(self):
-        """Push all composer step-lists into the synced voices_data trait."""
-        self.voices_data = [list(c.steps) for c in self._composers]
-
-    def _measure_beats(self):
-        return _measure_beats(self.time_signature_num, self.time_signature_den)
-
-    def _configured_length(self):
-        step_duration = max(0.001, float(self.step_duration))
-        measures = max(1, int(self.measures))
-        return max(1, round((measures * self._measure_beats()) / step_duration))
-
-    def _resize_composers(self, length):
-        for composer in self._composers:
-            composer.resize(length)
-        self._sync_voices_data()
-
-    def _on_num_voices_change(self, change):
-        """Grow or shrink the composers so every voice has an editor behind it."""
-        count = max(1, int(change["new"]))
-        if count != change["new"]:
-            self.num_voices = count
-            return
-        if count == len(self._composers):
-            return
-        while len(self._composers) < count:
-            composer = NoteComposer(length=self.length)
-            composer.observe(self._on_composer_change, names=["steps"])
-            self._composers.append(composer)
-        del self._composers[count:]
-        self._sync_voices_data()
-
-    def _on_length_change(self, change):
-        length = max(1, int(change["new"]))
-        if length != change["new"]:
-            self.length = length
-            return
-        self._resize_composers(length)
-
-    def _on_grid_config_change(self, change):
-        if self._configuring_grid:
-            return
-        self.configure_grid()
-
-    def configure_grid(self, measures=None, step_duration=None):
-        """Configure pattern length from measure count and step duration.
-
-        ``step_duration`` is in quarter-note beats. In 4/4, ``0.5``
-        gives eighth-notes and ``0.25`` gives sixteenth-notes.
-
-        Args:
-            measures: Number of measures (bars).
-            step_duration: Step duration in quarter-note beats.
-        """
-        self._configuring_grid = True
-        try:
-            if measures is not None:
-                self.measures = max(1, int(measures))
-            if step_duration is not None:
-                self.step_duration = max(0.001, float(step_duration))
-        finally:
-            self._configuring_grid = False
-
-        length = self._configured_length()
-        if self.length != length:
-            self.length = length
-        else:
-            self._resize_composers(length)
-
-    #  Voice accessors
-
-    @property
-    def composers(self):
-        """List of ``NoteComposer`` objects, one per voice."""
-        return list(self._composers)
-
-    @property
-    def voices(self):
-        """Alias for ``composers``."""
-        return self.composers
-
-    #  Backward-compatible steps property (voice 0)
-
-    @property
-    def steps(self):
-        """Steps for voice 0 (backward-compatible with monophonic API)."""
-        return self._composers[0].steps
-
-    @steps.setter
-    def steps(self, value):
-        self._composers[0].steps = value
-
-    #  Step manipulation (voice-aware)
-
-    def set_step(self, index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100):
-        """Set a step at the given index on the given voice.
-
-        Args:
-            index: Zero-based step index.
-            note: MIDI note number (0–127).
-            velocity: MIDI velocity (1–127).
-            duration_ticks: Step duration in ticks.
-            active: Whether the step is active.
-            voice: Voice index (0-based).
-            probability: Trigger probability (0–100).
-        """
-        if 0 <= voice < len(self._composers):
-            self._composers[voice].set_step(index, note, velocity, duration_ticks, active, probability)
+            self.config.voices_data = voices
 
     def toggle_step(self, index, voice=0):
-        """Toggle the active state of a step on the given voice.
-
-        Args:
-            index: Zero-based step index.
-            voice: Voice index (0-based).
-        """
-        if 0 <= voice < len(self._composers):
-            self._composers[voice].toggle_step(index)
+        """Flip one step's active state."""
+        voices = [list(steps) for steps in self.config.voices_data]
+        if 0 <= voice < len(voices) and 0 <= index < len(voices[voice]):
+            voices[voice][index] = {**voices[voice][index], "active": not voices[voice][index]["active"]}
+            self.config.voices_data = voices
 
     def clear(self):
-        """Deactivate all steps across all voices."""
-        for c in self._composers:
-            c.clear()
+        """Deactivate every step."""
+        self.config.voices_data = [[{**step, "active": False} for step in steps] for steps in self.config.voices_data]
+
+    def to_pattern(self, voice=0):
+        """A Rust ``Pattern`` of one voice, or ``None`` when ``voice`` is out of range."""
+        from nbplay import Pattern, Step
+
+        if not 0 <= voice < len(self.config.voices_data):
+            return None
+        steps = self.config.voices_data[voice]
+        pattern = Pattern(len(steps))
+        for index, data in enumerate(steps):
+            step = Step(data["note"], data["velocity"], data["duration_ticks"])
+            step.active = data["active"]
+            pattern.set_step(index, step)
+        pattern.loop_enabled = self.config.loop_enabled
+        return pattern
+
+    def to_step_sequencer(self, channel=0, voice=0):
+        """A Rust ``StepSequencer`` of one voice on a MIDI channel, or ``None`` when ``voice`` is out of range."""
+        from nbplay import StepSequencer
+
+        pattern = self.to_pattern(voice)
+        if pattern is None:
+            return None
+        sequencer = StepSequencer(pattern, channel)
+        sequencer.step_duration = self.config.step_duration
+        return sequencer
 
     def to_midi(self, path=None, name="Sequencer"):
-        """Export the pattern as a ``mido.MidiFile`` (written to ``path`` if given).
-
-        Every voice's active steps become notes; step index times
-        ``step_duration`` gives the beat, ``duration_ticks`` the length. The
-        file carries the sequencer's BPM and time signature.
-        """
+        """The pattern as a ``mido.MidiFile``, written to ``path`` when given."""
         from nbplay.midi import build_midi, steps_to_events
 
+        config = self.config
         midi = build_midi(
-            [{"name": name, "events": steps_to_events(self.voices_data, self.step_duration)}],
-            bpm=self.bpm,
-            time_signature=(self.time_signature_num, self.time_signature_den),
+            [{"name": name, "events": steps_to_events(config.voices_data, config.step_duration)}],
+            bpm=config.bpm,
+            time_signature=(config.time_signature_num, config.time_signature_den),
         )
         if path is not None:
             midi.save(os.fspath(path))
         return midi
 
     def load_midi(self, source, track=None, step_duration=None, max_voices=8):
-        """Replace the pattern with notes from a MIDI file.
-
-        ``track`` picks one track by index; by default every track with
-        notes is merged. Notes are quantized to ``step_duration`` (defaults
-        to the current grid), overlapping notes go to separate voices up to
-        ``max_voices``, and the grid grows to fit the last note. The file's
-        tempo is applied to ``bpm``. Returns self.
-        """
+        """Replace the pattern with the notes of a MIDI file; see ``SequencerWidget.load_midi``."""
         from nbplay.midi import events_to_voices, read_midi
 
         data = read_midi(source)
         tracks = data["tracks"]
         if track is not None:
-            if track < 0 or track >= len(tracks):
+            if not 0 <= track < len(tracks):
                 raise IndexError(f"MIDI track index out of range: {track}")
             tracks = [tracks[track]]
         events = [event for item in tracks for event in item["events"]]
-        step = self.step_duration if step_duration is None else float(step_duration)
+        step = self.config.step_duration if step_duration is None else float(step_duration)
         voices, length = events_to_voices(events, step, max_voices=max_voices)
-        self.bpm = data["bpm"]
-        self.step_duration = step
-        self.num_voices = len(voices)
-        self.length = length
-        self.voices_data = voices
+        self.config.update(bpm=data["bpm"], step_duration=step, num_voices=len(voices), length=length, voices_data=voices)
         return self
 
-    def to_pattern(self, voice=0):
-        """Build a Rust ``Pattern`` from the given voice.
+    def play(self):
+        """Start playback in the owning widget (the session clock when shared)."""
+        return self._command("is_playing", True)
 
-        Args:
-            voice: Voice index (0-based).
-
-        Returns:
-            A ``nbplay.Pattern``, or ``None`` if voice is out of range.
-        """
-        if 0 <= voice < len(self._composers):
-            return self._composers[voice].to_pattern(loop_enabled=self.loop_enabled)
-        return None
-
-    def to_step_sequencer(self, channel=0, voice=0):
-        """Build a Rust ``StepSequencer`` from the given voice.
-
-        Args:
-            channel: MIDI channel.
-            voice: Voice index (0-based).
-
-        Returns:
-            A ``nbplay.StepSequencer``, or ``None`` if voice is out of range.
-        """
-        from nbplay import StepSequencer as RustStepSequencer
-
-        pattern = self.to_pattern(voice=voice)
-        if pattern is None:
-            return None
-        seq = RustStepSequencer(pattern, channel)
-        seq.step_duration = self.step_duration
-        return seq
+    def stop(self):
+        """Stop playback in the owning widget."""
+        return self._command("is_playing", False)
 
 
-class SamplerWidget(_Themed, anywidget.AnyWidget):
-    """Sampler widget with waveform display, envelope, and trigger pads.
+class SamplerWidget(InstrumentWidget):
+    """The sampler on a transports session.
 
-    Sample data is synced as binary Float32Array bytes for
-    waveform visualisation. Envelope parameters are synced
-    as individual traits.
+    Sample PCM travels as bytes; zones carry their own bytes. Capturing a
+    browser-side clip is a command the owning widget decodes.
     """
 
-    _esm = _STATIC / "sampler.js"
-    _css = _STATIC / "nbplay.css"
+    TAG = "nbplay-sampler"
+    CONFIG_MODEL = SamplerConfig
+    STATUS_MODEL = SamplerStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "sample_name": "sampleName",
+        "sample_rate": "sampleRate",
+        "sample_length": "sampleLength",
+        "root_note": "rootNote",
+        "waveform": "waveform",
+        "sample_data": "sampleData",
+        "attack": "attack",
+        "decay": "decay",
+        "sustain": "sustain",
+        "release": "release",
+        "max_voices": "maxVoices",
+        "pad_count": "padCount",
+        "pad_notes": "padNotes",
+        "pad_velocities": "padVelocities",
+        "pad_actions": "padActions",
+        "sample_slices": "sampleSlices",
+        "velocity": "velocity",
+        "velocity_sensitive": "velocitySensitive",
+        "zones": "zones",
+        **_ROUTED,
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "active_pads": "activePads",
+        "last_note_event": "lastNoteEvent",
+        "last_pad_event": "lastPadEvent",
+    }
 
-    # Sample info
-    sample_name = traitlets.Unicode("(no sample)").tag(sync=True)
-    sample_rate = traitlets.Int(44100).tag(sync=True)
-    root_note = traitlets.Int(69).tag(sync=True)
-    sample_length = traitlets.Int(0).tag(sync=True)
+    def _set_sample_data(self, samples, **fields):
+        self.config.update(
+            sample_length=len(samples), sample_data=_pack_float32(samples), waveform=_pack_float32(_decimate_samples(samples)), **fields
+        )
 
-    # Waveform display data (decimated Float32Array)
-    waveform = traitlets.Bytes(b"").tag(sync=True)
-    sample_data = traitlets.Bytes(b"").tag(sync=True)
+    def get_sample_data(self):
+        """The main sample as floats."""
+        return _unpack_float32(self.config.sample_data)
 
-    # Envelope (ADSR)
-    attack = traitlets.Float(0.005).tag(sync=True)
-    decay = traitlets.Float(0.1).tag(sync=True)
-    sustain = traitlets.Float(0.8).tag(sync=True)
-    release = traitlets.Float(0.1).tag(sync=True)
+    def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
+        """Load mono float samples (or float32 bytes) as the main sample."""
+        samples = _unpack_float32(bytes(data)) if isinstance(data, (bytes, bytearray, memoryview)) else list(data)
+        self._set_sample_data(samples, sample_name=name, sample_rate=sample_rate, root_note=_clamp_midi_note(root_note))
+        return self
 
-    # Trigger pad notes (MIDI note numbers)
-    pad_notes = traitlets.List(
-        trait=traitlets.Int(),
-        default_value=_DEFAULT_PAD_NOTES,
-    ).tag(sync=True)
-    pad_velocities = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    pad_actions = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    sample_slices = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    # Multi-sample zones: each maps a note and velocity range to its own PCM
-    # (``data``: little-endian float32 bytes). A matching zone wins over the
-    # main sample when a note plays.
-    zones = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    # Ask the browser to decode audio it holds (a timeline clip URL) into a zone.
-    capture_request = traitlets.Dict(default_value={}).tag(sync=True)
-    pad_count = traitlets.Int(8).tag(sync=True)
-    velocity = traitlets.Int(100).tag(sync=True)
-    velocity_sensitive = traitlets.Bool(True).tag(sync=True)
-    active_pads = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    last_note_event = traitlets.Dict(default_value={}).tag(sync=True)
-    last_pad_event = traitlets.Dict(default_value={}).tag(sync=True)
+    def load_audio_file(self, path, root_note=69, name=None):
+        """Load an audio file (WAV through the stdlib, others through ``soundfile``) as the main sample."""
+        path = pathlib.Path(path)
+        samples, sample_rate = decode_audio_file(path)
+        return self.load_sample(samples, sample_rate=sample_rate, root_note=root_note, name=name or path.name)
 
-    # Polyphony
-    max_voices = traitlets.Int(8).tag(sync=True)
+    def trim_sample(self, start=0, end=None):
+        """Keep the frames in ``[start, end)``."""
+        samples = self.get_sample_data()
+        end = len(samples) if end is None else min(len(samples), int(end))
+        start = max(0, int(start))
+        if end <= start:
+            raise ValueError("trim range must contain at least one frame")
+        self._set_sample_data(samples[start:end])
+        return self
 
-    # Session routing (set by Session to route audio through mixer)
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
+    def normalize_sample(self, target=1.0):
+        """Scale the sample so its peak reaches ``target``."""
+        samples = self.get_sample_data()
+        peak = max((abs(s) for s in samples), default=0.0)
+        if peak:
+            gain = max(0.0, min(1.0, float(target))) / peak
+            self._set_sample_data([s * gain for s in samples])
+        return self
 
-    # Keyboard integration — set by KeyboardWidget.connect_sampler()
-    keyboard_connected = traitlets.Bool(False).tag(sync=True)
+    def reverse_sample(self):
+        """Reverse the sample."""
+        self._set_sample_data(list(reversed(self.get_sample_data())))
+        return self
 
-    def __init__(self, **kwargs):
-        explicit_pad_notes = "pad_notes" in kwargs
-        explicit_pad_count = "pad_count" in kwargs
-        if explicit_pad_notes and not explicit_pad_count:
-            kwargs["pad_count"] = max(1, len(kwargs["pad_notes"]))
-        super().__init__(**kwargs)
-        self._syncing_pads = False
-        self.pad_notes = _resize_pad_notes(self.pad_notes, self.pad_count)
-        self.pad_velocities = _resize_pad_velocities(self.pad_velocities, self.pad_count, self.velocity)
-        self.pad_actions = _normalize_pad_actions(self.pad_actions, self.pad_count, self.pad_notes, self.pad_velocities)
-        self.sample_slices = _normalize_sample_slices(self.sample_slices, self.sample_length)
-        self.zones = _normalize_zones(self.zones)
-        self.observe(self._on_zones_change, names=["zones"])
-        self.observe(self._on_pad_count_change, names=["pad_count"])
-        self.observe(self._on_pad_notes_change, names=["pad_notes"])
-        self.observe(self._on_pad_velocities_change, names=["pad_velocities"])
-        self.observe(self._on_pad_actions_change, names=["pad_actions"])
-        self.observe(self._on_sample_slices_change, names=["sample_slices"])
+    def fade_sample(self, fade_in=0, fade_out=0):
+        """Apply linear fades of the given frame counts."""
+        samples = self.get_sample_data()
+        total = len(samples)
+        fade_in = max(0, min(total, int(fade_in)))
+        fade_out = max(0, min(total, int(fade_out)))
+        for i in range(fade_in):
+            samples[i] *= i / max(1, fade_in - 1)
+        for i in range(fade_out):
+            samples[total - fade_out + i] *= 1.0 - i / max(1, fade_out - 1)
+        self._set_sample_data(samples)
+        return self
 
-    @traitlets.validate("velocity")
-    def _validate_velocity(self, proposal):
-        return _clamp_velocity(proposal["value"])
+    def slice_sample(self, count, start_note=36):
+        """Cut the sample into ``count`` equal slices on ascending notes and put them on the pads."""
+        count = max(1, min(_PAD_MAX_COUNT, int(count)))
+        length = self.config.sample_length
+        if length <= 0:
+            raise ValueError("load a sample before slicing")
+        step = length / count
+        slices = [
+            {
+                "index": i,
+                "note": _clamp_midi_note(start_note + i),
+                "start": int(i * step),
+                "end": length if i == count - 1 else int((i + 1) * step),
+                "label": f"S{i + 1}",
+            }
+            for i in range(count)
+        ]
+        velocity = self.config.velocity
+        self.config.update(
+            sample_slices=slices,
+            pad_count=count,
+            pad_notes=[s["note"] for s in slices],
+            pad_actions=[PadAction(note=s["note"], velocity=velocity, label=s["label"], slice_index=s["index"]).to_dict() for s in slices],
+        )
+        return slices
 
-    def _on_pad_count_change(self, change):
-        if self._syncing_pads:
-            return
-        pad_count = max(1, int(change["new"]))
-        if pad_count != change["new"]:
-            self.pad_count = pad_count
-            return
-        self._syncing_pads = True
-        try:
-            self.pad_notes = _resize_pad_notes(self.pad_notes, pad_count)
-            self.pad_velocities = _resize_pad_velocities(self.pad_velocities, pad_count, self.velocity)
-            self.pad_actions = _normalize_pad_actions(
-                self.pad_actions,
-                pad_count,
-                self.pad_notes,
-                self.pad_velocities,
-                prefer_defaults=True,
-            )
-        finally:
-            self._syncing_pads = False
+    def map_slices_to_pads(self, pads, count=None, start_note=36):
+        """Put the slices on a :class:`PadWidget` (slicing first when needed) and route the pads here."""
+        slices = self.config.sample_slices
+        if count is not None or not slices:
+            slices = self.slice_sample(count or pads.config.rows * pads.config.cols, start_note=start_note)
+        velocity = pads.config.velocity
+        pads.configure_grid_for_actions(
+            notes=[s["note"] for s in slices],
+            actions=[PadAction(note=s["note"], velocity=velocity, label=s.get("label"), slice_index=s["index"]) for s in slices],
+        )
+        if self.config.channel_index >= 0:
+            pads.connect_sampler(self)
+        return pads
 
-    def _on_pad_notes_change(self, change):
-        if self._syncing_pads:
-            return
-        notes = _resize_pad_notes(change["new"], max(1, len(change["new"])))
-        self._syncing_pads = True
-        try:
-            if notes != self.pad_notes:
-                self.pad_notes = notes
-            self.pad_count = len(notes)
-            self.pad_velocities = _resize_pad_velocities(self.pad_velocities, len(notes), self.velocity)
-            self.pad_actions = _normalize_pad_actions(
-                self.pad_actions,
-                len(notes),
-                self.pad_notes,
-                self.pad_velocities,
-                prefer_defaults=True,
-            )
-        finally:
-            self._syncing_pads = False
-
-    def _on_pad_velocities_change(self, change):
-        if self._syncing_pads:
-            return
-        velocities = _resize_pad_velocities(change["new"], self.pad_count, self.velocity)
-        self._syncing_pads = True
-        try:
-            if velocities != self.pad_velocities:
-                self.pad_velocities = velocities
-            self.pad_actions = _normalize_pad_actions(
-                self.pad_actions,
-                self.pad_count,
-                self.pad_notes,
-                self.pad_velocities,
-                prefer_defaults=True,
-            )
-        finally:
-            self._syncing_pads = False
-
-    def _on_pad_actions_change(self, change):
-        if self._syncing_pads:
-            return
-        actions = _normalize_pad_actions(change["new"], self.pad_count, self.pad_notes, self.pad_velocities)
-        self._syncing_pads = True
-        try:
-            if actions != self.pad_actions:
-                self.pad_actions = actions
-        finally:
-            self._syncing_pads = False
-
-    def _on_sample_slices_change(self, change):
-        slices = _normalize_sample_slices(change["new"], self.sample_length)
-        if slices != self.sample_slices:
-            self.sample_slices = slices
-
-    def _on_zones_change(self, change):
-        zones = _normalize_zones(change["new"])
-        if zones != self.zones:
-            self.zones = zones
-
-    # Multi-sample zones
+    def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
+        """Set the pad count and per-pad notes, velocities or actions."""
+        config = self.config
+        if pad_count is None and pad_notes is not None:
+            pad_count = len(pad_notes)
+        if pad_count is not None:
+            config.pad_count = max(1, int(pad_count))
+        if pad_notes is not None:
+            config.pad_notes = list(pad_notes)
+        if pad_velocities is not None:
+            config.pad_velocities = list(pad_velocities)
+        if pad_actions is not None:
+            config.pad_actions = list(pad_actions)
 
     def add_zone(self, data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None):
-        """Add a sample zone covering a note (and velocity) range.
-
-        Args:
-            data: Float samples, or float32 bytes.
-            note_low, note_high: MIDI note range the zone answers to.
-            velocity_low, velocity_high: Velocity range the zone answers to.
-            root_note: Note at which the sample plays unpitched (defaults to
-                ``note_low`` when the range is one note, else 60).
-            sample_rate: Sample rate of ``data``.
-            name: Display name.
-
-        Returns:
-            The zone dict.
-        """
-        if isinstance(data, (bytes, bytearray, memoryview)):
-            packed = bytes(data)
-        else:
-            packed = _pack_float32(list(data))
+        """Add a sample zone covering a note and velocity range; returns the zone."""
+        packed = bytes(data) if isinstance(data, (bytes, bytearray, memoryview)) else _pack_float32(list(data))
         if root_note is None:
             root_note = note_low if note_low == note_high else 60
         zone = _normalize_zone(
             {
-                "name": name or f"Zone {len(self.zones) + 1}",
+                "name": name or f"Zone {len(self.config.zones) + 1}",
                 "note_low": note_low,
                 "note_high": note_high,
                 "velocity_low": velocity_low,
@@ -1026,13 +961,13 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
                 "sample_rate": sample_rate,
                 "data": packed,
             },
-            len(self.zones),
+            len(self.config.zones),
         )
-        self.zones = [*self.zones, zone]
+        self.config.zones = [*self.config.zones, zone]
         return zone
 
     def add_zone_file(self, path, note_low=0, note_high=127, **kwargs):
-        """Add a zone from an audio file (WAV via stdlib, others via ``soundfile``)."""
+        """Add a zone from an audio file (WAV through the stdlib, others through ``soundfile``)."""
         path = pathlib.Path(path)
         samples, sample_rate = decode_audio_file(path)
         kwargs.setdefault("name", path.name)
@@ -1040,465 +975,371 @@ class SamplerWidget(_Themed, anywidget.AnyWidget):
 
     def set_zone(self, index, **fields):
         """Update fields of one zone (range, root note, name); returns the zone."""
-        zones = list(self.zones)
-        zone = {**zones[index], **fields}
-        zones[index] = _normalize_zone(zone, index)
-        self.zones = zones
+        zones = list(self.config.zones)
+        zones[index] = _normalize_zone({**zones[index], **fields}, index)
+        self.config.zones = zones
         return zones[index]
 
     def remove_zone(self, index):
         """Remove the zone at ``index``."""
-        zones = list(self.zones)
+        zones = list(self.config.zones)
         del zones[index]
-        self.zones = zones
+        self.config.zones = zones
 
     def clear_zones(self):
-        self.zones = []
+        self.config.zones = []
 
     def zone_for(self, note, velocity=100):
-        """Return the first zone matching ``note`` and ``velocity``, or None."""
+        """The first zone answering to ``note`` at ``velocity``, or ``None``."""
         note = _clamp_midi_note(note)
         velocity = _clamp_velocity(velocity)
-        for zone in self.zones:
+        for zone in self.config.zones:
             if zone["note_low"] <= note <= zone["note_high"] and zone["velocity_low"] <= velocity <= zone["velocity_high"]:
                 return zone
         return None
 
     def zone_samples(self, index):
-        """Return one zone's PCM as floats."""
-        return _unpack_float32(self.zones[index]["data"])
+        """One zone's PCM as floats."""
+        return _unpack_float32(self.config.zones[index]["data"])
 
     def to_sample_map(self):
-        """Build a Rust ``SampleMap``: zones in order, then the main sample as the fallback."""
+        """A Rust ``SampleMap``: the zones in order, then the main sample as the fallback."""
         from nbplay import AudioSample, SampleMap, SampleMapping
 
         sample_map = SampleMap()
-        for zone in self.zones:
+        for zone in self.config.zones:
             sample = AudioSample(_unpack_float32(zone["data"]), zone["sample_rate"], zone["root_note"])
             sample_map.add_mapping(SampleMapping(sample, zone["note_low"], zone["note_high"], zone["velocity_low"], zone["velocity_high"]))
-        if self.sample_length:
-            sample = AudioSample(self.get_sample_data(), self.sample_rate, self.root_note)
+        if self.config.sample_length:
+            sample = AudioSample(self.get_sample_data(), self.config.sample_rate, self.config.root_note)
             sample_map.add_mapping(SampleMapping(sample, 0, 127, 0, 127))
         return sample_map
 
-    def capture_clip(self, timeline, clip_id, pad=None, note=None, name=None):
-        """Turn a timeline audio clip into a zone, decoded by the browser.
-
-        With ``pad`` (index) or ``note`` the zone answers to that one note
-        and plays unpitched there, so the take sits on a pad; otherwise it
-        covers every note. The clip's trim (``offset``/``duration``) is
-        honoured. The zone appears in ``zones`` once the browser has decoded
-        the audio; both widgets must be rendered in the same page.
-        """
-        clip_id = str(clip_id)
-        clip = next((item for item in timeline.clips if item.get("id") == clip_id), None)
-        if clip is None:
-            raise ValueError(f"clip not found: {clip_id}")
-        if clip.get("kind") == "midi" or not clip.get("audio_url"):
-            raise ValueError(f"clip {clip_id} has no audio in the browser")
-        if pad is not None:
-            note = self.pad_notes[pad]
-        if note is not None:
-            note = _clamp_midi_note(note)
-            note_low = note_high = root_note = note
-        else:
-            note_low, note_high, root_note = 0, 127, self.root_note
-        seconds_per_beat = 60.0 / max(1e-6, float(timeline.bpm))
-        self.capture_request = {
-            "url": clip["audio_url"],
-            "name": name or clip.get("name") or "Take",
-            "note_low": note_low,
-            "note_high": note_high,
-            "root_note": root_note,
-            "offset": float(clip.get("offset", 0.0)) * seconds_per_beat,
-            "duration": float(clip.get("duration", 0.0)) * seconds_per_beat,
-            "nonce": self.capture_request.get("nonce", 0) + 1,
-        }
-        return self.capture_request
-
-    def _set_sample_data(self, samples):
-        self.sample_length = len(samples)
-        self.sample_data = _pack_float32(samples)
-        self.waveform = _pack_float32(_decimate_samples(samples))
-        self.sample_slices = _normalize_sample_slices(self.sample_slices, self.sample_length)
-
-    def get_sample_data(self):
-        """Return decoded mono PCM sample data as floats."""
-        return _unpack_float32(self.sample_data)
-
-    def load_audio_file(self, path, root_note=69, name=None):
-        """Load a local audio file into the sampler.
-
-        WAV uses Python's stdlib. MP3/OGG/other formats
-        require the optional ``soundfile`` package.
-
-        Args:
-            path: Path to the audio file.
-            root_note: MIDI root note for pitch shifting.
-            name: Display name (defaults to filename).
-
-        Returns:
-            Self for chaining.
-
-        Raises:
-            ValueError: If format is unsupported and ``soundfile``
-                is not installed, or if WAV format is invalid.
-        """
-        path = pathlib.Path(path)
-        samples, sample_rate = decode_audio_file(path)
-        self.load_sample(samples, sample_rate=sample_rate, root_note=root_note, name=name or path.name)
-        return self
-
-    def configure_pads(self, pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None):
-        """Configure sampler trigger pads.
-
-        Args:
-            pad_count: Number of pads.
-            pad_notes: MIDI note for each pad.
-            pad_velocities: Velocity for each pad.
-            pad_actions: Action descriptors for each pad.
-        """
-        if pad_notes is not None:
-            notes = _resize_pad_notes(pad_notes, max(1, len(pad_notes)))
-            self.pad_notes = notes
-            if pad_count is None:
-                self.pad_count = len(notes)
-        if pad_velocities is not None:
-            self.pad_velocities = _resize_pad_velocities(pad_velocities, max(1, len(pad_velocities)), self.velocity)
-            if pad_count is None:
-                self.pad_count = len(self.pad_velocities)
-        if pad_actions is not None:
-            count = pad_count or self.pad_count
-            self.pad_actions = _normalize_pad_actions(pad_actions, count, self.pad_notes, self.pad_velocities)
-        if pad_count is not None:
-            self.pad_count = max(1, int(pad_count))
-
-    def load_sample(self, data, sample_rate=44100, root_note=69, name="Sample"):
-        """Load sample PCM data into the widget.
-
-        Args:
-            data: List of float samples.
-            sample_rate: Sample rate in Hz.
-            root_note: MIDI root note for pitch shifting.
-            name: Display name for the sample.
-
-        Returns:
-            Self for chaining.
-        """
-        self.sample_name = name
-        self.sample_rate = sample_rate
-        self.root_note = _clamp_midi_note(root_note)
-        self._set_sample_data(list(data))
-        return self
-
-    def trim_sample(self, start=0, end=None):
-        """Trim sample data to frame range [start, end).
-
-        Args:
-            start: Start frame index.
-            end: End frame index (defaults to sample length).
-
-        Returns:
-            Self for chaining.
-
-        Raises:
-            ValueError: If the trim range is empty.
-        """
-        samples = self.get_sample_data()
-        end = len(samples) if end is None else int(end)
-        start = max(0, int(start))
-        end = min(len(samples), end)
-        if end <= start:
-            raise ValueError("trim range must contain at least one frame")
-        self._set_sample_data(samples[start:end])
-        return self
-
-    def normalize_sample(self, target=1.0):
-        """Scale sample data so peak absolute amplitude reaches target.
-
-        Args:
-            target: Target peak amplitude (0.0–1.0).
-
-        Returns:
-            Self for chaining.
-        """
-        samples = self.get_sample_data()
-        peak = max((abs(s) for s in samples), default=0.0)
-        if peak == 0.0:
-            return self
-        gain = max(0.0, min(1.0, float(target))) / peak
-        self._set_sample_data([s * gain for s in samples])
-        return self
-
-    def reverse_sample(self):
-        """Reverse sample data in place.
-
-        Returns:
-            Self for chaining.
-        """
-        self._set_sample_data(list(reversed(self.get_sample_data())))
-        return self
-
-    def fade_sample(self, fade_in=0, fade_out=0):
-        """Apply linear fade-in/fade-out in sample frames.
-
-        Args:
-            fade_in: Number of frames to fade in.
-            fade_out: Number of frames to fade out.
-
-        Returns:
-            Self for chaining.
-        """
-        samples = self.get_sample_data()
-        total = len(samples)
-        fade_in = max(0, min(total, int(fade_in)))
-        fade_out = max(0, min(total, int(fade_out)))
-        edited = list(samples)
-        for i in range(fade_in):
-            edited[i] *= i / max(1, fade_in - 1)
-        for i in range(fade_out):
-            idx = total - fade_out + i
-            edited[idx] *= 1.0 - i / max(1, fade_out - 1)
-        self._set_sample_data(edited)
-        return self
-
-    def slice_sample(self, count, start_note=36):
-        """Create equal sample slices mapped to ascending notes.
-
-        Args:
-            count: Number of slices.
-            start_note: MIDI note for the first slice.
-
-        Returns:
-            List of slice dicts with ``index``, ``note``, ``start``, ``end``.
-
-        Raises:
-            ValueError: If no sample is loaded.
-        """
-        count = max(1, min(_PAD_MAX_COUNT, int(count)))
-        if self.sample_length <= 0:
-            raise ValueError("load a sample before slicing")
-        step = self.sample_length / count
-        slices = []
-        for i in range(count):
-            start = int(i * step)
-            end = self.sample_length if i == count - 1 else int((i + 1) * step)
-            note = _clamp_midi_note(start_note + i)
-            slices.append({"index": i, "note": note, "start": start, "end": end, "label": f"S{i + 1}"})
-        self.sample_slices = slices
-        self.configure_pads(
-            pad_count=count,
-            pad_notes=[s["note"] for s in slices],
-            pad_actions=[PadAction(note=s["note"], velocity=self.velocity, label=s["label"], slice_index=s["index"]).to_dict() for s in slices],
-        )
-        return slices
-
-    def map_slices_to_pads(self, pads, count=None, start_note=36):
-        """Map sampler slices to a ``PadWidget``.
-
-        Args:
-            pads: Target ``PadWidget``.
-            count: Number of slices (defaults to pad count).
-            start_note: MIDI note for the first slice.
-
-        Returns:
-            The ``PadWidget`` with notes and actions configured.
-        """
-        slices = self.sample_slices
-        if count is not None or not slices:
-            slices = self.slice_sample(count or pads.rows * pads.cols, start_note=start_note)
-        notes = [s["note"] for s in slices]
-        actions = [PadAction(note=s["note"], velocity=pads.velocity, label=s.get("label"), slice_index=s["index"]).to_dict() for s in slices]
-        pads.configure_grid_for_actions(notes=notes, actions=actions)
-        if self.channel_index >= 0:
-            pads.connect_sampler(self)
-        return pads
-
     def to_sampler(self):
-        """Build a Rust ``Sampler`` from the current widget state.
-
-        Returns:
-            A new ``nbplay.Sampler`` instance.
-        """
+        """A Rust ``Sampler`` with the main sample, envelope and polyphony."""
         from nbplay import AudioSample, Envelope, Sampler
 
-        sample = AudioSample(self.get_sample_data(), self.sample_rate, self.root_note)
-        env = Envelope(self.attack, self.decay, self.sustain, self.release)
-        s = Sampler(sample, self.sample_rate, self.max_voices)
-        s.set_envelope(env)
-        return s
+        config = self.config
+        sampler = Sampler(AudioSample(self.get_sample_data(), config.sample_rate, config.root_note), config.sample_rate, config.max_voices)
+        sampler.set_envelope(Envelope(config.attack, config.decay, config.sustain, config.release))
+        return sampler
 
+    def capture_clip(self, timeline, clip_id, pad=None, note=None, name=None):
+        """Turn a timeline audio clip into a zone, decoded by the owning browser widget.
 
-class TransportWidget(_Themed, anywidget.AnyWidget):
-    """Global transport controls: play/stop, BPM, time signature, bar/beat.
+        With ``pad`` (index) or ``note`` the zone answers to that one note and
+        plays unpitched there; otherwise it covers every note. The clip's
+        trim (``offset`` and ``duration``, in beats) is honoured.
+        """
+        clip_id = str(clip_id)
+        clip = next((item for item in timeline.config.clips if item["id"] == clip_id), None)
+        if clip is None:
+            raise ValueError(f"clip not found: {clip_id}")
+        if clip["kind"] == "midi" or not clip["audio_url"]:
+            raise ValueError(f"clip {clip_id} has no audio in the browser")
+        if pad is not None:
+            note = self.config.pad_notes[pad]
+        seconds_per_beat = 60.0 / max(1e-6, float(timeline.config.bpm))
+        return self.capture(
+            clip["audio_url"],
+            name=name or clip["name"] or "Take",
+            note=note,
+            offset=clip["offset"] * seconds_per_beat,
+            duration=clip["duration"] * seconds_per_beat,
+        )
 
-    Used as the master clock for a ``Session``. In the browser the transport
-    drives the shared session clock on ``globalThis.__nbplay[session_id]``;
-    every sequencer and timeline with the same ``session_id`` follows that
-    clock directly, so play, seek, and tempo changes never wait on a kernel
-    round-trip. ``is_playing``, ``is_recording``, and ``current_beat`` are
-    status written by the browser clock; :meth:`play`, :meth:`stop`,
-    :meth:`seek`, and :meth:`record` move the clock through the ``command``
-    trait, and assigning those traits from Python issues the same command.
-    """
+    def capture(self, url, *, name="Take", note=None, offset=0.0, duration=0.0):
+        """Ask the owning widget to decode a browser-side audio URL into a zone.
 
-    _esm = _STATIC / "transport.js"
-    _css = _STATIC / "nbplay.css"
-
-    # Session routing (set by Session so the browser clock is shared)
-    session_id = traitlets.Unicode("").tag(sync=True)
-
-    # Transport state
-    bpm = traitlets.Float(120.0).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-    is_recording = traitlets.Bool(False).tag(sync=True)
-
-    # Time signature
-    time_signature_num = traitlets.Int(4).tag(sync=True)
-    time_signature_den = traitlets.Int(4).tag(sync=True)
-
-    # Position (updated by browser-side clock)
-    bar_number = traitlets.Int(0).tag(sync=True)
-    beat_in_bar = traitlets.Int(0).tag(sync=True)
-    current_beat = traitlets.Float(0.0).tag(sync=True)
-
-    # Loop
-    loop_enabled = traitlets.Bool(False).tag(sync=True)
-    loop_start_bar = traitlets.Int(0).tag(sync=True)
-    loop_end_bar = traitlets.Int(4).tag(sync=True)
-    # Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) in the browser bump these;
-    # a Session answers by undoing or redoing its history.
-    undo_request = traitlets.Int(0).tag(sync=True)
-    redo_request = traitlets.Int(0).tag(sync=True)
-    # Kernel -> browser clock commands: ``{"action", ..., "nonce"}``. Status
-    # traits are never commands, so a delayed echo cannot move the clock.
-    command = traitlets.Dict({}).tag(sync=True)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._status_write = False
-        self.observe(self._on_status_assigned, names=["is_playing", "is_recording", "current_beat"])
-
-    def _command(self, action, **fields):
-        self.command = {"action": action, **fields, "nonce": self.command.get("nonce", 0) + 1}
-
-    def _set_status(self, **values):
-        self._status_write = True
-        try:
-            for name, value in values.items():
-                setattr(self, name, value)
-        finally:
-            self._status_write = False
-
-    def _on_status_assigned(self, change):
-        # Browser writes arrive under the property lock; links and our own
-        # status writes set the flag. Anything else is user code assigning
-        # the trait, which keeps working by turning into a command.
-        if self._status_write or change["name"] in self._property_lock:
-            return
-        if change["name"] == "is_playing":
-            self._command("play" if change["new"] else "stop")
-        elif change["name"] == "is_recording":
-            self._command("record", on=bool(change["new"]))
+        With ``note`` the zone answers to that one note and plays unpitched
+        there; otherwise it covers every note at the sampler's root note.
+        ``offset`` and ``duration`` are seconds into the source.
+        """
+        if note is not None:
+            note = _clamp_midi_note(note)
+            low, high, root = note, note, note
         else:
-            self._command("seek", beat=float(change["new"]))
-
-    def play(self):
-        """Start the browser clock (and mark the status as playing)."""
-        self._command("play")
-        self._set_status(is_playing=True)
-
-    def stop(self):
-        """Stop the browser clock, keeping the playhead position."""
-        self._command("stop")
-        self._set_status(is_playing=False)
-
-    def seek(self, beat):
-        """Move the playhead to ``beat`` (quarter-note units)."""
-        beat = max(0.0, float(beat))
-        self._command("seek", beat=beat)
-        bpb = max(1, int(self.time_signature_num))
-        self._set_status(current_beat=beat, bar_number=int(beat // bpb), beat_in_bar=int(beat % bpb))
-
-    def record(self, on=True):
-        """Arm (or disarm) recording; arming also starts the clock."""
-        self._command("record", on=bool(on))
-        self._set_status(is_recording=bool(on), is_playing=self.is_playing or bool(on))
+            low, high, root = 0, 127, self.config.root_note
+        return self._command(
+            "request",
+            {
+                "url": str(url),
+                "name": name,
+                "note_low": low,
+                "note_high": high,
+                "root_note": root,
+                "offset": float(offset),
+                "duration": float(duration),
+            },
+        )
 
 
-class TimelineWidget(_Themed, anywidget.AnyWidget):
-    """Multi-track clip timeline with browser recording controls.
+class LauncherWidget(InstrumentWidget):
+    """The clip launcher on a transports session.
 
-    Clips are synced as JSON metadata. Browser-recorded audio is kept
-    as an object URL in the frontend for immediate playback. Use
-    :meth:`export_clip` / :meth:`write_exported_clip` to pull a clip's
-    audio bytes into Python and :meth:`import_clip` to push audio back.
-
-    Every armed lane records at once against the shared session clock.
-    A lane's ``input`` is ``"microphone"`` (browser microphone),
-    ``"channel"`` (a tap on the lane's mixer channel, which bounces an
-    instrument track to audio), or ``"midi"`` (note events from the
-    keyboard, MIDI keyboard, and pad widgets, stored as a MIDI clip that
-    plays back through the lane's sampler or a built-in oscillator).
+    Slots hold step patterns in the sequencer's ``voices_data`` shape; the
+    browser owns play and slot state, and launches are commands.
     """
 
-    _esm = _STATIC / "timeline.js"
-    _css = _STATIC / "nbplay.css"
+    TAG = "nbplay-launcher"
+    CONFIG_MODEL = LauncherConfig
+    STATUS_MODEL = LauncherStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "tracks": "tracks",
+        "scenes": "scenes",
+        "slots": "slots",
+        "quantize": "quantize",
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "selected_slot": "selectedSlot",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "is_playing": "isPlaying",
+        "active_slots": "activeSlots",
+        "queued_slots": "queuedSlots",
+    }
 
-    session_id = traitlets.Unicode("").tag(sync=True)
-    bpm = traitlets.Float(120.0).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-    is_recording = traitlets.Bool(False).tag(sync=True)
-    recording_track = traitlets.Int(-1).tag(sync=True)
-    recording_tracks = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    recording_error = traitlets.Unicode("").tag(sync=True)
+    def add_track(self, name="Track", channel_index=None):
+        """Append a track row and return its index."""
+        index = len(self.config.tracks)
+        self.config.tracks = [*self.config.tracks, {"name": name, "channel_index": index if channel_index is None else channel_index}]
+        return index
 
-    time_signature_num = traitlets.Int(4).tag(sync=True)
-    time_signature_den = traitlets.Int(4).tag(sync=True)
-    length = traitlets.Float(16.0).tag(sync=True)
-    current_beat = traitlets.Float(0.0).tag(sync=True)
-    count_in_bars = traitlets.Float(0.0).tag(sync=True)
-    recording_countdown_beats = traitlets.Float(0.0).tag(sync=True)
-    auto_extend_recording = traitlets.Bool(True).tag(sync=True)
-    recording_extend_bars = traitlets.Float(8.0).tag(sync=True)
+    def remove_track(self, index):
+        """Remove a track row, dropping its slots and shifting later rows."""
+        index = int(index)
+        tracks = self.config.tracks
+        if not 0 <= index < len(tracks):
+            return
+        removed_channel = tracks[index]["channel_index"]
+        next_tracks = []
+        for i, track in enumerate(tracks):
+            if i == index:
+                continue
+            item = dict(track)
+            if removed_channel >= 0 and item["channel_index"] > removed_channel:
+                item["channel_index"] -= 1
+            next_tracks.append(item)
+        slots = [
+            {**slot, "track_index": slot["track_index"] - 1} if slot["track_index"] > index else slot
+            for slot in self.config.slots
+            if slot["track_index"] != index
+        ]
+        fields = {"tracks": next_tracks, "slots": slots}
+        if self.config.selected_slot.get("track_index") == index:
+            fields["selected_slot"] = {}
+        self.config.update(**fields)
 
-    tracks = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    clips = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    selected_clip_id = traitlets.Unicode("").tag(sync=True)
-    recorded_clip = traitlets.Dict(default_value={}).tag(sync=True)
+    def add_scene(self, name=None):
+        """Append a scene column and return its index."""
+        index = len(self.config.scenes)
+        self.config.scenes = [*self.config.scenes, str(name) if name is not None else f"Scene {index + 1}"]
+        return index
 
-    # View: horizontal zoom in pixels per beat (0 fits the widget width)
-    pixels_per_beat = traitlets.Float(0.0).tag(sync=True)
+    def _check_indices(self, track_index, scene_index=None):
+        track_index = int(track_index)
+        if not 0 <= track_index < len(self.config.tracks):
+            raise IndexError(f"track index out of range: {track_index}")
+        if scene_index is None:
+            return track_index, None
+        scene_index = int(scene_index)
+        if not 0 <= scene_index < len(self.config.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        return track_index, scene_index
 
-    # Clip audio transfer. ``export_clip_id`` asks the browser for a clip's
-    # bytes; they arrive in ``exported_clip`` / ``exported_clip_data``.
-    # ``import_clip_request`` / ``import_clip_data`` push bytes to the
-    # browser, which attaches a playable URL to the matching clip.
-    export_clip_id = traitlets.Unicode("").tag(sync=True)
-    exported_clip = traitlets.Dict(default_value={}).tag(sync=True)
-    exported_clip_data = traitlets.Bytes(b"").tag(sync=True)
-    import_clip_request = traitlets.Dict(default_value={}).tag(sync=True)
-    import_clip_data = traitlets.Bytes(b"").tag(sync=True)
+    def _find_slot(self, track_index, scene_index):
+        for position, slot in enumerate(self.config.slots):
+            if slot["track_index"] == track_index and slot["scene_index"] == scene_index:
+                return position
+        return -1
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None):
+        """Fill a slot with a pattern and return it.
+
+        ``pattern`` may be a :class:`SequencerWidget` (whose grid, swing and
+        groove fill the unspecified arguments), a list of step dicts, or a
+        list of voices.
+        """
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        if isinstance(pattern, SequencerWidget):
+            config = pattern.config
+            step_duration = config.step_duration if step_duration is None else step_duration
+            swing = config.swing if swing == 0.0 else swing
+            groove = list(config.groove) if groove is None else groove
+            pattern = config.voices_data
+        slot = _normalize_launcher_slot(
+            {
+                "track_index": track_index,
+                "scene_index": scene_index,
+                "name": name if name is not None else f"{self.config.tracks[track_index]['name']} {scene_index + 1}",
+                "voices_data": _slot_voices(pattern),
+                "step_duration": 0.25 if step_duration is None else step_duration,
+                "swing": swing,
+                "groove": groove or [],
+            }
+        )
+        slots = list(self.config.slots)
+        position = self._find_slot(track_index, scene_index)
+        if position >= 0:
+            slots[position] = slot
+        else:
+            slots.append(slot)
+        self.config.slots = slots
+        return slot
+
+    def get_slot(self, track_index, scene_index):
+        """The slot at ``(track_index, scene_index)``, or ``None``."""
+        position = self._find_slot(int(track_index), int(scene_index))
+        return dict(self.config.slots[position]) if position >= 0 else None
+
+    def clear_slot(self, track_index, scene_index):
+        """Empty a slot."""
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        slots = [s for s in self.config.slots if not (s["track_index"] == track_index and s["scene_index"] == scene_index)]
+        fields = {"slots": slots}
+        if self.config.selected_slot == {"track_index": track_index, "scene_index": scene_index}:
+            fields["selected_slot"] = {}
+        self.config.update(**fields)
+
+    def bind_slot_editor(self, sequencer):
+        """Edit whichever slot is selected in ``sequencer`` (a :class:`SequencerWidget`); returns an unbinder.
+
+        Selecting a slot, in the browser or by assigning ``config.selected_slot``,
+        loads it into the sequencer; the sequencer's step, grid, swing and
+        groove edits write back into that slot.
+        """
+        state = {"loading": False}
+
+        def load(*_):
+            selected = self.config.selected_slot
+            if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
+                return
+            state["loading"] = True
+            try:
+                self.slot_to_sequencer(selected["track_index"], selected["scene_index"], sequencer)
+            finally:
+                state["loading"] = False
+
+        def write_back(*_):
+            selected = self.config.selected_slot
+            if state["loading"] or not selected:
+                return
+            current = self.get_slot(selected["track_index"], selected["scene_index"])
+            if current is not None:
+                self.set_slot(selected["track_index"], selected["scene_index"], sequencer, name=current["name"])
+
+        stop_select = self.on_change(load, names="selected_slot")
+        stop_edit = sequencer.on_change(write_back, names=("voices_data", "step_duration", "swing", "groove"))
+        load()
+
+        def unbind():
+            stop_select()
+            stop_edit()
+
+        return unbind
+
+    def slot_to_sequencer(self, track_index, scene_index, sequencer):
+        """Load a slot's pattern, grid, swing and groove into a :class:`SequencerWidget`."""
+        slot = self.get_slot(track_index, scene_index)
+        if slot is None:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        voices = [list(voice) for voice in slot["voices_data"]]
+        sequencer.config.update(
+            step_duration=slot["step_duration"],
+            swing=slot["swing"],
+            groove=list(slot["groove"]),
+            num_voices=max(1, len(voices)),
+            length=max(len(voice) for voice in voices),
+            voices_data=voices,
+        )
+        return slot
+
+    def launch(self, track_index, scene_index):
+        """Launch a slot on the next quantization boundary."""
+        track_index, scene_index = self._check_indices(track_index, scene_index)
+        if self._find_slot(track_index, scene_index) < 0:
+            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
+        return self._command("request", {"action": "launch", "track_index": track_index, "scene_index": scene_index})
+
+    def stop_track(self, track_index):
+        """Stop a track's playing slot."""
+        track_index, _ = self._check_indices(track_index)
+        return self._command("request", {"action": "stop", "track_index": track_index})
+
+    def launch_scene(self, scene_index):
+        """Launch every slot in a scene; tracks with no slot there stop."""
+        scene_index = int(scene_index)
+        if not 0 <= scene_index < len(self.config.scenes):
+            raise IndexError(f"scene index out of range: {scene_index}")
+        return self._command("request", {"action": "scene", "scene_index": scene_index})
+
+    def stop_all(self):
+        """Stop every playing slot."""
+        return self._command("request", {"action": "stop_all"})
+
+
+class TimelineWidget(InstrumentWidget):
+    """The tracking widget on a transports session.
+
+    Lanes and clips are kernel configuration; play, record and transfer
+    state belong to the browser. Clip audio export and import go through
+    the config fields the element watches.
+    """
+
+    TAG = "nbplay-timeline"
+    CONFIG_MODEL = TimelineConfig
+    STATUS_MODEL = TimelineStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "tracks": "tracks",
+        "clips": "clips",
+        "length": "length",
+        "selected_clip_id": "selectedClipId",
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "count_in_bars": "countInBars",
+        "auto_extend_recording": "autoExtendRecording",
+        "recording_extend_bars": "recordingExtendBars",
+        "pixels_per_beat": "pixelsPerBeat",
+        "current_beat": "currentBeat",
+        "export_clip_id": "exportClipId",
+        "import_clip_request": "importClipRequest",
+        "import_clip_data": "importClipData",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "is_playing": "isPlaying",
+        "is_recording": "isRecording",
+        "recording_track": "recordingTrack",
+        "recording_tracks": "recordingTracks",
+        "recording_countdown_beats": "recordingCountdownBeats",
+        "recording_error": "recordingError",
+        "recorded_clip": "recordedClip",
+        "exported_clip": "exportedClip",
+        "exported_clip_data": "exportedClipData",
+    }
+
+    def __init__(self, session=None, *, config=None, **kwargs):
+        super().__init__(session, config=config, **kwargs)
         # Clip audio that has arrived from the browser, by clip id, so a
         # session can be saved with its takes. See export_all_clips().
         self._clip_audio = {}
         self._export_queue = []
-        self.observe(self._on_clip_exported, names="exported_clip_data")
+        self.on_change(self._on_clip_exported, names="exported_clip_data")
 
-    def _on_clip_exported(self, change):
-        data = change["new"]
-        clip_id = str(self.exported_clip.get("id", ""))
+    def _on_clip_exported(self, widget, name, old, data):
+        exported = self.status.exported_clip
+        clip_id = str(exported.get("id", ""))
         if not data or not clip_id:
             return
-        self._clip_audio[clip_id] = {"data": bytes(data), "blob_type": str(self.exported_clip.get("blob_type", ""))}
-        if self.export_clip_id == clip_id:
-            self.export_clip_id = ""
+        self._clip_audio[clip_id] = {"data": bytes(data), "blob_type": str(exported.get("blob_type", ""))}
+        if self.config.export_clip_id == clip_id:
+            self.config.export_clip_id = ""
         while self._export_queue:
             next_id = self._export_queue.pop(0)
-            if any(clip.get("id") == next_id for clip in self.clips):
+            if any(clip["id"] == next_id for clip in self.config.clips):
                 self.export_clip(next_id)
                 break
 
@@ -1510,298 +1351,195 @@ class TimelineWidget(_Themed, anywidget.AnyWidget):
     @property
     def pending_exports(self):
         """Number of clip exports still waiting on the browser."""
-        return len(self._export_queue) + (1 if self.export_clip_id else 0)
+        return len(self._export_queue) + (1 if self.config.export_clip_id else 0)
 
     def export_all_clips(self, *, refresh=False):
-        """Ask the browser for every clip's audio, one clip at a time.
+        """Ask the browser for every clip's audio, one clip at a time; returns the number queued.
 
-        Returns the number of clips queued. The bytes accumulate in
-        :attr:`clip_audio` as they arrive; wait for :attr:`pending_exports`
-        to reach zero before saving the session. Clips whose audio is already
-        cached are skipped unless ``refresh`` is true.
+        The bytes accumulate in :attr:`clip_audio` as they arrive; wait for
+        :attr:`pending_exports` to reach zero before saving. Clips whose audio
+        is already cached are skipped unless ``refresh`` is true.
         """
-        wanted = [clip["id"] for clip in self.clips if clip.get("audio_url") and (refresh or clip["id"] not in self._clip_audio)]
+        wanted = [clip["id"] for clip in self.config.clips if clip["audio_url"] and (refresh or clip["id"] not in self._clip_audio)]
         if not wanted:
             return 0
         self._export_queue = wanted[1:]
         self.export_clip(wanted[0])
         return len(wanted)
 
-    @traitlets.validate("pixels_per_beat")
-    def _validate_pixels_per_beat(self, proposal):
-        return _nonnegative_number(proposal["value"], "pixels_per_beat", maximum=400.0)
-
-    @traitlets.validate("recording_tracks")
-    def _validate_recording_tracks(self, proposal):
-        count = len(self.tracks)
-        seen = []
-        for value in proposal["value"] or []:
-            index = int(value)
-            if 0 <= index < count and index not in seen:
-                seen.append(index)
-        return seen
-
-    @traitlets.validate("length")
-    def _validate_length(self, proposal):
-        return _positive_number(proposal["value"], "length", minimum=1.0, maximum=4096.0)
-
-    @traitlets.validate("current_beat")
-    def _validate_current_beat(self, proposal):
-        return min(self.length, _nonnegative_number(proposal["value"], "current_beat"))
-
-    @traitlets.validate("count_in_bars")
-    def _validate_count_in_bars(self, proposal):
-        return _nonnegative_number(proposal["value"], "count_in_bars", maximum=8.0)
-
-    @traitlets.validate("recording_countdown_beats")
-    def _validate_recording_countdown_beats(self, proposal):
-        return _nonnegative_number(proposal["value"], "recording_countdown_beats")
-
-    @traitlets.validate("recording_extend_bars")
-    def _validate_recording_extend_bars(self, proposal):
-        return _positive_number(proposal["value"], "recording_extend_bars", minimum=1.0, maximum=256.0)
-
-    @traitlets.validate("tracks")
-    def _validate_tracks(self, proposal):
-        return _normalize_timeline_tracks(proposal["value"])
-
-    @traitlets.validate("clips")
-    def _validate_clips(self, proposal):
-        return _normalize_audio_clips(proposal["value"], len(self.tracks))
-
-    @traitlets.validate("recording_track")
-    def _validate_recording_track(self, proposal):
-        track = int(proposal["value"])
-        if track < 0 or not self.tracks:
-            return -1
-        return min(track, len(self.tracks) - 1)
-
     def add_track(self, name="Track", channel_index=None, *, armed=False, monitor=False, input="microphone"):
-        """Append a timeline lane and return its index.
-
-        ``input`` selects the record source: ``"microphone"`` captures
-        the browser microphone, ``"channel"`` taps the lane's mixer
-        channel so instrument output is bounced to an audio clip.
-        """
-        idx = len(self.tracks)
+        """Append a lane and return its index."""
+        index = len(self.config.tracks)
         track = TimelineTrack(
             name=name,
-            channel_index=idx if channel_index is None else channel_index,
+            channel_index=index if channel_index is None else channel_index,
             armed=armed,
             monitor=monitor,
             input=input,
         ).to_dict()
-        self.tracks = [*self.tracks, track]
-        return idx
+        self.config.tracks = [*self.config.tracks, track]
+        return index
 
     def remove_track(self, index):
         """Remove a lane, dropping its clips and shifting later lanes."""
         index = int(index)
-        if index < 0 or index >= len(self.tracks):
+        tracks = self.config.tracks
+        if not 0 <= index < len(tracks):
             return
-        removed = self.tracks[index]
-        removed_channel = int(removed.get("channel_index", index))
+        removed_channel = tracks[index]["channel_index"]
         next_tracks = []
-        for i, track in enumerate(self.tracks):
+        for i, track in enumerate(tracks):
             if i == index:
                 continue
             item = dict(track)
-            if removed_channel >= 0 and int(item.get("channel_index", -1)) > removed_channel:
-                item["channel_index"] = int(item["channel_index"]) - 1
-            next_tracks.append(_normalize_timeline_track(item, len(next_tracks)))
+            if removed_channel >= 0 and item["channel_index"] > removed_channel:
+                item["channel_index"] -= 1
+            next_tracks.append(item)
         next_clips = []
-        for clip in self.clips:
-            item = dict(clip)
-            track_index = int(item.get("track_index", 0))
-            if track_index == index:
+        for clip in self.config.clips:
+            if clip["track_index"] == index:
                 continue
-            if track_index > index:
-                item["track_index"] = track_index - 1
-            next_clips.append(item)
-        self.tracks = next_tracks
-        self.clips = _normalize_audio_clips(next_clips, len(next_tracks))
-        self.recording_tracks = [i if i < index else i - 1 for i in self.recording_tracks if i != index]
-        if self.recording_track == index:
-            self.recording_track = -1
-            self.is_recording = False
-        elif self.recording_track > index:
-            self.recording_track -= 1
+            next_clips.append({**clip, "track_index": clip["track_index"] - 1} if clip["track_index"] > index else clip)
+        self.config.update(tracks=next_tracks, clips=next_clips)
 
     def arm_track(self, index, armed=True, *, exclusive=False):
-        """Set lane arm state."""
+        """Arm or disarm a lane; ``exclusive`` disarms every other lane."""
         index = int(index)
-        if index < 0 or index >= len(self.tracks):
+        if not 0 <= index < len(self.config.tracks):
             raise IndexError(f"track index out of range: {index}")
         tracks = []
-        for i, track in enumerate(self.tracks):
-            item = dict(track)
-            if exclusive and i != index:
-                item["armed"] = False
-            elif i == index:
-                item["armed"] = bool(armed)
-            tracks.append(item)
-        self.tracks = tracks
-        if not any(track.get("armed") for track in tracks):
-            self.recording_track = -1
+        for i, track in enumerate(self.config.tracks):
+            if i == index:
+                tracks.append({**track, "armed": bool(armed)})
+            elif exclusive:
+                tracks.append({**track, "armed": False})
+            else:
+                tracks.append(track)
+        self.config.tracks = tracks
 
-    def add_clip(self, name="Clip", track_index=0, start=0.0, duration=4.0, **kwargs):
-        """Append a clip descriptor and return it."""
-        clip = AudioClip(
-            name=name,
-            track_index=track_index,
-            start=start,
-            duration=duration,
-            **kwargs,
-        ).to_dict()
-        clip = _normalize_audio_clip(clip, len(self.clips), len(self.tracks))
-        self.clips = [*self.clips, clip]
-        self.selected_clip_id = clip["id"]
-        self.length = max(self.length, clip["start"] + clip["duration"])
+    def _find_clip(self, clip_id):
+        clip_id = str(clip_id)
+        for clip in self.config.clips:
+            if clip["id"] == clip_id:
+                return clip
+        raise ValueError(f"clip not found: {clip_id}")
+
+    def _midi_clip(self, clip_id):
+        clip = self._find_clip(clip_id)
+        if clip["kind"] != "midi":
+            raise ValueError(f"clip {clip_id} is not a MIDI clip")
         return clip
 
-    def add_midi_clip(self, name="MIDI", track_index=0, start=0.0, events=(), duration=None, **kwargs):
-        """Append a MIDI clip and return it.
+    def _append_clip(self, clip):
+        config = self.config
+        config.update(clips=[*config.clips, clip], selected_clip_id=clip["id"], length=max(config.length, clip["start"] + clip["duration"]))
+        return clip
 
-        ``events`` may be dicts (``beat``, ``duration``, ``note``,
-        ``velocity``; beats are relative to the clip start), ``NoteEvent``
-        objects, or an ``EventSequence``. ``duration`` defaults to the end
-        of the last event, at least one beat.
-        """
+    def add_clip(self, name="Clip", track_index=0, start=0.0, duration=4.0, **kwargs):
+        """Append a clip, select it, and grow the timeline to fit it."""
+        clip = _normalize_audio_clip(
+            AudioClip(name=name, track_index=track_index, start=start, duration=duration, **kwargs).to_dict(),
+            len(self.config.clips),
+            len(self.config.tracks),
+        )
+        return self._append_clip(clip)
+
+    def add_midi_clip(self, name="MIDI", track_index=0, start=0.0, events=(), duration=None, **kwargs):
+        """Append a MIDI clip; ``duration`` defaults to the end of the last event."""
         normalized = _normalize_midi_events(events)
         if duration is None:
             duration = max([1.0, *(event["beat"] + event["duration"] for event in normalized)])
         return self.add_clip(name, track_index=track_index, start=start, duration=duration, kind="midi", events=normalized, **kwargs)
 
     def add_pattern_clip(self, name, pattern, track_index=0, start=0.0, step_duration=0.25, repeat=1, duration=None, **kwargs):
-        """Append a MIDI clip that plays ``pattern`` (steps) ``repeat`` times.
-
-        ``pattern`` is anything ``LauncherWidget.set_slot`` accepts: a
-        ``SequencerWidget``, a ``NoteComposer``, a list of step dicts, or a
-        list of voices. Active steps become notes at ``step_duration`` beats
-        per step; the clip's ``pattern`` field records ``name`` so
-        ``Session.update_pattern()`` can regenerate it later.
-        """
-        voices = _slot_voices(pattern)
-        step_duration = _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0)
-        length = max(len(voice) for voice in voices) * step_duration
-        base = _steps_to_events(voices, step_duration)
-        repeat = max(1, int(repeat))
-        events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
+        """Append a MIDI clip that plays ``pattern`` (a :class:`SequencerWidget`, step dicts or voices) ``repeat`` times."""
+        if isinstance(pattern, SequencerWidget):
+            pattern = pattern.config.voices_data
+        events, total = _pattern_events(_slot_voices(pattern), step_duration, repeat)
         if duration is None:
-            duration = length * repeat
+            duration = total
         return self.add_midi_clip(name, track_index=track_index, start=start, events=events, duration=duration, pattern=name, **kwargs)
 
     def export_midi_clip(self, clip_id, path=None):
-        """Write one MIDI clip to a ``.mid`` file (or return the ``mido.MidiFile``)."""
+        """One MIDI clip as a ``mido.MidiFile``, written to ``path`` when given."""
         from nbplay.midi import build_midi
 
-        clip_id = str(clip_id)
-        for clip in self.clips:
-            if clip.get("id") == clip_id:
-                if clip.get("kind") != "midi":
-                    raise ValueError(f"clip {clip_id} is not a MIDI clip")
-                midi = build_midi(
-                    [{"name": clip["name"], "events": clip.get("events", [])}],
-                    bpm=self.bpm,
-                    time_signature=(self.time_signature_num, self.time_signature_den),
-                )
-                if path is not None:
-                    midi.save(os.fspath(path))
-                return midi
-        raise ValueError(f"clip not found: {clip_id}")
+        clip = self._midi_clip(clip_id)
+        config = self.config
+        midi = build_midi(
+            [{"name": clip["name"], "events": clip["events"]}],
+            bpm=config.bpm,
+            time_signature=(config.time_signature_num, config.time_signature_den),
+        )
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
 
     def import_midi(self, source, track_index=0, start=0.0):
-        """Add one MIDI clip per MIDI track with notes, all on one lane at ``start``.
-
-        Returns the clips added. Beats in the file map straight onto the
-        timeline; the file's tempo is not applied.
-        """
+        """Add one MIDI clip per MIDI track with notes, all on one lane at ``start``; returns the clips."""
         from nbplay.midi import read_midi
 
-        added = []
-        for item in read_midi(source)["tracks"]:
-            added.append(self.add_midi_clip(item["name"], track_index=track_index, start=start, events=item["events"]))
-        return added
+        return [self.add_midi_clip(item["name"], track_index=track_index, start=start, events=item["events"]) for item in read_midi(source)["tracks"]]
 
     def clip_to_event_sequence(self, clip_id):
-        """Return a MIDI clip's events as a Rust ``EventSequence``."""
-        clip_id = str(clip_id)
-        for clip in self.clips:
-            if clip.get("id") == clip_id:
-                if clip.get("kind") != "midi":
-                    raise ValueError(f"clip {clip_id} is not a MIDI clip")
-                sequence = EventSequence()
-                for event in clip.get("events", []):
-                    sequence.add_event(NoteEvent(event["beat"], event["duration"], event["note"], event["velocity"]))
-                return sequence
-        raise ValueError(f"clip not found: {clip_id}")
+        """A MIDI clip's events as a Rust ``EventSequence``."""
+        from nbplay import EventSequence, NoteEvent
+
+        sequence = EventSequence()
+        for event in self._midi_clip(clip_id)["events"]:
+            sequence.add_event(NoteEvent(event["beat"], event["duration"], event["note"], event["velocity"]))
+        return sequence
 
     def remove_clip(self, clip_id):
         """Remove a clip by id."""
         clip_id = str(clip_id)
-        self.clips = [clip for clip in self.clips if clip.get("id") != clip_id]
-        if self.selected_clip_id == clip_id:
-            self.selected_clip_id = ""
+        fields = {"clips": [clip for clip in self.config.clips if clip["id"] != clip_id]}
+        if self.config.selected_clip_id == clip_id:
+            fields["selected_clip_id"] = ""
+        self.config.update(**fields)
+
+    def _edit_clip(self, clip_id, **fields):
+        clip = self._find_clip(clip_id)
+        self.config.clips = [{**item, **fields} if item is clip else item for item in self.config.clips]
 
     def move_clip(self, clip_id, *, track_index=None, start=None):
-        """Move a clip to a new lane and/or beat position."""
-        clip_id = str(clip_id)
-        next_clips = []
-        found = False
-        for clip in self.clips:
-            item = dict(clip)
-            if item.get("id") == clip_id:
-                found = True
-                if track_index is not None:
-                    item["track_index"] = int(track_index)
-                if start is not None:
-                    item["start"] = start
-            next_clips.append(item)
-        if not found:
-            raise ValueError(f"clip not found: {clip_id}")
-        self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
+        """Move a clip to another lane or beat position."""
+        fields = {}
+        if track_index is not None:
+            fields["track_index"] = int(track_index)
+        if start is not None:
+            fields["start"] = start
+        self._edit_clip(clip_id, **fields)
+
+    def resize_clip(self, clip_id, duration):
+        """Set a clip's duration in beats."""
+        self._edit_clip(clip_id, duration=duration)
 
     def duplicate_clip(self, clip_id):
-        """Copy a clip onto the same lane right after the original."""
-        clip_id = str(clip_id)
-        for clip in self.clips:
-            if clip.get("id") == clip_id:
-                copy = {**clip, "id": _clip_id(), "start": clip["start"] + clip["duration"]}
-                copy = _normalize_audio_clip(copy, len(self.clips), len(self.tracks))
-                self.clips = [*self.clips, copy]
-                self.selected_clip_id = copy["id"]
-                self.length = max(self.length, copy["start"] + copy["duration"])
-                return copy
-        raise ValueError(f"clip not found: {clip_id}")
+        """Copy a clip onto the same lane right after the original; returns the copy."""
+        clip = self._find_clip(clip_id)
+        copy = _normalize_audio_clip(
+            {**clip, "id": _clip_id(), "start": clip["start"] + clip["duration"]}, len(self.config.clips), len(self.config.tracks)
+        )
+        return self._append_clip(copy)
 
     def export_clip(self, clip_id):
-        """Ask the browser for a clip's audio bytes.
-
-        The bytes arrive asynchronously in ``exported_clip_data`` with
-        the clip descriptor in ``exported_clip``; observe either trait
-        or call :meth:`write_exported_clip` once they have arrived.
-        """
-        clip_id = str(clip_id)
-        if not any(clip.get("id") == clip_id for clip in self.clips):
-            raise ValueError(f"clip not found: {clip_id}")
-        self.exported_clip = {}
-        self.exported_clip_data = b""
-        self.export_clip_id = clip_id
+        """Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``."""
+        self._find_clip(clip_id)
+        self.config.export_clip_id = str(clip_id)
 
     def write_exported_clip(self, path):
-        """Write the most recently exported clip bytes to ``path``."""
-        if not self.exported_clip_data:
+        """Write the most recently exported clip's bytes to ``path``; returns the clip."""
+        if not self.status.exported_clip_data:
             raise ValueError("no exported clip data; call export_clip() and wait for the browser")
         with open(path, "wb") as handle:
-            handle.write(self.exported_clip_data)
-        return self.exported_clip
+            handle.write(self.status.exported_clip_data)
+        return self.status.exported_clip
 
     def import_clip(self, data, name="Import", track_index=0, start=0.0, duration=None, blob_type="audio/webm", **kwargs):
-        """Add a clip backed by audio bytes (or a file path).
+        """Add a clip backed by audio bytes (or a file path); the browser attaches a playable URL.
 
-        The clip descriptor is appended immediately; the browser attaches
-        a playable URL to it once the bytes arrive. When ``duration`` is
-        omitted the browser measures the audio and fills it in.
+        When ``duration`` is omitted the browser measures the audio and fills it in.
         """
         if isinstance(data, (str, os.PathLike)):
             with open(data, "rb") as handle:
@@ -1821,293 +1559,423 @@ class TimelineWidget(_Themed, anywidget.AnyWidget):
         )
         # Bytes first, then the descriptor: the browser acts on the
         # descriptor change and expects the matching bytes to be present.
-        self.import_clip_data = data
-        self.import_clip_request = {**clip, "measure_duration": duration is None}
+        self.config.import_clip_data = data
+        self.config.import_clip_request = {**clip, "measure_duration": duration is None}
         return clip
 
-    def resize_clip(self, clip_id, duration):
-        """Set a clip duration in beats."""
-        clip_id = str(clip_id)
-        next_clips = []
-        found = False
-        for clip in self.clips:
-            item = dict(clip)
-            if item.get("id") == clip_id:
-                found = True
-                item["duration"] = duration
-            next_clips.append(item)
-        if not found:
-            raise ValueError(f"clip not found: {clip_id}")
-        self.clips = _normalize_audio_clips(next_clips, len(self.tracks))
+    def seek(self, beat):
+        """Move a standalone timeline's playhead (a session seeks through its transport)."""
+        self.config.current_beat = float(beat)
+
+    def play(self):
+        """Start playback in the owning widget."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop playback in the owning widget."""
+        return self._command("is_playing", False)
+
+    def record(self, on=True):
+        """Start or stop recording the armed lanes."""
+        return self._command("is_recording", bool(on))
 
 
-class LauncherWidget(_Themed, anywidget.AnyWidget):
-    """Beats view: a clip launcher in the session-view style.
+class Track:
+    """A session lane: a mixer channel plus an optional sequencer and sound source."""
 
-    Tracks are rows, scenes are columns, and each filled slot holds a step
-    pattern in the same ``voices_data`` shape as :class:`SequencerWidget`.
-    Launching a slot starts it on the next quantization boundary of the
-    shared session clock, so every playing slot stays phase-locked; a scene
-    launches its whole column. Playback runs in the browser through the
-    session mixer channel of each track, which means a launcher performance
-    can be captured by the timeline through channel-tap lanes.
-    """
-
-    _esm = _STATIC / "launcher.js"
-    _css = _STATIC / "nbplay.css"
-
-    session_id = traitlets.Unicode("").tag(sync=True)
-    bpm = traitlets.Float(120.0).tag(sync=True)
-    is_playing = traitlets.Bool(False).tag(sync=True)
-    time_signature_num = traitlets.Int(4).tag(sync=True)
-    time_signature_den = traitlets.Int(4).tag(sync=True)
-
-    # "bar", "beat", or "none": when a launch takes effect
-    quantize = traitlets.Unicode("bar").tag(sync=True)
-
-    tracks = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-    scenes = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
-    slots = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-
-    # Per track: playing scene index or -1; queued scene index, -1 for a
-    # queued stop, -2 for nothing queued. Mirrored by the browser.
-    active_slots = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    queued_slots = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    selected_slot = traitlets.Dict(default_value={}).tag(sync=True)
-
-    # Python -> browser command; the nonce makes repeated commands distinct
-    launch_request = traitlets.Dict(default_value={}).tag(sync=True)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._request_nonce = 0
-        self._editor_links = []
-
-    @traitlets.validate("quantize")
-    def _validate_quantize(self, proposal):
-        value = str(proposal["value"])
-        if value not in _LAUNCH_QUANTIZE:
-            raise ValueError(f"quantize must be one of {_LAUNCH_QUANTIZE}, got {value!r}")
-        return value
-
-    @traitlets.validate("tracks")
-    def _validate_tracks(self, proposal):
-        tracks = []
-        for index, track in enumerate(proposal["value"] or []):
-            tracks.append(
-                {
-                    "name": str(track.get("name", f"Track {index + 1}")),
-                    "channel_index": max(-1, int(track.get("channel_index", index))),
-                }
-            )
-        return tracks
-
-    @traitlets.validate("scenes")
-    def _validate_scenes(self, proposal):
-        return [str(name) for name in proposal["value"] or []]
-
-    @traitlets.validate("slots")
-    def _validate_slots(self, proposal):
-        return [_normalize_launcher_slot(slot) for slot in proposal["value"] or []]
-
-    @traitlets.validate("active_slots", "queued_slots")
-    def _validate_slot_states(self, proposal):
-        floor = -1 if proposal["trait"].name == "active_slots" else -2
-        return [max(floor, int(value)) for value in proposal["value"] or []]
-
-    def _find_slot(self, track_index, scene_index):
-        for position, slot in enumerate(self.slots):
-            if slot["track_index"] == track_index and slot["scene_index"] == scene_index:
-                return position
-        return -1
-
-    def _check_indices(self, track_index, scene_index=None):
-        track_index = int(track_index)
-        if track_index < 0 or track_index >= len(self.tracks):
-            raise IndexError(f"track index out of range: {track_index}")
-        if scene_index is None:
-            return track_index, None
-        scene_index = int(scene_index)
-        if scene_index < 0 or scene_index >= len(self.scenes):
-            raise IndexError(f"scene index out of range: {scene_index}")
-        return track_index, scene_index
-
-    def add_track(self, name="Track", channel_index=None):
-        """Append a track row and return its index."""
-        idx = len(self.tracks)
-        self.tracks = [*self.tracks, {"name": name, "channel_index": idx if channel_index is None else channel_index}]
-        self.active_slots = [*self.active_slots, -1]
-        self.queued_slots = [*self.queued_slots, -2]
-        return idx
-
-    def add_scene(self, name=None):
-        """Append a scene column and return its index."""
-        idx = len(self.scenes)
-        self.scenes = [*self.scenes, str(name) if name is not None else f"Scene {idx + 1}"]
-        return idx
-
-    def set_slot(self, track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None):
-        """Fill a slot with a pattern and return the stored slot.
-
-        ``pattern`` may be a :class:`SequencerWidget`, a :class:`NoteComposer`,
-        a list of step dicts (one voice), or a list of voices.
-        """
-        track_index, scene_index = self._check_indices(track_index, scene_index)
-        voices = _slot_voices(pattern)
-        if step_duration is None:
-            step_duration = pattern.step_duration if isinstance(pattern, SequencerWidget) else 0.25
-        if swing == 0.0 and isinstance(pattern, SequencerWidget):
-            swing = pattern.swing
-        if groove is None and isinstance(pattern, SequencerWidget):
-            groove = list(pattern.groove)
-        slot = _normalize_launcher_slot(
-            {
-                "track_index": track_index,
-                "scene_index": scene_index,
-                "name": name if name is not None else f"{self.tracks[track_index]['name']} {scene_index + 1}",
-                "voices_data": voices,
-                "step_duration": step_duration,
-                "swing": swing,
-                "groove": groove or [],
-            }
-        )
-        position = self._find_slot(track_index, scene_index)
-        slots = list(self.slots)
-        if position >= 0:
-            slots[position] = slot
-        else:
-            slots.append(slot)
-        self.slots = slots
-        return slot
-
-    def get_slot(self, track_index, scene_index):
-        """Return the slot dict at ``(track_index, scene_index)`` or ``None``."""
-        position = self._find_slot(int(track_index), int(scene_index))
-        return dict(self.slots[position]) if position >= 0 else None
-
-    def clear_slot(self, track_index, scene_index):
-        """Empty a slot."""
-        track_index, scene_index = self._check_indices(track_index, scene_index)
-        self.slots = [slot for slot in self.slots if not (slot["track_index"] == track_index and slot["scene_index"] == scene_index)]
-        if self.selected_slot == {"track_index": track_index, "scene_index": scene_index}:
-            self.selected_slot = {}
-
-    def _request(self, **payload):
-        self._request_nonce += 1
-        self.launch_request = {**payload, "nonce": self._request_nonce}
-
-    def launch(self, track_index, scene_index):
-        """Launch a slot on the next quantization boundary."""
-        track_index, scene_index = self._check_indices(track_index, scene_index)
-        if self._find_slot(track_index, scene_index) < 0:
-            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
-        self._request(action="launch", track_index=track_index, scene_index=scene_index)
-
-    def stop_track(self, track_index):
-        """Stop a track on the next quantization boundary."""
-        track_index, _ = self._check_indices(track_index)
-        self._request(action="stop", track_index=track_index)
-
-    def launch_scene(self, scene_index):
-        """Launch every slot in a scene; tracks with no slot there stop."""
-        _, scene_index = self._check_indices(0, scene_index) if self.tracks else (None, int(scene_index))
-        if scene_index < 0 or scene_index >= len(self.scenes):
-            raise IndexError(f"scene index out of range: {scene_index}")
-        self._request(action="scene", scene_index=scene_index)
-
-    def stop_all(self):
-        """Stop every track on the next quantization boundary."""
-        self._request(action="stop_all")
-
-    def slot_to_sequencer(self, track_index, scene_index, sequencer):
-        """Load a slot's pattern into a :class:`SequencerWidget` for editing."""
-        slot = self.get_slot(track_index, scene_index)
-        if slot is None:
-            raise ValueError(f"no slot at track {track_index}, scene {scene_index}")
-        voices = [list(voice) for voice in slot["voices_data"]]
-        sequencer.step_duration = slot["step_duration"]
-        sequencer.swing = slot["swing"]
-        sequencer.groove = list(slot["groove"])
-        # Voice count first: a one-voice editor given two voices would keep
-        # one composer and write the pattern back with a voice missing.
-        sequencer.num_voices = max(1, len(voices))
-        sequencer.voices_data = voices
-        return slot
-
-    def bind_slot_editor(self, sequencer):
-        """Use ``sequencer`` as the editor for whichever slot is selected.
-
-        Selecting a slot (by clicking it, or setting ``selected_slot``) loads
-        it into the sequencer; edits to the sequencer's steps write back into
-        that slot. Returns a function that removes the binding.
-        """
-        state = {"loading": False}
-
-        def load(_change=None):
-            selected = self.selected_slot
-            if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
-                return
-            state["loading"] = True
-            try:
-                self.slot_to_sequencer(selected["track_index"], selected["scene_index"], sequencer)
-            finally:
-                state["loading"] = False
-
-        def write_back(_change=None):
-            selected = self.selected_slot
-            if state["loading"] or not selected:
-                return
-            if self._find_slot(selected["track_index"], selected["scene_index"]) < 0:
-                return
-            current = self.get_slot(selected["track_index"], selected["scene_index"])
-            self.set_slot(
-                selected["track_index"],
-                selected["scene_index"],
-                sequencer,
-                name=current["name"],
-                step_duration=sequencer.step_duration,
-                swing=sequencer.swing,
-                groove=list(sequencer.groove),
-            )
-
-        self.observe(load, names="selected_slot")
-        sequencer.observe(write_back, names=["voices_data", "step_duration", "swing", "groove"])
-        load()
-
-        def unbind():
-            self.unobserve(load, names="selected_slot")
-            sequencer.unobserve(write_back, names=["voices_data", "step_duration", "swing", "groove"])
-
-        self._editor_links.append(unbind)
-        return unbind
+    def __init__(self, name, sequencer=None, sound_source=None, mixer_channel=0):
+        self.name = name
+        self.sequencer = sequencer
+        self.sound_source = sound_source
+        self.mixer_channel = mixer_channel
 
     def __repr__(self):
-        return f"LauncherWidget(tracks={len(self.tracks)}, scenes={len(self.scenes)}, slots={len(self.slots)})"
+        return f"Track(name={self.name!r}, channel={self.mixer_channel})"
 
 
-def _widget_state(widget, names):
-    return {name: _json_copy(getattr(widget, name)) for name in names}
+class Session:
+    """Transport, mixer, timeline and launcher widgets sharing one browser session.
+
+    Every widget carries the same ``session_id``, so the browser gives them
+    one audio bus and one clock, which keeps play state, position and tempo
+    consistent across them. Each widget hosts its models in its own transports
+    ``Session``: transports grants a connection ownership of every
+    client-owned field in the session it connects to, so widgets that shared
+    one would fight over each other's status. In the kernel the :attr:`bpm`,
+    :attr:`time_signature` and :attr:`theme` properties write every widget's
+    config, :attr:`history` records every widget's config edits for
+    :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
+    channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
+    as clips, and :meth:`export_midi` and :meth:`import_midi` move the
+    arrangement through ``.mid`` files, and :meth:`save` and :meth:`load`
+    read and write the same ``.nbplay`` archive as the traitlets
+    :class:`nbplay.widget.Session`.
+    """
+
+    def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
+        self._session_id = f"nbplay-{uuid.uuid4().hex[:8]}"
+        num, den = time_signature
+        common = {"session_id": self._session_id, "bpm": bpm, "time_signature_num": num, "theme": theme}
+        self.transport = TransportWidget(time_signature_den=den, **common)
+        self.mixer = MixerWidget(session_id=self._session_id, theme=theme)
+        self.timeline = TimelineWidget(time_signature_den=den, **common)
+        self.launcher = LauncherWidget(time_signature_den=den, **common)
+        self.tracks = []
+        # Named patterns for the tracking widget: name -> {voices_data, step_duration}.
+        self.patterns = {}
+        # Undo/redo over every widget's config; new tracks attach their
+        # sequencer and sound source as they are added.
+        self.history = History()
+        for widget in (self.transport, self.mixer, self.timeline, self.launcher):
+            self.history.attach(widget)
+        self.history.bind_ipython()
+        # Ctrl/Cmd+Z in the browser bumps the transport's request counts.
+        self.transport.on_change(lambda widget, name, old, new: self.undo(), names="undo_request")
+        self.transport.on_change(lambda widget, name, old, new: self.redo(), names="redo_request")
+        # Lane mute/solo and mixer channel mute/solo are the same control
+        # from the user's side; keep them mirrored by channel index.
+        self._mirroring_mute_solo = False
+        self.timeline.on_change(self._on_timeline_tracks, names="tracks")
+        self.mixer.on_change(self._on_mixer_channels, names="channels")
+
+    def _on_timeline_tracks(self, widget, name, old, tracks):
+        if self._mirroring_mute_solo:
+            return
+        channels = [dict(channel) for channel in self.mixer.config.channels]
+        changed = False
+        for track in tracks:
+            index = track["channel_index"]
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    if channels[index][channel_key] != track[lane_key]:
+                        channels[index][channel_key] = track[lane_key]
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.mixer.config.channels = channels
+            finally:
+                self._mirroring_mute_solo = False
+
+    def _on_mixer_channels(self, widget, name, old, channels):
+        if self._mirroring_mute_solo:
+            return
+        tracks = [dict(track) for track in self.timeline.config.tracks]
+        changed = False
+        for track in tracks:
+            index = track["channel_index"]
+            if 0 <= index < len(channels):
+                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
+                    if track[lane_key] != channels[index][channel_key]:
+                        track[lane_key] = channels[index][channel_key]
+                        changed = True
+        if changed:
+            self._mirroring_mute_solo = True
+            try:
+                self.timeline.config.tracks = tracks
+            finally:
+                self._mirroring_mute_solo = False
+
+    def undo(self):
+        """Revert the latest change to any widget; False when nothing to undo."""
+        return self.history.undo()
+
+    def redo(self):
+        """Reapply the latest undone change; False when nothing to redo."""
+        return self.history.redo()
+
+    @property
+    def session_id(self):
+        """The browser session id every widget shares."""
+        return self._session_id
+
+    @property
+    def widgets(self):
+        """Every widget in the session, including track instruments."""
+        widgets = [self.transport, self.mixer, self.timeline, self.launcher]
+        for track in self.tracks:
+            widgets.extend(widget for widget in (track.sequencer, track.sound_source) if isinstance(widget, InstrumentWidget))
+        return widgets
+
+    @property
+    def bpm(self):
+        return self.transport.config.bpm
+
+    @bpm.setter
+    def bpm(self, value):
+        for widget in self.widgets:
+            if "bpm" in widget.CONFIG:
+                widget.config.bpm = value
+
+    @property
+    def time_signature(self):
+        return (self.transport.config.time_signature_num, self.transport.config.time_signature_den)
+
+    @time_signature.setter
+    def time_signature(self, value):
+        num, den = value
+        for widget in self.widgets:
+            if "time_signature_num" in widget.CONFIG:
+                widget.config.time_signature_num = num
+            if "time_signature_den" in widget.CONFIG_MODEL.model_fields:
+                widget.config.time_signature_den = den
+
+    @property
+    def theme(self):
+        return self.transport.config.theme
+
+    @theme.setter
+    def theme(self, value):
+        for widget in self.widgets:
+            widget.config.theme = value
+
+    def play(self):
+        """Start the shared clock."""
+        return self.transport.play()
+
+    def stop(self):
+        """Stop the shared clock."""
+        return self.transport.stop()
+
+    def seek(self, beat):
+        """Move the shared clock."""
+        return self.transport.seek(beat)
+
+    def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
+        """Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing."""
+        with self.history.paused():
+            return self._add_track(name, sequencer, sound_source, input=input, armed=armed)
+
+    def _add_track(self, name, sequencer, sound_source, *, input, armed):
+        channel = self.mixer.add_channel(name)
+        for widget in (sequencer, sound_source):
+            if isinstance(widget, InstrumentWidget):
+                widget.config.session_id = self._session_id
+                widget.config.channel_index = channel
+                widget.config.theme = self.theme
+                if "bpm" in widget.CONFIG:
+                    widget.config.bpm = self.bpm
+                if "time_signature_num" in widget.CONFIG:
+                    num, den = self.time_signature
+                    widget.config.update(time_signature_num=num, time_signature_den=den)
+        if input is None:
+            input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
+        self.timeline.add_track(name, channel, armed=armed, input=input)
+        self.launcher.add_track(name, channel)
+        track = Track(name, sequencer, sound_source, channel)
+        self.tracks.append(track)
+        self.history.attach(sequencer)
+        self.history.attach(sound_source)
+        return track
+
+    def remove_track(self, index):
+        """Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down."""
+        if not 0 <= index < len(self.tracks):
+            return
+        with self.history.paused():
+            track = self.tracks.pop(index)
+            self.history.detach(track.sequencer)
+            self.history.detach(track.sound_source)
+            for widget in (track.sequencer, track.sound_source):
+                if isinstance(widget, InstrumentWidget):
+                    widget.config.update(session_id="", channel_index=-1)
+            self.mixer.remove_channel(track.mixer_channel)
+            self.timeline.remove_track(index)
+            self.launcher.remove_track(index)
+            for item in self.tracks:
+                if item.mixer_channel > track.mixer_channel:
+                    item.mixer_channel -= 1
+                    for widget in (item.sequencer, item.sound_source):
+                        if isinstance(widget, InstrumentWidget):
+                            widget.config.channel_index -= 1
+
+    def _track_index(self, track):
+        if isinstance(track, Track):
+            return self.tracks.index(track)
+        if isinstance(track, str):
+            names = [item.name for item in self.tracks]
+            if track not in names:
+                raise ValueError(f"no track named {track!r}")
+            return names.index(track)
+        index = int(track)
+        if not 0 <= index < len(self.tracks):
+            raise IndexError(f"track index out of range: {index}")
+        return index
+
+    def add_pattern(self, name, pattern, step_duration=None):
+        """Register a named pattern for chaining; returns its stored form.
+
+        ``pattern`` is a :class:`SequencerWidget` (whose step duration is used),
+        a list of step dicts, or a list of voices.
+        """
+        if isinstance(pattern, SequencerWidget):
+            step_duration = pattern.config.step_duration if step_duration is None else step_duration
+            pattern = pattern.config.voices_data
+        voices = _slot_voices(pattern)
+        length = max(len(voice) for voice in voices)
+        entry = {
+            "voices_data": [[dict(step) for step in voice] + _default_steps(length - len(voice)) for voice in voices],
+            "step_duration": _positive_number(0.25 if step_duration is None else step_duration, "step_duration", minimum=0.001, maximum=16.0),
+        }
+        self.patterns[str(name)] = entry
+        return entry
+
+    def remove_pattern(self, name):
+        """Forget a pattern; clips already placed keep playing as MIDI clips."""
+        del self.patterns[str(name)]
+
+    def chain(self, track, names, start=0.0, repeat=1):
+        """Place named patterns back to back on a track's lane; returns the clips.
+
+        A track with a sequencer stops following the transport so the
+        arrangement drives it. The whole chain is one undo step.
+        """
+        index = self._track_index(track)
+        item = self.tracks[index]
+        missing = [name for name in names if str(name) not in self.patterns]
+        if missing:
+            raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
+        with self.history.transaction():
+            if item.sequencer is not None:
+                item.sequencer.config.follow_transport = False
+            clips = []
+            position = _nonnegative_number(start, "start")
+            for name in names:
+                pattern = self.patterns[str(name)]
+                clip = self.timeline.add_pattern_clip(
+                    str(name), pattern["voices_data"], track_index=index, start=position, step_duration=pattern["step_duration"], repeat=repeat
+                )
+                clips.append(clip)
+                position += clip["duration"]
+            self.timeline.config.length = max(self.timeline.config.length, math.ceil(position))
+            return clips
+
+    def update_pattern(self, name, pattern, step_duration=None):
+        """Replace a pattern and regenerate every clip placed from it, as one undo step."""
+        name = str(name)
+        entry = self.add_pattern(name, pattern, step_duration=step_duration)
+        with self.history.transaction():
+            clips = []
+            for clip in self.timeline.config.clips:
+                if clip.get("pattern") != name:
+                    clips.append(clip)
+                    continue
+                length = max(len(voice) for voice in entry["voices_data"]) * entry["step_duration"]
+                repeat = max(1, round(clip["duration"] / length)) if length > 0 else 1
+                events, _ = _pattern_events(entry["voices_data"], entry["step_duration"], repeat)
+                clips.append({**clip, "events": events})
+            self.timeline.config.clips = clips
+        return entry
+
+    def export_midi(self, path=None):
+        """The sequencer patterns and MIDI clips as one ``mido.MidiFile``, written to ``path`` when given.
+
+        Each sequencer track becomes one MIDI track from beat 0; each MIDI
+        clip becomes one MIDI track at its timeline position.
+        """
+        from nbplay.midi import build_midi, steps_to_events
+
+        tracks = []
+        for track in self.tracks:
+            if track.sequencer is not None:
+                config = track.sequencer.config
+                events = steps_to_events(config.voices_data, config.step_duration)
+                tracks.append({"name": track.name, "events": events, "channel": min(15, max(0, track.mixer_channel))})
+        lanes = self.timeline.config.tracks
+        for clip in self.timeline.config.clips:
+            if clip["kind"] == "midi" and clip["events"]:
+                offset = clip["offset"]
+                events = [
+                    {**event, "beat": clip["start"] + event["beat"] - offset}
+                    for event in clip["events"]
+                    if event["beat"] >= offset and event["beat"] - offset < clip["duration"]
+                ]
+                channel = lanes[clip["track_index"]]["channel_index"] if clip["track_index"] < len(lanes) else 0
+                tracks.append({"name": clip["name"], "events": events, "channel": min(15, max(0, channel))})
+        midi = build_midi(tracks, bpm=self.bpm, time_signature=self.time_signature)
+        if path is not None:
+            midi.save(os.fspath(path))
+        return midi
+
+    def import_midi(self, source, *, apply_tempo=True):
+        """Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.
+
+        With ``apply_tempo`` the file's tempo and time signature are applied.
+        """
+        from nbplay.midi import read_midi
+
+        data = read_midi(source)
+        added = []
+        with self.history.paused():
+            if apply_tempo:
+                self.bpm = data["bpm"]
+                self.time_signature = tuple(data["time_signature"])
+            for item in data["tracks"]:
+                track = self.add_track(item["name"], input="midi")
+                self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.config.tracks) - 1, start=0.0, events=item["events"])
+                added.append(track)
+        return added
+
+    def to_dict(self):
+        """The session as a JSON-safe dict (no binary payloads); see :meth:`save`."""
+        return _session_to_dict(self)
+
+    def save(self, path):
+        """Write the session to a ``.nbplay`` zip archive; returns the path.
+
+        The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
+        little-endian float32) and ``clips/`` (timeline clip audio that has
+        arrived from the browser; call ``session.timeline.export_all_clips()``
+        first and wait for ``pending_exports`` to reach zero). The widget
+        session reads the same archive.
+        """
+        data, resources = _session_to_dict(self, resources={})
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("session.json", json.dumps(data, indent=1))
+            for name, payload in resources.items():
+                archive.writestr(name, payload)
+        return path
+
+    @classmethod
+    def load(cls, path):
+        """Rebuild a session from an archive written by :meth:`save` (of either session class)."""
+        with zipfile.ZipFile(path) as archive:
+            data = json.loads(archive.read("session.json"))
+            resources = {name: archive.read(name) for name in archive.namelist() if name != "session.json"}
+        return cls.from_dict(data, resources)
+
+    @classmethod
+    def from_dict(cls, data, resources=None):
+        """Rebuild a session from :meth:`to_dict` output plus binary resources."""
+        return _session_from_dict(cls, data, resources or {})
+
+    def close(self):
+        """Close every widget."""
+        for widget in self.widgets:
+            widget.close()
+
+
+def _dump(config, names):
+    return _json_copy(config.model_dump(include=set(names)))
 
 
 def _sound_source_to_dict(source, index, resources):
     if source is None:
         return None
     if isinstance(source, SynthWidget):
-        return {"type": "SynthWidget", "state": _widget_state(source, _SYNTH_STATE)}
+        return {"type": "SynthWidget", "state": _dump(source.config, _SYNTH_STATE)}
     if isinstance(source, SamplerWidget):
-        entry = {
-            "type": "SamplerWidget",
-            "state": {**_widget_state(source, _SAMPLER_STATE), **_widget_state(source, _SAMPLER_PAD_STATE)},
-        }
-        if source.sample_data:
+        config = source.config
+        entry = {"type": "SamplerWidget", "state": _dump(config, _SAMPLER_STATE + _SAMPLER_PAD_STATE)}
+        if config.sample_data:
             if resources is not None:
                 name = f"samples/track-{index}.f32"
-                resources[name] = bytes(source.sample_data)
+                resources[name] = bytes(config.sample_data)
                 entry["sample_file"] = name
-            entry["sample_length"] = int(source.sample_length)
-        if source.zones:
+            entry["sample_length"] = config.sample_length
+        if config.zones:
             saved = []
-            for zone_index, zone in enumerate(source.zones):
+            for zone_index, zone in enumerate(config.zones):
                 item = {k: v for k, v in zone.items() if k != "data"}
                 if resources is not None:
                     name = f"samples/track-{index}-zone-{zone_index}.f32"
@@ -2131,21 +1999,19 @@ def _sound_source_from_dict(entry, resources):
         sample_file = entry.get("sample_file")
         if sample_file and sample_file in resources:
             sampler.load_sample(
-                _unpack_float32(resources[sample_file]),
+                resources[sample_file],
                 sample_rate=state.get("sample_rate", 44100),
                 root_note=state.get("root_note", 69),
                 name=state.get("sample_name", "Sample"),
             )
-        for name in _SAMPLER_PAD_STATE:
-            if name in state:
-                setattr(sampler, name, state[name])
+        sampler.config.update(**{name: state[name] for name in _SAMPLER_PAD_STATE if name in state})
         zones = []
         for zone in entry.get("zones", []):
             sample_file = zone.get("sample_file")
             data = resources.get(sample_file, b"") if sample_file else b""
             zones.append({**{k: v for k, v in zone.items() if k != "sample_file"}, "data": data})
         if zones:
-            sampler.zones = zones
+            sampler.config.zones = zones
         return sampler
     raise ValueError(f"unknown sound source type in session data: {kind!r}")
 
@@ -2155,11 +2021,10 @@ def _sequencer_from_dict(state):
         return None
     ctor = {k: state[k] for k in ("num_voices", "length", "measures", "step_duration", "time_signature_num", "time_signature_den") if k in state}
     sequencer = SequencerWidget(**ctor)
-    for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport"):
-        if name in state:
-            setattr(sequencer, name, state[name])
+    fields = {name: state[name] for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport") if name in state}
     if state.get("voices_data"):
-        sequencer.voices_data = _json_copy(state["voices_data"])
+        fields["voices_data"] = _json_copy(state["voices_data"])
+    sequencer.config.update(**fields)
     return sequencer
 
 
@@ -2168,17 +2033,11 @@ def _session_to_dict(session, resources=None):
     for index, track in enumerate(session.tracks):
         sequencer = None
         if track.sequencer is not None:
-            sequencer = {**_widget_state(track.sequencer, _SEQUENCER_STATE), "voices_data": _json_copy(track.sequencer.voices_data)}
-        tracks.append(
-            {
-                "name": track.name,
-                "sequencer": sequencer,
-                "sound_source": _sound_source_to_dict(track.sound_source, index, resources),
-            }
-        )
+            sequencer = _dump(track.sequencer.config, (*_SEQUENCER_STATE, "voices_data"))
+        tracks.append({"name": track.name, "sequencer": sequencer, "sound_source": _sound_source_to_dict(track.sound_source, index, resources)})
     clips = []
     cached = session.timeline.clip_audio
-    for clip in session.timeline.clips:
+    for clip in session.timeline.config.clips:
         item = {k: v for k, v in clip.items() if k != "audio_url"}
         audio = cached.get(clip["id"])
         if audio and resources is not None:
@@ -2192,11 +2051,11 @@ def _session_to_dict(session, resources=None):
         "format": _SESSION_FORMAT,
         "version": _SESSION_FORMAT_VERSION,
         "nbplay": __version__,
-        "transport": _widget_state(session.transport, _TRANSPORT_STATE),
-        "mixer": _widget_state(session.mixer, ("channels", "master_gain", "master_effects", "returns")),
+        "transport": _dump(session.transport.config, _TRANSPORT_STATE),
+        "mixer": _dump(session.mixer.config, ("channels", "master_gain", "master_effects", "returns")),
         "tracks": tracks,
-        "timeline": {**_widget_state(session.timeline, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.tracks), "clips": clips},
-        "launcher": _widget_state(session.launcher, ("quantize", "scenes", "slots")),
+        "timeline": {**_dump(session.timeline.config, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.config.tracks), "clips": clips},
+        "launcher": _dump(session.launcher.config, ("quantize", "scenes", "slots")),
         "patterns": _json_copy(session.patterns),
         "theme": session.theme,
     }
@@ -2214,9 +2073,7 @@ def _session_from_dict(cls, data, resources):
         time_signature=(transport.get("time_signature_num", 4), transport.get("time_signature_den", 4)),
         theme=data.get("theme", ""),
     )
-    for name in ("loop_enabled", "loop_start_bar", "loop_end_bar"):
-        if name in transport:
-            setattr(session.transport, name, transport[name])
+    session.transport.config.update(**{name: transport[name] for name in ("loop_enabled", "loop_start_bar", "loop_end_bar") if name in transport})
 
     timeline_data = data.get("timeline", {})
     saved_lanes = timeline_data.get("tracks", [])
@@ -2231,23 +2088,15 @@ def _session_from_dict(cls, data, resources):
         )
 
     mixer = data.get("mixer", {})
-    if mixer.get("returns"):
-        session.mixer.returns = mixer["returns"]
-    if mixer.get("channels"):
-        session.mixer.channels = mixer["channels"]
-    if "master_gain" in mixer:
-        session.mixer.master_gain = mixer["master_gain"]
-    if "master_effects" in mixer:
-        session.mixer.master_effects = mixer["master_effects"]
+    session.mixer.config.update(**{name: mixer[name] for name in ("returns", "channels", "master_gain", "master_effects") if name in mixer})
 
     timeline = session.timeline
-    for name in _TIMELINE_STATE:
-        if name in timeline_data:
-            setattr(timeline, name, timeline_data[name])
+    fields = {name: timeline_data[name] for name in _TIMELINE_STATE if name in timeline_data}
     if saved_lanes:
-        timeline.tracks = saved_lanes
+        fields["tracks"] = saved_lanes
+    timeline.config.update(**fields)
     for clip in timeline_data.get("clips", []):
-        fields = {k: v for k, v in clip.items() if k not in ("audio_file",)}
+        fields = {k: v for k, v in clip.items() if k != "audio_file"}
         audio_file = clip.get("audio_file")
         if audio_file and audio_file in resources:
             timeline.import_clip(
@@ -2267,966 +2116,13 @@ def _session_from_dict(cls, data, resources):
                 duration=fields.pop("duration", 4.0),
                 **fields,
             )
-    timeline.selected_clip_id = ""
+    timeline.config.selected_clip_id = ""
 
     launcher_data = data.get("launcher", {})
     for name in launcher_data.get("scenes", []):
         session.launcher.add_scene(name)
-    if launcher_data.get("slots"):
-        session.launcher.slots = launcher_data["slots"]
-    if "quantize" in launcher_data:
-        session.launcher.quantize = launcher_data["quantize"]
+    session.launcher.config.update(**{name: launcher_data[name] for name in ("slots", "quantize") if name in launcher_data})
     for name, pattern in data.get("patterns", {}).items():
         session.add_pattern(name, pattern.get("voices_data", []), step_duration=pattern.get("step_duration", 0.25))
+    session.history.clear()
     return session
-
-
-class KeyboardWidget(_Themed, anywidget.AnyWidget):
-    r"""Musical typing keyboard widget (Logic Pro style).
-
-    4-row QWERTY layout across two independent octave halves.
-    Triggers audio via Web Audio and emits note events for
-    sequencer recording and sampler triggering.
-
-    Key mapping:
-        - Upper sharps: **2 3 _ 5 6 7 _ 9 0**
-        - Upper naturals: **Q W E R T Y U I O P**
-        - Lower sharps: **A S _ F G H _ K L**
-        - Lower naturals: **Z X C V B N M , .**
-        - ``[ ]`` octave shift upper, ``; '`` octave shift lower
-        - ``- =`` velocity down/up (hold to accelerate)
-        - ``\` `` sustain upper, ``/`` sustain lower, ``Space`` global sustain
-    """
-
-    _esm = _STATIC / "keyboard.js"
-    _css = _STATIC / "nbplay.css"
-
-    upper_octave = traitlets.Int(3).tag(sync=True)
-    lower_octave = traitlets.Int(4).tag(sync=True)
-    velocity = traitlets.Int(100).tag(sync=True)
-    active_notes = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    sustain_upper = traitlets.Bool(False).tag(sync=True)
-    sustain_lower = traitlets.Bool(False).tag(sync=True)
-    sustain_global = traitlets.Bool(False).tag(sync=True)
-    last_note_event = traitlets.Dict(default_value={}).tag(sync=True)
-
-    # Session routing
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
-
-    # Sampler routing: validated KeyboardRoute dictionaries
-    sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-
-    # Internal references (not synced)
-    _connected_sequencers: list
-    _connected_samplers: list
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._connected_sequencers = []
-        self._connected_samplers = []
-
-    def connect_sequencer(self, sequencer):
-        """Link this keyboard to a sequencer for recording and note input.
-
-        Args:
-            sequencer: A ``SequencerWidget`` to connect.
-        """
-        if sequencer not in self._connected_sequencers:
-            self._connected_sequencers.append(sequencer)
-            sequencer.keyboard_connected = True
-
-    def disconnect_sequencer(self, sequencer):
-        """Unlink this keyboard from a sequencer.
-
-        Args:
-            sequencer: A ``SequencerWidget`` to disconnect.
-        """
-        if sequencer in self._connected_sequencers:
-            self._connected_sequencers.remove(sequencer)
-            sequencer.keyboard_connected = False
-
-    def connect_sampler(
-        self,
-        sampler,
-        zone=None,
-        octave=None,
-        note=None,
-        notes=None,
-    ):
-        """Connect a sampler to the keyboard.
-
-        Args:
-            sampler: The ``SamplerWidget`` to connect.
-            zone: ``"upper"``, ``"lower"``, or ``None`` (whole keyboard).
-            octave: Route all notes in this MIDI octave (0–9).
-            note: Route a single MIDI note (0–127).
-            notes: Route specific MIDI notes.
-        """
-        # Build and validate route BEFORE mutating connection state
-        route = _build_route(sampler.channel_index, zone=zone, octave=octave, note=note, notes=notes)
-        if sampler not in self._connected_samplers:
-            self._connected_samplers.append(sampler)
-            sampler.keyboard_connected = True
-        routing = [r for r in self.sampler_routing if r.get("channel_index") != sampler.channel_index]
-        routing.append(route.to_dict())
-        self.sampler_routing = routing
-
-    def disconnect_sampler(self, sampler):
-        """Disconnect a sampler.
-
-        Args:
-            sampler: The ``SamplerWidget`` to disconnect.
-        """
-        if sampler in self._connected_samplers:
-            self._connected_samplers.remove(sampler)
-            sampler.keyboard_connected = False
-            routing = [r for r in self.sampler_routing if r.get("channel_index") != sampler.channel_index]
-            self.sampler_routing = routing
-
-
-class MidiKeyboardWidget(KeyboardWidget):
-    """Browser Web MIDI keyboard input widget.
-
-    Uses the same sequencer and sampler connection API as
-    ``KeyboardWidget``, but receives note events from a
-    selected browser MIDI input device.
-    """
-
-    _esm = _STATIC / "midi_keyboard.js"
-    _css = _STATIC / "nbplay.css"
-
-    midi_port = traitlets.Unicode("").tag(sync=True)
-    available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
-
-    # Last control change received: ``{"controller", "value", "channel", "seq"}``.
-    # ``seq`` increases per message so repeated identical values still notify.
-    control_change = traitlets.Dict({}).tag(sync=True)
-    # Follow the device's MIDI clock: start/stop/continue and song position
-    # drive the session clock, and the tick rate sets its tempo.
-    sync_clock = traitlets.Bool(False).tag(sync=True)
-    # Tempo measured from incoming clock ticks (0 until a beat has arrived).
-    clock_bpm = traitlets.Float(0.0).tag(sync=True)
-
-
-class MidiOutputWidget(_Themed, anywidget.AnyWidget):
-    """Send notes and control changes to a browser Web MIDI output port.
-
-    With a ``session_id`` the widget forwards every note the session plays
-    (keyboards, sequencers, launcher slots, MIDI clips) to the selected
-    port, at the scheduled time. Without one it forwards the notes that
-    keyboards and pads broadcast. ``forward_notes`` switches that off so
-    only messages sent from Python go out.
-    """
-
-    _esm = _STATIC / "midi_output.js"
-    _css = _STATIC / "nbplay.css"
-
-    session_id = traitlets.Unicode("").tag(sync=True)
-    midi_port = traitlets.Unicode("").tag(sync=True)
-    available_midi_ports = traitlets.List(traitlets.Unicode(), []).tag(sync=True)
-    channel = traitlets.Int(0, min=0, max=15).tag(sync=True)
-    forward_notes = traitlets.Bool(True).tag(sync=True)
-    # Act as MIDI clock leader: 24 ticks per beat plus start, continue, stop,
-    # and song position, scheduled from the session clock.
-    send_clock = traitlets.Bool(False).tag(sync=True)
-    send_request = traitlets.Dict({}).tag(sync=True)
-
-    def _request(self, **message):
-        message["nonce"] = self.send_request.get("nonce", 0) + 1
-        self.send_request = message
-
-    def note_on(self, note, velocity=100):
-        """Send a note-on on the widget's channel."""
-        self._request(kind="note_on", note=_clamp_midi_note(note), velocity=max(1, _clamp_velocity(velocity)))
-
-    def note_off(self, note):
-        """Send a note-off on the widget's channel."""
-        self._request(kind="note_off", note=_clamp_midi_note(note))
-
-    def control_change(self, controller, value):
-        """Send a control change (0-127) on the widget's channel."""
-        self._request(kind="control_change", controller=_clamp_int(controller, 0, 127), value=_clamp_int(value, 0, 127))
-
-    def send_raw(self, data):
-        """Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""
-        data = [_clamp_int(b, 0, 255) for b in data]
-        if not data:
-            raise ValueError("MIDI message must not be empty")
-        self._request(kind="raw", data=data)
-
-
-class PadWidget(_Themed, anywidget.AnyWidget):
-    """On-screen trigger-pad grid.
-
-    A grid of clickable, velocity-sensitive pads that send MIDI notes
-    through the session bus, using the same ``sampler_routing``
-    infrastructure as ``KeyboardWidget``. Falls back to a built-in
-    sine-wave oscillator when no sampler is connected.
-
-    Args:
-        rows: Number of pad rows (default 4).
-        cols: Number of pad columns (default 4).
-        velocity: Default velocity for pad triggers (1–127).
-        velocity_sensitive: If True, vertical click position maps to
-            velocity (top = soft, bottom = hard).
-        pad_notes: MIDI note assignments (row-major). Defaults to
-            [36, 37, ...] starting at C2.
-        pad_velocities: Per-pad velocity values (1–127). Shift+scroll
-            on a pad adjusts its individual velocity.
-    """
-
-    _esm = _STATIC / "pad.js"
-    _css = _STATIC / "nbplay.css"
-
-    rows = traitlets.Int(4).tag(sync=True)
-    cols = traitlets.Int(4).tag(sync=True)
-    velocity = traitlets.Int(100).tag(sync=True)
-    velocity_sensitive = traitlets.Bool(True).tag(sync=True)
-    pad_notes = traitlets.List(trait=traitlets.Int()).tag(sync=True)
-    pad_velocities = traitlets.List(trait=traitlets.Int()).tag(sync=True)
-    pad_actions = traitlets.List(trait=traitlets.Dict()).tag(sync=True)
-    active_pads = traitlets.List(trait=traitlets.Int(), default_value=[]).tag(sync=True)
-    last_note_event = traitlets.Dict(default_value={}).tag(sync=True)
-    last_pad_event = traitlets.Dict(default_value={}).tag(sync=True)
-
-    # Session routing (same API as KeyboardWidget)
-    session_id = traitlets.Unicode("").tag(sync=True)
-    channel_index = traitlets.Int(-1).tag(sync=True)
-    sampler_routing = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(sync=True)
-
-    _connected_samplers: list
-
-    @traitlets.validate("velocity")
-    def _validate_velocity(self, proposal):
-        return max(1, min(127, int(proposal["value"])))
-
-    @traitlets.validate("rows", "cols")
-    def _validate_grid_dimension(self, proposal):
-        return _positive_pad_dimension(proposal["value"])
-
-    @traitlets.validate("pad_notes")
-    def _validate_pad_notes(self, proposal):
-        return [max(0, min(127, int(n))) for n in proposal["value"]]
-
-    @traitlets.validate("pad_velocities")
-    def _validate_pad_velocities(self, proposal):
-        return [max(1, min(127, int(v))) for v in proposal["value"]]
-
-    @traitlets.validate("pad_actions")
-    def _validate_pad_actions(self, proposal):
-        return _normalize_pad_actions(
-            proposal["value"],
-            self.rows * self.cols,
-            self.pad_notes,
-            self.pad_velocities,
-        )
-
-    def __init__(self, **kwargs):
-        rows = _positive_pad_dimension(kwargs.get("rows", 4))
-        cols = _positive_pad_dimension(kwargs.get("cols", 4))
-        kwargs["rows"] = rows
-        kwargs["cols"] = cols
-        if "pad_notes" not in kwargs:
-            kwargs["pad_notes"] = _default_pad_notes(rows, cols)
-        velocity = kwargs.get("velocity", 100)
-        if "pad_velocities" not in kwargs:
-            total = rows * cols
-            if "pad_notes" in kwargs:
-                total = max(total, len(kwargs["pad_notes"]))
-            kwargs["pad_velocities"] = [velocity] * total
-        if "pad_actions" not in kwargs:
-            kwargs["pad_actions"] = _normalize_pad_actions(
-                [],
-                rows * cols,
-                kwargs["pad_notes"],
-                kwargs["pad_velocities"],
-            )
-        super().__init__(**kwargs)
-        self._connected_samplers = []
-
-    @traitlets.observe("rows", "cols")
-    def _on_grid_change(self, change):
-        """Resize pad_notes and pad_velocities when grid dimensions change."""
-        total = self.rows * self.cols
-        velocity = self.velocity
-
-        current_notes = list(self.pad_notes)
-        if len(current_notes) < total:
-            last = current_notes[-1] if current_notes else 35
-            current_notes.extend(last + 1 + i for i in range(total - len(current_notes)))
-        elif len(current_notes) > total:
-            current_notes = current_notes[:total]
-
-        current_vels = list(self.pad_velocities)
-        if len(current_vels) < total:
-            current_vels.extend(velocity for _ in range(total - len(current_vels)))
-        elif len(current_vels) > total:
-            current_vels = current_vels[:total]
-
-        if list(self.pad_notes) != current_notes:
-            self.pad_notes = current_notes
-        if list(self.pad_velocities) != current_vels:
-            self.pad_velocities = current_vels
-        actions = _normalize_pad_actions(self.pad_actions, total, current_notes, current_vels, prefer_defaults=True)
-        if list(self.pad_actions) != actions:
-            self.pad_actions = actions
-
-    @traitlets.observe("pad_notes", "pad_velocities")
-    def _on_pad_values_change(self, change):
-        total = self.rows * self.cols
-        actions = _normalize_pad_actions(
-            self.pad_actions,
-            total,
-            self.pad_notes,
-            self.pad_velocities,
-            prefer_defaults=True,
-        )
-        if list(self.pad_actions) != actions:
-            self.pad_actions = actions
-
-    @traitlets.observe("velocity")
-    def _on_velocity_change(self, change):
-        if change.get("old", traitlets.Undefined) is traitlets.Undefined:
-            return
-        total = self.rows * self.cols
-        count = max(total, len(self.pad_velocities))
-        velocities = [self.velocity] * count
-        if list(self.pad_velocities) != velocities:
-            self.pad_velocities = velocities
-        actions = _normalize_pad_actions(
-            self.pad_actions,
-            total,
-            self.pad_notes,
-            self.pad_velocities,
-            prefer_defaults=True,
-        )
-        if list(self.pad_actions) != actions:
-            self.pad_actions = actions
-
-    def configure_grid_for_actions(self, notes=None, velocities=None, actions=None, rows=None, cols=None):
-        """Configure pad grid from note/control actions.
-
-        Args:
-            notes: MIDI note assignments.
-            velocities: Per-pad velocity values.
-            actions: ``PadAction`` descriptors.
-            rows: Grid row count.
-            cols: Grid column count.
-
-        Returns:
-            Self for chaining.
-        """
-        explicit_count = max(len(actions or []), len(notes or []), len(velocities or []))
-        count = explicit_count or len(self.pad_notes)
-        count = max(1, count)
-        if cols is None:
-            cols = min(4, count)
-        if rows is None:
-            rows = max(1, (count + cols - 1) // cols)
-        self.rows = _positive_pad_dimension(rows)
-        self.cols = _positive_pad_dimension(cols)
-        total = self.rows * self.cols
-        if notes is not None:
-            self.pad_notes = _resize_pad_notes(notes, total)
-        if velocities is not None:
-            self.pad_velocities = _resize_pad_velocities(velocities, total, self.velocity)
-        else:
-            self.pad_velocities = _resize_pad_velocities(self.pad_velocities, total, self.velocity)
-        self.pad_actions = _normalize_pad_actions(actions, total, self.pad_notes, self.pad_velocities)
-        return self
-
-    def set_base_note(self, note):
-        """Set pads to ascending chromatic notes.
-
-        Args:
-            note: Starting MIDI note.
-
-        Returns:
-            Self for chaining.
-        """
-        start = _clamp_midi_note(note)
-        self.pad_notes = [_clamp_midi_note(start + i) for i in range(self.rows * self.cols)]
-        return self
-
-    def transpose_pads(self, semitones):
-        """Transpose current note pads by semitones.
-
-        Args:
-            semitones: Number of semitones to transpose (positive or negative).
-
-        Returns:
-            Self for chaining.
-        """
-        delta = int(semitones)
-        self.pad_notes = [_clamp_midi_note(note + delta) for note in self.pad_notes]
-        return self
-
-    def connect_sampler(self, sampler, **kwargs):
-        """Connect a sampler to all pads.
-
-        Uses the same ``KeyboardRoute`` routing model as
-        ``KeyboardWidget.connect_sampler``. By default routes
-        all pads to the sampler (``match="all"``).
-
-        Pads do not have keyboard zones; ``zone="upper"`` and
-        ``zone="lower"`` raise ``ValueError``. Use
-        ``match="all"``, ``match="octave"``, ``match="note"``,
-        or ``match="notes"`` instead.
-
-        Args:
-            sampler: The ``SamplerWidget`` to connect.
-            **kwargs: Passed to ``KeyboardRoute``.
-        """
-        # Pads don't have zones — validate before mutating state
-        zone = kwargs.get("zone")
-        if zone is not None and zone != "all":
-            raise ValueError(f"PadWidget does not support zone routing (got zone={zone!r}). Use match='all', 'octave', 'note', or 'notes'.")
-        route = _build_route(sampler.channel_index, **kwargs)
-        if sampler not in self._connected_samplers:
-            self._connected_samplers.append(sampler)
-            sampler.keyboard_connected = True
-        routing = [r for r in self.sampler_routing if r.get("channel_index") != sampler.channel_index]
-        routing.append(route.to_dict())
-        self.sampler_routing = routing
-
-    def disconnect_sampler(self, sampler):
-        """Disconnect a sampler from the pads.
-
-        Args:
-            sampler: The ``SamplerWidget`` to disconnect.
-        """
-        if sampler in self._connected_samplers:
-            self._connected_samplers.remove(sampler)
-            sampler.keyboard_connected = False
-            routing = [r for r in self.sampler_routing if r.get("channel_index") != sampler.channel_index]
-            self.sampler_routing = routing
-
-
-class Track:
-    """A session lane: a mixer channel plus an optional instrument.
-
-    A track may carry a sequencer and a sound source (an instrument
-    lane), only a sound source (a sampler or keyboard lane), or neither
-    (an audio lane that records from the microphone into the timeline).
-    When a sequencer is present, ``traitlets.link()`` propagates BPM
-    and play state from the ``Session`` transport to it.
-
-    Args:
-        name: Track display name.
-        sequencer: A ``SequencerWidget`` or ``None``.
-        sound_source: A widget that produces audio, or ``None``.
-        mixer_channel: Zero-based mixer channel index.
-    """
-
-    def __init__(self, name, sequencer=None, sound_source=None, mixer_channel=0):
-        self.name = name
-        self.sequencer = sequencer
-        self.sound_source = sound_source
-        self.mixer_channel = mixer_channel
-        self._links = []
-
-    def _link_transport(self, transport):
-        """Link this track's sequencer BPM and play state to the transport.
-
-        BPM is bidirectional so editing BPM on either widget stays
-        in sync. ``is_playing`` is one-directional (transport →
-        sequencer) so a single non-looping sequencer reaching its
-        end does not stop every other sequencer. Tracks without a
-        sequencer have nothing to link.
-
-        Args:
-            transport: A ``TransportWidget``.
-        """
-        if self.sequencer is None:
-            return
-        self._links.append(traitlets.link((transport, "bpm"), (self.sequencer, "bpm")))
-        self._links.append(traitlets.link((transport, "time_signature_num"), (self.sequencer, "time_signature_num")))
-        self._links.append(traitlets.link((transport, "time_signature_den"), (self.sequencer, "time_signature_den")))
-        self._links.append(traitlets.dlink((transport, "is_playing"), (self.sequencer, "is_playing")))
-
-    def _unlink(self):
-        """Remove all traitlets links."""
-        for lnk in self._links:
-            lnk.unlink()
-        self._links.clear()
-
-    def __repr__(self):
-        src_type = type(self.sound_source).__name__ if self.sound_source is not None else "audio"
-        return f"Track({self.name!r}, ch={self.mixer_channel}, source={src_type})"
-
-
-class Session:
-    """A collection of tracks with a shared transport and mixer.
-
-    Manages ``traitlets.link`` connections between the transport
-    and all track sequencers, and assigns mixer channels for
-    audio routing.
-
-    Args:
-        bpm: Initial tempo in beats per minute.
-        time_signature: ``(numerator, denominator)`` tuple.
-    """
-
-    def __init__(self, bpm=120.0, time_signature=(4, 4), theme=""):
-        self._session_id = f"nbplay-{uuid.uuid4().hex[:8]}"
-        self._theme = ""
-        self.transport = TransportWidget(
-            session_id=self._session_id,
-            bpm=bpm,
-            time_signature_num=time_signature[0],
-            time_signature_den=time_signature[1],
-        )
-        self.mixer = MixerWidget(session_id=self._session_id)
-        self.timeline = TimelineWidget(
-            session_id=self._session_id,
-            bpm=bpm,
-            time_signature_num=time_signature[0],
-            time_signature_den=time_signature[1],
-        )
-        self.launcher = LauncherWidget(
-            session_id=self._session_id,
-            bpm=bpm,
-            time_signature_num=time_signature[0],
-            time_signature_den=time_signature[1],
-        )
-        # Play state and position are status owned by the transport: the
-        # other widgets mirror it one way and never command the clock
-        # through these traits (browser actions go through the shared clock).
-        self._launcher_links = [
-            traitlets.link((self.transport, "bpm"), (self.launcher, "bpm")),
-            traitlets.link((self.transport, "time_signature_num"), (self.launcher, "time_signature_num")),
-            traitlets.link((self.transport, "time_signature_den"), (self.launcher, "time_signature_den")),
-            traitlets.dlink((self.transport, "is_playing"), (self.launcher, "is_playing")),
-        ]
-        self._timeline_links = [
-            traitlets.link((self.transport, "bpm"), (self.timeline, "bpm")),
-            traitlets.link((self.transport, "time_signature_num"), (self.timeline, "time_signature_num")),
-            traitlets.link((self.transport, "time_signature_den"), (self.timeline, "time_signature_den")),
-            traitlets.dlink((self.transport, "is_playing"), (self.timeline, "is_playing")),
-            traitlets.dlink((self.transport, "is_recording"), (self.timeline, "is_recording")),
-            traitlets.dlink((self.transport, "current_beat"), (self.timeline, "current_beat")),
-        ]
-        self.tracks = []
-        # Named patterns for the tracking view: name -> {voices_data, step_duration}.
-        self.patterns = {}
-        self.theme = theme
-        # Undo/redo over every session widget's state; new tracks attach their
-        # sequencer and sound source as they are added.
-        self.history = History()
-        for widget in (self.transport, self.mixer, self.timeline, self.launcher):
-            self.history.attach(widget)
-        self.transport.observe(lambda change: self.undo(), names="undo_request")
-        self.transport.observe(lambda change: self.redo(), names="redo_request")
-        self.history.bind_ipython()
-        # Lane mute/solo and mixer channel mute/solo are the same control
-        # from the user's side; keep them mirrored by channel index.
-        self._mirroring_mute_solo = False
-        self.timeline.observe(self._on_timeline_tracks, names="tracks")
-        self.mixer.observe(self._on_mixer_channels, names="channels")
-
-    def _on_timeline_tracks(self, change):
-        if self._mirroring_mute_solo:
-            return
-        channels = [dict(channel) for channel in self.mixer.channels]
-        changed = False
-        for track in change["new"] or []:
-            index = int(track.get("channel_index", -1))
-            if 0 <= index < len(channels):
-                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
-                    value = bool(track.get(lane_key, False))
-                    if channels[index].get(channel_key) != value:
-                        channels[index][channel_key] = value
-                        changed = True
-        if changed:
-            self._mirroring_mute_solo = True
-            try:
-                self.mixer.channels = channels
-            finally:
-                self._mirroring_mute_solo = False
-
-    def _on_mixer_channels(self, change):
-        if self._mirroring_mute_solo:
-            return
-        channels = change["new"] or []
-        tracks = [dict(track) for track in self.timeline.tracks]
-        changed = False
-        for track in tracks:
-            index = int(track.get("channel_index", -1))
-            if 0 <= index < len(channels):
-                for lane_key, channel_key in (("muted", "mute"), ("solo", "solo")):
-                    value = bool(channels[index].get(channel_key, False))
-                    if track.get(lane_key) != value:
-                        track[lane_key] = value
-                        changed = True
-        if changed:
-            self._mirroring_mute_solo = True
-            try:
-                self.timeline.tracks = tracks
-            finally:
-                self._mirroring_mute_solo = False
-
-    @property
-    def session_id(self):
-        """Identifier shared by every widget on this session's browser bus."""
-        return self._session_id
-
-    # Undo / redo
-
-    def undo(self):
-        """Revert the latest change to any session widget; False when nothing to undo."""
-        return self.history.undo()
-
-    def redo(self):
-        """Reapply the latest undone change; False when nothing to redo."""
-        return self.history.redo()
-
-    def play(self):
-        """Start the shared transport."""
-        self.transport.play()
-
-    def stop(self):
-        """Stop the shared transport, keeping the playhead position."""
-        self.transport.stop()
-
-    def seek(self, beat):
-        """Move the shared playhead to ``beat`` (quarter-note units)."""
-        self.transport.seek(beat)
-
-    def add_track(self, name, sequencer=None, sound_source=None, *, input=None, armed=False):
-        """Add a track, create a mixer channel, and link transport state.
-
-        Every track gets a mixer channel and a timeline lane. Tracks with
-        an instrument (a sequencer and/or a sound source) default their
-        timeline input to ``"channel"`` so the instrument's output can be
-        bounced to audio; tracks with neither default to ``"microphone"``.
-
-        Args:
-            name: Track display name.
-            sequencer: A ``SequencerWidget``, or ``None`` for a lane
-                without a step sequencer.
-            sound_source: A widget that produces audio, or ``None`` for
-                an audio-only lane.
-            input: Timeline record source, ``"microphone"`` or
-                ``"channel"``. Defaults by instrument presence.
-            armed: Arm the timeline lane for recording.
-
-        Returns:
-            The new ``Track`` object.
-        """
-        with self.history.paused():
-            return self._add_track(name, sequencer, sound_source, input=input, armed=armed)
-
-    def _add_track(self, name, sequencer, sound_source, *, input, armed):
-        channel_idx = self.mixer.add_channel(name)
-        track = Track(name, sequencer, sound_source, channel_idx)
-        track._link_transport(self.transport)
-        # Set audio routing metadata so JS can route through mixer
-        if sequencer is not None:
-            sequencer.session_id = self._session_id
-            sequencer.channel_index = channel_idx
-        # Also set routing on sound source (e.g. SamplerWidget) so it
-        # can register on the session bus for keyboard integration.
-        if hasattr(sound_source, "session_id"):
-            sound_source.session_id = self._session_id
-        if hasattr(sound_source, "channel_index"):
-            sound_source.channel_index = channel_idx
-        for widget in (sequencer, sound_source):
-            if isinstance(widget, _Themed):
-                widget.theme = self._theme
-        self.tracks.append(track)
-        if input is None:
-            input = "channel" if (sequencer is not None or sound_source is not None) else "microphone"
-        self.timeline.add_track(name, channel_idx, armed=armed, input=input)
-        self.launcher.add_track(name, channel_idx)
-        self.history.attach(sequencer)
-        self.history.attach(sound_source)
-        return track
-
-    def remove_track(self, index):
-        """Remove a track, unlinking transport and removing mixer channel.
-
-        Args:
-            index: Zero-based track index.
-        """
-        if not 0 <= index < len(self.tracks):
-            return
-        with self.history.paused():
-            track = self.tracks.pop(index)
-            track._unlink()
-            self.history.detach(track.sequencer)
-            self.history.detach(track.sound_source)
-            # Clear routing metadata
-            if track.sequencer is not None:
-                track.sequencer.session_id = ""
-                track.sequencer.channel_index = -1
-            if hasattr(track.sound_source, "session_id"):
-                track.sound_source.session_id = ""
-            if hasattr(track.sound_source, "channel_index"):
-                track.sound_source.channel_index = -1
-            self.mixer.remove_channel(track.mixer_channel)
-            self.timeline.remove_track(index)
-            self._remove_launcher_track(index)
-            # Adjust mixer_channel indices for remaining tracks
-            for t in self.tracks:
-                if t.mixer_channel > track.mixer_channel:
-                    t.mixer_channel -= 1
-                    if t.sequencer is not None:
-                        t.sequencer.channel_index -= 1
-                    if hasattr(t.sound_source, "channel_index"):
-                        t.sound_source.channel_index -= 1
-
-    # Pattern chaining
-
-    def _track_index(self, track):
-        if isinstance(track, Track):
-            index = self.tracks.index(track)
-        elif isinstance(track, str):
-            names = [item.name for item in self.tracks]
-            if track not in names:
-                raise ValueError(f"no track named {track!r}")
-            index = names.index(track)
-        else:
-            index = int(track)
-            if not 0 <= index < len(self.tracks):
-                raise IndexError(f"track index out of range: {index}")
-        return index
-
-    def add_pattern(self, name, pattern, step_duration=None):
-        """Register a named pattern for chaining; returns its stored form.
-
-        ``pattern`` is a ``SequencerWidget`` (its grid and step duration are
-        used), a ``NoteComposer``, a list of step dicts, or a list of voices.
-        """
-        voices = _slot_voices(pattern)
-        if step_duration is None:
-            step_duration = pattern.step_duration if isinstance(pattern, SequencerWidget) else 0.25
-        length = max(len(voice) for voice in voices)
-        entry = {
-            "voices_data": [[dict(step) for step in voice] + _default_steps(length - len(voice)) for voice in voices],
-            "step_duration": _positive_number(step_duration, "step_duration", minimum=0.001, maximum=16.0),
-        }
-        self.patterns[str(name)] = entry
-        return entry
-
-    def remove_pattern(self, name):
-        """Forget a pattern; clips already placed keep playing as MIDI clips."""
-        del self.patterns[str(name)]
-
-    def chain(self, track, names, start=0.0, repeat=1):
-        """Place named patterns back to back on a track's lane; returns the clips.
-
-        Each name becomes one pattern clip that plays ``repeat`` times. A
-        track with a sequencer stops following the transport
-        (``follow_transport = False``) so the arrangement drives it; the
-        clips play through the track's sampler or the built-in oscillator.
-        """
-        index = self._track_index(track)
-        item = self.tracks[index]
-        missing = [name for name in names if str(name) not in self.patterns]
-        if missing:
-            raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
-        with self.history.transaction():
-            return self._chain(item, index, names, start, repeat)
-
-    def _chain(self, item, index, names, start, repeat):
-        if item.sequencer is not None:
-            item.sequencer.follow_transport = False
-        clips = []
-        position = _nonnegative_number(start, "start")
-        for name in names:
-            pattern = self.patterns[str(name)]
-            clip = self.timeline.add_pattern_clip(
-                str(name),
-                pattern["voices_data"],
-                track_index=index,
-                start=position,
-                step_duration=pattern["step_duration"],
-                repeat=repeat,
-            )
-            clips.append(clip)
-            position += clip["duration"]
-        end = max(self.timeline.length, math.ceil(position))
-        self.timeline.length = max(self.timeline.length, end)
-        return clips
-
-    def update_pattern(self, name, pattern, step_duration=None):
-        """Replace a pattern and regenerate every clip placed from it."""
-        name = str(name)
-        entry = self.add_pattern(name, pattern, step_duration=step_duration)
-        with self.history.transaction():
-            self._regenerate_pattern_clips(name, entry)
-        return entry
-
-    def _regenerate_pattern_clips(self, name, entry):
-        scratch = TimelineWidget()
-        clips = []
-        for clip in self.timeline.clips:
-            if clip.get("pattern") != name:
-                clips.append(clip)
-                continue
-            length = max(len(voice) for voice in entry["voices_data"]) * entry["step_duration"]
-            repeat = max(1, round(clip["duration"] / length)) if length > 0 else 1
-            rebuilt = scratch.add_pattern_clip(
-                name,
-                entry["voices_data"],
-                track_index=clip["track_index"],
-                start=clip["start"],
-                step_duration=entry["step_duration"],
-                repeat=repeat,
-                duration=clip["duration"],
-                id=clip["id"],
-                muted=clip.get("muted", False),
-            )
-            clips.append(rebuilt)
-        self.timeline.clips = clips
-
-    # MIDI files
-
-    def export_midi(self, path=None):
-        """Export the session's sequencer patterns and MIDI clips as one MIDI file.
-
-        Each sequencer track becomes one MIDI track from beat 0; each MIDI
-        clip becomes one MIDI track placed at its timeline position. Returns
-        the ``mido.MidiFile`` (written to ``path`` if given).
-        """
-        from nbplay.midi import build_midi, steps_to_events
-
-        tracks = []
-        for track in self.tracks:
-            if track.sequencer is not None:
-                events = steps_to_events(track.sequencer.voices_data, track.sequencer.step_duration)
-                tracks.append({"name": track.name, "events": events, "channel": min(15, max(0, track.mixer_channel))})
-        for clip in self.timeline.clips:
-            if clip.get("kind") == "midi" and clip.get("events"):
-                offset = float(clip.get("offset", 0.0))
-                events = [
-                    {**event, "beat": clip["start"] + event["beat"] - offset}
-                    for event in clip["events"]
-                    if event["beat"] >= offset and event["beat"] - offset < clip["duration"]
-                ]
-                lane = self.timeline.tracks[clip["track_index"]] if clip["track_index"] < len(self.timeline.tracks) else {}
-                channel = min(15, max(0, int(lane.get("channel_index", 0))))
-                tracks.append({"name": clip["name"], "events": events, "channel": channel})
-        midi = build_midi(
-            tracks,
-            bpm=self.transport.bpm,
-            time_signature=(self.transport.time_signature_num, self.transport.time_signature_den),
-        )
-        if path is not None:
-            midi.save(os.fspath(path))
-        return midi
-
-    def import_midi(self, source, *, apply_tempo=True):
-        """Add one MIDI lane per MIDI track with notes, each holding the track as a clip.
-
-        Returns the new ``Track`` objects. With ``apply_tempo`` the file's
-        tempo and time signature are written to the transport.
-        """
-        from nbplay.midi import read_midi
-
-        data = read_midi(source)
-        added = []
-        # Adding tracks is structural, so the whole import stays out of the history.
-        with self.history.paused():
-            if apply_tempo:
-                self.transport.bpm = data["bpm"]
-                self.transport.time_signature_num, self.transport.time_signature_den = data["time_signature"]
-            for item in data["tracks"]:
-                track = self.add_track(item["name"], input="midi")
-                self.timeline.add_midi_clip(item["name"], track_index=len(self.timeline.tracks) - 1, start=0.0, events=item["events"])
-                added.append(track)
-        return added
-
-    # Persistence
-
-    def to_dict(self):
-        """Serialize the session to a JSON-safe dict (no binary payloads).
-
-        Sampler audio and timeline clip audio are written separately by
-        :meth:`save`; this dict references them by archive path.
-        """
-        return _session_to_dict(self)
-
-    def save(self, path):
-        """Write the session to a ``.nbplay`` zip archive.
-
-        The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
-        little-endian float32) and ``clips/`` (timeline clip audio that has
-        arrived from the browser; call ``session.timeline.export_all_clips()``
-        first and wait for ``pending_exports`` to reach zero).
-
-        Returns:
-            The path written.
-        """
-        data, resources = _session_to_dict(self, resources={})
-        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr("session.json", json.dumps(data, indent=1))
-            for name, payload in resources.items():
-                archive.writestr(name, payload)
-        return path
-
-    @classmethod
-    def load(cls, path):
-        """Rebuild a session from an archive written by :meth:`save`."""
-        with zipfile.ZipFile(path) as archive:
-            data = json.loads(archive.read("session.json"))
-            resources = {name: archive.read(name) for name in archive.namelist() if name != "session.json"}
-        return cls.from_dict(data, resources)
-
-    @classmethod
-    def from_dict(cls, data, resources=None):
-        """Rebuild a session from :meth:`to_dict` output plus binary resources."""
-        return _session_from_dict(cls, data, resources or {})
-
-    @property
-    def theme(self):
-        """Theme set applied to every widget in the session (see ``THEMES``)."""
-        return self._theme
-
-    @theme.setter
-    def theme(self, value):
-        if value not in THEMES:
-            raise ValueError(f"theme must be one of {THEMES}, got {value!r}")
-        self._theme = value
-        for widget in self._widgets():
-            widget.theme = value
-
-    def _widgets(self):
-        widgets = [self.transport, self.mixer, self.timeline, self.launcher]
-        for track in self.tracks:
-            for widget in (track.sequencer, track.sound_source):
-                if isinstance(widget, _Themed):
-                    widgets.append(widget)
-        return widgets
-
-    def _remove_launcher_track(self, index):
-        launcher = self.launcher
-        if index < 0 or index >= len(launcher.tracks):
-            return
-        removed_channel = launcher.tracks[index]["channel_index"]
-        tracks = []
-        for i, track in enumerate(launcher.tracks):
-            if i == index:
-                continue
-            item = dict(track)
-            if removed_channel >= 0 and item["channel_index"] > removed_channel:
-                item["channel_index"] -= 1
-            tracks.append(item)
-        slots = []
-        for slot in launcher.slots:
-            if slot["track_index"] == index:
-                continue
-            item = dict(slot)
-            if item["track_index"] > index:
-                item["track_index"] -= 1
-            slots.append(item)
-        launcher.tracks = tracks
-        launcher.slots = slots
-        launcher.active_slots = [v for i, v in enumerate(launcher.active_slots) if i != index]
-        launcher.queued_slots = [v for i, v in enumerate(launcher.queued_slots) if i != index]
-        if launcher.selected_slot.get("track_index") == index:
-            launcher.selected_slot = {}
-
-    def __repr__(self):
-        return f"Session(bpm={self.transport.bpm}, tracks={len(self.tracks)}, channels={len(self.mixer.channels)})"

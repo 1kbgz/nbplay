@@ -1,70 +1,49 @@
-"""Map hardware MIDI controllers to widget traits.
+"""Map hardware MIDI controllers to widget config fields.
 
-``MidiLearn`` watches the ``control_change`` trait of a ``MidiKeyboardWidget``
-and writes each mapped controller's value into a trait of any widget. Knob
-values travel through the kernel, which is fine for controls but not for
+``MidiLearn`` watches the ``control_change`` status of a ``MidiKeyboardWidget``
+and writes each mapped controller's value into a config field of any widget.
+Knob values travel through the kernel, which is fine for controls but not for
 note timing; notes stay in the browser.
 """
 
 from __future__ import annotations
 
-import traitlets
-
 
 def _field_kind(target, name):
-    """``bool``, ``int`` or ``float`` for a numeric trait of a widget or config field of a view."""
-    model_fields = getattr(type(getattr(target, "config", None)), "model_fields", None)
-    if model_fields is not None:
-        field = model_fields.get(name)
-        if field is None:
-            raise ValueError(f"{type(target).__name__} has no field {name!r}")
-        if field.annotation in (bool, int, float):
-            return field.annotation
-        raise TypeError(f"field {name!r} is not bool, int, or float")
-    trait = target.traits().get(name)
-    if trait is None:
-        raise ValueError(f"{type(target).__name__} has no trait {name!r}")
-    for kind, trait_type in ((bool, traitlets.Bool), (int, traitlets.Int), (float, traitlets.Float)):
-        if isinstance(trait, trait_type):
-            return kind
-    raise TypeError(f"trait {name!r} is not a Bool, Int, or Float trait")
-
-
-def _assign(target, name, value):
-    config = getattr(target, "config", None)
-    setattr(config if hasattr(type(config), "model_fields") else target, name, value)
+    """``bool``, ``int`` or ``float`` for a numeric config field of a widget."""
+    field = type(target.config).model_fields.get(name)
+    if field is None:
+        raise ValueError(f"{type(target).__name__} has no field {name!r}")
+    if field.annotation in (bool, int, float):
+        return field.annotation
+    raise TypeError(f"field {name!r} is not bool, int, or float")
 
 
 class MidiLearn:
-    """Route MIDI control changes to widget traits or view config fields.
+    """Route MIDI control changes to widget config fields.
 
     Args:
-        source: A widget with a synced ``control_change`` trait
-            (``MidiKeyboardWidget``) or a view whose status has one
-            (``MidiKeyboardView``).
+        source: A widget whose status has a ``control_change`` field
+            (``MidiKeyboardWidget``).
 
     ``map()`` binds a controller number now; ``learn()`` binds the next
     controller the hardware sends, so you can call it and turn the knob.
-    Bool traits switch on at values of 64 and above. Numeric traits scale
+    Bool fields switch on at values of 64 and above. Numeric fields scale
     the 0-127 value into ``[low, high]``, which default to 0-1 for floats
     and 0-127 for ints.
     """
 
     def __init__(self, source):
         status = getattr(source, "status", None)
-        if hasattr(source, "on_change") and "control_change" in getattr(type(status), "model_fields", {}):
-            self._stop = source.on_change(lambda view, name, old, new: self._handle(new), names="control_change")
-        elif hasattr(source, "trait_names") and "control_change" in source.trait_names():
-            source.observe(self._on_control_change, names="control_change")
-            self._stop = lambda: source.unobserve(self._on_control_change, names="control_change")
-        else:
-            raise TypeError("MidiLearn source needs a 'control_change' trait")
+        if not hasattr(source, "on_change") or "control_change" not in getattr(type(status), "model_fields", {}):
+            raise TypeError("MidiLearn source needs a 'control_change' status field")
+        self._stop = source.on_change(lambda widget, name, old, new: self._handle(new), names="control_change")
         self.source = source
         self.mappings = {}
         self._pending = None
 
     def map(self, controller, target, name, low=None, high=None, channel=None):
-        """Bind ``controller`` (0-127) to ``target.<name>``; returns the mapping."""
+        """Bind ``controller`` (0-127) to ``target.config.<name>``; returns the mapping."""
         controller = int(controller)
         if not 0 <= controller <= 127:
             raise ValueError("controller must be 0-127")
@@ -89,7 +68,7 @@ class MidiLearn:
         return mapping
 
     def learn(self, target, name, low=None, high=None):
-        """Bind ``target.<name>`` to the next controller the hardware sends."""
+        """Bind ``target.config.<name>`` to the next controller the hardware sends."""
         _field_kind(target, name)
         self._pending = (target, name, low, high)
 
@@ -131,11 +110,8 @@ class MidiLearn:
             result = low + (high - low) * value / 127
             if kind is int:
                 result = round(result)
-        _assign(mapping["target"], mapping["name"], result)
+        setattr(mapping["target"].config, mapping["name"], result)
         return result
-
-    def _on_control_change(self, change):
-        self._handle(change["new"])
 
     def _handle(self, message):
         message = message or {}

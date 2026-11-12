@@ -1,4 +1,4 @@
-"""Pydantic models behind the transports-backed views (:mod:`nbplay.views`).
+"""Pydantic models behind the widgets in :mod:`nbplay.widget`.
 
 Each widget splits into a config model the kernel owns and validates, and a
 status model the browser owns (hosted with ``owner="client"``), matching the
@@ -184,7 +184,7 @@ class SynthStatus(BaseModel):
 class MixerConfig(_Validated):
     """The mixer console the kernel owns: channels, returns, master.
 
-    Channels, returns and effects are the same dicts the traitlets widget
+    Channels, returns and effects are the same dicts the mixer widget
     syncs, normalized and clamped by the same helpers; every channel carries
     one send level per return. The mixer has no browser-owned status.
     """
@@ -226,7 +226,7 @@ class PadsConfig(_Validated):
 
     ``pad_notes``, ``pad_velocities`` and ``pad_actions`` always cover the
     ``rows`` by ``cols`` grid: the after-validator extends or trims them
-    the way the traitlets widget's observers do.
+    so the grid is always fully described.
     """
 
     rows: int = Field(4, ge=1)

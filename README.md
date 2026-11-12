@@ -24,9 +24,10 @@ browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
 trigger pads, a transport, a multitrack timeline that records audio and MIDI,
 a clip launcher, and a mixer. Every widget in a session follows one clock that
 lives in the browser, so play, seek, and tempo changes never wait on the
-kernel. The widgets are plain [anywidget](https://anywidget.dev) classes with
-no extension to install; they work in JupyterLab, Notebook, VS Code, Voila, and
-JupyterLite. A session can be saved to a `.nbplay` archive and loaded back:
+kernel. The widgets are [spaday](https://github.com/1kbgz/spaday) widgets on
+[transports](https://github.com/1kbgz/transports) models, with no extension to
+install; they work in JupyterLab, Notebook, VS Code, Voila, and JupyterLite. A
+session can be saved to a `.nbplay` archive and loaded back:
 
 ```python
 session.timeline.export_all_clips()   # pull recorded takes from the browser
@@ -66,19 +67,16 @@ session.play()   # or press play on any widget; they share the clock
 
 Song structure comes from named patterns: `session.add_pattern("verse", drums.sequencer)`, then `session.chain(drums, ["verse", "verse", "chorus"])` lays them out as clips on the track's timeline lane, and the sequencer stops looping on its own so the arrangement drives it.
 
-The next layer runs the same elements on [transports](https://github.com/1kbgz/transports)
-models rendered by [spaday](https://github.com/1kbgz/spaday):
-`from nbplay.views import Session, SequencerView, SynthView`. A view hosts a validated config model
-and, where the browser owns state, a status model; `session.play()`, `launcher.launch(0, 0)` or
-`midi_out.note_on(60)` is a transports command delivered to the owning browser view. `Session` gives
-its transport, mixer, timeline, launcher and tracks one browser session id, so they share a clock and
-an audio bus; `session.undo()`, patterns, chaining, MIDI files and `save()`/`load()` work as on the
-widgets, and the two session classes read each other's `.nbplay` archives.
-`examples/15_transports_views.ipynb` builds a two-track session on the views.
+Each widget hosts a validated config model in the kernel (`synth.config.frequency = 220.0`,
+`seq.config.length`) and, where the browser owns state, a status model it only reads
+(`session.transport.status.is_playing`). Edits made in the browser are validated by the same model
+before they land, and `widget.on_change(listener, names=...)` reports changes from either side.
+`session.play()`, `launcher.launch(0, 0)` or `midi_out.note_on(60)` is a transports command delivered
+to the browser widget that owns the state.
 
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
 
-`MidiOutputWidget` sends what the session plays to a hardware synth or another app over Web MIDI, and `MidiLearn` maps hardware knobs to widget traits (`MidiLearn(midi_keyboard).learn(synth, "frequency", low=100, high=2000)`, then turn a knob). The session can lead external gear with MIDI clock (`send_clock` on the output widget) or follow a device's clock (`sync_clock` on the MIDI keyboard). Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
+`MidiOutputWidget` sends what the session plays to a hardware synth or another app over Web MIDI, and `MidiLearn` maps hardware knobs to widget config fields (`MidiLearn(midi_keyboard).learn(synth, "frequency", low=100, high=2000)`, then turn a knob). The session can lead external gear with MIDI clock (`send_clock` on the output widget) or follow a device's clock (`sync_clock` on the MIDI keyboard). Patterns and MIDI clips move in and out of `.mid` files (`pip install "nbplay[midi]"`): `sequencer.to_midi("lead.mid")`, `sequencer.load_midi(path)`,
 `session.export_midi("song.mid")`, and `session.import_midi(path)`.
 
 Sequencers, launcher slots, and MIDI clips play through the track's own instrument, a sampler or a synth, with the built-in oscillator only as a fallback. Every change to a session widget is undoable: `session.undo()` and `session.redo()`, or Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z with the transport focused. Adding and removing tracks is the exception.

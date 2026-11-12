@@ -9,7 +9,7 @@ import pytest
 import transports
 from transports._buffers import join_buffers
 
-from nbplay import views
+import nbplay
 from nbplay.descriptors import PadAction
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
@@ -31,8 +31,8 @@ def messages(sent):
     return [json.loads(join_buffers(content["wire"], buffers, "json")) for content, buffers in sent if "wire" in content]
 
 
-def ready(view, name="owner"):
-    view._msg_callbacks(view, {"ready": True, "ownership": True, "view": name}, [])
+def ready(widget, name="owner"):
+    widget._msg_callbacks(widget, {"ready": True, "ownership": True, "view": name}, [])
 
 
 class TestTransportModels:
@@ -54,37 +54,37 @@ class TestTransportModels:
         assert session.command(mid, "is_playing", True) >= 0
 
 
-class TestSynthView:
+class TestSynthWidget:
     def test_waveform_follows_the_oscillator_parameters(self):
         with pytest.raises(ValueError):
             SynthConfig.model_validate({"oscillator_type": "triangle"})
-        view = views.SynthView(frequency=220.0, autosync=False)
+        widget = nbplay.SynthWidget(frequency=220.0, autosync=False)
         try:
-            first = view.config.waveform
+            first = widget.config.waveform
             assert len(first) == 4 * min(2048, int(44100 / 220 * 3))
-            view.config.frequency = 440.0
-            assert len(view.config.waveform) == 4 * int(44100 / 440 * 3)
-            view.config.oscillator_type = "noise"
-            assert len(view.config.waveform) == 4 * 1024
-            assert view._tree["tag"] == "nbplay-synth"
-            assert view._tree["bindings"]["waveform"]["field"] == "config.waveform"
+            widget.config.frequency = 440.0
+            assert len(widget.config.waveform) == 4 * int(44100 / 440 * 3)
+            widget.config.oscillator_type = "noise"
+            assert len(widget.config.waveform) == 4 * 1024
+            assert widget._tree["tag"] == "nbplay-synth"
+            assert widget._tree["bindings"]["waveform"]["field"] == "config.waveform"
         finally:
-            view.close()
+            widget.close()
 
     def test_waveform_bytes_travel_as_buffers(self):
-        view = views.SynthView(autosync=False)
+        widget = nbplay.SynthWidget(autosync=False)
         sent = []
-        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        widget.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
         try:
-            ready(view)
+            ready(widget)
             assert any(buffers for _, buffers in sent)
-            command = view.play()
+            command = widget.play()
             assert isinstance(command, int)
         finally:
-            view.close()
+            widget.close()
 
 
-class TestMixerView:
+class TestMixerWidget:
     def test_config_normalizes_like_the_widget(self):
         config = MixerConfig(channels=[{"name": "Drums", "gain": 5, "effects": [{"type": "gain", "gain": 9}]}], returns=[{"name": "Rev"}])
         assert config.channels[0]["gain"] == 2.0
@@ -96,81 +96,81 @@ class TestMixerView:
             config.master_gain = 3
 
     def test_view_builds_the_console_without_a_status_model(self):
-        view = views.MixerView(autosync=False)
+        widget = nbplay.MixerWidget(autosync=False)
         try:
-            assert view.status is None and view.status_id is None
-            assert [w["namespace"] for w in view._wires] == ["config"]
-            assert "nbplay-wire" not in str(view._tree)
-            index = view.add_channel("Drums")
-            view.add_return("Rev")
-            view.add_channel_effect(index, {"type": "compressor", "threshold": -18})
-            view.add_master_effect({"type": "limiter"})
-            assert view.config.channels[0]["sends"] == [0.0]
-            assert view.config.channels[0]["effects"][0]["type"] == "compressor"
-            assert view.config.master_effects[0]["type"] == "limiter"
-            view.remove_channel(index)
-            assert view.config.channels == []
+            assert widget.status is None and widget.status_id is None
+            assert [w["namespace"] for w in widget._wires] == ["config"]
+            assert "nbplay-wire" not in str(widget._tree)
+            index = widget.add_channel("Drums")
+            widget.add_return("Rev")
+            widget.add_channel_effect(index, {"type": "compressor", "threshold": -18})
+            widget.add_master_effect({"type": "limiter"})
+            assert widget.config.channels[0]["sends"] == [0.0]
+            assert widget.config.channels[0]["effects"][0]["type"] == "compressor"
+            assert widget.config.master_effects[0]["type"] == "limiter"
+            widget.remove_channel(index)
+            assert widget.config.channels == []
             with pytest.raises(TypeError):
-                view._command("x", 1)
+                widget._command("x", 1)
         finally:
-            view.close()
+            widget.close()
 
     def test_strip_send_and_effect_setters(self):
-        view = views.MixerView(autosync=False)
+        widget = nbplay.MixerWidget(autosync=False)
         try:
-            drums = view.add_channel("Drums")
-            keys = view.add_channel("Keys")
-            view.set_channel_gain(drums, 5)
-            view.set_channel_pan(drums, -2)
-            view.set_channel_mute(drums, 1)
-            view.set_channel_solo(keys, True)
-            channel = view.config.channels[drums]
+            drums = widget.add_channel("Drums")
+            keys = widget.add_channel("Keys")
+            widget.set_channel_gain(drums, 5)
+            widget.set_channel_pan(drums, -2)
+            widget.set_channel_mute(drums, 1)
+            widget.set_channel_solo(keys, True)
+            channel = widget.config.channels[drums]
             assert (channel["gain"], channel["pan"], channel["mute"]) == (2.0, -1.0, True)
-            assert view.config.channels[keys]["solo"] is True
-            view.set_channel_effects(drums, [{"type": "gain", "gain": 9}, {"type": "limiter"}])
-            view.set_channel_effect_enabled(drums, 1, False)
-            assert view.config.channels[drums]["effects"] == [
+            assert widget.config.channels[keys]["solo"] is True
+            widget.set_channel_effects(drums, [{"type": "gain", "gain": 9}, {"type": "limiter"}])
+            widget.set_channel_effect_enabled(drums, 1, False)
+            assert widget.config.channels[drums]["effects"] == [
                 {"type": "gain", "gain": 4.0},
                 {"type": "limiter", "threshold": -1.0, "release": 0.05, "enabled": False},
             ]
-            view.set_channel_effect_enabled(drums, 1)
-            assert "enabled" not in view.config.channels[drums]["effects"][1]
-            view.clear_channel_effects(drums)
-            assert view.config.channels[drums]["effects"] == []
-            view.set_master_effects([{"type": "compressor"}, {"type": "limiter"}])
-            view.set_master_effect_enabled(0, False)
-            assert view.config.master_effects[0]["enabled"] is False
-            view.clear_master_effects()
-            assert view.config.master_effects == []
+            widget.set_channel_effect_enabled(drums, 1)
+            assert "enabled" not in widget.config.channels[drums]["effects"][1]
+            widget.clear_channel_effects(drums)
+            assert widget.config.channels[drums]["effects"] == []
+            widget.set_master_effects([{"type": "compressor"}, {"type": "limiter"}])
+            widget.set_master_effect_enabled(0, False)
+            assert widget.config.master_effects[0]["enabled"] is False
+            widget.clear_master_effects()
+            assert widget.config.master_effects == []
 
-            verb = view.add_return("Verb")
-            delay = view.add_return("Delay", effects=[{"type": "delay"}])
-            view.set_return_gain(verb, 3)
-            view.add_return_effect(verb, {"type": "reverb", "wet": 2})
-            view.set_return_effect_enabled(verb, 0, False)
-            assert view.config.returns[verb]["gain"] == 2.0
-            assert view.config.returns[verb]["effects"][0]["wet"] == 1.0 and view.config.returns[verb]["effects"][0]["enabled"] is False
-            view.set_return_effects(delay, [])
-            assert view.config.returns[delay]["effects"] == []
-            view.set_send(drums, verb, 0.5)
-            view.set_send(drums, delay, 7)
-            assert view.config.channels[drums]["sends"] == [0.5, 1.0]
+            verb = widget.add_return("Verb")
+            delay = widget.add_return("Delay", effects=[{"type": "delay"}])
+            widget.set_return_gain(verb, 3)
+            widget.add_return_effect(verb, {"type": "reverb", "wet": 2})
+            widget.set_return_effect_enabled(verb, 0, False)
+            assert widget.config.returns[verb]["gain"] == 2.0
+            assert widget.config.returns[verb]["effects"][0]["wet"] == 1.0 and widget.config.returns[verb]["effects"][0]["enabled"] is False
+            widget.set_return_effects(delay, [])
+            assert widget.config.returns[delay]["effects"] == []
+            widget.set_send(drums, verb, 0.5)
+            widget.set_send(drums, delay, 7)
+            assert widget.config.channels[drums]["sends"] == [0.5, 1.0]
             with pytest.raises(IndexError):
-                view.set_send(drums, 2, 0.1)
-            view.remove_return(verb)
-            assert [r["name"] for r in view.config.returns] == ["Delay"]
-            assert view.config.channels[drums]["sends"] == [1.0] and view.config.channels[keys]["sends"] == [0.0]
+                widget.set_send(drums, 2, 0.1)
+            widget.remove_return(verb)
+            assert [r["name"] for r in widget.config.returns] == ["Delay"]
+            assert widget.config.channels[drums]["sends"] == [1.0] and widget.config.channels[keys]["sends"] == [0.0]
 
-            mixer = view.to_mixer()
+            mixer = widget.to_mixer()
             assert len(mixer) == 2
             assert mixer.get_channel(drums).gain == 2.0 and mixer.get_channel(drums).mute is True
             assert mixer.get_channel(keys).solo is True
             assert mixer.master_gain == pytest.approx(0.8)
         finally:
-            view.close()
+            widget.close()
 
 
-class TestKeysViews:
+class TestKeysWidgets:
     def test_pads_config_fits_the_grid(self):
         config = PadsConfig(rows=2, cols=2)
         assert config.pad_notes == [36, 37, 38, 39]
@@ -187,24 +187,28 @@ class TestKeysViews:
     def test_keyboard_and_midi_keyboard_views(self):
         with pytest.raises(ValueError):
             KeyboardConfig(upper_octave=12)
-        for cls, tag in ((views.PadsView, "nbplay-pads"), (views.KeyboardView, "nbplay-keyboard"), (views.MidiKeyboardView, "nbplay-midi-keyboard")):
-            view = cls(autosync=False)
+        for cls, tag in (
+            (nbplay.PadWidget, "nbplay-pads"),
+            (nbplay.KeyboardWidget, "nbplay-keyboard"),
+            (nbplay.MidiKeyboardWidget, "nbplay-midi-keyboard"),
+        ):
+            widget = cls(autosync=False)
             try:
-                assert view._tree["tag"] == tag
-                assert view.status_id is not None
-                assert view._tree["bindings"]["lastNoteEvent"]["field"] == "status.last_note_event"
-                assert view._tree["bindings"]["theme"]["field"] == "config.theme"
+                assert widget._tree["tag"] == tag
+                assert widget.status_id is not None
+                assert widget._tree["bindings"]["lastNoteEvent"]["field"] == "status.last_note_event"
+                assert widget._tree["bindings"]["theme"]["field"] == "config.theme"
             finally:
-                view.close()
+                widget.close()
 
     def test_keyboards_route_to_samplers_and_record_into_sequencers(self):
-        keys = views.KeyboardView(autosync=False)
-        midi = views.MidiKeyboardView(autosync=False)
-        pads = views.PadsView(autosync=False)
-        drums = views.SamplerView(channel_index=2, autosync=False)
-        bass = views.SamplerView(channel_index=5, autosync=False)
-        loose = views.SamplerView(autosync=False)
-        sequencer = views.SequencerView(autosync=False)
+        keys = nbplay.KeyboardWidget(autosync=False)
+        midi = nbplay.MidiKeyboardWidget(autosync=False)
+        pads = nbplay.PadWidget(autosync=False)
+        drums = nbplay.SamplerWidget(channel_index=2, autosync=False)
+        bass = nbplay.SamplerWidget(channel_index=5, autosync=False)
+        loose = nbplay.SamplerWidget(autosync=False)
+        sequencer = nbplay.SequencerWidget(autosync=False)
         try:
             keys.connect_sequencer(sequencer)
             assert sequencer.config.keyboard_connected is True
@@ -230,12 +234,12 @@ class TestKeysViews:
             pads.disconnect_sampler(drums)
             assert pads.config.sampler_routing == []
         finally:
-            for view in (keys, midi, pads, drums, bass, loose, sequencer):
-                view.close()
+            for widget in (keys, midi, pads, drums, bass, loose, sequencer):
+                widget.close()
 
     def test_pads_grid_helpers_and_sampler_slices(self):
-        pads = views.PadsView(velocity=90, autosync=False)
-        sampler = views.SamplerView(channel_index=1, autosync=False)
+        pads = nbplay.PadWidget(velocity=90, autosync=False)
+        sampler = nbplay.SamplerWidget(channel_index=1, autosync=False)
         try:
             pads.configure_grid_for_actions(notes=[60, 62, 64, 65, 67])
             assert (
@@ -260,9 +264,9 @@ class TestKeysViews:
             sampler.close()
 
 
-class TestIoViews:
+class TestIoWidgets:
     def test_settings_and_midi_output_views(self):
-        settings = views.SettingsView(sample_rate=48000, autosync=False)
+        settings = nbplay.SettingsWidget(sample_rate=48000, autosync=False)
         try:
             assert settings.config.sample_rate == 48000
             assert settings._tree["bindings"]["midiEvent"]["field"] == "status.midi_event"
@@ -270,7 +274,7 @@ class TestIoViews:
                 settings.config.channels = 3
         finally:
             settings.close()
-        out = views.MidiOutputView(channel=9, autosync=False)
+        out = nbplay.MidiOutputWidget(channel=9, autosync=False)
         sent = []
         out.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
         try:
@@ -288,7 +292,7 @@ class TestIoViews:
             out.close()
 
 
-class TestSequencerAndSamplerViews:
+class TestSequencerAndSamplerWidgets:
     def test_sequencer_config_fits_voices(self):
         config = SequencerConfig(length=4, num_voices=2)
         assert [len(v) for v in config.voices_data] == [4, 4]
@@ -298,16 +302,16 @@ class TestSequencerAndSamplerViews:
         assert [len(v) for v in config.voices_data] == [4, 4]
         config.length = 2
         assert [len(v) for v in config.voices_data] == [2, 2]
-        view = views.SequencerView(length=8, autosync=False)
+        widget = nbplay.SequencerWidget(length=8, autosync=False)
         try:
-            view.set_step(2, note=48, active=True)
-            view.toggle_step(3)
-            assert view.config.voices_data[0][2]["note"] == 48 and view.config.voices_data[0][3]["active"] is True
-            view.clear()
-            assert not any(step["active"] for step in view.config.voices_data[0])
-            assert isinstance(view.play(), int)
+            widget.set_step(2, note=48, active=True)
+            widget.toggle_step(3)
+            assert widget.config.voices_data[0][2]["note"] == 48 and widget.config.voices_data[0][3]["active"] is True
+            widget.clear()
+            assert not any(step["active"] for step in widget.config.voices_data[0])
+            assert isinstance(widget.play(), int)
         finally:
-            view.close()
+            widget.close()
 
     def test_sequencer_grid_follows_measures_and_step_duration(self):
         config = SequencerConfig(measures=2)
@@ -320,32 +324,32 @@ class TestSequencerAndSamplerViews:
         assert config.length == 6
         config.length = 5
         assert config.length == 5 and config.measures == 2
-        view = views.SequencerView(length=8, autosync=False)
+        widget = nbplay.SequencerWidget(length=8, autosync=False)
         try:
-            assert view.config.step_duration == 0.5
-            view.configure_grid(measures=2, step_duration=0.25)
-            assert view.config.length == 32
-            view.steps = [{"note": 48, "active": True}]
-            assert view.steps[0]["note"] == 48 and view.steps[0]["active"] is True and len(view.steps) == 32
+            assert widget.config.step_duration == 0.5
+            widget.configure_grid(measures=2, step_duration=0.25)
+            assert widget.config.length == 32
+            widget.steps = [{"note": 48, "active": True}]
+            assert widget.steps[0]["note"] == 48 and widget.steps[0]["active"] is True and len(widget.steps) == 32
         finally:
-            view.close()
+            widget.close()
 
     def test_sequencer_rust_and_midi_exports(self, tmp_path):
         pytest.importorskip("mido")
-        view = views.SequencerView(length=8, num_voices=2, step_duration=0.5, bpm=132.0, autosync=False)
-        other = views.SequencerView(autosync=False)
+        widget = nbplay.SequencerWidget(length=8, num_voices=2, step_duration=0.5, bpm=132.0, autosync=False)
+        other = nbplay.SequencerWidget(autosync=False)
         try:
-            view.set_step(0, note=60, velocity=90)
-            view.set_step(0, note=64, velocity=80, voice=1)
-            view.set_step(3, note=67, duration_ticks=2)
-            pattern = view.to_pattern()
+            widget.set_step(0, note=60, velocity=90)
+            widget.set_step(0, note=64, velocity=80, voice=1)
+            widget.set_step(3, note=67, duration_ticks=2)
+            pattern = widget.to_pattern()
             assert len(pattern) == 8 and pattern.get_step(3).note == 67 and pattern.get_step(1).active is False
-            assert view.to_pattern(voice=2) is None and view.to_step_sequencer(voice=2) is None
-            sequencer = view.to_step_sequencer(channel=3, voice=1)
+            assert widget.to_pattern(voice=2) is None and widget.to_step_sequencer(voice=2) is None
+            sequencer = widget.to_step_sequencer(channel=3, voice=1)
             assert sequencer.step_duration == 0.5
 
             path = tmp_path / "pattern.mid"
-            midi = view.to_midi(path, name="Lead")
+            midi = widget.to_midi(path, name="Lead")
             assert path.exists() and [t.name for t in midi.tracks[1:]] == ["Lead"]
             other.load_midi(path)
             assert other.config.bpm == pytest.approx(132.0)
@@ -357,7 +361,7 @@ class TestSequencerAndSamplerViews:
             with pytest.raises(IndexError):
                 other.load_midi(path, track=5)
         finally:
-            view.close()
+            widget.close()
             other.close()
 
     def test_sampler_config_and_view(self):
@@ -365,18 +369,18 @@ class TestSequencerAndSamplerViews:
         assert config.pad_notes == [48, 49, 50] and config.pad_velocities == [100] * 3 and len(config.pad_actions) == 3
         config.pad_count = 2
         assert len(config.pad_notes) == 2 and len(config.pad_actions) == 2
-        view = views.SamplerView(autosync=False)
+        widget = nbplay.SamplerWidget(autosync=False)
         try:
-            view.load_sample([0.0, 0.5, -0.5, 1.5], sample_rate=22050, root_note=200, name="click")
-            assert view.config.sample_length == 4 and view.config.root_note == 127
-            assert len(view.config.sample_data) == 16 and len(view.config.waveform) == 16
-            view.configure_pads(pad_notes=[60, 64])
-            assert view.config.pad_count == 2 and view.config.pad_notes == [60, 64]
-            zone = view.add_zone([0.1, 0.2], 40, 40)
-            assert zone["root_note"] == 40 and len(view.config.zones) == 1 and view.config.zones[0]["data"] == zone["data"]
-            assert isinstance(view.capture("blob:x", note=60, duration=1.5), int)
+            widget.load_sample([0.0, 0.5, -0.5, 1.5], sample_rate=22050, root_note=200, name="click")
+            assert widget.config.sample_length == 4 and widget.config.root_note == 127
+            assert len(widget.config.sample_data) == 16 and len(widget.config.waveform) == 16
+            widget.configure_pads(pad_notes=[60, 64])
+            assert widget.config.pad_count == 2 and widget.config.pad_notes == [60, 64]
+            zone = widget.add_zone([0.1, 0.2], 40, 40)
+            assert zone["root_note"] == 40 and len(widget.config.zones) == 1 and widget.config.zones[0]["data"] == zone["data"]
+            assert isinstance(widget.capture("blob:x", note=60, duration=1.5), int)
         finally:
-            view.close()
+            widget.close()
 
     def test_sampler_edits_slices_and_files(self, tmp_path):
         path = tmp_path / "tone.wav"
@@ -385,36 +389,36 @@ class TestSequencerAndSamplerViews:
             handle.setsampwidth(2)
             handle.setframerate(8000)
             handle.writeframes(struct.pack("<4h", 0, 32767, -32768, 0))
-        view = views.SamplerView(velocity=90, autosync=False)
+        widget = nbplay.SamplerWidget(velocity=90, autosync=False)
         try:
-            view.load_audio_file(path, root_note=60)
-            assert view.config.sample_name == "tone.wav" and view.config.sample_rate == 8000 and view.config.root_note == 60
-            assert view.config.sample_length == 4 and view.get_sample_data()[1] == pytest.approx(32767 / 32768)
-            view.load_sample([0.25, -0.5, 0.75, -1.0])
-            view.trim_sample(1, 4)
-            assert view.config.sample_length == 3 and view.get_sample_data() == pytest.approx([-0.5, 0.75, -1.0])
-            view.normalize_sample(0.5)
-            assert max(abs(s) for s in view.get_sample_data()) == pytest.approx(0.5)
-            view.reverse_sample()
-            assert view.get_sample_data()[0] == pytest.approx(-0.5)
-            view.fade_sample(fade_in=2, fade_out=2)
-            assert view.get_sample_data()[0] == 0.0 and view.get_sample_data()[-1] == 0.0
-            assert len(view.config.waveform) == 12
+            widget.load_audio_file(path, root_note=60)
+            assert widget.config.sample_name == "tone.wav" and widget.config.sample_rate == 8000 and widget.config.root_note == 60
+            assert widget.config.sample_length == 4 and widget.get_sample_data()[1] == pytest.approx(32767 / 32768)
+            widget.load_sample([0.25, -0.5, 0.75, -1.0])
+            widget.trim_sample(1, 4)
+            assert widget.config.sample_length == 3 and widget.get_sample_data() == pytest.approx([-0.5, 0.75, -1.0])
+            widget.normalize_sample(0.5)
+            assert max(abs(s) for s in widget.get_sample_data()) == pytest.approx(0.5)
+            widget.reverse_sample()
+            assert widget.get_sample_data()[0] == pytest.approx(-0.5)
+            widget.fade_sample(fade_in=2, fade_out=2)
+            assert widget.get_sample_data()[0] == 0.0 and widget.get_sample_data()[-1] == 0.0
+            assert len(widget.config.waveform) == 12
             with pytest.raises(ValueError):
-                view.trim_sample(3, 3)
+                widget.trim_sample(3, 3)
 
-            view.load_sample([0.1] * 100)
-            slices = view.slice_sample(4, start_note=36)
+            widget.load_sample([0.1] * 100)
+            slices = widget.slice_sample(4, start_note=36)
             assert [(s["start"], s["end"], s["note"]) for s in slices] == [(0, 25, 36), (25, 50, 37), (50, 75, 38), (75, 100, 39)]
-            assert view.config.pad_count == 4 and view.config.pad_notes == [36, 37, 38, 39]
-            assert view.config.pad_actions[0] == {"type": "note", "note": 36, "velocity": 90, "slice": 0, "label": "S1"}
-            assert view.config.sample_slices == slices
-            sampler = view.to_sampler()
+            assert widget.config.pad_count == 4 and widget.config.pad_notes == [36, 37, 38, 39]
+            assert widget.config.pad_actions[0] == {"type": "note", "note": 36, "velocity": 90, "slice": 0, "label": "S1"}
+            assert widget.config.sample_slices == slices
+            sampler = widget.to_sampler()
             assert sampler.max_voices == 8
             with pytest.raises(ValueError):
-                views.SamplerView(autosync=False).slice_sample(2)
+                nbplay.SamplerWidget(autosync=False).slice_sample(2)
         finally:
-            view.close()
+            widget.close()
 
     def test_sampler_zones_and_capture(self, tmp_path):
         path = tmp_path / "hit.wav"
@@ -423,195 +427,195 @@ class TestSequencerAndSamplerViews:
             handle.setsampwidth(2)
             handle.setframerate(8000)
             handle.writeframes(struct.pack("<3h", 0, 16384, -16384))
-        view = views.SamplerView(pad_notes=[36, 38, 42, 46], autosync=False)
-        timeline = views.TimelineView(bpm=120.0, autosync=False)
+        widget = nbplay.SamplerWidget(pad_notes=[36, 38, 42, 46], autosync=False)
+        timeline = nbplay.TimelineWidget(bpm=120.0, autosync=False)
         sent = []
-        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        widget.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
         try:
-            assert view.zone_for(60) is None
-            low = view.add_zone([0.1, 0.2, 0.3], 0, 59, sample_rate=22050, name="Low")
-            high = view.add_zone(struct.pack("<2f", 0.5, -0.5), 60, 127, root_note=72)
-            hit = view.add_zone_file(path, 36, 36)
+            assert widget.zone_for(60) is None
+            low = widget.add_zone([0.1, 0.2, 0.3], 0, 59, sample_rate=22050, name="Low")
+            high = widget.add_zone(struct.pack("<2f", 0.5, -0.5), 60, 127, root_note=72)
+            hit = widget.add_zone_file(path, 36, 36)
             assert low["root_note"] == 60 and high["name"] == "Zone 2" and high["length"] == 2
             assert hit["name"] == "hit.wav" and hit["sample_rate"] == 8000 and hit["root_note"] == 36
-            assert view.zone_samples(2) == pytest.approx([0.0, 0.5, -0.5])
-            assert view.zone_for(48)["id"] == low["id"] and view.zone_for(72)["id"] == high["id"]
-            view.set_zone(2, note_low=40, note_high=38, name="Kick")
-            assert (view.config.zones[2]["note_low"], view.config.zones[2]["note_high"], view.config.zones[2]["name"]) == (38, 40, "Kick")
-            view.load_sample([0.0, 0.1], root_note=60)
-            sample_map = view.to_sample_map()
+            assert widget.zone_samples(2) == pytest.approx([0.0, 0.5, -0.5])
+            assert widget.zone_for(48)["id"] == low["id"] and widget.zone_for(72)["id"] == high["id"]
+            widget.set_zone(2, note_low=40, note_high=38, name="Kick")
+            assert (widget.config.zones[2]["note_low"], widget.config.zones[2]["note_high"], widget.config.zones[2]["name"]) == (38, 40, "Kick")
+            widget.load_sample([0.0, 0.1], root_note=60)
+            sample_map = widget.to_sample_map()
             assert len(sample_map) == 4 and sample_map.find_sample(72, 100).root_note == 72
-            view.remove_zone(0)
-            assert [z["name"] for z in view.config.zones] == ["Zone 2", "Kick"]
-            view.clear_zones()
-            assert view.config.zones == [] and view.to_sample_map().find_sample(90, 100).root_note == 60
+            widget.remove_zone(0)
+            assert [z["name"] for z in widget.config.zones] == ["Zone 2", "Kick"]
+            widget.clear_zones()
+            assert widget.config.zones == [] and widget.to_sample_map().find_sample(90, 100).root_note == 60
 
             timeline.add_track("Mic")
             clip = timeline.add_clip("Take 1", start=0.0, duration=2.0, offset=0.5, audio_url="blob:take")
-            view.capture_clip(timeline, clip["id"], pad=1)
-            view.capture_clip(timeline, clip["id"], name="Vox")
-            ready(view)
+            widget.capture_clip(timeline, clip["id"], pad=1)
+            widget.capture_clip(timeline, clip["id"], name="Vox")
+            ready(widget)
             commands = [m for m in messages(sent) if m["t"] == "command"]
             request = commands[0]["value"]["Map"]
             assert request["url"] == {"Str": "blob:take"} and request["name"] == {"Str": "Take 1"}
             assert request["note_low"] == request["root_note"] == {"Int": 38}
             assert request["offset"] == {"Float": 0.25} and request["duration"] == {"Float": 1.0}
             with pytest.raises(ValueError, match="clip not found"):
-                view.capture_clip(timeline, "missing")
+                widget.capture_clip(timeline, "missing")
             midi = timeline.add_midi_clip("Riff", events=[])
             with pytest.raises(ValueError, match="no audio"):
-                view.capture_clip(timeline, midi["id"])
+                widget.capture_clip(timeline, midi["id"])
         finally:
-            view.close()
+            widget.close()
             timeline.close()
 
 
-class TestArrangementViews:
+class TestArrangementWidgets:
     def test_launcher_config_and_view(self):
         with pytest.raises(ValueError):
             LauncherConfig.model_validate({"quantize": "tick"})
-        view = views.LauncherView(autosync=False)
+        widget = nbplay.LauncherWidget(autosync=False)
         try:
-            track = view.add_track("Drums")
-            scene = view.add_scene()
-            slot = view.set_slot(track, scene, [{"note": 36, "active": True}, {"note": 38}])
+            track = widget.add_track("Drums")
+            scene = widget.add_scene()
+            slot = widget.set_slot(track, scene, [{"note": 36, "active": True}, {"note": 38}])
             assert slot["name"] == "Drums 1" and len(slot["voices_data"][0]) == 2
-            assert view.config.slots == [slot] and view.config.tracks[0]["channel_index"] == 0
+            assert widget.config.slots == [slot] and widget.config.tracks[0]["channel_index"] == 0
             with pytest.raises(IndexError):
-                view.set_slot(1, 0, [{"note": 36}])
-            sequencer = views.SequencerView(autosync=False, length=4)
+                widget.set_slot(1, 0, [{"note": 36}])
+            sequencer = nbplay.SequencerWidget(autosync=False, length=4)
             try:
                 sequencer.set_step(2, note=42)
-                from_view = view.set_slot(track, scene, sequencer, name="From view")
+                from_view = widget.set_slot(track, scene, sequencer, name="From widget")
             finally:
                 sequencer.close()
             assert from_view["voices_data"] == sequencer.config.voices_data
-            assert view.config.slots == [from_view]
-            assert isinstance(view.launch(track, scene), int)
-            assert isinstance(view.stop_all(), int)
+            assert widget.config.slots == [from_view]
+            assert isinstance(widget.launch(track, scene), int)
+            assert isinstance(widget.stop_all(), int)
         finally:
-            view.close()
+            widget.close()
 
     def test_launcher_slots_round_trip_through_a_sequencer_view(self):
-        view = views.LauncherView(autosync=False)
-        sequencer = views.SequencerView(length=4, num_voices=2, step_duration=0.5, swing=20.0, groove=[5.0, -5.0], autosync=False)
-        editor = views.SequencerView(autosync=False)
+        widget = nbplay.LauncherWidget(autosync=False)
+        sequencer = nbplay.SequencerWidget(length=4, num_voices=2, step_duration=0.5, swing=20.0, groove=[5.0, -5.0], autosync=False)
+        editor = nbplay.SequencerWidget(autosync=False)
         try:
-            drums = view.add_track("Drums")
-            view.add_track("Keys")
-            a = view.add_scene("A")
-            b = view.add_scene()
+            drums = widget.add_track("Drums")
+            widget.add_track("Keys")
+            a = widget.add_scene("A")
+            b = widget.add_scene()
             sequencer.set_step(1, note=38, voice=1)
-            slot = view.set_slot(drums, a, sequencer)
+            slot = widget.set_slot(drums, a, sequencer)
             assert (slot["step_duration"], slot["swing"], slot["groove"]) == (0.5, 20.0, [5.0, -5.0])
-            assert view.get_slot(drums, a) == slot and view.get_slot(drums, b) is None
-            replaced = view.set_slot(drums, a, [{"note": 36, "active": True}], step_duration=1.0)
-            assert view.config.slots == [replaced] and replaced["step_duration"] == 1.0
-            view.set_slot(drums, b, sequencer, swing=5.0)
-            assert view.config.slots[1]["swing"] == 5.0
-            view.slot_to_sequencer(drums, b, editor)
+            assert widget.get_slot(drums, a) == slot and widget.get_slot(drums, b) is None
+            replaced = widget.set_slot(drums, a, [{"note": 36, "active": True}], step_duration=1.0)
+            assert widget.config.slots == [replaced] and replaced["step_duration"] == 1.0
+            widget.set_slot(drums, b, sequencer, swing=5.0)
+            assert widget.config.slots[1]["swing"] == 5.0
+            widget.slot_to_sequencer(drums, b, editor)
             assert editor.config.num_voices == 2 and editor.config.length == 4 and editor.config.step_duration == 0.5
             assert editor.config.voices_data == sequencer.config.voices_data and editor.config.groove == [5.0, -5.0]
             with pytest.raises(ValueError, match="no slot"):
-                view.slot_to_sequencer(1, a, editor)
+                widget.slot_to_sequencer(1, a, editor)
             with pytest.raises(ValueError, match="no slot"):
-                view.launch(1, a)
+                widget.launch(1, a)
             with pytest.raises(IndexError):
-                view.launch(drums, 5)
+                widget.launch(drums, 5)
             with pytest.raises(IndexError):
-                view.stop_track(7)
+                widget.stop_track(7)
             with pytest.raises(IndexError):
-                view.launch_scene(2)
-            assert isinstance(view.launch_scene(b), int) and isinstance(view.stop_track(drums), int)
-            view.config.selected_slot = {"track_index": drums, "scene_index": b}
-            view.clear_slot(drums, b)
-            assert [s["scene_index"] for s in view.config.slots] == [a] and view.config.selected_slot == {}
+                widget.launch_scene(2)
+            assert isinstance(widget.launch_scene(b), int) and isinstance(widget.stop_track(drums), int)
+            widget.config.selected_slot = {"track_index": drums, "scene_index": b}
+            widget.clear_slot(drums, b)
+            assert [s["scene_index"] for s in widget.config.slots] == [a] and widget.config.selected_slot == {}
         finally:
-            view.close()
+            widget.close()
             sequencer.close()
             editor.close()
 
     def test_timeline_config_and_view(self):
         config = TimelineConfig(tracks=[{"name": "A"}], clips=[{"name": "c", "track_index": 5, "start": 0, "duration": 4}], current_beat=99)
         assert config.clips[0]["track_index"] == 0 and config.current_beat == 16.0
-        view = views.TimelineView(autosync=False)
+        widget = nbplay.TimelineWidget(autosync=False)
         try:
-            lane = view.add_track("Vocals", armed=True)
-            clip = view.add_clip("Take", track_index=lane, start=12.0, duration=8.0)
-            assert view.config.selected_clip_id == clip["id"] and view.config.length == 20.0
-            midi = view.add_midi_clip("Riff", events=[{"beat": 1.0, "duration": 0.5, "note": 72, "velocity": 90}])
+            lane = widget.add_track("Vocals", armed=True)
+            clip = widget.add_clip("Take", track_index=lane, start=12.0, duration=8.0)
+            assert widget.config.selected_clip_id == clip["id"] and widget.config.length == 20.0
+            midi = widget.add_midi_clip("Riff", events=[{"beat": 1.0, "duration": 0.5, "note": 72, "velocity": 90}])
             assert midi["kind"] == "midi" and midi["duration"] == 1.5
-            view.export_clip(clip["id"])
-            assert view.config.export_clip_id == clip["id"]
+            widget.export_clip(clip["id"])
+            assert widget.config.export_clip_id == clip["id"]
             with pytest.raises(ValueError, match="clip not found"):
-                view.export_clip("missing")
+                widget.export_clip("missing")
             with pytest.raises(ValueError, match="no exported clip data"):
-                view.write_exported_clip("take.webm")
-            imported = view.import_clip(b"abc", "Import", track_index=lane, start=2.0, blob_type="audio/wav")
+                widget.write_exported_clip("take.webm")
+            imported = widget.import_clip(b"abc", "Import", track_index=lane, start=2.0, blob_type="audio/wav")
             assert imported["source"] == "import" and imported["blob_size"] == 3 and imported["duration"] == 4.0
-            assert view.config.import_clip_request == {**imported, "measure_duration": True} and view.config.import_clip_data == b"abc"
+            assert widget.config.import_clip_request == {**imported, "measure_duration": True} and widget.config.import_clip_data == b"abc"
             with pytest.raises(ValueError):
-                view.import_clip(b"")
-            view.seek(4.0)
-            assert view.config.current_beat == 4.0
-            assert isinstance(view.record(), int)
+                widget.import_clip(b"")
+            widget.seek(4.0)
+            assert widget.config.current_beat == 4.0
+            assert isinstance(widget.record(), int)
         finally:
-            view.close()
+            widget.close()
 
     def test_timeline_lane_and_clip_edits(self, tmp_path):
         pytest.importorskip("mido")
-        view = views.TimelineView(autosync=False)
-        sequencer = views.SequencerView(length=4, autosync=False)
+        widget = nbplay.TimelineWidget(autosync=False)
+        sequencer = nbplay.SequencerWidget(length=4, autosync=False)
         try:
-            mic = view.add_track("Mic")
-            keys = view.add_track("Keys", channel_index=3)
-            drums = view.add_track("Drums", channel_index=4)
-            view.arm_track(keys)
-            view.arm_track(drums, exclusive=True)
-            assert [t["armed"] for t in view.config.tracks] == [False, False, True]
+            mic = widget.add_track("Mic")
+            keys = widget.add_track("Keys", channel_index=3)
+            drums = widget.add_track("Drums", channel_index=4)
+            widget.arm_track(keys)
+            widget.arm_track(drums, exclusive=True)
+            assert [t["armed"] for t in widget.config.tracks] == [False, False, True]
             with pytest.raises(IndexError):
-                view.arm_track(9)
-            take = view.add_clip("Take", track_index=mic, start=0.0, duration=2.0)
+                widget.arm_track(9)
+            take = widget.add_clip("Take", track_index=mic, start=0.0, duration=2.0)
             sequencer.set_step(0, note=60)
             sequencer.set_step(2, note=64, duration_ticks=2)
-            riff = view.add_pattern_clip("riff", sequencer, track_index=keys, start=4.0, step_duration=0.5, repeat=2)
+            riff = widget.add_pattern_clip("riff", sequencer, track_index=keys, start=4.0, step_duration=0.5, repeat=2)
             assert riff["pattern"] == "riff" and riff["duration"] == 4.0
             assert [(e["beat"], e["note"]) for e in riff["events"]] == [(0.0, 60), (1.0, 64), (2.0, 60), (3.0, 64)]
-            sequence = view.clip_to_event_sequence(riff["id"])
+            sequence = widget.clip_to_event_sequence(riff["id"])
             assert len(sequence) == 4
             with pytest.raises(ValueError, match="not a MIDI clip"):
-                view.clip_to_event_sequence(take["id"])
+                widget.clip_to_event_sequence(take["id"])
             path = tmp_path / "riff.mid"
-            view.export_midi_clip(riff["id"], path)
-            added = view.import_midi(path, track_index=drums, start=8.0)
+            widget.export_midi_clip(riff["id"], path)
+            added = widget.import_midi(path, track_index=drums, start=8.0)
             assert len(added) == 1 and added[0]["track_index"] == drums and added[0]["start"] == 8.0
             assert [e["note"] for e in added[0]["events"]] == [60, 64, 60, 64]
 
-            view.move_clip(take["id"], track_index=keys, start=1.0)
-            view.resize_clip(take["id"], 3.0)
-            moved = view.config.clips[0]
+            widget.move_clip(take["id"], track_index=keys, start=1.0)
+            widget.resize_clip(take["id"], 3.0)
+            moved = widget.config.clips[0]
             assert (moved["track_index"], moved["start"], moved["duration"]) == (keys, 1.0, 3.0)
-            copy = view.duplicate_clip(take["id"])
-            assert copy["start"] == 4.0 and copy["id"] != take["id"] and view.config.selected_clip_id == copy["id"]
-            view.remove_clip(copy["id"])
-            assert view.config.selected_clip_id == "" and len(view.config.clips) == 3
+            copy = widget.duplicate_clip(take["id"])
+            assert copy["start"] == 4.0 and copy["id"] != take["id"] and widget.config.selected_clip_id == copy["id"]
+            widget.remove_clip(copy["id"])
+            assert widget.config.selected_clip_id == "" and len(widget.config.clips) == 3
             with pytest.raises(ValueError, match="clip not found"):
-                view.move_clip("missing", start=0.0)
+                widget.move_clip("missing", start=0.0)
 
-            view.remove_track(mic)
-            assert [t["name"] for t in view.config.tracks] == ["Keys", "Drums"]
-            assert [t["channel_index"] for t in view.config.tracks] == [2, 3]
-            assert sorted(c["track_index"] for c in view.config.clips) == [0, 0, 1]
-            view.remove_track(0)
-            assert [c["name"] for c in view.config.clips] == ["riff"] and view.config.clips[0]["track_index"] == 0
-            view.remove_track(5)
+            widget.remove_track(mic)
+            assert [t["name"] for t in widget.config.tracks] == ["Keys", "Drums"]
+            assert [t["channel_index"] for t in widget.config.tracks] == [2, 3]
+            assert sorted(c["track_index"] for c in widget.config.clips) == [0, 0, 1]
+            widget.remove_track(0)
+            assert [c["name"] for c in widget.config.clips] == ["riff"] and widget.config.clips[0]["track_index"] == 0
+            widget.remove_track(5)
         finally:
-            view.close()
+            widget.close()
             sequencer.close()
 
 
-def browser_writes(view, **values):
-    """A browser write to the view's status, as the server applies it after the ownership check."""
+def browser_writes(widget, **values):
+    """A browser write to the widget's status, as the server applies it after the ownership check."""
 
     def tagged(value):
         if isinstance(value, bool):
@@ -629,50 +633,50 @@ def browser_writes(view, **values):
         return {"Map": {key: tagged(item) for key, item in value.items()}}
 
     ops = [{"Set": {"path": [{"Key": name}], "value": tagged(value)}} for name, value in values.items()]
-    view.session._submit_owned(view.status_id, {"ops": ops})
+    widget.session._submit_owned(widget.status_id, {"ops": ops})
 
 
 class TestObservers:
     def test_config_and_status_changes_reach_observers(self):
-        view = views.TransportView(autosync=False)
+        widget = nbplay.TransportWidget(autosync=False)
         seen = []
         try:
-            stop = view.on_change(lambda v, name, old, new: seen.append((name, old, new)))
+            stop = widget.on_change(lambda v, name, old, new: seen.append((name, old, new)))
             only_bpm = []
-            view.on_change(lambda v, name, old, new: only_bpm.append(new), names="bpm")
-            view.config.bpm = 140.0
-            browser_writes(view, is_playing=True, current_beat=2.5)
-            assert view.status.is_playing is True and view.status.current_beat == 2.5
-            browser_writes(view, is_playing=True)
+            widget.on_change(lambda v, name, old, new: only_bpm.append(new), names="bpm")
+            widget.config.bpm = 140.0
+            browser_writes(widget, is_playing=True, current_beat=2.5)
+            assert widget.status.is_playing is True and widget.status.current_beat == 2.5
+            browser_writes(widget, is_playing=True)
             assert seen == [("bpm", 120.0, 140.0), ("is_playing", False, True), ("current_beat", 0.0, 2.5)]
             assert only_bpm == [140.0]
             stop()
-            view.config.bpm = 90.0
+            widget.config.bpm = 90.0
             assert len(seen) == 3 and only_bpm == [140.0, 90.0]
         finally:
-            view.close()
+            widget.close()
 
     def test_timeline_collects_exported_clips(self):
-        view = views.TimelineView(autosync=False)
+        widget = nbplay.TimelineWidget(autosync=False)
         try:
-            view.add_track("Mic")
-            first = view.add_clip("One", audio_url="blob:one")
-            second = view.add_clip("Two", start=4.0, audio_url="blob:two")
-            view.add_clip("Silent")
-            assert view.export_all_clips() == 2
-            assert view.pending_exports == 2 and view.config.export_clip_id == first["id"]
-            browser_writes(view, exported_clip={"id": first["id"], "blob_type": "audio/webm"}, exported_clip_data=b"one")
-            assert view.clip_audio == {first["id"]: {"data": b"one", "blob_type": "audio/webm"}}
-            assert view.pending_exports == 1 and view.config.export_clip_id == second["id"]
-            browser_writes(view, exported_clip={"id": second["id"], "blob_type": "audio/wav"}, exported_clip_data=b"two")
-            assert view.pending_exports == 0 and view.config.export_clip_id == ""
-            assert view.export_all_clips() == 0 and view.export_all_clips(refresh=True) == 2
+            widget.add_track("Mic")
+            first = widget.add_clip("One", audio_url="blob:one")
+            second = widget.add_clip("Two", start=4.0, audio_url="blob:two")
+            widget.add_clip("Silent")
+            assert widget.export_all_clips() == 2
+            assert widget.pending_exports == 2 and widget.config.export_clip_id == first["id"]
+            browser_writes(widget, exported_clip={"id": first["id"], "blob_type": "audio/webm"}, exported_clip_data=b"one")
+            assert widget.clip_audio == {first["id"]: {"data": b"one", "blob_type": "audio/webm"}}
+            assert widget.pending_exports == 1 and widget.config.export_clip_id == second["id"]
+            browser_writes(widget, exported_clip={"id": second["id"], "blob_type": "audio/wav"}, exported_clip_data=b"two")
+            assert widget.pending_exports == 0 and widget.config.export_clip_id == ""
+            assert widget.export_all_clips() == 0 and widget.export_all_clips(refresh=True) == 2
         finally:
-            view.close()
+            widget.close()
 
     def test_launcher_slot_editor_follows_the_selection(self):
-        launcher = views.LauncherView(autosync=False)
-        editor = views.SequencerView(autosync=False)
+        launcher = nbplay.LauncherWidget(autosync=False)
+        editor = nbplay.SequencerWidget(autosync=False)
         try:
             track = launcher.add_track("Drums")
             scene = launcher.add_scene()
@@ -699,16 +703,17 @@ class TestObservers:
 
 
 class TestSession:
-    def test_views_share_the_session_and_follow_the_session_settings(self):
-        session = views.Session(bpm=100.0, time_signature=(3, 4), theme="flat")
+    def test_widgets_share_the_session_and_follow_the_session_settings(self):
+        session = nbplay.Session(bpm=100.0, time_signature=(3, 4), theme="flat")
         try:
             assert session.transport.session is not session.launcher.session
-            assert len({view.config.session_id for view in session.views}) == 1
+            assert len({widget.config.session_id for widget in session.widgets}) == 1
             assert session.timeline.config.bpm == 100.0 and session.launcher.config.time_signature_num == 3
-            seq, synth = views.SequencerView(autosync=False), views.SynthView(autosync=False)
+            seq, synth = nbplay.SequencerWidget(autosync=False), nbplay.SynthWidget(autosync=False)
             track = session.add_track("Lead", seq, synth)
             assert track.mixer_channel == 0 and seq.config.channel_index == 0 and synth.config.channel_index == 0
             assert seq.config.session_id == session.session_id and synth.config.theme == "flat" and seq.config.bpm == 100.0
+            assert (seq.config.time_signature_num, seq.config.time_signature_den) == (3, 4) and seq.config.length == 12
             assert session.timeline.config.tracks[0]["input"] == "channel" and session.launcher.config.tracks[0]["name"] == "Lead"
             session.add_track("Vocals", armed=True)
             assert session.timeline.config.tracks[1]["input"] == "microphone" and session.timeline.config.tracks[1]["armed"] is True
@@ -721,8 +726,8 @@ class TestSession:
             session.close()
 
     def test_session_undo_covers_views_but_not_track_structure(self):
-        session = views.Session()
-        seq, synth = views.SequencerView(length=4, autosync=False), views.SynthView(autosync=False)
+        session = nbplay.Session()
+        seq, synth = nbplay.SequencerWidget(length=4, autosync=False), nbplay.SynthWidget(autosync=False)
         try:
             track = session.add_track("Lead", seq, synth)
             assert len(session.history) == 0
@@ -750,7 +755,7 @@ class TestSession:
             session.close()
 
     def test_transport_shortcut_requests_undo_and_redo(self):
-        session = views.Session()
+        session = nbplay.Session()
         try:
             binding = session.transport._tree["bindings"]["undoRequest"]
             assert binding["field"] == "status.undo_request" and binding["event"] == "nbplay-request"
@@ -766,7 +771,7 @@ class TestSession:
             session.close()
 
     def test_lane_and_channel_mute_solo_mirror_each_other(self):
-        session = views.Session()
+        session = nbplay.Session()
         try:
             session.add_track("Drums")
             session.add_track("Keys")
@@ -781,8 +786,8 @@ class TestSession:
 
 class TestSessionArrangement:
     def test_remove_track_shifts_channels_lanes_and_rows(self):
-        session = views.Session()
-        seq, sampler = views.SequencerView(autosync=False), views.SamplerView(autosync=False)
+        session = nbplay.Session()
+        seq, sampler = nbplay.SequencerWidget(autosync=False), nbplay.SamplerWidget(autosync=False)
         try:
             session.add_track("Audio")
             inst = session.add_track("Inst", seq, sampler)
@@ -808,11 +813,11 @@ class TestSessionArrangement:
             session.close()
 
     def test_patterns_chain_and_update_as_single_steps(self):
-        session = views.Session()
-        seq = views.SequencerView(length=4, step_duration=1.0, autosync=False)
+        session = nbplay.Session()
+        seq = nbplay.SequencerWidget(length=4, step_duration=1.0, autosync=False)
         try:
             seq.set_step(0, note=36)
-            drums = session.add_track("Drums", seq, views.SamplerView(autosync=False))
+            drums = session.add_track("Drums", seq, nbplay.SamplerWidget(autosync=False))
             session.history.clear()
             entry = session.add_pattern("a", seq)
             assert entry["step_duration"] == 1.0 and len(entry["voices_data"][0]) == 4
@@ -836,12 +841,12 @@ class TestSessionArrangement:
 
     def test_midi_round_trip(self, tmp_path):
         pytest.importorskip("mido")
-        session = views.Session(bpm=100.0, time_signature=(3, 4))
-        seq = views.SequencerView(length=4, step_duration=1.0, autosync=False)
-        loaded = views.Session()
+        session = nbplay.Session(bpm=100.0, time_signature=(3, 4))
+        seq = nbplay.SequencerWidget(length=4, step_duration=1.0, autosync=False)
+        loaded = nbplay.Session()
         try:
             seq.set_step(0, note=60)
-            session.add_track("Lead", seq, views.SynthView(autosync=False))
+            session.add_track("Lead", seq, nbplay.SynthWidget(autosync=False))
             keys = session.add_track("Keys", input="midi")
             session.timeline.add_midi_clip("Riff", track_index=keys.mixer_channel, start=2.0, events=[{"beat": 0.5, "duration": 0.5, "note": 72}])
             path = tmp_path / "song.mid"
@@ -858,14 +863,14 @@ class TestSessionArrangement:
 
 
 def arranged_session():
-    session = views.Session(bpm=132.0, time_signature=(3, 4), theme="pro")
+    session = nbplay.Session(bpm=132.0, time_signature=(3, 4), theme="pro")
     session.transport.config.update(loop_enabled=True, loop_end_bar=8)
-    seq = views.SequencerView(length=8, num_voices=2, step_duration=0.5, swing=15, autosync=False)
+    seq = nbplay.SequencerWidget(length=8, num_voices=2, step_duration=0.5, swing=15, autosync=False)
     seq.set_step(0, note=60, velocity=90)
     seq.set_step(3, note=67, velocity=70, voice=1)
-    synth = views.SynthView(oscillator_type="saw", frequency=220.0, amplitude=0.3, autosync=False)
+    synth = nbplay.SynthWidget(oscillator_type="saw", frequency=220.0, amplitude=0.3, autosync=False)
     lead = session.add_track("Lead", seq, synth)
-    sampler = views.SamplerView(pad_count=4, attack=0.02, release=0.4, autosync=False)
+    sampler = nbplay.SamplerWidget(pad_count=4, attack=0.02, release=0.4, autosync=False)
     sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=48, name="Blip")
     sampler.configure_pads(pad_notes=[48, 50, 52, 53])
     sampler.add_zone([0.25, -0.25], 36, 36, sample_rate=8000, name="Kick")
@@ -899,7 +904,7 @@ class TestSessionPersistence:
             assert [t["name"] for t in data["tracks"]] == ["Lead", "Drums", "Vocals"]
             assert data["tracks"][0]["sound_source"]["type"] == "SynthWidget" and data["tracks"][1]["sequencer"] is None
             assert "audio_url" not in data["timeline"]["clips"][0] and "sample_file" not in data["tracks"][1]["sound_source"]
-            keys = views.KeyboardView(autosync=False)
+            keys = nbplay.KeyboardWidget(autosync=False)
             session.add_track("Keys", sound_source=keys)
             with pytest.raises(ValueError, match="cannot save sound source"):
                 session.to_dict()
@@ -915,7 +920,7 @@ class TestSessionPersistence:
             with zipfile.ZipFile(path) as archive:
                 names = set(archive.namelist())
             assert {"session.json", "samples/track-1.f32", "samples/track-1-zone-0.f32", f"clips/{take['id']}.bin"} <= names
-            loaded = views.Session.load(path)
+            loaded = nbplay.Session.load(path)
             assert loaded.bpm == 132.0 and loaded.time_signature == (3, 4) and loaded.theme == "pro"
             assert loaded.transport.config.loop_enabled is True and loaded.transport.config.loop_end_bar == 8
             assert [t.name for t in loaded.tracks] == ["Lead", "Drums", "Vocals"]
@@ -924,9 +929,9 @@ class TestSessionPersistence:
             assert seq.config.voices_data == session.tracks[0].sequencer.config.voices_data and seq.config.theme == "pro"
             assert seq.config.session_id == loaded.session_id and seq.config.channel_index == 0
             synth = loaded.tracks[0].sound_source
-            assert isinstance(synth, views.SynthView) and synth.config.oscillator_type == "saw" and synth.config.frequency == 220.0
+            assert isinstance(synth, nbplay.SynthWidget) and synth.config.oscillator_type == "saw" and synth.config.frequency == 220.0
             sampler = loaded.tracks[1].sound_source
-            assert isinstance(sampler, views.SamplerView) and loaded.tracks[1].sequencer is None
+            assert isinstance(sampler, nbplay.SamplerWidget) and loaded.tracks[1].sequencer is None
             assert sampler.get_sample_data() == pytest.approx([0.0, 0.5, -0.5, 0.25]) and sampler.config.sample_name == "Blip"
             assert sampler.config.pad_notes == [48, 50, 52, 53] and sampler.config.attack == 0.02
             assert sampler.zone_samples(0) == pytest.approx([0.25, -0.25]) and sampler.config.zones[0]["name"] == "Kick"
@@ -949,63 +954,32 @@ class TestSessionPersistence:
             if loaded is not None:
                 loaded.close()
 
-    def test_archives_move_between_the_widget_and_view_sessions(self, tmp_path):
-        from nbplay import SamplerWidget, SequencerWidget, SynthWidget
-        from nbplay.widget import Session as WidgetSession
 
-        widgets = WidgetSession(bpm=96.0, theme="flat")
-        seq = SequencerWidget(length=4)
-        seq.set_step(1, note=50, active=True)
-        widgets.add_track("Lead", seq, SynthWidget(oscillator_type="square"))
-        sampler = SamplerWidget()
-        sampler.load_sample([0.1, 0.2], sample_rate=8000, root_note=40, name="Blip")
-        widgets.add_track("Drums", sound_source=sampler)
-        widgets.add_pattern("a", seq)
-        widgets.chain("Lead", ["a"])
-        path = widgets.save(tmp_path / "widgets.nbplay")
-
-        session = views.Session.load(path)
-        try:
-            assert session.bpm == 96.0 and session.theme == "flat" and [t.name for t in session.tracks] == ["Lead", "Drums"]
-            assert session.tracks[0].sequencer.config.voices_data[0][1]["note"] == 50
-            assert session.tracks[0].sound_source.config.oscillator_type == "square"
-            assert session.tracks[1].sound_source.get_sample_data() == pytest.approx([0.1, 0.2])
-            assert session.timeline.config.clips[0]["pattern"] == "a" and session.patterns == widgets.patterns
-            back = session.save(tmp_path / "views.nbplay")
-        finally:
-            session.close()
-        again = WidgetSession.load(back)
-        assert again.transport.bpm == 96.0 and [t.name for t in again.tracks] == ["Lead", "Drums"]
-        assert again.tracks[0].sequencer.voices_data[0][1]["note"] == 50
-        assert again.tracks[1].sound_source.get_sample_data() == pytest.approx([0.1, 0.2])
-        assert again.timeline.clips[0]["pattern"] == "a"
-
-
-class TestHistoryAndMidiLearnOnViews:
+class TestHistoryAndMidiLearn:
     def test_history_tracks_config_fields_and_skips_transient_ones(self):
-        view = views.TransportView(autosync=False)
+        widget = nbplay.TransportWidget(autosync=False)
         history = History(group_window=0)
         try:
-            history.attach(view)
-            view.config.session_id = "nbplay-x"
+            history.attach(widget)
+            widget.config.session_id = "nbplay-x"
             assert len(history) == 0
-            view.config.bpm = 100.0
-            view.config.loop_enabled = True
-            assert history.steps == [[(view.config, "bpm")], [(view.config, "loop_enabled")]]
-            assert history.undo() and view.config.loop_enabled is False
-            assert history.undo() and view.config.bpm == 120.0
-            assert history.redo() and view.config.bpm == 100.0
-            history.detach(view)
-            view.config.bpm = 90.0
+            widget.config.bpm = 100.0
+            widget.config.loop_enabled = True
+            assert history.steps == [[(widget.config, "bpm")], [(widget.config, "loop_enabled")]]
+            assert history.undo() and widget.config.loop_enabled is False
+            assert history.undo() and widget.config.bpm == 120.0
+            assert history.redo() and widget.config.bpm == 100.0
+            history.detach(widget)
+            widget.config.bpm = 90.0
             assert len(history) == 0
         finally:
-            view.close()
+            widget.close()
 
     def test_midi_learn_maps_controllers_to_view_fields(self):
-        source = views.MidiKeyboardView(autosync=False)
-        synth = views.SynthView(autosync=False)
-        transport = views.TransportView(autosync=False)
-        keys = views.KeyboardView(autosync=False)
+        source = nbplay.MidiKeyboardWidget(autosync=False)
+        synth = nbplay.SynthWidget(autosync=False)
+        transport = nbplay.TransportWidget(autosync=False)
+        keys = nbplay.KeyboardWidget(autosync=False)
         try:
             with pytest.raises(TypeError):
                 MidiLearn(synth)
@@ -1028,52 +1002,182 @@ class TestHistoryAndMidiLearnOnViews:
             browser_writes(source, control_change={"controller": 74, "value": 0, "channel": 0, "seq": 5})
             assert synth.config.frequency == 1000.0
         finally:
-            for view in (source, synth, transport, keys):
-                view.close()
+            for widget in (source, synth, transport, keys):
+                widget.close()
 
-
-class TestTransportView:
-    def test_hosts_config_and_status_and_binds_the_element(self):
-        view = views.TransportView(bpm=100.0, theme="flat", autosync=False)
+    def test_history_groups_transactions_and_skips_paused_changes(self):
+        seq = nbplay.SequencerWidget(length=4, autosync=False)
+        history = History(limit=3, group_window=0)
         try:
-            assert view.config.bpm == 100.0 and view.config.theme == "flat"
-            assert view.config_id != view.status_id
-            tree = view._tree
+            history.attach(seq)
+            assert history.can_undo is False and history.undo() is False
+            with history.transaction():
+                seq.set_step(0, note=60)
+                seq.config.swing = 20.0
+                with history.transaction():
+                    seq.config.loop_enabled = False
+            assert len(history) == 1
+            history.undo()
+            assert seq.config.swing == 0.0 and seq.config.loop_enabled is True and not seq.config.voices_data[0][0]["active"]
+            with history.paused():
+                seq.config.swing = 50.0
+            assert history.can_redo is True and len(history) == 0
+            for value in (1.0, 2.0, 3.0, 4.0, 5.0):
+                seq.config.swing = value
+            assert len(history) == 3 and history.can_redo is False
+            history.clear()
+            assert len(history) == 0
+            history.attach(None)
+            history.attach(object())
+            assert history.steps == []
+        finally:
+            seq.close()
+
+    def test_history_rapid_changes_share_a_step_and_detach_drops_entries(self):
+        a, b = nbplay.SynthWidget(autosync=False), nbplay.SynthWidget(autosync=False)
+        history = History()
+        try:
+            history.attach(a)
+            history.attach(b)
+            a.config.frequency = 100.0
+            a.config.amplitude = 0.1
+            assert len(history) == 1
+            history.mark()
+            b.config.frequency = 200.0
+            assert len(history) == 2
+            history.undo()
+            assert b.config.frequency == 440.0
+            history.undo()
+            assert a.config.frequency == 440.0 and a.config.amplitude == 0.8
+            history.redo()
+            history.redo()
+            history.detach(a)
+            assert history.steps == [[(b.config, "frequency")]]
+        finally:
+            a.close()
+            b.close()
+
+    def test_history_binds_ipython_cell_boundaries(self):
+        class Events:
+            def __init__(self):
+                self.registered = []
+
+            def register(self, name, callback):
+                self.registered.append((name, callback))
+
+        class Shell:
+            events = Events()
+
+        synth = nbplay.SynthWidget(autosync=False)
+        history = History()
+        try:
+            history.attach(synth)
+            shell = Shell()
+            assert history.bind_ipython(shell) is True
+            ((name, callback),) = shell.events.registered
+            assert name == "post_run_cell"
+            synth.config.frequency = 100.0
+            callback(object())
+            synth.config.frequency = 200.0
+            assert len(history) == 2
+            assert history.bind_ipython(object()) is False
+        finally:
+            synth.close()
+
+    def test_sampler_load_is_one_undo_step(self):
+        session = nbplay.Session()
+        sampler = nbplay.SamplerWidget(autosync=False)
+        try:
+            session.add_track("Drums", sound_source=sampler)
+            sampler.load_sample([0.1, 0.2], sample_rate=8000, root_note=40, name="Blip")
+            assert len(session.history) == 1
+            session.undo()
+            assert sampler.config.sample_length == 0 and sampler.config.root_note == 69
+            session.redo()
+            assert sampler.get_sample_data() == pytest.approx([0.1, 0.2])
+        finally:
+            session.close()
+
+    def test_midi_learn_scales_ints_and_bools_and_filters_channels(self):
+        source = nbplay.MidiKeyboardWidget(autosync=False)
+        seq = nbplay.SequencerWidget(autosync=False)
+        synth = nbplay.SynthWidget(amplitude=0.3, autosync=False)
+        try:
+            learn = MidiLearn(source)
+            learn.map(20, seq, "length", low=1, high=16)
+            learn.map(21, seq, "loop_enabled")
+            learn.map(1, synth, "amplitude", channel=2)
+            with pytest.raises(ValueError):
+                learn.map(128, synth, "amplitude")
+            browser_writes(source, control_change={"controller": 20, "value": 127, "channel": 0, "seq": 1})
+            browser_writes(source, control_change={"controller": 21, "value": 63, "channel": 0, "seq": 2})
+            assert seq.config.length == 16 and seq.config.loop_enabled is False
+            browser_writes(source, control_change={"controller": 20, "value": 0, "channel": 0, "seq": 3})
+            browser_writes(source, control_change={"controller": 21, "value": 64, "channel": 0, "seq": 4})
+            assert seq.config.length == 1 and seq.config.loop_enabled is True
+            browser_writes(source, control_change={"controller": 1, "value": 127, "channel": 0, "seq": 5})
+            assert synth.config.amplitude == 0.3
+            browser_writes(source, control_change={"controller": 1, "value": 127, "channel": 2, "seq": 6})
+            assert synth.config.amplitude == 1.0
+            assert learn.apply(20, 200) == 16 and learn.apply(99, 10) is None
+            assert learn.unmap(1) is True and learn.unmap(1) is False
+            learn.learn(synth, "frequency")
+            assert learn.learning is True
+            learn.cancel()
+            assert learn.learning is False
+            browser_writes(source, control_change={"controller": 12, "value": 1, "channel": 0, "seq": 7})
+            assert 12 not in learn.mappings
+            with pytest.raises(ValueError):
+                learn.learn(synth, "missing")
+            learn.close()
+            assert learn.mappings == {}
+        finally:
+            for widget in (source, seq, synth):
+                widget.close()
+
+
+class TestTransportWidget:
+    def test_hosts_config_and_status_and_binds_the_element(self):
+        widget = nbplay.TransportWidget(bpm=100.0, theme="flat", autosync=False)
+        try:
+            assert widget.config.bpm == 100.0 and widget.config.theme == "flat"
+            assert widget.config_id != widget.status_id
+            tree = widget._tree
             assert tree["tag"] == "nbplay-transport"
             assert tree["bindings"]["bpm"] == {"field": "config.bpm", "mode": "two-way", "event": "nbplay-set"}
             assert tree["bindings"]["isPlaying"] == {"field": "status.is_playing", "mode": "two-way", "event": "nbplay-status"}
-            assert [w["namespace"] for w in view._wires] == ["config", "status"]
-            assert [p["name"] for p in view._packages] == ["nbplay"]
+            assert [w["namespace"] for w in widget._wires] == ["config", "status"]
+            assert [p["name"] for p in widget._packages] == ["nbplay"]
         finally:
-            view.close()
+            widget.close()
 
     def test_commands_reach_the_owning_view(self):
-        view = views.TransportView(autosync=False)
+        widget = nbplay.TransportWidget(autosync=False)
         sent = []
-        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        widget.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
         try:
-            command = view.play()
+            command = widget.play()
             assert isinstance(command, int)
-            ready(view)
+            ready(widget)
             kinds = [m["t"] for m in messages(sent)]
             assert kinds.count("snapshot") == 2
             commands = [m for m in messages(sent) if m["t"] == "command"]
             assert len(commands) == 1
             assert commands[0]["field"] == "is_playing" and commands[0]["value"] == {"Bool": True}
-            assert commands[0]["id"] == view.status_id
+            assert commands[0]["id"] == widget.status_id
         finally:
-            view.close()
+            widget.close()
 
     def test_config_assignment_syncs(self):
-        view = views.TransportView(autosync=False)
+        widget = nbplay.TransportWidget(autosync=False)
         sent = []
-        view.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
+        widget.send = Mock(side_effect=lambda content, buffers=(): sent.append((content, buffers)))
         try:
-            ready(view)
+            ready(widget)
             sent.clear()
-            view.config.bpm = 140.0
-            transports.sync(view.server)
+            widget.config.bpm = 140.0
+            transports.sync(widget.server)
             patches = [m for m in messages(sent) if m["t"] == "patch"]
             assert patches and json.dumps(patches[-1]).count("140") >= 1
         finally:
-            view.close()
+            widget.close()

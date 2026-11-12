@@ -163,7 +163,7 @@ generated.
 ### Shared Python helpers
 
 These live in `nbplay/descriptors.py`, which imports neither traitlets nor pydantic, so
-`nbplay/models.py` and `nbplay/views.py` use them without importing the widget module.
+`nbplay/models.py` and `nbplay/widget.py` share them.
 
 - `_default_step()` and `_default_steps(length)` build the sequencer's default
   inactive step dictionaries.
@@ -852,7 +852,7 @@ future external controller layouts.
 
 ## Transports views (preview)
 
-`nbplay/views.py` is the parallel layer that will replace the traitlets widgets: the same elements
+`nbplay/widget.py` holds the widgets: the elements
 on [transports](https://github.com/1kbgz/transports) models rendered by
 [spaday](https://github.com/1kbgz/spaday). A view hosts two pydantic models from `nbplay/models.py`
 in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`,
@@ -904,7 +904,7 @@ notifies its own listeners), while browser status writes arrive as the patches t
 `TimelineView.export_all_clips` collects clip bytes into `clip_audio` as the browser exports them, and
 `LauncherView.bind_slot_editor` loads the selected slot into a `SequencerView` and writes its edits back.
 
-`nbplay.views.Session` creates transport, mixer, timeline and launcher views with one browser
+`nbplay.Session` creates transport, mixer, timeline and launcher widgets with one browser
 `session_id`, so the elements share a clock and an audio bus, and `add_track` adds a mixer channel, a
 timeline lane and a launcher row while routing the track's sequencer and sound source. Each view
 hosts its models in its own transports `Session`: transports grants a connection ownership of every
@@ -917,7 +917,7 @@ pattern clips (one undo step each, with the clip events rebuilt in place on upda
 `import_midi` match the widget session. `save`, `load`, `to_dict` and `from_dict` write and read the
 `.nbplay` archive described below with the format constants from `descriptors.py`; the sound source
 type names stay `SynthWidget` and `SamplerWidget` in `session.json`, so a widget session and a views
-session open each other's files. `examples/15_transports_views.ipynb` is the session walkthrough on the views. The spaday tree is
+session open each other's files. The spaday tree is
 the instrument element with every config field bound two-way on `nbplay-set` and every status field
 bound two-way on `nbplay-status` (or the event a view names in `STATUS_EVENTS`: the transport's
 `undo_request` and `redo_request` counts are written back on `nbplay-request`), so the element's
@@ -930,7 +930,7 @@ acknowledges. The build writes that bundle and the
 stylesheet to `nbplay/static/spaday/`, which `nbplay.components.package` publishes as the spaday
 component package `nbplay` (also an installed entry point).
 
-Tests: `nbplay/tests/test_views.py` drives a view through a mocked comm; `js/tests/spaday.spec.js`
+Tests: `nbplay/tests/test_widgets.py` drives a widget through a mocked comm; `js/tests/spaday.spec.js`
 renders the spaday widget bundle against a real `TransportView` in a Python subprocess
 (`nbplay/tests/spaday_bridge.py`); `NBPLAY_TEST_PYTHON` names the Python with nbplay installed.
 
