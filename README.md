@@ -17,7 +17,9 @@ let's play!
 
 **Try it in your browser:** the [live demo](https://1kbgz.github.io/nbplay/lite/lab/index.html?path=13_daw_playground.ipynb)
 runs the example notebooks on JupyterLite with nbplay compiled to WebAssembly.
-Nothing to install; open a notebook and run it top to bottom.
+Nothing to install; open a notebook and run it top to bottom. The
+[web app](https://1kbgz.github.io/nbplay/app/) runs a demo session the same
+way, as a page of panels with no notebook.
 
 nbplay is a set of Jupyter widgets that together form a small DAW in the
 browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
