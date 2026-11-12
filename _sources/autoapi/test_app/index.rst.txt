@@ -39,3 +39,9 @@ Module Contents
    .. py:method:: test_served_page_provides_its_wires_to_the_root()
 
 
+   .. py:method:: test_standalone_host_passes_frames_without_a_server()
+
+
+   .. py:method:: test_export_writes_a_static_site(tmp_path)
+
+

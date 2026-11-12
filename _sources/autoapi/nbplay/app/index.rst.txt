@@ -15,6 +15,19 @@ nbplay.app
 
    ``python -m nbplay.app`` serves a demo session on http://127.0.0.1:8020.
 
+   The same page also runs with no server: :func:`export` writes a static site
+   whose Python side (the session and its models) runs in Pyodide inside a Web
+   Worker, with ``postMessage`` in place of the WebSockets
+   (``python -m nbplay.app --export DIR --wheel nbplay-...wasm32.whl``).
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   nbplay.app.Standalone
 
 
 Functions
@@ -25,6 +38,7 @@ Functions
    nbplay.app.panel_widgets
    nbplay.app.default_layout
    nbplay.app.build
+   nbplay.app.export
    nbplay.app.demo_session
 
 
@@ -49,6 +63,77 @@ Module Contents
    ``layout`` is a regular-layout split/tab tree over the panel names from
    :func:`panel_widgets`; ``probes`` adds the JSON routes the browser tests
    drive. Other keyword options go to :func:`spaday.backends.starlette.serve`.
+
+
+.. py:class:: Standalone(session, *, layout=None, title='nbplay')
+
+   The Python side of the page with no server: what a Pyodide Web Worker runs.
+
+   Each panel's transports server talks to one in-browser connection; the
+   worker passes wire frames between this object and the page with
+   ``postMessage``. Every method takes and returns JSON text, the form that
+   crosses the worker boundary.
+
+
+   .. py:attribute:: session
+
+
+   .. py:attribute:: panels
+
+
+   .. py:attribute:: servers
+
+
+   .. py:attribute:: _page
+
+
+   .. py:method:: load(spec)
+      :classmethod:
+
+
+      Build from ``"module:function"``, a zero-argument callable returning the :class:`Session`.
+
+
+
+   .. py:method:: page()
+
+      The tree, the page styles, and each panel's model-to-namespace wires.
+
+
+
+   .. py:method:: open()
+
+      Connect the page to every panel; the frames that bring it up to date, by panel.
+
+
+
+   .. py:method:: receive(panel, frame)
+
+      Apply one frame from the page; the frames to send back, by panel.
+
+      A browser edit can change other widgets' models (the session mirrors
+      theme, mute and solo), so every server is flushed.
+
+
+
+   .. py:method:: call(panel, method)
+
+      Call a widget method (``"transport"``, ``"play"``) the way Python driving the session would; the frames to send.
+
+
+
+   .. py:method:: _flush(out)
+
+
+.. py:function:: export(directory, *, session='nbplay.app:demo_session', wheels=(), requirements=())
+
+   Write the app as a static site that runs its Python in Pyodide.
+
+   ``session`` names a zero-argument callable (``"module:function"``) that the
+   worker imports and calls for the :class:`Session`. ``wheels`` are local
+   wheel files to bundle and install first (the nbplay Pyodide wheel, until
+   one is on PyPI); ``requirements`` are further micropip requirements. The
+   site needs no server beyond static file hosting.
 
 
 .. py:function:: demo_session()
