@@ -751,7 +751,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InstrumentWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""One instrument element on a config model and, usually, a status model.</span>
 
@@ -786,7 +786,7 @@ window.runMermaid = runMermaid;</script>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">(),</span> <span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">wires</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wires</span><span class="p">(),</span> <span class="n">packages</span><span class="o">=</span><span class="n">PACKAGE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="InstrumentWidget.tree">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.tree">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget.tree">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The instrument element with its bindings; ``prefix`` namespaces them (``"lead."``) on a shared store."""</span>
         <span class="n">node</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TAG</span><span class="p">)</span>
@@ -800,7 +800,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget.wires">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.wires">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget.wires">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">wires</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The wire specs for the hosted models: notebook mappings, or :class:`spaday.Wire` for a served page at ``url``."""</span>
         <span class="n">specs</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">config"</span><span class="p">)]</span>
@@ -812,13 +812,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget._prepare">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._prepare">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget._prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Hook run after the models exist and before they are hosted."""</span></div>
 
 
 <div class="viewcode-block" id="InstrumentWidget._command">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._command">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget._command">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no browser-owned status to command"</span><span class="p">)</span>
@@ -826,7 +826,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget.on_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.on_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget.on_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listener</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Call ``listener(widget, name, old, new)`` when a config or status field changes; returns a remover.</span>
 
@@ -845,7 +845,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget._notify">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._notify">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget._notify">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">wanted</span><span class="p">,</span> <span class="n">listener</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_listeners</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">wanted</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">:</span>
@@ -853,14 +853,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget._on_config_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._on_config_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget._on_config_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_config_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">changes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_notify</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="InstrumentWidget._on_patch">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._on_patch">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget._on_patch">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">mid</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status_id</span><span class="p">:</span>
             <span class="k">return</span>
@@ -877,7 +877,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="InstrumentWidget.close">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.close">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.InstrumentWidget.close">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unobserve_config</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unhook_patches</span><span class="p">()</span>
@@ -888,7 +888,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TransportWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TransportWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The transport instrument on a transports session."""</span>
 
@@ -917,28 +917,28 @@ window.runMermaid = runMermaid;</script>
     <span class="n">STATUS_EVENTS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"undo_request"</span><span class="p">:</span> <span class="s2">"nbplay-request"</span><span class="p">,</span> <span class="s2">"redo_request"</span><span class="p">:</span> <span class="s2">"nbplay-request"</span><span class="p">}</span>
 
 <div class="viewcode-block" id="TransportWidget.play">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.play">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start the clock in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransportWidget.stop">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.stop">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop the clock in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TransportWidget.seek">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.seek">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.seek">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Move the clock to ``beat``."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"current_beat"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">beat</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="TransportWidget.record">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.record">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TransportWidget.record">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Arm or disarm recording; arming also starts the clock."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_recording"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">on</span><span class="p">))</span></div>
@@ -947,7 +947,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SynthWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SynthWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The synth instrument on a transports session.</span>
 
@@ -971,14 +971,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">}</span>
 
 <div class="viewcode-block" id="SynthWidget.play">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget.play">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start the tone in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SynthWidget.stop">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget.stop">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SynthWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop the tone in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
@@ -987,7 +987,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixerWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The mixer console on a transports session.</span>
 
@@ -1009,7 +1009,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">}</span>
 
 <div class="viewcode-block" id="MixerWidget.add_channel">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_channel">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Channel"</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a channel strip and return its index."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">}]</span>
@@ -1017,7 +1017,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.remove_channel">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.remove_channel">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove the channel at ``index``."""</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
@@ -1027,7 +1027,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget._update_channel">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget._update_channel">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget._update_channel">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
@@ -1036,38 +1036,38 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_gain">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_gain">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_gain">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_channel</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="n">gain</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_pan">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_pan">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_pan">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_pan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">pan</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_channel</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">pan</span><span class="o">=</span><span class="n">pan</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_mute">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_mute">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_mute">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_mute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">mute</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_channel</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">mute</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_solo">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_solo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_solo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_solo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">solo</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_channel</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">solo</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">solo</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_effects">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_effects">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effects">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effects</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Replace the insert chain of the channel at ``index``."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_channel</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="n">_normalize_effects</span><span class="p">(</span><span class="n">effects</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.add_channel_effect">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_channel_effect">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_channel_effect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_channel_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effect</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append an insert effect to the channel at ``index``."""</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">):</span>
@@ -1075,7 +1075,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.set_channel_effect_enabled">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_channel_effect_enabled">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_channel_effect_enabled">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_channel_effect_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effect_index</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Bypass (``False``) or re-enable one channel insert effect."""</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">):</span>
@@ -1086,28 +1086,28 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.clear_channel_effects">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.clear_channel_effects">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.clear_channel_effects">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_channel_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove every insert effect from the channel at ``index``."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_channel_effects</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">[])</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_master_effects">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_master_effects">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_master_effects">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_master_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effects</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Replace the master bus insert chain."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_effects</span> <span class="o">=</span> <span class="n">_normalize_effects</span><span class="p">(</span><span class="n">effects</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.add_master_effect">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_master_effect">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_master_effect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_master_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append an insert effect to the master bus."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_effects</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_effects</span><span class="p">,</span> <span class="n">_normalize_effect</span><span class="p">(</span><span class="n">effect</span><span class="p">)]</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_master_effect_enabled">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_master_effect_enabled">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_master_effect_enabled">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_master_effect_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">effect_index</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Bypass (``False``) or re-enable one master insert effect."""</span>
         <span class="n">effects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_effects</span><span class="p">)</span>
@@ -1117,14 +1117,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.clear_master_effects">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.clear_master_effects">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.clear_master_effects">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_master_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove every insert effect from the master bus."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_effects</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.add_return">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_return">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_return">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Return"</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="p">(),</span> <span class="n">gain</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a send/return bus and return its index; every channel gains a send."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">,</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"gain"</span><span class="p">:</span> <span class="n">gain</span><span class="p">,</span> <span class="s2">"effects"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">effects</span><span class="p">)}]</span>
@@ -1132,7 +1132,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.remove_return">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.remove_return">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.remove_return">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove a return bus and every channel's send to it."""</span>
         <span class="n">returns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">)</span>
@@ -1143,7 +1143,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget._update_return">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget._update_return">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget._update_return">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
         <span class="n">returns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">returns</span><span class="p">):</span>
@@ -1152,20 +1152,20 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.set_return_gain">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_return_gain">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_gain">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_return_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_return</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="n">gain</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.set_return_effects">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_return_effects">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_effects">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_return_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effects</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Replace a return bus's effect chain."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_return</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="n">_normalize_effects</span><span class="p">(</span><span class="n">effects</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MixerWidget.add_return_effect">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.add_return_effect">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.add_return_effect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_return_effect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effect</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append an effect to a return bus's chain."""</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">):</span>
@@ -1173,7 +1173,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.set_return_effect_enabled">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_return_effect_enabled">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_return_effect_enabled">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_return_effect_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">effect_index</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Bypass (``False``) or re-enable one return bus effect."""</span>
         <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">):</span>
@@ -1184,7 +1184,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.set_send">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.set_send">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.set_send">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel_index</span><span class="p">,</span> <span class="n">return_index</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Set a channel's post-fader send level (0 to 1) to a return bus."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">return_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">):</span>
@@ -1196,7 +1196,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MixerWidget.to_mixer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MixerWidget.to_mixer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MixerWidget.to_mixer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_mixer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A Rust ``Mixer`` with this console's channels and master gain."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixer</span>
@@ -1244,7 +1244,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.PadWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PadWidget</span><span class="p">(</span><span class="n">_NoteSource</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The trigger-pad grid on a transports session; the browser owns the taps."""</span>
 
@@ -1268,7 +1268,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">}</span>
 
 <div class="viewcode-block" id="PadWidget.configure_grid_for_actions">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.PadWidget.configure_grid_for_actions">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.configure_grid_for_actions">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_grid_for_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">actions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Size the grid for the given notes, velocities or actions and apply them."""</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span>
@@ -1294,7 +1294,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadWidget.set_base_note">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.PadWidget.set_base_note">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.set_base_note">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_base_note</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Lay the pads out chromatically from ``note``."""</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
@@ -1303,7 +1303,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadWidget.transpose_pads">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.PadWidget.transpose_pads">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.transpose_pads">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">transpose_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">semitones</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Shift every pad note by ``semitones``."""</span>
         <span class="n">delta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">semitones</span><span class="p">)</span>
@@ -1312,7 +1312,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadWidget.connect_sampler">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.PadWidget.connect_sampler">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.PadWidget.connect_sampler">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">connect_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Route the pads to ``sampler``; pads have no zones, so ``zone`` must be ``None`` or ``"all"``."""</span>
         <span class="n">zone</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"zone"</span><span class="p">)</span>
@@ -1324,7 +1324,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="KeyboardWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.KeyboardWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KeyboardWidget</span><span class="p">(</span><span class="n">_Keys</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The QWERTY musical-typing keyboard on a transports session."""</span>
 
@@ -1345,7 +1345,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MidiKeyboardWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiKeyboardWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiKeyboardWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MidiKeyboardWidget</span><span class="p">(</span><span class="n">_Keys</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The Web MIDI keyboard on a transports session; ports and clock are browser-owned."""</span>
 
@@ -1364,7 +1364,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SettingsWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SettingsWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SettingsWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SettingsWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Audio and MIDI device settings; the browser owns the port list and MIDI monitor."""</span>
 
@@ -1384,7 +1384,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="MidiOutputWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MidiOutputWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A Web MIDI output; sends are commands delivered to the owning widget."""</span>
 
@@ -1402,34 +1402,34 @@ window.runMermaid = runMermaid;</script>
     <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"available_midi_ports"</span><span class="p">:</span> <span class="s2">"availableMidiPorts"</span><span class="p">}</span>
 
 <div class="viewcode-block" id="MidiOutputWidget._request">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget._request">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget._request">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">message</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"request"</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MidiOutputWidget.note_on">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget.note_on">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.note_on">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">note_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Send a note-on on the output's channel."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"note_on"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">),</span> <span class="n">velocity</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">_clamp_velocity</span><span class="p">(</span><span class="n">velocity</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="MidiOutputWidget.note_off">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget.note_off">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.note_off">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">note_off</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Send a note-off on the output's channel."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"note_off"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MidiOutputWidget.control_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget.control_change">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.control_change">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">control_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Send a control change (0-127) on the output's channel."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">,</span> <span class="n">controller</span><span class="o">=</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="MidiOutputWidget.send_raw">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiOutputWidget.send_raw">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.MidiOutputWidget.send_raw">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">send_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change."""</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">_clamp_int</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
@@ -1441,7 +1441,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SequencerWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The step sequencer on a transports session.</span>
 
@@ -1480,7 +1480,7 @@ window.runMermaid = runMermaid;</script>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SequencerWidget.configure_grid">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.configure_grid">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.configure_grid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measures</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Set the grid from a measure count and a step duration in beats; the length follows."""</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1501,7 +1501,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
 <div class="viewcode-block" id="SequencerWidget.set_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.set_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.set_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">duration_ticks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Set one step of one voice."""</span>
         <span class="n">voices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="k">for</span> <span class="n">steps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span>
@@ -1517,7 +1517,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.toggle_step">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.toggle_step">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.toggle_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">toggle_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Flip one step's active state."""</span>
         <span class="n">voices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="k">for</span> <span class="n">steps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span>
@@ -1527,14 +1527,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.clear">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.clear">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.clear">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Deactivate every step."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="p">[[{</span><span class="o">**</span><span class="n">step</span><span class="p">,</span> <span class="s2">"active"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span> <span class="k">for</span> <span class="n">steps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="SequencerWidget.to_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.to_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A Rust ``Pattern`` of one voice, or ``None`` when ``voice`` is out of range."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pattern</span><span class="p">,</span> <span class="n">Step</span>
@@ -1552,7 +1552,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.to_step_sequencer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.to_step_sequencer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_step_sequencer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_step_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A Rust ``StepSequencer`` of one voice on a MIDI channel, or ``None`` when ``voice`` is out of range."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepSequencer</span>
@@ -1566,7 +1566,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.to_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.to_midi">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.to_midi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_midi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Sequencer"</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The pattern as a ``mido.MidiFile``, written to ``path`` when given."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.midi</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_midi</span><span class="p">,</span> <span class="n">steps_to_events</span>
@@ -1583,7 +1583,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.load_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.load_midi">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.load_midi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_midi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">track</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_voices</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Replace the pattern with the notes of a MIDI file; see ``SequencerWidget.load_midi``."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.midi</span><span class="w"> </span><span class="kn">import</span> <span class="n">events_to_voices</span><span class="p">,</span> <span class="n">read_midi</span>
@@ -1602,14 +1602,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SequencerWidget.play">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.play">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start playback in the owning widget (the session clock when shared)."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SequencerWidget.stop">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.stop">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SequencerWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop playback in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
@@ -1618,7 +1618,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SamplerWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The sampler on a transports session.</span>
 
@@ -1658,7 +1658,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">}</span>
 
 <div class="viewcode-block" id="SamplerWidget._set_sample_data">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget._set_sample_data">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget._set_sample_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">sample_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="n">sample_data</span><span class="o">=</span><span class="n">_pack_float32</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="n">waveform</span><span class="o">=</span><span class="n">_pack_float32</span><span class="p">(</span><span class="n">_decimate_samples</span><span class="p">(</span><span class="n">samples</span><span class="p">)),</span> <span class="o">**</span><span class="n">fields</span>
@@ -1666,14 +1666,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.get_sample_data">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.get_sample_data">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.get_sample_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The main sample as floats."""</span>
         <span class="k">return</span> <span class="n">_unpack_float32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sample_data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SamplerWidget.load_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.load_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Sample"</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Load mono float samples (or float32 bytes) as the main sample."""</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="n">_unpack_float32</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1682,7 +1682,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.load_audio_file">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.load_audio_file">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.load_audio_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_audio_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="mi">69</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Load an audio file (WAV through the stdlib, others through ``soundfile``) as the main sample."""</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -1691,7 +1691,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.trim_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.trim_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.trim_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trim_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Keep the frames in ``[start, end)``."""</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_data</span><span class="p">()</span>
@@ -1704,7 +1704,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.normalize_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.normalize_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.normalize_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalize_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Scale the sample so its peak reaches ``target``."""</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_data</span><span class="p">()</span>
@@ -1716,7 +1716,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.reverse_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.reverse_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.reverse_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reverse_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Reverse the sample."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_sample_data</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_sample_data</span><span class="p">())))</span>
@@ -1724,7 +1724,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.fade_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.fade_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.fade_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fade_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fade_in</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fade_out</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Apply linear fades of the given frame counts."""</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample_data</span><span class="p">()</span>
@@ -1740,7 +1740,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.slice_sample">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.slice_sample">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.slice_sample">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">slice_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">start_note</span><span class="o">=</span><span class="mi">36</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Cut the sample into ``count`` equal slices on ascending notes and put them on the pads."""</span>
         <span class="n">count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_PAD_MAX_COUNT</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)))</span>
@@ -1769,7 +1769,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.map_slices_to_pads">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.map_slices_to_pads">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.map_slices_to_pads">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">map_slices_to_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pads</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_note</span><span class="o">=</span><span class="mi">36</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Put the slices on a :class:`PadWidget` (slicing first when needed) and route the pads here."""</span>
         <span class="n">slices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sample_slices</span>
@@ -1786,7 +1786,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.configure_pads">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.configure_pads">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.configure_pads">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_notes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_actions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Set the pad count and per-pad notes, velocities or actions."""</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span>
@@ -1803,7 +1803,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.add_zone">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.add_zone">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.add_zone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">note_low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">note_high</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">velocity_low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">velocity_high</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="n">root_note</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a sample zone covering a note and velocity range; returns the zone."""</span>
         <span class="n">packed</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span> <span class="k">else</span> <span class="n">_pack_float32</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
@@ -1827,7 +1827,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.add_zone_file">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.add_zone_file">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.add_zone_file">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_zone_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">note_low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">note_high</span><span class="o">=</span><span class="mi">127</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a zone from an audio file (WAV through the stdlib, others through ``soundfile``)."""</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -1837,7 +1837,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.set_zone">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.set_zone">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.set_zone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Update fields of one zone (range, root note, name); returns the zone."""</span>
         <span class="n">zones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">zones</span><span class="p">)</span>
@@ -1847,7 +1847,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.remove_zone">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.remove_zone">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.remove_zone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove the zone at ``index``."""</span>
         <span class="n">zones</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">zones</span><span class="p">)</span>
@@ -1856,13 +1856,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.clear_zones">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.clear_zones">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.clear_zones">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_zones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">zones</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 
 <div class="viewcode-block" id="SamplerWidget.zone_for">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.zone_for">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.zone_for">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">zone_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The first zone answering to ``note`` at ``velocity``, or ``None``."""</span>
         <span class="n">note</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
@@ -1874,14 +1874,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.zone_samples">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.zone_samples">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.zone_samples">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">zone_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""One zone's PCM as floats."""</span>
         <span class="k">return</span> <span class="n">_unpack_float32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">zones</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s2">"data"</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="SamplerWidget.to_sample_map">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.to_sample_map">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.to_sample_map">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_sample_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A Rust ``SampleMap``: the zones in order, then the main sample as the fallback."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">AudioSample</span><span class="p">,</span> <span class="n">SampleMap</span><span class="p">,</span> <span class="n">SampleMapping</span>
@@ -1897,7 +1897,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.to_sampler">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.to_sampler">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.to_sampler">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A Rust ``Sampler`` with the main sample, envelope and polyphony."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">AudioSample</span><span class="p">,</span> <span class="n">Envelope</span><span class="p">,</span> <span class="n">Sampler</span>
@@ -1909,7 +1909,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.capture_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.capture_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.capture_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">capture_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeline</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Turn a timeline audio clip into a zone, decoded by the owning browser widget.</span>
 
@@ -1936,7 +1936,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SamplerWidget.capture">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SamplerWidget.capture">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.SamplerWidget.capture">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Take"</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Ask the owning widget to decode a browser-side audio URL into a zone.</span>
 
@@ -1966,7 +1966,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LauncherWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The clip launcher on a transports session.</span>
 
@@ -1995,7 +1995,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">}</span>
 
 <div class="viewcode-block" id="LauncherWidget.add_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.add_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.add_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Track"</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a track row and return its index."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span>
@@ -2004,7 +2004,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.remove_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.remove_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.remove_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove a track row, dropping its slots and shifting later rows."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -2032,7 +2032,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.add_scene">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.add_scene">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.add_scene">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a scene column and return its index."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">scenes</span><span class="p">)</span>
@@ -2041,7 +2041,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget._check_indices">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget._check_indices">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget._check_indices">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">track_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">track_index</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">track_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
@@ -2055,7 +2055,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget._find_slot">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget._find_slot">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget._find_slot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">slot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">slots</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">track_index</span> <span class="ow">and</span> <span class="n">slot</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">scene_index</span><span class="p">:</span>
@@ -2064,7 +2064,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.set_slot">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.set_slot">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.set_slot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">swing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">groove</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Fill a slot with a pattern and return it.</span>
 
@@ -2101,7 +2101,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.get_slot">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.get_slot">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.get_slot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The slot at ``(track_index, scene_index)``, or ``None``."""</span>
         <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_slot</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">track_index</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">scene_index</span><span class="p">))</span>
@@ -2109,7 +2109,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.clear_slot">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.clear_slot">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.clear_slot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Empty a slot."""</span>
         <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_indices</span><span class="p">(</span><span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">)</span>
@@ -2121,7 +2121,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.bind_slot_editor">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.bind_slot_editor">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.bind_slot_editor">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">bind_slot_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Edit whichever slot is selected in ``sequencer`` (a :class:`SequencerWidget`); returns an unbinder.</span>
 
@@ -2161,7 +2161,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.slot_to_sequencer">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.slot_to_sequencer">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.slot_to_sequencer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">slot_to_sequencer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Load a slot's pattern, grid, swing and groove into a :class:`SequencerWidget`."""</span>
         <span class="n">slot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">)</span>
@@ -2180,7 +2180,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.launch">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.launch">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.launch">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Launch a slot on the next quantization boundary."""</span>
         <span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_indices</span><span class="p">(</span><span class="n">track_index</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">)</span>
@@ -2190,7 +2190,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.stop_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.stop_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.stop_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop a track's playing slot."""</span>
         <span class="n">track_index</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_indices</span><span class="p">(</span><span class="n">track_index</span><span class="p">)</span>
@@ -2198,7 +2198,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.launch_scene">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.launch_scene">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.launch_scene">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">launch_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scene_index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Launch every slot in a scene; tracks with no slot there stop."""</span>
         <span class="n">scene_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">scene_index</span><span class="p">)</span>
@@ -2208,7 +2208,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="LauncherWidget.stop_all">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.stop_all">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.LauncherWidget.stop_all">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop every playing slot."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"request"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"action"</span><span class="p">:</span> <span class="s2">"stop_all"</span><span class="p">})</span></div>
@@ -2217,7 +2217,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TimelineWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The tracking widget on a transports session.</span>
 
@@ -2268,7 +2268,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_clip_exported</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"exported_clip_data"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimelineWidget._on_clip_exported">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._on_clip_exported">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._on_clip_exported">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_clip_exported</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="n">exported</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">exported_clip</span>
         <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">exported</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
@@ -2295,7 +2295,7 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_export_queue</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">export_clip_id</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimelineWidget.export_all_clips">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.export_all_clips">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_all_clips">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_all_clips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Ask the browser for every clip's audio, one clip at a time; returns the number queued.</span>
 
@@ -2312,7 +2312,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.add_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.add_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Track"</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s2">"microphone"</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a lane and return its index."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tracks</span><span class="p">)</span>
@@ -2328,7 +2328,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.remove_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.remove_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.remove_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove a lane, dropping its clips and shifting later lanes."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -2353,7 +2353,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.arm_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.arm_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.arm_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">arm_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Arm or disarm a lane; ``exclusive`` disarms every other lane."""</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -2371,7 +2371,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget._find_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._find_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._find_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
         <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clips</span><span class="p">:</span>
@@ -2381,7 +2381,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget._midi_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._midi_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._midi_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_midi_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
         <span class="n">clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clip</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"midi"</span><span class="p">:</span>
@@ -2390,7 +2390,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget._append_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._append_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._append_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_append_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span>
         <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">clips</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">config</span><span class="o">.</span><span class="n">clips</span><span class="p">,</span> <span class="n">clip</span><span class="p">],</span> <span class="n">selected_clip_id</span><span class="o">=</span><span class="n">clip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]</span> <span class="o">+</span> <span class="n">clip</span><span class="p">[</span><span class="s2">"duration"</span><span class="p">]))</span>
@@ -2398,7 +2398,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.add_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.add_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Clip"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a clip, select it, and grow the timeline to fit it."""</span>
         <span class="n">clip</span> <span class="o">=</span> <span class="n">_normalize_audio_clip</span><span class="p">(</span>
@@ -2410,7 +2410,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.add_midi_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.add_midi_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_midi_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_midi_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"MIDI"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">(),</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a MIDI clip; ``duration`` defaults to the end of the last event."""</span>
         <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_midi_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
@@ -2420,7 +2420,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.add_pattern_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.add_pattern_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.add_pattern_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_pattern_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Append a MIDI clip that plays ``pattern`` (a :class:`SequencerWidget`, step dicts or voices) ``repeat`` times."""</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">):</span>
@@ -2432,7 +2432,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.export_midi_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.export_midi_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_midi_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_midi_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""One MIDI clip as a ``mido.MidiFile``, written to ``path`` when given."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.midi</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_midi</span>
@@ -2450,7 +2450,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.import_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.import_midi">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.import_midi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">import_midi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add one MIDI clip per MIDI track with notes, all on one lane at ``start``; returns the clips."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay.midi</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_midi</span>
@@ -2459,7 +2459,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.clip_to_event_sequence">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.clip_to_event_sequence">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.clip_to_event_sequence">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clip_to_event_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A MIDI clip's events as a Rust ``EventSequence``."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventSequence</span><span class="p">,</span> <span class="n">NoteEvent</span>
@@ -2471,7 +2471,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.remove_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.remove_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.remove_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove a clip by id."""</span>
         <span class="n">clip_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
@@ -2482,14 +2482,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget._edit_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._edit_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget._edit_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_edit_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
         <span class="n">clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clip</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clips</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">item</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">}</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="n">clip</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clips</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.move_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.move_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.move_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">move_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Move a clip to another lane or beat position."""</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2501,14 +2501,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.resize_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.resize_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.resize_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">resize_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Set a clip's duration in beats."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_edit_clip</span><span class="p">(</span><span class="n">clip_id</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.duplicate_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.duplicate_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.duplicate_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">duplicate_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Copy a clip onto the same lane right after the original; returns the copy."""</span>
         <span class="n">clip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clip</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
@@ -2519,7 +2519,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.export_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.export_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.export_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_clip</span><span class="p">(</span><span class="n">clip_id</span><span class="p">)</span>
@@ -2527,7 +2527,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.write_exported_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.write_exported_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.write_exported_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_exported_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Write the most recently exported clip's bytes to ``path``; returns the clip."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">exported_clip_data</span><span class="p">:</span>
@@ -2538,7 +2538,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.import_clip">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.import_clip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.import_clip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">import_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Import"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blob_type</span><span class="o">=</span><span class="s2">"audio/webm"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a clip backed by audio bytes (or a file path); the browser attaches a playable URL.</span>
 
@@ -2568,28 +2568,28 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineWidget.seek">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.seek">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.seek">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Move a standalone timeline's playhead (a session seeks through its transport)."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">current_beat</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">beat</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.play">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.play">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start playback in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.stop">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.stop">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop playback in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineWidget.record">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget.record">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.TimelineWidget.record">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start or stop recording the armed lanes."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_recording"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">on</span><span class="p">))</span></div>
@@ -2598,7 +2598,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Track</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A session lane: a mixer channel plus an optional sequencer and sound source."""</span>
 
@@ -2609,7 +2609,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">=</span> <span class="n">mixer_channel</span>
 
 <div class="viewcode-block" id="Track.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Track.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Track.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"Track(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">, channel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mixer_channel</span><span class="si">}</span><span class="s2">)"</span></div>
 </div>
@@ -2617,7 +2617,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Session</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Transport, mixer, timeline and launcher widgets sharing one browser session.</span>
 
@@ -2667,7 +2667,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_mixer_channels</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"channels"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Session._on_timeline_tracks">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._on_timeline_tracks">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._on_timeline_tracks">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_timeline_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">tracks</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span><span class="p">:</span>
             <span class="k">return</span>
@@ -2689,7 +2689,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session._on_mixer_channels">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._on_mixer_channels">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._on_mixer_channels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_mixer_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span><span class="p">:</span>
             <span class="k">return</span>
@@ -2711,14 +2711,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.undo">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.undo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.undo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Revert the latest change to any widget; False when nothing to undo."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Session.redo">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.redo">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.redo">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Reapply the latest undone change; False when nothing to redo."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span></div>
@@ -2770,28 +2770,28 @@ window.runMermaid = runMermaid;</script>
             <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="Session.play">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.play">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Start the shared clock."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">play</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Session.stop">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.stop">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop the shared clock."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Session.seek">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.seek">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.seek">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">seek</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Move the shared clock."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">beat</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Session.add_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.add_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.add_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sound_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing."""</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">paused</span><span class="p">():</span>
@@ -2799,7 +2799,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session._add_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._add_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._add_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">armed</span><span class="p">):</span>
         <span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">sound_source</span><span class="p">):</span>
@@ -2824,7 +2824,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.remove_track">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.remove_track">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_track">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
@@ -2848,7 +2848,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session._track_index">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._track_index">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session._track_index">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_track_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Track</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
@@ -2864,7 +2864,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.add_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.add_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.add_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Register a named pattern for chaining; returns its stored form.</span>
 
@@ -2885,14 +2885,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.remove_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.remove_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.remove_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Forget a pattern; clips already placed keep playing as MIDI clips."""</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span></div>
 
 
 <div class="viewcode-block" id="Session.chain">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.chain">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.chain">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Place named patterns back to back on a track's lane; returns the clips.</span>
 
@@ -2921,7 +2921,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.update_pattern">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.update_pattern">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.update_pattern">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Replace a pattern and regenerate every clip placed from it, as one undo step."""</span>
         <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -2941,7 +2941,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.export_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.export_midi">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.export_midi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_midi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The sequencer patterns and MIDI clips as one ``mido.MidiFile``, written to ``path`` when given.</span>
 
@@ -2974,7 +2974,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.import_midi">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.import_midi">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.import_midi">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">import_midi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">apply_tempo</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.</span>
 
@@ -2996,14 +2996,14 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""The session as a JSON-safe dict (no binary payloads); see :meth:`save`."""</span>
         <span class="k">return</span> <span class="n">_session_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Session.save">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.save">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Write the session to a ``.nbplay`` zip archive; returns the path.</span>
 
@@ -3022,7 +3022,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.load">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.load">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.load">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Rebuild a session from an archive written by :meth:`save` (of either session class)."""</span>
@@ -3033,7 +3033,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.from_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.from_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.from_dict">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Rebuild a session from :meth:`to_dict` output plus binary resources."""</span>
@@ -3041,7 +3041,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="Session.close">
-<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.close">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.widget.Session.close">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Close every widget."""</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgets</span><span class="p">:</span>

@@ -1383,23 +1383,27 @@ widget does, so <code class="docutils literal notranslate"><span class="pre">nbp
 <code class="docutils literal notranslate"><span class="pre">demo_session()</span></code> on port 8020; <code class="docutils literal notranslate"><span class="pre">--probes</span></code> adds the JSON routes the browser test
 drives (<code class="docutils literal notranslate"><span class="pre">/state</span></code>, <code class="docutils literal notranslate"><span class="pre">/command/&lt;panel&gt;/&lt;method&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">/set/&lt;panel&gt;/&lt;field&gt;</span></code>). The
 <code class="docutils literal notranslate"><span class="pre">app</span></code> extra installs <code class="docutils literal notranslate"><span class="pre">spaday-regular-layout</span></code>, <code class="docutils literal notranslate"><span class="pre">starlette</span></code> and <code class="docutils literal notranslate"><span class="pre">uvicorn</span></code>.</p>
-<p>The same page runs with no server. <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">nbplay.app</span> <span class="pre">--export</span> <span class="pre">DIR</span> <span class="pre">--wheel</span> <span class="pre">&lt;nbplay</span> <span class="pre">Pyodide</span> <span class="pre">wheel&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">standalone</span></code> writes <code class="docutils literal notranslate"><span class="pre">docs/html/app</span></code>) writes a
-static site: <code class="docutils literal notranslate"><span class="pre">index.html</span></code>, <code class="docutils literal notranslate"><span class="pre">worker.js</span></code> (both from <code class="docutils literal notranslate"><span class="pre">nbplay/standalone/</span></code>), the
-spaday and transports browser runtimes, the component packages’ assets, the
-bundled wheels and a <code class="docutils literal notranslate"><span class="pre">config.json</span></code> naming the session factory
-(<code class="docutils literal notranslate"><span class="pre">&quot;module:function&quot;</span></code>, default <code class="docutils literal notranslate"><span class="pre">nbplay.app:demo_session</span></code>). The worker loads
-Pyodide, installs the wheels with micropip and builds <code class="docutils literal notranslate"><span class="pre">nbplay.app.Standalone</span></code>,
-which holds one <code class="docutils literal notranslate"><span class="pre">transports.Server</span></code> per panel. The page creates one managed
-transports client per panel, attaches it to the worker with <code class="docutils literal notranslate"><span class="pre">postMessage</span></code>
-(<code class="docutils literal notranslate"><span class="pre">client.attach(send)</span></code> / <code class="docutils literal notranslate"><span class="pre">client.recv(frame)</span></code>, the way the notebook widget
-rides its comm), connects each model to the shared store under the panel’s
-namespace and provides the wires to the root for <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code>. Every frame
-from the page is applied by <code class="docutils literal notranslate"><span class="pre">Standalone.receive()</span></code>, which then flushes every
-server, because one edit can change other widgets’ models through the
-session’s mirroring. So validation, derived fields (the Rust waveform, as
-WebAssembly) and the <code class="docutils literal notranslate"><span class="pre">Session</span></code> logic are the same Python as in a kernel.
-<code class="docutils literal notranslate"><span class="pre">nbplay.call(&quot;transport&quot;,</span> <span class="pre">&quot;play&quot;)</span></code> in the page calls a widget method in the
-worker. <code class="docutils literal notranslate"><span class="pre">nbplay/app.py</span></code> imports Starlette lazily, so it imports in Pyodide.</p>
+<p>The same page runs with no server as the standalone Pyodide example, laid out
+like the ones in the spaday packages. <code class="docutils literal notranslate"><span class="pre">js/examples/pyodide.html</span></code> is the page,
+<code class="docutils literal notranslate"><span class="pre">js/examples/pyodide-worker.js</span></code> the Web Worker, and
+<code class="docutils literal notranslate"><span class="pre">js/examples/build_pyodide_example.py</span></code> assembles the site from wheels: it
+copies the nbplay, spaday, transports and spaday-regular-layout wheels into
+<code class="docutils literal notranslate"><span class="pre">pypi/</span></code>, extracts their browser assets (<code class="docutils literal notranslate"><span class="pre">runtime/spaday/</span></code>,
+<code class="docutils literal notranslate"><span class="pre">components/nbplay/</span></code>, <code class="docutils literal notranslate"><span class="pre">components/regular-layout/</span></code>) and writes <code class="docutils literal notranslate"><span class="pre">wheels.json</span></code>.
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyodide-example</span></code> runs it into <code class="docutils literal notranslate"><span class="pre">dist/app</span></code> with the nbplay wheel from
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide</span></code>. The worker loads Pyodide, installs the wheels with
+micropip and builds <code class="docutils literal notranslate"><span class="pre">nbplay.app.Standalone(demo_session())</span></code>, which holds one
+<code class="docutils literal notranslate"><span class="pre">transports.Server</span></code> per panel. The page creates one managed transports client
+per panel, attaches it to the worker with <code class="docutils literal notranslate"><span class="pre">postMessage</span></code> (<code class="docutils literal notranslate"><span class="pre">client.attach(send)</span></code>
+/ <code class="docutils literal notranslate"><span class="pre">client.recv(frame)</span></code>, the way the notebook widget rides its comm), connects
+each model to the shared store under the panel’s namespace and provides the
+wires to the root for <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code>. Every frame from the page is applied by
+<code class="docutils literal notranslate"><span class="pre">Standalone.receive()</span></code>, which then flushes every server, because one edit can
+change other widgets’ models through the session’s mirroring. So validation,
+derived fields (the Rust waveform, as WebAssembly) and the <code class="docutils literal notranslate"><span class="pre">Session</span></code> logic are
+the same Python as in a kernel. <code class="docutils literal notranslate"><span class="pre">nbplay.call(&quot;transport&quot;,</span> <span class="pre">&quot;play&quot;)</span></code> in the page
+calls a widget method in the worker. <code class="docutils literal notranslate"><span class="pre">nbplay/app.py</span></code> imports Starlette lazily,
+so it imports in Pyodide.</p>
 </section>
 </section>
 <section id="styling-system">
@@ -1500,13 +1504,15 @@ pnpm<span class="w"> </span><span class="nb">test</span>
 panel, a kernel assignment and a browser edit meet in the transport’s model,
 play from the browser reaches the kernel’s status on every panel, and kernel
 commands stop and start the clock through <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-standalone</span></code> exports the static site with the Pyodide wheel from
-<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide</span></code> and runs <code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">run</span> <span class="pre">test:standalone</span></code> (config:
-<code class="docutils literal notranslate"><span class="pre">js/playwright.standalone.config.js</span></code>) against it: the page comes up from
-Pyodide, pydantic rejects an out-of-range edit, a valid one re-renders the
-waveform, the session mirrors mute and theme across panels, and Python calls
-start and stop the clock. Pyodide and the dependency wheels come from their
-CDNs, so the test needs network access.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide-example</span></code> builds the standalone Pyodide example and runs
+<code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">run</span> <span class="pre">test:pyodide</span></code> (config: <code class="docutils literal notranslate"><span class="pre">js/playwright.pyodide.config.js</span></code>) against
+<code class="docutils literal notranslate"><span class="pre">dist/app</span></code>: the page comes up from Pyodide, pydantic rejects an out-of-range
+edit, a valid one re-renders the waveform, the session mirrors mute and theme
+across panels, and Python calls start and stop the clock. Pyodide and nbplay’s
+pure-Python dependencies come from their CDNs, so the test needs network
+access. The page imports <code class="docutils literal notranslate"><span class="pre">provideWires</span></code> from the spaday runtime in the spaday
+wheel, so the pinned spaday in the make target must be a release that exports
+it.</p>
 </section>
 <section id="host-compatibility-tests">
 <h3>Host compatibility tests<a class="headerlink" href="#host-compatibility-tests" title="Link to this heading">¶</a></h3>

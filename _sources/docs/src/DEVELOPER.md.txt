@@ -933,23 +933,27 @@ widget does, so `nbplay-wire` finds the client for its panel and kernel commands
 drives (`/state`, `/command/<panel>/<method>`, `/set/<panel>/<field>`). The
 `app` extra installs `spaday-regular-layout`, `starlette` and `uvicorn`.
 
-The same page runs with no server. `python -m nbplay.app --export DIR --wheel <nbplay Pyodide wheel>` (`make standalone` writes `docs/html/app`) writes a
-static site: `index.html`, `worker.js` (both from `nbplay/standalone/`), the
-spaday and transports browser runtimes, the component packages' assets, the
-bundled wheels and a `config.json` naming the session factory
-(`"module:function"`, default `nbplay.app:demo_session`). The worker loads
-Pyodide, installs the wheels with micropip and builds `nbplay.app.Standalone`,
-which holds one `transports.Server` per panel. The page creates one managed
-transports client per panel, attaches it to the worker with `postMessage`
-(`client.attach(send)` / `client.recv(frame)`, the way the notebook widget
-rides its comm), connects each model to the shared store under the panel's
-namespace and provides the wires to the root for `nbplay-wire`. Every frame
-from the page is applied by `Standalone.receive()`, which then flushes every
-server, because one edit can change other widgets' models through the
-session's mirroring. So validation, derived fields (the Rust waveform, as
-WebAssembly) and the `Session` logic are the same Python as in a kernel.
-`nbplay.call("transport", "play")` in the page calls a widget method in the
-worker. `nbplay/app.py` imports Starlette lazily, so it imports in Pyodide.
+The same page runs with no server as the standalone Pyodide example, laid out
+like the ones in the spaday packages. `js/examples/pyodide.html` is the page,
+`js/examples/pyodide-worker.js` the Web Worker, and
+`js/examples/build_pyodide_example.py` assembles the site from wheels: it
+copies the nbplay, spaday, transports and spaday-regular-layout wheels into
+`pypi/`, extracts their browser assets (`runtime/spaday/`,
+`components/nbplay/`, `components/regular-layout/`) and writes `wheels.json`.
+`make pyodide-example` runs it into `dist/app` with the nbplay wheel from
+`make test-pyodide`. The worker loads Pyodide, installs the wheels with
+micropip and builds `nbplay.app.Standalone(demo_session())`, which holds one
+`transports.Server` per panel. The page creates one managed transports client
+per panel, attaches it to the worker with `postMessage` (`client.attach(send)`
+/ `client.recv(frame)`, the way the notebook widget rides its comm), connects
+each model to the shared store under the panel's namespace and provides the
+wires to the root for `nbplay-wire`. Every frame from the page is applied by
+`Standalone.receive()`, which then flushes every server, because one edit can
+change other widgets' models through the session's mirroring. So validation,
+derived fields (the Rust waveform, as WebAssembly) and the `Session` logic are
+the same Python as in a kernel. `nbplay.call("transport", "play")` in the page
+calls a widget method in the worker. `nbplay/app.py` imports Starlette lazily,
+so it imports in Pyodide.
 
 ## Styling system
 
@@ -1057,13 +1061,15 @@ panel, a kernel assignment and a browser edit meet in the transport's model,
 play from the browser reaches the kernel's status on every panel, and kernel
 commands stop and start the clock through `nbplay-wire`.
 
-`make test-standalone` exports the static site with the Pyodide wheel from
-`make test-pyodide` and runs `pnpm run test:standalone` (config:
-`js/playwright.standalone.config.js`) against it: the page comes up from
-Pyodide, pydantic rejects an out-of-range edit, a valid one re-renders the
-waveform, the session mirrors mute and theme across panels, and Python calls
-start and stop the clock. Pyodide and the dependency wheels come from their
-CDNs, so the test needs network access.
+`make test-pyodide-example` builds the standalone Pyodide example and runs
+`pnpm run test:pyodide` (config: `js/playwright.pyodide.config.js`) against
+`dist/app`: the page comes up from Pyodide, pydantic rejects an out-of-range
+edit, a valid one re-renders the waveform, the session mirrors mute and theme
+across panels, and Python calls start and stop the clock. Pyodide and nbplay's
+pure-Python dependencies come from their CDNs, so the test needs network
+access. The page imports `provideWires` from the spaday runtime in the spaday
+wheel, so the pinned spaday in the make target must be a release that exports
+it.
 
 ### Host compatibility tests
 

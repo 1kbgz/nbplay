@@ -15,10 +15,9 @@ nbplay.app
 
    ``python -m nbplay.app`` serves a demo session on http://127.0.0.1:8020.
 
-   The same page also runs with no server: :func:`export` writes a static site
-   whose Python side (the session and its models) runs in Pyodide inside a Web
-   Worker, with ``postMessage`` in place of the WebSockets
-   (``python -m nbplay.app --export DIR --wheel nbplay-...wasm32.whl``).
+   The same page also runs with no server: :class:`Standalone` is the Python side
+   for a Pyodide Web Worker, with ``postMessage`` in place of the WebSockets
+   (``js/examples/pyodide.html``, built by ``make pyodide-example``).
 
 
 
@@ -38,7 +37,6 @@ Functions
    nbplay.app.panel_widgets
    nbplay.app.default_layout
    nbplay.app.build
-   nbplay.app.export
    nbplay.app.demo_session
 
 
@@ -87,14 +85,6 @@ Module Contents
    .. py:attribute:: _page
 
 
-   .. py:method:: load(spec)
-      :classmethod:
-
-
-      Build from ``"module:function"``, a zero-argument callable returning the :class:`Session`.
-
-
-
    .. py:method:: page()
 
       The tree, the page styles, and each panel's model-to-namespace wires.
@@ -123,17 +113,6 @@ Module Contents
 
 
    .. py:method:: _flush(out)
-
-
-.. py:function:: export(directory, *, session='nbplay.app:demo_session', wheels=(), requirements=())
-
-   Write the app as a static site that runs its Python in Pyodide.
-
-   ``session`` names a zero-argument callable (``"module:function"``) that the
-   worker imports and calls for the :class:`Session`. ``wheels`` are local
-   wheel files to bundle and install first (the nbplay Pyodide wheel, until
-   one is on PyPI); ``requirements`` are further micropip requirements. The
-   site needs no server beyond static file hosting.
 
 
 .. py:function:: demo_session()
