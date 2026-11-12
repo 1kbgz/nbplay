@@ -7,10 +7,12 @@ in enough detail to add a feature to any component without reading the whole
 repository first.
 
 nbplay is a notebook-native digital audio workstation. Users instantiate Python
-objects in a Jupyter kernel; anywidget syncs trait state to browser-side
-TypeScript renderers; the browser uses Web Audio and Web MIDI for low-latency
-interaction; Rust provides reusable DSP/data types and compiles both to a native
-Python extension and to browser WebAssembly.
+widgets in a Jupyter kernel; each hosts a pydantic config model, and where the
+browser owns state a status model, on a [transports](https://github.com/1kbgz/transports)
+session that [spaday](https://github.com/1kbgz/spaday) renders as a custom
+element in the output area; the browser uses Web Audio and Web MIDI for
+low-latency interaction; Rust provides reusable DSP/data types and compiles both
+to a native Python extension and to browser WebAssembly.
 
 ## Mental model
 
@@ -19,11 +21,11 @@ The runtime has three cooperating layers:
 ```text
 Jupyter notebook / Lab / VS Code / Colab
   Python kernel
-    nbplay/widget.py anywidget classes
+    nbplay/widget.py spaday widgets hosting nbplay/models.py on transports sessions
     nbplay.nbplay native extension from Rust/PyO3
-      | traitlets sync over Jupyter comms
+      | transports patches and commands over the widget comm
   Browser output area
-    js/src/ts/*.ts anywidget ESM renderers
+    js/src/ts/components/*.ts elements, bound by the spaday tree
     Web Audio API and Web MIDI API
     optional wasm-bindgen bindings from js/src/rust
       | shared Rust source compiled for native and wasm targets
@@ -32,8 +34,10 @@ Jupyter notebook / Lab / VS Code / Colab
     native-only cpal audio output and midir MIDI input
 ```
 
-The important design choice is that notebook state lives in Python traits, while
-real-time interaction lives in the browser. Rust supports both sides: the Python
+The important design choice is that configuration lives in kernel-owned,
+validated models, browser-derived state (play position, held notes, ports)
+lives in browser-owned status models, and real-time interaction lives in the
+browser. Rust supports both sides: the Python
 package uses PyO3 wrappers for ergonomic Python classes, and the JavaScript
 package builds WebAssembly bindings for browser-facing Rust helpers.
 
@@ -41,8 +45,9 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 
 | Path                                              | Responsibility                                                                                             |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `nbplay/widget.py`                                | Python anywidget classes, session orchestration, and notebook-facing helper APIs.                          |
-| `nbplay/descriptors.py`                           | Descriptor classes and `_normalize_*` helpers shared by the widgets, the pydantic models and the views.    |
+| `nbplay/widget.py`                                | The spaday widgets, session orchestration, and notebook-facing helper APIs.                                |
+| `nbplay/models.py`                                | Pydantic config and status models behind every widget, validated on assignment.                            |
+| `nbplay/descriptors.py`                           | Descriptor classes and `_normalize_*` helpers the models and widgets share.                                |
 | `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                              |
 | `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.         |
 | `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                                      |
@@ -50,7 +55,7 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 | `js/src/css/`                                     | `components/` (tokens plus one stylesheet per element), theme sets, bundled by lightningcss into one file. |
 | `js/src/rust/`                                    | wasm-bindgen browser bindings around selected Rust functionality.                                          |
 | `js/tests/`                                       | Playwright browser tests: elements on a mock model and a mock Web Audio context, and spaday end to end.    |
-| `nbplay/tests/test_all.py`                        | Python, Rust-extension, widget, session, and example-notebook regression tests.                            |
+| `nbplay/tests/`                                   | Rust-extension and descriptor tests, the widget and session suite, and the example-notebook runner.        |
 | `examples/`                                       | Executable tutorial notebooks used by users and docs builds.                                               |
 | `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                                |
 | `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration.                                                  |
@@ -63,24 +68,33 @@ through Hatch artifact configuration.
 
 ### Python to browser
 
-Each rendered widget is an `anywidget.AnyWidget` subclass in `nbplay/widget.py`.
-Traits are declared with `traitlets.*.tag(sync=True)`. When Python code sets a
-trait, the value is serialized through the Jupyter comm protocol to the browser
-model. Browser code reads and writes the same state through the anywidget model
-interface:
+Each widget in `nbplay/widget.py` extends `InstrumentWidget`, a
+`spaday.Widget` that hosts two pydantic models from `nbplay/models.py` in its
+own `transports.Session`: a config model the kernel owns (`TransportConfig`,
+`SynthConfig`, ...) and, for instruments with browser-derived state, a status
+model hosted with `owner="client"` (`TransportStatus`, ...). The spaday tree is
+the instrument element with every config field bound two-way to a property on
+`nbplay-set` and every status field bound two-way on `nbplay-status`, so a
+kernel assignment reaches the element as a property write and an element event
+comes back as a patch:
 
-```ts
-model.get("trait_name");
-model.set("trait_name", nextValue);
-model.save_changes();
-model.on("change:trait_name", callback);
+```python
+synth.config.frequency = 220.0          # validated, pushed to the browser
+session.transport.status.is_playing     # read-only mirror of the browser clock
+session.transport.play()                # a command delivered to the owning element
+synth.on_change(listener, names="frequency")  # changes from Python or the browser
 ```
 
-User-initiated changes call `model.save_changes()` so the kernel receives them.
-Render-time resets and very frequent visual updates generally use `model.set()`
-without saving to avoid racing other widget initialization or flooding comms.
-For example, SynthWidget, SequencerWidget, and TransportWidget force playback to
-stopped during render with local `model.set()` calls only.
+Config models extend `_Validated`, whose `__setattr__` validates a copy of the
+model through `model_validate` and assigns every field that changed, so a
+browser edit and a Python assignment go through the same validation and derived
+fields (the synth waveform, mixer send padding) are recomputed either way.
+`config.update(**fields)` validates several fields at once. Status fields are
+never assigned from Python: `play()`, `seek()`, `note_on()` and the like are
+`session.command(status_id, field, value)` calls, which the `nbplay-wire` child
+of the element turns into `element.command(...)` (see "TypeScript widget
+architecture"). An element never emits status while it is being constructed,
+so rendering a widget never writes back to the kernel.
 
 ### Rust to Python
 
@@ -112,10 +126,11 @@ the browser.
 
 ### Python runtime
 
-- `anywidget`: provides the notebook widget transport and ESM frontend loading.
-- `ipywidgets>=8`: widget runtime foundation used by anywidget.
-- `traitlets`: declared indirectly through the widget stack and used directly in
-  `nbplay/widget.py` for synced state and links.
+- `spaday[widget]`: the notebook widget that renders a component tree bound to
+  transports models; `anywidget` and `ipywidgets` come with it.
+- `transports`: hosts the pydantic models, applies validated patches and
+  delivers commands between the kernel and the browser.
+- `pydantic`: the config and status models in `nbplay/models.py`.
 
 ### Rust runtime
 
@@ -154,15 +169,18 @@ the browser.
 
 ## Python widget layer
 
-All Python widget classes live in `nbplay/widget.py`. `_esm` points to the
-widget's built module under `nbplay/static/` and `_css` to the one shared
-stylesheet, `nbplay/static/nbplay.css`. The JavaScript build must run before a
-source checkout can render widgets from Python because those static files are
-generated.
+All Python widget classes live in `nbplay/widget.py` and their models in
+`nbplay/models.py`. A widget class names its element tag, its models and the
+field-to-property maps (`CONFIG`, `STATUS`, and `STATUS_EVENTS` for a status
+field written back on an event other than `nbplay-status`); `InstrumentWidget`
+hosts the models, builds the tree and the wires. The elements and the shared
+stylesheet ship as the spaday component package `nbplay`
+(`nbplay/components.py`, assets under `nbplay/static/spaday/`), so the
+JavaScript build must run before a source checkout can render widgets.
 
 ### Shared Python helpers
 
-These live in `nbplay/descriptors.py`, which imports neither traitlets nor pydantic, so
+These live in `nbplay/descriptors.py`, which does not import pydantic, so
 `nbplay/models.py` and `nbplay/widget.py` share them.
 
 - `_default_step()` and `_default_steps(length)` build the sequencer's default
@@ -176,49 +194,42 @@ These live in `nbplay/descriptors.py`, which imports neither traitlets nor pydan
 - `AudioClip`, `TimelineTrack`, and their normalizers define the synced
   metadata shape for timeline lanes and browser-recorded clips.
 - `PadAction` and `_normalize_pad_actions()` define the shared pad action shape
-  used by sampler pads and PadWidget. Note actions are live today; trait/event
+  used by sampler pads and PadWidget. Note actions are live today; field/event
   actions provide a stable controller-pad path for future automation and MIDI
   learn work.
 
-### Widget trait summary
+### Widget config and status fields
 
-| Python class         | Browser entry      | CSS entry    | Key synced traits                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------- | ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SynthWidget`        | `widget.js`        | `nbplay.css` | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `is_playing`, `waveform`                                                                                                                                                                                                                                                                                                                                                                             |
-| `SettingsWidget`     | `settings.js`      | `nbplay.css` | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `available_midi_ports`, `midi_event`                                                                                                                                                                                                                                                                                                                                                      |
-| `MixerWidget`        | `mixer.js`         | `nbplay.css` | `channels`, `master_gain`, `master_effects`, `session_id`                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `SequencerWidget`    | `sequencer.js`     | `nbplay.css` | `length`, `measures`, `time_signature_num`, `time_signature_den`, `bpm`, `step_duration`, `swing`, `groove`, `automation_lanes`, `is_playing`, `current_step`, `loop_enabled`, `num_voices`, `session_id`, `channel_index`, `keyboard_connected`, `voices_data`                                                                                                                                                                                                  |
-| `SamplerWidget`      | `sampler.js`       | `nbplay.css` | `sample_name`, `sample_rate`, `root_note`, `sample_length`, `waveform`, `sample_data`, ADSR traits, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `pad_count`, `velocity`, `velocity_sensitive`, `max_voices`, `session_id`, `channel_index`, `keyboard_connected`, `zones`, `capture_request`                                                                                                                                                  |
-| `TransportWidget`    | `transport.js`     | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `time_signature_num`, `time_signature_den`, `bar_number`, `beat_in_bar`, `current_beat`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`                                                                                                                                                                                                                                                                     |
-| `TimelineWidget`     | `timeline.js`      | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_error`, `recording_countdown_beats`, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `time_signature_num`, `time_signature_den`, `length`, `current_beat`, `pixels_per_beat`, `tracks`, `clips`, `selected_clip_id`, `recorded_clip`, `export_clip_id`, `exported_clip`, `exported_clip_data`, `import_clip_request`, `import_clip_data` |
-| `LauncherWidget`     | `launcher.js`      | `nbplay.css` | `session_id`, `bpm`, `is_playing`, `time_signature_num`, `time_signature_den`, `quantize`, `tracks`, `scenes`, `slots`, `active_slots`, `queued_slots`, `selected_slot`, `launch_request`                                                                                                                                                                                                                                                                        |
-| `KeyboardWidget`     | `keyboard.js`      | `nbplay.css` | `upper_octave`, `lower_octave`, `velocity`, `active_notes`, sustain traits, `last_note_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                                                                                  |
-| `MidiKeyboardWidget` | `midi_keyboard.js` | `nbplay.css` | Keyboard traits plus `midi_port`, `available_midi_ports`, and `control_change`                                                                                                                                                                                                                                                                                                                                                                                   |
-| `MidiOutputWidget`   | `midi_output.js`   | `nbplay.css` | `session_id`, `midi_port`, `available_midi_ports`, `channel`, `forward_notes`, `send_request`                                                                                                                                                                                                                                                                                                                                                                    |
-| `PadWidget`          | `pad.js`           | `nbplay.css` | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `active_pads`, `last_note_event`, `last_pad_event`, `session_id`, `channel_index`, `sampler_routing`                                                                                                                                                                                                                                                             |
+| Python class         | Config fields (kernel-owned)                                                                                                                                                                                                                                           | Status fields (browser-owned)                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SynthWidget`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `waveform`, `session_id`, `channel_index`, `theme`                                                                                                                                                         | `is_playing`                                                                                                                                                                |
+| `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
+| `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
+| `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
+| `SamplerWidget`      | `sample_name`, `sample_rate`, `sample_length`, `root_note`, `waveform`, `sample_data`, ADSR fields, `max_voices`, `pad_count`, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `velocity`, `velocity_sensitive`, `zones`, `session_id`, `channel_index` | `active_pads`, `last_note_event`, `last_pad_event`, `request` (capture commands)                                                                                            |
+| `TransportWidget`    | `bpm`, `time_signature_num`, `time_signature_den`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`, `session_id`, `theme`                                                                                                                                             | `is_playing`, `is_recording`, `current_beat`, `bar_number`, `beat_in_bar`, `undo_request`, `redo_request`                                                                   |
+| `TimelineWidget`     | `tracks`, `clips`, `length`, `selected_clip_id`, `bpm`, time signature, `count_in_bars`, `auto_extend_recording`, `recording_extend_bars`, `pixels_per_beat`, `current_beat`, `export_clip_id`, `import_clip_request`, `import_clip_data`, `session_id`, `theme`       | `is_playing`, `is_recording`, `recording_track`, `recording_tracks`, `recording_countdown_beats`, `recording_error`, `recorded_clip`, `exported_clip`, `exported_clip_data` |
+| `LauncherWidget`     | `tracks`, `scenes`, `slots`, `quantize`, `bpm`, time signature, `selected_slot`, `session_id`, `theme`                                                                                                                                                                 | `is_playing`, `active_slots`, `queued_slots`, `request` (launch commands)                                                                                                   |
+| `KeyboardWidget`     | `upper_octave`, `lower_octave`, `velocity`, sustain fields, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | `active_notes`, `last_note_event`                                                                                                                                           |
+| `MidiKeyboardWidget` | `midi_port`, `sync_clock`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                                                   | `available_midi_ports`, `active_notes`, `last_note_event`, `control_change`, `clock_bpm`                                                                                    |
+| `MidiOutputWidget`   | `midi_port`, `channel`, `forward_notes`, `send_clock`, `session_id`, `theme`                                                                                                                                                                                           | `available_midi_ports`, `request` (send commands)                                                                                                                           |
+| `PadWidget`          | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                              | `active_pads`, `last_note_event`, `last_pad_event`                                                                                                                          |
 
 ### Non-rendered Python orchestration types
 
-`NoteComposer` is a traitlets object that owns one voice of sequencer step data.
-It is not rendered directly. A `SequencerWidget` owns one composer per voice and
-syncs all composers into `voices_data`, a list of step lists. The `steps`
-property remains a backward-compatible alias for voice 0.
-
 `Track` is a session lane: a mixer channel plus an optional sequencer and sound
-source. When a sequencer is present, it links BPM and time signature
-bidirectionally between the session transport and the sequencer, and dlinks
-`is_playing` from transport to sequencer so a non-looping sequencer cannot stop
-every track.
+source. The browser clock keeps every widget in a session in step, so a track
+carries no kernel-side links.
 
 `Session` creates a shared `session_id`, a `TransportWidget`, a `MixerWidget`,
 a `TimelineWidget`, and a `LauncherWidget`. `Session.add_track()` creates a
-mixer channel, links transport state, adds a timeline lane and a launcher row,
-and writes `session_id` and `channel_index` into the sequencer and sound
-source. Browser widgets use those fields to route audio through the shared
-mixer bus. `Session` also mirrors mute and solo between timeline lanes and
-their mixer channels (by `channel_index`) in both directions, so a lane's M/S
-buttons silence the channel's instruments as well as its clips.
-`Session.save()` and `Session.load()` persist the whole thing; see
+mixer channel, adds a timeline lane and a launcher row, and writes
+`session_id`, `channel_index`, tempo, time signature and theme into the
+sequencer and sound source. Browser widgets use those fields to route audio
+through the shared mixer bus. `Session` also mirrors mute and solo between
+timeline lanes and their mixer channels (by `channel_index`) in both
+directions, so a lane's M/S buttons silence the channel's instruments as well
+as its clips. `Session.save()` and `Session.load()` persist the whole thing; see
 "Session persistence".
 
 ## Rust core
@@ -403,13 +414,13 @@ Render order can vary in notebooks. SamplerWidget handles this by listening for
 
 ### SynthWidget
 
-Python class: `SynthWidget`. Adapter: `js/src/ts/widget.ts`. Element:
+Python class: `SynthWidget`. Element:
 `js/src/ts/components/synth.ts`.
 
 SynthWidget exposes oscillator type, frequency, amplitude, sample rate, play
 state, and a binary waveform preview. Python renders the preview through the
 Rust oscillator classes and stores little-endian float32 bytes in the `waveform`
-trait. Browser code converts those bytes with `toFloat32()` and draws a high-DPI
+field. Browser code converts those bytes with `toFloat32()` and draws a high-DPI
 canvas waveform.
 
 Browser playback is independent from the Rust preview. The TypeScript engine
@@ -428,12 +439,12 @@ With a `session_id` and `channel_index` (set by `Session.add_track()`), the
 synth also registers under `bus.instruments` so sequencers, launcher slots, and
 MIDI clips on its track play notes with its oscillator type and amplitude
 (noise plays a short burst) through the track's mixer channel, instead of the
-scheduler's sine fallback. It registers at render, when the routing traits
+scheduler's sine fallback. It registers at render, when the routing fields
 change, and on `nbplay-bus-ready` when the mixer renders later.
 
 ### SettingsWidget
 
-Python class: `SettingsWidget`. Adapter: `js/src/ts/settings.ts`. Element:
+Python class: `SettingsWidget`. Element:
 `js/src/ts/components/settings.ts`.
 
 SettingsWidget is a browser configuration panel for sample rate, channel count,
@@ -450,7 +461,7 @@ monitoring surface for user configuration.
 
 ### MixerWidget
 
-Python class: `MixerWidget`. Adapter: `js/src/ts/mixer.ts`. Element:
+Python class: `MixerWidget`. Element:
 `js/src/ts/components/mixer.ts`.
 
 MixerWidget owns a list of channel dictionaries with `name`, `gain`, `pan`,
@@ -522,11 +533,11 @@ writes a `data-peak` attribute on each strip.
 
 ### SequencerWidget
 
-Python class: `SequencerWidget`. Adapter: `js/src/ts/sequencer.ts`. Element:
+Python class: `SequencerWidget`. Element:
 `js/src/ts/components/sequencer.ts`.
 
-SequencerWidget models a pattern grid. Python owns one `NoteComposer` per voice
-and syncs them as `voices_data`. The grid can be configured by absolute length
+SequencerWidget models a pattern grid. `voices_data` is one list of step dicts
+per voice, kept at `num_voices` by `length` by the config model. The grid can be configured by absolute length
 or musically by `measures`, `step_duration`, and time signature. In 4/4, a
 `step_duration` of 0.5 is eighth notes, 0.25 is sixteenth notes, and 0.125 is
 thirty-second notes. `configure_grid()` on the Python side and the frontend grid
@@ -546,8 +557,8 @@ oscillator scheduling, duration ticks, swing/groove offsets, per-step
 `probability`, and step-quantized `automation_lanes`. `swing` is a 0-100 percent
 delay applied to odd steps. `groove` is a repeating list of -50 to 50 percent
 step-duration offsets. Automation lanes are dictionaries of `{trait, points}`,
-where each point has `{step, value}`; scheduled steps update numeric traits with
-`model.set()` only, avoiding comm traffic on every tick.
+where each point has `{step, value}` and `trait` names a numeric property;
+scheduled steps update the element property only, so a tick costs no comm traffic.
 
 The UI includes play, stop, record, BPM, step duration, measure count, loop, a
 header row, step rows, and velocity rows. Clicking a cell toggles active state.
@@ -565,13 +576,13 @@ tests.
 
 ### SamplerWidget
 
-Python class: `SamplerWidget`. Adapter: `js/src/ts/sampler.ts`. Element:
+Python class: `SamplerWidget`. Element:
 `js/src/ts/components/sampler.ts`.
 
 SamplerWidget displays sample metadata, waveform bytes, ADSR controls, max
 voices, pad count, and per-pad MIDI notes/velocities/actions. Raw mono PCM is
 stored in `sample_data`; the decimated canvas preview is stored in `waveform`.
-Python `load_sample()` populates both traits. `load_audio_file()` loads WAV via
+Python `load_sample()` populates both fields. `load_audio_file()` loads WAV via
 stdlib `wave` and MP3/OGG/other formats through optional `soundfile`.
 
 Browser code can load audio from a file input or by dropping audio onto the
@@ -589,7 +600,7 @@ when the sampler has a channel index.
 
 Sampler pads and PadWidget both use `pad_actions`. `{"type": "note"}` actions
 trigger notes and optional sample slices. `{"type": "trait"}` actions set a
-trait on the current widget, and `{"type": "event"}` actions update
+property on the current element, and `{"type": "event"}` actions update
 `last_pad_event`. This keeps pad input source-agnostic for future browser MIDI
 controller discovery, MIDI learn, and automation control.
 
@@ -620,18 +631,26 @@ same page for that. Session save stores zone PCM as `samples/track-N-zone-M.f32`
 
 ### Transport commands versus status
 
-The transport's play state and position are status. The browser clock writes `is_playing`, `is_recording`, `current_beat`, `bar_number`, and `beat_in_bar` into the model, the session mirrors them one way (`dlink`) into the timeline and launcher, and no browser widget in a session treats a kernel write of these traits as an instruction: a delayed echo of old status can therefore never restart or stop the clock. Kernel code moves the clock through the transport's `command` trait, `{"action": "play" | "stop" | "seek" | "record", ..., "nonce"}`, issued by `play()`, `stop()`, `seek()`, and `record()`; the nonce makes repeated commands distinct and lets a view ignore a command that was already in the model when it rendered. Assigning `is_playing`, `is_recording`, or `current_beat` from user code still works: the widget sees that the write did not come from the browser (ipywidgets holds the property lock for browser writes) and turns it into the same command, while also setting the status optimistically so headless code reads a consistent value. Standalone widgets without a session keep treating a kernel `is_playing` write as a command on their private clock. Every accepted command, including a no-op, re-publishes the clock's real status, and a status write that disagrees with the clock is re-mirrored from it. Known limits: commands are one synced dictionary, so several issued inside `hold_sync()` coalesce into the last one (use the methods one at a time); the assignment compatibility path cannot classify a write made from inside an observer of a browser update; and a command issued before the transport view has rendered is ignored like a saved one (display the transport first, or use the session widgets' own buttons).
+The transport's play state and position are status: the browser clock writes
+`is_playing`, `is_recording`, `current_beat`, `bar_number` and `beat_in_bar`
+into the browser-owned status model, and the kernel only reads them, so a
+delayed echo of old status can never restart or stop the clock. Kernel code
+moves the clock through commands on those fields, `session.command(status_id, "is_playing", True)` behind `play()`, `stop()`, `seek()` and `record()`; the
+`nbplay-wire` child maps each onto the element's `{"action": ...}` command and
+acknowledges it, and every accepted command re-publishes the clock's real
+status. A command issued before the transport has rendered waits in the
+transports session until the element connects.
 
 ### TransportWidget
 
-Python class: `TransportWidget`. Adapter: `js/src/ts/transport.ts`. Element:
+Python class: `TransportWidget`. Element:
 `js/src/ts/components/transport.ts`.
 
-TransportWidget is the global play/stop and tempo surface. It syncs BPM, play
-state, time signature, bar/beat position, and loop range. In a `Session`, tracks
-link their sequencers to transport BPM and time signature, and dlink transport
-play state into sequencers; `Session.play()`, `stop()`, and `seek(beat)` wrap
-the transport traits.
+TransportWidget is the global play/stop and tempo surface. Its config holds
+BPM, time signature and loop range; its status mirrors play state and the
+bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
+commands, and `session.bpm` and `session.time_signature` write every widget's
+config.
 
 In the browser the transport owns the session clock: `bus.clock` on
 `globalThis.__nbplay[session_id]`, a `SessionClock` derived from the shared
@@ -646,13 +665,13 @@ control drives the clock; clock events are mirrored back into the model. A 50 ms
 ticker updates `current_beat`, `bar_number`, and `beat_in_bar` locally while
 playing and saves at most every 250 ms on beat changes. Loop wrapping between
 `loop_start_bar` and `loop_end_bar` and mid-play tempo changes happen inside
-the clock. Model changes arriving from the kernel (`is_playing`, `bpm`,
-`current_beat`, loop traits) are forwarded to the clock, so Python can start,
+the clock. Config writes and commands arriving from the kernel (`bpm`,
+loop fields, play, seek) are forwarded to the clock, so Python can start,
 stop, and seek the whole session.
 
 ### TimelineWidget
 
-Python class: `TimelineWidget`. Adapter: `js/src/ts/timeline.ts`. Element:
+Python class: `TimelineWidget`. Element:
 `js/src/ts/components/timeline.ts`.
 
 TimelineWidget is the tracking view: multitrack clip lanes and the browser
@@ -720,16 +739,15 @@ the timeline reaches the validated maximum length.
 
 ### LauncherWidget
 
-Python class: `LauncherWidget`. Adapter: `js/src/ts/launcher.ts`. Element:
+Python class: `LauncherWidget`. Element:
 `js/src/ts/components/launcher.ts`.
 
 LauncherWidget is the beats view: a clip-launcher grid with tracks as rows and
 scenes as columns. Each filled slot holds a pattern in the sequencer's
 `voices_data` shape plus `step_duration`, `swing`, and `groove`. Python fills
-slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a
-`NoteComposer`, a list of step dicts, or a list of voices, and issues
-`launch()`, `launch_scene()`, `stop_track()`, and `stop_all()` through the
-`launch_request` trait (a nonce makes repeated commands distinct).
+slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a list
+of step dicts, or a list of voices, and issues `launch()`, `launch_scene()`,
+`stop_track()`, and `stop_all()` as commands on the status `request` field.
 `bind_slot_editor(sequencer)` turns a sequencer into the editor for whichever
 slot is selected; edits write back into the slot live.
 
@@ -759,7 +777,7 @@ captured by timeline lanes with channel-tap inputs.
 
 ### KeyboardWidget
 
-Python class: `KeyboardWidget`. Adapter: `js/src/ts/keyboard.ts`. Element:
+Python class: `KeyboardWidget`. Element:
 `js/src/ts/components/keyboard.ts`.
 
 KeyboardWidget is a four-row musical typing keyboard. The upper zone maps number
@@ -787,8 +805,7 @@ dictionary form through `sampler_routing`.
 
 ### MidiKeyboardWidget
 
-Python class: `MidiKeyboardWidget`. Adapter: `js/src/ts/midi_keyboard.ts`.
-Element: `js/src/ts/components/midi-keyboard.ts`.
+Python class: `MidiKeyboardWidget`. Element: `js/src/ts/components/midi-keyboard.ts`.
 
 MidiKeyboardWidget subclasses KeyboardWidget on the Python side so it shares the
 sequencer and sampler connection API. Its browser implementation is separate
@@ -806,7 +823,7 @@ multiple samplers split by range through the same `connect_sampler()` API.
 
 ### MidiOutputWidget
 
-`js/src/ts/midi_output.ts` is the session's way out to hardware and other software. It lists Web MIDI output ports (`midi_port`, `available_midi_ports`) and sends on one channel (`channel`, 0-15). With a `session_id` it registers on the bus's `noteListeners`, where every note the session plays arrives: keyboards and pads broadcast when a key goes down, and the sequencer scheduler, launcher slots, and timeline MIDI clips emit their notes as they are scheduled, with `at` (AudioContext time) and `duration`. Scheduled notes are converted to Web MIDI timestamps so the hardware plays them at the same time as the browser. Without a session it listens to the document-level `nbplay-note` events instead, never both, so nothing is sent twice. `forward_notes` turns that forwarding off. Python sends through the `send_request` trait (`note_on()`, `note_off()`, `control_change()`, `send()` for raw bytes), each request carrying a nonce so identical messages still fire. Changing port or channel and teardown send all-notes-off first.
+`MidiOutputWidget` (element `js/src/ts/components/midi-output.ts`) is the session's way out to hardware and other software. It lists Web MIDI output ports (`midi_port`, `available_midi_ports`) and sends on one channel (`channel`, 0-15). With a `session_id` it registers on the bus's `noteListeners`, where every note the session plays arrives: keyboards and pads broadcast when a key goes down, and the sequencer scheduler, launcher slots, and timeline MIDI clips emit their notes as they are scheduled, with `at` (AudioContext time) and `duration`. Scheduled notes are converted to Web MIDI timestamps so the hardware plays them at the same time as the browser. Without a session it listens to the document-level `nbplay-note` events instead, never both, so nothing is sent twice. `forward_notes` turns that forwarding off. Python sends through the `send_request` trait (`note_on()`, `note_off()`, `control_change()`, `send()` for raw bytes), each request carrying a nonce so identical messages still fire. Changing port or channel and teardown send all-notes-off first.
 
 ### MIDI clock sync
 
@@ -814,12 +831,11 @@ The session can lead or follow external MIDI clock. As leader, `MidiOutputWidget
 
 ### MIDI learn
 
-`nbplay/midi_learn.py` maps hardware knobs to widget traits through the kernel. `MidiKeyboardWidget` syncs each control change it receives into its `control_change` trait (`controller`, `value`, `channel`, and a `seq` counter so repeated values still notify). `MidiLearn(source)` observes that trait; `map(controller, target, name, low, high, channel)` binds a controller now and `learn(target, name)` binds the next one the hardware sends. Bool traits switch at 64, Int and Float traits scale the 0-127 value into `[low, high]` (defaulting to 0-127 and 0-1). Values go through the kernel, which is fine for knobs; notes stay in the browser.
+`nbplay/midi_learn.py` maps hardware knobs to widget config fields through the kernel. `MidiKeyboardWidget` reports each control change it receives in its `control_change` status field (`controller`, `value`, `channel`, and a `seq` counter so repeated values still notify). `MidiLearn(source)` subscribes with `on_change`; `map(controller, target, name, low, high, channel)` binds a controller now and `learn(target, name)` binds the next one the hardware sends. Bool fields switch at 64, int and float fields scale the 0-127 value into `[low, high]` (defaulting to 0-127 and 0-1), and the field's annotation on the config model decides which. Values go through the kernel, which is fine for knobs; notes stay in the browser.
 
 ### PadWidget
 
-Python class: `PadWidget`. Adapter: `js/src/ts/pad.ts`.
-Element: `js/src/ts/components/pads.ts`.
+Python class: `PadWidget`. Element: `js/src/ts/components/pads.ts`.
 
 PadWidget renders an on-screen trigger grid with per-pad MIDI notes, velocities,
 and shared `pad_actions`. It uses the same `sampler_routing` and `KeyboardRoute`
@@ -832,89 +848,67 @@ Python helpers `configure_grid_for_actions()`, `set_base_note()`, and
 `transpose_pads()` provide global note/action setup for sampler slicing and
 future external controller layouts.
 
-## Transports views (preview)
+## Transports widgets
 
-`nbplay/widget.py` holds the widgets: the elements
-on [transports](https://github.com/1kbgz/transports) models rendered by
-[spaday](https://github.com/1kbgz/spaday). A view hosts two pydantic models from `nbplay/models.py`
-in a `transports.Session`: a config model the kernel owns and validates (`TransportConfig`,
-`SynthConfig`), and a status model the browser owns (`TransportStatus`, `SynthStatus`, hosted with
-`owner="client"`). `InstrumentView` is the shared base: it hosts the models, builds the tree and the
-wires, and subclasses only name the element tag, the models and the trait-to-property maps.
-The config models extend `_Validated`, whose `__setattr__` validates a copy through `model_validate`
-and assigns every field that changed: pydantic's own `validate_assignment` writes fields from inside
-pydantic-core where transports' observer cannot see them. Derived fields live in after-validators and
-write through `__dict__`: `SynthConfig` renders `waveform`, `MixerConfig` pads each channel's sends
-to the return count. A Python assignment and a validated browser edit therefore agree, and a browser
-edit's authoritative patch already carries the derived values. `MixerView` has no status model;
-`InstrumentView` skips the status wire and the `nbplay-wire` child when `STATUS_MODEL` is `None`.
-`PadsConfig` fits `pad_notes`, `pad_velocities` and `pad_actions` to the grid in its after-validator,
-as the widget's observers do; `PadsView`, `KeyboardView` and `MidiKeyboardView` own their status
-(taps, held notes, ports, control changes, device clock) in the browser, and `connect_sampler` /
-`disconnect_sampler` edit `sampler_routing` with the shared `KeyboardRoute` builder, the keyboards'
-`connect_sequencer` sets the sequencer's `keyboard_connected`, and the pads' grid helpers
-(`configure_grid_for_actions`, `set_base_note`, `transpose_pads`) size and relabel the grid. `SettingsView`
-follows the same shape. `MidiOutputView` sends through commands: `note_on`, `note_off`,
-`control_change` and `send_raw` call `session.command(status_id, "request", {...})`; transports
-requires the target to be a client-owned field, so `MidiOutputStatus.request` exists only for that,
-and `nbplay-wire` hands any non-transport command object straight to `element.command()`, untagging
-nested transports values (`{"Map": {...}}`) first. `_Validated.update(**fields)` validates several fields at once, so
-`MixerView.remove_return` drops a bus and every channel's send to it in one step and
-`SequencerView.load_midi` replaces tempo, grid and steps together; `SequencerConfig.update` also
-recomputes `length` when a grid field (measures, step duration, meter) changes without an explicit
-length, as the widget's observers do. `SequencerConfig` keeps `voices_data` at
-`num_voices` lists of `length` normalized steps in its after-validator, standing in for the widget's
-`NoteComposer`s; `SequencerView.set_step`, `toggle_step` and `clear` edit that list, `to_pattern`,
-`to_step_sequencer`, `to_midi` and `load_midi` match the widget, and `play` and
-`stop` are `is_playing` commands the wire writes onto the element. `SamplerConfig` treats
-`pad_count` as authoritative for the pad lists, bounds slices by `sample_length` and normalizes zones,
-whose float32 bytes travel inside the list; `SamplerView.load_sample` packs PCM and the decimated
-preview, the zone, trim, fade, normalize, slice and Rust export methods match the widget, and
-`capture` (or `capture_clip` with a `TimelineView` clip) is a `request` command the owning view
-decodes. Audio file decoding for both layers is in `nbplay/audio_files.py`. `LauncherConfig` normalizes
-slots with the shared `_normalize_launcher_slot`; `LauncherView.set_slot` takes a `SequencerView`'s grid,
-swing and groove, `slot_to_sequencer` loads a slot back into one, and `launch`, `stop_track`,
-`launch_scene` and `stop_all` are `request` commands carrying the element's `LaunchRequest`. `TimelineConfig` keeps
-clips within the lane count and `current_beat` within `length`; `current_beat` stays configuration,
-as in the widget, so `TimelineView.seek` assigns it while `play`, `stop` and `record` are status
-commands, the lane and clip edits (`remove_track`, `arm_track`, `add_pattern_clip`, `move_clip`,
-`duplicate_clip`, `resize_clip`, `remove_clip`, MIDI clip export and import) match the widget, and clip
-audio export and import go through the config fields the element watches. `view.on_change(listener, names=None)` reports config and status changes as `listener(view, name, old, new)`, from Python and
-from the browser alike: config edits arrive through the hosted model's assignment path (`_Validated.update`
-notifies its own listeners), while browser status writes arrive as the patches transports hands to
-`Session.on_patch`, which the views share through one dispatcher per transports Session. On top of that,
-`TimelineView.export_all_clips` collects clip bytes into `clip_audio` as the browser exports them, and
-`LauncherView.bind_slot_editor` loads the selected slot into a `SequencerView` and writes its edits back.
+Every widget in `nbplay/widget.py` is an `InstrumentWidget`: a `spaday.Widget`
+hosting a config model and, where the browser owns state, a status model from
+`nbplay/models.py` in its own `transports.Session`. Each widget has its own
+transports session because transports grants a connection ownership of every
+client-owned field in the session it joins; widgets sharing one fought over
+each other's status. The browser `session_id` is what links the widgets in a
+`Session` (the clock and the audio bus), and the kernel-side `bpm`,
+`time_signature` and `theme` properties write every widget's config.
 
-`nbplay.Session` creates transport, mixer, timeline and launcher widgets with one browser
-`session_id`, so the elements share a clock and an audio bus, and `add_track` adds a mixer channel, a
-timeline lane and a launcher row while routing the track's sequencer and sound source. Each view
-hosts its models in its own transports `Session`: transports grants a connection ownership of every
-client-owned field in the session it connects to, so views sharing one would fight over each
-other's status (the first attempt hung the page with "client does not own this field"). Kernel-side
-`bpm`, `time_signature` and `theme` properties write every view; browser-side the clock does the
-linking. `remove_track` drops the mixer channel, the lane and the launcher row and shifts the later
-tracks' channel indices; `add_pattern`, `chain` and `update_pattern` lay named patterns out as
-pattern clips (one undo step each, with the clip events rebuilt in place on update); `export_midi` and
-`import_midi` match the widget session. `save`, `load`, `to_dict` and `from_dict` write and read the
-`.nbplay` archive described below with the format constants from `descriptors.py`; the sound source
-type names stay `SynthWidget` and `SamplerWidget` in `session.json`, so a widget session and a views
-session open each other's files. The spaday tree is
-the instrument element with every config field bound two-way on `nbplay-set` and every status field
-bound two-way on `nbplay-status` (or the event a view names in `STATUS_EVENTS`: the transport's
-`undo_request` and `redo_request` counts are written back on `nbplay-request`), so the element's
-events write the wire store and the store writes the element's properties. Kernel commands (`view.play()`, `view.seek(beat)`) are
-`session.command(status_id, field, value)` calls; `<nbplay-wire namespace="status">`, a child of the
-instrument defined in `js/src/ts/spaday.ts`, requests the wire from the widget root, maps the
-status field to `element.command(...)` when the element has one (the transport), or writes the
-field's camelCase property and reports it as `nbplay-status` (the synth's `isPlaying`), then
-acknowledges. The build writes that bundle and the
-stylesheet to `nbplay/static/spaday/`, which `nbplay.components.package` publishes as the spaday
-component package `nbplay` (also an installed entry point).
+Config models extend `_Validated` (see "Python to browser"). Derived fields
+live in after-validators and write through `__dict__`: `SynthConfig` renders
+`waveform`, `MixerConfig` pads each channel's sends to the return count,
+`SequencerConfig` keeps `voices_data` at `num_voices` lists of `length`
+normalized steps and recomputes `length` when a grid field changes without an
+explicit length, `SamplerConfig` treats `pad_count` as authoritative for the pad
+lists, bounds slices by `sample_length` and normalizes zones (whose float32
+bytes travel inside the list), `PadsConfig` fits the pad lists to the grid,
+`LauncherConfig` normalizes slots with `_normalize_launcher_slot`, and
+`TimelineConfig` keeps clips within the lane count and `current_beat` within
+`length`. `current_beat` on the timeline stays configuration, so
+`TimelineWidget.seek` assigns it while `play`, `stop` and `record` are status
+commands.
 
-Tests: `nbplay/tests/test_widgets.py` drives a widget through a mocked comm; `js/tests/spaday.spec.js`
-renders the spaday widget bundle against a real `TransportView` in a Python subprocess
-(`nbplay/tests/spaday_bridge.py`); `NBPLAY_TEST_PYTHON` names the Python with nbplay installed.
+Commands target client-owned fields. Play state and position are commands on
+the transport, sequencer, synth and timeline status fields; the sampler's
+`capture` (and `capture_clip` with a timeline clip), the launcher's `launch`,
+`launch_scene`, `stop_track` and `stop_all`, and the MIDI output's `note_on`,
+`note_off`, `control_change` and `send_raw` are commands on a status `request`
+field that exists only for that purpose. `nbplay-wire` maps a status-field
+command onto the transport's actions and hands any other command object
+straight to `element.command()`, untagging nested transports values
+(`{"Map": {...}}`) first.
+
+`widget.on_change(listener, names=None)` reports config and status changes as
+`listener(widget, name, old, new)`, from Python and from the browser alike:
+config edits arrive through the hosted model's assignment path (`_Validated.update`
+notifies its own listeners), while browser status writes arrive as the patches
+transports hands to `Session.on_patch`, which the widgets share through one
+dispatcher per transports session. `TimelineWidget.export_all_clips` collects
+clip bytes into `clip_audio` as the browser exports them, and
+`LauncherWidget.bind_slot_editor` loads the selected slot into a
+`SequencerWidget` and writes its edits back, both on top of `on_change`.
+
+The spaday tree is the instrument element with every config field bound
+two-way on `nbplay-set` and every status field bound two-way on
+`nbplay-status`, or the event a widget names in `STATUS_EVENTS` (the
+transport's `undo_request` and `redo_request` counts are written back on
+`nbplay-request`), so the element's events write the wire store and the store
+writes the element's properties. `<nbplay-wire namespace="status">`, a child of
+the instrument defined in `js/src/ts/spaday.ts`, requests the wire from the
+widget root and applies each command before acknowledging it. The build writes
+that bundle and the stylesheet to `nbplay/static/spaday/`, which
+`nbplay.components.package` publishes as the spaday component package `nbplay`
+(also an installed entry point).
+
+Tests: `nbplay/tests/test_widgets.py` drives a widget through a mocked comm;
+`js/tests/spaday.spec.js` renders the spaday widget bundle against real widgets
+in a Python subprocess (`nbplay/tests/spaday_bridge.py`), and
+`NBPLAY_TEST_PYTHON` names the Python with nbplay installed.
 
 ## Styling system
 
@@ -933,7 +927,7 @@ subtree. `light` and `dark` are the default theme's two sets; `studio`, `flat`,
 `cube`, `one`, `grim`, `pro` and `fruit` ship as `js/src/css/theme-*.css`, each
 redefining every token under `[data-nbplay-theme="<name>"]`. A new set copies
 one of these and changes values; it never adds selectors for individual
-elements. From Python, every widget has a `theme` trait (validated against
+elements. From Python, every widget has a `theme` config field (validated against
 `nbplay.THEMES`) that its element reflects as `data-nbplay-theme` on itself,
 and `Session(theme=...)` or `session.theme = ...` sets it on every widget in
 the session, including tracks added later; the value is saved with the
@@ -981,11 +975,12 @@ The Python build uses Hatch hooks:
 
 ### Python tests
 
-`nbplay/tests/test_all.py` covers Rust/PyO3 types, Python widget classes,
-session behavior, and example notebooks. Tests check construction, defaults,
-validation, repr/equality, oscillator output, mixer mixdown, sampler rendering,
-sequencer conversion, widget trait defaults, `Session.add_track()`, keyboard and
-sampler connections, MIDI keyboard traits, and notebook metadata/execution.
+`nbplay/tests/test_all.py` covers the Rust/PyO3 types, the descriptor classes,
+the pure MIDI-file helpers and the example notebooks (metadata and top-to-bottom
+execution). `nbplay/tests/test_widgets.py` covers the models and every widget:
+validation, the Python methods, browser edits and status writes through a mocked
+comm (`browser_writes`), `on_change`, `Session`, persistence, history and MIDI
+learn.
 
 Run:
 
@@ -1111,9 +1106,9 @@ their metadata. Loading creates fresh widgets with a new `session_id`.
 
 ### Undo and redo
 
-`nbplay/history.py` keeps an undo stack over widget and view state. `History.attach(widget)` observes every synced trait of a widget except the transient ones listed in `TRANSIENT_TRAITS` (play state, playhead, recording status, selection, meters, request nonces, derived data such as the waveform preview). Each change becomes an entry `(widget, trait, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several traits is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order and moves it to the redo stack; a new change clears redo. Old values are the list and dict objects traitlets hands over, which works because every widget setter assigns new containers instead of mutating in place.
+`nbplay/history.py` keeps an undo stack over widget config. `History.attach(widget)` subscribes to the widget's config model with `on_change`, so browser edits count too, and ignores the transient fields listed in `TRANSIENT_TRAITS` (selection, request counts, derived data such as the waveform preview); browser-owned status never reaches a config model. Each change becomes an entry `(config, field, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several fields is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order by assigning the config fields, and moves the step to the redo stack; a new change clears redo.
 
-Attaching a transports view records its config model's changes instead (through the model's `on_change`, so browser edits count too), and a step then sets fields on that config model. `MidiLearn` follows the same split: a `MidiKeyboardView` source reports control changes through `on_change`, and a view target's config field type (bool, int or float) decides the scaling. A `Session` owns one `History`, attaches the transport, mixer, timeline, and launcher, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a trait-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` traits (status fields on a `TransportView`), which the session answers.
+A `Session` owns one `History`, attaches the transport, mixer, timeline, and launcher, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a field-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` status counts, which the session answers.
 
 ### Pattern chaining
 
@@ -1219,15 +1214,15 @@ make major
 1. Add or update an example notebook when the widget is user-facing.
 1. Run `cd js && pnpm build`, then focused Python and JS tests.
 
-### Modify an existing widget trait
+### Modify an existing widget field
 
-1. Update the Python trait default and validation/coercion logic.
+1. Update the field's default and validation on the config or status model.
 1. Add the field to the widget's `CONFIG` or `STATUS` map in `nbplay/widget.py`,
    the matching property to the element, and the trait map in `js/tests/support/instruments.ts`.
-1. Update CSS if the trait changes layout or visible state.
+1. Update CSS if the field changes layout or visible state.
 1. Update `nbplay/static` by rebuilding JS before testing Python rendering from
    source.
-1. Add Python tests for the trait default/API and Playwright tests for browser
+1. Add Python tests for the field default/API and Playwright tests for browser
    interaction.
 1. Update examples and this guide when the feature changes developer workflow.
 
@@ -1256,8 +1251,9 @@ make major
 
 ## Common pitfalls and invariants
 
-- Do not call `save_changes()` during initial render resets. It can race with
-  Session trait links while multiple widgets are being initialized.
+- Never emit `nbplay-status` from an element during construction or its first
+  property assignment; the kernel must not see a write before the widget's
+  ready handshake.
 - Always return a cleanup function from a widget renderer. Stop audio, clear
   intervals, remove global event listeners, disconnect MIDI ports, and unregister
   session bus entries.
