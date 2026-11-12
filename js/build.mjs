@@ -5,21 +5,6 @@ import { node_modules_external } from "./tools/externals.mjs";
 import fs from "fs";
 import cpy from "cpy";
 
-const WIDGET_NAMES = [
-  "widget",
-  "mixer",
-  "sampler",
-  "sequencer",
-  "timeline",
-  "launcher",
-  "transport",
-  "settings",
-  "keyboard",
-  "midi_keyboard",
-  "midi_output",
-  "pad",
-];
-
 const BUNDLES = [
   {
     entryPoints: ["src/ts/index.ts"],
@@ -30,10 +15,6 @@ const BUNDLES = [
     entryPoints: ["src/ts/index.ts"],
     outfile: "dist/cdn/index.js",
   },
-  ...WIDGET_NAMES.map((name) => ({
-    entryPoints: [`src/ts/${name}.ts`],
-    outfile: `dist/widgets/${name}.js`,
-  })),
   // UI primitives on their own (future standalone package) and their gallery
   {
     entryPoints: ["src/ts/components/index.ts"],
@@ -47,6 +28,11 @@ const BUNDLES = [
   {
     entryPoints: ["src/ts/spaday.ts"],
     outfile: "dist/spaday/index.js",
+  },
+  // Test-only: the instrument elements behind a trait-shaped mock model
+  {
+    entryPoints: ["tests/support/instruments.ts"],
+    outfile: "dist/tests/instruments.js",
   },
 ];
 
@@ -81,22 +67,15 @@ async function build() {
 
   await Promise.all(BUNDLES.map(bundle)).catch(() => process.exit(1));
 
-  // Copy servable assets to python extension (exclude esm/)
+  // Copy servable assets to python extension (exclude esm/, gallery/, tests/)
   fs.mkdirSync("../nbplay/extension", { recursive: true });
   await cpy("dist/**/*", "../nbplay/extension", {
     filter: (file) =>
-      !file.relativePath.startsWith("esm/") &&
-      !file.relativePath.startsWith("dist/esm/") &&
-      !file.relativePath.startsWith("gallery") &&
-      !file.relativePath.startsWith("dist/gallery"),
+      !/^(dist\/)?(esm|gallery|tests)\//.test(file.relativePath),
   });
 
-  // Copy per-widget JS/CSS to python static dir for anywidget
-  fs.mkdirSync("../nbplay/static", { recursive: true });
-  await cpy("dist/widgets/*.js", "../nbplay/static");
-  // Every widget shares one stylesheet: the elements plus the theme sets.
-  fs.copyFileSync("dist/css/nbplay.css", "../nbplay/static/nbplay.css");
-  // The spaday component package assets (nbplay.components:package)
+  // The spaday component package assets (nbplay.components:package): every
+  // widget shares one stylesheet, the elements plus the theme sets.
   fs.mkdirSync("../nbplay/static/spaday", { recursive: true });
   fs.copyFileSync("dist/spaday/index.js", "../nbplay/static/spaday/index.js");
   fs.copyFileSync("dist/css/nbplay.css", "../nbplay/static/spaday/nbplay.css");

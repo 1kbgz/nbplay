@@ -92,11 +92,11 @@ async function renderWidget(page, overrides = {}) {
     link.href = "/dist/css/components.css";
     document.head.appendChild(link);
 
-    const mod = await import("/dist/widgets/timeline.js");
+    const mod = await import("/dist/tests/instruments.js");
     const el = document.getElementById("root");
     const model = window.createMockModel({ ...opts });
     window.__testModel = model;
-    window.__cleanup = mod.default.render({ model, el });
+    window.__cleanup = mod.render("timeline", { model, el });
   }, opts);
 }
 
@@ -788,7 +788,7 @@ test.describe("TimelineWidget", () => {
         link.rel = "stylesheet";
         link.href = "/dist/css/components.css";
         document.head.appendChild(link);
-        const mod = await import("/dist/widgets/timeline.js");
+        const mod = await import("/dist/tests/instruments.js");
         const el = document.getElementById("root");
         const model = window.createMockModel({ ...opts });
         const set = model.set.bind(model);
@@ -798,7 +798,7 @@ test.describe("TimelineWidget", () => {
           if (changed) model._trigger("change:" + key);
         };
         window.__testModel = model;
-        window.__cleanup = mod.default.render({ model, el });
+        window.__cleanup = mod.render("timeline", { model, el });
       },
       {
         ...DEFAULTS,

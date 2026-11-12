@@ -37,11 +37,11 @@ async function renderWidget(page, overrides = {}) {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/sampler.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.getElementById("root");
       const model = window.createMockModel({ ...opts });
       window.__testModel = model;
-      window.__cleanup = mod.default.render({ model, el });
+      window.__cleanup = mod.render("sampler", { model, el });
     },
     { ...DEFAULTS, ...overrides },
   );
@@ -955,7 +955,7 @@ test.describe("SamplerWidget", () => {
       link.href = "/dist/css/components.css";
       document.head.appendChild(link);
 
-      const mod = await import("/dist/widgets/sampler.js");
+      const mod = await import("/dist/tests/instruments.js");
       const el = document.createElement("div");
       document.getElementById("root").appendChild(el);
       const model = window.createMockModel({
@@ -976,7 +976,7 @@ test.describe("SamplerWidget", () => {
         keyboard_connected: false,
       });
       window.__testModel = model;
-      const destroyFn = mod.default.render({ model, el });
+      const destroyFn = mod.render("sampler", { model, el });
       // Store destroy function on window for later
       window.__destroySampler = destroyFn;
       return true;

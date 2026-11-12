@@ -46,10 +46,10 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 | `nbplay/__init__.py`                              | Public Python exports for Rust/PyO3 types and widget classes.                                              |
 | `rust/src/`                                       | Shared Rust core library: audio buffers, MIDI, oscillators, mixer, sampler, sequencer, native I/O.         |
 | `rust/python/`                                    | PyO3 wrapper classes exposed as the `nbplay.nbplay` native extension.                                      |
-| `js/src/ts/`                                      | Browser frontends: one anywidget adapter per widget, shared engines, and `components/` (Lit elements).     |
+| `js/src/ts/`                                      | Browser frontends: `components/` (Lit elements), shared engines, and the spaday package entry.             |
 | `js/src/css/`                                     | `components/` (tokens plus one stylesheet per element), theme sets, bundled by lightningcss into one file. |
 | `js/src/rust/`                                    | wasm-bindgen browser bindings around selected Rust functionality.                                          |
-| `js/tests/`                                       | Playwright browser tests using a mock anywidget model and mock Web Audio context.                          |
+| `js/tests/`                                       | Playwright browser tests: elements on a mock model and a mock Web Audio context, and spaday end to end.    |
 | `nbplay/tests/test_all.py`                        | Python, Rust-extension, widget, session, and example-notebook regression tests.                            |
 | `examples/`                                       | Executable tutorial notebooks used by users and docs builds.                                               |
 | `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                                |
@@ -316,29 +316,13 @@ edited), `nbplay-status` (`{values, save}`, browser-derived state such as play
 position) and `nbplay-request` (`{name}`, a nonce request such as undo). Kernel
 commands arrive through `element.command(cmd)`.
 
-Every widget file in `js/src/ts/` is then an adapter:
-
-```ts
-function render({ model, el }: { model: AnyModel; el: HTMLElement }): () => void {
-  const node = document.createElement("nbplay-mixer") as NbplayMixer;
-  return bindInstrument(model, el, node, {
-    config: { channels: "channels", master_gain: "masterGain", session_id: "sessionId" },
-    status: {},
-    command: true,
-    onDisconnect: () => node.teardown(),
-  });
-}
-
-export default { render };
-```
-
-`bindInstrument` in `js/src/ts/adapter.ts` writes `config` traits into
-properties, mirrors `nbplay-status` values into the model (saving only when
-`save` is set), saves `nbplay-set` values, forwards `nbplay-request` names as
-nonce traits, calls `node.command()` for the nonced `command` trait, and stops
-the element when the kernel disconnects. An element never emits status during
-construction or its first property assignment, which keeps the old rule that
-render must not call `save_changes()`. Non-visual engines the elements share
+Each Python widget renders its element through a spaday tree built in
+`nbplay/widget.py`: config fields bind two-way on `nbplay-set`, status fields
+two-way on `nbplay-status` (or the event a widget names in `STATUS_EVENTS`),
+and the `nbplay-wire` child defined in `js/src/ts/spaday.ts` delivers kernel
+commands to `element.command()`; see "Transports widgets" below. An element
+never emits status during construction or its first property assignment, so
+rendering a widget never writes back to the kernel. Non-visual engines the elements share
 live beside them: `voices.ts` (fallback sine voices), `midi_access.ts` (Web
 MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
 `sampler_engine.ts` (sample playback).
@@ -346,15 +330,13 @@ MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
 The component gallery, `js/dist/gallery.html` after a build, renders every
 element with a property panel, an event log and a theme switch.
 
-The shared `AnyModel` type and helpers are in `js/src/ts/helpers.ts`:
+The shared helpers are in `js/src/ts/helpers.ts` (`AnyModel` there is the
+model-shaped shim the scheduler and session clock read through):
 
-- `onKernelDisconnect()` polls the widget model for comm loss and calls a
-  cleanup callback after a delay. Widgets use it to stop audio when the kernel
-  restarts or shuts down.
 - `cssVar()` reads Jupyter CSS custom properties for canvas drawing.
 - `makeEditable()` implements double-click inline editing with an Enter/blur
   commit guard.
-- `toFloat32()` converts anywidget binary buffers into `Float32Array`.
+- `toFloat32()` converts binary buffers into `Float32Array`.
 - `bindShortcuts()` binds keyboard shortcuts to a widget root (see
   "Keyboard shortcuts" below).
 - Gain/pan helpers convert and format linear gain, dB, and pan values.
@@ -1017,9 +999,12 @@ python -m pytest -v nbplay/tests/test_all.py -k "TestDemoNotebook"
 Playwright tests live in `js/tests/`. The harness at
 `js/tests/fixtures/harness.html` provides a mock `AudioContext` and
 `createMockModel()` implementation with `get`, `set`, `save_changes`, `on`, and
-manual trigger helpers. Tests cover DOM rendering, synced model state, user
-interactions, inline editing, keyboard capture, MIDI input, scheduler state, and
-session integration.
+manual trigger helpers; `js/tests/support/instruments.ts` (bundled to
+`dist/tests/instruments.js`, never shipped) binds an instrument element to such
+a model through the same trait maps the Python widgets use, so the widget specs
+drive each element through traits. Tests cover DOM rendering, synced model
+state, user interactions, inline editing, keyboard capture, MIDI input,
+scheduler state, and session integration.
 
 Run:
 
@@ -1217,18 +1202,18 @@ make major
 
 ### Add a new widget
 
-1. Add a Python class in `nbplay/widget.py` extending `anywidget.AnyWidget`.
-1. Give it `_esm = _STATIC / "<name>.js"` and `_css = _STATIC / "nbplay.css"`.
-1. Define synced traits with `.tag(sync=True)` and keep defaults valid.
+1. Add a config model (and a status model when the browser owns state) in
+   `nbplay/models.py`, with valid defaults and validators.
+1. Add a class in `nbplay/widget.py` extending `InstrumentWidget` with `TAG`,
+   `CONFIG_MODEL`, `STATUS_MODEL`, and the `CONFIG` and `STATUS` field-to-property maps.
 1. Create the element in `js/src/ts/components/<name>.ts`: extend
    `NbplayElement`, compose existing primitives and composites, emit
    `nbplay-set`, `nbplay-status` and `nbplay-request`, and `define("nbplay-<name>", ...)`.
    Export it from `components/index.ts` and add a section to `gallery.ts`.
 1. Create `js/src/css/components/<name>.css` scoped under the tag and add it to
    `js/src/css/components.css`.
-1. Create `js/src/ts/<name>.ts` whose `render()` returns `bindInstrument(...)`
-   with the trait map.
-1. Add `<name>` to `WIDGET_NAMES` in `js/build.mjs`.
+1. Add the element's trait maps to `INSTRUMENTS` in `js/tests/support/instruments.ts`
+   so the widget specs can drive it.
 1. Re-export the widget from `nbplay/__init__.py`.
 1. Add Python widget tests and Playwright tests.
 1. Add or update an example notebook when the widget is user-facing.
@@ -1237,8 +1222,8 @@ make major
 ### Modify an existing widget trait
 
 1. Update the Python trait default and validation/coercion logic.
-1. Add the trait to the adapter's `config` or `status` map in `js/src/ts/<widget>.ts`
-   and the matching property to the element.
+1. Add the field to the widget's `CONFIG` or `STATUS` map in `nbplay/widget.py`,
+   the matching property to the element, and the trait map in `js/tests/support/instruments.ts`.
 1. Update CSS if the trait changes layout or visible state.
 1. Update `nbplay/static` by rebuilding JS before testing Python rendering from
    source.

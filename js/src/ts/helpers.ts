@@ -1,81 +1,11 @@
-// Shared helpers for nbplay anywidget ESM frontends
+// Shared helpers for the nbplay elements and engines
 
-/** Minimal interface for the anywidget model object. */
+/** A model-shaped shim the scheduler and session clock read traits through. */
 export interface AnyModel {
   get(name: string): unknown;
   set(name: string, value: unknown): void;
   save_changes(): void;
   on(event: string, callback: (...args: unknown[]) => void): void;
-}
-
-/**
- * Monitor the model's kernel connection.  When the underlying comm
- * channel disappears (kernel restart / shutdown), wait `delay` ms
- * then call `callback`.  If the comm reappears within that window
- * (transient disconnect), the timer is cancelled.
- *
- * The anywidget model proxy doesn't expose `comm` directly, so we
- * check `widget_manager` instead — it's set on the proxy and its
- * kernel connection reflects whether the comm is alive.
- *
- * If the model never had a `widget_manager` (e.g. test mock or
- * standalone use), monitoring is skipped entirely.
- *
- * Returns a cleanup function that stops monitoring.
- */
-export function onKernelDisconnect(
-  model: AnyModel,
-  callback: () => void,
-  delay: number = 5000,
-): () => void {
-  const m = model as unknown as Record<string, unknown>;
-  let pollTimer: ReturnType<typeof setInterval> | null = null;
-  let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
-  let fired = false;
-
-  // Only monitor if the model was created with a live kernel connection.
-  // The anywidget proxy exposes `widget_manager`; raw ipywidgets models
-  // expose `comm`.  If neither is present at init time, this is a mock
-  // or standalone environment — skip monitoring.
-  const hasComm = "comm" in m || "widget_manager" in m;
-  if (!hasComm) {
-    return () => {};
-  }
-
-  function isConnected(): boolean {
-    // Check `comm` first (raw ipywidgets model), then fall back to
-    // `widget_manager` (anywidget proxy).  Both become null/undefined
-    // when the kernel disconnects.
-    if ("comm" in m) return m.comm != null;
-    return m.widget_manager != null;
-  }
-
-  pollTimer = setInterval(() => {
-    if (fired) return;
-    if (!isConnected() && !pendingTimeout) {
-      pendingTimeout = setTimeout(() => {
-        if (!isConnected() && !fired) {
-          fired = true;
-          callback();
-        }
-        pendingTimeout = null;
-      }, delay);
-    } else if (isConnected() && pendingTimeout) {
-      clearTimeout(pendingTimeout);
-      pendingTimeout = null;
-    }
-  }, 2000);
-
-  return () => {
-    if (pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = null;
-    }
-    if (pendingTimeout) {
-      clearTimeout(pendingTimeout);
-      pendingTimeout = null;
-    }
-  };
 }
 
 /**
