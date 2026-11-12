@@ -118,4 +118,39 @@ test.describe("web app", () => {
       .toBe("grim");
     expect(errors).toEqual([]);
   });
+
+  test("the palette reopens a closed panel", async ({ page }) => {
+    await page.goto("/");
+    const mixer = page.locator("regular-layout-frame nbplay-mixer");
+    await expect(mixer).toBeVisible();
+    const laidOut = () =>
+      page.evaluate(
+        () =>
+          document
+            .querySelector("spaday-regular-layout")
+            .calculatePath("mixer") !== null,
+      );
+    await page
+      .locator('regular-layout-frame[name="mixer"] [part~="close"]')
+      .click();
+    await expect.poll(laidOut).toBe(false);
+    await expect(mixer).toBeHidden();
+
+    // Ctrl+K lists every panel; picking one puts it back in the layout.
+    const dialog = page.locator("nbplay-palette dialog");
+    await page.keyboard.press("Control+k");
+    await expect(dialog).toBeVisible();
+    await expect(page.locator(".nbplay-palette-option")).toHaveCount(8);
+    await page.keyboard.type("mix");
+    await page.keyboard.press("Enter");
+    await expect(dialog).toBeHidden();
+    await expect.poll(laidOut).toBe(true);
+    await expect(mixer).toBeVisible();
+
+    // The top bar button opens the same palette.
+    await page.locator(".nbplay-app-bar button").click();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
 });

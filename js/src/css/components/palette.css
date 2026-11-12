@@ -1,0 +1,57 @@
+nbplay-palette {
+  display: contents;
+}
+nbplay-palette .nbplay-palette-dialog {
+  width: min(440px, calc(100vw - 32px));
+  margin: 12vh auto auto;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--nbplay-font);
+  font-size: var(--nbplay-font-size);
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+}
+nbplay-palette .nbplay-palette-dialog::backdrop {
+  background: color-mix(in srgb, var(--nbplay-bg) 60%, transparent);
+}
+nbplay-palette .nbplay-palette-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 0;
+  border-bottom: 1px solid var(--nbplay-border);
+  outline: none;
+}
+nbplay-palette .nbplay-palette-input:focus-visible {
+  box-shadow: inset 0 -2px var(--nbplay-focus);
+}
+nbplay-palette .nbplay-palette-list {
+  max-height: 50vh;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+nbplay-palette .nbplay-palette-option,
+nbplay-palette .nbplay-palette-empty {
+  padding: 6px 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-palette .nbplay-palette-option {
+  cursor: pointer;
+}
+nbplay-palette .nbplay-palette-option.active {
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+}
+nbplay-palette .nbplay-palette-empty {
+  color: var(--nbplay-fg-muted);
+}

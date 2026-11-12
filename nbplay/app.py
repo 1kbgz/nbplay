@@ -20,7 +20,7 @@ import json
 import re
 
 import transports
-from spaday import element
+from spaday import Invoke, by_id, element, event_prop
 from spaday_regular_layout import RegularLayout, RegularLayoutFrame, package as layout_package
 
 from .components import package as nbplay_package
@@ -43,10 +43,11 @@ html, body { margin: 0; height: 100%; background: var(--nbplay-bg); color: var(-
 }
 .nbplay-app-title { font-weight: 700; letter-spacing: 0.5px; }
 .nbplay-app-bar label {
-  display: flex; align-items: center; gap: 6px; margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
   font-family: var(--nbplay-font-mono); font-size: var(--nbplay-font-size-small); color: var(--nbplay-fg-muted);
 }
-.nbplay-app-bar select {
+.nbplay-app-bar button { margin-left: auto; cursor: pointer; }
+.nbplay-app-bar button, .nbplay-app-bar select {
   height: var(--nbplay-control-height); padding: 0 6px; font: inherit;
   background: var(--nbplay-bg-control); color: var(--nbplay-fg);
   border: 1px solid var(--nbplay-border); border-radius: var(--nbplay-radius-control);
@@ -131,7 +132,10 @@ def default_layout(names):
 
 
 def _app_bar(title):
-    """Title and a theme select bound to the transport's theme, which the session mirrors to every widget."""
+    """Title, a button that opens the panel palette, and a theme select.
+
+    The select is bound to the transport's theme, which the session mirrors to every widget.
+    """
     select = element("select", title="Theme").bind("value", "transport.config.theme", mode="two-way")
     for theme in THEMES:
         select.child(element("option", value=theme).text(theme or "default"))
@@ -140,18 +144,29 @@ def _app_bar(title):
         .classes("nbplay-app-bar")
         .child(
             element("span").classes("nbplay-app-title").text(title),
+            element("button", type="button", title="Open a panel (Ctrl+K or Cmd+K)")
+            .text("panels")
+            .on("click", Invoke(by_id("nbplay-palette"), "show")),
             element("label").child(element("span").text("theme"), select),
         )
     )
 
 
 def _page(panels, layout, title):
-    """The top bar over the panel layout, each panel's element bound under its own namespace."""
+    """The top bar over the panel layout, each panel's element bound under its own namespace.
+
+    The palette (Ctrl+K or Cmd+K) lists every panel and reopens one the user closed.
+    """
     frames = [RegularLayoutFrame(widget.tree(f"{name}."), name=name) for name, widget in panels.items()]
+    palette = element("nbplay-palette", id="nbplay-palette", placeholder="Open a panel", commands=[{"id": name} for name in panels])
     return (
         element("div")
         .classes("nbplay-app")
-        .child(_app_bar(title), RegularLayout(*frames, layout=layout or default_layout(list(panels))).classes("spa nbplay"))
+        .child(
+            _app_bar(title),
+            RegularLayout(*frames, layout=layout or default_layout(list(panels)), id="nbplay-layout").classes("spa nbplay"),
+            palette.on("nbplay-request", Invoke(by_id("nbplay-layout"), "openPanel", event_prop("detail.name"))),
+        )
         .bind_root_attr("data-nbplay-theme", "transport.config.theme")
     )
 
