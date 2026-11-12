@@ -8,7 +8,7 @@ pytest.importorskip("spaday_regular_layout")
 from starlette.testclient import TestClient
 
 import nbplay
-from nbplay.app import Standalone, build, default_layout, demo_session, export, panel_widgets
+from nbplay.app import Standalone, build, default_layout, demo_session, export, main, panel_widgets
 
 
 def _instrument(tree, panel):
@@ -133,3 +133,11 @@ class TestApp:
             assert (site / path).is_file(), path
         assert {"type": "js", "path": "components/nbplay/index.js"} in config["assets"]
         assert json.loads((export(tmp_path / "pypi") / "config.json").read_text())["requirements"] == ["nbplay", "spaday-regular-layout"]
+
+    def test_command_line_exports_or_serves(self, tmp_path, capsys, monkeypatch):
+        main(["--export", str(tmp_path / "site")])
+        assert capsys.readouterr().out.strip() == str(tmp_path / "site") and (tmp_path / "site" / "config.json").is_file()
+        served = {}
+        monkeypatch.setattr("uvicorn.run", lambda app, **options: served.update(options, app=app))
+        main(["--port", "8123"])
+        assert served["port"] == 8123 and served["host"] == "127.0.0.1" and served["app"] is not None
