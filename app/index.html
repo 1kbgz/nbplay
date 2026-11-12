@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nbplay in Pyodide</title>
+    <link rel="stylesheet" href="./components/nbplay/nbplay.css" />
+    <link rel="stylesheet" href="./components/regular-layout/css/lorax.css" />
+    <link rel="stylesheet" href="./components/regular-layout/css/spa.css" />
+    <style>
+      #pyodide-status {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        white-space: pre-wrap;
+      }
+      #pyodide-status[hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pyodide-status">Loading Python in the browser…</div>
+    <div id="example-root"></div>
+    <script type="module">
+      // The elements and the spaday store run here; the session and its
+      // models run in Pyodide inside pyodide-worker.js, and transports wire
+      // frames cross between them with postMessage.
+      import {
+        connectStore,
+        init,
+        mount,
+        provideWires,
+        Store,
+      } from "./runtime/spaday/cdn/index.js";
+      import "./components/nbplay/index.js";
+      import "./components/regular-layout/cdn/index.js";
+      import * as transports from "./runtime/spaday/transports/cdn/index.js";
+
+      const status = document.querySelector("#pyodide-status");
+      const root = document.querySelector("#example-root");
+
+      function fail(error) {
+        status.hidden = false;
+        status.textContent = `Unable to start\n${error}`;
+      }
+
+      try {
+        await Promise.all([
+          init({ module_or_path: "./runtime/spaday/pkg/spaday_bg.wasm" }),
+          transports.wasm.default({
+            module_or_path:
+              "./runtime/spaday/transports/pkg/transports_bg.wasm",
+          }),
+        ]);
+
+        const worker = new Worker("./pyodide-worker.js", { type: "module" });
+        const clients = {};
+        // Call a widget method in Python: nbplay.call("transport", "play").
+        globalThis.nbplay = {
+          call: (panel, method) =>
+            worker.postMessage({ type: "call", panel, method }),
+        };
+
+        worker.addEventListener("message", (event) => {
+          if (event.data.type === "status")
+            status.textContent = event.data.message;
+          if (event.data.type === "error") fail(event.data.message);
+          if (event.data.type === "wires") {
+            for (const [panel, frames] of Object.entries(event.data.wires))
+              for (const frame of frames) clients[panel].recv(frame);
+          }
+          if (event.data.type === "snapshot") {
+            const { tree, style, panels } = event.data.payload;
+            const sheet = document.createElement("style");
+            sheet.textContent = style;
+            document.head.appendChild(sheet);
+            const store = new Store();
+            const wires = [];
+            for (const [panel, specs] of Object.entries(panels)) {
+              // One managed client per panel, as with one WebSocket per
+              // panel when the app is served.
+              const client = new transports.Client("json", { ownership: true });
+              clients[panel] = client;
+              for (const { model, namespace } of specs) {
+                const link = connectStore(
+                  store,
+                  client,
+                  undefined,
+                  transports,
+                  namespace,
+                  true,
+                  model,
+                );
+                wires.push({ client, link, store, namespace });
+              }
+              client.attach((frame) =>
+                worker.postMessage({ type: "wire", panel, frame }),
+              );
+            }
+            // nbplay-wire asks for its panel's client here to deliver the
+            // commands Python sends.
+            provideWires(root, wires);
+            mount(root, tree, store);
+            worker.postMessage({ type: "open" });
+            status.hidden = true;
+            document.documentElement.dataset.ready = "true";
+          }
+        });
+        worker.addEventListener("error", (event) => fail(event.message));
+        worker.postMessage({ type: "start" });
+      } catch (error) {
+        fail(error);
+      }
+    </script>
+  </body>
+</html>

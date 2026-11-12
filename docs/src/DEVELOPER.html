@@ -1391,7 +1391,8 @@ copies the nbplay, spaday, transports and spaday-regular-layout wheels into
 <code class="docutils literal notranslate"><span class="pre">pypi/</span></code>, extracts their browser assets (<code class="docutils literal notranslate"><span class="pre">runtime/spaday/</span></code>,
 <code class="docutils literal notranslate"><span class="pre">components/nbplay/</span></code>, <code class="docutils literal notranslate"><span class="pre">components/regular-layout/</span></code>) and writes <code class="docutils literal notranslate"><span class="pre">wheels.json</span></code>.
 <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyodide-example</span></code> runs it into <code class="docutils literal notranslate"><span class="pre">dist/app</span></code> with the nbplay wheel from
-<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide</span></code>. The worker loads Pyodide, installs the wheels with
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-pyodide</span></code>, and the docs workflow publishes that directory at <code class="docutils literal notranslate"><span class="pre">/app/</span></code>
+on the docs site. The worker loads Pyodide, installs the wheels with
 micropip and builds <code class="docutils literal notranslate"><span class="pre">nbplay.app.Standalone(demo_session())</span></code>, which holds one
 <code class="docutils literal notranslate"><span class="pre">transports.Server</span></code> per panel. The page creates one managed transports client
 per panel, attaches it to the worker with <code class="docutils literal notranslate"><span class="pre">postMessage</span></code> (<code class="docutils literal notranslate"><span class="pre">client.attach(send)</span></code>
