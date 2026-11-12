@@ -1,11 +1,12 @@
-"""Undo and redo for widget and view state.
+"""Undo and redo for widget state.
 
-``History`` watches the synced traits of a set of widgets, or the config
-fields of transports views, and records every change as an undo step. Changes that land within a short window of each
-other (a fader drag, a method that writes several traits) share one step,
+``History`` watches the config fields of a set of widgets and records every
+change as an undo step. Changes that land within a short window of each
+other (a fader drag, a method that writes several fields) share one step,
 ``transaction()`` groups anything explicitly, and a notebook cell boundary
-always ends a step. Transient traits such as play state, playhead position,
-meters, and request nonces are ignored.
+always ends a step. Browser-owned status (play state, playhead position,
+meters, request counts) never reaches the config model, and the transient
+config fields listed below are ignored.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ import contextlib
 import functools
 import time
 
-# Synced traits that describe the moment rather than the document.
+# Config fields that describe the moment rather than the document.
 TRANSIENT_TRAITS = frozenset(
     {
         "session_id",
@@ -56,7 +57,7 @@ TRANSIENT_TRAITS = frozenset(
 
 
 class History:
-    """Undo/redo stack over the synced traits of attached widgets.
+    """Undo/redo stack over the config fields of attached widgets.
 
     Args:
         limit: Maximum number of undo steps kept.
@@ -78,55 +79,26 @@ class History:
 
     # Attachment
 
-    @staticmethod
-    def tracked_traits(widget):
-        return [
-            name for name in widget.trait_names() if widget.trait_metadata(name, "sync") and name not in TRANSIENT_TRAITS and not name.startswith("_")
-        ]
-
-    @staticmethod
-    def _is_view(widget):
-        return hasattr(getattr(widget, "config", None), "on_change")
-
-    @classmethod
-    def _target(cls, widget):
-        """The object whose attributes a step sets: a widget, or a view's config model."""
-        return widget.config if cls._is_view(widget) else widget
-
     def attach(self, widget):
-        """Start recording changes to ``widget``'s synced traits, or to a view's config fields."""
-        if widget is None or widget in self._widgets:
+        """Start recording changes to ``widget``'s config fields."""
+        config = getattr(widget, "config", None)
+        if widget is None or widget in self._widgets or not hasattr(config, "on_change"):
             return
-        if self._is_view(widget):
-            self._removers[widget] = widget.config.on_change(functools.partial(self._on_model_change, widget.config))
-        elif hasattr(widget, "trait_names"):
-            names = self.tracked_traits(widget)
-            if not names:
-                return
-            widget.observe(self._on_change, names=names)
-        else:
-            return
+        self._removers[widget] = config.on_change(functools.partial(self._on_model_change, config))
         self._widgets.append(widget)
 
     def detach(self, widget):
         if widget in self._widgets:
-            if self._is_view(widget):
-                self._removers.pop(widget)()
-            else:
-                widget.unobserve(self._on_change, names=self.tracked_traits(widget))
+            self._removers.pop(widget)()
             self._widgets.remove(widget)
-            target = self._target(widget)
-            self._undo = [group for group in (self._without(group, target) for group in self._undo) if group]
-            self._redo = [group for group in (self._without(group, target) for group in self._redo) if group]
+            self._undo = [group for group in (self._without(group, widget.config) for group in self._undo) if group]
+            self._redo = [group for group in (self._without(group, widget.config) for group in self._redo) if group]
 
     @staticmethod
-    def _without(group, widget):
-        return [entry for entry in group if entry[0] is not widget]
+    def _without(group, config):
+        return [entry for entry in group if entry[0] is not config]
 
     # Recording
-
-    def _on_change(self, change):
-        self._record(change["owner"], change["name"], change["old"], change["new"])
 
     def _on_model_change(self, model, changes):
         for name, (old, new) in changes.items():
@@ -230,8 +202,8 @@ class History:
     def _apply(self, group, reverse):
         self._applying = True
         try:
-            for widget, name, old, new in reversed(group) if reverse else group:
-                setattr(widget, name, old if reverse else new)
+            for config, name, old, new in reversed(group) if reverse else group:
+                setattr(config, name, old if reverse else new)
         finally:
             self._applying = False
             self.mark()
@@ -243,8 +215,8 @@ class History:
 
     @property
     def steps(self):
-        """Undo steps, oldest first, as lists of ``(widget, trait)`` or ``(config, field)`` pairs."""
-        return [[(widget, name) for widget, name, _, _ in group] for group in self._undo]
+        """Undo steps, oldest first, as lists of ``(config, field)`` pairs."""
+        return [[(config, name) for config, name, _, _ in group] for group in self._undo]
 
     def __len__(self):
         return len(self._undo)

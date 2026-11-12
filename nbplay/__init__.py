@@ -50,7 +50,6 @@ from nbplay.widget import (
     MidiKeyboardWidget,
     MidiOutputWidget,
     MixerWidget,
-    NoteComposer,
     PadWidget,
     SamplerWidget,
     SequencerWidget,

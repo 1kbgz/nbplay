@@ -1,6 +1,6 @@
-"""Validated descriptors and normalizers shared by the widgets and the views.
+"""Validated descriptors and normalizers shared by the widgets and their models.
 
-The traitlets widgets in :mod:`nbplay.widget` and the pydantic models in
+The widgets in :mod:`nbplay.widget` and the pydantic models in
 :mod:`nbplay.models` accept the same dict shapes for effects, mixer channels,
 timeline tracks and clips, pad actions, sampler zones and slices, launcher
 slots and keyboard routes. The descriptor classes (:class:`EffectPlugin`,
@@ -715,10 +715,9 @@ _LAUNCH_QUANTIZE = ("bar", "beat", "none")
 
 def _slot_voices(pattern):
     """Coerce a pattern into ``voices_data`` (list of voices, each a list of step dicts)."""
-    if hasattr(pattern, "voices_data"):  # SequencerWidget
-        return [list(steps) for steps in pattern.voices_data]
-    if hasattr(pattern, "steps"):  # NoteComposer
-        return [list(pattern.steps)]
+    config = getattr(pattern, "config", pattern)
+    if hasattr(config, "voices_data"):  # SequencerWidget or its config
+        return [list(steps) for steps in config.voices_data]
     if isinstance(pattern, (list, tuple)):
         if not pattern:
             raise ValueError("pattern must not be empty")
@@ -726,7 +725,7 @@ def _slot_voices(pattern):
             return [list(voice) for voice in pattern]
         if all(isinstance(step, dict) for step in pattern):
             return [list(pattern)]
-    raise ValueError("pattern must be a SequencerWidget, NoteComposer, list of step dicts, or list of voices")
+    raise ValueError("pattern must be a SequencerWidget, list of step dicts, or list of voices")
 
 
 def _normalize_launcher_slot(slot):

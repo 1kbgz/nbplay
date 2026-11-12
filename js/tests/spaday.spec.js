@@ -4,7 +4,7 @@ import { createInterface } from "node:readline";
 import fs from "node:fs";
 
 // The transport instrument as a spaday view on transports models: a real
-// TransportView runs in a Python subprocess and its comm traffic is relayed
+// TransportWidget runs in a Python subprocess and its comm traffic is relayed
 // to the spaday widget bundle rendered here. NBPLAY_TEST_PYTHON names the
 // Python with nbplay installed (default: python).
 
