@@ -8,7 +8,7 @@ pytest.importorskip("spaday_regular_layout")
 from starlette.testclient import TestClient
 
 import nbplay
-from nbplay.app import Standalone, build, default_layout, demo_session, export, main, panel_widgets
+from nbplay.app import Standalone, build, default_layout, demo_session, main, panel_widgets
 
 
 def _instrument(tree, panel):
@@ -93,7 +93,7 @@ class TestApp:
             session.close()
 
     def test_standalone_host_passes_frames_without_a_server(self):
-        host = Standalone.load("nbplay.app:demo_session")
+        host = Standalone(demo_session())
         try:
             page = json.loads(host.page())
             assert page["tree"]["tag"] == "div" and "spaday-regular-layout.nbplay" in page["style"]
@@ -121,22 +121,7 @@ class TestApp:
         finally:
             host.session.close()
 
-    def test_export_writes_a_static_site(self, tmp_path):
-        wheel = tmp_path / "nbplay-0.0.0-py3-none-any.whl"
-        wheel.write_bytes(b"wheel")
-        site = export(tmp_path / "site", wheels=[wheel])
-        config = json.loads((site / "config.json").read_text())
-        assert config["session"] == "nbplay.app:demo_session"
-        assert config["wheels"] == ["wheels/nbplay-0.0.0-py3-none-any.whl"] and config["requirements"] == ["spaday-regular-layout"]
-        assert (site / "wheels" / wheel.name).read_bytes() == b"wheel"
-        for path in ["index.html", "worker.js", *config["runtime"].values(), *(asset["path"] for asset in config["assets"])]:
-            assert (site / path).is_file(), path
-        assert {"type": "js", "path": "components/nbplay/index.js"} in config["assets"]
-        assert json.loads((export(tmp_path / "pypi") / "config.json").read_text())["requirements"] == ["nbplay", "spaday-regular-layout"]
-
-    def test_command_line_exports_or_serves(self, tmp_path, capsys, monkeypatch):
-        main(["--export", str(tmp_path / "site")])
-        assert capsys.readouterr().out.strip() == str(tmp_path / "site") and (tmp_path / "site" / "config.json").is_file()
+    def test_command_line_serves_the_demo(self, monkeypatch):
         served = {}
         monkeypatch.setattr("uvicorn.run", lambda app, **options: served.update(options, app=app))
         main(["--port", "8123"])

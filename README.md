@@ -87,8 +87,7 @@ full DAW playground and the beats view.
 The same session runs outside Jupyter as a web app with the instruments in
 resizable panels: `pip install "nbplay[app]"`, then `python -m nbplay.app` and
 open http://127.0.0.1:8020. `nbplay.app.build(session)` serves your own session
-with one WebSocket per instrument, and `python -m nbplay.app --export DIR --wheel <nbplay Pyodide wheel>` writes the same app as a static site whose Python
-runs in the browser with Pyodide.
+with one WebSocket per instrument.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
