@@ -86,8 +86,6 @@ class TestApp:
         try:
             with TestClient(build(session)) as client:
                 html = client.get("/").text
-                if "provideWires" not in html:
-                    pytest.skip("this spaday does not provide a served page's wires to the root (1kbgz/spaday#250)")
                 assert 'provideWires(document.body, [{ client: client0, link: link0, store, namespace: "transport.config" }' in html
         finally:
             session.close()

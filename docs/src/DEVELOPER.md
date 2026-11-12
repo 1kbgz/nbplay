@@ -1055,7 +1055,7 @@ pnpm test
 
 ### Web app test
 
-`pnpm run test:app` boots `python -m nbplay.app --probes` (config:
+`pnpm run test:app` (also part of `pnpm test`) boots `python -m nbplay.app --probes` (config:
 `js/playwright.app.config.js`) and checks that every instrument renders in its
 panel, a kernel assignment and a browser edit meet in the transport's model,
 play from the browser reaches the kernel's status on every panel, and kernel

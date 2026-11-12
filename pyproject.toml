@@ -34,7 +34,7 @@ classifiers = [
 dependencies = [
     "anywidget",
     "ipywidgets>=8",
-    "spaday[widget]>=0.14.0",
+    "spaday[widget]>=0.14.1",
     "transports>=0.12.2",
 ]
 
