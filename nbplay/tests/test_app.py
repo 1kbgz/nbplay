@@ -55,7 +55,7 @@ class TestApp:
             with TestClient(app) as client:
                 html = client.get("/").text
                 assert "/ws/transport" in html and "/ws/drums-sampler" in html
-                assert 'provideWires(document.body, [{ client: client0, link: link0, store, namespace: "transport.config" }' in html
+                assert 'namespace: "transport.config", url: "/ws/transport"' in html
                 bundle = client.get("/components/nbplay/index.js")
                 assert bundle.status_code == 200 and bundle.headers["cache-control"] == "no-cache"
                 assert "cache-control" not in client.get("/state").headers
@@ -76,5 +76,16 @@ class TestApp:
                 assert client.post("/set/transport/bpm", json={"value": 99}).json() == {"value": 99.0}
                 assert session.transport.config.bpm == 99.0
                 assert isinstance(client.post("/command/transport/play").json()["result"], int)
+        finally:
+            session.close()
+
+    def test_served_page_provides_its_wires_to_the_root(self):
+        session = demo_session()
+        try:
+            with TestClient(build(session)) as client:
+                html = client.get("/").text
+                if "provideWires" not in html:
+                    pytest.skip("this spaday does not provide a served page's wires to the root (1kbgz/spaday#250)")
+                assert 'provideWires(document.body, [{ client: client0, link: link0, store, namespace: "transport.config" }' in html
         finally:
             session.close()
