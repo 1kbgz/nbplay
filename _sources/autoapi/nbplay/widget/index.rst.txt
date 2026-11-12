@@ -104,8 +104,6 @@ Module Contents
 
 
    .. py:attribute:: status_id
-      :value: None
-
 
 
    .. py:attribute:: _listeners
@@ -120,6 +118,18 @@ Module Contents
 
 
    .. py:attribute:: _unhook_patches
+
+
+   .. py:method:: tree(prefix='')
+
+      The instrument element with its bindings; ``prefix`` namespaces them (``"lead."``) on a shared store.
+
+
+
+   .. py:method:: wires(prefix='', url=None)
+
+      The wire specs for the hosted models: notebook mappings, or :class:`spaday.Wire` for a served page at ``url``.
+
 
 
    .. py:method:: _prepare()

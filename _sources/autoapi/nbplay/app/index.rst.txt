@@ -1,0 +1,58 @@
+nbplay.app
+==========
+
+.. py:module:: nbplay.app
+
+.. autoapi-nested-parse::
+
+   Serve a :class:`Session` as a web page with every instrument in a resizable panel.
+
+   The widgets are the same objects a notebook displays: each hosts its models in
+   its own transports session, which the app serves over one WebSocket per
+   instrument, and the page binds each element to those models under the panel's
+   namespace. The panels are a `regular-layout` split/tab tree that the browser
+   can rearrange.
+
+   ``python -m nbplay.app`` serves a demo session on http://127.0.0.1:8020.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nbplay.app.panel_widgets
+   nbplay.app.default_layout
+   nbplay.app.build
+   nbplay.app.demo_session
+
+
+Module Contents
+---------------
+
+.. py:function:: panel_widgets(session)
+
+   Panel name to widget: the session views, then each track's sequencer and sound source.
+
+
+.. py:function:: default_layout(names)
+
+   The transport across the top, launcher, timeline and mixer in the middle, instruments below.
+
+
+.. py:function:: build(session, *, layout=None, title='nbplay', probes=False, **options)
+
+   A Starlette app serving ``session``: one WebSocket per instrument and a panel layout page.
+
+   The page is a top bar (``title`` and a theme select) over the panels.
+   ``layout`` is a regular-layout split/tab tree over the panel names from
+   :func:`panel_widgets`; ``probes`` adds the JSON routes the browser tests
+   drive. Other keyword options go to :func:`spaday.backends.starlette.serve`.
+
+
+.. py:function:: demo_session()
+
+   Two tracks: a saw lead on a sequencer and a sampler kit with a kick.
+
+

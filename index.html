@@ -97,6 +97,11 @@
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="autoapi/nbplay/app/index.html">
+      <span class="fd-link-text">nbplay.app</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="autoapi/nbplay/audio_files/index.html">
       <span class="fd-link-text">nbplay.audio_files</span>
     </a>
@@ -143,6 +148,11 @@
   </li>
 </ul>
     </details>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="autoapi/test_app/index.html">
+      <span class="fd-link-text">test_app</span>
+    </a>
   </li>
   <li class="fd-tree-item">
     <a class="fd-link" href="autoapi/test_all/index.html">
@@ -268,6 +278,10 @@ to the browser widget that owns the state.</p>
 <p>Sequencers, launcher slots, and MIDI clips play through the track’s own instrument, a sampler or a synth, with the built-in oscillator only as a fallback. Every change to a session widget is undoable: <code class="docutils literal notranslate"><span class="pre">session.undo()</span></code> and <code class="docutils literal notranslate"><span class="pre">session.redo()</span></code>, or Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z with the transport focused. Adding and removing tracks is the exception.</p>
 <p>The example notebooks in <code class="docutils literal notranslate"><span class="pre">examples/</span></code> walk through each widget and end with a
 full DAW playground and the beats view.</p>
+<p>The same session runs outside Jupyter as a web app with the instruments in
+resizable panels: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[app]&quot;</span></code>, then <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">nbplay.app</span></code> and
+open http://127.0.0.1:8020. <code class="docutils literal notranslate"><span class="pre">nbplay.app.build(session)</span></code> serves your own session
+with one WebSocket per instrument.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>

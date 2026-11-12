@@ -502,6 +502,11 @@ window.runMermaid = runMermaid;</script>
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/app/index.html">
+      <span class="fd-link-text">nbplay.app</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/audio_files/index.html">
       <span class="fd-link-text">nbplay.audio_files</span>
     </a>
@@ -548,6 +553,11 @@ window.runMermaid = runMermaid;</script>
   </li>
 </ul>
     </details>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/test_app/index.html">
+      <span class="fd-link-text">test_app</span>
+    </a>
   </li>
   <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/test_all/index.html">
@@ -751,7 +761,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EffectPlugin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validated Web Audio effect descriptor for mixer insert chains."""</span>
 
@@ -766,7 +776,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_params</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EffectPlugin._param">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin._param">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin._param">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_param</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -777,7 +787,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin._number">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin._number">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin._number">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_number</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_param</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">)</span>
@@ -790,7 +800,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin._normalize_params">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin._normalize_params">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin._normalize_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">"gain"</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">"gain"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">"gain"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)}</span>
@@ -830,7 +840,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># A bypassed effect carries enabled=False; enabled effects stay compact.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">}</span>
@@ -840,13 +850,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"EffectPlugin(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="si">!r}</span><span class="s2">)"</span></div>
 
 
 <div class="viewcode-block" id="EffectPlugin.__eq__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin.__eq__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -854,7 +864,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="EffectPlugin.__hash__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.EffectPlugin.__hash__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin.__hash__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="n">_freeze_effect_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()))</span></div>
 </div>
@@ -1141,7 +1151,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="AudioClip">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.AudioClip">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.AudioClip">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AudioClip</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Serializable audio clip descriptor for timeline lanes."""</span>
 
@@ -1195,19 +1205,19 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_normalize_audio_clip</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AudioClip.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.AudioClip.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.AudioClip.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AudioClip.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.AudioClip.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.AudioClip.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"AudioClip(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="si">!r}</span><span class="s2">)"</span></div>
 
 
 <div class="viewcode-block" id="AudioClip.__eq__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.AudioClip.__eq__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.AudioClip.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">AudioClip</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -1217,7 +1227,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="TimelineTrack">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.TimelineTrack">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.TimelineTrack">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TimelineTrack</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Serializable track-lane descriptor for ``TimelineWidget``."""</span>
 
@@ -1245,19 +1255,19 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="TimelineTrack.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.TimelineTrack.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.TimelineTrack.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TimelineTrack.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.TimelineTrack.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.TimelineTrack.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"TimelineTrack(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="si">!r}</span><span class="s2">)"</span></div>
 
 
 <div class="viewcode-block" id="TimelineTrack.__eq__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.TimelineTrack.__eq__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.TimelineTrack.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">TimelineTrack</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -1267,7 +1277,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadAction">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.PadAction">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.PadAction">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PadAction</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validated pad action descriptor.</span>
 
@@ -1306,7 +1316,7 @@ window.runMermaid = runMermaid;</script>
             <span class="bp">self</span><span class="o">.</span><span class="n">trait</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trait</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PadAction.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.PadAction.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.PadAction.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"trait"</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"trait"</span><span class="p">,</span> <span class="s2">"trait"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trait</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
@@ -1326,13 +1336,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="PadAction.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.PadAction.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.PadAction.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"PadAction(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="si">!r}</span><span class="s2">)"</span></div>
 
 
 <div class="viewcode-block" id="PadAction.__eq__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.PadAction.__eq__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.PadAction.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PadAction</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -1529,7 +1539,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="KeyboardRoute">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.KeyboardRoute">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.KeyboardRoute">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KeyboardRoute</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validated route descriptor for keyboard → sampler mapping.</span>
 
@@ -1584,7 +1594,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">notes</span> <span class="o">=</span> <span class="n">notes</span>
 
 <div class="viewcode-block" id="KeyboardRoute.to_dict">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.KeyboardRoute.to_dict">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.KeyboardRoute.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Serialize to the dict format stored in ``sampler_routing``.</span>
 
@@ -1604,7 +1614,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="KeyboardRoute.__repr__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.KeyboardRoute.__repr__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.KeyboardRoute.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"ch=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">channel_index</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"match=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1619,7 +1629,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="KeyboardRoute.__eq__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.KeyboardRoute.__eq__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.KeyboardRoute.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">KeyboardRoute</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -1627,7 +1637,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="KeyboardRoute.__hash__">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.descriptors.KeyboardRoute.__hash__">[docs]</a>
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.KeyboardRoute.__hash__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span>
             <span class="p">(</span>

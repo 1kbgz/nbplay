@@ -96,6 +96,11 @@
       
 <ul class="fd-tree">
   <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/nbplay/app/index.html">
+      <span class="fd-link-text">nbplay.app</span>
+    </a>
+  </li>
+  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/audio_files/index.html">
       <span class="fd-link-text">nbplay.audio_files</span>
     </a>
@@ -142,6 +147,11 @@
   </li>
 </ul>
     </details>
+  </li>
+  <li class="fd-tree-item">
+    <a class="fd-link" href="../../autoapi/test_app/index.html">
+      <span class="fd-link-text">test_app</span>
+    </a>
   </li>
   <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/test_all/index.html">
@@ -302,6 +312,9 @@
   <li class="fd-toc-item" data-depth="1">
     <a href="#transports-widgets">Transports widgets</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#web-app">Web app</a>
+  </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#styling-system">Styling system</a>
   </li>
@@ -316,6 +329,9 @@
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#javascript-tests">JavaScript tests</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#web-app-test">Web app test</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#host-compatibility-tests">Host compatibility tests</a>
@@ -1345,6 +1361,29 @@ that bundle and the stylesheet to <code class="docutils literal notranslate"><sp
 <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code> renders the spaday widget bundle against real widgets
 in a Python subprocess (<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>), and
 <code class="docutils literal notranslate"><span class="pre">NBPLAY_TEST_PYTHON</span></code> names the Python with nbplay installed.</p>
+<section id="web-app">
+<h3>Web app<a class="headerlink" href="#web-app" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">nbplay/app.py</span></code> serves a <code class="docutils literal notranslate"><span class="pre">Session</span></code> outside Jupyter. <code class="docutils literal notranslate"><span class="pre">build(session)</span></code> makes a
+Starlette app from the same widget objects a notebook displays: each widget’s
+transports session gets a <code class="docutils literal notranslate"><span class="pre">WebSocketRoute</span></code> at <code class="docutils literal notranslate"><span class="pre">/ws/&lt;panel&gt;</span></code> with its own
+<code class="docutils literal notranslate"><span class="pre">transports.Server</span></code> and <code class="docutils literal notranslate"><span class="pre">autosync</span></code> task, the page is a <code class="docutils literal notranslate"><span class="pre">spaday-regular-layout</span></code>
+whose frames hold <code class="docutils literal notranslate"><span class="pre">widget.tree(&quot;&lt;panel&gt;.&quot;)</span></code>, and <code class="docutils literal notranslate"><span class="pre">widget.wires(&quot;&lt;panel&gt;.&quot;,</span> <span class="pre">url=...)</span></code> gives the <code class="docutils literal notranslate"><span class="pre">Wire</span></code> specs that mirror the config and status models under
+that panel’s namespace in the page’s one store. <code class="docutils literal notranslate"><span class="pre">panel_widgets()</span></code> names the
+panels (<code class="docutils literal notranslate"><span class="pre">transport</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher</span></code>, <code class="docutils literal notranslate"><span class="pre">timeline</span></code>, <code class="docutils literal notranslate"><span class="pre">mixer</span></code>, then <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-sequencer</span></code>
+and <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-synth</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-sampler</span></code>) and <code class="docutils literal notranslate"><span class="pre">default_layout()</span></code> is the split
+tree: the transport across the top, launcher, timeline and mixer in the
+middle, the instruments in a tab strip below. A top bar holds the title and a
+theme select bound two-way to the transport’s <code class="docutils literal notranslate"><span class="pre">theme</span></code>; the <code class="docutils literal notranslate"><span class="pre">Session</span></code> mirrors
+that field to every widget, and the page binds it to <code class="docutils literal notranslate"><span class="pre">data-nbplay-theme</span></code> on the
+document root, so one select re-themes the chrome and every instrument.
+<code class="docutils literal notranslate"><span class="pre">APP_CSS</span></code> maps regular-layout’s surface, border and muted tokens onto the nbplay
+tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
+widget does, so <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> finds the client for its panel and kernel commands
+(<code class="docutils literal notranslate"><span class="pre">session.play()</span></code>) reach the element unchanged. <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">nbplay.app</span></code> serves
+<code class="docutils literal notranslate"><span class="pre">demo_session()</span></code> on port 8020; <code class="docutils literal notranslate"><span class="pre">--probes</span></code> adds the JSON routes the browser test
+drives (<code class="docutils literal notranslate"><span class="pre">/state</span></code>, <code class="docutils literal notranslate"><span class="pre">/command/&lt;panel&gt;/&lt;method&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">/set/&lt;panel&gt;/&lt;field&gt;</span></code>). The
+<code class="docutils literal notranslate"><span class="pre">app</span></code> extra installs <code class="docutils literal notranslate"><span class="pre">spaday-regular-layout</span></code>, <code class="docutils literal notranslate"><span class="pre">starlette</span></code> and <code class="docutils literal notranslate"><span class="pre">uvicorn</span></code>.</p>
+</section>
 </section>
 <section id="styling-system">
 <h2>Styling system<a class="headerlink" href="#styling-system" title="Link to this heading">¶</a></h2>
@@ -1436,6 +1475,14 @@ scheduler state, and session integration.</p>
 pnpm<span class="w"> </span><span class="nb">test</span>
 </pre></div>
 </div>
+</section>
+<section id="web-app-test">
+<h3>Web app test<a class="headerlink" href="#web-app-test" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">run</span> <span class="pre">test:app</span></code> boots <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">nbplay.app</span> <span class="pre">--probes</span></code> (config:
+<code class="docutils literal notranslate"><span class="pre">js/playwright.app.config.js</span></code>) and checks that every instrument renders in its
+panel, a kernel assignment and a browser edit meet in the transport’s model,
+play from the browser reaches the kernel’s status on every panel, and kernel
+commands stop and start the clock through <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code>.</p>
 </section>
 <section id="host-compatibility-tests">
 <h3>Host compatibility tests<a class="headerlink" href="#host-compatibility-tests" title="Link to this heading">¶</a></h3>
@@ -1888,6 +1935,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   <li class="fd-toc-item" data-depth="1">
     <a href="#transports-widgets">Transports widgets</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#web-app">Web app</a>
+  </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#styling-system">Styling system</a>
   </li>
@@ -1902,6 +1952,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#javascript-tests">JavaScript tests</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#web-app-test">Web app test</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#host-compatibility-tests">Host compatibility tests</a>

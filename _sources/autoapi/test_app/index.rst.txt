@@ -1,0 +1,41 @@
+test_app
+========
+
+.. py:module:: test_app
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   test_app.TestApp
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   test_app._instrument
+
+
+Module Contents
+---------------
+
+.. py:function:: _instrument(tree, panel)
+
+.. py:class:: TestApp
+
+   .. py:method:: test_panels_name_the_session_and_track_widgets()
+
+
+   .. py:method:: test_widget_tree_and_wires_take_a_prefix()
+
+
+   .. py:method:: test_served_page_binds_every_panel_and_provides_its_wires()
+
+
+   .. py:method:: test_served_page_provides_its_wires_to_the_root()
+
+
