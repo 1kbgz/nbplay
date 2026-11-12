@@ -721,6 +721,8 @@ class TestSession:
             assert seq.config.bpm == 128.0 and session.timeline.config.bpm == 128.0
             session.theme = "grim"
             assert synth.config.theme == "grim" and session.mixer.config.theme == "grim"
+            session.transport.config.theme = "pro"
+            assert session.theme == "pro" and synth.config.theme == "pro" and session.launcher.config.theme == "pro"
             assert isinstance(session.play(), int)
         finally:
             session.close()

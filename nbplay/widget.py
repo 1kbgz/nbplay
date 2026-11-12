@@ -18,7 +18,7 @@ from typing import ClassVar
 
 import transports
 from pydantic import BaseModel
-from spaday import Widget, element
+from spaday import Widget, Wire, element
 
 from . import __version__
 from .audio_files import decode_audio_file
@@ -165,25 +165,34 @@ class InstrumentWidget(Widget):
         self.session = session if session is not None else transports.Session()
         self._prepare()
         self.config_id = self.session.host(self.config)
-        # Plain wire mappings: the released Wire requires a websocket url.
-        wires = [{"model": self.config_id, "namespace": "config"}]
-        node = element(self.TAG)
-        for name, prop in self.CONFIG.items():
-            node.bind(prop, f"config.{name}", mode="two-way", event="nbplay-set")
-        self.status_id = None
-        if self.status is not None:
-            self.status_id = self.session.host(self.status, owner="client")
-            wires.append({"model": self.status_id, "namespace": "status"})
-            node.child(element("nbplay-wire", namespace="status"))
-            for name, prop in self.STATUS.items():
-                node.bind(prop, f"status.{name}", mode="two-way", event=self.STATUS_EVENTS.get(name, "nbplay-status"))
+        self.status_id = self.session.host(self.status, owner="client") if self.status is not None else None
         # Config changes come through the model (Python assignments and browser
         # edits alike); status changes come as patches the browser submits.
         self._listeners = []
         self._status_mirror = self.status.model_dump() if self.status is not None else {}
         self._unobserve_config = self.config.on_change(self._on_config_change)
         self._unhook_patches = _on_session_patch(self.session, self._on_patch)
-        super().__init__(node, session=self.session, wires=wires, packages=PACKAGE, **kwargs)
+        super().__init__(self.tree(), session=self.session, wires=self.wires(), packages=PACKAGE, **kwargs)
+
+    def tree(self, prefix=""):
+        """The instrument element with its bindings; ``prefix`` namespaces them (``"lead."``) on a shared store."""
+        node = element(self.TAG)
+        for name, prop in self.CONFIG.items():
+            node.bind(prop, f"{prefix}config.{name}", mode="two-way", event="nbplay-set")
+        if self.status is not None:
+            node.child(element("nbplay-wire", namespace=f"{prefix}status"))
+            for name, prop in self.STATUS.items():
+                node.bind(prop, f"{prefix}status.{name}", mode="two-way", event=self.STATUS_EVENTS.get(name, "nbplay-status"))
+        return node
+
+    def wires(self, prefix="", url=None):
+        """The wire specs for the hosted models: notebook mappings, or :class:`spaday.Wire` for a served page at ``url``."""
+        specs = [(self.config_id, f"{prefix}config")]
+        if self.status_id is not None:
+            specs.append((self.status_id, f"{prefix}status"))
+        if url is None:
+            return [{"model": model, "namespace": namespace} for model, namespace in specs]
+        return [Wire(url, model=model, namespace=namespace) for model, namespace in specs]
 
     def _prepare(self):
         """Hook run after the models exist and before they are hosted."""
@@ -1632,6 +1641,9 @@ class Session:
         # Ctrl/Cmd+Z in the browser bumps the transport's request counts.
         self.transport.on_change(lambda widget, name, old, new: self.undo(), names="undo_request")
         self.transport.on_change(lambda widget, name, old, new: self.redo(), names="redo_request")
+        # The transport's theme is the session theme, so a browser theme
+        # switch bound to it re-themes every widget.
+        self.transport.on_change(lambda widget, name, old, new: setattr(self, "theme", new), names="theme")
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False

@@ -35,7 +35,11 @@ export class NbplaySlider extends NbplayElement {
   declare disabled: boolean;
   declare dragging: boolean;
 
-  private internal = false;
+  // The value the pointer last set; while dragging, any other write to
+  // `value` (a host echoing model state) is put back to it. Lit applies
+  // property changes asynchronously, so a flag around the assignment would
+  // already be cleared by the time `willUpdate` sees the change.
+  private internal: number | null = null;
 
   constructor() {
     super();
@@ -51,8 +55,13 @@ export class NbplaySlider extends NbplayElement {
   }
 
   protected willUpdate(changed: Map<string, unknown>): void {
-    if (changed.has("value") && this.dragging && !this.internal) {
-      this.value = changed.get("value") as number;
+    if (
+      changed.has("value") &&
+      this.dragging &&
+      this.internal !== null &&
+      this.value !== this.internal
+    ) {
+      this.value = this.internal;
     }
   }
 
@@ -99,9 +108,8 @@ export class NbplaySlider extends NbplayElement {
 
   private onInput(e: Event): void {
     e.stopPropagation();
-    this.internal = true;
     this.value = this.readValue(e);
-    this.internal = false;
+    if (this.dragging) this.internal = this.value;
     this.emit("input", this.value);
   }
 
@@ -124,11 +132,14 @@ export class NbplaySlider extends NbplayElement {
   }
 
   private startDrag(): void {
-    if (!this.disabled) this.dragging = true;
+    if (this.disabled) return;
+    this.dragging = true;
+    this.internal = this.value;
   }
 
   private endDrag(): void {
     this.dragging = false;
+    this.internal = null;
   }
 }
 

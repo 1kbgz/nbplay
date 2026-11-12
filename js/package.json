@@ -48,6 +48,7 @@
     "start:tests": "http-server -p 3000 ",
     "test:js": "playwright test",
     "test:hosts": "playwright test --config playwright.hosts.config.js",
+    "test:app": "playwright test --config playwright.app.config.js",
     "test:rust": "cargo test -- --show-output",
     "test": "npm-run-all test:rust test:js test:hosts",
     "watch": "nodemon --watch src -e ts,css,html --exec \"pnpm build:debug\"",
