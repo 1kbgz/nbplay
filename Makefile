@@ -148,7 +148,7 @@ pyodide-example:  ## build the standalone Pyodide example into dist/app (needs t
 	test -n "$(firstword $(wildcard dist/pyodide/nbplay-*.whl))"
 	rm -rf dist/app dist/pyodide-deps
 	mkdir -p dist/app dist/pyodide-deps
-	python -m pip download --no-deps --only-binary=:all: --platform pyemscripten_2026_0_wasm32 --python-version 314 --implementation cp --abi cp314 --dest dist/pyodide-deps "spaday==0.14.0" "transports==0.12.2"
+	python -m pip download --no-deps --only-binary=:all: --platform pyemscripten_2026_0_wasm32 --python-version 314 --implementation cp --abi cp314 --dest dist/pyodide-deps "spaday==0.14.1" "transports==0.12.2"
 	python -m pip download --no-deps --only-binary=:all: --dest dist/pyodide-deps "spaday-regular-layout==0.3.3"
 	python js/examples/build_pyodide_example.py dist/app "$(firstword $(wildcard dist/pyodide/nbplay-*.whl))" dist/pyodide-deps
 	cp js/examples/pyodide.html dist/app/index.html

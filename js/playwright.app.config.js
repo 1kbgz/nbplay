@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 // The web app: `python -m nbplay.app` serves the demo session over one
 // WebSocket per instrument with the panels in a regular-layout. The probe
 // routes let the test read the kernel's models and issue commands.
-// Run with `pnpm run test:app`.
+// Run with `pnpm run test:app` (also part of `pnpm test`).
 export default defineConfig({
   testDir: "tests",
   testMatch: ["app.spec.js"],
