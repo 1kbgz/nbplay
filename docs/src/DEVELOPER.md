@@ -910,6 +910,29 @@ Tests: `nbplay/tests/test_widgets.py` drives a widget through a mocked comm;
 in a Python subprocess (`nbplay/tests/spaday_bridge.py`), and
 `NBPLAY_TEST_PYTHON` names the Python with nbplay installed.
 
+### Web app
+
+`nbplay/app.py` serves a `Session` outside Jupyter. `build(session)` makes a
+Starlette app from the same widget objects a notebook displays: each widget's
+transports session gets a `WebSocketRoute` at `/ws/<panel>` with its own
+`transports.Server` and `autosync` task, the page is a `spaday-regular-layout`
+whose frames hold `widget.tree("<panel>.")`, and `widget.wires("<panel>.", url=...)` gives the `Wire` specs that mirror the config and status models under
+that panel's namespace in the page's one store. `panel_widgets()` names the
+panels (`transport`, `launcher`, `timeline`, `mixer`, then `<track>-sequencer`
+and `<track>-synth` or `<track>-sampler`) and `default_layout()` is the split
+tree: the transport across the top, launcher, timeline and mixer in the
+middle, the instruments in a tab strip below. A top bar holds the title and a
+theme select bound two-way to the transport's `theme`; the `Session` mirrors
+that field to every widget, and the page binds it to `data-nbplay-theme` on the
+document root, so one select re-themes the chrome and every instrument.
+`APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
+tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
+widget does, so `nbplay-wire` finds the client for its panel and kernel commands
+(`session.play()`) reach the element unchanged. `python -m nbplay.app` serves
+`demo_session()` on port 8020; `--probes` adds the JSON routes the browser test
+drives (`/state`, `/command/<panel>/<method>`, `/set/<panel>/<field>`). The
+`app` extra installs `spaday-regular-layout`, `starlette` and `uvicorn`.
+
 ## Styling system
 
 Implementation lives in `js/src/css/components/`: `tokens.css` defines the
@@ -1007,6 +1030,14 @@ Run:
 cd js
 pnpm test
 ```
+
+### Web app test
+
+`pnpm run test:app` boots `python -m nbplay.app --probes` (config:
+`js/playwright.app.config.js`) and checks that every instrument renders in its
+panel, a kernel assignment and a browser edit meet in the transport's model,
+play from the browser reaches the kernel's status on every panel, and kernel
+commands stop and start the clock through `nbplay-wire`.
 
 ### Host compatibility tests
 

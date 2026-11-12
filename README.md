@@ -84,5 +84,10 @@ Sequencers, launcher slots, and MIDI clips play through the track's own instrume
 The example notebooks in `examples/` walk through each widget and end with a
 full DAW playground and the beats view.
 
+The same session runs outside Jupyter as a web app with the instruments in
+resizable panels: `pip install "nbplay[app]"`, then `python -m nbplay.app` and
+open http://127.0.0.1:8020. `nbplay.app.build(session)` serves your own session
+with one WebSocket per instrument.
+
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
