@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -241,7 +236,7 @@
 
 <span class="n">record_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">112.0</span><span class="p">)</span>
 <span class="n">midi_keyboard</span><span class="o">.</span><span class="n">connect_sequencer</span><span class="p">(</span><span class="n">record_seq</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">record_seq</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">record_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="p">)</span>
 <span class="n">record_seq</span>
 </pre></div>
 </div>
@@ -261,9 +256,9 @@
 <span class="n">sampler_seq</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">sampler_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'MIDI Sampler'</span><span class="p">,</span> <span class="n">sampler_seq</span><span class="p">,</span> <span class="n">sampler</span><span class="p">)</span>
 
-<span class="n">midi_keyboard</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">session_id</span>
+<span class="n">midi_keyboard</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_id</span>
 <span class="n">midi_keyboard</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">midi_keyboard</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">midi_keyboard</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
 <span class="n">sampler</span>
 </pre></div>
 </div>
@@ -281,10 +276,10 @@
 <span class="n">split_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'Lower'</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">lower_sampler</span><span class="p">)</span>
 <span class="n">split_session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'Upper'</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">upper_sampler</span><span class="p">)</span>
 
-<span class="n">midi_split</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">split_session</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
+<span class="n">midi_split</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">split_session</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
 <span class="n">midi_split</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">lower_sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">)</span>
 <span class="n">midi_split</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">upper_sampler</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s1">'upper'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">midi_split</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">midi_split</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sampler_routing</span><span class="p">)</span>
 <span class="n">midi_split</span>
 </pre></div>
 </div>
@@ -293,7 +288,7 @@
 </section>
 <section id="map-knobs-with-midi-learn">
 <h2>Map Knobs with MIDI Learn<a class="headerlink" href="#map-knobs-with-midi-learn" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> routes the control changes a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code> receives to widget traits. Call <code class="docutils literal notranslate"><span class="pre">learn()</span></code> and turn a knob to bind it, or <code class="docutils literal notranslate"><span class="pre">map()</span></code> a controller number directly. Values scale into the <code class="docutils literal notranslate"><span class="pre">low</span></code>/<code class="docutils literal notranslate"><span class="pre">high</span></code> range you give.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> routes the control changes a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code> receives to widget config fields. Call <code class="docutils literal notranslate"><span class="pre">learn()</span></code> and turn a knob to bind it, or <code class="docutils literal notranslate"><span class="pre">map()</span></code> a controller number directly. Values scale into the <code class="docutils literal notranslate"><span class="pre">low</span></code>/<code class="docutils literal notranslate"><span class="pre">high</span></code> range you give.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">MidiLearn</span><span class="p">,</span> <span class="n">SynthWidget</span>
@@ -327,7 +322,7 @@
 </section>
 <section id="midi-clock">
 <h2>MIDI Clock<a class="headerlink" href="#midi-clock" title="Link to this heading">¶</a></h2>
-<p>Inside a session the output widget can lead external gear with MIDI clock, and the MIDI keyboard can follow a device’s clock so the whole session plays, stops, and changes tempo with it. Tick either checkbox in the widgets, or set the traits from Python.</p>
+<p>Inside a session the output widget can lead external gear with MIDI clock, and the MIDI keyboard can follow a device’s clock so the whole session plays, stops, and changes tempo with it. Tick either checkbox in the widgets, or set the config fields from Python.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>

@@ -1,7 +1,7 @@
-test_views
-==========
+test_widgets
+============
 
-.. py:module:: test_views
+.. py:module:: test_widgets
 
 
 Classes
@@ -9,19 +9,19 @@ Classes
 
 .. autoapisummary::
 
-   test_views.TestTransportModels
-   test_views.TestSynthView
-   test_views.TestMixerView
-   test_views.TestKeysViews
-   test_views.TestIoViews
-   test_views.TestSequencerAndSamplerViews
-   test_views.TestArrangementViews
-   test_views.TestObservers
-   test_views.TestSession
-   test_views.TestSessionArrangement
-   test_views.TestSessionPersistence
-   test_views.TestHistoryAndMidiLearnOnViews
-   test_views.TestTransportView
+   test_widgets.TestTransportModels
+   test_widgets.TestSynthWidget
+   test_widgets.TestMixerWidget
+   test_widgets.TestKeysWidgets
+   test_widgets.TestIoWidgets
+   test_widgets.TestSequencerAndSamplerWidgets
+   test_widgets.TestArrangementWidgets
+   test_widgets.TestObservers
+   test_widgets.TestSession
+   test_widgets.TestSessionArrangement
+   test_widgets.TestSessionPersistence
+   test_widgets.TestHistoryAndMidiLearn
+   test_widgets.TestTransportWidget
 
 
 Functions
@@ -29,10 +29,10 @@ Functions
 
 .. autoapisummary::
 
-   test_views.messages
-   test_views.ready
-   test_views.browser_writes
-   test_views.arranged_session
+   test_widgets.messages
+   test_widgets.ready
+   test_widgets.browser_writes
+   test_widgets.arranged_session
 
 
 Module Contents
@@ -40,7 +40,7 @@ Module Contents
 
 .. py:function:: messages(sent)
 
-.. py:function:: ready(view, name='owner')
+.. py:function:: ready(widget, name='owner')
 
 .. py:class:: TestTransportModels
 
@@ -50,7 +50,7 @@ Module Contents
    .. py:method:: test_status_is_browser_owned()
 
 
-.. py:class:: TestSynthView
+.. py:class:: TestSynthWidget
 
    .. py:method:: test_waveform_follows_the_oscillator_parameters()
 
@@ -58,7 +58,7 @@ Module Contents
    .. py:method:: test_waveform_bytes_travel_as_buffers()
 
 
-.. py:class:: TestMixerView
+.. py:class:: TestMixerWidget
 
    .. py:method:: test_config_normalizes_like_the_widget()
 
@@ -69,7 +69,7 @@ Module Contents
    .. py:method:: test_strip_send_and_effect_setters()
 
 
-.. py:class:: TestKeysViews
+.. py:class:: TestKeysWidgets
 
    .. py:method:: test_pads_config_fits_the_grid()
 
@@ -83,12 +83,12 @@ Module Contents
    .. py:method:: test_pads_grid_helpers_and_sampler_slices()
 
 
-.. py:class:: TestIoViews
+.. py:class:: TestIoWidgets
 
    .. py:method:: test_settings_and_midi_output_views()
 
 
-.. py:class:: TestSequencerAndSamplerViews
+.. py:class:: TestSequencerAndSamplerWidgets
 
    .. py:method:: test_sequencer_config_fits_voices()
 
@@ -108,7 +108,7 @@ Module Contents
    .. py:method:: test_sampler_zones_and_capture(tmp_path)
 
 
-.. py:class:: TestArrangementViews
+.. py:class:: TestArrangementWidgets
 
    .. py:method:: test_launcher_config_and_view()
 
@@ -122,9 +122,9 @@ Module Contents
    .. py:method:: test_timeline_lane_and_clip_edits(tmp_path)
 
 
-.. py:function:: browser_writes(view, **values)
+.. py:function:: browser_writes(widget, **values)
 
-   A browser write to the view's status, as the server applies it after the ownership check.
+   A browser write to the widget's status, as the server applies it after the ownership check.
 
 
 .. py:class:: TestObservers
@@ -140,7 +140,7 @@ Module Contents
 
 .. py:class:: TestSession
 
-   .. py:method:: test_views_share_the_session_and_follow_the_session_settings()
+   .. py:method:: test_widgets_share_the_session_and_follow_the_session_settings()
 
 
    .. py:method:: test_session_undo_covers_views_but_not_track_structure()
@@ -173,10 +173,7 @@ Module Contents
    .. py:method:: test_save_and_load_round_trip(tmp_path)
 
 
-   .. py:method:: test_archives_move_between_the_widget_and_view_sessions(tmp_path)
-
-
-.. py:class:: TestHistoryAndMidiLearnOnViews
+.. py:class:: TestHistoryAndMidiLearn
 
    .. py:method:: test_history_tracks_config_fields_and_skips_transient_ones()
 
@@ -184,7 +181,22 @@ Module Contents
    .. py:method:: test_midi_learn_maps_controllers_to_view_fields()
 
 
-.. py:class:: TestTransportView
+   .. py:method:: test_history_groups_transactions_and_skips_paused_changes()
+
+
+   .. py:method:: test_history_rapid_changes_share_a_step_and_detach_drops_entries()
+
+
+   .. py:method:: test_history_binds_ipython_cell_boundaries()
+
+
+   .. py:method:: test_sampler_load_is_one_undo_step()
+
+
+   .. py:method:: test_midi_learn_scales_ints_and_bools_and_filters_channels()
+
+
+.. py:class:: TestTransportWidget
 
    .. py:method:: test_hosts_config_and_status_and_binds_the_element()
 

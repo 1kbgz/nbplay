@@ -5,11 +5,11 @@ spaday_bridge
 
 .. autoapi-nested-parse::
 
-   Real view comm endpoints for the browser test, driven by JSON lines on stdin.
+   Real widget comm endpoints for the browser test, driven by JSON lines on stdin.
 
-   ``python spaday_bridge.py <view> [codec]`` serves one instrument view, where
-   ``view`` names an entry of ``VIEWS``; ``python spaday_bridge.py session``
-   serves a :class:`nbplay.views.Session` with one sequencer-and-synth track,
+   ``python spaday_bridge.py <widget> [codec]`` serves one instrument widget, where
+   ``widget`` names an entry of ``VIEWS``; ``python spaday_bridge.py session``
+   serves a :class:`nbplay.nbplay.Session` with one sequencer-and-synth track,
    exposing every widget by name. Requests carry an optional ``widget`` name;
    without one they address the only widget, or the session itself for
    ``command``.
@@ -52,9 +52,9 @@ Module Contents
    Replace bytes with their length, recursively, so the state fits a JSON line.
 
 
-.. py:function:: _describe(view)
+.. py:function:: _describe(widget)
 
-.. py:function:: _state(view)
+.. py:function:: _state(widget)
 
 .. py:data:: name
 

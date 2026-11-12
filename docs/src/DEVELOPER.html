@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -588,7 +583,7 @@ generated.</p>
 <section id="shared-python-helpers">
 <h3>Shared Python helpers<a class="headerlink" href="#shared-python-helpers" title="Link to this heading">¶</a></h3>
 <p>These live in <code class="docutils literal notranslate"><span class="pre">nbplay/descriptors.py</span></code>, which imports neither traitlets nor pydantic, so
-<code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/views.py</span></code> use them without importing the widget module.</p>
+<code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> share them.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">_default_step()</span></code> and <code class="docutils literal notranslate"><span class="pre">_default_steps(length)</span></code> build the sequencer’s default
 inactive step dictionaries.</p></li>
@@ -1306,7 +1301,7 @@ future external controller layouts.</p>
 </section>
 <section id="transports-views-preview">
 <h2>Transports views (preview)<a class="headerlink" href="#transports-views-preview" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">nbplay/views.py</span></code> is the parallel layer that will replace the traitlets widgets: the same elements
+<p><code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> holds the widgets: the elements
 on <a class="reference external" href="https://github.com/1kbgz/transports">transports</a> models rendered by
 <a class="reference external" href="https://github.com/1kbgz/spaday">spaday</a>. A view hosts two pydantic models from <code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code>
 in a <code class="docutils literal notranslate"><span class="pre">transports.Session</span></code>: a config model the kernel owns and validates (<code class="docutils literal notranslate"><span class="pre">TransportConfig</span></code>,
@@ -1357,7 +1352,7 @@ notifies its own listeners), while browser status writes arrive as the patches t
 <code class="docutils literal notranslate"><span class="pre">Session.on_patch</span></code>, which the views share through one dispatcher per transports Session. On top of that,
 <code class="docutils literal notranslate"><span class="pre">TimelineView.export_all_clips</span></code> collects clip bytes into <code class="docutils literal notranslate"><span class="pre">clip_audio</span></code> as the browser exports them, and
 <code class="docutils literal notranslate"><span class="pre">LauncherView.bind_slot_editor</span></code> loads the selected slot into a <code class="docutils literal notranslate"><span class="pre">SequencerView</span></code> and writes its edits back.</p>
-<p><code class="docutils literal notranslate"><span class="pre">nbplay.views.Session</span></code> creates transport, mixer, timeline and launcher views with one browser
+<p><code class="docutils literal notranslate"><span class="pre">nbplay.Session</span></code> creates transport, mixer, timeline and launcher widgets with one browser
 <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, so the elements share a clock and an audio bus, and <code class="docutils literal notranslate"><span class="pre">add_track</span></code> adds a mixer channel, a
 timeline lane and a launcher row while routing the track’s sequencer and sound source. Each view
 hosts its models in its own transports <code class="docutils literal notranslate"><span class="pre">Session</span></code>: transports grants a connection ownership of every
@@ -1370,7 +1365,7 @@ pattern clips (one undo step each, with the clip events rebuilt in place on upda
 <code class="docutils literal notranslate"><span class="pre">import_midi</span></code> match the widget session. <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">to_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">from_dict</span></code> write and read the
 <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive described below with the format constants from <code class="docutils literal notranslate"><span class="pre">descriptors.py</span></code>; the sound source
 type names stay <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> in <code class="docutils literal notranslate"><span class="pre">session.json</span></code>, so a widget session and a views
-session open each other’s files. <code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> is the session walkthrough on the views. The spaday tree is
+session open each other’s files. The spaday tree is
 the instrument element with every config field bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> and every status field
 bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> (or the event a view names in <code class="docutils literal notranslate"><span class="pre">STATUS_EVENTS</span></code>: the transport’s
 <code class="docutils literal notranslate"><span class="pre">undo_request</span></code> and <code class="docutils literal notranslate"><span class="pre">redo_request</span></code> counts are written back on <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code>), so the element’s
@@ -1382,7 +1377,7 @@ field’s camelCase property and reports it as <code class="docutils literal not
 acknowledges. The build writes that bundle and the
 stylesheet to <code class="docutils literal notranslate"><span class="pre">nbplay/static/spaday/</span></code>, which <code class="docutils literal notranslate"><span class="pre">nbplay.components.package</span></code> publishes as the spaday
 component package <code class="docutils literal notranslate"><span class="pre">nbplay</span></code> (also an installed entry point).</p>
-<p>Tests: <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_views.py</span></code> drives a view through a mocked comm; <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code>
+<p>Tests: <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_widgets.py</span></code> drives a widget through a mocked comm; <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code>
 renders the spaday widget bundle against a real <code class="docutils literal notranslate"><span class="pre">TransportView</span></code> in a Python subprocess
 (<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>); <code class="docutils literal notranslate"><span class="pre">NBPLAY_TEST_PYTHON</span></code> names the Python with nbplay installed.</p>
 </section>

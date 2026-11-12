@@ -542,11 +542,6 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -560,8 +555,8 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -602,14 +597,15 @@ window.runMermaid = runMermaid;</script>
 </nav>
       <div class="fd-prose">
   <h1>Source code for nbplay.history</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Undo and redo for widget and view state.</span>
+<span></span><span class="sd">"""Undo and redo for widget state.</span>
 
-<span class="sd">``History`` watches the synced traits of a set of widgets, or the config</span>
-<span class="sd">fields of transports views, and records every change as an undo step. Changes that land within a short window of each</span>
-<span class="sd">other (a fader drag, a method that writes several traits) share one step,</span>
+<span class="sd">``History`` watches the config fields of a set of widgets and records every</span>
+<span class="sd">change as an undo step. Changes that land within a short window of each</span>
+<span class="sd">other (a fader drag, a method that writes several fields) share one step,</span>
 <span class="sd">``transaction()`` groups anything explicitly, and a notebook cell boundary</span>
-<span class="sd">always ends a step. Transient traits such as play state, playhead position,</span>
-<span class="sd">meters, and request nonces are ignored.</span>
+<span class="sd">always ends a step. Browser-owned status (play state, playhead position,</span>
+<span class="sd">meters, request counts) never reaches the config model, and the transient</span>
+<span class="sd">config fields listed below are ignored.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -618,7 +614,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="c1"># Synced traits that describe the moment rather than the document.</span>
+<span class="c1"># Config fields that describe the moment rather than the document.</span>
 <span class="n">TRANSIENT_TRAITS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
     <span class="p">{</span>
         <span class="s2">"session_id"</span><span class="p">,</span>
@@ -662,7 +658,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="History">
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">History</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Undo/redo stack over the synced traits of attached widgets.</span>
+<span class="w">    </span><span class="sd">"""Undo/redo stack over the config fields of attached widgets.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        limit: Maximum number of undo steps kept.</span>
@@ -684,45 +680,14 @@ window.runMermaid = runMermaid;</script>
 
     <span class="c1"># Attachment</span>
 
-<div class="viewcode-block" id="History.tracked_traits">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.tracked_traits">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">widget</span><span class="o">.</span><span class="n">trait_names</span><span class="p">()</span> <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">trait_metadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">"sync"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TRANSIENT_TRAITS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
-        <span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="History._is_view">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._is_view">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_is_view</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"on_change"</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="History._target">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._target">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_target</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""The object whose attributes a step sets: a widget, or a view's config model."""</span>
-        <span class="k">return</span> <span class="n">widget</span><span class="o">.</span><span class="n">config</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_is_view</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span> <span class="k">else</span> <span class="n">widget</span></div>
-
-
 <div class="viewcode-block" id="History.attach">
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.attach">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Start recording changes to ``widget``'s synced traits, or to a view's config fields."""</span>
-        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Start recording changes to ``widget``'s config fields."""</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">"on_change"</span><span class="p">):</span>
             <span class="k">return</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_view</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_removers</span><span class="p">[</span><span class="n">widget</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_model_change</span><span class="p">,</span> <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s2">"trait_names"</span><span class="p">):</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
-                <span class="k">return</span>
-            <span class="n">widget</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_removers</span><span class="p">[</span><span class="n">widget</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_model_change</span><span class="p">,</span> <span class="n">config</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span></div>
 
 
@@ -730,30 +695,20 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.detach">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_view</span><span class="p">(</span><span class="n">widget</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_removers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">widget</span><span class="p">)()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">widget</span><span class="o">.</span><span class="n">unobserve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_traits</span><span class="p">(</span><span class="n">widget</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_removers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">widget</span><span class="p">)()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span> <span class="o">=</span> <span class="p">[</span><span class="n">group</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redo</span><span class="p">)</span> <span class="k">if</span> <span class="n">group</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="History._without">
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._without">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">widget</span><span class="p">]</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_without</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">config</span><span class="p">]</span></div>
 
 
     <span class="c1"># Recording</span>
-
-<div class="viewcode-block" id="History._on_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._on_change">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"owner"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"old"</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">])</span></div>
-
 
 <div class="viewcode-block" id="History._on_model_change">
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History._on_model_change">[docs]</a>
@@ -886,8 +841,8 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">reverse</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">group</span><span class="p">:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">new</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">group</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="n">new</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_applying</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mark</span><span class="p">()</span></div>
@@ -903,8 +858,8 @@ window.runMermaid = runMermaid;</script>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Undo steps, oldest first, as lists of ``(widget, trait)`` or ``(config, field)`` pairs."""</span>
-        <span class="k">return</span> <span class="p">[[(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">"""Undo steps, oldest first, as lists of ``(config, field)`` pairs."""</span>
+        <span class="k">return</span> <span class="p">[[(</span><span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">config</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undo</span><span class="p">]</span>
 
 <div class="viewcode-block" id="History.__len__">
 <a class="viewcode-back" href="../../autoapi/nbplay/index.html#nbplay.history.History.__len__">[docs]</a>

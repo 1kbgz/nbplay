@@ -138,11 +138,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -156,8 +151,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -235,15 +230,6 @@
     <a href="#nbplay.history.History._last_time">History._last_time</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History.tracked_traits">History.tracked_traits()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._is_view">History._is_view()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._target">History._target()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History.attach">History.attach()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -251,9 +237,6 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History._without">History._without()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._on_change">History._on_change()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History._on_model_change">History._on_model_change()</a>
@@ -322,13 +305,14 @@
       <div class="fd-prose">
   <section id="module-nbplay.history">
 <span id="nbplay-history"></span><h1>nbplay.history<a class="headerlink" href="#module-nbplay.history" title="Link to this heading">¶</a></h1>
-<p>Undo and redo for widget and view state.</p>
-<p><code class="docutils literal notranslate"><span class="pre">History</span></code> watches the synced traits of a set of widgets, or the config
-fields of transports views, and records every change as an undo step. Changes that land within a short window of each
-other (a fader drag, a method that writes several traits) share one step,
+<p>Undo and redo for widget state.</p>
+<p><code class="docutils literal notranslate"><span class="pre">History</span></code> watches the config fields of a set of widgets and records every
+change as an undo step. Changes that land within a short window of each
+other (a fader drag, a method that writes several fields) share one step,
 <code class="docutils literal notranslate"><span class="pre">transaction()</span></code> groups anything explicitly, and a notebook cell boundary
-always ends a step. Transient traits such as play state, playhead position,
-meters, and request nonces are ignored.</p>
+always ends a step. Browser-owned status (play state, playhead position,
+meters, request counts) never reaches the config model, and the transient
+config fields listed below are ignored.</p>
 <section id="attributes">
 <h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
 <table class="autosummary longtable docutils align-default">
@@ -344,7 +328,7 @@ meters, and request nonces are ignored.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.history.History" title="nbplay.history.History"><code class="xref py py-obj docutils literal notranslate"><span class="pre">History</span></code></a></p></td>
-<td><p>Undo/redo stack over the synced traits of attached widgets.</p></td>
+<td><p>Undo/redo stack over the config fields of attached widgets.</p></td>
 </tr>
 </tbody>
 </table>
@@ -359,7 +343,7 @@ meters, and request nonces are ignored.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.history.History">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.history.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History" title="Link to this definition">¶</a></dt>
-<dd><p>Undo/redo stack over the synced traits of attached widgets.</p>
+<dd><p>Undo/redo stack over the config fields of attached widgets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -420,25 +404,9 @@ same step.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="nbplay.history.History.tracked_traits">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tracked_traits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History.tracked_traits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History.tracked_traits" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nbplay.history.History._is_view">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_is_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History._is_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History._is_view" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nbplay.history.History._target">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History._target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History._target" title="Link to this definition">¶</a></dt>
-<dd><p>The object whose attributes a step sets: a widget, or a view’s config model.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.history.History.attach">
 <span class="sig-name descname"><span class="pre">attach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History.attach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History.attach" title="Link to this definition">¶</a></dt>
-<dd><p>Start recording changes to <code class="docutils literal notranslate"><span class="pre">widget</span></code>’s synced traits, or to a view’s config fields.</p>
+<dd><p>Start recording changes to <code class="docutils literal notranslate"><span class="pre">widget</span></code>’s config fields.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -448,12 +416,7 @@ same step.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.history.History._without">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_without</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History._without"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History._without" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nbplay.history.History._on_change">
-<span class="sig-name descname"><span class="pre">_on_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History._on_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History._on_change" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_without</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/history.html#History._without"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.history.History._without" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -532,7 +495,7 @@ shell by default). Returns True when a shell was found.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="nbplay.history.History.steps">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">steps</span></span><a class="headerlink" href="#nbplay.history.History.steps" title="Link to this definition">¶</a></dt>
-<dd><p>Undo steps, oldest first, as lists of <code class="docutils literal notranslate"><span class="pre">(widget,</span> <span class="pre">trait)</span></code> or <code class="docutils literal notranslate"><span class="pre">(config,</span> <span class="pre">field)</span></code> pairs.</p>
+<dd><p>Undo steps, oldest first, as lists of <code class="docutils literal notranslate"><span class="pre">(config,</span> <span class="pre">field)</span></code> pairs.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -624,15 +587,6 @@ shell by default). Returns True when a shell was found.</p>
     <a href="#nbplay.history.History._last_time">History._last_time</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History.tracked_traits">History.tracked_traits()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._is_view">History._is_view()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._target">History._target()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History.attach">History.attach()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -640,9 +594,6 @@ shell by default). Returns True when a shell was found.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History._without">History._without()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.history.History._on_change">History._on_change()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.history.History._on_model_change">History._on_model_change()</a>

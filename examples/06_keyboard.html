@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -278,9 +273,9 @@ your QWERTY keys to play notes.</p>
 <p>You can adjust octaves and velocity programmatically too:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kb</span><span class="o">.</span><span class="n">upper_octave</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="n">kb</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">80</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Upper octave: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">upper_octave</span><span class="si">}</span><span class="s2">, Lower octave: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">lower_octave</span><span class="si">}</span><span class="s2">, Velocity: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">velocity</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">upper_octave</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">kb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Upper octave: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">upper_octave</span><span class="si">}</span><span class="s2">, Lower octave: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lower_octave</span><span class="si">}</span><span class="s2">, Velocity: </span><span class="si">{</span><span class="n">kb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">velocity</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -304,7 +299,7 @@ typing a note name, press a key on the keyboard and the note is captured.</p>
 <span class="c1"># Connect keyboard</span>
 <span class="n">kb2</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">()</span>
 <span class="n">kb2</span><span class="o">.</span><span class="n">connect_sequencer</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sequencer keyboard_connected: </span><span class="si">{</span><span class="n">seq</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sequencer keyboard_connected: </span><span class="si">{</span><span class="n">seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -359,8 +354,8 @@ when you call <code class="docutils literal notranslate"><span class="pre">add_t
 <section id="one-sampler-for-the-whole-keyboard">
 <h3>One sampler for the whole keyboard<a class="headerlink" href="#one-sampler-for-the-whole-keyboard" title="Link to this heading">¶</a></h3>
 <p>Create a <code class="docutils literal notranslate"><span class="pre">Session</span></code> with a sampler track. <code class="docutils literal notranslate"><span class="pre">add_track</span></code> sets the sampler’s
-<code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, so the keyboard can find it on the session
-bus. Then <code class="docutils literal notranslate"><span class="pre">connect_sampler</span></code> tells the keyboard to route all keys through that
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, so a keyboard created with the same
+<code class="docutils literal notranslate"><span class="pre">session_id</span></code> can find it on the session bus. Then <code class="docutils literal notranslate"><span class="pre">connect_sampler</span></code> tells the keyboard to route all keys through that
 sampler.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -377,13 +372,12 @@ sampler.</p>
 <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Sampler"</span><span class="p">,</span> <span class="n">seq3</span><span class="p">,</span> <span class="n">samp</span><span class="p">)</span>
 
 <span class="c1"># Connect keyboard to the sampler</span>
-<span class="n">kb3</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">()</span>
-<span class="n">kb3</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">_session_id</span>
+<span class="n">kb3</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
 <span class="n">kb3</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">samp</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s2">"all"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler session_id: </span><span class="si">{</span><span class="n">samp</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler channel_index: </span><span class="si">{</span><span class="n">samp</span><span class="o">.</span><span class="n">channel_index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Keyboard routing: </span><span class="si">{</span><span class="n">kb3</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler session_id: </span><span class="si">{</span><span class="n">samp</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler channel_index: </span><span class="si">{</span><span class="n">samp</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Keyboard routing: </span><span class="si">{</span><span class="n">kb3</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">kb3</span><span class="p">,</span> <span class="n">samp</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span><span class="p">)</span>
 </pre></div>
@@ -410,12 +404,11 @@ leaving the other fast.</p>
 <span class="n">session2</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Hi"</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">samp_hi</span><span class="p">)</span>
 <span class="n">session2</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Lo"</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span> <span class="n">samp_lo</span><span class="p">)</span>
 
-<span class="n">kb4</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">()</span>
-<span class="n">kb4</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">session2</span><span class="o">.</span><span class="n">_session_id</span>
+<span class="n">kb4</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session2</span><span class="o">.</span><span class="n">session_id</span><span class="p">)</span>
 <span class="n">kb4</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">samp_hi</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s2">"upper"</span><span class="p">)</span>
 <span class="n">kb4</span><span class="o">.</span><span class="n">connect_sampler</span><span class="p">(</span><span class="n">samp_lo</span><span class="p">,</span> <span class="n">zone</span><span class="o">=</span><span class="s2">"lower"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler routing: </span><span class="si">{</span><span class="n">kb4</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Sampler routing: </span><span class="si">{</span><span class="n">kb4</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">kb4</span><span class="p">,</span> <span class="n">samp_hi</span><span class="p">,</span> <span class="n">samp_lo</span><span class="p">,</span> <span class="n">session2</span><span class="o">.</span><span class="n">mixer</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -427,8 +420,7 @@ leaving the other fast.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kb4</span><span class="o">.</span><span class="n">disconnect_sampler</span><span class="p">(</span><span class="n">samp_hi</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Routing after disconnect: </span><span class="si">{</span><span class="n">kb4</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hi sampler keyboard_connected: </span><span class="si">{</span><span class="n">samp_hi</span><span class="o">.</span><span class="n">keyboard_connected</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Routing after disconnect: </span><span class="si">{</span><span class="n">kb4</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sampler_routing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

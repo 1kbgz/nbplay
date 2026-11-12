@@ -5,9 +5,9 @@ nbplay.descriptors
 
 .. autoapi-nested-parse::
 
-   Validated descriptors and normalizers shared by the widgets and the views.
+   Validated descriptors and normalizers shared by the widgets and their models.
 
-   The traitlets widgets in :mod:`nbplay.widget` and the pydantic models in
+   The widgets in :mod:`nbplay.widget` and the pydantic models in
    :mod:`nbplay.models` accept the same dict shapes for effects, mixer channels,
    timeline tracks and clips, pad actions, sampler zones and slices, launcher
    slots and keyboard routes. The descriptor classes (:class:`EffectPlugin`,

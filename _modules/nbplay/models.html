@@ -542,11 +542,6 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -560,8 +555,8 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -602,7 +597,7 @@ window.runMermaid = runMermaid;</script>
 </nav>
       <div class="fd-prose">
   <h1>Source code for nbplay.models</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Pydantic models behind the transports-backed views (:mod:`nbplay.views`).</span>
+<span></span><span class="sd">"""Pydantic models behind the widgets in :mod:`nbplay.widget`.</span>
 
 <span class="sd">Each widget splits into a config model the kernel owns and validates, and a</span>
 <span class="sd">status model the browser owns (hosted with ``owner="client"``), matching the</span>
@@ -805,7 +800,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">MixerConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The mixer console the kernel owns: channels, returns, master.</span>
 
-<span class="sd">    Channels, returns and effects are the same dicts the traitlets widget</span>
+<span class="sd">    Channels, returns and effects are the same dicts the mixer widget</span>
 <span class="sd">    syncs, normalized and clamped by the same helpers; every channel carries</span>
 <span class="sd">    one send level per return. The mixer has no browser-owned status.</span>
 <span class="sd">    """</span>
@@ -862,7 +857,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    ``pad_notes``, ``pad_velocities`` and ``pad_actions`` always cover the</span>
 <span class="sd">    ``rows`` by ``cols`` grid: the after-validator extends or trims them</span>
-<span class="sd">    the way the traitlets widget's observers do.</span>
+<span class="sd">    so the grid is always fully described.</span>
 <span class="sd">    """</span>
 
     <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>

@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -236,7 +231,7 @@
 <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"delay"</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span> <span class="n">feedback</span><span class="o">=</span><span class="mf">0.22</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">0.18</span><span class="p">))</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">2.4</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">0.16</span><span class="p">))</span>
 
-<span class="n">mixer</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span>
+<span class="n">mixer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">master_gain</span> <span class="o">=</span> <span class="mf">0.84</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"limiter"</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">release</span><span class="o">=</span><span class="mf">0.05</span><span class="p">))</span>
 
 <span class="n">mixer</span>
@@ -244,7 +239,7 @@
 </div>
 </div>
 </div>
-<p>Try this after the mixer renders: change faders, toggle mute/solo, add effects from the widget controls, or run another cell that mutates <code class="docutils literal notranslate"><span class="pre">mixer.channels</span></code> and <code class="docutils literal notranslate"><span class="pre">mixer.master_effects</span></code>.</p>
+<p>Try this after the mixer renders: change faders, toggle mute/solo, add effects from the widget controls, or run another cell that edits <code class="docutils literal notranslate"><span class="pre">mixer.config.channels</span></code> and <code class="docutils literal notranslate"><span class="pre">mixer.config.master_effects</span></code>.</p>
 <section id="send-and-return-buses">
 <h2>Send and Return Buses<a class="headerlink" href="#send-and-return-buses" title="Link to this heading">¶</a></h2>
 <p>A return bus is a shared effect chain with its own fader that feeds the master. Every channel gets a post-fader send level for it, so one reverb can serve several channels at different amounts. In the widget, <strong>+ Return</strong> adds a bus, the small sliders on each channel strip set the sends, and the return strip edits its effects like any other strip.</p>
@@ -253,7 +248,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">verb</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_return</span><span class="p">(</span><span class="s2">"Verb"</span><span class="p">,</span> <span class="n">effects</span><span class="o">=</span><span class="p">[</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">wet</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)],</span> <span class="n">gain</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">set_send</span><span class="p">(</span><span class="n">lead</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">set_send</span><span class="p">(</span><span class="n">drums</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">mixer</span><span class="o">.</span><span class="n">returns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"name"</span><span class="p">],</span> <span class="p">[</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">]</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">mixer</span><span class="o">.</span><span class="n">channels</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mixer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">returns</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"name"</span><span class="p">],</span> <span class="p">[</span><span class="n">channel</span><span class="p">[</span><span class="s2">"sends"</span><span class="p">]</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">mixer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channels</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>

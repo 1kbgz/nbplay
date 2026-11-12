@@ -27,7 +27,7 @@
     <script src="../../_static/js/custom.js?v=956e5d78"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="prev" title="test_views" href="../test_views/index.html" />
+    <link rel="prev" title="test_widgets" href="../test_widgets/index.html" />
     <script>
       (function () {
         var root = document.documentElement;
@@ -137,11 +137,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -155,8 +150,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -251,10 +246,10 @@
       <div class="fd-prose">
   <section id="module-spaday_bridge">
 <span id="spaday-bridge"></span><h1>spaday_bridge<a class="headerlink" href="#module-spaday_bridge" title="Link to this heading">¶</a></h1>
-<p>Real view comm endpoints for the browser test, driven by JSON lines on stdin.</p>
-<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">spaday_bridge.py</span> <span class="pre">&lt;view&gt;</span> <span class="pre">[codec]</span></code> serves one instrument view, where
-<code class="docutils literal notranslate"><span class="pre">view</span></code> names an entry of <code class="docutils literal notranslate"><span class="pre">VIEWS</span></code>; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">spaday_bridge.py</span> <span class="pre">session</span></code>
-serves a <a class="reference internal" href="../nbplay/views/index.html#nbplay.views.Session" title="nbplay.views.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.views.Session</span></code></a> with one sequencer-and-synth track,
+<p>Real widget comm endpoints for the browser test, driven by JSON lines on stdin.</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">spaday_bridge.py</span> <span class="pre">&lt;widget&gt;</span> <span class="pre">[codec]</span></code> serves one instrument widget, where
+<code class="docutils literal notranslate"><span class="pre">widget</span></code> names an entry of <code class="docutils literal notranslate"><span class="pre">VIEWS</span></code>; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">spaday_bridge.py</span> <span class="pre">session</span></code>
+serves a <code class="xref py py-class docutils literal notranslate"><span class="pre">nbplay.nbplay.Session</span></code> with one sequencer-and-synth track,
 exposing every widget by name. Requests carry an optional <code class="docutils literal notranslate"><span class="pre">widget</span></code> name;
 without one they address the only widget, or the session itself for
 <code class="docutils literal notranslate"><span class="pre">command</span></code>.</p>
@@ -293,10 +288,10 @@ without one they address the only widget, or the session itself for
 <tr class="row-odd"><td><p><a class="reference internal" href="#spaday_bridge._jsonable" title="spaday_bridge._jsonable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_jsonable</span></code></a>(value)</p></td>
 <td><p>Replace bytes with their length, recursively, so the state fits a JSON line.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#spaday_bridge._describe" title="spaday_bridge._describe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_describe</span></code></a>(view)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#spaday_bridge._describe" title="spaday_bridge._describe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_describe</span></code></a>(widget)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#spaday_bridge._state" title="spaday_bridge._state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_state</span></code></a>(view)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spaday_bridge._state" title="spaday_bridge._state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_state</span></code></a>(widget)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#spaday_bridge.sync_all" title="spaday_bridge.sync_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sync_all</span></code></a>()</p></td>
@@ -323,12 +318,12 @@ without one they address the only widget, or the session itself for
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spaday_bridge._describe">
-<span class="sig-prename descclassname"><span class="pre">spaday_bridge.</span></span><span class="sig-name descname"><span class="pre">_describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spaday_bridge._describe" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">spaday_bridge.</span></span><span class="sig-name descname"><span class="pre">_describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spaday_bridge._describe" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spaday_bridge._state">
-<span class="sig-prename descclassname"><span class="pre">spaday_bridge.</span></span><span class="sig-name descname"><span class="pre">_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spaday_bridge._state" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">spaday_bridge.</span></span><span class="sig-name descname"><span class="pre">_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spaday_bridge._state" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
@@ -377,11 +372,11 @@ without one they address the only widget, or the session itself for
 
       </div>
 <nav class="fd-pagination" aria-label="Pagination">
-  <a class="fd-pagination-card fd-pagination-prev" href="../test_views/index.html" title="Previous: test_views">
+  <a class="fd-pagination-card fd-pagination-prev" href="../test_widgets/index.html" title="Previous: test_widgets">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="fd-icon "><path d="m15 18-6-6 6-6"/></svg>
     <span class="fd-pagination-text">
       <span class="fd-pagination-label">Previous</span>
-      <span class="fd-pagination-title">test_views</span>
+      <span class="fd-pagination-title">test_widgets</span>
     </span>
   </a>
 </nav>

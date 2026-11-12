@@ -542,11 +542,6 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -560,8 +555,8 @@ window.runMermaid = runMermaid;</script>
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -602,75 +597,51 @@ window.runMermaid = runMermaid;</script>
 </nav>
       <div class="fd-prose">
   <h1>Source code for nbplay.midi_learn</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Map hardware MIDI controllers to widget traits.</span>
+<span></span><span class="sd">"""Map hardware MIDI controllers to widget config fields.</span>
 
-<span class="sd">``MidiLearn`` watches the ``control_change`` trait of a ``MidiKeyboardWidget``</span>
-<span class="sd">and writes each mapped controller's value into a trait of any widget. Knob</span>
-<span class="sd">values travel through the kernel, which is fine for controls but not for</span>
+<span class="sd">``MidiLearn`` watches the ``control_change`` status of a ``MidiKeyboardWidget``</span>
+<span class="sd">and writes each mapped controller's value into a config field of any widget.</span>
+<span class="sd">Knob values travel through the kernel, which is fine for controls but not for</span>
 <span class="sd">note timing; notes stay in the browser.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">traitlets</span>
-
 
 <div class="viewcode-block" id="_field_kind">
 <a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay._field_kind">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_field_kind</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""``bool``, ``int`` or ``float`` for a numeric trait of a widget or config field of a view."""</span>
-    <span class="n">model_fields</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span> <span class="s2">"model_fields"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">model_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">field</span> <span class="o">=</span> <span class="n">model_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no field </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">annotation</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"field </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not bool, int, or float"</span><span class="p">)</span>
-    <span class="n">trait</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">traits</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">trait</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no trait </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">trait_type</span> <span class="ow">in</span> <span class="p">((</span><span class="nb">bool</span><span class="p">,</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Bool</span><span class="p">),</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Int</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">traitlets</span><span class="o">.</span><span class="n">Float</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trait</span><span class="p">,</span> <span class="n">trait_type</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">kind</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"trait </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not a Bool, Int, or Float trait"</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="_assign">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay._assign">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">_assign</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">config</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="s2">"model_fields"</span><span class="p">)</span> <span class="k">else</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+<span class="w">    </span><span class="sd">"""``bool``, ``int`` or ``float`` for a numeric config field of a widget."""</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no field </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">annotation</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"field </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not bool, int, or float"</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="MidiLearn">
 <a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay.MidiLearn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MidiLearn</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Route MIDI control changes to widget traits or view config fields.</span>
+<span class="w">    </span><span class="sd">"""Route MIDI control changes to widget config fields.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        source: A widget with a synced ``control_change`` trait</span>
-<span class="sd">            (``MidiKeyboardWidget``) or a view whose status has one</span>
-<span class="sd">            (``MidiKeyboardView``).</span>
+<span class="sd">        source: A widget whose status has a ``control_change`` field</span>
+<span class="sd">            (``MidiKeyboardWidget``).</span>
 
 <span class="sd">    ``map()`` binds a controller number now; ``learn()`` binds the next</span>
 <span class="sd">    controller the hardware sends, so you can call it and turn the knob.</span>
-<span class="sd">    Bool traits switch on at values of 64 and above. Numeric traits scale</span>
+<span class="sd">    Bool fields switch on at values of 64 and above. Numeric fields scale</span>
 <span class="sd">    the 0-127 value into ``[low, high]``, which default to 0-1 for floats</span>
 <span class="sd">    and 0-127 for ints.</span>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="n">status</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"on_change"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"control_change"</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">status</span><span class="p">),</span> <span class="s2">"model_fields"</span><span class="p">,</span> <span class="p">{}):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="k">lambda</span> <span class="n">view</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span><span class="p">(</span><span class="n">new</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"trait_names"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"control_change"</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">trait_names</span><span class="p">():</span>
-            <span class="n">source</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_control_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">unobserve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_control_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"MidiLearn source needs a 'control_change' trait"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"on_change"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"control_change"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">status</span><span class="p">),</span> <span class="s2">"model_fields"</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"MidiLearn source needs a 'control_change' status field"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="k">lambda</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span><span class="p">(</span><span class="n">new</span><span class="p">),</span> <span class="n">names</span><span class="o">=</span><span class="s2">"control_change"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="o">=</span> <span class="kc">None</span>
@@ -678,7 +649,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="MidiLearn.map">
 <a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay.MidiLearn.map">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Bind ``controller`` (0-127) to ``target.&lt;name&gt;``; returns the mapping."""</span>
+<span class="w">        </span><span class="sd">"""Bind ``controller`` (0-127) to ``target.config.&lt;name&gt;``; returns the mapping."""</span>
         <span class="n">controller</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">controller</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">controller</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"controller must be 0-127"</span><span class="p">)</span>
@@ -706,7 +677,7 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="MidiLearn.learn">
 <a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay.MidiLearn.learn">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">learn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Bind ``target.&lt;name&gt;`` to the next controller the hardware sends."""</span>
+<span class="w">        </span><span class="sd">"""Bind ``target.config.&lt;name&gt;`` to the next controller the hardware sends."""</span>
         <span class="n">_field_kind</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span></div>
 
@@ -763,14 +734,8 @@ window.runMermaid = runMermaid;</script>
             <span class="n">result</span> <span class="o">=</span> <span class="n">low</span> <span class="o">+</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">*</span> <span class="n">value</span> <span class="o">/</span> <span class="mi">127</span>
             <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-        <span class="n">_assign</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="s2">"target"</span><span class="p">],</span> <span class="n">mapping</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">result</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">mapping</span><span class="p">[</span><span class="s2">"target"</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">mapping</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">result</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
-
-
-<div class="viewcode-block" id="MidiLearn._on_control_change">
-<a class="viewcode-back" href="../../autoapi/nbplay/midi_learn/index.html#nbplay.MidiLearn._on_control_change">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_control_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="MidiLearn._handle">

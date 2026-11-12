@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -228,7 +223,7 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">notes</span><span class="p">)</span>
     <span class="p">]</span>
 
-<span class="c1"># Patterns can come from step lists, NoteComposers, or SequencerWidgets.</span>
+<span class="c1"># Patterns can come from step lists or SequencerWidgets.</span>
 <span class="n">launcher</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">steps</span><span class="p">([</span><span class="mi">36</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="n">every</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Kick"</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">launcher</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="p">([</span><span class="mi">36</span><span class="p">,</span> <span class="mi">38</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Kick+Snare"</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">launcher</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">steps</span><span class="p">([</span><span class="mi">36</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">42</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Full kit"</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
@@ -245,7 +240,7 @@
 <span class="c1"># is selected and writes changes straight back into the launcher.</span>
 <span class="n">editor</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">launcher</span><span class="o">.</span><span class="n">bind_slot_editor</span><span class="p">(</span><span class="n">editor</span><span class="p">)</span>
-<span class="n">launcher</span><span class="o">.</span><span class="n">selected_slot</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"track_index"</span><span class="p">:</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="s2">"scene_index"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">launcher</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">selected_slot</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"track_index"</span><span class="p">:</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="s2">"scene_index"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 
 <span class="c1"># Bounce a performance: arm the lanes (channel taps) and press Rec on the transport.</span>
 <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="p">(</span><span class="n">drum_track</span><span class="p">,</span> <span class="n">bass_track</span><span class="p">,</span> <span class="n">keys_track</span><span class="p">):</span>
@@ -276,8 +271,8 @@
 <p>Once the slots feel right, lay them out as a song. Register named patterns with <code class="docutils literal notranslate"><span class="pre">add_pattern()</span></code> (from a slot’s steps, a sequencer, or a step list) and <code class="docutils literal notranslate"><span class="pre">chain()</span></code> them onto a track’s timeline lane. The clips play through the track’s instrument; a track with a sequencer stops looping on its own so the arrangement drives it. <code class="docutils literal notranslate"><span class="pre">update_pattern()</span></code> regenerates every clip made from a name.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kick_slot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">launcher</span><span class="o">.</span><span class="n">slots</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">kit_slot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">launcher</span><span class="o">.</span><span class="n">slots</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span> <span class="o">==</span> <span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kick_slot</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">kit_slot</span> <span class="o">=</span> <span class="n">launcher</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">drum_track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"kick"</span><span class="p">,</span> <span class="n">kick_slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">kick_slot</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">])</span>
 <span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="s2">"kit"</span><span class="p">,</span> <span class="n">kit_slot</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">],</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">kit_slot</span><span class="p">[</span><span class="s2">"step_duration"</span><span class="p">])</span>
 

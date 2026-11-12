@@ -138,11 +138,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -156,8 +151,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -877,7 +872,7 @@
       <div class="fd-prose">
   <section id="module-nbplay.models">
 <span id="nbplay-models"></span><h1>nbplay.models<a class="headerlink" href="#module-nbplay.models" title="Link to this heading">¶</a></h1>
-<p>Pydantic models behind the transports-backed views (<a class="reference internal" href="../views/index.html#module-nbplay.views" title="nbplay.views"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nbplay.views</span></code></a>).</p>
+<p>Pydantic models behind the widgets in <a class="reference internal" href="../widget/index.html#module-nbplay.widget" title="nbplay.widget"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nbplay.widget</span></code></a>.</p>
 <p>Each widget splits into a config model the kernel owns and validates, and a
 status model the browser owns (hosted with <code class="docutils literal notranslate"><span class="pre">owner=&quot;client&quot;</span></code>), matching the
 <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> / <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> split of the elements.</p>
@@ -1149,7 +1144,7 @@ validated to form a valid model.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">MixerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MixerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MixerConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
 <p>The mixer console the kernel owns: channels, returns, master.</p>
-<p>Channels, returns and effects are the same dicts the traitlets widget
+<p>Channels, returns and effects are the same dicts the mixer widget
 syncs, normalized and clamped by the same helpers; every channel carries
 one send level per return. The mixer has no browser-owned status.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1220,7 +1215,7 @@ validated to form a valid model.</p>
 <p>The trigger-pad grid the kernel owns.</p>
 <p><code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code> and <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code> always cover the
 <code class="docutils literal notranslate"><span class="pre">rows</span></code> by <code class="docutils literal notranslate"><span class="pre">cols</span></code> grid: the after-validator extends or trims them
-the way the traitlets widget’s observers do.</p>
+so the grid is always fully described.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>

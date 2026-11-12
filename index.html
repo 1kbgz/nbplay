@@ -137,11 +137,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -155,8 +150,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -223,9 +218,10 @@ browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
 trigger pads, a transport, a multitrack timeline that records audio and MIDI,
 a clip launcher, and a mixer. Every widget in a session follows one clock that
 lives in the browser, so play, seek, and tempo changes never wait on the
-kernel. The widgets are plain <a class="reference external" href="https://anywidget.dev">anywidget</a> classes with
-no extension to install; they work in JupyterLab, Notebook, VS Code, Voila, and
-JupyterLite. A session can be saved to a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive and loaded back:</p>
+kernel. The widgets are <a class="reference external" href="https://github.com/1kbgz/spaday">spaday</a> widgets on
+<a class="reference external" href="https://github.com/1kbgz/transports">transports</a> models, with no extension to
+install; they work in JupyterLab, Notebook, VS Code, Voila, and JupyterLite. A
+session can be saved to a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive and loaded back:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">export_all_clips</span><span class="p">()</span>   <span class="c1"># pull recorded takes from the browser</span>
 <span class="c1"># ... once session.timeline.pending_exports == 0</span>
 <span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"song.nbplay"</span><span class="p">)</span>
@@ -260,17 +256,14 @@ silent until the browser provides those APIs.</p>
 </pre></div>
 </div>
 <p>Song structure comes from named patterns: <code class="docutils literal notranslate"><span class="pre">session.add_pattern(&quot;verse&quot;,</span> <span class="pre">drums.sequencer)</span></code>, then <code class="docutils literal notranslate"><span class="pre">session.chain(drums,</span> <span class="pre">[&quot;verse&quot;,</span> <span class="pre">&quot;verse&quot;,</span> <span class="pre">&quot;chorus&quot;])</span></code> lays them out as clips on the track’s timeline lane, and the sequencer stops looping on its own so the arrangement drives it.</p>
-<p>The next layer runs the same elements on <a class="reference external" href="https://github.com/1kbgz/transports">transports</a>
-models rendered by <a class="reference external" href="https://github.com/1kbgz/spaday">spaday</a>:
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">nbplay.views</span> <span class="pre">import</span> <span class="pre">Session,</span> <span class="pre">SequencerView,</span> <span class="pre">SynthView</span></code>. A view hosts a validated config model
-and, where the browser owns state, a status model; <code class="docutils literal notranslate"><span class="pre">session.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher.launch(0,</span> <span class="pre">0)</span></code> or
-<code class="docutils literal notranslate"><span class="pre">midi_out.note_on(60)</span></code> is a transports command delivered to the owning browser view. <code class="docutils literal notranslate"><span class="pre">Session</span></code> gives
-its transport, mixer, timeline, launcher and tracks one browser session id, so they share a clock and
-an audio bus; <code class="docutils literal notranslate"><span class="pre">session.undo()</span></code>, patterns, chaining, MIDI files and <code class="docutils literal notranslate"><span class="pre">save()</span></code>/<code class="docutils literal notranslate"><span class="pre">load()</span></code> work as on the
-widgets, and the two session classes read each other’s <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archives.
-<code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> builds a two-track session on the views.</p>
+<p>Each widget hosts a validated config model in the kernel (<code class="docutils literal notranslate"><span class="pre">synth.config.frequency</span> <span class="pre">=</span> <span class="pre">220.0</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seq.config.length</span></code>) and, where the browser owns state, a status model it only reads
+(<code class="docutils literal notranslate"><span class="pre">session.transport.status.is_playing</span></code>). Edits made in the browser are validated by the same model
+before they land, and <code class="docutils literal notranslate"><span class="pre">widget.on_change(listener,</span> <span class="pre">names=...)</span></code> reports changes from either side.
+<code class="docutils literal notranslate"><span class="pre">session.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher.launch(0,</span> <span class="pre">0)</span></code> or <code class="docutils literal notranslate"><span class="pre">midi_out.note_on(60)</span></code> is a transports command delivered
+to the browser widget that owns the state.</p>
 <p>Samplers hold one main sample plus <code class="docutils literal notranslate"><span class="pre">zones</span></code>, each mapping a key and velocity range to its own audio: <code class="docutils literal notranslate"><span class="pre">sampler.add_zone_file(&quot;kick.wav&quot;,</span> <span class="pre">36,</span> <span class="pre">36)</span></code>, or press Rec in the sampler to record the microphone straight onto a pad, or <code class="docutils literal notranslate"><span class="pre">sampler.capture_clip(session.timeline,</span> <span class="pre">clip_id,</span> <span class="pre">pad=0)</span></code> to move a recorded take onto one.</p>
-<p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code> sends what the session plays to a hardware synth or another app over Web MIDI, and <code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> maps hardware knobs to widget traits (<code class="docutils literal notranslate"><span class="pre">MidiLearn(midi_keyboard).learn(synth,</span> <span class="pre">&quot;frequency&quot;,</span> <span class="pre">low=100,</span> <span class="pre">high=2000)</span></code>, then turn a knob). The session can lead external gear with MIDI clock (<code class="docutils literal notranslate"><span class="pre">send_clock</span></code> on the output widget) or follow a device’s clock (<code class="docutils literal notranslate"><span class="pre">sync_clock</span></code> on the MIDI keyboard). Patterns and MIDI clips move in and out of <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[midi]&quot;</span></code>): <code class="docutils literal notranslate"><span class="pre">sequencer.to_midi(&quot;lead.mid&quot;)</span></code>, <code class="docutils literal notranslate"><span class="pre">sequencer.load_midi(path)</span></code>,
+<p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code> sends what the session plays to a hardware synth or another app over Web MIDI, and <code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> maps hardware knobs to widget config fields (<code class="docutils literal notranslate"><span class="pre">MidiLearn(midi_keyboard).learn(synth,</span> <span class="pre">&quot;frequency&quot;,</span> <span class="pre">low=100,</span> <span class="pre">high=2000)</span></code>, then turn a knob). The session can lead external gear with MIDI clock (<code class="docutils literal notranslate"><span class="pre">send_clock</span></code> on the output widget) or follow a device’s clock (<code class="docutils literal notranslate"><span class="pre">sync_clock</span></code> on the MIDI keyboard). Patterns and MIDI clips move in and out of <code class="docutils literal notranslate"><span class="pre">.mid</span></code> files (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;nbplay[midi]&quot;</span></code>): <code class="docutils literal notranslate"><span class="pre">sequencer.to_midi(&quot;lead.mid&quot;)</span></code>, <code class="docutils literal notranslate"><span class="pre">sequencer.load_midi(path)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">session.export_midi(&quot;song.mid&quot;)</span></code>, and <code class="docutils literal notranslate"><span class="pre">session.import_midi(path)</span></code>.</p>
 <p>Sequencers, launcher slots, and MIDI clips play through the track’s own instrument, a sampler or a synth, with the built-in oscillator only as a fallback. Every change to a session widget is undoable: <code class="docutils literal notranslate"><span class="pre">session.undo()</span></code> and <code class="docutils literal notranslate"><span class="pre">session.redo()</span></code>, or Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z with the transport focused. Adding and removing tracks is the exception.</p>
 <p>The example notebooks in <code class="docutils literal notranslate"><span class="pre">examples/</span></code> walk through each widget and end with a

@@ -138,11 +138,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -156,8 +151,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../../test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../../test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -202,10 +197,10 @@
     <a href="#nbplay.midi_learn._field_kind">_field_kind()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.midi_learn._assign">_assign()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.midi_learn.MidiLearn">MidiLearn</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.midi_learn.MidiLearn._stop">MidiLearn._stop</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.midi_learn.MidiLearn.source">MidiLearn.source</a>
@@ -241,9 +236,6 @@
     <a href="#nbplay.midi_learn.MidiLearn.apply">MidiLearn.apply()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.midi_learn.MidiLearn._on_control_change">MidiLearn._on_control_change()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.midi_learn.MidiLearn._handle">MidiLearn._handle()</a>
   </li>
 </ul>
@@ -268,17 +260,17 @@
       <div class="fd-prose">
   <section id="module-nbplay.midi_learn">
 <span id="nbplay-midi-learn"></span><h1>nbplay.midi_learn<a class="headerlink" href="#module-nbplay.midi_learn" title="Link to this heading">¶</a></h1>
-<p>Map hardware MIDI controllers to widget traits.</p>
-<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> watches the <code class="docutils literal notranslate"><span class="pre">control_change</span></code> trait of a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>
-and writes each mapped controller’s value into a trait of any widget. Knob
-values travel through the kernel, which is fine for controls but not for
+<p>Map hardware MIDI controllers to widget config fields.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MidiLearn</span></code> watches the <code class="docutils literal notranslate"><span class="pre">control_change</span></code> status of a <code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>
+and writes each mapped controller’s value into a config field of any widget.
+Knob values travel through the kernel, which is fine for controls but not for
 note timing; notes stay in the browser.</p>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi_learn.MidiLearn" title="nbplay.midi_learn.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
-<td><p>Route MIDI control changes to widget traits or view config fields.</p></td>
+<td><p>Route MIDI control changes to widget config fields.</p></td>
 </tr>
 </tbody>
 </table>
@@ -288,10 +280,7 @@ note timing; notes stay in the browser.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.midi_learn._field_kind" title="nbplay.midi_learn._field_kind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_field_kind</span></code></a>(target, name)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code> for a numeric trait of a widget or config field of a view.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.midi_learn._assign" title="nbplay.midi_learn._assign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_assign</span></code></a>(target, name, value)</p></td>
-<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code> for a numeric config field of a widget.</p></td>
 </tr>
 </tbody>
 </table>
@@ -301,30 +290,29 @@ note timing; notes stay in the browser.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.midi_learn._field_kind">
 <span class="sig-prename descclassname"><span class="pre">nbplay.midi_learn.</span></span><span class="sig-name descname"><span class="pre">_field_kind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#_field_kind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn._field_kind" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code> for a numeric trait of a widget or config field of a view.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code> for a numeric config field of a widget.</p>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nbplay.midi_learn._assign">
-<span class="sig-prename descclassname"><span class="pre">nbplay.midi_learn.</span></span><span class="sig-name descname"><span class="pre">_assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#_assign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn._assign" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.midi_learn.</span></span><span class="sig-name descname"><span class="pre">MidiLearn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn" title="Link to this definition">¶</a></dt>
-<dd><p>Route MIDI control changes to widget traits or view config fields.</p>
+<dd><p>Route MIDI control changes to widget config fields.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>source</strong> – A widget with a synced <code class="docutils literal notranslate"><span class="pre">control_change</span></code> trait
-(<code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>) or a view whose status has one
-(<code class="docutils literal notranslate"><span class="pre">MidiKeyboardView</span></code>).</p>
+<dd class="field-odd"><p><strong>source</strong> – A widget whose status has a <code class="docutils literal notranslate"><span class="pre">control_change</span></code> field
+(<code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code>).</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">map()</span></code> binds a controller number now; <code class="docutils literal notranslate"><span class="pre">learn()</span></code> binds the next
 controller the hardware sends, so you can call it and turn the knob.
-Bool traits switch on at values of 64 and above. Numeric traits scale
+Bool fields switch on at values of 64 and above. Numeric fields scale
 the 0-127 value into <code class="docutils literal notranslate"><span class="pre">[low,</span> <span class="pre">high]</span></code>, which default to 0-1 for floats
 and 0-127 for ints.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn._stop">
+<span class="sig-name descname"><span class="pre">_stop</span></span><a class="headerlink" href="#nbplay.midi_learn.MidiLearn._stop" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.source">
 <span class="sig-name descname"><span class="pre">source</span></span><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.source" title="Link to this definition">¶</a></dt>
@@ -343,13 +331,13 @@ and 0-127 for ints.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.map">
 <span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.map" title="Link to this definition">¶</a></dt>
-<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">controller</span></code> (0-127) to <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code>; returns the mapping.</p>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">controller</span></code> (0-127) to <code class="docutils literal notranslate"><span class="pre">target.config.&lt;name&gt;</span></code>; returns the mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn.learn">
 <span class="sig-name descname"><span class="pre">learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.learn" title="Link to this definition">¶</a></dt>
-<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">target.&lt;name&gt;</span></code> to the next controller the hardware sends.</p>
+<dd><p>Bind <code class="docutils literal notranslate"><span class="pre">target.config.&lt;name&gt;</span></code> to the next controller the hardware sends.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -386,11 +374,6 @@ and 0-127 for ints.</p>
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn.apply" title="Link to this definition">¶</a></dt>
 <dd><p>Apply a controller value as if it came from the hardware; returns the written value or None.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn._on_control_change">
-<span class="sig-name descname"><span class="pre">_on_control_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/midi_learn.html#MidiLearn._on_control_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.midi_learn.MidiLearn._on_control_change" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.midi_learn.MidiLearn._handle">
@@ -448,10 +431,10 @@ and 0-127 for ints.</p>
     <a href="#nbplay.midi_learn._field_kind">_field_kind()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
-    <a href="#nbplay.midi_learn._assign">_assign()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.midi_learn.MidiLearn">MidiLearn</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.midi_learn.MidiLearn._stop">MidiLearn._stop</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.midi_learn.MidiLearn.source">MidiLearn.source</a>
@@ -485,9 +468,6 @@ and 0-127 for ints.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.midi_learn.MidiLearn.apply">MidiLearn.apply()</a>
-  </li>
-  <li class="fd-toc-item" data-depth="3">
-    <a href="#nbplay.midi_learn.MidiLearn._on_control_change">MidiLearn._on_control_change()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.midi_learn.MidiLearn._handle">MidiLearn._handle()</a>

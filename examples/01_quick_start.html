@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -203,24 +198,23 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ipywidgets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">widgets</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">traitlets</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EffectPlugin</span><span class="p">,</span>
     <span class="n">KeyboardWidget</span><span class="p">,</span>
     <span class="n">MidiKeyboardWidget</span><span class="p">,</span>
-    <span class="n">MixerWidget</span><span class="p">,</span>
     <span class="n">PadWidget</span><span class="p">,</span>
     <span class="n">SamplerWidget</span><span class="p">,</span>
     <span class="n">SequencerWidget</span><span class="p">,</span>
+    <span class="n">Session</span><span class="p">,</span>
     <span class="n">SettingsWidget</span><span class="p">,</span>
     <span class="n">SynthWidget</span><span class="p">,</span>
-    <span class="n">TimelineWidget</span><span class="p">,</span>
-    <span class="n">TransportWidget</span><span class="p">,</span>
-    <span class="n">EffectPlugin</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="c1"># A session gives its transport, timeline and mixer one browser clock and audio bus.</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">)</span>
 <span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsWidget</span><span class="p">()</span>
-<span class="n">transport</span> <span class="o">=</span> <span class="n">TransportWidget</span><span class="p">(</span><span class="n">bpm</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="s2">"quick-start"</span><span class="p">)</span>
+<span class="n">transport</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">transport</span>
 
 <span class="n">synth</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="n">oscillator_type</span><span class="o">=</span><span class="s2">"saw"</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.35</span><span class="p">)</span>
 <span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="n">sample_name</span><span class="o">=</span><span class="s2">"Drop audio here"</span><span class="p">,</span> <span class="n">pad_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
@@ -229,30 +223,16 @@
     <span class="n">seq</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">keyboard</span> <span class="o">=</span> <span class="n">KeyboardWidget</span><span class="p">(</span><span class="n">upper_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lower_octave</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">96</span><span class="p">)</span>
-<span class="n">midi_keyboard</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">(</span><span class="n">upper_octave</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lower_octave</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">midi_keyboard</span> <span class="o">=</span> <span class="n">MidiKeyboardWidget</span><span class="p">()</span>
 <span class="n">pads</span> <span class="o">=</span> <span class="n">PadWidget</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
 
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">()</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">mixer</span>
 <span class="n">channel</span> <span class="o">=</span> <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="s2">"Preview"</span><span class="p">)</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">add_channel_effect</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"compressor"</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">18</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 <span class="n">mixer</span><span class="o">.</span><span class="n">add_master_effect</span><span class="p">(</span><span class="n">EffectPlugin</span><span class="p">(</span><span class="s2">"limiter"</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
-<span class="n">timeline</span> <span class="o">=</span> <span class="n">TimelineWidget</span><span class="p">(</span>
-    <span class="n">session_id</span><span class="o">=</span><span class="s2">"quick-start"</span><span class="p">,</span>
-    <span class="n">bpm</span><span class="o">=</span><span class="n">transport</span><span class="o">.</span><span class="n">bpm</span><span class="p">,</span>
-    <span class="n">length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-    <span class="n">count_in_bars</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">auto_extend_recording</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">recording_extend_bars</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">transport_links</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"bpm"</span><span class="p">)),</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">)),</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)),</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_playing"</span><span class="p">)),</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">link</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"is_recording"</span><span class="p">)),</span>
-    <span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="n">transport</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">),</span> <span class="p">(</span><span class="n">timeline</span><span class="p">,</span> <span class="s2">"current_beat"</span><span class="p">)),</span>
-<span class="p">]</span>
+<span class="n">timeline</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">timeline</span>
+<span class="n">timeline</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">count_in_bars</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">auto_extend_recording</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">recording_extend_bars</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 <span class="n">timeline</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s2">"Audio"</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">armed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">timeline</span><span class="o">.</span><span class="n">add_clip</span><span class="p">(</span><span class="s2">"Drop or record here"</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"placeholder"</span><span class="p">)</span>
 
@@ -273,14 +253,21 @@
 </div>
 <section id="themes">
 <h2>Themes<a class="headerlink" href="#themes" title="Link to this heading">¶</a></h2>
-<p>Every widget has a <code class="docutils literal notranslate"><span class="pre">theme</span></code> trait. Empty follows the Jupyter theme; <code class="docutils literal notranslate"><span class="pre">light</span></code> and <code class="docutils literal notranslate"><span class="pre">dark</span></code> pin the default look; <code class="docutils literal notranslate"><span class="pre">studio</span></code>, <code class="docutils literal notranslate"><span class="pre">flat</span></code>, <code class="docutils literal notranslate"><span class="pre">cube</span></code>, <code class="docutils literal notranslate"><span class="pre">one</span></code>, <code class="docutils literal notranslate"><span class="pre">grim</span></code>, <code class="docutils literal notranslate"><span class="pre">pro</span></code> and <code class="docutils literal notranslate"><span class="pre">fruit</span></code> are complete sets. A <code class="docutils literal notranslate"><span class="pre">Session(theme=...)</span></code> sets all of its widgets at once; here the playground has no session, so a dropdown drives each widget’s trait.</p>
+<p>Every widget has a <code class="docutils literal notranslate"><span class="pre">theme</span></code> config field. Empty follows the Jupyter theme; <code class="docutils literal notranslate"><span class="pre">light</span></code> and <code class="docutils literal notranslate"><span class="pre">dark</span></code> pin the default look; <code class="docutils literal notranslate"><span class="pre">studio</span></code>, <code class="docutils literal notranslate"><span class="pre">flat</span></code>, <code class="docutils literal notranslate"><span class="pre">cube</span></code>, <code class="docutils literal notranslate"><span class="pre">one</span></code>, <code class="docutils literal notranslate"><span class="pre">grim</span></code>, <code class="docutils literal notranslate"><span class="pre">pro</span></code> and <code class="docutils literal notranslate"><span class="pre">fruit</span></code> are complete sets. <code class="docutils literal notranslate"><span class="pre">Session(theme=...)</span></code> or <code class="docutils literal notranslate"><span class="pre">session.theme</span></code> sets all of a session’s widgets at once; here a dropdown drives every widget on the page, including the standalone ones.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">nbplay</span><span class="w"> </span><span class="kn">import</span> <span class="n">THEMES</span>
 
 <span class="n">themed</span> <span class="o">=</span> <span class="p">[</span><span class="n">settings</span><span class="p">,</span> <span class="n">transport</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">keyboard</span><span class="p">,</span> <span class="n">midi_keyboard</span><span class="p">,</span> <span class="n">pads</span><span class="p">,</span> <span class="n">mixer</span><span class="p">,</span> <span class="n">timeline</span><span class="p">]</span>
 <span class="n">theme</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">THEMES</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Theme"</span><span class="p">)</span>
-<span class="n">theme_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">traitlets</span><span class="o">.</span><span class="n">dlink</span><span class="p">((</span><span class="n">theme</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="s2">"theme"</span><span class="p">))</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">themed</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_theme</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">themed</span><span class="p">:</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">"new"</span><span class="p">]</span>
+
+
+<span class="n">theme</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">apply_theme</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"value"</span><span class="p">)</span>
 <span class="n">theme</span>
 </pre></div>
 </div>

@@ -136,11 +136,6 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/nbplay/views/index.html">
-      <span class="fd-link-text">nbplay.views</span>
-    </a>
-  </li>
-  <li class="fd-tree-item">
     <a class="fd-link" href="../autoapi/nbplay/widget/index.html">
       <span class="fd-link-text">nbplay.widget</span>
     </a>
@@ -154,8 +149,8 @@
     </a>
   </li>
   <li class="fd-tree-item">
-    <a class="fd-link" href="../autoapi/test_views/index.html">
-      <span class="fd-link-text">test_views</span>
+    <a class="fd-link" href="../autoapi/test_widgets/index.html">
+      <span class="fd-link-text">test_widgets</span>
     </a>
   </li>
   <li class="fd-tree-item">
@@ -197,7 +192,7 @@
     <a href="#transport-time-signature-sync">Transport Time Signature Sync</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
-    <a href="#notecomposer-and-pattern-export">NoteComposer and Pattern Export</a>
+    <a href="#pattern-export">Pattern Export</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#midi-files">MIDI Files</a>
@@ -230,11 +225,11 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'measures: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">measures</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'step_duration: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">step_duration</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'length: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">step_duration</span> <span class="o">==</span> <span class="mf">0.5</span>
-<span class="k">assert</span> <span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">8</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'measures: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">measures</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'step_duration: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_duration</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'length: </span><span class="si">{</span><span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_duration</span> <span class="o">==</span> <span class="mf">0.5</span>
+<span class="k">assert</span> <span class="n">one_bar_eighths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">8</span>
 </pre></div>
 </div>
 </div>
@@ -248,10 +243,10 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">four_bar_sixteenths</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="n">num_voices</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">bpm</span><span class="o">=</span><span class="mf">124.0</span><span class="p">)</span>
 <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">configure_grid</span><span class="p">(</span><span class="n">measures</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
     <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">112</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">62</span><span class="p">]):</span>
+<span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">note</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">62</span><span class="p">]):</span>
     <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">set_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">voice</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="n">four_bar_sixteenths</span>
@@ -261,11 +256,11 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'voices: </span><span class="si">{</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">num_voices</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'length: </span><span class="si">{</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'voice lengths: </span><span class="si">{</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">voice</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">measures</span> <span class="o">==</span> <span class="mi">4</span>
-<span class="k">assert</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">64</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'voices: </span><span class="si">{</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_voices</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'length: </span><span class="si">{</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'voice lengths: </span><span class="si">{</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">voice</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">voice</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">measures</span> <span class="o">==</span> <span class="mi">4</span>
+<span class="k">assert</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">64</span>
 </pre></div>
 </div>
 </div>
@@ -283,28 +278,27 @@
 <span class="n">transport_seq</span><span class="o">.</span><span class="n">configure_grid</span><span class="p">(</span><span class="n">measures</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">track</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">add_track</span><span class="p">(</span><span class="s1">'Lead'</span><span class="p">,</span> <span class="n">transport_seq</span><span class="p">,</span> <span class="n">SynthWidget</span><span class="p">())</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">time_signature_den</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">transport_seq</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">time_signature_den</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">transport_seq</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">time_signature_num</span> <span class="o">==</span> <span class="mi">3</span>
-<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">time_signature_den</span> <span class="o">==</span> <span class="mi">4</span>
-<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">6</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">time_signature</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">time_signature_num</span><span class="p">,</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">time_signature_den</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">time_signature_num</span> <span class="o">==</span> <span class="mi">3</span>
+<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">time_signature_den</span> <span class="o">==</span> <span class="mi">4</span>
+<span class="k">assert</span> <span class="n">transport_seq</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">6</span>
 <span class="n">track</span>
 </pre></div>
 </div>
 </div>
 </div>
 </section>
-<section id="notecomposer-and-pattern-export">
-<h2>NoteComposer and Pattern Export<a class="headerlink" href="#notecomposer-and-pattern-export" title="Link to this heading">¶</a></h2>
-<p>Each sequencer voice is a <code class="docutils literal notranslate"><span class="pre">NoteComposer</span></code>. Convert a voice to a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> when you want the lower-level representation.</p>
+<section id="pattern-export">
+<h2>Pattern Export<a class="headerlink" href="#pattern-export" title="Link to this heading">¶</a></h2>
+<p>Each sequencer voice is a list of step dicts in <code class="docutils literal notranslate"><span class="pre">config.voices_data</span></code>. Convert a voice to a Rust <code class="docutils literal notranslate"><span class="pre">Pattern</span></code> when you want the lower-level representation.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">composer</span> <span class="o">=</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">composers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">pattern</span> <span class="o">=</span> <span class="n">composer</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">(</span><span class="n">loop_enabled</span><span class="o">=</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">loop_enabled</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">composer</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pattern</span> <span class="o">=</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">to_pattern</span><span class="p">(</span><span class="n">voice</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">2</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
-<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="o">==</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">length</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="o">==</span> <span class="n">four_bar_sixteenths</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span>
 </pre></div>
 </div>
 </div>
@@ -323,7 +317,7 @@
 
 <span class="n">from_file</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">()</span>
 <span class="n">from_file</span><span class="o">.</span><span class="n">load_midi</span><span class="p">(</span><span class="n">midi_path</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">from_file</span><span class="o">.</span><span class="n">num_voices</span><span class="p">,</span> <span class="s2">"voices,"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="s2">"steps of"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">step_duration</span><span class="p">,</span> <span class="s2">"beats"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">from_file</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_voices</span><span class="p">,</span> <span class="s2">"voices,"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="s2">"steps of"</span><span class="p">,</span> <span class="n">from_file</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_duration</span><span class="p">,</span> <span class="s2">"beats"</span><span class="p">)</span>
 <span class="n">from_file</span>
 </pre></div>
 </div>
@@ -359,7 +353,7 @@
     <a href="#transport-time-signature-sync">Transport Time Signature Sync</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
-    <a href="#notecomposer-and-pattern-export">NoteComposer and Pattern Export</a>
+    <a href="#pattern-export">Pattern Export</a>
   </li>
   <li class="fd-toc-item" data-depth="1">
     <a href="#midi-files">MIDI Files</a>
