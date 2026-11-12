@@ -4,14 +4,6 @@ test_views
 .. py:module:: test_views
 
 
-Attributes
-----------
-
-.. autoapisummary::
-
-   test_views.views
-
-
 Classes
 -------
 
@@ -45,8 +37,6 @@ Functions
 
 Module Contents
 ---------------
-
-.. py:data:: views
 
 .. py:function:: messages(sent)
 

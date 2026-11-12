@@ -12,13 +12,7 @@
     "\n",
     "Build the session from `nbplay.views` instead of the traitlets widgets. The views render the same elements, but each one hosts a pydantic config model in the kernel and a status model the browser owns, synced by [transports](https://github.com/1kbgz/transports) and rendered by [spaday](https://github.com/1kbgz/spaday). Config edits made in the browser are validated in the kernel before they land, and browser-side state (play, position, active pads) reaches Python without a traitlets round-trip.\n",
     "\n",
-    "Install the extra first:\n",
-    "\n",
-    "```bash\n",
-    "pip install \"nbplay[spaday]\"\n",
-    "```\n",
-    "\n",
-    "Undo, named patterns, MIDI files and `save()`/`load()` stay with the traitlets `Session` for now; see notebooks 11 and 13 for those."
+    "Undo, named patterns, MIDI files and `save()`/`load()` work as on the traitlets `Session`; notebooks 11 and 13 show them."
    ]
   },
   {

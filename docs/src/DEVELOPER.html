@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
     <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="../../_static/fonts/fuma-fonts.css?v=c2892c73" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/custom.css?v=88c24c6a" />
     <script src="../../_static/documentation_options.js?v=e259d695"></script>
@@ -21,7 +21,7 @@
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=f281be69"></script>
-    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
     <script data-searchlite-index="searchlite-index.json" defer="defer" src="../../_static/searchlite.js?v=a5320898"></script>
     <script defer="defer" src="../../_static/fuma.js?v=9c325f6c"></script>
     <script src="../../_static/js/custom.js?v=956e5d78"></script>
@@ -1370,9 +1370,7 @@ pattern clips (one undo step each, with the clip events rebuilt in place on upda
 <code class="docutils literal notranslate"><span class="pre">import_midi</span></code> match the widget session. <code class="docutils literal notranslate"><span class="pre">save</span></code>, <code class="docutils literal notranslate"><span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">to_dict</span></code> and <code class="docutils literal notranslate"><span class="pre">from_dict</span></code> write and read the
 <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive described below with the format constants from <code class="docutils literal notranslate"><span class="pre">descriptors.py</span></code>; the sound source
 type names stay <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> in <code class="docutils literal notranslate"><span class="pre">session.json</span></code>, so a widget session and a views
-session open each other’s files. <code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> is the session walkthrough on the views; the notebook
-runner in <code class="docutils literal notranslate"><span class="pre">test_all.py</span></code> skips a notebook that imports <code class="docutils literal notranslate"><span class="pre">nbplay.views</span></code> when the installed spaday has no
-session support, which is the case until spaday ships a release after 0.13.1. The spaday tree is
+session open each other’s files. <code class="docutils literal notranslate"><span class="pre">examples/15_transports_views.ipynb</span></code> is the session walkthrough on the views. The spaday tree is
 the instrument element with every config field bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> and every status field
 bound two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> (or the event a view names in <code class="docutils literal notranslate"><span class="pre">STATUS_EVENTS</span></code>: the transport’s
 <code class="docutils literal notranslate"><span class="pre">undo_request</span></code> and <code class="docutils literal notranslate"><span class="pre">redo_request</span></code> counts are written back on <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code>), so the element’s
@@ -1386,8 +1384,7 @@ stylesheet to <code class="docutils literal notranslate"><span class="pre">nbpla
 component package <code class="docutils literal notranslate"><span class="pre">nbplay</span></code> (also an installed entry point).</p>
 <p>Tests: <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_views.py</span></code> drives a view through a mocked comm; <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code>
 renders the spaday widget bundle against a real <code class="docutils literal notranslate"><span class="pre">TransportView</span></code> in a Python subprocess
-(<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>), set <code class="docutils literal notranslate"><span class="pre">NBPLAY_TEST_PYTHON</span></code> to a Python with <code class="docutils literal notranslate"><span class="pre">nbplay[spaday]</span></code>.
-Both skip when spaday lacks notebook session support.</p>
+(<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>); <code class="docutils literal notranslate"><span class="pre">NBPLAY_TEST_PYTHON</span></code> names the Python with nbplay installed.</p>
 </section>
 <section id="styling-system">
 <h2>Styling system<a class="headerlink" href="#styling-system" title="Link to this heading">¶</a></h2>
