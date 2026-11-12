@@ -1,21 +1,14 @@
 import { test, expect } from "@playwright/test";
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import fs from "node:fs";
 
 // The transport instrument as a spaday view on transports models: a real
 // TransportView runs in a Python subprocess and its comm traffic is relayed
-// to the spaday widget bundle rendered here. Needs a Python with spaday
-// session support and transports 0.12 (NBPLAY_TEST_PYTHON); skipped otherwise.
+// to the spaday widget bundle rendered here. NBPLAY_TEST_PYTHON names the
+// Python with nbplay installed (default: python).
 
 const PYTHON = process.env.NBPLAY_TEST_PYTHON ?? "python";
-
-function available() {
-  const probe = spawnSync(PYTHON, ["-c", "import nbplay.views"], {
-    encoding: "utf8",
-  });
-  return probe.status === 0;
-}
 
 async function viewKernel(view) {
   const child = spawn(PYTHON, [
@@ -121,7 +114,6 @@ const state = async (kernel) => (await kernel.call({ op: "state" })).result;
 test.describe("views on transports", () => {
   // One kernel subprocess and one copied widget bundle at a time.
   test.describe.configure({ mode: "serial" });
-  test.skip(!available(), "spaday session support is not installed");
 
   test("transport: the kernel and the owning view share config, status and commands", async ({
     page,

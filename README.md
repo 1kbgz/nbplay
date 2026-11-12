@@ -66,16 +66,15 @@ session.play()   # or press play on any widget; they share the clock
 
 Song structure comes from named patterns: `session.add_pattern("verse", drums.sequencer)`, then `session.chain(drums, ["verse", "verse", "chorus"])` lays them out as clips on the track's timeline lane, and the sequencer stops looping on its own so the arrangement drives it.
 
-A preview of the next layer runs the same elements on [transports](https://github.com/1kbgz/transports)
-models rendered by [spaday](https://github.com/1kbgz/spaday): `pip install "nbplay[spaday]"`, then
+The next layer runs the same elements on [transports](https://github.com/1kbgz/transports)
+models rendered by [spaday](https://github.com/1kbgz/spaday):
 `from nbplay.views import Session, SequencerView, SynthView`. A view hosts a validated config model
 and, where the browser owns state, a status model; `session.play()`, `launcher.launch(0, 0)` or
 `midi_out.note_on(60)` is a transports command delivered to the owning browser view. `Session` gives
 its transport, mixer, timeline, launcher and tracks one browser session id, so they share a clock and
 an audio bus; `session.undo()`, patterns, chaining, MIDI files and `save()`/`load()` work as on the
-widgets, and the two session classes read each other's `.nbplay` archives. The layer needs a spaday
-release with notebook session support. `examples/15_transports_views.ipynb`
-builds a two-track session on the views.
+widgets, and the two session classes read each other's `.nbplay` archives.
+`examples/15_transports_views.ipynb` builds a two-track session on the views.
 
 Samplers hold one main sample plus `zones`, each mapping a key and velocity range to its own audio: `sampler.add_zone_file("kick.wav", 36, 36)`, or press Rec in the sampler to record the microphone straight onto a pad, or `sampler.capture_clip(session.timeline, clip_id, pad=0)` to move a recorded take onto one.
 
