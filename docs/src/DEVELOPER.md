@@ -941,7 +941,8 @@ copies the nbplay, spaday, transports and spaday-regular-layout wheels into
 `pypi/`, extracts their browser assets (`runtime/spaday/`,
 `components/nbplay/`, `components/regular-layout/`) and writes `wheels.json`.
 `make pyodide-example` runs it into `dist/app` with the nbplay wheel from
-`make test-pyodide`. The worker loads Pyodide, installs the wheels with
+`make test-pyodide`, and the docs workflow publishes that directory at `/app/`
+on the docs site. The worker loads Pyodide, installs the wheels with
 micropip and builds `nbplay.app.Standalone(demo_session())`, which holds one
 `transports.Server` per panel. The page creates one managed transports client
 per panel, attaches it to the worker with `postMessage` (`client.attach(send)`

@@ -100,6 +100,11 @@ jobs:
       - name: Build JupyterLite demo
         run: make lite
 
+      - name: Build Pyodide example
+        run: |
+          make pyodide-example
+          cp -r dist/app docs/html/app
+
       - name: Publish documentation
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453  # v4.1.0
         with:
