@@ -14,10 +14,12 @@ nbplay-mixer {
 }
 nbplay-mixer .nbplay-mixer-add-btn,
 nbplay-mixer .nbplay-mixer-add-return-btn {
+  flex: none;
   height: var(--nbplay-control-height);
   font: inherit;
   font-family: var(--nbplay-font-mono);
   font-size: var(--nbplay-font-size-small);
+  white-space: nowrap;
   padding: 0 8px;
   background: var(--nbplay-bg-control);
   color: var(--nbplay-fg-muted);
