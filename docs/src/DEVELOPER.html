@@ -444,7 +444,7 @@ package builds WebAssembly bindings for browser-facing Rust helpers.</p>
 <td><p>PyO3 wrapper classes exposed as the <code class="docutils literal notranslate"><span class="pre">nbplay.nbplay</span></code> native extension.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code></p></td>
-<td><p>Browser frontends: one anywidget adapter per widget, shared engines, and <code class="docutils literal notranslate"><span class="pre">components/</span></code> (Lit elements).</p></td>
+<td><p>Browser frontends: <code class="docutils literal notranslate"><span class="pre">components/</span></code> (Lit elements), shared engines, and the spaday package entry.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/src/css/</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">components/</span></code> (tokens plus one stylesheet per element), theme sets, bundled by lightningcss into one file.</p></td>
@@ -453,7 +453,7 @@ package builds WebAssembly bindings for browser-facing Rust helpers.</p>
 <td><p>wasm-bindgen browser bindings around selected Rust functionality.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">js/tests/</span></code></p></td>
-<td><p>Playwright browser tests using a mock anywidget model and mock Web Audio context.</p></td>
+<td><p>Playwright browser tests: elements on a mock model and a mock Web Audio context, and spaday end to end.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_all.py</span></code></p></td>
 <td><p>Python, Rust-extension, widget, session, and example-notebook regression tests.</p></td>
@@ -814,41 +814,25 @@ MIDI or recording, and emits <code class="docutils literal notranslate"><span cl
 edited), <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> (<code class="docutils literal notranslate"><span class="pre">{values,</span> <span class="pre">save}</span></code>, browser-derived state such as play
 position) and <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> (<code class="docutils literal notranslate"><span class="pre">{name}</span></code>, a nonce request such as undo). Kernel
 commands arrive through <code class="docutils literal notranslate"><span class="pre">element.command(cmd)</span></code>.</p>
-<p>Every widget file in <code class="docutils literal notranslate"><span class="pre">js/src/ts/</span></code> is then an adapter:</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">render</span><span class="p">({</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">el</span><span class="w"> </span><span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="kt">AnyModel</span><span class="p">;</span><span class="w"> </span><span class="nx">el</span><span class="o">:</span><span class="w"> </span><span class="kt">HTMLElement</span><span class="w"> </span><span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">"nbplay-mixer"</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">NbplayMixer</span><span class="p">;</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">bindInstrument</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">el</span><span class="p">,</span><span class="w"> </span><span class="nx">node</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="s2">"channels"</span><span class="p">,</span><span class="w"> </span><span class="nx">master_gain</span><span class="o">:</span><span class="w"> </span><span class="s2">"masterGain"</span><span class="p">,</span><span class="w"> </span><span class="nx">session_id</span><span class="o">:</span><span class="w"> </span><span class="s2">"sessionId"</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="p">{},</span>
-<span class="w">    </span><span class="nx">command</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">onDisconnect</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">node</span><span class="p">.</span><span class="nx">teardown</span><span class="p">(),</span>
-<span class="w">  </span><span class="p">});</span>
-<span class="p">}</span>
-
-<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">render</span><span class="w"> </span><span class="p">};</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">bindInstrument</span></code> in <code class="docutils literal notranslate"><span class="pre">js/src/ts/adapter.ts</span></code> writes <code class="docutils literal notranslate"><span class="pre">config</span></code> traits into
-properties, mirrors <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> values into the model (saving only when
-<code class="docutils literal notranslate"><span class="pre">save</span></code> is set), saves <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code> values, forwards <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> names as
-nonce traits, calls <code class="docutils literal notranslate"><span class="pre">node.command()</span></code> for the nonced <code class="docutils literal notranslate"><span class="pre">command</span></code> trait, and stops
-the element when the kernel disconnects. An element never emits status during
-construction or its first property assignment, which keeps the old rule that
-render must not call <code class="docutils literal notranslate"><span class="pre">save_changes()</span></code>. Non-visual engines the elements share
+<p>Each Python widget renders its element through a spaday tree built in
+<code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code>: config fields bind two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code>, status fields
+two-way on <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> (or the event a widget names in <code class="docutils literal notranslate"><span class="pre">STATUS_EVENTS</span></code>),
+and the <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> child defined in <code class="docutils literal notranslate"><span class="pre">js/src/ts/spaday.ts</span></code> delivers kernel
+commands to <code class="docutils literal notranslate"><span class="pre">element.command()</span></code>; see “Transports widgets” below. An element
+never emits status during construction or its first property assignment, so
+rendering a widget never writes back to the kernel. Non-visual engines the elements share
 live beside them: <code class="docutils literal notranslate"><span class="pre">voices.ts</span></code> (fallback sine voices), <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code> (Web
 MIDI ports), <code class="docutils literal notranslate"><span class="pre">mixer_bus.ts</span></code> (audio graph, effects, meters) and
 <code class="docutils literal notranslate"><span class="pre">sampler_engine.ts</span></code> (sample playback).</p>
 <p>The component gallery, <code class="docutils literal notranslate"><span class="pre">js/dist/gallery.html</span></code> after a build, renders every
 element with a property panel, an event log and a theme switch.</p>
-<p>The shared <code class="docutils literal notranslate"><span class="pre">AnyModel</span></code> type and helpers are in <code class="docutils literal notranslate"><span class="pre">js/src/ts/helpers.ts</span></code>:</p>
+<p>The shared helpers are in <code class="docutils literal notranslate"><span class="pre">js/src/ts/helpers.ts</span></code> (<code class="docutils literal notranslate"><span class="pre">AnyModel</span></code> there is the
+model-shaped shim the scheduler and session clock read through):</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">onKernelDisconnect()</span></code> polls the widget model for comm loss and calls a
-cleanup callback after a delay. Widgets use it to stop audio when the kernel
-restarts or shuts down.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cssVar()</span></code> reads Jupyter CSS custom properties for canvas drawing.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">makeEditable()</span></code> implements double-click inline editing with an Enter/blur
 commit guard.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> converts anywidget binary buffers into <code class="docutils literal notranslate"><span class="pre">Float32Array</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> converts binary buffers into <code class="docutils literal notranslate"><span class="pre">Float32Array</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bindShortcuts()</span></code> binds keyboard shortcuts to a widget root (see
 “Keyboard shortcuts” below).</p></li>
 <li><p>Gain/pan helpers convert and format linear gain, dB, and pan values.</p></li>
@@ -1459,9 +1443,12 @@ python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> <
 <p>Playwright tests live in <code class="docutils literal notranslate"><span class="pre">js/tests/</span></code>. The harness at
 <code class="docutils literal notranslate"><span class="pre">js/tests/fixtures/harness.html</span></code> provides a mock <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code> and
 <code class="docutils literal notranslate"><span class="pre">createMockModel()</span></code> implementation with <code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">set</span></code>, <code class="docutils literal notranslate"><span class="pre">save_changes</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>, and
-manual trigger helpers. Tests cover DOM rendering, synced model state, user
-interactions, inline editing, keyboard capture, MIDI input, scheduler state, and
-session integration.</p>
+manual trigger helpers; <code class="docutils literal notranslate"><span class="pre">js/tests/support/instruments.ts</span></code> (bundled to
+<code class="docutils literal notranslate"><span class="pre">dist/tests/instruments.js</span></code>, never shipped) binds an instrument element to such
+a model through the same trait maps the Python widgets use, so the widget specs
+drive each element through traits. Tests cover DOM rendering, synced model
+state, user interactions, inline editing, keyboard capture, MIDI input,
+scheduler state, and session integration.</p>
 <p>Run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>js
 pnpm<span class="w"> </span><span class="nb">test</span>
@@ -1666,18 +1653,18 @@ uses the new binding.</p></li>
 <section id="add-a-new-widget">
 <h3>Add a new widget<a class="headerlink" href="#add-a-new-widget" title="Link to this heading">¶</a></h3>
 <ol class="arabic simple">
-<li><p>Add a Python class in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> extending <code class="docutils literal notranslate"><span class="pre">anywidget.AnyWidget</span></code>.</p></li>
-<li><p>Give it <code class="docutils literal notranslate"><span class="pre">_esm</span> <span class="pre">=</span> <span class="pre">_STATIC</span> <span class="pre">/</span> <span class="pre">&quot;&lt;name&gt;.js&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">_css</span> <span class="pre">=</span> <span class="pre">_STATIC</span> <span class="pre">/</span> <span class="pre">&quot;nbplay.css&quot;</span></code>.</p></li>
-<li><p>Define synced traits with <code class="docutils literal notranslate"><span class="pre">.tag(sync=True)</span></code> and keep defaults valid.</p></li>
+<li><p>Add a config model (and a status model when the browser owns state) in
+<code class="docutils literal notranslate"><span class="pre">nbplay/models.py</span></code>, with valid defaults and validators.</p></li>
+<li><p>Add a class in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code> extending <code class="docutils literal notranslate"><span class="pre">InstrumentWidget</span></code> with <code class="docutils literal notranslate"><span class="pre">TAG</span></code>,
+<code class="docutils literal notranslate"><span class="pre">CONFIG_MODEL</span></code>, <code class="docutils literal notranslate"><span class="pre">STATUS_MODEL</span></code>, and the <code class="docutils literal notranslate"><span class="pre">CONFIG</span></code> and <code class="docutils literal notranslate"><span class="pre">STATUS</span></code> field-to-property maps.</p></li>
 <li><p>Create the element in <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/&lt;name&gt;.ts</span></code>: extend
 <code class="docutils literal notranslate"><span class="pre">NbplayElement</span></code>, compose existing primitives and composites, emit
 <code class="docutils literal notranslate"><span class="pre">nbplay-set</span></code>, <code class="docutils literal notranslate"><span class="pre">nbplay-status</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code>, and <code class="docutils literal notranslate"><span class="pre">define(&quot;nbplay-&lt;name&gt;&quot;,</span> <span class="pre">...)</span></code>.
 Export it from <code class="docutils literal notranslate"><span class="pre">components/index.ts</span></code> and add a section to <code class="docutils literal notranslate"><span class="pre">gallery.ts</span></code>.</p></li>
 <li><p>Create <code class="docutils literal notranslate"><span class="pre">js/src/css/components/&lt;name&gt;.css</span></code> scoped under the tag and add it to
 <code class="docutils literal notranslate"><span class="pre">js/src/css/components.css</span></code>.</p></li>
-<li><p>Create <code class="docutils literal notranslate"><span class="pre">js/src/ts/&lt;name&gt;.ts</span></code> whose <code class="docutils literal notranslate"><span class="pre">render()</span></code> returns <code class="docutils literal notranslate"><span class="pre">bindInstrument(...)</span></code>
-with the trait map.</p></li>
-<li><p>Add <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> to <code class="docutils literal notranslate"><span class="pre">WIDGET_NAMES</span></code> in <code class="docutils literal notranslate"><span class="pre">js/build.mjs</span></code>.</p></li>
+<li><p>Add the element’s trait maps to <code class="docutils literal notranslate"><span class="pre">INSTRUMENTS</span></code> in <code class="docutils literal notranslate"><span class="pre">js/tests/support/instruments.ts</span></code>
+so the widget specs can drive it.</p></li>
 <li><p>Re-export the widget from <code class="docutils literal notranslate"><span class="pre">nbplay/__init__.py</span></code>.</p></li>
 <li><p>Add Python widget tests and Playwright tests.</p></li>
 <li><p>Add or update an example notebook when the widget is user-facing.</p></li>
@@ -1688,8 +1675,8 @@ with the trait map.</p></li>
 <h3>Modify an existing widget trait<a class="headerlink" href="#modify-an-existing-widget-trait" title="Link to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Update the Python trait default and validation/coercion logic.</p></li>
-<li><p>Add the trait to the adapter’s <code class="docutils literal notranslate"><span class="pre">config</span></code> or <code class="docutils literal notranslate"><span class="pre">status</span></code> map in <code class="docutils literal notranslate"><span class="pre">js/src/ts/&lt;widget&gt;.ts</span></code>
-and the matching property to the element.</p></li>
+<li><p>Add the field to the widget’s <code class="docutils literal notranslate"><span class="pre">CONFIG</span></code> or <code class="docutils literal notranslate"><span class="pre">STATUS</span></code> map in <code class="docutils literal notranslate"><span class="pre">nbplay/widget.py</span></code>,
+the matching property to the element, and the trait map in <code class="docutils literal notranslate"><span class="pre">js/tests/support/instruments.ts</span></code>.</p></li>
 <li><p>Update CSS if the trait changes layout or visible state.</p></li>
 <li><p>Update <code class="docutils literal notranslate"><span class="pre">nbplay/static</span></code> by rebuilding JS before testing Python rendering from
 source.</p></li>
