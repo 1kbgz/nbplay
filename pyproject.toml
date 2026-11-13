@@ -63,6 +63,7 @@ develop = [
     "mdformat-myst",
     "mdformat-tables>=1",
     "mido",
+    "notebook",
     "pytest",
     "pytest-cov",
     "ruff",

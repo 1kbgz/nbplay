@@ -1122,7 +1122,9 @@ a live kernel and drives the rendered widgets through Playwright:
 - `tests/voila.spec.js` serves `tests/fixtures/host_smoke.ipynb` with
   `python -m voila` on port 8866.
 - `tests/jupyterlab.spec.js` opens the same notebook in `jupyter lab` on port
-  8899, runs every cell, and then interacts with the outputs.
+  8899 and in `jupyter notebook` (Notebook 7) on port 8898, runs every cell,
+  and then interacts with the outputs. Each editor gets its own scratch copy of
+  the notebook so their autosaves do not collide.
 
 The smoke notebook builds a `Session` (transport, sequencer track, launcher,
 timeline, mixer) plus a kernel-side probe: an `ipywidgets.HTML` label that a
@@ -1132,9 +1134,9 @@ pressing play propagates through the browser clock to the sequencer and
 timeline, that the kernel probe flips to "playing" (browser to kernel), and
 that the kernel button stops everything (kernel to browser). Page errors are
 collected only after the widgets have rendered, because host startup noise
-from third-party lab extensions is unrelated to nbplay. `voila` is a `develop`
-extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
-manager.
+from third-party lab extensions is unrelated to nbplay. `voila` and
+`notebook` are `develop` extras so CI has them; JupyterLab and Notebook 7 come
+with the ipywidgets lab manager.
 
 ### Pyodide wheel
 
