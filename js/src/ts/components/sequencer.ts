@@ -185,7 +185,7 @@ export class NbplaySequencer extends NbplayElement {
     if (!this.binding) {
       this.binding = bindElementClock(this, this.onClockEvent, this.onRebind);
       const clk = this.binding.clock();
-      clk.setTempo(Number(this.bpm));
+      this.joinTempo(clk);
       this.isPlaying = clk.playing;
       this.currentStep = -1;
       if (clk.playing) this.startScheduler();
@@ -310,9 +310,18 @@ export class NbplaySequencer extends NbplayElement {
     }
   };
 
+  /** Join `clk`: set its tempo if no element has yet, otherwise take it. */
+  private joinTempo(clk: SessionClock): void {
+    const bpm = clk.adoptTempo(Number(this.bpm));
+    if (bpm !== Number(this.bpm)) {
+      this.bpm = bpm;
+      this.set({ bpm });
+    }
+  }
+
   private onRebind = (clk: SessionClock): void => {
     this.scheduler.stop();
-    clk.setTempo(Number(this.bpm));
+    this.joinTempo(clk);
     this.currentStep = -1;
     if (clk.playing && this.followTransport !== false) this.startScheduler();
     this.isPlaying = this.scheduler.isPlaying();
@@ -321,11 +330,13 @@ export class NbplaySequencer extends NbplayElement {
 
   updated(changed: PropertyValues): void {
     if (!this.binding) return;
-    if (changed.has("sessionId") && changed.get("sessionId") !== undefined) {
-      this.binding.rebind();
-    }
+    // A tempo that arrives with the session id is the model's at render,
+    // which joins the clock; a later write is the host setting the tempo.
+    const joined =
+      changed.has("sessionId") && changed.get("sessionId") !== undefined;
+    if (joined) this.binding.rebind();
     const clk = this.clock();
-    if (changed.has("bpm") && Number(this.bpm) !== clk.bpm) {
+    if (changed.has("bpm") && !joined && Number(this.bpm) !== clk.bpm) {
       clk.setTempo(Number(this.bpm));
     }
     if (

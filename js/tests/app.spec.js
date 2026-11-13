@@ -60,6 +60,45 @@ test.describe("web app", () => {
       .poll(async () => (await state(request)).transport.config.bpm)
       .toBe(96);
 
+    // A tempo drag in the browser reaches every widget's model in the kernel,
+    // and the kernel's mirrored writes do not pull the clock back.
+    const tempo = page.locator(
+      "nbplay-transport .nbplay-transport-tempo input[type=range]",
+    );
+    const box = await tempo.boundingBox();
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 40; i++) {
+      await page.mouse.move(box.x + box.width * (0.3 + (0.4 * i) / 40), y);
+    }
+    await page.mouse.up();
+    const dragged = await page.evaluate(
+      () => document.querySelector("nbplay-transport").bpm,
+    );
+    expect(dragged).not.toBe(96);
+    await expect
+      .poll(async () => {
+        const models = await state(request);
+        return [
+          "transport",
+          "launcher",
+          "timeline",
+          "lead-sequencer",
+          "drums-sequencer",
+        ].map((name) => models[name].config.bpm);
+      })
+      .toEqual([dragged, dragged, dragged, dragged, dragged]);
+    expect(
+      await page.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            "nbplay-transport, nbplay-launcher, nbplay-timeline, nbplay-sequencer",
+          ),
+        ].map((el) => Number(el.bpm)),
+      ),
+    ).toEqual([dragged, dragged, dragged, dragged, dragged]);
+
     // The browser owns play state: pressing play updates the kernel's status
     // and every instrument follows the shared clock.
     await page.locator("nbplay-transport .nbplay-transport-play").click();
@@ -136,6 +175,19 @@ test.describe("web app", () => {
     await expect.poll(laidOut).toBe(false);
     await expect(mixer).toBeHidden();
 
+    // The tabs are titled, not labelled with the panel ids.
+    expect(
+      await page.evaluate(() => {
+        const frame = document.querySelector(
+          'regular-layout-frame[name="drums-sampler"]',
+        );
+        const title = (frame.shadowRoot ?? frame).querySelector(
+          'regular-layout-tab[name="drums-sampler"] [part~="title"]',
+        );
+        return getComputedStyle(title, "::before").content;
+      }),
+    ).toBe('"Drums sampler"');
+
     // Ctrl+K lists every panel; picking one puts it back in the layout.
     const dialog = page.locator("nbplay-palette dialog");
     await page.keyboard.press("Control+k");
@@ -154,5 +206,55 @@ test.describe("web app", () => {
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
+  });
+
+  test("save downloads the session and load replaces it", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    await expect(
+      page.locator("regular-layout-frame nbplay-mixer"),
+    ).toBeVisible();
+    await request.post("/set/transport/bpm", { data: { value: 111 } });
+    const tempo = page.locator(
+      "nbplay-transport .nbplay-transport-tempo .nbplay-value-text",
+    );
+    await expect(tempo).toContainText("111");
+    await expect
+      .poll(async () => {
+        const models = await state(request);
+        return [
+          models.launcher.config.bpm,
+          models.timeline.config.bpm,
+          models["lead-sequencer"].config.bpm,
+          models["drums-sequencer"].config.bpm,
+        ];
+      })
+      .toEqual([111, 111, 111, 111]);
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator(".nbplay-app-bar a", { hasText: "save" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe("session.nbplay");
+    const saved = await download.path();
+
+    // Change the session, then load the saved one: the page reloads onto it.
+    await request.post("/set/transport/bpm", { data: { value: 150 } });
+    await expect(tempo).toContainText("150");
+    await page
+      .locator(".nbplay-app-bar nbplay-upload input")
+      .setInputFiles(saved);
+    await expect(tempo).toContainText("111");
+    await expect
+      .poll(async () => (await state(request)).transport.config.bpm)
+      .toBe(111);
+    // The reloaded page talks to the loaded session.
+    await page.locator("nbplay-transport .nbplay-transport-play").click();
+    await expect
+      .poll(async () => (await state(request)).transport.status.is_playing)
+      .toBe(true);
+    await request.post("/command/transport/stop");
   });
 });
