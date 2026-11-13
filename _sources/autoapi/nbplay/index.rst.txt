@@ -29,7 +29,6 @@ Attributes
 
    nbplay.__version__
    nbplay.AudioOutput
-   nbplay.THEMES
 
 
 Classes
@@ -61,13 +60,22 @@ Classes
    nbplay.StepSequencer
    nbplay.TransportClock
    nbplay.Velocity
-   nbplay.AudioClip
-   nbplay.EffectPlugin
-   nbplay.KeyboardRoute
-   nbplay.PadAction
-   nbplay.TimelineTrack
    nbplay.History
    nbplay.MidiLearn
+   nbplay.KeyboardWidget
+   nbplay.LauncherWidget
+   nbplay.MidiKeyboardWidget
+   nbplay.MidiOutputWidget
+   nbplay.MixerWidget
+   nbplay.PadWidget
+   nbplay.SamplerWidget
+   nbplay.SequencerWidget
+   nbplay.Session
+   nbplay.SettingsWidget
+   nbplay.SynthWidget
+   nbplay.TimelineWidget
+   nbplay.Track
+   nbplay.TransportWidget
 
 
 Package Contents
@@ -597,210 +605,6 @@ Package Contents
    :value: None
 
 
-.. py:data:: THEMES
-   :value: ('', 'light', 'dark', 'studio', 'flat', 'cube', 'one', 'grim', 'pro', 'fruit')
-
-
-.. py:class:: AudioClip(*, id=None, name='Clip', track_index=0, start=0.0, duration=4.0, loop=False, muted=False, recorded=False, offset=0.0, audio_url='', blob_type='', source='recording', sample_rate=44100, blob_size=None, color=None, kind='audio', events=None, pattern=None)
-
-   Serializable audio clip descriptor for timeline lanes.
-
-
-   .. py:attribute:: _data
-
-
-   .. py:method:: to_dict()
-
-
-   .. py:method:: __repr__()
-
-
-   .. py:method:: __eq__(other)
-
-
-.. py:class:: EffectPlugin(type, enabled=True, **params)
-
-   Validated Web Audio effect descriptor for mixer insert chains.
-
-
-   .. py:attribute:: _VALID_TYPES
-
-
-   .. py:attribute:: _FILTER_TYPES
-
-
-   .. py:attribute:: type
-
-
-   .. py:attribute:: enabled
-      :value: True
-
-
-
-   .. py:attribute:: params
-
-
-   .. py:method:: _param(params, *names, default=None)
-      :staticmethod:
-
-
-
-   .. py:method:: _number(params, *names, default, low, high)
-      :classmethod:
-
-
-
-   .. py:method:: _normalize_params(type, params)
-
-
-   .. py:method:: to_dict()
-
-
-   .. py:method:: __repr__()
-
-
-   .. py:method:: __eq__(other)
-
-
-   .. py:method:: __hash__()
-
-
-.. py:class:: KeyboardRoute(channel_index: int, *, match: str = 'all', zone: str | None = None, octave: int | None = None, note: int | None = None, notes: list[int] | None = None)
-
-   Validated route descriptor for keyboard → sampler mapping.
-
-   Determines which MIDI notes a ``KeyboardWidget`` or
-   ``MidiKeyboardWidget`` routes to a specific sampler.
-
-   :param channel_index: The sampler's channel index on the session bus (≥ 0).
-   :param match: One of ``"all"``, ``"zone"``, ``"octave"``, ``"note"``, ``"notes"``.
-   :param zone: Required when *match="zone"*. ``"upper"`` or ``"lower"``.
-   :param octave: Required when *match="octave"*. MIDI octave 0–9.
-   :param note: Required when *match="note"*. Single MIDI note 0–127.
-   :param notes: Required when *match="notes"*. Non-empty list of MIDI notes 0–127.
-
-
-   .. py:attribute:: _VALID_MATCHES
-
-
-   .. py:attribute:: _VALID_ZONES
-
-
-   .. py:attribute:: channel_index
-
-
-   .. py:attribute:: match
-      :value: 'all'
-
-
-
-   .. py:attribute:: zone
-      :value: None
-
-
-
-   .. py:attribute:: octave
-      :value: None
-
-
-
-   .. py:attribute:: note
-      :value: None
-
-
-
-   .. py:attribute:: notes
-      :value: None
-
-
-
-   .. py:method:: to_dict() -> dict
-
-      Serialize to the dict format stored in ``sampler_routing``.
-
-      :returns: Dict with keys ``channel_index``, ``match``, and optional fields.
-
-
-
-   .. py:method:: __repr__() -> str
-
-
-   .. py:method:: __eq__(other: object) -> bool
-
-
-   .. py:method:: __hash__() -> int
-
-
-.. py:class:: PadAction(*, type='note', note=60, velocity=None, trait=None, value=None, label=None, slice_index=None)
-
-   Validated pad action descriptor.
-
-   ``type="note"`` is the current playback path. ``type="trait"`` and
-   ``type="event"`` provide a stable synced shape for future controller pads.
-
-
-   .. py:attribute:: _VALID_TYPES
-
-
-   .. py:attribute:: type
-      :value: 'note'
-
-
-
-   .. py:attribute:: note
-
-
-   .. py:attribute:: velocity
-      :value: None
-
-
-
-   .. py:attribute:: trait
-      :value: None
-
-
-
-   .. py:attribute:: value
-      :value: None
-
-
-
-   .. py:attribute:: label
-      :value: ''
-
-
-
-   .. py:attribute:: slice_index
-      :value: None
-
-
-
-   .. py:method:: to_dict()
-
-
-   .. py:method:: __repr__()
-
-
-   .. py:method:: __eq__(other)
-
-
-.. py:class:: TimelineTrack(*, name='Track', channel_index=0, armed=False, muted=False, solo=False, input='microphone', monitor=False)
-
-   Serializable track-lane descriptor for ``TimelineWidget``.
-
-
-   .. py:attribute:: _data
-
-
-   .. py:method:: to_dict()
-
-
-   .. py:method:: __repr__()
-
-
-   .. py:method:: __eq__(other)
-
-
 .. py:class:: History(limit=100, group_window=0.3)
 
    Undo/redo stack over the config fields of attached widgets.
@@ -1009,5 +813,1246 @@ Package Contents
 
 
    .. py:method:: _handle(message)
+
+
+.. py:class:: KeyboardWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`_Keys`
+
+
+   The QWERTY musical-typing keyboard on a transports session.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-keyboard'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: LauncherWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The clip launcher on a transports session.
+
+   Slots hold step patterns in the sequencer's ``voices_data`` shape; the
+   browser owns play and slot state, and launches are commands.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-launcher'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_track(name='Track', channel_index=None)
+
+      Append a track row and return its index.
+
+
+
+   .. py:method:: remove_track(index)
+
+      Remove a track row, dropping its slots and shifting later rows.
+
+
+
+   .. py:method:: add_scene(name=None)
+
+      Append a scene column and return its index.
+
+
+
+   .. py:method:: _check_indices(track_index, scene_index=None)
+
+
+   .. py:method:: _find_slot(track_index, scene_index)
+
+
+   .. py:method:: set_slot(track_index, scene_index, pattern, *, name=None, step_duration=None, swing=0.0, groove=None)
+
+      Fill a slot with a pattern and return it.
+
+      ``pattern`` may be a :class:`SequencerWidget` (whose grid, swing and
+      groove fill the unspecified arguments), a list of step dicts, or a
+      list of voices.
+
+
+
+   .. py:method:: get_slot(track_index, scene_index)
+
+      The slot at ``(track_index, scene_index)``, or ``None``.
+
+
+
+   .. py:method:: clear_slot(track_index, scene_index)
+
+      Empty a slot.
+
+
+
+   .. py:method:: bind_slot_editor(sequencer)
+
+      Edit whichever slot is selected in ``sequencer`` (a :class:`SequencerWidget`); returns an unbinder.
+
+      Selecting a slot, in the browser or by assigning ``config.selected_slot``,
+      loads it into the sequencer; the sequencer's step, grid, swing and
+      groove edits write back into that slot.
+
+
+
+   .. py:method:: slot_to_sequencer(track_index, scene_index, sequencer)
+
+      Load a slot's pattern, grid, swing and groove into a :class:`SequencerWidget`.
+
+
+
+   .. py:method:: launch(track_index, scene_index)
+
+      Launch a slot on the next quantization boundary.
+
+
+
+   .. py:method:: stop_track(track_index)
+
+      Stop a track's playing slot.
+
+
+
+   .. py:method:: launch_scene(scene_index)
+
+      Launch every slot in a scene; tracks with no slot there stop.
+
+
+
+   .. py:method:: stop_all()
+
+      Stop every playing slot.
+
+
+
+.. py:class:: MidiKeyboardWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`_Keys`
+
+
+   The Web MIDI keyboard on a transports session; ports and clock are browser-owned.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-midi-keyboard'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: MidiOutputWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   A Web MIDI output; sends are commands delivered to the owning widget.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-midi-output'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: _request(**message)
+
+
+   .. py:method:: note_on(note, velocity=100)
+
+      Send a note-on on the output's channel.
+
+
+
+   .. py:method:: note_off(note)
+
+      Send a note-off on the output's channel.
+
+
+
+   .. py:method:: control_change(controller, value)
+
+      Send a control change (0-127) on the output's channel.
+
+
+
+   .. py:method:: send_raw(data)
+
+      Send raw MIDI bytes, for example ``[0xC0, 5]`` for a program change.
+
+
+
+.. py:class:: MixerWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The mixer console on a transports session.
+
+   The console is configuration only: faders, pans, mutes, sends and
+   effects live in the kernel model, and the browser builds the Web Audio
+   graph from it. Edits in either place are validated by
+   :class:`~nbplay.models.MixerConfig`.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-mixer'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_channel(name='Channel')
+
+      Append a channel strip and return its index.
+
+
+
+   .. py:method:: remove_channel(index)
+
+      Remove the channel at ``index``.
+
+
+
+   .. py:method:: _update_channel(index, **fields)
+
+
+   .. py:method:: set_channel_gain(index, gain)
+
+
+   .. py:method:: set_channel_pan(index, pan)
+
+
+   .. py:method:: set_channel_mute(index, mute)
+
+
+   .. py:method:: set_channel_solo(index, solo)
+
+
+   .. py:method:: set_channel_effects(index, effects)
+
+      Replace the insert chain of the channel at ``index``.
+
+
+
+   .. py:method:: add_channel_effect(index, effect)
+
+      Append an insert effect to the channel at ``index``.
+
+
+
+   .. py:method:: set_channel_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one channel insert effect.
+
+
+
+   .. py:method:: clear_channel_effects(index)
+
+      Remove every insert effect from the channel at ``index``.
+
+
+
+   .. py:method:: set_master_effects(effects)
+
+      Replace the master bus insert chain.
+
+
+
+   .. py:method:: add_master_effect(effect)
+
+      Append an insert effect to the master bus.
+
+
+
+   .. py:method:: set_master_effect_enabled(effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one master insert effect.
+
+
+
+   .. py:method:: clear_master_effects()
+
+      Remove every insert effect from the master bus.
+
+
+
+   .. py:method:: add_return(name='Return', effects=(), gain=0.8)
+
+      Append a send/return bus and return its index; every channel gains a send.
+
+
+
+   .. py:method:: remove_return(index)
+
+      Remove a return bus and every channel's send to it.
+
+
+
+   .. py:method:: _update_return(index, **fields)
+
+
+   .. py:method:: set_return_gain(index, gain)
+
+
+   .. py:method:: set_return_effects(index, effects)
+
+      Replace a return bus's effect chain.
+
+
+
+   .. py:method:: add_return_effect(index, effect)
+
+      Append an effect to a return bus's chain.
+
+
+
+   .. py:method:: set_return_effect_enabled(index, effect_index, enabled=True)
+
+      Bypass (``False``) or re-enable one return bus effect.
+
+
+
+   .. py:method:: set_send(channel_index, return_index, level)
+
+      Set a channel's post-fader send level (0 to 1) to a return bus.
+
+
+
+   .. py:method:: to_mixer()
+
+      A Rust ``Mixer`` with this console's channels and master gain.
+
+
+
+.. py:class:: PadWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`_NoteSource`
+
+
+   The trigger-pad grid on a transports session; the browser owns the taps.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-pads'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: configure_grid_for_actions(notes=None, velocities=None, actions=None, rows=None, cols=None)
+
+      Size the grid for the given notes, velocities or actions and apply them.
+
+
+
+   .. py:method:: set_base_note(note)
+
+      Lay the pads out chromatically from ``note``.
+
+
+
+   .. py:method:: transpose_pads(semitones)
+
+      Shift every pad note by ``semitones``.
+
+
+
+   .. py:method:: connect_sampler(sampler, **kwargs)
+
+      Route the pads to ``sampler``; pads have no zones, so ``zone`` must be ``None`` or ``"all"``.
+
+
+
+.. py:class:: SamplerWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The sampler on a transports session.
+
+   Sample PCM travels as bytes; zones carry their own bytes. Capturing a
+   browser-side clip is a command the owning widget decodes.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-sampler'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: _set_sample_data(samples, **fields)
+
+
+   .. py:method:: get_sample_data()
+
+      The main sample as floats.
+
+
+
+   .. py:method:: load_sample(data, sample_rate=44100, root_note=69, name='Sample')
+
+      Load mono float samples (or float32 bytes) as the main sample.
+
+
+
+   .. py:method:: load_audio_file(path, root_note=69, name=None)
+
+      Load an audio file (WAV through the stdlib, others through ``soundfile``) as the main sample.
+
+
+
+   .. py:method:: trim_sample(start=0, end=None)
+
+      Keep the frames in ``[start, end)``.
+
+
+
+   .. py:method:: normalize_sample(target=1.0)
+
+      Scale the sample so its peak reaches ``target``.
+
+
+
+   .. py:method:: reverse_sample()
+
+      Reverse the sample.
+
+
+
+   .. py:method:: fade_sample(fade_in=0, fade_out=0)
+
+      Apply linear fades of the given frame counts.
+
+
+
+   .. py:method:: slice_sample(count, start_note=36)
+
+      Cut the sample into ``count`` equal slices on ascending notes and put them on the pads.
+
+
+
+   .. py:method:: map_slices_to_pads(pads, count=None, start_note=36)
+
+      Put the slices on a :class:`PadWidget` (slicing first when needed) and route the pads here.
+
+
+
+   .. py:method:: configure_pads(pad_count=None, pad_notes=None, pad_velocities=None, pad_actions=None)
+
+      Set the pad count and per-pad notes, velocities or actions.
+
+
+
+   .. py:method:: add_zone(data, note_low=0, note_high=127, *, velocity_low=0, velocity_high=127, root_note=None, sample_rate=44100, name=None)
+
+      Add a sample zone covering a note and velocity range; returns the zone.
+
+
+
+   .. py:method:: add_zone_file(path, note_low=0, note_high=127, **kwargs)
+
+      Add a zone from an audio file (WAV through the stdlib, others through ``soundfile``).
+
+
+
+   .. py:method:: set_zone(index, **fields)
+
+      Update fields of one zone (range, root note, name); returns the zone.
+
+
+
+   .. py:method:: remove_zone(index)
+
+      Remove the zone at ``index``.
+
+
+
+   .. py:method:: clear_zones()
+
+
+   .. py:method:: zone_for(note, velocity=100)
+
+      The first zone answering to ``note`` at ``velocity``, or ``None``.
+
+
+
+   .. py:method:: zone_samples(index)
+
+      One zone's PCM as floats.
+
+
+
+   .. py:method:: to_sample_map()
+
+      A Rust ``SampleMap``: the zones in order, then the main sample as the fallback.
+
+
+
+   .. py:method:: to_sampler()
+
+      A Rust ``Sampler`` with the main sample, envelope and polyphony.
+
+
+
+   .. py:method:: capture_clip(timeline, clip_id, pad=None, note=None, name=None)
+
+      Turn a timeline audio clip into a zone, decoded by the owning browser widget.
+
+      With ``pad`` (index) or ``note`` the zone answers to that one note and
+      plays unpitched there; otherwise it covers every note. The clip's
+      trim (``offset`` and ``duration``, in beats) is honoured.
+
+
+
+   .. py:method:: capture(url, *, name='Take', note=None, offset=0.0, duration=0.0)
+
+      Ask the owning widget to decode a browser-side audio URL into a zone.
+
+      With ``note`` the zone answers to that one note and plays unpitched
+      there; otherwise it covers every note at the sampler's root note.
+      ``offset`` and ``duration`` are seconds into the source.
+
+
+
+.. py:class:: SequencerWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The step sequencer on a transports session.
+
+   Steps are edited through ``voices_data``; play state and the sounding
+   step belong to the browser scheduler.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-sequencer'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: configure_grid(measures=None, step_duration=None)
+
+      Set the grid from a measure count and a step duration in beats; the length follows.
+
+
+
+   .. py:property:: steps
+
+      Voice 0's steps.
+
+
+   .. py:method:: set_step(index, note=60, velocity=100, duration_ticks=1, active=True, voice=0, probability=100)
+
+      Set one step of one voice.
+
+
+
+   .. py:method:: toggle_step(index, voice=0)
+
+      Flip one step's active state.
+
+
+
+   .. py:method:: clear()
+
+      Deactivate every step.
+
+
+
+   .. py:method:: to_pattern(voice=0)
+
+      A Rust ``Pattern`` of one voice, or ``None`` when ``voice`` is out of range.
+
+
+
+   .. py:method:: to_step_sequencer(channel=0, voice=0)
+
+      A Rust ``StepSequencer`` of one voice on a MIDI channel, or ``None`` when ``voice`` is out of range.
+
+
+
+   .. py:method:: to_midi(path=None, name='Sequencer')
+
+      The pattern as a ``mido.MidiFile``, written to ``path`` when given.
+
+
+
+   .. py:method:: load_midi(source, track=None, step_duration=None, max_voices=8)
+
+      Replace the pattern with the notes of a MIDI file; see ``SequencerWidget.load_midi``.
+
+
+
+   .. py:method:: play()
+
+      Start playback in the owning widget (the session clock when shared).
+
+
+
+   .. py:method:: stop()
+
+      Stop playback in the owning widget.
+
+
+
+.. py:class:: Session(bpm=120.0, time_signature=(4, 4), theme='')
+
+   Transport, mixer, timeline and launcher widgets sharing one browser session.
+
+   Every widget carries the same ``session_id``, so the browser gives them
+   one audio bus and one clock, which keeps play state, position and tempo
+   consistent across them. Each widget hosts its models in its own transports
+   ``Session``: transports grants a connection ownership of every
+   client-owned field in the session it connects to, so widgets that shared
+   one would fight over each other's status. In the kernel the :attr:`bpm`,
+   :attr:`time_signature` and :attr:`theme` properties write every widget's
+   config, :attr:`history` records every widget's config edits for
+   :meth:`undo` and :meth:`redo`, and lane mute and solo mirror the mixer
+   channels. :meth:`add_pattern` and :meth:`chain` lay named patterns out
+   as clips, and :meth:`export_midi` and :meth:`import_midi` move the
+   arrangement through ``.mid`` files, and :meth:`save` and :meth:`load`
+   read and write the same ``.nbplay`` archive as the traitlets
+   :class:`nbplay.widget.Session`.
+
+
+   .. py:attribute:: _session_id
+      :value: 'nbplay-00000000'
+
+
+
+   .. py:attribute:: transport
+
+
+   .. py:attribute:: mixer
+
+
+   .. py:attribute:: timeline
+
+
+   .. py:attribute:: launcher
+
+
+   .. py:attribute:: tracks
+      :value: []
+
+
+
+   .. py:attribute:: patterns
+
+
+   .. py:attribute:: history
+
+
+   .. py:attribute:: _mirroring_mute_solo
+      :value: False
+
+
+
+   .. py:method:: _on_timeline_tracks(widget, name, old, tracks)
+
+
+   .. py:method:: _on_mixer_channels(widget, name, old, channels)
+
+
+   .. py:method:: undo()
+
+      Revert the latest change to any widget; False when nothing to undo.
+
+
+
+   .. py:method:: redo()
+
+      Reapply the latest undone change; False when nothing to redo.
+
+
+
+   .. py:property:: session_id
+
+      The browser session id every widget shares.
+
+
+   .. py:property:: widgets
+
+      Every widget in the session, including track instruments.
+
+
+   .. py:property:: bpm
+
+
+   .. py:property:: time_signature
+
+
+   .. py:property:: theme
+
+
+   .. py:method:: play()
+
+      Start the shared clock.
+
+
+
+   .. py:method:: stop()
+
+      Stop the shared clock.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move the shared clock.
+
+
+
+   .. py:method:: add_track(name, sequencer=None, sound_source=None, *, input=None, armed=False)
+
+      Add a track: a mixer channel, a timeline lane, a launcher row, and the instruments' routing.
+
+
+
+   .. py:method:: _add_track(name, sequencer, sound_source, *, input, armed)
+
+
+   .. py:method:: remove_track(index)
+
+      Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down.
+
+
+
+   .. py:method:: _track_index(track)
+
+
+   .. py:method:: add_pattern(name, pattern, step_duration=None)
+
+      Register a named pattern for chaining; returns its stored form.
+
+      ``pattern`` is a :class:`SequencerWidget` (whose step duration is used),
+      a list of step dicts, or a list of voices.
+
+
+
+   .. py:method:: remove_pattern(name)
+
+      Forget a pattern; clips already placed keep playing as MIDI clips.
+
+
+
+   .. py:method:: chain(track, names, start=0.0, repeat=1)
+
+      Place named patterns back to back on a track's lane; returns the clips.
+
+      A track with a sequencer stops following the transport so the
+      arrangement drives it. The whole chain is one undo step.
+
+
+
+   .. py:method:: update_pattern(name, pattern, step_duration=None)
+
+      Replace a pattern and regenerate every clip placed from it, as one undo step.
+
+
+
+   .. py:method:: export_midi(path=None)
+
+      The sequencer patterns and MIDI clips as one ``mido.MidiFile``, written to ``path`` when given.
+
+      Each sequencer track becomes one MIDI track from beat 0; each MIDI
+      clip becomes one MIDI track at its timeline position.
+
+
+
+   .. py:method:: import_midi(source, *, apply_tempo=True)
+
+      Add one MIDI lane per MIDI track with notes, each holding the track as a clip; returns the tracks.
+
+      With ``apply_tempo`` the file's tempo and time signature are applied.
+
+
+
+   .. py:method:: to_dict()
+
+      The session as a JSON-safe dict (no binary payloads); see :meth:`save`.
+
+
+
+   .. py:method:: save(path)
+
+      Write the session to a ``.nbplay`` zip archive; returns the path.
+
+      The archive holds ``session.json`` plus ``samples/`` (sampler PCM as
+      little-endian float32) and ``clips/`` (timeline clip audio that has
+      arrived from the browser; call ``session.timeline.export_all_clips()``
+      first and wait for ``pending_exports`` to reach zero). The widget
+      session reads the same archive.
+
+
+
+   .. py:method:: load(path)
+      :classmethod:
+
+
+      Rebuild a session from an archive written by :meth:`save` (of either session class).
+
+
+
+   .. py:method:: from_dict(data, resources=None)
+      :classmethod:
+
+
+      Rebuild a session from :meth:`to_dict` output plus binary resources.
+
+
+
+   .. py:method:: close()
+
+      Close every widget.
+
+
+
+.. py:class:: SettingsWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   Audio and MIDI device settings; the browser owns the port list and MIDI monitor.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-settings'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: SynthWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The synth instrument on a transports session.
+
+   :class:`~nbplay.models.SynthConfig` renders the waveform preview as
+   part of validation, so kernel and browser edits both refresh it.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-synth'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: play()
+
+      Start the tone in the owning widget.
+
+
+
+   .. py:method:: stop()
+
+      Stop the tone in the owning widget.
+
+
+
+.. py:class:: TimelineWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The tracking widget on a transports session.
+
+   Lanes and clips are kernel configuration; play, record and transfer
+   state belong to the browser. Clip audio export and import go through
+   the config fields the element watches.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-timeline'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: _clip_audio
+
+
+   .. py:attribute:: _export_queue
+      :value: []
+
+
+
+   .. py:method:: _on_clip_exported(widget, name, old, data)
+
+
+   .. py:property:: clip_audio
+
+      Clip audio bytes received from the browser, keyed by clip id.
+
+
+   .. py:property:: pending_exports
+
+      Number of clip exports still waiting on the browser.
+
+
+   .. py:method:: export_all_clips(*, refresh=False)
+
+      Ask the browser for every clip's audio, one clip at a time; returns the number queued.
+
+      The bytes accumulate in :attr:`clip_audio` as they arrive; wait for
+      :attr:`pending_exports` to reach zero before saving. Clips whose audio
+      is already cached are skipped unless ``refresh`` is true.
+
+
+
+   .. py:method:: add_track(name='Track', channel_index=None, *, armed=False, monitor=False, input='microphone')
+
+      Append a lane and return its index.
+
+
+
+   .. py:method:: remove_track(index)
+
+      Remove a lane, dropping its clips and shifting later lanes.
+
+
+
+   .. py:method:: arm_track(index, armed=True, *, exclusive=False)
+
+      Arm or disarm a lane; ``exclusive`` disarms every other lane.
+
+
+
+   .. py:method:: _find_clip(clip_id)
+
+
+   .. py:method:: _midi_clip(clip_id)
+
+
+   .. py:method:: _append_clip(clip)
+
+
+   .. py:method:: add_clip(name='Clip', track_index=0, start=0.0, duration=4.0, **kwargs)
+
+      Append a clip, select it, and grow the timeline to fit it.
+
+
+
+   .. py:method:: add_midi_clip(name='MIDI', track_index=0, start=0.0, events=(), duration=None, **kwargs)
+
+      Append a MIDI clip; ``duration`` defaults to the end of the last event.
+
+
+
+   .. py:method:: add_pattern_clip(name, pattern, track_index=0, start=0.0, step_duration=0.25, repeat=1, duration=None, **kwargs)
+
+      Append a MIDI clip that plays ``pattern`` (a :class:`SequencerWidget`, step dicts or voices) ``repeat`` times.
+
+
+
+   .. py:method:: export_midi_clip(clip_id, path=None)
+
+      One MIDI clip as a ``mido.MidiFile``, written to ``path`` when given.
+
+
+
+   .. py:method:: import_midi(source, track_index=0, start=0.0)
+
+      Add one MIDI clip per MIDI track with notes, all on one lane at ``start``; returns the clips.
+
+
+
+   .. py:method:: clip_to_event_sequence(clip_id)
+
+      A MIDI clip's events as a Rust ``EventSequence``.
+
+
+
+   .. py:method:: remove_clip(clip_id)
+
+      Remove a clip by id.
+
+
+
+   .. py:method:: _edit_clip(clip_id, **fields)
+
+
+   .. py:method:: move_clip(clip_id, *, track_index=None, start=None)
+
+      Move a clip to another lane or beat position.
+
+
+
+   .. py:method:: resize_clip(clip_id, duration)
+
+      Set a clip's duration in beats.
+
+
+
+   .. py:method:: duplicate_clip(clip_id)
+
+      Copy a clip onto the same lane right after the original; returns the copy.
+
+
+
+   .. py:method:: export_clip(clip_id)
+
+      Ask the browser for a clip's audio; it arrives in ``status.exported_clip_data``.
+
+
+
+   .. py:method:: write_exported_clip(path)
+
+      Write the most recently exported clip's bytes to ``path``; returns the clip.
+
+
+
+   .. py:method:: import_clip(data, name='Import', track_index=0, start=0.0, duration=None, blob_type='audio/webm', **kwargs)
+
+      Add a clip backed by audio bytes (or a file path); the browser attaches a playable URL.
+
+      When ``duration`` is omitted the browser measures the audio and fills it in.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move a standalone timeline's playhead (a session seeks through its transport).
+
+
+
+   .. py:method:: play()
+
+      Start playback in the owning widget.
+
+
+
+   .. py:method:: stop()
+
+      Stop playback in the owning widget.
+
+
+
+   .. py:method:: record(on=True)
+
+      Start or stop recording the armed lanes.
+
+
+
+.. py:class:: Track(name, sequencer=None, sound_source=None, mixer_channel=0)
+
+   A session lane: a mixer channel plus an optional sequencer and sound source.
+
+
+   .. py:attribute:: name
+
+
+   .. py:attribute:: sequencer
+      :value: None
+
+
+
+   .. py:attribute:: sound_source
+      :value: None
+
+
+
+   .. py:attribute:: mixer_channel
+      :value: 0
+
+
+
+   .. py:method:: __repr__()
+
+
+.. py:class:: TransportWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   The transport instrument on a transports session.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-transport'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS_EVENTS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: play()
+
+      Start the clock in the owning widget.
+
+
+
+   .. py:method:: stop()
+
+      Stop the clock in the owning widget.
+
+
+
+   .. py:method:: seek(beat)
+
+      Move the clock to ``beat``.
+
+
+
+   .. py:method:: record(on=True)
+
+      Arm or disarm recording; arming also starts the clock.
+
 
 

@@ -1046,8 +1046,11 @@ scheduled steps update the element property only, so a tick costs no comm traffi
 <p>The UI includes play, stop, record, BPM, step duration, measure count, loop, a
 header row, step rows, and velocity rows. Clicking a cell toggles active state.
 Mouse wheel over a step changes note. Mouse wheel over a velocity cell changes
-velocity. If a keyboard is connected, double-clicking a cell waits for the next
-<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> event and writes that note into the cell. Recording arms all voices
+velocity. Double-clicking a cell opens a text field for a note name (<code class="docutils literal notranslate"><span class="pre">F#3</span></code>) or a
+MIDI number; Enter or a click elsewhere writes the note and activates the step,
+Escape cancels. If a keyboard is connected, double-clicking a cell instead waits
+for the next <code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> event and writes that note into the cell. Recording
+arms all voices
 or individual voice dots and writes live note-on events into the current step
 while playing.</p>
 <p>Important extension points are the grid reconciliation helpers, scheduler helper
@@ -1370,7 +1373,9 @@ transports session gets a <code class="docutils literal notranslate"><span class
 whose frames hold <code class="docutils literal notranslate"><span class="pre">widget.tree(&quot;&lt;panel&gt;.&quot;)</span></code>, and <code class="docutils literal notranslate"><span class="pre">widget.wires(&quot;&lt;panel&gt;.&quot;,</span> <span class="pre">url=...)</span></code> gives the <code class="docutils literal notranslate"><span class="pre">Wire</span></code> specs that mirror the config and status models under
 that panel’s namespace in the page’s one store. <code class="docutils literal notranslate"><span class="pre">panel_widgets()</span></code> names the
 panels (<code class="docutils literal notranslate"><span class="pre">transport</span></code>, <code class="docutils literal notranslate"><span class="pre">launcher</span></code>, <code class="docutils literal notranslate"><span class="pre">timeline</span></code>, <code class="docutils literal notranslate"><span class="pre">mixer</span></code>, then <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-sequencer</span></code>
-and <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-synth</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-sampler</span></code>) and <code class="docutils literal notranslate"><span class="pre">default_layout()</span></code> is the split
+and <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-synth</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;track&gt;-sampler</span></code>), <code class="docutils literal notranslate"><span class="pre">panel_titles()</span></code> gives each tab its
+title (<code class="docutils literal notranslate"><span class="pre">Mixer</span></code>, <code class="docutils literal notranslate"><span class="pre">Lead</span> <span class="pre">synth</span></code>) through regular-layout’s
+<code class="docutils literal notranslate"><span class="pre">--regular-layout-&lt;name&gt;--title</span></code> custom property, and <code class="docutils literal notranslate"><span class="pre">default_layout()</span></code> is the split
 tree: the transport across the top, launcher, timeline and mixer in the
 middle, the instruments in a tab strip below. A top bar holds the title and a
 theme select bound two-way to the transport’s <code class="docutils literal notranslate"><span class="pre">theme</span></code>; the <code class="docutils literal notranslate"><span class="pre">Session</span></code> mirrors
@@ -1380,6 +1385,12 @@ closed panel is reopened from the palette: <code class="docutils literal notrans
 names, opens on Ctrl+K or Cmd+K or from the bar’s <code class="docutils literal notranslate"><span class="pre">panels</span></code> button
 (<code class="docutils literal notranslate"><span class="pre">nbplay-palette-hint</span></code>, which shows the shortcut for the platform), and its
 <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> event invokes the layout’s <code class="docutils literal notranslate"><span class="pre">openPanel</span></code> with the picked name.
+The bar’s save link downloads <code class="docutils literal notranslate"><span class="pre">session.nbplay</span></code> (<code class="docutils literal notranslate"><span class="pre">Session.save()</span></code>, after asking
+the page to export recorded clip audio) and its load button (<code class="docutils literal notranslate"><span class="pre">nbplay-upload</span></code>)
+PUTs a picked archive to the same URL. <code class="docutils literal notranslate"><span class="pre">build()</span></code> answers a load by replacing
+the session it serves: it rebuilds the app’s routes (page, one WebSocket per
+panel, probes) for the loaded session, restarts the <code class="docutils literal notranslate"><span class="pre">autosync</span></code> tasks, and the
+page reloads. <code class="docutils literal notranslate"><span class="pre">app.state.session</span></code> is the session being served.
 <code class="docutils literal notranslate"><span class="pre">APP_CSS</span></code> maps regular-layout’s surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> finds the client for its panel and kernel commands

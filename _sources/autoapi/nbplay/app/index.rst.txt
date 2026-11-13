@@ -35,6 +35,7 @@ Functions
 .. autoapisummary::
 
    nbplay.app.panel_widgets
+   nbplay.app.panel_titles
    nbplay.app.default_layout
    nbplay.app.build
    nbplay.app.demo_session
@@ -48,6 +49,11 @@ Module Contents
    Panel name to widget: the session views, then each track's sequencer and sound source.
 
 
+.. py:function:: panel_titles(session)
+
+   Panel name to the title on its tab: ``Mixer``, or the track's name and the instrument (``Lead synth``).
+
+
 .. py:function:: default_layout(names)
 
    The transport across the top, launcher, timeline and mixer in the middle, instruments below.
@@ -57,10 +63,16 @@ Module Contents
 
    A Starlette app serving ``session``: one WebSocket per instrument and a panel layout page.
 
-   The page is a top bar (``title`` and a theme select) over the panels.
-   ``layout`` is a regular-layout split/tab tree over the panel names from
-   :func:`panel_widgets`; ``probes`` adds the JSON routes the browser tests
-   drive. Other keyword options go to :func:`spaday.backends.starlette.serve`.
+   The page is a top bar (``title``, the panel palette, save and load, and a
+   theme select) over the panels. ``layout`` is a regular-layout split/tab
+   tree over the panel names from :func:`panel_widgets`; ``probes`` adds the
+   JSON routes the browser tests drive. Other keyword options go to
+   :func:`spaday.backends.starlette.build_routes`.
+
+   ``GET /session.nbplay`` downloads the session as a ``.nbplay`` archive and
+   ``PUT /session.nbplay`` replaces the served session with an uploaded one,
+   after which the page has to be reloaded. ``app.state.session`` is the
+   session being served.
 
 
 .. py:class:: Standalone(session, *, layout=None, title='nbplay')

@@ -36,6 +36,15 @@ Module Contents
    .. py:method:: test_served_page_binds_every_panel_and_provides_its_wires()
 
 
+   .. py:method:: test_served_app_saves_the_session_and_loads_another()
+
+
+   .. py:method:: test_save_waits_for_the_browser_to_export_recorded_clips(monkeypatch)
+
+
+   .. py:method:: test_standalone_page_has_no_session_file_controls()
+
+
    .. py:method:: test_served_page_provides_its_wires_to_the_root()
 
 

@@ -207,6 +207,9 @@
     <a href="#nbplay.app.panel_widgets">panel_widgets()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.app.panel_titles">panel_titles()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.app.default_layout">default_layout()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -294,13 +297,16 @@ for a Pyodide Web Worker, with <code class="docutils literal notranslate"><span 
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.panel_widgets" title="nbplay.app.panel_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_widgets</span></code></a>(session)</p></td>
 <td><p>Panel name to widget: the session views, then each track's sequencer and sound source.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.default_layout" title="nbplay.app.default_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_layout</span></code></a>(names)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.panel_titles" title="nbplay.app.panel_titles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_titles</span></code></a>(session)</p></td>
+<td><p>Panel name to the title on its tab: <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>, or the track's name and the instrument (<code class="docutils literal notranslate"><span class="pre">Lead</span> <span class="pre">synth</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.default_layout" title="nbplay.app.default_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_layout</span></code></a>(names)</p></td>
 <td><p>The transport across the top, launcher, timeline and mixer in the middle, instruments below.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.build" title="nbplay.app.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a>(session, *[, layout, title, probes])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.build" title="nbplay.app.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a>(session, *[, layout, title, probes])</p></td>
 <td><p>A Starlette app serving <code class="docutils literal notranslate"><span class="pre">session</span></code>: one WebSocket per instrument and a panel layout page.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.demo_session" title="nbplay.app.demo_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_session</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.demo_session" title="nbplay.app.demo_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_session</span></code></a>()</p></td>
 <td><p>Two tracks: a saw lead on a sequencer and a sampler kit with a kick.</p></td>
 </tr>
 </tbody>
@@ -315,6 +321,12 @@ for a Pyodide Web Worker, with <code class="docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="nbplay.app.panel_titles">
+<span class="sig-prename descclassname"><span class="pre">nbplay.app.</span></span><span class="sig-name descname"><span class="pre">panel_titles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.app.panel_titles" title="Link to this definition">¶</a></dt>
+<dd><p>Panel name to the title on its tab: <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>, or the track’s name and the instrument (<code class="docutils literal notranslate"><span class="pre">Lead</span> <span class="pre">synth</span></code>).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="nbplay.app.default_layout">
 <span class="sig-prename descclassname"><span class="pre">nbplay.app.</span></span><span class="sig-name descname"><span class="pre">default_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.app.default_layout" title="Link to this definition">¶</a></dt>
 <dd><p>The transport across the top, launcher, timeline and mixer in the middle, instruments below.</p>
@@ -324,10 +336,15 @@ for a Pyodide Web Worker, with <code class="docutils literal notranslate"><span 
 <dt class="sig sig-object py" id="nbplay.app.build">
 <span class="sig-prename descclassname"><span class="pre">nbplay.app.</span></span><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nbplay'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.app.build" title="Link to this definition">¶</a></dt>
 <dd><p>A Starlette app serving <code class="docutils literal notranslate"><span class="pre">session</span></code>: one WebSocket per instrument and a panel layout page.</p>
-<p>The page is a top bar (<code class="docutils literal notranslate"><span class="pre">title</span></code> and a theme select) over the panels.
-<code class="docutils literal notranslate"><span class="pre">layout</span></code> is a regular-layout split/tab tree over the panel names from
-<a class="reference internal" href="#nbplay.app.panel_widgets" title="nbplay.app.panel_widgets"><code class="xref py py-func docutils literal notranslate"><span class="pre">panel_widgets()</span></code></a>; <code class="docutils literal notranslate"><span class="pre">probes</span></code> adds the JSON routes the browser tests
-drive. Other keyword options go to <code class="xref py py-func docutils literal notranslate"><span class="pre">spaday.backends.starlette.serve()</span></code>.</p>
+<p>The page is a top bar (<code class="docutils literal notranslate"><span class="pre">title</span></code>, the panel palette, save and load, and a
+theme select) over the panels. <code class="docutils literal notranslate"><span class="pre">layout</span></code> is a regular-layout split/tab
+tree over the panel names from <a class="reference internal" href="#nbplay.app.panel_widgets" title="nbplay.app.panel_widgets"><code class="xref py py-func docutils literal notranslate"><span class="pre">panel_widgets()</span></code></a>; <code class="docutils literal notranslate"><span class="pre">probes</span></code> adds the
+JSON routes the browser tests drive. Other keyword options go to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">spaday.backends.starlette.build_routes()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/session.nbplay</span></code> downloads the session as a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive and
+<code class="docutils literal notranslate"><span class="pre">PUT</span> <span class="pre">/session.nbplay</span></code> replaces the served session with an uploaded one,
+after which the page has to be reloaded. <code class="docutils literal notranslate"><span class="pre">app.state.session</span></code> is the
+session being served.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -444,6 +461,9 @@ theme, mute and solo), so every server is flushed.</p>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.app.panel_widgets">panel_widgets()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.app.panel_titles">panel_titles()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.app.default_layout">default_layout()</a>
