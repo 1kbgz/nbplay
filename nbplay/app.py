@@ -16,8 +16,11 @@ for a Pyodide Web Worker, with ``postMessage`` in place of the WebSockets
 from __future__ import annotations
 
 import argparse
+import asyncio
+import io
 import json
 import re
+import zipfile
 
 import transports
 from spaday import Invoke, by_id, element, event_prop
@@ -28,6 +31,9 @@ from .descriptors import THEMES
 from .widget import InstrumentWidget, SamplerWidget, SequencerWidget, Session, SynthWidget
 
 __all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_titles", "panel_widgets")
+
+#: The session archive on the served app: ``GET`` downloads it, ``PUT`` replaces the session.
+SESSION_URL = "session.nbplay"
 
 #: The page chrome follows the nbplay tokens: the document root carries the
 #: session theme, and regular-layout's own tokens map onto nbplay's.
@@ -47,6 +53,12 @@ html, body { margin: 0; height: 100%; background: var(--nbplay-bg); color: var(-
   font-family: var(--nbplay-font-mono); font-size: var(--nbplay-font-size-small); color: var(--nbplay-fg-muted);
 }
 .nbplay-app-bar nbplay-palette-hint { margin-left: auto; }
+.nbplay-app-bar a {
+  display: inline-flex; align-items: center; height: var(--nbplay-control-height); box-sizing: border-box; padding: 0 6px;
+  font-family: var(--nbplay-font-mono); font-size: var(--nbplay-font-size-small); color: var(--nbplay-fg-muted); text-decoration: none;
+  background: var(--nbplay-bg-control); border: 1px solid var(--nbplay-border); border-radius: var(--nbplay-radius-control);
+}
+.nbplay-app-bar a:hover { color: var(--nbplay-fg); }
 .nbplay-app-bar select {
   height: var(--nbplay-control-height); padding: 0 6px; font: inherit;
   background: var(--nbplay-bg-control); color: var(--nbplay-fg);
@@ -144,11 +156,21 @@ def default_layout(names):
     return {"type": "split-layout", "orientation": "vertical", "sizes": sizes, "children": rows}
 
 
-def _app_bar(title):
+def _app_bar(title, files):
     """Title, a button that opens the panel palette and shows its shortcut, and a theme select.
 
     The select is bound to the transport's theme, which the session mirrors to every widget.
+    ``files`` adds save (a download link) and load (an upload button) for the session archive
+    at :data:`SESSION_URL`, which only a server answers.
     """
+    files = (
+        [
+            element("a", href=SESSION_URL, download=SESSION_URL, title="Download the session").text("save"),
+            element("nbplay-upload", url=SESSION_URL, label="load", accept=".nbplay", title="Replace the session with a saved one"),
+        ]
+        if files
+        else []
+    )
     select = element("select", title="Theme").bind("value", "transport.config.theme", mode="two-way")
     for theme in THEMES:
         select.child(element("option", value=theme).text(theme or "default"))
@@ -158,12 +180,13 @@ def _app_bar(title):
         .child(
             element("span").classes("nbplay-app-title").text(title),
             element("nbplay-palette-hint", label="panels").on("click", Invoke(by_id("nbplay-palette"), "show")),
+            *files,
             element("label").child(element("span").text("theme"), select),
         )
     )
 
 
-def _page(panels, titles, layout, title):
+def _page(panels, titles, layout, title, files=False):
     """The top bar over the panel layout, each panel's element bound under its own namespace.
 
     The palette (Ctrl+K or Cmd+K) lists every panel and reopens one the user closed.
@@ -178,7 +201,7 @@ def _page(panels, titles, layout, title):
         element("div")
         .classes("nbplay-app")
         .child(
-            _app_bar(title),
+            _app_bar(title, files),
             RegularLayout(*frames, layout=layout or default_layout(list(panels)), id="nbplay-layout").classes("spa nbplay").css(**tab_titles),
             palette.on("nbplay-request", Invoke(by_id("nbplay-layout"), "openPanel", event_prop("detail.name"))),
         )
@@ -233,35 +256,82 @@ def _probe_routes(panels):
 def build(session, *, layout=None, title="nbplay", probes=False, **options):
     """A Starlette app serving ``session``: one WebSocket per instrument and a panel layout page.
 
-    The page is a top bar (``title`` and a theme select) over the panels.
-    ``layout`` is a regular-layout split/tab tree over the panel names from
-    :func:`panel_widgets`; ``probes`` adds the JSON routes the browser tests
-    drive. Other keyword options go to :func:`spaday.backends.starlette.serve`.
-    """
-    from spaday.backends.starlette import serve
-    from starlette.routing import WebSocketRoute
+    The page is a top bar (``title``, the panel palette, save and load, and a
+    theme select) over the panels. ``layout`` is a regular-layout split/tab
+    tree over the panel names from :func:`panel_widgets`; ``probes`` adds the
+    JSON routes the browser tests drive. Other keyword options go to
+    :func:`spaday.backends.starlette.build_routes`.
 
-    panels = panel_widgets(session)
-    wires, routes, background = [], [], []
-    for name, widget in panels.items():
-        url = f"/ws/{name}"
-        server = transports.Server(widget.session)
-        wires.extend(widget.wires(f"{name}.", url=url))
-        routes.append(WebSocketRoute(url, transports.ws_endpoint(server)))
-        background.append(transports.autosync(server))
-    if probes:
-        routes.extend(_probe_routes(panels))
-    page = _page(panels, panel_titles(session), layout, title)
-    app = serve(
-        lambda: page,
-        packages=[nbplay_package, layout_package],
-        wire=wires,
-        routes=routes,
-        background=background,
-        title=title,
-        styles=[APP_CSS, *options.pop("styles", ())],
-        **options,
-    )
+    ``GET /session.nbplay`` downloads the session as a ``.nbplay`` archive and
+    ``PUT /session.nbplay`` replaces the served session with an uploaded one,
+    after which the page has to be reloaded. ``app.state.session`` is the
+    session being served.
+    """
+    from contextlib import asynccontextmanager
+
+    from spaday.backends.starlette import build_routes
+    from starlette.applications import Starlette
+    from starlette.responses import JSONResponse, Response
+    from starlette.routing import Route, WebSocketRoute
+
+    styles = [APP_CSS, *options.pop("styles", ())]
+    servers, tasks = [], []
+
+    def install(session, layout=None):
+        """Point the app's routes at ``session``: its page, a WebSocket per panel, and the session archive."""
+        panels = panel_widgets(session)
+        servers[:] = [transports.Server(widget.session) for widget in panels.values()]
+        wires = [wire for name, widget in panels.items() for wire in widget.wires(f"{name}.", url=f"/ws/{name}")]
+        routes: list = [WebSocketRoute(f"/ws/{name}", transports.ws_endpoint(server)) for name, server in zip(panels, servers)]
+        routes += [Route(f"/{SESSION_URL}", save), Route(f"/{SESSION_URL}", load, methods=["PUT"])]
+        if probes:
+            routes.extend(_probe_routes(panels))
+        page = _page(panels, panel_titles(session), layout, title, files=True)
+        app.router.routes[:] = build_routes(
+            lambda: page, packages=[nbplay_package, layout_package], wire=wires, routes=routes, title=title, styles=styles, **options
+        )
+        app.state.session = session
+
+    def sync(running):
+        """Start or stop the tasks that flush each panel's server."""
+        for task in tasks:
+            task.cancel()
+        tasks[:] = [asyncio.ensure_future(transports.autosync(server)) for server in servers] if running else []
+
+    async def save(request):
+        session = app.state.session
+        # Recorded clip audio stays in the browser until it is exported; give a connected page five seconds.
+        session.timeline.export_all_clips()
+        waits = 100
+        while session.timeline.pending_exports and waits:
+            await asyncio.sleep(0.05)
+            waits -= 1
+        archive = io.BytesIO()
+        session.save(archive)
+        headers = {"content-disposition": f'attachment; filename="{SESSION_URL}"'}
+        return Response(archive.getvalue(), media_type="application/zip", headers=headers)
+
+    async def load(request):
+        try:
+            session = Session.load(io.BytesIO(await request.body()))
+        except (zipfile.BadZipFile, KeyError, TypeError, ValueError) as error:
+            return JSONResponse({"error": f"Not a session archive: {error}"}, status_code=400)
+        sync(False)
+        app.state.session.close()
+        install(session)
+        sync(True)
+        return JSONResponse({"panels": list(panel_widgets(session))})
+
+    @asynccontextmanager
+    async def lifespan(app):
+        sync(True)
+        try:
+            yield
+        finally:
+            sync(False)
+
+    app = Starlette(lifespan=lifespan)
+    install(session, layout)
     app.add_middleware(_NoCache)
     return app
 

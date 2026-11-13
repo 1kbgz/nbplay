@@ -168,4 +168,54 @@ test.describe("web app", () => {
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });
+
+  test("save downloads the session and load replaces it", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    await expect(
+      page.locator("regular-layout-frame nbplay-mixer"),
+    ).toBeVisible();
+    await request.post("/set/transport/bpm", { data: { value: 111 } });
+    const tempo = page.locator(
+      "nbplay-transport .nbplay-transport-tempo .nbplay-value-text",
+    );
+    await expect(tempo).toContainText("111");
+    await expect
+      .poll(async () => {
+        const models = await state(request);
+        return [
+          models.launcher.config.bpm,
+          models.timeline.config.bpm,
+          models["lead-sequencer"].config.bpm,
+          models["drums-sequencer"].config.bpm,
+        ];
+      })
+      .toEqual([111, 111, 111, 111]);
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator(".nbplay-app-bar a", { hasText: "save" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe("session.nbplay");
+    const saved = await download.path();
+
+    // Change the session, then load the saved one: the page reloads onto it.
+    await request.post("/set/transport/bpm", { data: { value: 150 } });
+    await expect(tempo).toContainText("150");
+    await page
+      .locator(".nbplay-app-bar nbplay-upload input")
+      .setInputFiles(saved);
+    await expect(tempo).toContainText("111");
+    await expect
+      .poll(async () => (await state(request)).transport.config.bpm)
+      .toBe(111);
+    // The reloaded page talks to the loaded session.
+    await page.locator("nbplay-transport .nbplay-transport-play").click();
+    await expect
+      .poll(async () => (await state(request)).transport.status.is_playing)
+      .toBe(true);
+    await request.post("/command/transport/stop");
+  });
 });

@@ -1,4 +1,7 @@
+import asyncio
+import io
 import json
+import zipfile
 
 import pytest
 
@@ -89,7 +92,10 @@ class TestApp:
                 hint = bar["slots"]["default"][1]
                 assert hint["tag"] == "nbplay-palette-hint" and hint["props"]["label"] == {"Str": "panels"}
                 assert hint["events"]["click"] == {"kind": "invoke", "target": {"ref": "id", "id": palette["props"]["id"]["Str"]}, "method": "show"}
-                select = bar["slots"]["default"][2]["slots"]["default"][1]
+                save, load = bar["slots"]["default"][2:4]
+                assert save["tag"] == "a" and save["props"]["href"] == {"Str": "session.nbplay"} and "download" in save["props"]
+                assert load["tag"] == "nbplay-upload" and load["props"]["url"] == {"Str": "session.nbplay"}
+                select = bar["slots"]["default"][4]["slots"]["default"][1]
                 assert select["tag"] == "select" and select["bindings"]["value"] == {"field": "transport.config.theme", "mode": "two-way"}
                 assert [option["props"]["value"]["Str"] for option in select["slots"]["default"]] == list(nbplay.THEMES)
                 transport = _instrument(tree, "transport")
@@ -104,6 +110,68 @@ class TestApp:
                 assert isinstance(client.post("/command/transport/play").json()["result"], int)
         finally:
             session.close()
+
+    def test_served_app_saves_the_session_and_loads_another(self):
+        app = build(demo_session(), probes=True)
+        with TestClient(app) as client:
+            first = app.state.session
+            first.bpm = 87.0
+            saved = client.get("/session.nbplay")
+            assert saved.status_code == 200 and "session.nbplay" in saved.headers["content-disposition"]
+            assert nbplay.Session.load(io.BytesIO(saved.content)).bpm == 87.0
+
+            # An upload that is not an archive is refused and the session stays.
+            refused = client.put("/session.nbplay", content=b"not a zip")
+            assert refused.status_code == 400 and refused.json()["error"].startswith("Not a session archive")
+            assert app.state.session is first
+
+            # A different session replaces the served one: its panels, page, sockets and probes.
+            other = nbplay.Session(bpm=140.0, theme="grim")
+            other.add_track("Bass", nbplay.SequencerWidget(length=8), nbplay.SynthWidget())
+            archive = io.BytesIO()
+            other.save(archive)
+            other.close()
+            loaded = client.put("/session.nbplay", content=archive.getvalue())
+            assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "bass-sequencer", "bass-synth"]}
+            assert app.state.session is not first and app.state.session.bpm == 140.0
+            html = client.get("/").text
+            assert "/ws/bass-synth" in html and "/ws/drums-sampler" not in html
+            state = client.get("/state").json()
+            assert state["transport"]["config"]["theme"] == "grim" and state["bass-sequencer"]["config"]["length"] == 8
+            with client.websocket_connect("/ws/bass-synth?codec=json&ownership=1") as socket:
+                assert socket.receive_text()
+            # The loaded session saves like the first.
+            assert nbplay.Session.load(io.BytesIO(client.get("/session.nbplay").content)).bpm == 140.0
+        app.state.session.close()
+
+    def test_save_waits_for_the_browser_to_export_recorded_clips(self, monkeypatch):
+        from test_widgets import browser_writes
+
+        session = demo_session()
+        take = session.timeline.add_clip("Take", audio_url="blob:take")
+
+        sleep = asyncio.sleep
+
+        async def browser_exports(delay):
+            # The patch reaches every asyncio.sleep, so it still has to yield to the loop.
+            if session.timeline.pending_exports:
+                browser_writes(session.timeline, exported_clip={"id": take["id"], "blob_type": "audio/webm"}, exported_clip_data=b"take")
+            await sleep(0.001)
+
+        monkeypatch.setattr("nbplay.app.asyncio.sleep", browser_exports)
+        app = build(session)
+        with TestClient(app) as client:
+            saved = zipfile.ZipFile(io.BytesIO(client.get("/session.nbplay").content))
+            assert [saved.read(name) for name in saved.namelist() if name.startswith("clips/")] == [b"take"]
+        session.close()
+
+    def test_standalone_page_has_no_session_file_controls(self):
+        host = Standalone(demo_session())
+        try:
+            bar = json.loads(host.page())["tree"]["slots"]["default"][0]
+            assert [child["tag"] for child in bar["slots"]["default"]] == ["span", "nbplay-palette-hint", "label"]
+        finally:
+            host.session.close()
 
     def test_served_page_provides_its_wires_to_the_root(self):
         session = demo_session()

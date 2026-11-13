@@ -611,6 +611,22 @@ const SECTIONS: Section[] = [
     variants: [{ label: "panels", props: { label: "panels" } }],
   },
   {
+    tag: "nbplay-upload",
+    title: "nbplay-upload",
+    desc: "File button that PUTs the picked file to url and reloads the page when the server accepts it. A rejected file shows the server's error beside the button.",
+    events: [],
+    controls: [
+      { name: "label", type: "text" },
+      { name: "accept", type: "text" },
+    ],
+    variants: [
+      {
+        label: "load",
+        props: { label: "load", accept: ".nbplay", url: "session.nbplay" },
+      },
+    ],
+  },
+  {
     tag: "nbplay-segmented",
     title: "nbplay-segmented",
     desc: "One-of-N button group: oscillator type, launch quantize, step resolution.",

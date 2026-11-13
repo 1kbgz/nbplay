@@ -1,0 +1,38 @@
+nbplay-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-upload .nbplay-upload-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: var(--nbplay-control-height);
+  box-sizing: border-box;
+  padding: 0 6px;
+  color: var(--nbplay-fg-muted);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-upload .nbplay-upload-button:hover {
+  color: var(--nbplay-fg);
+}
+nbplay-upload .nbplay-upload-button:focus-within {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+/* Kept in the layout, invisible, so the keyboard can still reach it. */
+nbplay-upload .nbplay-upload-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+nbplay-upload .nbplay-upload-error {
+  color: var(--nbplay-error);
+}
