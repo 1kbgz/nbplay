@@ -3,11 +3,6 @@ import io
 import json
 import zipfile
 
-import pytest
-
-pytest.importorskip("starlette")
-pytest.importorskip("spaday_regular_layout")
-
 from starlette.testclient import TestClient
 
 import nbplay

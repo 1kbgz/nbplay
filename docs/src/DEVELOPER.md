@@ -973,7 +973,8 @@ widget does, so `nbplay-wire` finds the client for its panel and kernel commands
 (`session.play()`) reach the element unchanged. `python -m nbplay.app` serves
 `demo_session()` on port 8020; `--probes` adds the JSON routes the browser test
 drives (`/state`, `/command/<panel>/<method>`, `/set/<panel>/<field>`). The
-`app` extra installs `spaday-regular-layout`, `starlette` and `uvicorn`.
+server (`spaday-regular-layout`, `starlette`, `uvicorn`, `websockets`) is part of
+the core dependencies.
 
 The same page runs with no server as the standalone Pyodide example, laid out
 like the ones in the spaday packages. `js/examples/pyodide.html` is the page,

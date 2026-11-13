@@ -35,15 +35,14 @@ dependencies = [
     "anywidget",
     "ipywidgets>=8",
     "spaday[widget]>=0.14.1",
+    "spaday-regular-layout",
+    "starlette",
     "transports>=0.12.2",
+    "uvicorn",
+    "websockets",
 ]
 
 [project.optional-dependencies]
-app = [
-    "spaday-regular-layout",
-    "starlette",
-    "uvicorn",
-]
 midi = [
     "mido",
 ]
@@ -56,6 +55,7 @@ develop = [
     "hatch-js",
     "hatch-rs",
     "hatchling",
+    "httpx",
     "jupyterlab",
     "jupyterlite-core[contents]",
     "jupyterlite-pyodide-kernel",
@@ -66,12 +66,9 @@ develop = [
     "pytest",
     "pytest-cov",
     "ruff",
-    "spaday-regular-layout",
-    "starlette",
     "twine",
     "ty",
     "uv",
-    "uvicorn",
     "voila",
     "wheel",
 ]
