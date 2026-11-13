@@ -1615,8 +1615,12 @@ export class NbplayTimeline extends NbplayElement {
     const finish = (error: string) => {
       if (this.disposed) return;
       this.recordingError = error;
-      this.exportClipId = "";
       this.status({ recordingError: error }, false);
+      // A failed export clears the request. A finished one leaves it for the
+      // kernel to clear when the audio arrives: a cleared request reaches the
+      // kernel before the audio does, and would read as an export with none.
+      if (!error) return;
+      this.exportClipId = "";
       this.set({ exportClipId: "" });
     };
     if (!clip?.audio_url) {

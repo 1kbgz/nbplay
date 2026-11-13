@@ -431,11 +431,12 @@ test.describe("Tracking view", () => {
       .toBe("hello-audio");
     const state = await page.evaluate(() => ({
       exported: window.__testModel._state.exported_clip,
-      requestCleared: window.__testModel._state.export_clip_id,
+      request: window.__testModel._state.export_clip_id,
     }));
     expect(state.exported.id).toBe("clip-a");
     expect(state.exported.blob_size).toBe("hello-audio".length);
-    expect(state.requestCleared).toBe("");
+    // The kernel clears the request when the audio arrives, not the element.
+    expect(state.request).toBe("clip-a");
   });
 
   test("export of a clip without audio reports an error", async ({ page }) => {

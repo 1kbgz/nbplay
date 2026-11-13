@@ -1,3 +1,4 @@
+import fs from "fs";
 import { test, expect } from "@playwright/test";
 
 // The served app: real widgets in a Python process behind WebSockets, the
@@ -256,5 +257,59 @@ test.describe("web app", () => {
       .poll(async () => (await state(request)).transport.status.is_playing)
       .toBe(true);
     await request.post("/command/transport/stop");
+  });
+
+  test("a saved session holds the audio of a recorded take", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    await expect(
+      page.locator("regular-layout-frame nbplay-mixer"),
+    ).toBeVisible();
+    // A take lives in the page as a blob until a save asks for its audio.
+    await page.evaluate(() => {
+      const timeline = document.querySelector("nbplay-timeline");
+      const clips = [
+        {
+          id: "take-1",
+          name: "Take 1",
+          track_index: 0,
+          start: 0,
+          duration: 4,
+          recorded: true,
+          audio_url: URL.createObjectURL(
+            new Blob(["recorded take"], { type: "audio/webm" }),
+          ),
+          blob_type: "audio/webm",
+          source: "recording",
+          sample_rate: 44100,
+        },
+      ];
+      timeline.clips = clips;
+      timeline.dispatchEvent(
+        new CustomEvent("nbplay-set", {
+          detail: { values: { clips } },
+          bubbles: true,
+        }),
+      );
+    });
+    await expect
+      .poll(async () =>
+        (await state(request)).timeline.config.clips.map((clip) => clip.id),
+      )
+      .toEqual(["take-1"]);
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator(".nbplay-app-bar a", { hasText: "save" }).click(),
+    ]);
+    const archive = fs.readFileSync(await download.path());
+    expect(archive.includes("clips/take-1")).toBe(true);
+    const timeline = (await state(request)).timeline;
+    expect(timeline.status.exported_clip_data).toEqual({
+      bytes: "recorded take".length,
+    });
+    expect(timeline.config.export_clip_id).toBe("");
   });
 });
