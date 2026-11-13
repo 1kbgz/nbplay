@@ -329,6 +329,39 @@ test.describe("Session clock", () => {
     expect(state.onSharedGrid).toBe(true);
   });
 
+  test("a widget rendered into a live session takes the clock's tempo", async ({
+    page,
+  }) => {
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("240");
+    // These models still hold the tempo they were created with.
+    await renderWidget(page, "sequencer", "late", SEQUENCER_DEFAULTS);
+    await renderWidget(page, "timeline", "lanes", TIMELINE_DEFAULTS);
+    expect(
+      await page.evaluate(() => ({
+        clock: globalThis.__nbplay["clock-test-session"].clock.bpm,
+        transport: window.__models.transport._state.bpm,
+        late: window.__models.late._state.bpm,
+        lanes: window.__models.lanes._state.bpm,
+      })),
+    ).toEqual({ clock: 240, transport: 240, late: 240, lanes: 240 });
+
+    // A later write from the host still sets the session's tempo.
+    await page.evaluate(() => {
+      const model = window.__models.late;
+      model.set("bpm", 90);
+      model._trigger("change:bpm");
+    });
+    await expect
+      .poll(() =>
+        page.evaluate(() => [
+          globalThis.__nbplay["clock-test-session"].clock.bpm,
+          window.__models.transport._state.bpm,
+        ]),
+      )
+      .toEqual([90, 90]);
+  });
+
   test("a sequencer that does not follow the transport stays silent until its own play", async ({
     page,
   }) => {
@@ -447,8 +480,8 @@ test.describe("Session clock", () => {
         },
       };
     }, SESSION_ID);
-    // The sequencer pushes its own model tempo into the clock at render,
-    // so it must agree with the transport.
+    // The sequencer joins the transport's clock at render and would take
+    // its tempo, so give it the same one.
     await renderWidget(page, "sequencer", "a", {
       ...SEQUENCER_DEFAULTS,
       channel_index: 0,
