@@ -103,7 +103,7 @@ export class NbplayTransport extends NbplayElement {
     if (!this.binding) {
       this.binding = bindElementClock(this, this.onClockEvent, this.onRebind);
       const clk = this.binding.clock();
-      this.pushTempo(clk);
+      this.joinTempo(clk);
       this.pushLoop(clk);
       this.pullState(clk);
       if (clk.playing) this.startTicking(clk.beat());
@@ -144,6 +144,15 @@ export class NbplayTransport extends NbplayElement {
 
   private pushTempo(clk: SessionClock): void {
     clk.setTempo(Number(this.bpm));
+  }
+
+  /** Join `clk`: set its tempo if no element has yet, otherwise take it. */
+  private joinTempo(clk: SessionClock): void {
+    const bpm = clk.adoptTempo(Number(this.bpm));
+    if (bpm !== Number(this.bpm)) {
+      this.bpm = bpm;
+      this.set({ bpm });
+    }
   }
 
   private pushLoop(clk: SessionClock): void {
@@ -281,7 +290,7 @@ export class NbplayTransport extends NbplayElement {
 
   private onRebind = (clk: SessionClock): void => {
     this.stopTicking();
-    this.pushTempo(clk);
+    this.joinTempo(clk);
     this.pushLoop(clk);
     this.pullState(clk);
     this.status(true);
