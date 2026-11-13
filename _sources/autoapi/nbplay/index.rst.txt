@@ -82,7 +82,7 @@ Package Contents
 ----------------
 
 .. py:data:: __version__
-   :value: '0.3.0'
+   :value: '0.4.0'
 
 
 .. py:class:: AudioBuffer(frames: int, sample_rate: int = 44100, channels: int = 1)

@@ -1,5 +1,5 @@
 {
-  "nbplay": "pypi/nbplay-0.3.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+  "nbplay": "pypi/nbplay-0.4.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
   "spaday": "pypi/spaday-0.14.1-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
   "transports": "pypi/transports-0.12.2-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
   "regular-layout": "pypi/spaday_regular_layout-0.3.3-py3-none-any.whl"
