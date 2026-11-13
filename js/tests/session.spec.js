@@ -245,6 +245,54 @@ test.describe("Session clock", () => {
     expect(after.clockBeat).toBeGreaterThanOrEqual(2);
   });
 
+  test("a loop that is not a multiple of the step still plays the first step after the wrap", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    // Three steps over two bars are 8/3 of a beat each, so a one-bar loop
+    // (4 beats) holds boundaries at 0 and 8/3 and wraps 4/3 after the second.
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 600,
+      loop_enabled: true,
+      loop_end_bar: 1,
+    });
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      measures: 2,
+      length: 3,
+      step_duration: 8 / 3,
+      voices_data: [
+        Array.from({ length: 3 }, (_, i) => ({
+          active: true,
+          note: 60 + i,
+          velocity: 100,
+          duration_ticks: 1,
+          probability: 100,
+        })),
+      ],
+    });
+    await page.evaluate((id) => {
+      window.__busNotes = [];
+      const bus = globalThis.__nbplay[id];
+      bus.noteListeners = bus.noteListeners || [];
+      bus.noteListeners.push((evt) => window.__busNotes.push(evt));
+    }, SESSION_ID);
+
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => window.__busNotes.length >= 6);
+    const notes = await page.evaluate(() =>
+      window.__busNotes.slice(0, 6).map((evt) => [evt.note, evt.at]),
+    );
+    expect(notes.map(([note]) => note)).toEqual([60, 61, 60, 61, 60, 61]);
+    const spb = 60 / 600;
+    const gaps = notes.slice(1).map(([, at], i) => (at - notes[i][1]) / spb);
+    [8 / 3, 4 / 3, 8 / 3, 4 / 3, 8 / 3].forEach((beats, i) =>
+      expect(gaps[i]).toBeCloseTo(beats, 4),
+    );
+  });
+
   test("timeline and sequencer follow the transport play state without a kernel round-trip", async ({
     page,
   }) => {
@@ -327,6 +375,39 @@ test.describe("Session clock", () => {
     });
     expect(state.bPlaying).toBe(true);
     expect(state.onSharedGrid).toBe(true);
+  });
+
+  test("a widget rendered into a live session takes the clock's tempo", async ({
+    page,
+  }) => {
+    await renderWidget(page, "transport", "transport", TRANSPORT_DEFAULTS);
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("240");
+    // These models still hold the tempo they were created with.
+    await renderWidget(page, "sequencer", "late", SEQUENCER_DEFAULTS);
+    await renderWidget(page, "timeline", "lanes", TIMELINE_DEFAULTS);
+    expect(
+      await page.evaluate(() => ({
+        clock: globalThis.__nbplay["clock-test-session"].clock.bpm,
+        transport: window.__models.transport._state.bpm,
+        late: window.__models.late._state.bpm,
+        lanes: window.__models.lanes._state.bpm,
+      })),
+    ).toEqual({ clock: 240, transport: 240, late: 240, lanes: 240 });
+
+    // A later write from the host still sets the session's tempo.
+    await page.evaluate(() => {
+      const model = window.__models.late;
+      model.set("bpm", 90);
+      model._trigger("change:bpm");
+    });
+    await expect
+      .poll(() =>
+        page.evaluate(() => [
+          globalThis.__nbplay["clock-test-session"].clock.bpm,
+          window.__models.transport._state.bpm,
+        ]),
+      )
+      .toEqual([90, 90]);
   });
 
   test("a sequencer that does not follow the transport stays silent until its own play", async ({
@@ -447,8 +528,8 @@ test.describe("Session clock", () => {
         },
       };
     }, SESSION_ID);
-    // The sequencer pushes its own model tempo into the clock at render,
-    // so it must agree with the transport.
+    // The sequencer joins the transport's clock at render and would take
+    // its tempo, so give it the same one.
     await renderWidget(page, "sequencer", "a", {
       ...SEQUENCER_DEFAULTS,
       channel_index: 0,
@@ -476,6 +557,57 @@ test.describe("Session clock", () => {
     expect(await page.evaluate(() => window.__cancelled)).toBeGreaterThan(
       afterSeek,
     );
+  });
+
+  test("a mixer channel that appears while playing takes the sequencer's notes", async ({
+    page,
+  }) => {
+    // Record where each note's gain node is connected.
+    await page.evaluate(() => {
+      const BaseAudioContext = window.AudioContext;
+      window.__targets = [];
+      class RoutingAudioContext extends BaseAudioContext {
+        createGain() {
+          const gain = super.createGain();
+          const connect = gain.connect.bind(gain);
+          gain.connect = (target) => {
+            window.__targets.push(
+              target === this.destination ? "destination" : target.__label,
+            );
+            return connect(target);
+          };
+          return gain;
+        }
+      }
+      window.AudioContext = RoutingAudioContext;
+      window.webkitAudioContext = RoutingAudioContext;
+    });
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 600,
+    });
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      channel_index: 0,
+    });
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => window.__targets.length >= 2);
+    expect(await page.evaluate(() => new Set(window.__targets).size)).toBe(1);
+    expect(await page.evaluate(() => window.__targets[0])).toBe("destination");
+
+    // The mixer renders while the sequencer plays and puts the channel on the bus.
+    await page.evaluate((id) => {
+      const bus = globalThis.__nbplay[id];
+      const gain = bus.clock.context().createGain();
+      gain.__label = "channel";
+      bus.channels = [{ gain }];
+      window.__targets = [];
+    }, SESSION_ID);
+    await page.waitForFunction(() => window.__targets.length >= 2);
+    expect(await page.evaluate(() => [...new Set(window.__targets)])).toEqual([
+      "channel",
+    ]);
   });
 
   test("a claimed channel silences its sequencer, which resumes in step when released", async ({

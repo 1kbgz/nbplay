@@ -97,6 +97,12 @@ export interface SessionClock {
   stop(): void;
   seek(beat: number): void;
   setTempo(bpm: number): void;
+  /**
+   * Join the clock with a model's tempo: the first caller sets the clock's
+   * tempo, later callers leave it alone. Returns the clock's tempo, which a
+   * later caller writes back to its model.
+   */
+  adoptTempo(bpm: number): number;
   setBeatsPerBar(beatsPerBar: number): void;
   setLoop(enabled: boolean, startBeat: number, endBeat: number): void;
   setRecording(recording: boolean): void;
@@ -194,6 +200,7 @@ export function createSessionClock(
   let playing = false;
   let recording = false;
   let bpm = 120;
+  let tempoSet = false;
   let beatsPerBar = 4;
   let loop: ClockLoop = { enabled: false, startBeat: 0, endBeat: 16 };
   let originBeat = 0;
@@ -317,11 +324,16 @@ export function createSessionClock(
       emit("seek");
     },
     setTempo(next: number): void {
+      tempoSet = true;
       const value = clampNumber(next, bpm, 1);
       if (value === bpm) return;
       reanchor();
       bpm = value;
       emit("tempo");
+    },
+    adoptTempo(next: number): number {
+      if (!tempoSet) self.setTempo(next);
+      return bpm;
     },
     setBeatsPerBar(next: number): void {
       const value = Math.max(1, Math.round(clampNumber(next, beatsPerBar, 1)));

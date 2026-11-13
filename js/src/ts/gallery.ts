@@ -529,7 +529,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-step-grid",
     title: "nbplay-step-grid",
-    desc: "Beat grid: a step row and a velocity row per voice. Click toggles, wheel moves the note, Shift-free wheel on the bars sets velocity. The first instance is animated.",
+    desc: "Beat grid: a step row and a velocity row per voice. Click toggles, wheel moves the note, double-click types a note name or MIDI number, Shift-free wheel on the bars sets velocity. The first instance is animated.",
     events: ["change", "nbplay-arm", "nbplay-step-pick"],
     controls: [
       { name: "currentStep", type: "number" },
@@ -609,6 +609,22 @@ const SECTIONS: Section[] = [
     events: ["click"],
     controls: [{ name: "label", type: "text" }],
     variants: [{ label: "panels", props: { label: "panels" } }],
+  },
+  {
+    tag: "nbplay-upload",
+    title: "nbplay-upload",
+    desc: "File button that PUTs the picked file to url and reloads the page when the server accepts it. A rejected file shows the server's error beside the button.",
+    events: [],
+    controls: [
+      { name: "label", type: "text" },
+      { name: "accept", type: "text" },
+    ],
+    variants: [
+      {
+        label: "load",
+        props: { label: "load", accept: ".nbplay", url: "session.nbplay" },
+      },
+    ],
   },
   {
     tag: "nbplay-segmented",
