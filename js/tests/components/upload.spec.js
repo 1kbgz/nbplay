@@ -74,4 +74,32 @@ test.describe("upload", () => {
       "Upload failed (500)",
     );
   });
+
+  test("a host that cancels the request takes the file and reports its own error", async ({
+    page,
+  }) => {
+    const requests = [];
+    await page.route("**/session.nbplay", async (route) => {
+      requests.push(route.request().method());
+      await route.fulfill({ json: {} });
+    });
+    await mount(page, "nbplay-upload", {
+      url: "/session.nbplay",
+      label: "load",
+    });
+    await page.evaluate(() => {
+      document.addEventListener("nbplay-request", async (event) => {
+        if (event.detail.name !== "upload") return;
+        event.preventDefault();
+        window.__taken = await event.detail.file.text();
+        event.target.error = "Not a session archive";
+      });
+    });
+    await page.locator("nbplay-upload input").setInputFiles(FILE);
+    await expect(page.locator("nbplay-upload [role=alert]")).toHaveText(
+      "Not a session archive",
+    );
+    expect(await page.evaluate(() => window.__taken)).toBe("archive bytes");
+    expect(requests).toEqual([]);
+  });
 });

@@ -161,7 +161,8 @@ def _app_bar(title, files):
 
     The select is bound to the transport's theme, which the session mirrors to every widget.
     ``files`` adds save (a download link) and load (an upload button) for the session archive
-    at :data:`SESSION_URL`, which only a server answers.
+    at :data:`SESSION_URL`. A server answers that URL; the standalone page has none, so its
+    script takes over both controls.
     """
     files = (
         [
@@ -207,6 +208,14 @@ def _page(panels, titles, layout, title, files=False):
         )
         .bind_root_attr("data-nbplay-theme", "transport.config.theme")
     )
+
+
+def _load_session(data):
+    """The session saved in ``data``, the bytes of a ``.nbplay`` archive; ``ValueError`` if it is not one."""
+    try:
+        return Session.load(io.BytesIO(data))
+    except (zipfile.BadZipFile, KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"Not a session archive: {error}") from error
 
 
 def _jsonable(value):
@@ -313,9 +322,9 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
 
     async def load(request):
         try:
-            session = Session.load(io.BytesIO(await request.body()))
-        except (zipfile.BadZipFile, KeyError, TypeError, ValueError) as error:
-            return JSONResponse({"error": f"Not a session archive: {error}"}, status_code=400)
+            session = _load_session(await request.body())
+        except ValueError as error:
+            return JSONResponse({"error": str(error)}, status_code=400)
         sync(False)
         app.state.session.close()
         install(session)
@@ -341,15 +350,36 @@ class Standalone:
 
     Each panel's transports server talks to one in-browser connection; the
     worker passes wire frames between this object and the page with
-    ``postMessage``. Every method takes and returns JSON text, the form that
-    crosses the worker boundary.
+    ``postMessage``. The wire methods take and return JSON text, the form that
+    crosses the worker boundary; :meth:`save` and :meth:`load` exchange the
+    session archive as bytes.
     """
 
     def __init__(self, session, *, layout=None, title="nbplay"):
         self.session = session
         self.panels = panel_widgets(session)
         self.servers = {name: transports.Server(widget.session) for name, widget in self.panels.items()}
-        self._page = _page(self.panels, panel_titles(session), layout, title)
+        self._page = _page(self.panels, panel_titles(session), layout, title, files=True)
+
+    @classmethod
+    def load(cls, data, **options):
+        """The standalone app for the session saved in ``data``, the bytes of a ``.nbplay`` archive."""
+        return cls(_load_session(data), **options)
+
+    def save(self):
+        """The session as the bytes of a ``.nbplay`` archive.
+
+        Recorded clip audio stays in the page until it is exported: call
+        ``call("timeline", "export_all_clips")`` first and wait for
+        :meth:`pending_exports` to reach zero.
+        """
+        archive = io.BytesIO()
+        self.session.save(archive)
+        return archive.getvalue()
+
+    def pending_exports(self):
+        """How many recorded clips the page has not sent yet."""
+        return self.session.timeline.pending_exports
 
     def page(self):
         """The tree, the page styles, and each panel's model-to-namespace wires."""

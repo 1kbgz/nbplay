@@ -96,4 +96,65 @@ test.describe("standalone Pyodide example", () => {
     await expect(transport).not.toHaveAttribute("is-playing");
     expect(errors).toEqual([]);
   });
+
+  test("save downloads the session and load restores it after a reload", async ({
+    page,
+  }) => {
+    const ready = () =>
+      expect(page.locator("html")).toHaveAttribute("data-ready", "true", {
+        timeout: 240 * 1000,
+      });
+    await page.goto("/index.html");
+    await ready();
+    const tempo = page.locator(
+      "nbplay-transport .nbplay-transport-tempo .nbplay-value-text",
+    );
+    await set(page, "nbplay-transport", { bpm: 111 });
+    await expect(tempo).toContainText("111");
+    // The session mirrors the tempo, so the launcher shows Python has it.
+    await expect(page.locator("nbplay-launcher")).toHaveJSProperty("bpm", 111);
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator(".nbplay-app-bar a", { hasText: "save" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe("session.nbplay");
+    const saved = await download.path();
+
+    // A file that is not an archive is refused and the session stays.
+    const upload = page.locator(".nbplay-app-bar nbplay-upload");
+    await upload.locator("input").setInputFiles({
+      name: "song.nbplay",
+      mimeType: "application/zip",
+      buffer: Buffer.from("not a zip"),
+    });
+    await expect(upload.locator("[role=alert]")).toContainText(
+      "Not a session archive",
+    );
+    await expect(tempo).toContainText("111");
+
+    // Change the session, then load the saved one: the page reloads onto it.
+    await set(page, "nbplay-transport", { bpm: 150 });
+    await expect(page.locator("nbplay-launcher")).toHaveJSProperty("bpm", 150);
+    await page.evaluate(() => {
+      window.__beforeReload = true;
+    });
+    await upload.locator("input").setInputFiles(saved);
+    await expect
+      .poll(() => page.evaluate(() => window.__beforeReload))
+      .toBeUndefined();
+    await ready();
+    await expect(tempo).toContainText("111");
+    // The loaded session is live: Python commands still reach the elements.
+    const transport = page.locator("nbplay-transport");
+    await page.evaluate(() => globalThis.nbplay.call("transport", "play"));
+    await expect(transport).toHaveAttribute("is-playing", "");
+    await page.evaluate(() => globalThis.nbplay.call("transport", "stop"));
+    await expect(transport).not.toHaveAttribute("is-playing");
+
+    // The loaded session is used once: a plain reload is the demo again.
+    await page.reload();
+    await ready();
+    await expect(tempo).toContainText("120");
+  });
 });
