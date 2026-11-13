@@ -55,3 +55,34 @@ nbplay-palette .nbplay-palette-option.active {
 nbplay-palette .nbplay-palette-empty {
   color: var(--nbplay-fg-muted);
 }
+nbplay-palette-hint .nbplay-palette-hint-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--nbplay-control-height);
+  padding: 0 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-palette-hint .nbplay-palette-hint-button:hover {
+  color: var(--nbplay-fg);
+}
+nbplay-palette-hint .nbplay-palette-hint-button:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-palette-hint .nbplay-palette-hint-keys {
+  display: none;
+  font: inherit;
+  color: var(--nbplay-fg);
+}
+@media (hover: hover) and (pointer: fine) {
+  nbplay-palette-hint .nbplay-palette-hint-keys {
+    display: inline;
+  }
+}

@@ -14,7 +14,11 @@ export { NbplayToggle, type ToggleVariant } from "./toggle.ts";
 export { NbplayPosition } from "./position.ts";
 export { NbplaySegmented, type SegmentOption } from "./segmented.ts";
 export { NbplayHeader } from "./header.ts";
-export { NbplayPalette, type PaletteCommand } from "./palette.ts";
+export {
+  NbplayPalette,
+  NbplayPaletteHint,
+  type PaletteCommand,
+} from "./palette.ts";
 export { NbplayParam } from "./param.ts";
 export { NbplayTransportButtons } from "./transport-buttons.ts";
 export { NbplayFader } from "./fader.ts";

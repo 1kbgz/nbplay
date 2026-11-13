@@ -6,6 +6,14 @@ export interface PaletteCommand {
   label?: string;
 }
 
+/** The palette shortcut as it is written on this platform: `⌘ K` or `Ctrl K`. */
+export function shortcutLabel(): string {
+  const platform =
+    (navigator as { userAgentData?: { platform?: string } }).userAgentData
+      ?.platform ?? navigator.platform;
+  return /mac|iphone|ipad|ipod/i.test(platform) ? "\u2318 K" : "Ctrl K";
+}
+
 /**
  * `<nbplay-palette>`: a command palette in a modal dialog. Ctrl+K or Cmd+K
  * anywhere on the page toggles it, and `show()` opens it. Typing filters
@@ -147,3 +155,34 @@ export class NbplayPalette extends NbplayElement {
 }
 
 define("nbplay-palette", NbplayPalette);
+
+/**
+ * `<nbplay-palette-hint>`: a button for a top bar that shows `label` and the
+ * palette shortcut for this platform. The shortcut is hidden where there is no
+ * keyboard. It does not open the palette itself; the host handles its click.
+ */
+export class NbplayPaletteHint extends NbplayElement {
+  static properties = {
+    label: { type: String },
+  };
+
+  declare label: string;
+
+  constructor() {
+    super();
+    this.label = "";
+  }
+
+  render() {
+    return html`<button
+      type="button"
+      class="nbplay-palette-hint-button"
+      aria-label="Open the command palette"
+    >
+      ${this.label}
+      <kbd class="nbplay-palette-hint-keys">${shortcutLabel()}</kbd>
+    </button>`;
+  }
+}
+
+define("nbplay-palette-hint", NbplayPaletteHint);

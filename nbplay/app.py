@@ -46,8 +46,8 @@ html, body { margin: 0; height: 100%; background: var(--nbplay-bg); color: var(-
   display: flex; align-items: center; gap: 6px;
   font-family: var(--nbplay-font-mono); font-size: var(--nbplay-font-size-small); color: var(--nbplay-fg-muted);
 }
-.nbplay-app-bar button { margin-left: auto; cursor: pointer; }
-.nbplay-app-bar button, .nbplay-app-bar select {
+.nbplay-app-bar nbplay-palette-hint { margin-left: auto; }
+.nbplay-app-bar select {
   height: var(--nbplay-control-height); padding: 0 6px; font: inherit;
   background: var(--nbplay-bg-control); color: var(--nbplay-fg);
   border: 1px solid var(--nbplay-border); border-radius: var(--nbplay-radius-control);
@@ -132,7 +132,7 @@ def default_layout(names):
 
 
 def _app_bar(title):
-    """Title, a button that opens the panel palette, and a theme select.
+    """Title, a button that opens the panel palette and shows its shortcut, and a theme select.
 
     The select is bound to the transport's theme, which the session mirrors to every widget.
     """
@@ -144,9 +144,7 @@ def _app_bar(title):
         .classes("nbplay-app-bar")
         .child(
             element("span").classes("nbplay-app-title").text(title),
-            element("button", type="button", title="Open a panel (Ctrl+K or Cmd+K)")
-            .text("panels")
-            .on("click", Invoke(by_id("nbplay-palette"), "show")),
+            element("nbplay-palette-hint", label="panels").on("click", Invoke(by_id("nbplay-palette"), "show")),
             element("label").child(element("span").text("theme"), select),
         )
     )

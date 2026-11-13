@@ -926,7 +926,8 @@ theme select bound two-way to the transport's `theme`; the `Session` mirrors
 that field to every widget, and the page binds it to `data-nbplay-theme` on the
 document root, so one select re-themes the chrome and every instrument. A
 closed panel is reopened from the palette: `nbplay-palette` lists the panel
-names, opens on Ctrl+K or Cmd+K or from the bar's `panels` button, and its
+names, opens on Ctrl+K or Cmd+K or from the bar's `panels` button
+(`nbplay-palette-hint`, which shows the shortcut for the platform), and its
 `nbplay-request` event invokes the layout's `openPanel` with the picked name.
 `APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
