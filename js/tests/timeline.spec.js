@@ -156,6 +156,20 @@ test.describe("TimelineWidget", () => {
     ).toHaveText("timeline");
   });
 
+  test("the ruler counts bars by the time signature", async ({ page }) => {
+    // 12 beats are three 4/4 bars and four 6/8 bars.
+    await renderWidget(page, { length: 12 });
+    await expect(page.locator(".nbplay-ruler-bar")).toHaveCount(3);
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      model.set("time_signature_num", 6);
+      model.set("time_signature_den", 8);
+      model._trigger("change:time_signature_num");
+      model._trigger("change:time_signature_den");
+    });
+    await expect(page.locator(".nbplay-ruler-bar")).toHaveCount(4);
+  });
+
   test("renders tracks and clips", async ({ page }) => {
     await renderWidget(page);
     await expect(page.locator("nbplay-lane")).toHaveCount(2);

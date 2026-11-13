@@ -3,6 +3,7 @@ import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
 import { midiToHz, scheduleOscillator } from "../scheduler.ts";
 import {
+  barBeats,
   bindElementClock,
   type ClockBinding,
   type ClockEvent,
@@ -148,6 +149,7 @@ export class NbplayTimeline extends NbplayElement {
     selectedClipId: { type: String, attribute: "selected-clip-id" },
     bpm: { type: Number },
     timeSignatureNum: { type: Number, attribute: "time-signature-num" },
+    timeSignatureDen: { type: Number, attribute: "time-signature-den" },
     countInBars: { type: Number, attribute: "count-in-bars" },
     autoExtendRecording: { type: Boolean, attribute: "auto-extend-recording" },
     recordingExtendBars: { type: Number, attribute: "recording-extend-bars" },
@@ -175,6 +177,7 @@ export class NbplayTimeline extends NbplayElement {
   declare selectedClipId: string;
   declare bpm: number;
   declare timeSignatureNum: number;
+  declare timeSignatureDen: number;
   declare countInBars: number;
   declare autoExtendRecording: boolean;
   declare recordingExtendBars: number;
@@ -232,6 +235,7 @@ export class NbplayTimeline extends NbplayElement {
     this.selectedClipId = "";
     this.bpm = 120;
     this.timeSignatureNum = 4;
+    this.timeSignatureDen = 4;
     this.countInBars = 0;
     this.autoExtendRecording = true;
     this.recordingExtendBars = 8;
@@ -299,7 +303,7 @@ export class NbplayTimeline extends NbplayElement {
   }
 
   private beatsPerBar(): number {
-    return Math.max(1, numberValue(this.timeSignatureNum, 4));
+    return barBeats(this.timeSignatureNum, this.timeSignatureDen);
   }
 
   private clampBeat(beat: number): number {

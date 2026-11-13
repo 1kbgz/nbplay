@@ -2,6 +2,7 @@ import { html } from "lit";
 import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
 import {
+  barBeats,
   bindElementClock,
   type ClockBinding,
   type ClockEvent,
@@ -139,7 +140,7 @@ export class NbplayTransport extends NbplayElement {
   }
 
   private beatsPerBar(): number {
-    return Math.max(1, Number(this.timeSignatureNum) || 4);
+    return barBeats(this.timeSignatureNum, this.timeSignatureDen);
   }
 
   private pushTempo(clk: SessionClock): void {
@@ -301,6 +302,7 @@ export class NbplayTransport extends NbplayElement {
     if (changed.has("bpm") && Number(this.bpm) !== clk.bpm) this.pushTempo(clk);
     if (
       changed.has("timeSignatureNum") ||
+      changed.has("timeSignatureDen") ||
       changed.has("loopEnabled") ||
       changed.has("loopStartBar") ||
       changed.has("loopEndBar")

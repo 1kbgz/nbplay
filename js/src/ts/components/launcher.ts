@@ -7,6 +7,7 @@ import {
   type StepData,
 } from "../scheduler.ts";
 import {
+  barBeats,
   bindElementClock,
   type ClockBinding,
   type ClockEvent,
@@ -104,6 +105,7 @@ export class NbplayLauncher extends NbplayElement {
     quantize: { type: String },
     bpm: { type: Number },
     timeSignatureNum: { type: Number, attribute: "time-signature-num" },
+    timeSignatureDen: { type: Number, attribute: "time-signature-den" },
     selectedSlot: { attribute: false },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -117,6 +119,7 @@ export class NbplayLauncher extends NbplayElement {
   declare quantize: "bar" | "beat" | "none";
   declare bpm: number;
   declare timeSignatureNum: number;
+  declare timeSignatureDen: number;
   declare selectedSlot: { track_index?: number; scene_index?: number };
   declare sessionId: string;
   declare isPlaying: boolean;
@@ -137,6 +140,7 @@ export class NbplayLauncher extends NbplayElement {
     this.quantize = "bar";
     this.bpm = 120;
     this.timeSignatureNum = 4;
+    this.timeSignatureDen = 4;
     this.selectedSlot = {};
     this.sessionId = "";
     this.isPlaying = false;
@@ -186,7 +190,7 @@ export class NbplayLauncher extends NbplayElement {
   }
 
   private beatsPerBar(): number {
-    return Math.max(1, numberValue(this.timeSignatureNum, 4));
+    return barBeats(this.timeSignatureNum, this.timeSignatureDen);
   }
 
   /**

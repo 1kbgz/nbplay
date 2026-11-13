@@ -650,7 +650,10 @@ TransportWidget is the global play/stop and tempo surface. Its config holds
 BPM, time signature and loop range; its status mirrors play state and the
 bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
 commands, and `session.bpm` and `session.time_signature` write every widget's
-config.
+config. A beat is a quarter note, so a bar is `numerator * 4 / denominator`
+beats long (`barBeats()` in `session.ts`): 3 in 6/8 and 3.5 in 7/8. The
+transport's loop range and bar:beat readout, the launcher's bar quantize and the
+timeline's ruler, count-in and length all use that length.
 
 In the browser the transport owns the session clock: `bus.clock` on
 `globalThis.__nbplay[session_id]`, a `SessionClock` derived from the shared

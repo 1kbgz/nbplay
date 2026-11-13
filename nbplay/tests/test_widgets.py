@@ -724,6 +724,11 @@ class TestSession:
             session.transport.config.theme = "pro"
             assert session.theme == "pro" and synth.config.theme == "pro" and session.launcher.config.theme == "pro"
             assert isinstance(session.play(), int)
+            # Every widget that counts bars gets both halves of the time signature.
+            for widget in (session.transport, session.launcher, session.timeline, seq):
+                bindings = widget.tree().to_node()["bindings"]
+                assert bindings["timeSignatureNum"]["field"] == "config.time_signature_num"
+                assert bindings["timeSignatureDen"]["field"] == "config.time_signature_den"
         finally:
             session.close()
 

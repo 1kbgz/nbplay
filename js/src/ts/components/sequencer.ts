@@ -7,6 +7,7 @@ import {
   type StepData,
 } from "../scheduler.ts";
 import {
+  barBeats,
   bindElementClock,
   type ClockBinding,
   type ClockEvent,
@@ -33,10 +34,6 @@ function defaultStep(): StepData {
   };
 }
 
-function measureBeatCount(num: number, den: number): number {
-  return Math.max(0, num * (4 / Math.max(1, den)));
-}
-
 function configuredStepCount(
   measures: number,
   stepDuration: number,
@@ -47,7 +44,7 @@ function configuredStepCount(
   const safeStepDuration = Math.max(0.001, stepDuration || 0.25);
   return Math.max(
     1,
-    Math.round((safeMeasures * measureBeatCount(num, den)) / safeStepDuration),
+    Math.round((safeMeasures * barBeats(num, den)) / safeStepDuration),
   );
 }
 
@@ -371,7 +368,7 @@ export class NbplaySequencer extends NbplayElement {
     const measures = Math.max(1, Number(this.measures || 1));
     const beats =
       measures *
-      measureBeatCount(
+      barBeats(
         Number(this.timeSignatureNum || 4),
         Number(this.timeSignatureDen || 4),
       );

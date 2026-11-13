@@ -303,6 +303,15 @@ test.describe("primitives", () => {
       el.beatsPerBar = 3;
     });
     await expect(page.locator("nbplay-position")).toHaveText("2.3");
+    // A 7/8 bar is 3.5 beats: beat 5.5 is two beats into the second bar.
+    await page.evaluate(() => {
+      document.querySelector("nbplay-position").beatsPerBar = 3.5;
+    });
+    await expect(page.locator("nbplay-position")).toHaveText("2.3");
+    await page.evaluate(() => {
+      document.querySelector("nbplay-position").beat = 7.25;
+    });
+    await expect(page.locator("nbplay-position")).toHaveText("3.1");
   });
 
   test("waveform and envelope draw onto sized canvases", async ({ page }) => {

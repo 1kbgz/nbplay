@@ -642,6 +642,26 @@ test.describe("LauncherWidget", () => {
     expect(result.cancelled).toBe(result.future);
   });
 
+  test("bar quantize uses the bar length of the time signature", async ({
+    page,
+  }) => {
+    await renderLauncher(page, {
+      time_signature_num: 6,
+      time_signature_den: 8,
+    });
+    const next = (beat) =>
+      page.evaluate(
+        (beat) => document.querySelector("nbplay-launcher").nextBoundary(beat),
+        beat,
+      );
+    expect([await next(0.5), await next(3), await next(4)]).toEqual([3, 3, 6]);
+    await page.evaluate(() => {
+      window.__testModel.set("time_signature_num", 7);
+      window.__testModel._trigger("change:time_signature_num");
+    });
+    await expect.poll(() => next(4)).toBe(7);
+  });
+
   test("quantize select writes the model", async ({ page }) => {
     await renderLauncher(page);
     await page.locator(".nbplay-launcher-quantize").selectOption("beat");
