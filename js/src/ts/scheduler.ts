@@ -283,7 +283,6 @@ export function createAudioScheduler(
   options: AudioSchedulerOptions = {},
 ): AudioScheduler {
   let audioCtx: AudioContext | null = null;
-  let outputNode: AudioNode | null = null;
   let activeClock: SessionClock | null = null;
   let activeModel: AnyModel | null = null;
   let schedulerTimer: ReturnType<typeof setInterval> | null = null;
@@ -322,7 +321,6 @@ export function createAudioScheduler(
       const resolved = resolveAudioOutput(model, clock);
       if (!resolved.ctx) return;
       audioCtx = resolved.ctx;
-      outputNode = resolved.output;
       activeClock = clock;
       activeModel = model;
       cursor = null;
@@ -358,7 +356,6 @@ export function createAudioScheduler(
     destroy(): void {
       self.stop();
       audioCtx = null;
-      outputNode = null;
     },
 
     isPlaying(): boolean {
@@ -429,6 +426,9 @@ export function createAudioScheduler(
       sessionId && channelIndex >= 0
         ? getSessionBus(sessionId)?.instruments?.[channelIndex]
         : undefined;
+    // Like the instrument, the channel is looked up per step: a mixer that
+    // renders after playback started takes the notes without a restart.
+    const outputNode = resolveAudioOutput(model, clock).output;
     for (const { note, freq, velocity, durationTicks } of iterateActiveVoices(
       vd,
       stepIndex,
