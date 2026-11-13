@@ -246,10 +246,13 @@ export function advanceCursor(
     loop.endBeat > loop.startBeat &&
     beat >= loop.endBeat - 1e-9
   ) {
-    const wrapped = loop.startBeat + (beat - loop.endBeat);
-    const gridBeat = snapUp(wrapped, stepBeats);
-    time += (gridBeat - wrapped) * spb;
-    beat = gridBeat;
+    // The clock jumps to the loop start when it reaches the loop end, so the
+    // next step is the first boundary at or after the loop start. Carrying
+    // the overshoot past the end over the wrap would skip that boundary when
+    // the loop length is not a multiple of the step.
+    const wrapTime = cursor.time + (loop.endBeat - cursor.beat) * spb;
+    beat = snapUp(loop.startBeat, stepBeats);
+    time = wrapTime + (beat - loop.startBeat) * spb;
   }
   return { beat, time };
 }

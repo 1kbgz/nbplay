@@ -245,6 +245,54 @@ test.describe("Session clock", () => {
     expect(after.clockBeat).toBeGreaterThanOrEqual(2);
   });
 
+  test("a loop that is not a multiple of the step still plays the first step after the wrap", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    // Three steps over two bars are 8/3 of a beat each, so a one-bar loop
+    // (4 beats) holds boundaries at 0 and 8/3 and wraps 4/3 after the second.
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 600,
+      loop_enabled: true,
+      loop_end_bar: 1,
+    });
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      measures: 2,
+      length: 3,
+      step_duration: 8 / 3,
+      voices_data: [
+        Array.from({ length: 3 }, (_, i) => ({
+          active: true,
+          note: 60 + i,
+          velocity: 100,
+          duration_ticks: 1,
+          probability: 100,
+        })),
+      ],
+    });
+    await page.evaluate((id) => {
+      window.__busNotes = [];
+      const bus = globalThis.__nbplay[id];
+      bus.noteListeners = bus.noteListeners || [];
+      bus.noteListeners.push((evt) => window.__busNotes.push(evt));
+    }, SESSION_ID);
+
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => window.__busNotes.length >= 6);
+    const notes = await page.evaluate(() =>
+      window.__busNotes.slice(0, 6).map((evt) => [evt.note, evt.at]),
+    );
+    expect(notes.map(([note]) => note)).toEqual([60, 61, 60, 61, 60, 61]);
+    const spb = 60 / 600;
+    const gaps = notes.slice(1).map(([, at], i) => (at - notes[i][1]) / spb);
+    [8 / 3, 4 / 3, 8 / 3, 4 / 3, 8 / 3].forEach((beats, i) =>
+      expect(gaps[i]).toBeCloseTo(beats, 4),
+    );
+  });
+
   test("timeline and sequencer follow the transport play state without a kernel round-trip", async ({
     page,
   }) => {
