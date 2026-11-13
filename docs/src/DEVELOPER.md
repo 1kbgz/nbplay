@@ -924,7 +924,10 @@ tree: the transport across the top, launcher, timeline and mixer in the
 middle, the instruments in a tab strip below. A top bar holds the title and a
 theme select bound two-way to the transport's `theme`; the `Session` mirrors
 that field to every widget, and the page binds it to `data-nbplay-theme` on the
-document root, so one select re-themes the chrome and every instrument.
+document root, so one select re-themes the chrome and every instrument. A
+closed panel is reopened from the palette: `nbplay-palette` lists the panel
+names, opens on Ctrl+K or Cmd+K or from the bar's `panels` button, and its
+`nbplay-request` event invokes the layout's `openPanel` with the picked name.
 `APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so `nbplay-wire` finds the client for its panel and kernel commands

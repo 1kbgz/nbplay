@@ -63,9 +63,21 @@ class TestApp:
                 assert "cache-control" not in client.get("/state").headers
                 tree = client.get("/tree.json").json()
                 assert tree["tag"] == "div" and tree["bindings"]["root-attr:data-nbplay-theme"]["field"] == "transport.config.theme"
-                bar, layout = tree["slots"]["default"]
+                bar, layout, palette = tree["slots"]["default"]
                 assert bar["tag"] == "header" and layout["tag"] == "spaday-regular-layout"
-                select = bar["slots"]["default"][1]["slots"]["default"][1]
+                # The palette lists every panel and reopens the picked one; the bar's button opens it.
+                assert palette["tag"] == "nbplay-palette"
+                assert [command["Map"]["id"]["Str"] for command in palette["props"]["commands"]["List"]] == list(panel_widgets(session))
+                assert palette["events"]["nbplay-request"] == {
+                    "kind": "invoke",
+                    "target": {"ref": "id", "id": layout["props"]["id"]["Str"]},
+                    "method": "openPanel",
+                    "args": [{"expr": "event-prop", "path": "detail.name"}],
+                }
+                button = bar["slots"]["default"][1]
+                assert button["tag"] == "button"
+                assert button["events"]["click"] == {"kind": "invoke", "target": {"ref": "id", "id": palette["props"]["id"]["Str"]}, "method": "show"}
+                select = bar["slots"]["default"][2]["slots"]["default"][1]
                 assert select["tag"] == "select" and select["bindings"]["value"] == {"field": "transport.config.theme", "mode": "two-way"}
                 assert [option["props"]["value"]["Str"] for option in select["slots"]["default"]] == list(nbplay.THEMES)
                 transport = _instrument(tree, "transport")

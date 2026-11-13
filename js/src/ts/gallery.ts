@@ -583,6 +583,26 @@ const SECTIONS: Section[] = [
     },
   },
   {
+    tag: "nbplay-palette",
+    title: "nbplay-palette",
+    desc: "Command palette in a modal dialog. Press Ctrl+K or Cmd+K to open it; type to filter, arrow keys and Enter to pick, Escape to close.",
+    events: ["nbplay-request"],
+    controls: [{ name: "placeholder", type: "text" }],
+    variants: [
+      {
+        label: "panels",
+        props: {
+          placeholder: "Open a panel",
+          commands: [
+            { id: "transport" },
+            { id: "mixer" },
+            { id: "lead-synth", label: "Lead synth" },
+          ],
+        },
+      },
+    ],
+  },
+  {
     tag: "nbplay-segmented",
     title: "nbplay-segmented",
     desc: "One-of-N button group: oscillator type, launch quantize, step resolution.",
