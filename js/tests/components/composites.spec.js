@@ -306,6 +306,69 @@ test.describe("composites", () => {
     ]);
   });
 
+  test("step grid double-click types a note into a step", async ({ page }) => {
+    const voices = [
+      [
+        { active: false, note: 60, velocity: 100 },
+        { active: true, note: 62, velocity: 100 },
+      ],
+    ];
+    await mount(page, "nbplay-step-grid", { voices }, [
+      "change",
+      "nbplay-step-pick",
+    ]);
+    const cell = page
+      .locator("nbplay-step-grid .nbplay-step-grid-cell")
+      .first();
+    const input = page.locator("nbplay-step-grid .nbplay-step-grid-edit");
+    const edits = async () =>
+      (await events(page)).filter(([, d]) => d?.field !== "active" || d.value);
+
+    // The field opens on the current note; a note name commits and activates.
+    await cell.dblclick();
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue("C4");
+    await input.fill("f#3");
+    await input.press("Enter");
+    await expect(input).toHaveCount(0);
+    await expect(cell).toHaveText("F#3");
+    await expect(cell).toHaveClass(/active/);
+    const changes = (await events(page)).slice(-2);
+    expect(changes).toEqual([
+      ["change", { voice: 0, step: 0, field: "note", value: 54 }],
+      ["change", { voice: 0, step: 0, field: "active", value: true }],
+    ]);
+
+    // Escape and unparseable text leave the step alone.
+    await page.evaluate(() => {
+      window.__events = [];
+    });
+    await cell.dblclick();
+    await input.fill("A2");
+    await input.press("Escape");
+    await expect(input).toHaveCount(0);
+    await cell.dblclick();
+    await input.fill("nope");
+    await input.press("Enter");
+    await expect(cell).toHaveText("F#3");
+    expect((await edits()).filter(([, d]) => d.field === "note")).toEqual([]);
+
+    // A MIDI number works, and clicking elsewhere commits.
+    const second = page
+      .locator("nbplay-step-grid .nbplay-step-grid-cell")
+      .nth(1);
+    await second.dblclick();
+    await input.fill("72");
+    await page
+      .locator("nbplay-step-grid .nbplay-step-grid-head")
+      .first()
+      .click();
+    await expect(second).toHaveText("C5");
+    expect(
+      (await events(page)).filter(([n]) => n === "nbplay-step-pick"),
+    ).toEqual([]);
+  });
+
   test("step grid double-click asks the host for a note", async ({ page }) => {
     const voices = [[{ active: false, note: 60, velocity: 100 }]];
     await mount(page, "nbplay-step-grid", { voices, showArm: true }, [

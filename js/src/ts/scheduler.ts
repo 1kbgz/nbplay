@@ -2,7 +2,13 @@
 // oscillator triggering, probability, groove, and automation.
 
 import { type AnyModel } from "./helpers.ts";
-import { emitBusNote, getSessionBus, type SessionClock } from "./session.ts";
+import {
+  channelOwner,
+  type ChannelOwner,
+  emitBusNote,
+  getSessionBus,
+  type SessionClock,
+} from "./session.ts";
 
 export interface StepData {
   active: boolean;
@@ -36,6 +42,12 @@ interface AudioSchedulerOptions {
   random?: () => number;
   /** Called when a non-looping pattern reaches its end. */
   onEnd?: () => void;
+  /**
+   * The claim this scheduler plays under. Steps are silent while its channel
+   * is owned by anything else; a sequencer passes none and plays only an
+   * unclaimed channel.
+   */
+  owner?: ChannelOwner;
 }
 
 /** Position of the next step to schedule, in clock beats and context time. */
@@ -246,10 +258,13 @@ export function advanceCursor(
     loop.endBeat > loop.startBeat &&
     beat >= loop.endBeat - 1e-9
   ) {
-    const wrapped = loop.startBeat + (beat - loop.endBeat);
-    const gridBeat = snapUp(wrapped, stepBeats);
-    time += (gridBeat - wrapped) * spb;
-    beat = gridBeat;
+    // The clock jumps to the loop start when it reaches the loop end, so the
+    // next step is the first boundary at or after the loop start. Carrying
+    // the overshoot past the end over the wrap would skip that boundary when
+    // the loop length is not a multiple of the step.
+    const wrapTime = cursor.time + (loop.endBeat - cursor.beat) * spb;
+    beat = snapUp(loop.startBeat, stepBeats);
+    time = wrapTime + (beat - loop.startBeat) * spb;
   }
   return { beat, time };
 }
@@ -283,7 +298,6 @@ export function createAudioScheduler(
   options: AudioSchedulerOptions = {},
 ): AudioScheduler {
   let audioCtx: AudioContext | null = null;
-  let outputNode: AudioNode | null = null;
   let activeClock: SessionClock | null = null;
   let activeModel: AnyModel | null = null;
   let schedulerTimer: ReturnType<typeof setInterval> | null = null;
@@ -322,7 +336,6 @@ export function createAudioScheduler(
       const resolved = resolveAudioOutput(model, clock);
       if (!resolved.ctx) return;
       audioCtx = resolved.ctx;
-      outputNode = resolved.output;
       activeClock = clock;
       activeModel = model;
       cursor = null;
@@ -358,7 +371,6 @@ export function createAudioScheduler(
     destroy(): void {
       self.stop();
       audioCtx = null;
-      outputNode = null;
     },
 
     isPlaying(): boolean {
@@ -407,6 +419,11 @@ export function createAudioScheduler(
     }
 
     model.set("current_step", stepIndex);
+    const sessionId = (model.get("session_id") as string) || "";
+    const channelIndex = numberOr(model.get("channel_index"), -1);
+    // Another source owns the track: keep the grid running so playback
+    // resumes in phase when the track comes back, but stay silent.
+    if (channelOwner(sessionId, channelIndex) !== options.owner) return true;
     applyAutomationLanes(model, stepIndex);
 
     const stepSeconds = stepBeats * clock.secondsPerBeat();
@@ -421,14 +438,15 @@ export function createAudioScheduler(
     // time for the same step, and Web Audio starts past-due nodes at once.
     const scheduledTime = Math.max(0, at.time + offset);
 
-    const sessionId = (model.get("session_id") as string) || "";
     // The track's instrument (sampler or synth on the bus) plays the step
     // when it has one; the built-in oscillator is the fallback.
-    const channelIndex = numberOr(model.get("channel_index"), -1);
     const instrument =
       sessionId && channelIndex >= 0
         ? getSessionBus(sessionId)?.instruments?.[channelIndex]
         : undefined;
+    // Like the instrument, the channel is looked up per step: a mixer that
+    // renders after playback started takes the notes without a restart.
+    const outputNode = resolveAudioOutput(model, clock).output;
     for (const { note, freq, velocity, durationTicks } of iterateActiveVoices(
       vd,
       stepIndex,

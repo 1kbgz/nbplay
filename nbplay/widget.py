@@ -1650,6 +1650,10 @@ class Session:
         # The transport's theme is the session theme, so a browser theme
         # switch bound to it re-themes every widget.
         self.transport.on_change(lambda widget, name, old, new: setattr(self, "theme", new), names="theme")
+        # The browser clock carries a tempo edit to every rendered element, but
+        # a widget that is not on the page (or does not write the clock's tempo
+        # back, like the launcher) would keep its old tempo in the kernel.
+        self.transport.on_change(lambda widget, name, old, new: setattr(self, "bpm", new), names="bpm")
         # Lane mute/solo and mixer channel mute/solo are the same control
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False

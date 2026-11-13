@@ -394,7 +394,8 @@ globalThis.__nbplay[sessionId] = {
   channels: [{ gain, pan }, ...],
   plugins: { [effectType]: (ctx, effect) => AudioNode | EffectUnit },
   samplers: { [channelIndex]: { triggerNote, releaseNote } },
-  noteListeners: [(evt) => void]
+  noteListeners: [(evt) => void],
+  claims: { [channelIndex]: { launcher?: true, timeline?: true } }
 };
 ```
 
@@ -406,6 +407,16 @@ can trigger them. Keyboard widgets also broadcast `nbplay-note` on `document`,
 which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
 clip playback reads `audioCtx` and `channels` from the bus so recorded clips go
 through the same channel strip and insert effects as live sources.
+
+A launcher slot, the timeline's MIDI clips and the track's sequencer can all
+play one channel, so `claims` decides which one sounds. The launcher claims a
+track's channel while a slot on it is launched; the timeline claims the channel
+of every track that holds MIDI clips with notes. `channelOwner()` returns
+`launcher` over `timeline`, and the scheduler stays silent on a channel owned by
+anything but its own claim, so a launched slot plays in place of the track's
+clips and either one silences the looping sequencer. The silent grid keeps
+running, and the claims stack, so stopping the slot hands the track back in
+phase.
 
 Render order can vary in notebooks. SamplerWidget handles this by listening for
 `nbplay-bus-ready` and registering again when the mixer attaches its graph.
@@ -563,8 +574,11 @@ scheduled steps update the element property only, so a tick costs no comm traffi
 The UI includes play, stop, record, BPM, step duration, measure count, loop, a
 header row, step rows, and velocity rows. Clicking a cell toggles active state.
 Mouse wheel over a step changes note. Mouse wheel over a velocity cell changes
-velocity. If a keyboard is connected, double-clicking a cell waits for the next
-`nbplay-note` event and writes that note into the cell. Recording arms all voices
+velocity. Double-clicking a cell opens a text field for a note name (`F#3`) or a
+MIDI number; Enter or a click elsewhere writes the note and activates the step,
+Escape cancels. If a keyboard is connected, double-clicking a cell instead waits
+for the next `nbplay-note` event and writes that note into the cell. Recording
+arms all voices
 or individual voice dots and writes live note-on events into the current step
 while playing.
 
@@ -925,7 +939,9 @@ transports session gets a `WebSocketRoute` at `/ws/<panel>` with its own
 whose frames hold `widget.tree("<panel>.")`, and `widget.wires("<panel>.", url=...)` gives the `Wire` specs that mirror the config and status models under
 that panel's namespace in the page's one store. `panel_widgets()` names the
 panels (`transport`, `launcher`, `timeline`, `mixer`, then `<track>-sequencer`
-and `<track>-synth` or `<track>-sampler`) and `default_layout()` is the split
+and `<track>-synth` or `<track>-sampler`), `panel_titles()` gives each tab its
+title (`Mixer`, `Lead synth`) through regular-layout's
+`--regular-layout-<name>--title` custom property, and `default_layout()` is the split
 tree: the transport across the top, launcher, timeline and mixer in the
 middle, the instruments in a tab strip below. A top bar holds the title and a
 theme select bound two-way to the transport's `theme`; the `Session` mirrors
@@ -935,6 +951,12 @@ closed panel is reopened from the palette: `nbplay-palette` lists the panel
 names, opens on Ctrl+K or Cmd+K or from the bar's `panels` button
 (`nbplay-palette-hint`, which shows the shortcut for the platform), and its
 `nbplay-request` event invokes the layout's `openPanel` with the picked name.
+The bar's save link downloads `session.nbplay` (`Session.save()`, after asking
+the page to export recorded clip audio) and its load button (`nbplay-upload`)
+PUTs a picked archive to the same URL. `build()` answers a load by replacing
+the session it serves: it rebuilds the app's routes (page, one WebSocket per
+panel, probes) for the loaded session, restarts the `autosync` tasks, and the
+page reloads. `app.state.session` is the session being served.
 `APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so `nbplay-wire` finds the client for its panel and kernel commands

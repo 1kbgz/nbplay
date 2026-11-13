@@ -8,8 +8,10 @@ import {
 } from "../scheduler.ts";
 import {
   bindElementClock,
+  claimChannel,
   type ClockBinding,
   type ClockEvent,
+  releaseChannel,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, define } from "./base.ts";
@@ -68,6 +70,8 @@ interface TrackState {
   activeData: string;
   queued: QueuedLaunch | null;
   currentStep: number;
+  /** The channel this track's slot holds while it is launched. */
+  claim: { sessionId: string; channel: number } | null;
 }
 
 function numberValue(value: unknown, fallback: number): number {
@@ -250,7 +254,7 @@ export class NbplayLauncher extends NbplayElement {
     if (!this.binding) {
       this.binding = bindElementClock(this, this.onClockEvent, this.onRebind);
       const clk = this.binding.clock();
-      clk.setTempo(numberValue(this.bpm, 120));
+      this.joinTempo(clk);
       this.isPlaying = clk.playing;
       this.activeSlots = this.trackList().map(() => -1);
       this.queuedSlots = this.trackList().map(() => NONE_QUEUED);
@@ -294,7 +298,10 @@ export class NbplayLauncher extends NbplayElement {
     this.stopQueueTimer();
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
-    this.states.forEach((state) => state.scheduler.destroy());
+    this.states.forEach((state) => {
+      this.release(state);
+      state.scheduler.destroy();
+    });
     this.states.length = 0;
     this.binding?.dispose();
     this.binding = null;
@@ -361,10 +368,12 @@ export class NbplayLauncher extends NbplayElement {
   updated(changed: PropertyValues): void {
     if (!this.binding) return;
     if (changed.has("engineKey")) this.join();
-    if (changed.has("sessionId") && changed.get("sessionId") !== undefined) {
-      this.binding.rebind();
-    }
-    if (changed.has("bpm") && changed.get("bpm") !== undefined) {
+    // A tempo that arrives with the session id is the model's at render,
+    // which joins the clock; a later write is the host setting the tempo.
+    const joined =
+      changed.has("sessionId") && changed.get("sessionId") !== undefined;
+    if (joined) this.binding.rebind();
+    if (changed.has("bpm") && changed.get("bpm") !== undefined && !joined) {
       this.clock().setTempo(numberValue(this.bpm, 120));
     }
     if (this.engine) return;
@@ -421,21 +430,42 @@ export class NbplayLauncher extends NbplayElement {
     while (this.states.length < count) {
       const index = this.states.length;
       this.states.push({
-        scheduler: createAudioScheduler({ onEnd: () => this.stopNow(index) }),
+        scheduler: createAudioScheduler({
+          onEnd: () => this.stopNow(index),
+          owner: "launcher",
+        }),
         activeScene: -1,
         activeData: "",
         queued: null,
         currentStep: -1,
+        claim: null,
       });
     }
     while (this.states.length > count) {
-      this.states.pop()?.scheduler.destroy();
+      const state = this.states.pop();
+      if (state) this.release(state);
+      state?.scheduler.destroy();
     }
+  }
+
+  /** A launched slot plays its channel in place of the arrangement and the track's sequencer. */
+  private hold(state: TrackState, channel: number): void {
+    this.release(state);
+    if (!this.sessionId || !(channel >= 0)) return;
+    state.claim = { sessionId: this.sessionId, channel };
+    claimChannel(this.sessionId, channel, "launcher");
+  }
+
+  private release(state: TrackState): void {
+    if (!state.claim) return;
+    releaseChannel(state.claim.sessionId, state.claim.channel, "launcher");
+    state.claim = null;
   }
 
   private clearStates(): void {
     this.states.forEach((state) => {
       state.scheduler.stop();
+      this.release(state);
       state.activeScene = -1;
       state.activeData = "";
       state.queued = null;
@@ -485,8 +515,19 @@ export class NbplayLauncher extends NbplayElement {
         this.status(true, { isPlaying: false });
         this.mirrorSlotState(true);
         break;
+      case "tempo": {
+        // Follow the clock's tempo the way the sequencer and timeline do, so
+        // the host's model does not keep the tempo this element rendered with.
+        const bpm = this.clock().bpm;
+        if (numberValue(this.bpm, 120) !== bpm) {
+          this.bpm = bpm;
+          this.set({ bpm });
+        }
+        this.states.forEach((state) => state.scheduler.realign());
+        this.requantize();
+        break;
+      }
       case "seek":
-      case "tempo":
       case "loop":
         this.states.forEach((state) => state.scheduler.realign());
         this.requantize();
@@ -497,8 +538,18 @@ export class NbplayLauncher extends NbplayElement {
     }
   };
 
+  /** Join `clk`: set its tempo if no element has yet, otherwise take it. */
+  private joinTempo(clk: SessionClock): void {
+    const bpm = clk.adoptTempo(numberValue(this.bpm, 120));
+    if (bpm !== numberValue(this.bpm, 120)) {
+      this.bpm = bpm;
+      this.set({ bpm });
+    }
+  }
+
   private onRebind = (clk: SessionClock): void => {
     this.states.forEach((state) => state.scheduler.stop());
+    this.joinTempo(clk);
     if (this.engine) return;
     this.isPlaying = clk.playing;
     this.status(false, { isPlaying: clk.playing });
@@ -516,6 +567,7 @@ export class NbplayLauncher extends NbplayElement {
     const slot = this.findSlot(trackIndex, sceneIndex);
     if (!state || !track || !slot) return false;
     state.scheduler.stop();
+    this.hold(state, track.channel_index);
     state.activeScene = sceneIndex;
     state.activeData = slotData(slot);
     state.currentStep = -1;
@@ -535,6 +587,7 @@ export class NbplayLauncher extends NbplayElement {
     const state = this.states[trackIndex];
     if (!state) return;
     state.scheduler.stop();
+    this.release(state);
     state.activeScene = -1;
     state.activeData = "";
     state.currentStep = -1;

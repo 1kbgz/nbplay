@@ -1,5 +1,5 @@
-import { html, nothing } from "lit";
-import { clampMidiNote, noteName } from "../pads.ts";
+import { html, nothing, type PropertyValues } from "lit";
+import { clampMidiNote, noteName, parseNoteName } from "../pads.ts";
 import { NbplayElement, define } from "./base.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./bar.ts";
@@ -22,8 +22,10 @@ export interface StepRef {
  * `<nbplay-step-grid>`: the beat grid. One step row plus one velocity row per
  * voice. Click toggles a step, the wheel moves its note, the velocity bars take
  * the wheel too. `change` carries `{voice, step, field, value}`; the arm dots
- * fire `nbplay-arm` ({voice, armed}); a double-click fires `nbplay-step-pick`
- * ({voice, step}) when `show-arm` is on, so a host can wait for a played note.
+ * fire `nbplay-arm` ({voice, armed}). A double-click opens a text field in the
+ * step for a note name or MIDI number (Enter commits and activates the step,
+ * Escape cancels); with `show-arm` on it fires `nbplay-step-pick`
+ * ({voice, step}) instead, so a host can wait for a played note.
  * `current-step`, `cursor`, and `pending` are display state owned by the host.
  */
 export class NbplayStepGrid extends NbplayElement {
@@ -35,6 +37,7 @@ export class NbplayStepGrid extends NbplayElement {
     armed: { attribute: false },
     showArm: { type: Boolean, attribute: "show-arm" },
     disabled: { type: Boolean, reflect: true },
+    editing: { state: true },
   };
 
   declare voices: Step[][];
@@ -44,6 +47,7 @@ export class NbplayStepGrid extends NbplayElement {
   declare armed: number[];
   declare showArm: boolean;
   declare disabled: boolean;
+  declare editing: StepRef | null;
 
   constructor() {
     super();
@@ -54,6 +58,19 @@ export class NbplayStepGrid extends NbplayElement {
     this.armed = [];
     this.showArm = false;
     this.disabled = false;
+    this.editing = null;
+  }
+
+  protected updated(changed: PropertyValues): void {
+    if (!changed.has("editing") || !this.editing) return;
+    const input = this.querySelector<HTMLInputElement>(
+      ".nbplay-step-grid-edit",
+    );
+    const step = this.step(this.editing.voice, this.editing.step);
+    if (!input || !step) return;
+    input.value = noteName(step.note);
+    input.focus();
+    input.select();
   }
 
   get length(): number {
@@ -146,8 +163,46 @@ export class NbplayStepGrid extends NbplayElement {
       @dblclick=${() => this.pick(v, i)}
       @wheel=${(e: WheelEvent) => this.onWheel(e, v, i)}
     >
-      ${pending ? "♪?" : noteName(s.note)}
+      ${
+        this.editing?.voice === v && this.editing?.step === i
+          ? this.renderEditor(v, i)
+          : pending
+            ? "♪?"
+            : noteName(s.note)
+      }
     </div>`;
+  }
+
+  private renderEditor(v: number, i: number) {
+    const stop = (e: Event) => e.stopPropagation();
+    return html`<input
+      class="nbplay-step-grid-edit"
+      type="text"
+      aria-label="Note for voice ${v + 1} step ${i + 1}"
+      autocomplete="off"
+      spellcheck="false"
+      @click=${stop}
+      @dblclick=${stop}
+      @wheel=${stop}
+      @input=${stop}
+      @change=${stop}
+      @keydown=${(e: KeyboardEvent) => {
+        if (e.key === "Enter") this.commitEdit(e.target as HTMLInputElement);
+        else if (e.key === "Escape") this.editing = null;
+      }}
+      @blur=${(e: Event) => this.commitEdit(e.target as HTMLInputElement)}
+    />`;
+  }
+
+  /** Removing the field blurs it, so a commit or cancel clears `editing` first. */
+  private commitEdit(input: HTMLInputElement): void {
+    const ref = this.editing;
+    if (!ref) return;
+    this.editing = null;
+    const note = parseNoteName(input.value);
+    if (note === null) return;
+    this.set(ref.voice, ref.step, "note", note);
+    this.set(ref.voice, ref.step, "active", true);
   }
 
   private step(v: number, i: number): Step | undefined {
@@ -172,8 +227,10 @@ export class NbplayStepGrid extends NbplayElement {
   }
 
   private pick(v: number, i: number): void {
-    if (this.disabled || !this.showArm) return;
-    this.emitDetail("nbplay-step-pick", { voice: v, step: i });
+    if (this.disabled) return;
+    if (this.showArm)
+      this.emitDetail("nbplay-step-pick", { voice: v, step: i });
+    else this.editing = { voice: v, step: i };
   }
 
   private onWheel(e: WheelEvent, v: number, i: number): void {

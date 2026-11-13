@@ -244,6 +244,64 @@ test.describe("MIDI clips", () => {
     expect(await page.evaluate(() => window.__cancelled)).toContain(67);
   });
 
+  test("MIDI clips claim their track and a launched slot plays in their place", async ({
+    page,
+  }) => {
+    const events = Array.from({ length: 16 }, (_, beat) => ({
+      beat,
+      duration: 0.5,
+      note: 60,
+      velocity: 100,
+    }));
+    await renderWidget(page, {
+      bpm: 300,
+      clips: [midiClip(events, { duration: 16 })],
+    });
+    const claims = () =>
+      page.evaluate(
+        (id) => ({ ...globalThis.__nbplay[id].claims?.[0] }),
+        SESSION_ID,
+      );
+    // The arrangement plays this track, so a looping sequencer on it would not.
+    expect(await claims()).toEqual({ timeline: true });
+    await page.evaluate((id) => {
+      window.__scheduled = [];
+      globalThis.__nbplay[id].instruments = {
+        0: {
+          scheduleNote(note, velocity, at) {
+            window.__scheduled.push(at);
+          },
+        },
+      };
+    }, SESSION_ID);
+    await page.locator(".nbplay-timeline-play").click();
+    await page.waitForFunction(() => window.__scheduled.length >= 2);
+
+    // A launched slot takes the track: the clip's remaining notes are skipped.
+    const held = await page.evaluate((id) => {
+      globalThis.__nbplay[id].claims[0].launcher = true;
+      return window.__scheduled.length;
+    }, SESSION_ID);
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => window.__scheduled.length)).toBe(held);
+
+    // The slot stops and the clip plays again.
+    await page.evaluate((id) => {
+      delete globalThis.__nbplay[id].claims[0].launcher;
+    }, SESSION_ID);
+    await page.waitForFunction(
+      (held) => window.__scheduled.length > held,
+      held,
+    );
+
+    // A muted clip, or no clip, leaves the track to its sequencer.
+    await page.evaluate(() => {
+      window.__testModel.set("clips", []);
+      window.__testModel._trigger("change:clips");
+    });
+    await expect.poll(claims).toEqual({});
+  });
+
   test("MIDI notes keep valid times across a loop wrap", async ({ page }) => {
     await renderWidget(page, {
       bpm: 600,

@@ -4,10 +4,13 @@ import { bindShortcuts } from "../helpers.ts";
 import { midiToHz, scheduleOscillator } from "../scheduler.ts";
 import {
   bindElementClock,
+  channelOwner,
+  claimChannel,
   type ClockBinding,
   type ClockEvent,
   emitBusNote,
   getSessionBus,
+  releaseChannel,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
@@ -220,6 +223,10 @@ export class NbplayTimeline extends NbplayElement {
   private noteListenerActive = false;
   private suppressRestart = false;
   private disposed = false;
+  private claims: { sessionId: string; channels: number[] } = {
+    sessionId: "",
+    channels: [],
+  };
   private objectUrls = new Set<string>();
   private activeMedia: HTMLMediaElement[] = [];
   private activeSources: AudioNode[] = [];
@@ -322,7 +329,7 @@ export class NbplayTimeline extends NbplayElement {
     if (!this.binding) {
       this.binding = bindElementClock(this, this.onClockEvent, this.onRebind);
       const clk = this.binding.clock();
-      clk.setTempo(numberValue(this.bpm, 120));
+      this.joinTempo(clk);
       // A standalone timeline restores its playhead from the host; a
       // session's position lives in the shared clock, never in saved status.
       if (!this.sessionId && !clk.playing) {
@@ -346,6 +353,7 @@ export class NbplayTimeline extends NbplayElement {
     this.classList.add("nbplay-timeline");
     this.disposed = false;
     this.clock();
+    this.syncClaims();
     this.unbindShortcuts = bindShortcuts(this, {
       Space: () => this.togglePlay(),
       "Shift+Space": () => {
@@ -375,6 +383,7 @@ export class NbplayTimeline extends NbplayElement {
     });
     this.releaseLanes();
     this.clearScheduledPlayback();
+    this.syncClaims();
     this.setNoteListener(false);
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
@@ -387,8 +396,10 @@ export class NbplayTimeline extends NbplayElement {
     if (!this.binding) return;
     const fresh = (key: string) =>
       changed.has(key) && changed.get(key) !== undefined;
+    // A tempo that arrives with the session id is the model's at render,
+    // which joins the clock; a later write is the host setting the tempo.
     if (fresh("sessionId")) this.binding.rebind();
-    if (fresh("bpm")) this.clock().setTempo(numberValue(this.bpm, 120));
+    else if (fresh("bpm")) this.clock().setTempo(numberValue(this.bpm, 120));
     if (fresh("isPlaying")) this.onPlayStateWrite();
     if (fresh("isRecording")) this.onRecordStateWrite();
     if (fresh("currentBeat")) this.onPositionWrite();
@@ -402,6 +413,41 @@ export class NbplayTimeline extends NbplayElement {
     ) {
       this.syncLoopRange();
     }
+    if (
+      changed.has("clips") ||
+      changed.has("tracks") ||
+      changed.has("sessionId")
+    ) {
+      this.syncClaims();
+    }
+  }
+
+  /**
+   * Claim the channel of every track that holds MIDI clips with notes: the
+   * arrangement plays those tracks, so their looping sequencers stay silent.
+   */
+  private syncClaims(): void {
+    this.claims.channels.forEach((channel) =>
+      releaseChannel(this.claims.sessionId, channel, "timeline"),
+    );
+    const tracks = this.trackList();
+    const channels = new Set<number>();
+    if (this.isConnected && this.sessionId) {
+      this.clipList().forEach((clip) => {
+        const track = tracks[clip.track_index];
+        if (
+          clip.kind === "midi" &&
+          track &&
+          !clip.muted &&
+          (clip.events || []).length > 0
+        )
+          channels.add(track.channel_index);
+      });
+    }
+    channels.forEach((channel) =>
+      claimChannel(this.sessionId, channel, "timeline"),
+    );
+    this.claims = { sessionId: this.sessionId, channels: [...channels] };
   }
 
   private set(values: Record<string, unknown>): void {
@@ -484,8 +530,18 @@ export class NbplayTimeline extends NbplayElement {
     }
   };
 
+  /** Join `clk`: set its tempo if no element has yet, otherwise take it. */
+  private joinTempo(clk: SessionClock): void {
+    const bpm = clk.adoptTempo(numberValue(this.bpm, 120));
+    if (bpm !== numberValue(this.bpm, 120)) {
+      this.bpm = bpm;
+      this.set({ bpm });
+    }
+  }
+
   private onRebind = (clk: SessionClock): void => {
     this.clearScheduledPlayback();
+    this.joinTempo(clk);
     this.isPlaying = clk.playing;
     this.status({ isPlaying: clk.playing }, false);
     if (clk.playing) this.startPlayback();
@@ -1144,6 +1200,9 @@ export class NbplayTimeline extends NbplayElement {
     atTime: number,
     spb: number,
   ): void {
+    // A launched slot on this track plays in place of its clips.
+    if (channelOwner(this.sessionId, track.channel_index) === "launcher")
+      return;
     const clk = this.clock();
     const bus = getSessionBus(this.sessionId);
     const sampler = bus?.samplers?.[track.channel_index];
