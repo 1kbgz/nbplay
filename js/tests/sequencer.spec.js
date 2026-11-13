@@ -692,6 +692,25 @@ test.describe("SequencerWidget", () => {
   });
 
   // 21. Double-click step shows ♪? when keyboard connected
+  test("double-click step, type a note, Enter → model updated", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    const cell = page.locator(".nbplay-step-grid-cell").nth(1);
+    await cell.dblclick();
+    const input = page.locator(".nbplay-step-grid-edit");
+    await expect(input).toBeFocused();
+    await input.fill("G5");
+    await input.press("Enter");
+    await expect(cell).toHaveText("G5");
+    expect(
+      await page.evaluate(() => {
+        const step = window.__testModel._state.voices_data[0][1];
+        return [step.note, step.active];
+      }),
+    ).toEqual([79, true]);
+  });
+
   test("double-click step shows note prompt when keyboard connected", async ({
     page,
   }) => {
