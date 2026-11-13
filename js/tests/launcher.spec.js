@@ -533,6 +533,89 @@ test.describe("LauncherWidget", () => {
     ).toEqual({ active: [0, 0], queued: [-2, -2] });
   });
 
+  test("two views of one launcher share one engine", async ({ page }) => {
+    await installAudioRecorder(page);
+    await renderLauncher(page, { bpm: 600, quantize: "none" });
+    await page.evaluate(async () => {
+      const mod = await import("/dist/tests/instruments.js");
+      const el = document.createElement("div");
+      document.getElementById("root").appendChild(el);
+      mod.render("launcher", { model: window.__testModel, el });
+      // The widget gives every view of itself the same key.
+      document.querySelectorAll("nbplay-launcher").forEach((view) => {
+        view.engineKey = "one-launcher";
+      });
+    });
+    const views = page.locator("nbplay-launcher");
+    await expect(views).toHaveCount(2);
+    const slot = 'nbplay-launcher-slot[data-track="0"][data-scene="0"]';
+    const once = async () => {
+      const times = await page.evaluate(() =>
+        window.__oscStarts.map((start) => start.time.toFixed(6)),
+      );
+      expect(new Set(times).size).toBe(times.length);
+      return times.length;
+    };
+
+    // A launch from the second view reaches the engine in the first.
+    await views.nth(1).locator(slot).click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([0, -1]);
+    await expect(views.nth(0).locator(slot)).toHaveAttribute("active", "");
+    await expect(views.nth(1).locator(slot)).toHaveAttribute("active", "");
+    await page.waitForFunction(() => window.__oscStarts.length >= 4);
+    const played = await once();
+
+    // The engine's view goes away and the other one carries on.
+    await page.evaluate(() =>
+      document.querySelector("nbplay-launcher").remove(),
+    );
+    await page.waitForFunction(
+      (played) => window.__oscStarts.length >= played + 4,
+      played,
+    );
+    await once();
+    await expect(views.first().locator(slot)).toHaveAttribute("active", "");
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([0, -1]);
+    // It is the engine now: its own stop reaches the schedulers.
+    await views
+      .first()
+      .locator(
+        '.nbplay-launcher-grid-row[data-track="0"] .nbplay-launcher-grid-track-stop',
+      )
+      .click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.active_slots),
+    ).toEqual([-1, -1]);
+  });
+
+  test("a view that starts following another engine releases its channel claims", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
+    await page
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    const claimed = () =>
+      page.evaluate(() =>
+        Boolean(globalThis.__nbplay["launcher-session"].claims?.[0]?.launcher),
+      );
+    expect(await claimed()).toBe(true);
+    await page.evaluate(async () => {
+      const first = document.querySelector("nbplay-launcher");
+      const engine = document.createElement("nbplay-launcher");
+      engine.engineKey = "one-launcher";
+      document.getElementById("root").appendChild(engine);
+      await engine.updateComplete;
+      first.engineKey = "one-launcher";
+      await first.updateComplete;
+    });
+    expect(await claimed()).toBe(false);
+  });
+
   test("a stop request while stopped does not start the clock", async ({
     page,
   }) => {

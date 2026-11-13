@@ -476,6 +476,11 @@ class TestArrangementWidgets:
             LauncherConfig.model_validate({"quantize": "tick"})
         widget = nbplay.LauncherWidget(autosync=False)
         try:
+            # Every view of one widget carries the same engine key; another widget has its own.
+            key = widget.tree().to_node()["props"]["engineKey"]
+            other = nbplay.LauncherWidget(autosync=False)
+            assert key == widget.tree("lead.").to_node()["props"]["engineKey"] != other.tree().to_node()["props"]["engineKey"]
+            other.close()
             track = widget.add_track("Drums")
             scene = widget.add_scene()
             slot = widget.set_slot(track, scene, [{"note": 36, "active": True}, {"note": 38}])

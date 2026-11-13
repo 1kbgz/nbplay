@@ -792,6 +792,12 @@ write restarts a playing slot only when its own pattern changed. `active_slots` 
 track's `channel_index` on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.
 
+A launcher displayed twice plays once. `LauncherWidget.tree()` gives every view
+of the widget the same `engineKey`, and the elements with one key share an
+engine: the first to connect runs the schedulers, and the others render its
+slot state and progress and pass their launches to it. When the engine's view
+is removed, the next view takes over from the `active_slots` it was showing.
+
 ### KeyboardWidget
 
 Python class: `KeyboardWidget`. Element:
