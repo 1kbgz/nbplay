@@ -60,9 +60,9 @@ package builds WebAssembly bindings for browser-facing Rust helpers.
 | `.github/workflows/`                              | CI for build/test/dist and docs publishing.                                                                |
 | `pyproject.toml`, `Cargo.toml`, `js/package.json` | Python, Rust, and JavaScript package/build configuration.                                                  |
 
-Generated assets are copied into `nbplay/static/` and `nbplay/extension/` by the
-JavaScript build. These folders are ignored in Git but included in built wheels
-through Hatch artifact configuration.
+Generated assets are copied into `nbplay/static/` by the JavaScript build. The
+folder is ignored in Git but included in built wheels through Hatch artifact
+configuration.
 
 ## Runtime data flow
 
@@ -1043,22 +1043,21 @@ make dist          # Full distribution build and checks
 
 The JavaScript build in `js/package.json` is ordered as:
 
-1. `pnpm build:clean`: remove `js/dist/` and `nbplay/extension/`.
+1. `pnpm build:clean`: remove `js/dist/`.
 1. `pnpm build:rust`: compile the WASM crate for `wasm32-unknown-unknown`.
 1. `pnpm build:wasm-bindgen`: generate JS glue and `.wasm` under
    `js/dist/pkg/`.
 1. `pnpm build:prod`: run `js/build.mjs`, which bundles TypeScript entries,
-   processes CSS, copies extension assets, and copies widget JS/CSS into
-   `nbplay/static/`.
+   processes CSS, and copies widget JS/CSS into `nbplay/static/`.
 1. `pnpm build:types`: emit TypeScript declarations under `js/dist/esm/`.
 
 The Python build uses Hatch hooks:
 
 - hatch-js runs the JavaScript build from `js/` and expects
-  `nbplay/extension/cdn/index.js`.
+  `nbplay/static/spaday/index.js`.
 - hatch-rs builds the PyO3 extension from the root Cargo package.
-- `nbplay/static` and `nbplay/extension` are declared build artifacts so wheels
-  include generated assets even though they are ignored in Git.
+- `nbplay/static` is a declared build artifact so wheels include the generated
+  assets even though they are ignored in Git.
 
 ## Testing strategy
 
@@ -1364,8 +1363,8 @@ make major
 - Always return a cleanup function from a widget renderer. Stop audio, clear
   intervals, remove global event listeners, disconnect MIDI ports, and unregister
   session bus entries.
-- Treat `nbplay/static/` and `nbplay/extension/` as generated outputs. Rebuild
-  them when testing widget rendering, but do not hand-edit them.
+- Treat `nbplay/static/` as generated output. Rebuild it when testing widget
+  rendering, but do not hand-edit it.
 - Keep CSS scoped under a widget root class. Notebook pages are shared DOMs.
 - Use Jupyter theme variables for colors. Canvas code should read CSS variables
   through `cssVar()`.

@@ -492,9 +492,9 @@ package builds WebAssembly bindings for browser-facing Rust helpers.</p>
 </tr>
 </tbody>
 </table>
-<p>Generated assets are copied into <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code> by the
-JavaScript build. These folders are ignored in Git but included in built wheels
-through Hatch artifact configuration.</p>
+<p>Generated assets are copied into <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> by the JavaScript build. The
+folder is ignored in Git but included in built wheels through Hatch artifact
+configuration.</p>
 </section>
 <section id="runtime-data-flow">
 <h2>Runtime data flow<a class="headerlink" href="#runtime-data-flow" title="Link to this heading">¶</a></h2>
@@ -1488,22 +1488,21 @@ make<span class="w"> </span>dist<span class="w">          </span><span class="c1
 </div>
 <p>The JavaScript build in <code class="docutils literal notranslate"><span class="pre">js/package.json</span></code> is ordered as:</p>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:clean</span></code>: remove <code class="docutils literal notranslate"><span class="pre">js/dist/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:clean</span></code>: remove <code class="docutils literal notranslate"><span class="pre">js/dist/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:rust</span></code>: compile the WASM crate for <code class="docutils literal notranslate"><span class="pre">wasm32-unknown-unknown</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:wasm-bindgen</span></code>: generate JS glue and <code class="docutils literal notranslate"><span class="pre">.wasm</span></code> under
 <code class="docutils literal notranslate"><span class="pre">js/dist/pkg/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:prod</span></code>: run <code class="docutils literal notranslate"><span class="pre">js/build.mjs</span></code>, which bundles TypeScript entries,
-processes CSS, copies extension assets, and copies widget JS/CSS into
-<code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code>.</p></li>
+processes CSS, and copies widget JS/CSS into <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">build:types</span></code>: emit TypeScript declarations under <code class="docutils literal notranslate"><span class="pre">js/dist/esm/</span></code>.</p></li>
 </ol>
 <p>The Python build uses Hatch hooks:</p>
 <ul class="simple">
 <li><p>hatch-js runs the JavaScript build from <code class="docutils literal notranslate"><span class="pre">js/</span></code> and expects
-<code class="docutils literal notranslate"><span class="pre">nbplay/extension/cdn/index.js</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">nbplay/static/spaday/index.js</span></code>.</p></li>
 <li><p>hatch-rs builds the PyO3 extension from the root Cargo package.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nbplay/static</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension</span></code> are declared build artifacts so wheels
-include generated assets even though they are ignored in Git.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nbplay/static</span></code> is a declared build artifact so wheels include the generated
+assets even though they are ignored in Git.</p></li>
 </ul>
 </section>
 <section id="testing-strategy">
@@ -1823,8 +1822,8 @@ ready handshake.</p></li>
 <li><p>Always return a cleanup function from a widget renderer. Stop audio, clear
 intervals, remove global event listeners, disconnect MIDI ports, and unregister
 session bus entries.</p></li>
-<li><p>Treat <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> and <code class="docutils literal notranslate"><span class="pre">nbplay/extension/</span></code> as generated outputs. Rebuild
-them when testing widget rendering, but do not hand-edit them.</p></li>
+<li><p>Treat <code class="docutils literal notranslate"><span class="pre">nbplay/static/</span></code> as generated output. Rebuild it when testing widget
+rendering, but do not hand-edit it.</p></li>
 <li><p>Keep CSS scoped under a widget root class. Notebook pages are shared DOMs.</p></li>
 <li><p>Use Jupyter theme variables for colors. Canvas code should read CSS variables
 through <code class="docutils literal notranslate"><span class="pre">cssVar()</span></code>.</p></li>
