@@ -559,6 +559,57 @@ test.describe("Session clock", () => {
     );
   });
 
+  test("a mixer channel that appears while playing takes the sequencer's notes", async ({
+    page,
+  }) => {
+    // Record where each note's gain node is connected.
+    await page.evaluate(() => {
+      const BaseAudioContext = window.AudioContext;
+      window.__targets = [];
+      class RoutingAudioContext extends BaseAudioContext {
+        createGain() {
+          const gain = super.createGain();
+          const connect = gain.connect.bind(gain);
+          gain.connect = (target) => {
+            window.__targets.push(
+              target === this.destination ? "destination" : target.__label,
+            );
+            return connect(target);
+          };
+          return gain;
+        }
+      }
+      window.AudioContext = RoutingAudioContext;
+      window.webkitAudioContext = RoutingAudioContext;
+    });
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 600,
+    });
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      channel_index: 0,
+    });
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => window.__targets.length >= 2);
+    expect(await page.evaluate(() => new Set(window.__targets).size)).toBe(1);
+    expect(await page.evaluate(() => window.__targets[0])).toBe("destination");
+
+    // The mixer renders while the sequencer plays and puts the channel on the bus.
+    await page.evaluate((id) => {
+      const bus = globalThis.__nbplay[id];
+      const gain = bus.clock.context().createGain();
+      gain.__label = "channel";
+      bus.channels = [{ gain }];
+      window.__targets = [];
+    }, SESSION_ID);
+    await page.waitForFunction(() => window.__targets.length >= 2);
+    expect(await page.evaluate(() => [...new Set(window.__targets)])).toEqual([
+      "channel",
+    ]);
+  });
+
   test("standalone sequencer uses a private clock", async ({ page }) => {
     await renderWidget(page, "sequencer", "solo", {
       ...SEQUENCER_DEFAULTS,
