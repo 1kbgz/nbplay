@@ -143,6 +143,16 @@ export function getBusClock(bus: SessionBus): SessionClock {
   return bus.clock;
 }
 
+/**
+ * Length of a bar in beats. A beat is a quarter note, so 4/4 is 4 beats,
+ * 6/8 is 3 and 7/8 is 3.5.
+ */
+export function barBeats(num: unknown, den: unknown): number {
+  const n = Number(num);
+  const d = Number(den);
+  return ((n > 0 ? n : 4) * 4) / (d > 0 ? d : 4);
+}
+
 function clampNumber(value: unknown, fallback: number, min: number): number {
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(min, n) : fallback;
@@ -294,7 +304,7 @@ export function createSessionClock(
       return bpm;
     },
     setBeatsPerBar(next: number): void {
-      const value = Math.max(1, Math.round(clampNumber(next, beatsPerBar, 1)));
+      const value = clampNumber(next, beatsPerBar, 0.25);
       if (value === beatsPerBar) return;
       beatsPerBar = value;
       emit("timesig");

@@ -29,13 +29,13 @@ export class NbplayPosition extends NbplayElement {
 
   get bar(): number {
     return (
-      Math.floor(Math.max(0, this.beat) / Math.max(1, this.beatsPerBar)) + 1
+      Math.floor(Math.max(0, this.beat) / Math.max(0.25, this.beatsPerBar)) + 1
     );
   }
 
   get beatInBar(): number {
     return (
-      (Math.floor(Math.max(0, this.beat)) % Math.max(1, this.beatsPerBar)) + 1
+      Math.floor(Math.max(0, this.beat) % Math.max(0.25, this.beatsPerBar)) + 1
     );
   }
 

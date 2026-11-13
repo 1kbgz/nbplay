@@ -513,6 +513,47 @@ test.describe("TransportWidget", () => {
   });
 
   // 16. Time signature with different values
+  test("bar length follows the time signature's denominator", async ({
+    page,
+  }) => {
+    // 6/8 is three quarter-note beats to the bar, not six.
+    await renderWidget(page, {
+      time_signature_num: 6,
+      time_signature_den: 8,
+      loop_enabled: true,
+      loop_start_bar: 1,
+      loop_end_bar: 3,
+    });
+    const clock = () =>
+      page.evaluate(() => {
+        const clk = document.querySelector("nbplay-transport").clock();
+        return [clk.beatsPerBar, clk.loop.startBeat, clk.loop.endBeat];
+      });
+    expect(await clock()).toEqual([3, 3, 9]);
+    await page.evaluate(() =>
+      document.querySelector("nbplay-transport").clock().seek(7),
+    );
+    expect(
+      await page.evaluate(() => [
+        window.__testModel._state.bar_number,
+        window.__testModel._state.beat_in_bar,
+      ]),
+    ).toEqual([2, 1]);
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-bar"),
+    ).toHaveText("003");
+    await expect(
+      page.locator(".nbplay-transport-position .nbplay-position-beat"),
+    ).toHaveText("2");
+
+    // 7/8 is three and a half.
+    await page.evaluate(() => {
+      window.__testModel.set("time_signature_num", 7);
+      window.__testModel._trigger("change:time_signature_num");
+    });
+    await expect.poll(clock).toEqual([3.5, 3.5, 10.5]);
+  });
+
   test("custom time signature displays correctly", async ({ page }) => {
     await renderWidget(page, { time_signature_num: 3, time_signature_den: 8 });
     await expect(page.locator(".nbplay-transport-timesig-val")).toHaveText(

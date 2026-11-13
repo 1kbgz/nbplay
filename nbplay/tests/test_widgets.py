@@ -730,6 +730,11 @@ class TestSession:
             assert seq.config.bpm == 141.0 and session.timeline.config.bpm == 141.0
             assert session.undo() and session.launcher.config.bpm == 128.0 and session.transport.config.bpm == 128.0
             assert isinstance(session.play(), int)
+            # Every widget that counts bars gets both halves of the time signature.
+            for widget in (session.transport, session.launcher, session.timeline, seq):
+                bindings = widget.tree().to_node()["bindings"]
+                assert bindings["timeSignatureNum"]["field"] == "config.time_signature_num"
+                assert bindings["timeSignatureDen"]["field"] == "config.time_signature_den"
         finally:
             session.close()
 
