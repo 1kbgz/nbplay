@@ -180,6 +180,26 @@ test.describe("LauncherWidget", () => {
     await page.waitForFunction(() => window.__oscStarts.length >= 1);
   });
 
+  test("bar quantize uses the bar length of the time signature", async ({
+    page,
+  }) => {
+    await renderLauncher(page, {
+      time_signature_num: 6,
+      time_signature_den: 8,
+    });
+    const next = (beat) =>
+      page.evaluate(
+        (beat) => document.querySelector("nbplay-launcher").nextBoundary(beat),
+        beat,
+      );
+    expect([await next(0.5), await next(3), await next(4)]).toEqual([3, 3, 6]);
+    await page.evaluate(() => {
+      window.__testModel.set("time_signature_num", 7);
+      window.__testModel._trigger("change:time_signature_num");
+    });
+    await expect.poll(() => next(4)).toBe(7);
+  });
+
   test("launches quantize to the next bar while playing", async ({ page }) => {
     await renderLauncher(page, { bpm: 6000 });
     await page
@@ -642,24 +662,18 @@ test.describe("LauncherWidget", () => {
     expect(result.cancelled).toBe(result.future);
   });
 
-  test("bar quantize uses the bar length of the time signature", async ({
+  test("a tempo change on the shared clock is written to the launcher's model", async ({
     page,
   }) => {
-    await renderLauncher(page, {
-      time_signature_num: 6,
-      time_signature_den: 8,
-    });
-    const next = (beat) =>
-      page.evaluate(
-        (beat) => document.querySelector("nbplay-launcher").nextBoundary(beat),
-        beat,
-      );
-    expect([await next(0.5), await next(3), await next(4)]).toEqual([3, 3, 6]);
-    await page.evaluate(() => {
-      window.__testModel.set("time_signature_num", 7);
-      window.__testModel._trigger("change:time_signature_num");
-    });
-    await expect.poll(() => next(4)).toBe(7);
+    await renderLauncher(page);
+    await renderTransport(page);
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("96");
+    expect(
+      await page.evaluate(() => ({
+        launcher: window.__testModel._state.bpm,
+        transport: window.__transportModel._state.bpm,
+      })),
+    ).toEqual({ launcher: 96, transport: 96 });
   });
 
   test("quantize select writes the model", async ({ page }) => {
