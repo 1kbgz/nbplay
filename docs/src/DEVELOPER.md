@@ -919,7 +919,9 @@ transports session gets a `WebSocketRoute` at `/ws/<panel>` with its own
 whose frames hold `widget.tree("<panel>.")`, and `widget.wires("<panel>.", url=...)` gives the `Wire` specs that mirror the config and status models under
 that panel's namespace in the page's one store. `panel_widgets()` names the
 panels (`transport`, `launcher`, `timeline`, `mixer`, then `<track>-sequencer`
-and `<track>-synth` or `<track>-sampler`) and `default_layout()` is the split
+and `<track>-synth` or `<track>-sampler`), `panel_titles()` gives each tab its
+title (`Mixer`, `Lead synth`) through regular-layout's
+`--regular-layout-<name>--title` custom property, and `default_layout()` is the split
 tree: the transport across the top, launcher, timeline and mixer in the
 middle, the instruments in a tab strip below. A top bar holds the title and a
 theme select bound two-way to the transport's `theme`; the `Session` mirrors

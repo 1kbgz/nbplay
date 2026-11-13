@@ -8,7 +8,7 @@ pytest.importorskip("spaday_regular_layout")
 from starlette.testclient import TestClient
 
 import nbplay
-from nbplay.app import Standalone, build, default_layout, demo_session, main, panel_widgets
+from nbplay.app import Standalone, build, default_layout, demo_session, main, panel_titles, panel_widgets
 
 
 def _instrument(tree, panel):
@@ -27,6 +27,7 @@ class TestApp:
             panels = panel_widgets(session)
             assert list(panels) == ["transport", "launcher", "timeline", "mixer", "lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert panels["lead-synth-synth"] is session.tracks[0].sound_source
+            assert list(panel_titles(session).values()) == ["Transport", "Launcher", "Timeline", "Mixer", "Lead Synth sequencer", "Lead Synth synth", "Lead Synth synth 2"]
             layout = default_layout(list(panels))
             assert layout["children"][2]["tabs"] == ["lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert layout["children"][0]["tabs"] == ["transport"] and layout["children"][1]["children"][1]["tabs"] == ["timeline"]
@@ -67,7 +68,10 @@ class TestApp:
                 assert bar["tag"] == "header" and layout["tag"] == "spaday-regular-layout"
                 # The palette lists every panel and reopens the picked one; the bar's button opens it.
                 assert palette["tag"] == "nbplay-palette"
-                assert [command["Map"]["id"]["Str"] for command in palette["props"]["commands"]["List"]] == list(panel_widgets(session))
+                commands = [command["Map"] for command in palette["props"]["commands"]["List"]]
+                assert {command["id"]["Str"]: command["label"]["Str"] for command in commands} == panel_titles(session)
+                # The tabs take their titles from regular-layout's per-panel custom properties.
+                assert '--regular-layout-drums-sampler--title: "Drums sampler"' in layout["props"]["style"]["Str"]
                 assert palette["events"]["nbplay-request"] == {
                     "kind": "invoke",
                     "target": {"ref": "id", "id": layout["props"]["id"]["Str"]},

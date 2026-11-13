@@ -27,7 +27,7 @@ from .components import package as nbplay_package
 from .descriptors import THEMES
 from .widget import InstrumentWidget, SamplerWidget, SequencerWidget, Session, SynthWidget
 
-__all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_widgets")
+__all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_titles", "panel_widgets")
 
 #: The page chrome follows the nbplay tokens: the document root carries the
 #: session theme, and regular-layout's own tokens map onto nbplay's.
@@ -91,21 +91,32 @@ def _slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "track"
 
 
-def panel_widgets(session):
-    """Panel name to widget: the session views, then each track's sequencer and sound source."""
-    panels = {"transport": session.transport, "launcher": session.launcher, "timeline": session.timeline, "mixer": session.mixer}
+def _panels(session):
+    """(name, title, widget) per panel: the session views, then each track's sequencer and sound source."""
+    panels = [(name, name.capitalize(), getattr(session, name)) for name in ("transport", "launcher", "timeline", "mixer")]
+    taken = {name for name, _, _ in panels}
     for track in session.tracks:
-        base = _slug(track.name)
         for widget in (track.sequencer, track.sound_source):
             if not isinstance(widget, InstrumentWidget):
                 continue
-            name = f"{base}-{widget.TAG.removeprefix('nbplay-')}"
-            index = 2
-            while name in panels:
-                name = f"{base}-{widget.TAG.removeprefix('nbplay-')}-{index}"
+            kind = widget.TAG.removeprefix("nbplay-")
+            name, title, index = f"{_slug(track.name)}-{kind}", f"{track.name} {kind.replace('-', ' ')}", 2
+            while name in taken:
+                name, title = f"{_slug(track.name)}-{kind}-{index}", f"{track.name} {kind.replace('-', ' ')} {index}"
                 index += 1
-            panels[name] = widget
+            taken.add(name)
+            panels.append((name, title, widget))
     return panels
+
+
+def panel_widgets(session):
+    """Panel name to widget: the session views, then each track's sequencer and sound source."""
+    return {name: widget for name, _, widget in _panels(session)}
+
+
+def panel_titles(session):
+    """Panel name to the title on its tab: ``Mixer``, or the track's name and the instrument (``Lead synth``)."""
+    return {name: title for name, title, _ in _panels(session)}
 
 
 def default_layout(names):
@@ -150,19 +161,23 @@ def _app_bar(title):
     )
 
 
-def _page(panels, layout, title):
+def _page(panels, titles, layout, title):
     """The top bar over the panel layout, each panel's element bound under its own namespace.
 
     The palette (Ctrl+K or Cmd+K) lists every panel and reopens one the user closed.
+    regular-layout labels a tab with the panel name unless the layout sets
+    ``--regular-layout-<name>--title`` to a CSS string, which is how the tabs get their titles.
     """
     frames = [RegularLayoutFrame(widget.tree(f"{name}."), name=name) for name, widget in panels.items()]
-    palette = element("nbplay-palette", id="nbplay-palette", placeholder="Open a panel", commands=[{"id": name} for name in panels])
+    commands = [{"id": name, "label": titles[name]} for name in panels]
+    palette = element("nbplay-palette", id="nbplay-palette", placeholder="Open a panel", commands=commands)
+    tab_titles = {f"regular-layout-{name}--title": json.dumps(titles[name], ensure_ascii=False) for name in panels}
     return (
         element("div")
         .classes("nbplay-app")
         .child(
             _app_bar(title),
-            RegularLayout(*frames, layout=layout or default_layout(list(panels)), id="nbplay-layout").classes("spa nbplay"),
+            RegularLayout(*frames, layout=layout or default_layout(list(panels)), id="nbplay-layout").classes("spa nbplay").css(**tab_titles),
             palette.on("nbplay-request", Invoke(by_id("nbplay-layout"), "openPanel", event_prop("detail.name"))),
         )
         .bind_root_attr("data-nbplay-theme", "transport.config.theme")
@@ -234,7 +249,7 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
         background.append(transports.autosync(server))
     if probes:
         routes.extend(_probe_routes(panels))
-    page = _page(panels, layout, title)
+    page = _page(panels, panel_titles(session), layout, title)
     app = serve(
         lambda: page,
         packages=[nbplay_package, layout_package],
@@ -262,7 +277,7 @@ class Standalone:
         self.session = session
         self.panels = panel_widgets(session)
         self.servers = {name: transports.Server(widget.session) for name, widget in self.panels.items()}
-        self._page = _page(self.panels, layout, title)
+        self._page = _page(self.panels, panel_titles(session), layout, title)
 
     def page(self):
         """The tree, the page styles, and each panel's model-to-namespace wires."""

@@ -136,6 +136,19 @@ test.describe("web app", () => {
     await expect.poll(laidOut).toBe(false);
     await expect(mixer).toBeHidden();
 
+    // The tabs are titled, not labelled with the panel ids.
+    expect(
+      await page.evaluate(() => {
+        const frame = document.querySelector(
+          'regular-layout-frame[name="drums-sampler"]',
+        );
+        const title = (frame.shadowRoot ?? frame).querySelector(
+          'regular-layout-tab[name="drums-sampler"] [part~="title"]',
+        );
+        return getComputedStyle(title, "::before").content;
+      }),
+    ).toBe('"Drums sampler"');
+
     // Ctrl+K lists every panel; picking one puts it back in the layout.
     const dialog = page.locator("nbplay-palette dialog");
     await page.keyboard.press("Control+k");
