@@ -1,3 +1,4 @@
+import fs from "fs";
 import { test, expect } from "@playwright/test";
 
 // The standalone Pyodide example: no server. The session and its models run in Pyodide
@@ -114,12 +115,42 @@ test.describe("standalone Pyodide example", () => {
     // The session mirrors the tempo, so the launcher shows Python has it.
     await expect(page.locator("nbplay-launcher")).toHaveJSProperty("bpm", 111);
 
+    // A recorded take lives in the page until a save asks for its audio.
+    await page.evaluate(() => {
+      const timeline = document.querySelector("nbplay-timeline");
+      const clips = [
+        {
+          id: "take-1",
+          name: "Take 1",
+          track_index: 0,
+          start: 0,
+          duration: 4,
+          recorded: true,
+          audio_url: URL.createObjectURL(
+            new Blob(["recorded take"], { type: "audio/webm" }),
+          ),
+          blob_type: "audio/webm",
+          source: "recording",
+          sample_rate: 44100,
+        },
+      ];
+      timeline.clips = clips;
+      timeline.dispatchEvent(
+        new CustomEvent("nbplay-set", {
+          detail: { values: { clips } },
+          bubbles: true,
+        }),
+      );
+    });
+
     const [download] = await Promise.all([
       page.waitForEvent("download"),
       page.locator(".nbplay-app-bar a", { hasText: "save" }).click(),
     ]);
     expect(download.suggestedFilename()).toBe("session.nbplay");
     const saved = await download.path();
+    // The worker waited for the take's audio before writing the archive.
+    expect(fs.readFileSync(saved).includes("clips/take-1")).toBe(true);
 
     // A file that is not an archive is refused and the session stays.
     const upload = page.locator(".nbplay-app-bar nbplay-upload");
