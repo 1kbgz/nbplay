@@ -1467,6 +1467,8 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"swing"</span><span class="p">:</span> <span class="s2">"swing"</span><span class="p">,</span>
         <span class="s2">"groove"</span><span class="p">:</span> <span class="s2">"groove"</span><span class="p">,</span>
         <span class="s2">"automation_lanes"</span><span class="p">:</span> <span class="s2">"automationLanes"</span><span class="p">,</span>
+        <span class="s2">"edit_token"</span><span class="p">:</span> <span class="s2">"editToken"</span><span class="p">,</span>
+        <span class="s2">"edit_ack"</span><span class="p">:</span> <span class="s2">"editAck"</span><span class="p">,</span>
         <span class="o">**</span><span class="n">_ROUTED</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">,</span> <span class="s2">"current_step"</span><span class="p">:</span> <span class="s2">"currentStep"</span><span class="p">}</span>
@@ -1984,6 +1986,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"quantize"</span><span class="p">:</span> <span class="s2">"quantize"</span><span class="p">,</span>
         <span class="s2">"bpm"</span><span class="p">:</span> <span class="s2">"bpm"</span><span class="p">,</span>
         <span class="s2">"time_signature_num"</span><span class="p">:</span> <span class="s2">"timeSignatureNum"</span><span class="p">,</span>
+        <span class="s2">"time_signature_den"</span><span class="p">:</span> <span class="s2">"timeSignatureDen"</span><span class="p">,</span>
         <span class="s2">"selected_slot"</span><span class="p">:</span> <span class="s2">"selectedSlot"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
@@ -1993,6 +1996,15 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"active_slots"</span><span class="p">:</span> <span class="s2">"activeSlots"</span><span class="p">,</span>
         <span class="s2">"queued_slots"</span><span class="p">:</span> <span class="s2">"queuedSlots"</span><span class="p">,</span>
     <span class="p">}</span>
+
+<div class="viewcode-block" id="LauncherWidget.tree">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.tree">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The launcher element; every view of this widget carries one engine key, so displaying it twice plays once."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_engine_key"</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_engine_key</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">tree</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="s2">"engineKey"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine_key</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="LauncherWidget.add_track">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.LauncherWidget.add_track">[docs]</a>
@@ -2127,35 +2139,77 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">        Selecting a slot, in the browser or by assigning ``config.selected_slot``,</span>
 <span class="sd">        loads it into the sequencer; the sequencer's step, grid, swing and</span>
-<span class="sd">        groove edits write back into that slot.</span>
-<span class="sd">        """</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"loading"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<span class="sd">        groove edits write back into that slot. A slot replaced while it is</span>
+<span class="sd">        selected (``set_slot()``, undo) is loaded again.</span>
 
-        <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="o">*</span><span class="n">_</span><span class="p">):</span>
+<span class="sd">        Each load gives the sequencer an ``edit_token``, and the browser</span>
+<span class="sd">        precedes every pattern edit with an ``edit_ack`` naming the token it</span>
+<span class="sd">        was made on. An edit made before the browser saw the current slot is</span>
+<span class="sd">        dropped instead of landing on it.</span>
+<span class="sd">        """</span>
+        <span class="n">loading</span> <span class="o">=</span> <span class="n">writing</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">serial</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ack</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># The selected slot as the sequencer last loaded or wrote it.</span>
+        <span class="n">synced</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">selected_slot</span><span class="p">():</span>
             <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">selected_slot</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">selected</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">selected</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="o">*</span><span class="n">_</span><span class="p">,</span> <span class="n">renew</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">nonlocal</span> <span class="n">loading</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="n">synced</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">selected_slot</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span>
-            <span class="n">state</span><span class="p">[</span><span class="s2">"loading"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">loading</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">slot_to_sequencer</span><span class="p">(</span><span class="n">selected</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">],</span> <span class="n">sequencer</span><span class="p">)</span>
+                <span class="n">synced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slot_to_sequencer</span><span class="p">(</span><span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">renew</span><span class="p">:</span>
+                    <span class="n">serial</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">edit_token</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">target</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">serial</span><span class="si">}</span><span class="s2">"</span>
             <span class="k">finally</span><span class="p">:</span>
-                <span class="n">state</span><span class="p">[</span><span class="s2">"loading"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">loading</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">acked</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+            <span class="k">nonlocal</span> <span class="n">ack</span>
+            <span class="n">ack</span> <span class="o">=</span> <span class="n">new</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">write_back</span><span class="p">(</span><span class="o">*</span><span class="n">_</span><span class="p">):</span>
-            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">selected_slot</span>
-            <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s2">"loading"</span><span class="p">]</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">selected</span><span class="p">:</span>
+            <span class="k">nonlocal</span> <span class="n">ack</span><span class="p">,</span> <span class="n">writing</span><span class="p">,</span> <span class="n">synced</span>
+            <span class="c1"># A browser edit follows its ack; a change with none came from Python.</span>
+            <span class="n">base</span><span class="p">,</span> <span class="n">ack</span> <span class="o">=</span> <span class="n">ack</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">selected_slot</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">loading</span> <span class="ow">or</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span>
-            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="n">selected</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="n">selected</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">],</span> <span class="n">selected</span><span class="p">[</span><span class="s2">"scene_index"</span><span class="p">],</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">current</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">base</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">edit_token</span><span class="p">:</span>
+                <span class="n">load</span><span class="p">(</span><span class="n">renew</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">writing</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">synced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_slot</span><span class="p">(</span><span class="o">*</span><span class="n">target</span><span class="p">,</span> <span class="n">sequencer</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="o">*</span><span class="n">target</span><span class="p">)[</span><span class="s2">"name"</span><span class="p">])</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">writing</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">stop_select</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">load</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"selected_slot"</span><span class="p">)</span>
-        <span class="n">stop_edit</span> <span class="o">=</span> <span class="n">sequencer</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">write_back</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">))</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">reload_replaced</span><span class="p">(</span><span class="o">*</span><span class="n">_</span><span class="p">):</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">selected_slot</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">writing</span> <span class="ow">or</span> <span class="n">loading</span> <span class="ow">or</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slot</span><span class="p">(</span><span class="o">*</span><span class="n">target</span><span class="p">)</span> <span class="o">!=</span> <span class="n">synced</span><span class="p">:</span>
+                <span class="n">load</span><span class="p">()</span>
+
+        <span class="n">removers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">load</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"selected_slot"</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">reload_replaced</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"slots"</span><span class="p">),</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">acked</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"edit_ack"</span><span class="p">),</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="n">write_back</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">)),</span>
+        <span class="p">]</span>
         <span class="n">load</span><span class="p">()</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">unbind</span><span class="p">():</span>
-            <span class="n">stop_select</span><span class="p">()</span>
-            <span class="n">stop_edit</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">remove</span> <span class="ow">in</span> <span class="n">removers</span><span class="p">:</span>
+                <span class="n">remove</span><span class="p">()</span>
+            <span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">edit_token</span> <span class="o">=</span> <span class="s2">""</span>
 
         <span class="k">return</span> <span class="n">unbind</span></div>
 
@@ -2236,6 +2290,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"selected_clip_id"</span><span class="p">:</span> <span class="s2">"selectedClipId"</span><span class="p">,</span>
         <span class="s2">"bpm"</span><span class="p">:</span> <span class="s2">"bpm"</span><span class="p">,</span>
         <span class="s2">"time_signature_num"</span><span class="p">:</span> <span class="s2">"timeSignatureNum"</span><span class="p">,</span>
+        <span class="s2">"time_signature_den"</span><span class="p">:</span> <span class="s2">"timeSignatureDen"</span><span class="p">,</span>
         <span class="s2">"count_in_bars"</span><span class="p">:</span> <span class="s2">"countInBars"</span><span class="p">,</span>
         <span class="s2">"auto_extend_recording"</span><span class="p">:</span> <span class="s2">"autoExtendRecording"</span><span class="p">,</span>
         <span class="s2">"recording_extend_bars"</span><span class="p">:</span> <span class="s2">"recordingExtendBars"</span><span class="p">,</span>

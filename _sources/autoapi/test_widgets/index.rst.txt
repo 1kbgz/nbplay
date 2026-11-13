@@ -135,6 +135,9 @@ Module Contents
    .. py:method:: test_timeline_collects_exported_clips()
 
 
+   .. py:method:: test_slot_editor_drops_stale_browser_edits_and_reloads_a_replaced_slot()
+
+
    .. py:method:: test_launcher_slot_editor_follows_the_selection()
 
 

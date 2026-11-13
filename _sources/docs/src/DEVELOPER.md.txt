@@ -394,7 +394,8 @@ globalThis.__nbplay[sessionId] = {
   channels: [{ gain, pan }, ...],
   plugins: { [effectType]: (ctx, effect) => AudioNode | EffectUnit },
   samplers: { [channelIndex]: { triggerNote, releaseNote } },
-  noteListeners: [(evt) => void]
+  noteListeners: [(evt) => void],
+  claims: { [channelIndex]: { launcher?: true, timeline?: true } }
 };
 ```
 
@@ -406,6 +407,16 @@ can trigger them. Keyboard widgets also broadcast `nbplay-note` on `document`,
 which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
 clip playback reads `audioCtx` and `channels` from the bus so recorded clips go
 through the same channel strip and insert effects as live sources.
+
+A launcher slot, the timeline's MIDI clips and the track's sequencer can all
+play one channel, so `claims` decides which one sounds. The launcher claims a
+track's channel while a slot on it is launched; the timeline claims the channel
+of every track that holds MIDI clips with notes. `channelOwner()` returns
+`launcher` over `timeline`, and the scheduler stays silent on a channel owned by
+anything but its own claim, so a launched slot plays in place of the track's
+clips and either one silences the looping sequencer. The silent grid keeps
+running, and the claims stack, so stopping the slot hands the track back in
+phase.
 
 Render order can vary in notebooks. SamplerWidget handles this by listening for
 `nbplay-bus-ready` and registering again when the mixer attaches its graph.
@@ -653,7 +664,10 @@ TransportWidget is the global play/stop and tempo surface. Its config holds
 BPM, time signature and loop range; its status mirrors play state and the
 bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
 commands, and `session.bpm` and `session.time_signature` write every widget's
-config.
+config. A beat is a quarter note, so a bar is `numerator * 4 / denominator`
+beats long (`barBeats()` in `session.ts`): 3 in 6/8 and 3.5 in 7/8. The
+transport's loop range and bar:beat readout, the launcher's bar quantize and the
+timeline's ruler, count-in and length all use that length.
 
 In the browser the transport owns the session clock: `bus.clock` on
 `globalThis.__nbplay[session_id]`, a `SessionClock` derived from the shared
@@ -752,7 +766,14 @@ slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a list
 of step dicts, or a list of voices, and issues `launch()`, `launch_scene()`,
 `stop_track()`, and `stop_all()` as commands on the status `request` field.
 `bind_slot_editor(sequencer)` turns a sequencer into the editor for whichever
-slot is selected; edits write back into the slot live.
+slot is selected; edits write back into the slot live, and a selected slot that
+is replaced (`set_slot()`, undo) is loaded into the editor again. Each load
+gives the sequencer an `edit_token` (`track:scene:serial`). The sequencer
+element writes `edit_ack` (the token plus a serial) before every pattern field
+it edits, so the kernel sees which pattern a browser edit was made on. An edit
+that acks an older token was made before the browser saw the current slot; it
+is dropped and the slot is loaded again instead of being overwritten. A change
+with no ack came from Python and is written back.
 
 In the browser every track owns one shared-scheduler instance
 (`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over
@@ -777,6 +798,12 @@ write restarts a playing slot only when its own pattern changed. `active_slots` 
 -2 for nothing queued) are mirrored to the kernel. Audio routes through each
 track's `channel_index` on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.
+
+A launcher displayed twice plays once. `LauncherWidget.tree()` gives every view
+of the widget the same `engineKey`, and the elements with one key share an
+engine: the first to connect runs the schedulers, and the others render its
+slot state and progress and pass their launches to it. When the engine's view
+is removed, the next view takes over from the `active_slots` it was showing.
 
 ### KeyboardWidget
 

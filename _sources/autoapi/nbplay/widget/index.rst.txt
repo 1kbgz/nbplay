@@ -882,6 +882,12 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:method:: tree(prefix='')
+
+      The launcher element; every view of this widget carries one engine key, so displaying it twice plays once.
+
+
+
    .. py:method:: add_track(name='Track', channel_index=None)
 
       Append a track row and return its index.
@@ -934,7 +940,13 @@ Module Contents
 
       Selecting a slot, in the browser or by assigning ``config.selected_slot``,
       loads it into the sequencer; the sequencer's step, grid, swing and
-      groove edits write back into that slot.
+      groove edits write back into that slot. A slot replaced while it is
+      selected (``set_slot()``, undo) is loaded again.
+
+      Each load gives the sequencer an ``edit_token``, and the browser
+      precedes every pattern edit with an ``edit_ack`` naming the token it
+      was made on. An edit made before the browser saw the current slot is
+      dropped instead of landing on it.
 
 
 

@@ -895,7 +895,8 @@ first creates it:</p>
 <span class="w">  </span><span class="nx">channels</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">gain</span><span class="p">,</span><span class="w"> </span><span class="nx">pan</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">...],</span>
 <span class="w">  </span><span class="nx">plugins</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">effectType</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">effect</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">AudioNode</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">EffectUnit</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">samplers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">channelIndex</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">triggerNote</span><span class="p">,</span><span class="w"> </span><span class="nx">releaseNote</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">noteListeners</span><span class="o">:</span><span class="w"> </span><span class="p">[(</span><span class="nx">evt</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">]</span>
+<span class="w">  </span><span class="nx">noteListeners</span><span class="o">:</span><span class="w"> </span><span class="p">[(</span><span class="nx">evt</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">claims</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">[</span><span class="nx">channelIndex</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">launcher?</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">timeline?</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -907,6 +908,15 @@ can trigger them. Keyboard widgets also broadcast <code class="docutils literal 
 which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
 clip playback reads <code class="docutils literal notranslate"><span class="pre">audioCtx</span></code> and <code class="docutils literal notranslate"><span class="pre">channels</span></code> from the bus so recorded clips go
 through the same channel strip and insert effects as live sources.</p>
+<p>A launcher slot, the timeline’s MIDI clips and the track’s sequencer can all
+play one channel, so <code class="docutils literal notranslate"><span class="pre">claims</span></code> decides which one sounds. The launcher claims a
+track’s channel while a slot on it is launched; the timeline claims the channel
+of every track that holds MIDI clips with notes. <code class="docutils literal notranslate"><span class="pre">channelOwner()</span></code> returns
+<code class="docutils literal notranslate"><span class="pre">launcher</span></code> over <code class="docutils literal notranslate"><span class="pre">timeline</span></code>, and the scheduler stays silent on a channel owned by
+anything but its own claim, so a launched slot plays in place of the track’s
+clips and either one silences the looping sequencer. The silent grid keeps
+running, and the claims stack, so stopping the slot hands the track back in
+phase.</p>
 <p>Render order can vary in notebooks. SamplerWidget handles this by listening for
 <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer attaches its graph.</p>
 </section>
@@ -1128,7 +1138,10 @@ transports session until the element connects.</p>
 BPM, time signature and loop range; its status mirrors play state and the
 bar/beat position. <code class="docutils literal notranslate"><span class="pre">Session.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, and <code class="docutils literal notranslate"><span class="pre">seek(beat)</span></code> are transport
 commands, and <code class="docutils literal notranslate"><span class="pre">session.bpm</span></code> and <code class="docutils literal notranslate"><span class="pre">session.time_signature</span></code> write every widget’s
-config.</p>
+config. A beat is a quarter note, so a bar is <code class="docutils literal notranslate"><span class="pre">numerator</span> <span class="pre">*</span> <span class="pre">4</span> <span class="pre">/</span> <span class="pre">denominator</span></code>
+beats long (<code class="docutils literal notranslate"><span class="pre">barBeats()</span></code> in <code class="docutils literal notranslate"><span class="pre">session.ts</span></code>): 3 in 6/8 and 3.5 in 7/8. The
+transport’s loop range and bar:beat readout, the launcher’s bar quantize and the
+timeline’s ruler, count-in and length all use that length.</p>
 <p>In the browser the transport owns the session clock: <code class="docutils literal notranslate"><span class="pre">bus.clock</span></code> on
 <code class="docutils literal notranslate"><span class="pre">globalThis.__nbplay[session_id]</span></code>, a <code class="docutils literal notranslate"><span class="pre">SessionClock</span></code> derived from the shared
 <code class="docutils literal notranslate"><span class="pre">AudioContext.currentTime</span></code>. Sequencers and the timeline with the same
@@ -1218,7 +1231,14 @@ slots with <code class="docutils literal notranslate"><span class="pre">set_slot
 of step dicts, or a list of voices, and issues <code class="docutils literal notranslate"><span class="pre">launch()</span></code>, <code class="docutils literal notranslate"><span class="pre">launch_scene()</span></code>,
 <code class="docutils literal notranslate"><span class="pre">stop_track()</span></code>, and <code class="docutils literal notranslate"><span class="pre">stop_all()</span></code> as commands on the status <code class="docutils literal notranslate"><span class="pre">request</span></code> field.
 <code class="docutils literal notranslate"><span class="pre">bind_slot_editor(sequencer)</span></code> turns a sequencer into the editor for whichever
-slot is selected; edits write back into the slot live.</p>
+slot is selected; edits write back into the slot live, and a selected slot that
+is replaced (<code class="docutils literal notranslate"><span class="pre">set_slot()</span></code>, undo) is loaded into the editor again. Each load
+gives the sequencer an <code class="docutils literal notranslate"><span class="pre">edit_token</span></code> (<code class="docutils literal notranslate"><span class="pre">track:scene:serial</span></code>). The sequencer
+element writes <code class="docutils literal notranslate"><span class="pre">edit_ack</span></code> (the token plus a serial) before every pattern field
+it edits, so the kernel sees which pattern a browser edit was made on. An edit
+that acks an older token was made before the browser saw the current slot; it
+is dropped and the slot is loaded again instead of being overwritten. A change
+with no ack came from Python and is written back.</p>
 <p>In the browser every track owns one shared-scheduler instance
 (<code class="docutils literal notranslate"><span class="pre">createAudioScheduler</span></code> from <code class="docutils literal notranslate"><span class="pre">scheduler.ts</span></code>) fed by a small model adapter over
 the active slot, so all playing slots follow the session clock’s absolute beat
@@ -1242,6 +1262,11 @@ write restarts a playing slot only when its own pattern changed. <code class="do
 -2 for nothing queued) are mirrored to the kernel. Audio routes through each
 track’s <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> on the session bus, so a launcher performance can be
 captured by timeline lanes with channel-tap inputs.</p>
+<p>A launcher displayed twice plays once. <code class="docutils literal notranslate"><span class="pre">LauncherWidget.tree()</span></code> gives every view
+of the widget the same <code class="docutils literal notranslate"><span class="pre">engineKey</span></code>, and the elements with one key share an
+engine: the first to connect runs the schedulers, and the others render its
+slot state and progress and pass their launches to it. When the engine’s view
+is removed, the next view takes over from the <code class="docutils literal notranslate"><span class="pre">active_slots</span></code> it was showing.</p>
 </section>
 <section id="keyboardwidget">
 <h3>KeyboardWidget<a class="headerlink" href="#keyboardwidget" title="Link to this heading">¶</a></h3>

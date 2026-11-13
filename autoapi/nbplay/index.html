@@ -822,6 +822,9 @@
     <a href="#nbplay.LauncherWidget.STATUS">LauncherWidget.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.LauncherWidget.tree">LauncherWidget.tree()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.LauncherWidget.add_track">LauncherWidget.add_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -2721,6 +2724,12 @@ browser owns play and slot state, and launches are commands.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.LauncherWidget.tree">
+<span class="sig-name descname"><span class="pre">tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#LauncherWidget.tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.LauncherWidget.tree" title="Link to this definition">¶</a></dt>
+<dd><p>The launcher element; every view of this widget carries one engine key, so displaying it twice plays once.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.LauncherWidget.add_track">
 <span class="sig-name descname"><span class="pre">add_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Track'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#LauncherWidget.add_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.LauncherWidget.add_track" title="Link to this definition">¶</a></dt>
 <dd><p>Append a track row and return its index.</p>
@@ -2775,7 +2784,12 @@ list of voices.</p>
 <dd><p>Edit whichever slot is selected in <code class="docutils literal notranslate"><span class="pre">sequencer</span></code> (a <a class="reference internal" href="#nbplay.SequencerWidget" title="nbplay.SequencerWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a>); returns an unbinder.</p>
 <p>Selecting a slot, in the browser or by assigning <code class="docutils literal notranslate"><span class="pre">config.selected_slot</span></code>,
 loads it into the sequencer; the sequencer’s step, grid, swing and
-groove edits write back into that slot.</p>
+groove edits write back into that slot. A slot replaced while it is
+selected (<code class="docutils literal notranslate"><span class="pre">set_slot()</span></code>, undo) is loaded again.</p>
+<p>Each load gives the sequencer an <code class="docutils literal notranslate"><span class="pre">edit_token</span></code>, and the browser
+precedes every pattern edit with an <code class="docutils literal notranslate"><span class="pre">edit_ack</span></code> naming the token it
+was made on. An edit made before the browser saw the current slot is
+dropped instead of landing on it.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4668,6 +4682,9 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.LauncherWidget.STATUS">LauncherWidget.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.LauncherWidget.tree">LauncherWidget.tree()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.LauncherWidget.add_track">LauncherWidget.add_track()</a>

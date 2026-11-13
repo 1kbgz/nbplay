@@ -884,6 +884,18 @@ Module Contents
 
 
 
+   .. py:attribute:: edit_token
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: edit_ack
+      :type:  str
+      :value: ''
+
+
+
    .. py:attribute:: session_id
       :type:  str
       :value: ''
