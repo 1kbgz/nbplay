@@ -642,6 +642,34 @@ test.describe("LauncherWidget", () => {
     expect(result.cancelled).toBe(result.future);
   });
 
+  test("a launched slot claims its track's channel until the track stops", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
+    await renderTransport(page);
+    const claims = () =>
+      page.evaluate(() => {
+        const held = globalThis.__nbplay["launcher-session"].claims || {};
+        return [0, 1].map((channel) => Boolean(held[channel]?.launcher));
+      });
+    expect(await claims()).toEqual([false, false]);
+    await page
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    expect(await claims()).toEqual([true, false]);
+    await page.locator('.nbplay-launcher-grid-scene[data-scene="0"]').click();
+    expect(await claims()).toEqual([true, true]);
+    await page
+      .locator(
+        '.nbplay-launcher-grid-row[data-track="1"] .nbplay-launcher-grid-track-stop',
+      )
+      .click();
+    expect(await claims()).toEqual([true, false]);
+    // Stopping the clock stops every slot.
+    await page.locator(".nbplay-transport-stop").click();
+    expect(await claims()).toEqual([false, false]);
+  });
+
   test("quantize select writes the model", async ({ page }) => {
     await renderLauncher(page);
     await page.locator(".nbplay-launcher-quantize").selectOption("beat");

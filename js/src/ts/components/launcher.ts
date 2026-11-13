@@ -8,8 +8,10 @@ import {
 } from "../scheduler.ts";
 import {
   bindElementClock,
+  claimChannel,
   type ClockBinding,
   type ClockEvent,
+  releaseChannel,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, define } from "./base.ts";
@@ -68,6 +70,8 @@ interface TrackState {
   activeData: string;
   queued: QueuedLaunch | null;
   currentStep: number;
+  /** The channel this track's slot holds while it is launched. */
+  claim: { sessionId: string; channel: number } | null;
 }
 
 function numberValue(value: unknown, fallback: number): number {
@@ -277,7 +281,10 @@ export class NbplayLauncher extends NbplayElement {
     this.stopQueueTimer();
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
-    this.states.forEach((state) => state.scheduler.destroy());
+    this.states.forEach((state) => {
+      this.release(state);
+      state.scheduler.destroy();
+    });
     this.states.length = 0;
     this.binding?.dispose();
     this.binding = null;
@@ -344,21 +351,42 @@ export class NbplayLauncher extends NbplayElement {
     while (this.states.length < count) {
       const index = this.states.length;
       this.states.push({
-        scheduler: createAudioScheduler({ onEnd: () => this.stopNow(index) }),
+        scheduler: createAudioScheduler({
+          onEnd: () => this.stopNow(index),
+          owner: "launcher",
+        }),
         activeScene: -1,
         activeData: "",
         queued: null,
         currentStep: -1,
+        claim: null,
       });
     }
     while (this.states.length > count) {
-      this.states.pop()?.scheduler.destroy();
+      const state = this.states.pop();
+      if (state) this.release(state);
+      state?.scheduler.destroy();
     }
+  }
+
+  /** A launched slot plays its channel in place of the arrangement and the track's sequencer. */
+  private hold(state: TrackState, channel: number): void {
+    this.release(state);
+    if (!this.sessionId || !(channel >= 0)) return;
+    state.claim = { sessionId: this.sessionId, channel };
+    claimChannel(this.sessionId, channel, "launcher");
+  }
+
+  private release(state: TrackState): void {
+    if (!state.claim) return;
+    releaseChannel(state.claim.sessionId, state.claim.channel, "launcher");
+    state.claim = null;
   }
 
   private clearStates(): void {
     this.states.forEach((state) => {
       state.scheduler.stop();
+      this.release(state);
       state.activeScene = -1;
       state.activeData = "";
       state.queued = null;
@@ -436,6 +464,7 @@ export class NbplayLauncher extends NbplayElement {
     const slot = this.findSlot(trackIndex, sceneIndex);
     if (!state || !track || !slot) return false;
     state.scheduler.stop();
+    this.hold(state, track.channel_index);
     state.activeScene = sceneIndex;
     state.activeData = slotData(slot);
     state.currentStep = -1;
@@ -455,6 +484,7 @@ export class NbplayLauncher extends NbplayElement {
     const state = this.states[trackIndex];
     if (!state) return;
     state.scheduler.stop();
+    this.release(state);
     state.activeScene = -1;
     state.activeData = "";
     state.currentStep = -1;

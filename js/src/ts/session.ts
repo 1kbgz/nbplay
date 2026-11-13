@@ -39,6 +39,9 @@ export interface InstrumentBus {
   ) => (() => void) | void;
 }
 
+/** A source that plays a track's notes in place of its looping sequencer. */
+export type ChannelOwner = "launcher" | "timeline";
+
 export interface SessionBus {
   audioCtx?: AudioContext;
   masterGain?: AudioNode;
@@ -47,6 +50,8 @@ export interface SessionBus {
   samplers?: Record<number, SamplerBus>;
   instruments?: Record<number, InstrumentBus>;
   noteListeners?: Array<(evt: NoteEvent) => void>;
+  /** Sources claiming each channel's notes; see `channelOwner`. */
+  claims?: Record<number, Partial<Record<ChannelOwner, boolean>>>;
   plugins?: unknown;
   clock?: SessionClock;
 }
@@ -121,6 +126,43 @@ export function getOrCreateSessionBus(sessionId: string): SessionBus {
 export function emitBusNote(sessionId: string, evt: NoteEvent): void {
   const bus = getSessionBus(sessionId);
   bus?.noteListeners?.forEach((fn) => fn(evt));
+}
+
+// Per-track playback ownership. A launched slot, the timeline's MIDI clips
+// and the track's sequencer can all play one channel. Claims decide which one
+// sounds: a launched slot outranks the arrangement, and either one silences
+// the looping sequencer. Claims stack, so stopping a slot hands the track
+// back to whatever else claims it.
+
+export function claimChannel(
+  sessionId: string,
+  channel: number,
+  owner: ChannelOwner,
+): void {
+  if (!sessionId || !(channel >= 0)) return;
+  const bus = getOrCreateSessionBus(sessionId);
+  if (!bus.claims) bus.claims = {};
+  if (!bus.claims[channel]) bus.claims[channel] = {};
+  bus.claims[channel][owner] = true;
+}
+
+export function releaseChannel(
+  sessionId: string,
+  channel: number,
+  owner: ChannelOwner,
+): void {
+  const claims = getSessionBus(sessionId)?.claims?.[channel];
+  if (claims) delete claims[owner];
+}
+
+/** The source whose notes sound on a channel; undefined leaves it to the sequencer. */
+export function channelOwner(
+  sessionId: string,
+  channel: number,
+): ChannelOwner | undefined {
+  const claims = getSessionBus(sessionId)?.claims?.[channel];
+  if (claims?.launcher) return "launcher";
+  return claims?.timeline ? "timeline" : undefined;
 }
 
 /** Return the shared AudioContext for a bus, creating it once. */
