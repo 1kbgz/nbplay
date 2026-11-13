@@ -529,7 +529,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-step-grid",
     title: "nbplay-step-grid",
-    desc: "Beat grid: a step row and a velocity row per voice. Click toggles, wheel moves the note, Shift-free wheel on the bars sets velocity. The first instance is animated.",
+    desc: "Beat grid: a step row and a velocity row per voice. Click toggles, wheel moves the note, double-click types a note name or MIDI number, Shift-free wheel on the bars sets velocity. The first instance is animated.",
     events: ["change", "nbplay-arm", "nbplay-step-pick"],
     controls: [
       { name: "currentStep", type: "number" },

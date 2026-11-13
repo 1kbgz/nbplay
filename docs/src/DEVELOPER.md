@@ -563,8 +563,11 @@ scheduled steps update the element property only, so a tick costs no comm traffi
 The UI includes play, stop, record, BPM, step duration, measure count, loop, a
 header row, step rows, and velocity rows. Clicking a cell toggles active state.
 Mouse wheel over a step changes note. Mouse wheel over a velocity cell changes
-velocity. If a keyboard is connected, double-clicking a cell waits for the next
-`nbplay-note` event and writes that note into the cell. Recording arms all voices
+velocity. Double-clicking a cell opens a text field for a note name (`F#3`) or a
+MIDI number; Enter or a click elsewhere writes the note and activates the step,
+Escape cancels. If a keyboard is connected, double-clicking a cell instead waits
+for the next `nbplay-note` event and writes that note into the cell. Recording
+arms all voices
 or individual voice dots and writes live note-on events into the current step
 while playing.
 
