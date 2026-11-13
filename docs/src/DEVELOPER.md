@@ -934,6 +934,12 @@ closed panel is reopened from the palette: `nbplay-palette` lists the panel
 names, opens on Ctrl+K or Cmd+K or from the bar's `panels` button
 (`nbplay-palette-hint`, which shows the shortcut for the platform), and its
 `nbplay-request` event invokes the layout's `openPanel` with the picked name.
+The bar's save link downloads `session.nbplay` (`Session.save()`, after asking
+the page to export recorded clip audio) and its load button (`nbplay-upload`)
+PUTs a picked archive to the same URL. `build()` answers a load by replacing
+the session it serves: it rebuilds the app's routes (page, one WebSocket per
+panel, probes) for the loaded session, restarts the `autosync` tasks, and the
+page reloads. `app.state.session` is the session being served.
 `APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so `nbplay-wire` finds the client for its panel and kernel commands
