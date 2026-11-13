@@ -2,7 +2,13 @@
 // oscillator triggering, probability, groove, and automation.
 
 import { type AnyModel } from "./helpers.ts";
-import { emitBusNote, getSessionBus, type SessionClock } from "./session.ts";
+import {
+  channelOwner,
+  type ChannelOwner,
+  emitBusNote,
+  getSessionBus,
+  type SessionClock,
+} from "./session.ts";
 
 export interface StepData {
   active: boolean;
@@ -36,6 +42,12 @@ interface AudioSchedulerOptions {
   random?: () => number;
   /** Called when a non-looping pattern reaches its end. */
   onEnd?: () => void;
+  /**
+   * The claim this scheduler plays under. Steps are silent while its channel
+   * is owned by anything else; a sequencer passes none and plays only an
+   * unclaimed channel.
+   */
+  owner?: ChannelOwner;
 }
 
 /** Position of the next step to schedule, in clock beats and context time. */
@@ -407,6 +419,11 @@ export function createAudioScheduler(
     }
 
     model.set("current_step", stepIndex);
+    const sessionId = (model.get("session_id") as string) || "";
+    const channelIndex = numberOr(model.get("channel_index"), -1);
+    // Another source owns the track: keep the grid running so playback
+    // resumes in phase when the track comes back, but stay silent.
+    if (channelOwner(sessionId, channelIndex) !== options.owner) return true;
     applyAutomationLanes(model, stepIndex);
 
     const stepSeconds = stepBeats * clock.secondsPerBeat();
@@ -421,10 +438,8 @@ export function createAudioScheduler(
     // time for the same step, and Web Audio starts past-due nodes at once.
     const scheduledTime = Math.max(0, at.time + offset);
 
-    const sessionId = (model.get("session_id") as string) || "";
     // The track's instrument (sampler or synth on the bus) plays the step
     // when it has one; the built-in oscillator is the fallback.
-    const channelIndex = numberOr(model.get("channel_index"), -1);
     const instrument =
       sessionId && channelIndex >= 0
         ? getSessionBus(sessionId)?.instruments?.[channelIndex]

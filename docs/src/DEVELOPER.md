@@ -394,7 +394,8 @@ globalThis.__nbplay[sessionId] = {
   channels: [{ gain, pan }, ...],
   plugins: { [effectType]: (ctx, effect) => AudioNode | EffectUnit },
   samplers: { [channelIndex]: { triggerNote, releaseNote } },
-  noteListeners: [(evt) => void]
+  noteListeners: [(evt) => void],
+  claims: { [channelIndex]: { launcher?: true, timeline?: true } }
 };
 ```
 
@@ -406,6 +407,16 @@ can trigger them. Keyboard widgets also broadcast `nbplay-note` on `document`,
 which lets sequencers and MIDI lanes record notes without a mixer bus. Timeline
 clip playback reads `audioCtx` and `channels` from the bus so recorded clips go
 through the same channel strip and insert effects as live sources.
+
+A launcher slot, the timeline's MIDI clips and the track's sequencer can all
+play one channel, so `claims` decides which one sounds. The launcher claims a
+track's channel while a slot on it is launched; the timeline claims the channel
+of every track that holds MIDI clips with notes. `channelOwner()` returns
+`launcher` over `timeline`, and the scheduler stays silent on a channel owned by
+anything but its own claim, so a launched slot plays in place of the track's
+clips and either one silences the looping sequencer. The silent grid keeps
+running, and the claims stack, so stopping the slot hands the track back in
+phase.
 
 Render order can vary in notebooks. SamplerWidget handles this by listening for
 `nbplay-bus-ready` and registering again when the mixer attaches its graph.

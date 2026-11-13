@@ -610,6 +610,68 @@ test.describe("Session clock", () => {
     ]);
   });
 
+  test("a claimed channel silences its sequencer, which resumes in step when released", async ({
+    page,
+  }) => {
+    await installAudioRecorder(page);
+    await renderWidget(page, "transport", "transport", {
+      ...TRANSPORT_DEFAULTS,
+      bpm: 600,
+    });
+    await renderWidget(page, "sequencer", "a", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      channel_index: 0,
+    });
+    await renderWidget(page, "sequencer", "other", {
+      ...SEQUENCER_DEFAULTS,
+      bpm: 600,
+      channel_index: 1,
+    });
+    const starts = (key) =>
+      page.evaluate((key) => (window.__oscStarts[key] || []).slice(), key);
+    await page.locator(".nbplay-transport-play").click();
+    await page.waitForFunction(() => (window.__oscStarts.a?.length || 0) >= 2);
+
+    // A launched slot or the arrangement claims channel 0.
+    const claimedAt = await page.evaluate((id) => {
+      const bus = globalThis.__nbplay[id];
+      bus.claims = { 0: { launcher: true } };
+      return bus.clock.now();
+    }, SESSION_ID);
+    await page.waitForFunction(
+      (n) => (window.__oscStarts.other?.length || 0) >= n + 4,
+      (await starts("other")).length,
+    );
+    // Nothing new was scheduled for the claimed channel, the other
+    // sequencer kept playing, and the silent grid kept moving.
+    expect((await starts("a")).filter((at) => at > claimedAt + 0.2)).toEqual(
+      [],
+    );
+    const step = await page.evaluate(
+      () => window.__models.a._state.current_step,
+    );
+    await expect
+      .poll(() => page.evaluate(() => window.__models.a._state.current_step))
+      .not.toBe(step);
+
+    // Released: the sequencer sounds again, on the same grid as before.
+    const releasedAt = await page.evaluate((id) => {
+      const bus = globalThis.__nbplay[id];
+      delete bus.claims[0].launcher;
+      return bus.clock.now();
+    }, SESSION_ID);
+    await page.waitForFunction(
+      (at) => (window.__oscStarts.a || []).some((time) => time > at),
+      releasedAt,
+    );
+    const all = await starts("a");
+    const resumed = all.find((at) => at > releasedAt);
+    const stepSeconds = 0.5 * (60 / 600);
+    const steps = (resumed - all[0]) / stepSeconds;
+    expect(Math.abs(steps - Math.round(steps))).toBeLessThan(1e-3);
+  });
+
   test("standalone sequencer uses a private clock", async ({ page }) => {
     await renderWidget(page, "sequencer", "solo", {
       ...SEQUENCER_DEFAULTS,

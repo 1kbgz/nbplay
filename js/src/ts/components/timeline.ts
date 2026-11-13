@@ -5,10 +5,13 @@ import { midiToHz, scheduleOscillator } from "../scheduler.ts";
 import {
   barBeats,
   bindElementClock,
+  channelOwner,
+  claimChannel,
   type ClockBinding,
   type ClockEvent,
   emitBusNote,
   getSessionBus,
+  releaseChannel,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
@@ -223,6 +226,10 @@ export class NbplayTimeline extends NbplayElement {
   private noteListenerActive = false;
   private suppressRestart = false;
   private disposed = false;
+  private claims: { sessionId: string; channels: number[] } = {
+    sessionId: "",
+    channels: [],
+  };
   private objectUrls = new Set<string>();
   private activeMedia: HTMLMediaElement[] = [];
   private activeSources: AudioNode[] = [];
@@ -350,6 +357,7 @@ export class NbplayTimeline extends NbplayElement {
     this.classList.add("nbplay-timeline");
     this.disposed = false;
     this.clock();
+    this.syncClaims();
     this.unbindShortcuts = bindShortcuts(this, {
       Space: () => this.togglePlay(),
       "Shift+Space": () => {
@@ -379,6 +387,7 @@ export class NbplayTimeline extends NbplayElement {
     });
     this.releaseLanes();
     this.clearScheduledPlayback();
+    this.syncClaims();
     this.setNoteListener(false);
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
@@ -408,6 +417,41 @@ export class NbplayTimeline extends NbplayElement {
     ) {
       this.syncLoopRange();
     }
+    if (
+      changed.has("clips") ||
+      changed.has("tracks") ||
+      changed.has("sessionId")
+    ) {
+      this.syncClaims();
+    }
+  }
+
+  /**
+   * Claim the channel of every track that holds MIDI clips with notes: the
+   * arrangement plays those tracks, so their looping sequencers stay silent.
+   */
+  private syncClaims(): void {
+    this.claims.channels.forEach((channel) =>
+      releaseChannel(this.claims.sessionId, channel, "timeline"),
+    );
+    const tracks = this.trackList();
+    const channels = new Set<number>();
+    if (this.isConnected && this.sessionId) {
+      this.clipList().forEach((clip) => {
+        const track = tracks[clip.track_index];
+        if (
+          clip.kind === "midi" &&
+          track &&
+          !clip.muted &&
+          (clip.events || []).length > 0
+        )
+          channels.add(track.channel_index);
+      });
+    }
+    channels.forEach((channel) =>
+      claimChannel(this.sessionId, channel, "timeline"),
+    );
+    this.claims = { sessionId: this.sessionId, channels: [...channels] };
   }
 
   private set(values: Record<string, unknown>): void {
@@ -1160,6 +1204,9 @@ export class NbplayTimeline extends NbplayElement {
     atTime: number,
     spb: number,
   ): void {
+    // A launched slot on this track plays in place of its clips.
+    if (channelOwner(this.sessionId, track.channel_index) === "launcher")
+      return;
     const clk = this.clock();
     const bus = getSessionBus(this.sessionId);
     const sampler = bus?.samplers?.[track.channel_index];
