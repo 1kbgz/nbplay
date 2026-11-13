@@ -679,6 +679,21 @@ class TestObservers:
         finally:
             widget.close()
 
+    def test_timeline_moves_on_when_the_browser_gives_up_on_an_export(self):
+        widget = nbplay.TimelineWidget(autosync=False)
+        try:
+            widget.add_track("Mic")
+            widget.add_clip("One", audio_url="blob:one")
+            second = widget.add_clip("Two", start=4.0, audio_url="blob:two")
+            assert widget.export_all_clips() == 2
+            # The browser clears the request when it cannot read a clip's audio.
+            widget.config.export_clip_id = ""
+            assert widget.pending_exports == 1 and widget.config.export_clip_id == second["id"]
+            browser_writes(widget, exported_clip={"id": second["id"], "blob_type": "audio/wav"}, exported_clip_data=b"two")
+            assert widget.pending_exports == 0 and list(widget.clip_audio) == [second["id"]]
+        finally:
+            widget.close()
+
     def test_slot_editor_drops_stale_browser_edits_and_reloads_a_replaced_slot(self):
         launcher = nbplay.LauncherWidget(autosync=False)
         editor = nbplay.SequencerWidget(autosync=False)

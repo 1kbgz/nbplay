@@ -733,7 +733,10 @@ session like audio clips, but have nothing to export.
 Clip audio crosses the comm on request. `export_clip(clip_id)` sets
 `export_clip_id`; the browser fetches the object URL and answers with
 `exported_clip` and `exported_clip_data` (bytes), which
-`write_exported_clip(path)` saves. `import_clip(bytes_or_path, ...)` appends
+`write_exported_clip(path)` saves. The kernel clears `export_clip_id` when the
+bytes arrive, so `pending_exports` stays above zero until then; the browser
+clears it only when the export fails, and either way the next queued clip is
+requested. `import_clip(bytes_or_path, ...)` appends
 clip metadata immediately, sends `import_clip_data` followed by
 `import_clip_request`, and the browser attaches an object URL to the matching
 clip, measuring the duration with `decodeAudioData` when none was given.

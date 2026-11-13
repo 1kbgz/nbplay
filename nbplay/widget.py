@@ -1389,6 +1389,7 @@ class TimelineWidget(InstrumentWidget):
         self._clip_audio = {}
         self._export_queue = []
         self.on_change(self._on_clip_exported, names="exported_clip_data")
+        self.on_change(self._on_export_request, names="export_clip_id")
 
     def _on_clip_exported(self, widget, name, old, data):
         exported = self.status.exported_clip
@@ -1398,6 +1399,12 @@ class TimelineWidget(InstrumentWidget):
         self._clip_audio[clip_id] = {"data": bytes(data), "blob_type": str(exported.get("blob_type", ""))}
         if self.config.export_clip_id == clip_id:
             self.config.export_clip_id = ""
+
+    def _on_export_request(self, widget, name, old, clip_id):
+        # The request is cleared here when a clip's audio arrives, and by the
+        # browser when an export fails; either way the next clip is due.
+        if clip_id:
+            return
         while self._export_queue:
             next_id = self._export_queue.pop(0)
             if any(clip["id"] == next_id for clip in self.config.clips):
