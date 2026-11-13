@@ -674,6 +674,64 @@ class TestObservers:
         finally:
             widget.close()
 
+    def test_slot_editor_drops_stale_browser_edits_and_reloads_a_replaced_slot(self):
+        launcher = nbplay.LauncherWidget(autosync=False)
+        editor = nbplay.SequencerWidget(autosync=False)
+
+        def browser_edits(token, serial, note):
+            # The element acks the token it edited on, then sends the pattern field.
+            editor.config.edit_ack = f"{token}#{serial}"
+            voices = [[dict(step) for step in voice] for voice in editor.config.voices_data]
+            voices[0][0]["note"] = note
+            editor.config.voices_data = voices
+
+        def first_note(scene):
+            return launcher.get_slot(0, scene)["voices_data"][0][0]["note"]
+
+        try:
+            launcher.add_track("Drums")
+            launcher.add_scene()
+            launcher.add_scene()
+            launcher.set_slot(0, 0, [{"note": 36, "active": True}, {"note": 38}])
+            launcher.set_slot(0, 1, [{"note": 48, "active": True}, {"note": 50}])
+            unbind = launcher.bind_slot_editor(editor)
+            launcher.config.selected_slot = {"track_index": 0, "scene_index": 0}
+            first = editor.config.edit_token
+            assert first.startswith("0:0:")
+            browser_edits(first, 1, 37)
+            assert first_note(0) == 37
+
+            # The user selects the other slot while an edit of the first is still on its way.
+            launcher.config.selected_slot = {"track_index": 0, "scene_index": 1}
+            second = editor.config.edit_token
+            assert second.startswith("0:1:") and second != first and editor.steps[0]["note"] == 48
+            browser_edits(first, 2, 99)
+            assert first_note(1) == 48 and first_note(0) == 37
+            assert editor.steps[0]["note"] == 48 and editor.config.edit_token == second
+            # Edits made on the slot the browser now shows land on it, and so does a Python edit.
+            browser_edits(second, 3, 49)
+            assert first_note(1) == 49
+            editor.set_step(1, note=51)
+            assert launcher.get_slot(0, 1)["voices_data"][0][1]["note"] == 51
+
+            # Replacing the selected slot from Python reloads the editor under a new token.
+            launcher.set_slot(0, 1, [{"note": 72, "active": True}])
+            third = editor.config.edit_token
+            assert editor.config.length == 1 and editor.steps[0]["note"] == 72 and third not in (first, second)
+            browser_edits(second, 4, 10)
+            assert first_note(1) == 72 and editor.steps[0]["note"] == 72
+            # Replacing a slot that is not selected leaves the editor alone.
+            launcher.set_slot(0, 0, [{"note": 40}])
+            assert editor.config.edit_token == third and editor.steps[0]["note"] == 72
+
+            unbind()
+            assert editor.config.edit_token == ""
+            editor.set_step(0, note=73)
+            assert first_note(1) == 72
+        finally:
+            launcher.close()
+            editor.close()
+
     def test_launcher_slot_editor_follows_the_selection(self):
         launcher = nbplay.LauncherWidget(autosync=False)
         editor = nbplay.SequencerWidget(autosync=False)

@@ -429,6 +429,10 @@ class SequencerConfig(_Validated):
     swing: float = Field(0.0, ge=0, le=100)
     groove: list[float] = []
     automation_lanes: list[dict] = []
+    #: Names the pattern loaded by a slot editor; the browser writes ``edit_ack``
+    #: (the token plus a serial) before each pattern edit it makes on it.
+    edit_token: str = ""
+    edit_ack: str = ""
     session_id: str = ""
     channel_index: int = -1
     theme: str = ""
