@@ -84,6 +84,13 @@ function slotData(slot: LauncherSlotData): string {
   ]);
 }
 
+// One engine per launcher. Every view of the same widget carries its
+// `engineKey`; the first to connect runs the schedulers and the others render
+// its state and send it their launches, so a launcher displayed twice plays
+// once. When the engine's view goes away the next one takes over.
+const engines = new Map<string, NbplayLauncher>();
+const views = new Map<string, Set<NbplayLauncher>>();
+
 /**
  * `<nbplay-launcher>`: the beats view. Tracks are rows, scenes are columns,
  * each filled slot holds a step pattern in the sequencer's `voices_data`
@@ -94,7 +101,8 @@ function slotData(slot: LauncherSlotData): string {
  * launches it; an empty slot, the track stop and stop-all queue stops.
  * `quantize` and `selectedSlot` edits fire `nbplay-set`; `isPlaying`,
  * `activeSlots` and `queuedSlots` fire `nbplay-status`. `command()` takes a
- * kernel launch request (`launch`, `stop`, `scene`, `stop_all`).
+ * kernel launch request (`launch`, `stop`, `scene`, `stop_all`). Elements
+ * with the same `engineKey` are views of one launcher and share one engine.
  */
 export class NbplayLauncher extends NbplayElement {
   static properties = {
@@ -105,6 +113,7 @@ export class NbplayLauncher extends NbplayElement {
     bpm: { type: Number },
     timeSignatureNum: { type: Number, attribute: "time-signature-num" },
     selectedSlot: { attribute: false },
+    engineKey: { type: String, attribute: "engine-key" },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
     activeSlots: { attribute: false },
@@ -118,6 +127,7 @@ export class NbplayLauncher extends NbplayElement {
   declare bpm: number;
   declare timeSignatureNum: number;
   declare selectedSlot: { track_index?: number; scene_index?: number };
+  declare engineKey: string;
   declare sessionId: string;
   declare isPlaying: boolean;
   declare activeSlots: number[];
@@ -128,6 +138,10 @@ export class NbplayLauncher extends NbplayElement {
   private queueTimer: ReturnType<typeof setInterval> | null = null;
   private unbindShortcuts: (() => void) | null = null;
   private progress: number[] = [];
+  /** The view running the engine when it is not this one. */
+  private engine: NbplayLauncher | null = null;
+  /** The engine key this element is registered under. */
+  private joined = "";
 
   constructor() {
     super();
@@ -138,6 +152,7 @@ export class NbplayLauncher extends NbplayElement {
     this.bpm = 120;
     this.timeSignatureNum = 4;
     this.selectedSlot = {};
+    this.engineKey = "";
     this.sessionId = "";
     this.isPlaying = false;
     this.activeSlots = [];
@@ -253,6 +268,7 @@ export class NbplayLauncher extends NbplayElement {
     this.tabIndex = 0;
     this.clock();
     this.ensureStates();
+    this.join();
     // Space toggles the clock, digits launch scenes, Escape/0 stop all.
     const shortcuts: Record<string, () => boolean | void> = {
       Space: () => {
@@ -274,6 +290,7 @@ export class NbplayLauncher extends NbplayElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.leave();
     this.stopQueueTimer();
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
@@ -283,14 +300,74 @@ export class NbplayLauncher extends NbplayElement {
     this.binding = null;
   }
 
+  // Engine sharing
+
+  /** Register under `engineKey`: run the engine if no view does, else follow the one that does. */
+  private join(): void {
+    this.leave();
+    const key = this.isConnected ? this.engineKey : "";
+    if (!key) return;
+    this.joined = key;
+    const engine = engines.get(key);
+    if (!engine) {
+      engines.set(key, this);
+      return;
+    }
+    this.engine = engine;
+    if (!views.has(key)) views.set(key, new Set());
+    views.get(key)?.add(this);
+    // Another view plays: this one's own schedulers stay quiet.
+    this.stopQueueTimer();
+    this.states.forEach((state) => {
+      state.scheduler.stop();
+      state.queued = null;
+      state.currentStep = -1;
+    });
+  }
+
+  private leave(): void {
+    const key = this.joined;
+    if (!key) return;
+    this.joined = "";
+    const following = views.get(key);
+    if (this.engine) {
+      following?.delete(this);
+      this.engine = null;
+      return;
+    }
+    if (engines.get(key) !== this) return;
+    engines.delete(key);
+    const next = following?.values().next().value;
+    if (!next) return;
+    following?.delete(next);
+    engines.set(key, next);
+    following?.forEach((view) => {
+      view.engine = next;
+    });
+    next.takeOver();
+  }
+
+  /** Run the engine from here on, continuing the performance the old engine reported. */
+  private takeOver(): void {
+    this.engine = null;
+    this.ensureStates();
+    this.states.forEach((state, index) => {
+      state.activeScene = numberValue(this.activeSlots?.[index], -1);
+    });
+    if (this.clock().playing) this.resumeActive();
+    this.mirrorSlotState(true);
+  }
+
   updated(changed: PropertyValues): void {
     if (!this.binding) return;
+    if (changed.has("engineKey")) this.join();
     if (changed.has("sessionId") && changed.get("sessionId") !== undefined) {
       this.binding.rebind();
     }
     if (changed.has("bpm") && changed.get("bpm") !== undefined) {
       this.clock().setTempo(numberValue(this.bpm, 120));
     }
+    if (this.engine) return;
     if (changed.has("tracks") && changed.get("tracks") !== undefined) {
       // Track indices shift when a track is removed, so a running
       // performance cannot be mapped onto the new rows: stop everything.
@@ -386,11 +463,13 @@ export class NbplayLauncher extends NbplayElement {
       return length > 0 ? (state.currentStep + 1) / length : 0;
     });
     this.requestUpdate();
+    views.get(this.joined)?.forEach((view) => view.requestUpdate());
   }
 
   // Clock
 
   private onClockEvent = (event: ClockEvent): void => {
+    if (this.engine) return;
     switch (event.type) {
       case "play":
         this.isPlaying = true;
@@ -420,6 +499,7 @@ export class NbplayLauncher extends NbplayElement {
 
   private onRebind = (clk: SessionClock): void => {
     this.states.forEach((state) => state.scheduler.stop());
+    if (this.engine) return;
     this.isPlaying = clk.playing;
     this.status(false, { isPlaying: clk.playing });
     if (clk.playing) this.resumeActive();
@@ -501,6 +581,10 @@ export class NbplayLauncher extends NbplayElement {
 
   /** Apply a batch of launches to one clock position so rows stay together. */
   private applyLaunches(launches: Launch[]): void {
+    if (this.engine) {
+      this.engine.applyLaunches(launches);
+      return;
+    }
     this.ensureStates();
     const valid = launches.filter((launch) => this.states[launch.trackIndex]);
     if (!valid.length) return;
@@ -633,6 +717,7 @@ export class NbplayLauncher extends NbplayElement {
   }
 
   render() {
+    const engine = this.engine ?? this;
     const tracks = this.trackList();
     const selected =
       typeof this.selectedSlot?.track_index === "number" &&
@@ -680,17 +765,17 @@ export class NbplayLauncher extends NbplayElement {
           scene: s.scene_index,
           name: s.name,
         }))}
-        .active=${this.states.map((s) => s.activeScene)}
-        .queued=${this.states.map((s) =>
+        .active=${engine.states.map((s) => s.activeScene)}
+        .queued=${engine.states.map((s) =>
           s.queued
             ? s.queued.scene >= 0
               ? s.queued.scene
               : GRID_STOP_QUEUED
             : -1,
         )}
-        .progress=${this.progress}
+        .progress=${engine.progress}
         .selected=${selected}
-        .playing=${this.isPlaying}
+        .playing=${engine.isPlaying}
         @nbplay-launch=${(e: Event) => {
           e.stopPropagation();
           const { track, scene } = (e as CustomEvent).detail;

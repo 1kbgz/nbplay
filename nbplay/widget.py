@@ -1110,6 +1110,12 @@ class LauncherWidget(InstrumentWidget):
         "queued_slots": "queuedSlots",
     }
 
+    def tree(self, prefix=""):
+        """The launcher element; every view of this widget carries one engine key, so displaying it twice plays once."""
+        if not hasattr(self, "_engine_key"):
+            self._engine_key = uuid.uuid4().hex
+        return super().tree(prefix).prop("engineKey", self._engine_key)
+
     def add_track(self, name="Track", channel_index=None):
         """Append a track row and return its index."""
         index = len(self.config.tracks)
