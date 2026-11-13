@@ -642,6 +642,20 @@ test.describe("LauncherWidget", () => {
     expect(result.cancelled).toBe(result.future);
   });
 
+  test("a tempo change on the shared clock is written to the launcher's model", async ({
+    page,
+  }) => {
+    await renderLauncher(page);
+    await renderTransport(page);
+    await page.locator(".nbplay-transport-tempo input[type=range]").fill("96");
+    expect(
+      await page.evaluate(() => ({
+        launcher: window.__testModel._state.bpm,
+        transport: window.__transportModel._state.bpm,
+      })),
+    ).toEqual({ launcher: 96, transport: 96 });
+  });
+
   test("quantize select writes the model", async ({ page }) => {
     await renderLauncher(page);
     await page.locator(".nbplay-launcher-quantize").selectOption("beat");

@@ -723,6 +723,12 @@ class TestSession:
             assert synth.config.theme == "grim" and session.mixer.config.theme == "grim"
             session.transport.config.theme = "pro"
             assert session.theme == "pro" and synth.config.theme == "pro" and session.launcher.config.theme == "pro"
+            # A tempo edit on the transport (the browser's clock writes it there) reaches every widget's model.
+            session.history.mark()
+            session.transport.config.bpm = 141.0
+            assert session.bpm == 141.0 and session.launcher.config.bpm == 141.0
+            assert seq.config.bpm == 141.0 and session.timeline.config.bpm == 141.0
+            assert session.undo() and session.launcher.config.bpm == 128.0 and session.transport.config.bpm == 128.0
             assert isinstance(session.play(), int)
         finally:
             session.close()

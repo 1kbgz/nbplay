@@ -60,6 +60,45 @@ test.describe("web app", () => {
       .poll(async () => (await state(request)).transport.config.bpm)
       .toBe(96);
 
+    // A tempo drag in the browser reaches every widget's model in the kernel,
+    // and the kernel's mirrored writes do not pull the clock back.
+    const tempo = page.locator(
+      "nbplay-transport .nbplay-transport-tempo input[type=range]",
+    );
+    const box = await tempo.boundingBox();
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 40; i++) {
+      await page.mouse.move(box.x + box.width * (0.3 + (0.4 * i) / 40), y);
+    }
+    await page.mouse.up();
+    const dragged = await page.evaluate(
+      () => document.querySelector("nbplay-transport").bpm,
+    );
+    expect(dragged).not.toBe(96);
+    await expect
+      .poll(async () => {
+        const models = await state(request);
+        return [
+          "transport",
+          "launcher",
+          "timeline",
+          "lead-sequencer",
+          "drums-sequencer",
+        ].map((name) => models[name].config.bpm);
+      })
+      .toEqual([dragged, dragged, dragged, dragged, dragged]);
+    expect(
+      await page.evaluate(() =>
+        [
+          ...document.querySelectorAll(
+            "nbplay-transport, nbplay-launcher, nbplay-timeline, nbplay-sequencer",
+          ),
+        ].map((el) => Number(el.bpm)),
+      ),
+    ).toEqual([dragged, dragged, dragged, dragged, dragged]);
+
     // The browser owns play state: pressing play updates the kernel's status
     // and every instrument follows the shared clock.
     await page.locator("nbplay-transport .nbplay-transport-play").click();
