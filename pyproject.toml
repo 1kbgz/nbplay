@@ -32,6 +32,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "anywidget",  # direct: the Pyodide example installs spaday from a wheel URL, without its widget extra
     "ipywidgets>=8",
     "spaday[widget]>=0.14.1",
     "spaday-regular-layout",
