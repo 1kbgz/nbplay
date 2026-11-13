@@ -406,8 +406,19 @@ export class NbplayLauncher extends NbplayElement {
         this.status(true, { isPlaying: false });
         this.mirrorSlotState(true);
         break;
+      case "tempo": {
+        // Follow the clock's tempo the way the sequencer and timeline do, so
+        // the host's model does not keep the tempo this element rendered with.
+        const bpm = this.clock().bpm;
+        if (numberValue(this.bpm, 120) !== bpm) {
+          this.bpm = bpm;
+          this.set({ bpm });
+        }
+        this.states.forEach((state) => state.scheduler.realign());
+        this.requantize();
+        break;
+      }
       case "seek":
-      case "tempo":
       case "loop":
         this.states.forEach((state) => state.scheduler.realign());
         this.requantize();
