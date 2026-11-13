@@ -603,6 +603,14 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-palette-hint",
+    title: "nbplay-palette-hint",
+    desc: "Top bar button that shows the palette shortcut for this platform (\u2318 K or Ctrl K). The shortcut is hidden on touch devices.",
+    events: ["click"],
+    controls: [{ name: "label", type: "text" }],
+    variants: [{ label: "panels", props: { label: "panels" } }],
+  },
+  {
     tag: "nbplay-segmented",
     title: "nbplay-segmented",
     desc: "One-of-N button group: oscillator type, launch quantize, step resolution.",

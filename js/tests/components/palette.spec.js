@@ -8,6 +8,50 @@ const COMMANDS = [
   { id: "lead-sequencer", label: "Lead sequencer" },
 ];
 
+test.describe("palette hint", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/tests/fixtures/components.html");
+  });
+
+  for (const [platform, keys] of [
+    ["MacIntel", "\u2318 K"],
+    ["Win32", "Ctrl K"],
+    ["Linux x86_64", "Ctrl K"],
+  ]) {
+    test(`shows ${keys} on ${platform}`, async ({ page }) => {
+      await page.evaluate((platform) => {
+        Object.defineProperty(navigator, "userAgentData", {
+          value: undefined,
+          configurable: true,
+        });
+        Object.defineProperty(navigator, "platform", {
+          value: platform,
+          configurable: true,
+        });
+      }, platform);
+      await mount(page, "nbplay-palette-hint", { label: "panels" }, ["click"]);
+      const button = page.locator("nbplay-palette-hint button");
+      await expect(button).toContainText("panels");
+      await expect(page.locator("nbplay-palette-hint kbd")).toHaveText(keys);
+      await button.click();
+      expect(await events(page)).toHaveLength(1);
+    });
+  }
+
+  test("hides the shortcut where there is no keyboard", async ({ browser }) => {
+    const context = await browser.newContext({
+      hasTouch: true,
+      isMobile: true,
+    });
+    const page = await context.newPage();
+    await page.goto("/tests/fixtures/components.html");
+    await mount(page, "nbplay-palette-hint", { label: "panels" }, ["click"]);
+    await expect(page.locator("nbplay-palette-hint button")).toBeVisible();
+    await expect(page.locator("nbplay-palette-hint kbd")).toBeHidden();
+    await context.close();
+  });
+});
+
 test.describe("palette", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/tests/fixtures/components.html");

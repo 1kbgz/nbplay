@@ -147,8 +147,10 @@ test.describe("web app", () => {
     await expect.poll(laidOut).toBe(true);
     await expect(mixer).toBeVisible();
 
-    // The top bar button opens the same palette.
-    await page.locator(".nbplay-app-bar button").click();
+    // The top bar button shows the shortcut and opens the same palette.
+    const hint = page.locator(".nbplay-app-bar nbplay-palette-hint button");
+    await expect(hint).toHaveText(/panels\s+(\u2318|Ctrl) K/);
+    await hint.click();
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();

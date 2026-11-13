@@ -74,9 +74,9 @@ class TestApp:
                     "method": "openPanel",
                     "args": [{"expr": "event-prop", "path": "detail.name"}],
                 }
-                button = bar["slots"]["default"][1]
-                assert button["tag"] == "button"
-                assert button["events"]["click"] == {"kind": "invoke", "target": {"ref": "id", "id": palette["props"]["id"]["Str"]}, "method": "show"}
+                hint = bar["slots"]["default"][1]
+                assert hint["tag"] == "nbplay-palette-hint" and hint["props"]["label"] == {"Str": "panels"}
+                assert hint["events"]["click"] == {"kind": "invoke", "target": {"ref": "id", "id": palette["props"]["id"]["Str"]}, "method": "show"}
                 select = bar["slots"]["default"][2]["slots"]["default"][1]
                 assert select["tag"] == "select" and select["bindings"]["value"] == {"field": "transport.config.theme", "mode": "two-way"}
                 assert [option["props"]["value"]["Str"] for option in select["slots"]["default"]] == list(nbplay.THEMES)
