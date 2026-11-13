@@ -685,6 +685,8 @@ class SequencerWidget(InstrumentWidget):
         "swing": "swing",
         "groove": "groove",
         "automation_lanes": "automationLanes",
+        "edit_token": "editToken",
+        "edit_ack": "editAck",
         **_ROUTED,
     }
     STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "current_step": "currentStep"}
@@ -1224,35 +1226,77 @@ class LauncherWidget(InstrumentWidget):
 
         Selecting a slot, in the browser or by assigning ``config.selected_slot``,
         loads it into the sequencer; the sequencer's step, grid, swing and
-        groove edits write back into that slot.
-        """
-        state = {"loading": False}
+        groove edits write back into that slot. A slot replaced while it is
+        selected (``set_slot()``, undo) is loaded again.
 
-        def load(*_):
+        Each load gives the sequencer an ``edit_token``, and the browser
+        precedes every pattern edit with an ``edit_ack`` naming the token it
+        was made on. An edit made before the browser saw the current slot is
+        dropped instead of landing on it.
+        """
+        loading = writing = False
+        serial = 0
+        ack: str | None = None
+        # The selected slot as the sequencer last loaded or wrote it.
+        synced: dict | None = None
+
+        def selected_slot():
             selected = self.config.selected_slot
             if not selected or self.get_slot(selected["track_index"], selected["scene_index"]) is None:
+                return None
+            return selected["track_index"], selected["scene_index"]
+
+        def load(*_, renew=True):
+            nonlocal loading, serial, synced
+            target = selected_slot()
+            if target is None:
                 return
-            state["loading"] = True
+            loading = True
             try:
-                self.slot_to_sequencer(selected["track_index"], selected["scene_index"], sequencer)
+                synced = self.slot_to_sequencer(*target, sequencer)
+                if renew:
+                    serial += 1
+                    sequencer.config.edit_token = f"{target[0]}:{target[1]}:{serial}"
             finally:
-                state["loading"] = False
+                loading = False
+
+        def acked(widget, name, old, new):
+            nonlocal ack
+            ack = new
 
         def write_back(*_):
-            selected = self.config.selected_slot
-            if state["loading"] or not selected:
+            nonlocal ack, writing, synced
+            # A browser edit follows its ack; a change with none came from Python.
+            base, ack = ack, None
+            target = selected_slot()
+            if loading or target is None:
                 return
-            current = self.get_slot(selected["track_index"], selected["scene_index"])
-            if current is not None:
-                self.set_slot(selected["track_index"], selected["scene_index"], sequencer, name=current["name"])
+            if base is not None and base.rpartition("#")[0] != sequencer.config.edit_token:
+                load(renew=False)
+                return
+            writing = True
+            try:
+                synced = self.set_slot(*target, sequencer, name=self.get_slot(*target)["name"])
+            finally:
+                writing = False
 
-        stop_select = self.on_change(load, names="selected_slot")
-        stop_edit = sequencer.on_change(write_back, names=("voices_data", "step_duration", "swing", "groove"))
+        def reload_replaced(*_):
+            target = selected_slot()
+            if not (writing or loading or target is None) and self.get_slot(*target) != synced:
+                load()
+
+        removers = [
+            self.on_change(load, names="selected_slot"),
+            self.on_change(reload_replaced, names="slots"),
+            sequencer.on_change(acked, names="edit_ack"),
+            sequencer.on_change(write_back, names=("voices_data", "step_duration", "swing", "groove")),
+        ]
         load()
 
         def unbind():
-            stop_select()
-            stop_edit()
+            for remove in removers:
+                remove()
+            sequencer.config.edit_token = ""
 
         return unbind
 

@@ -692,6 +692,58 @@ test.describe("SequencerWidget", () => {
   });
 
   // 21. Double-click step shows ♪? when keyboard connected
+  test("pattern edits ack the slot editor's token first", async ({ page }) => {
+    await renderWidget(page, { edit_token: "0:1:4", edit_ack: "" });
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      const set = model.set.bind(model);
+      window.__writes = [];
+      model.set = (name, value) => {
+        window.__writes.push(name === "edit_ack" ? [name, value] : [name]);
+        return set(name, value);
+      };
+    });
+    const cells = page.locator(".nbplay-step-grid-cell");
+    await cells.nth(1).click();
+    await cells.nth(2).click();
+    expect(await page.evaluate(() => window.__writes)).toEqual([
+      ["edit_ack", "0:1:4#1"],
+      ["voices_data"],
+      ["edit_ack", "0:1:4#2"],
+      ["voices_data"],
+    ]);
+
+    // A new token from the host is the one acked next; tempo is not a pattern field.
+    await page.evaluate(() => {
+      window.__writes = [];
+      window.__testModel.set("edit_token", "0:0:5");
+      window.__testModel._trigger("change:edit_token");
+      window.__writes = [];
+    });
+    await cells.nth(3).click();
+    await page.locator(".nbplay-seq-loop-label input").click();
+    expect(await page.evaluate(() => window.__writes)).toEqual([
+      ["edit_ack", "0:0:5#3"],
+      ["voices_data"],
+      ["loop_enabled"],
+    ]);
+  });
+
+  test("a sequencer with no slot editor sends no acks", async ({ page }) => {
+    await renderWidget(page);
+    await page.evaluate(() => {
+      const model = window.__testModel;
+      const set = model.set.bind(model);
+      window.__writes = [];
+      model.set = (name, value) => {
+        window.__writes.push(name);
+        return set(name, value);
+      };
+    });
+    await page.locator(".nbplay-step-grid-cell").nth(1).click();
+    expect(await page.evaluate(() => window.__writes)).toEqual(["voices_data"]);
+  });
+
   test("double-click step, type a note, Enter → model updated", async ({
     page,
   }) => {

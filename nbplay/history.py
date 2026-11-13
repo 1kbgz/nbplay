@@ -45,6 +45,8 @@ TRANSIENT_TRAITS = frozenset(
         "last_note_event",
         "last_pad_event",
         "keyboard_connected",
+        "edit_token",
+        "edit_ack",
         "capture_request",
         "send_request",
         "control_change",

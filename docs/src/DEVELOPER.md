@@ -766,7 +766,14 @@ slots with `set_slot(track, scene, pattern)` from a `SequencerWidget`, a list
 of step dicts, or a list of voices, and issues `launch()`, `launch_scene()`,
 `stop_track()`, and `stop_all()` as commands on the status `request` field.
 `bind_slot_editor(sequencer)` turns a sequencer into the editor for whichever
-slot is selected; edits write back into the slot live.
+slot is selected; edits write back into the slot live, and a selected slot that
+is replaced (`set_slot()`, undo) is loaded into the editor again. Each load
+gives the sequencer an `edit_token` (`track:scene:serial`). The sequencer
+element writes `edit_ack` (the token plus a serial) before every pattern field
+it edits, so the kernel sees which pattern a browser edit was made on. An edit
+that acks an older token was made before the browser saw the current slot; it
+is dropped and the slot is loaded again instead of being overwritten. A change
+with no ack came from Python and is written back.
 
 In the browser every track owns one shared-scheduler instance
 (`createAudioScheduler` from `scheduler.ts`) fed by a small model adapter over

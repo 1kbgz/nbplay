@@ -69,6 +69,9 @@ function camel(trait: string): string {
   return trait.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
+/** The fields a slot editor writes back into the selected slot. */
+const PATTERN_FIELDS = ["voicesData", "stepDuration", "swing", "groove"];
+
 /**
  * `<nbplay-sequencer>`: the step sequencer instrument. A header, a transport
  * bar (play, stop, record, tempo, step resolution, bars, loop), an
@@ -96,6 +99,8 @@ export class NbplaySequencer extends NbplayElement {
     swing: { type: Number },
     groove: { attribute: false },
     automationLanes: { attribute: false },
+    editToken: { type: String, attribute: "edit-token" },
+    editAck: { type: String, attribute: "edit-ack" },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -116,6 +121,8 @@ export class NbplaySequencer extends NbplayElement {
   declare swing: number;
   declare groove: number[];
   declare automationLanes: AutomationLane[];
+  declare editToken: string;
+  declare editAck: string;
   declare sessionId: string;
   declare channelIndex: number;
   declare isPlaying: boolean;
@@ -128,6 +135,7 @@ export class NbplaySequencer extends NbplayElement {
   private armed = new Set<number>();
   private cursor: StepRef | null = null;
   private pending: StepRef | null = null;
+  private editSerial = 0;
   private unbindShortcuts: (() => void) | null = null;
   private applyingGrid = false;
 
@@ -160,6 +168,8 @@ export class NbplaySequencer extends NbplayElement {
     this.swing = 0;
     this.groove = [];
     this.automationLanes = [];
+    this.editToken = "";
+    this.editAck = "";
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
@@ -222,7 +232,21 @@ export class NbplaySequencer extends NbplayElement {
   }
 
   private set(values: Record<string, unknown>): void {
-    this.emitDetail("nbplay-set", { values });
+    if (!this.editToken) {
+      this.emitDetail("nbplay-set", { values });
+      return;
+    }
+    // A slot editor loaded this pattern and named it with `editToken`. Each
+    // pattern field goes out behind an ack of the token it was edited on, so
+    // the host can drop an edit made on a pattern it has since replaced.
+    for (const [key, value] of Object.entries(values)) {
+      if (PATTERN_FIELDS.includes(key)) {
+        this.editSerial += 1;
+        this.editAck = `${this.editToken}#${this.editSerial}`;
+        this.emitDetail("nbplay-set", { values: { editAck: this.editAck } });
+      }
+      this.emitDetail("nbplay-set", { values: { [key]: value } });
+    }
   }
 
   private status(save: boolean, values: Record<string, unknown>): void {

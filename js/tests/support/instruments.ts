@@ -301,6 +301,8 @@ const INSTRUMENTS: Record<
         swing: "swing",
         groove: "groove",
         automation_lanes: "automationLanes",
+        edit_token: "editToken",
+        edit_ack: "editAck",
         session_id: "sessionId",
         channel_index: "channelIndex",
       },
