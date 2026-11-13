@@ -44,10 +44,6 @@ async function build() {
       }
     }
   }
-  fs.rmSync("../nbplay/extension", {
-    recursive: true,
-    force: true,
-  });
   fs.rmSync("../nbplay/static", {
     recursive: true,
     force: true,
@@ -66,13 +62,6 @@ async function build() {
   }
 
   await Promise.all(BUNDLES.map(bundle)).catch(() => process.exit(1));
-
-  // Copy servable assets to python extension (exclude esm/, gallery/, tests/)
-  fs.mkdirSync("../nbplay/extension", { recursive: true });
-  await cpy("dist/**/*", "../nbplay/extension", {
-    filter: (file) =>
-      !/^(dist\/)?(esm|gallery|tests)\//.test(file.relativePath),
-  });
 
   // The spaday component package assets (nbplay.components:package): every
   // widget shares one stylesheet, the elements plus the theme sets.

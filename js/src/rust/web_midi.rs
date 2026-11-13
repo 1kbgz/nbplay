@@ -29,14 +29,12 @@ impl WasmMidiAccess {
         let mut names = Vec::new();
         let entries = js_sys::try_iter(&inputs);
         if let Ok(Some(iter)) = entries {
-            for entry in iter {
-                if let Ok(val) = entry {
-                    let arr: Array = val.dyn_into().unwrap_or_default();
-                    if arr.length() >= 2 {
-                        let port: web_sys::MidiPort = arr.get(1).dyn_into().unwrap();
-                        if let Some(name) = port.name() {
-                            names.push(name);
-                        }
+            for val in iter.flatten() {
+                let arr: Array = val.dyn_into().unwrap_or_default();
+                if arr.length() >= 2 {
+                    let port: web_sys::MidiPort = arr.get(1).dyn_into().unwrap();
+                    if let Some(name) = port.name() {
+                        names.push(name);
                     }
                 }
             }
