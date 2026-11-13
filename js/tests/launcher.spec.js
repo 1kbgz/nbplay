@@ -572,6 +572,30 @@ test.describe("LauncherWidget", () => {
     ).toEqual([-1, -1]);
   });
 
+  test("a view that starts following another engine releases its channel claims", async ({
+    page,
+  }) => {
+    await renderLauncher(page, { quantize: "none" });
+    await page
+      .locator('nbplay-launcher-slot[data-track="0"][data-scene="0"]')
+      .click();
+    const claimed = () =>
+      page.evaluate(() =>
+        Boolean(globalThis.__nbplay["launcher-session"].claims?.[0]?.launcher),
+      );
+    expect(await claimed()).toBe(true);
+    await page.evaluate(async () => {
+      const first = document.querySelector("nbplay-launcher");
+      const engine = document.createElement("nbplay-launcher");
+      engine.engineKey = "one-launcher";
+      document.getElementById("root").appendChild(engine);
+      await engine.updateComplete;
+      first.engineKey = "one-launcher";
+      await first.updateComplete;
+    });
+    expect(await claimed()).toBe(false);
+  });
+
   test("a stop request while stopped does not start the clock", async ({
     page,
   }) => {

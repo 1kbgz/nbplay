@@ -327,6 +327,7 @@ export class NbplayLauncher extends NbplayElement {
     this.stopQueueTimer();
     this.states.forEach((state) => {
       state.scheduler.stop();
+      this.release(state);
       state.queued = null;
       state.currentStep = -1;
     });
