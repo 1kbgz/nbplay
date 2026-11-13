@@ -93,7 +93,9 @@ def _slug(name):
 
 def _panels(session):
     """(name, title, widget) per panel: the session views, then each track's sequencer and sound source."""
-    panels = [(name, name.capitalize(), getattr(session, name)) for name in ("transport", "launcher", "timeline", "mixer")]
+    panels: list[tuple[str, str, InstrumentWidget]] = [
+        (name, name.capitalize(), getattr(session, name)) for name in ("transport", "launcher", "timeline", "mixer")
+    ]
     taken = {name for name, _, _ in panels}
     for track in session.tracks:
         for widget in (track.sequencer, track.sound_source):

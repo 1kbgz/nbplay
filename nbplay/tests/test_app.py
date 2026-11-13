@@ -27,7 +27,15 @@ class TestApp:
             panels = panel_widgets(session)
             assert list(panels) == ["transport", "launcher", "timeline", "mixer", "lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert panels["lead-synth-synth"] is session.tracks[0].sound_source
-            assert list(panel_titles(session).values()) == ["Transport", "Launcher", "Timeline", "Mixer", "Lead Synth sequencer", "Lead Synth synth", "Lead Synth synth 2"]
+            assert list(panel_titles(session).values()) == [
+                "Transport",
+                "Launcher",
+                "Timeline",
+                "Mixer",
+                "Lead Synth sequencer",
+                "Lead Synth synth",
+                "Lead Synth synth 2",
+            ]
             layout = default_layout(list(panels))
             assert layout["children"][2]["tabs"] == ["lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert layout["children"][0]["tabs"] == ["transport"] and layout["children"][1]["children"][1]["tabs"] == ["timeline"]
