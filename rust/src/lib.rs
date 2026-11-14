@@ -17,7 +17,9 @@ pub use midi::{
 #[cfg(not(target_arch = "wasm32"))]
 pub use midi_input::MidiInput;
 pub use mixer::{Mixer, MixerChannel};
-pub use oscillator::{AudioSource, NoiseSource, SawOscillator, SineOscillator, SquareOscillator};
+pub use oscillator::{
+    AudioSource, NoiseSource, SawOscillator, SineOscillator, SquareOscillator, TriangleOscillator,
+};
 pub use sampler::{AudioSample, Envelope, SampleMap, SampleMapping, Sampler};
 pub use sequencer::{
     EventSequence, NoteEvent, Pattern, Step, StepSequencer, TransportClock, TransportState,

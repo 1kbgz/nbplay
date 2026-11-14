@@ -24,6 +24,7 @@ from nbplay.nbplay import (
     Step,
     StepSequencer,
     TransportClock,
+    TriangleOscillator,
     Velocity,
 )
 

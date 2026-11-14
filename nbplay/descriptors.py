@@ -23,6 +23,7 @@ from nbplay import (
     SawOscillator,
     SineOscillator,
     SquareOscillator,
+    TriangleOscillator,
 )
 
 _PREVIEW_MAX_FRAMES = 2048
@@ -698,6 +699,8 @@ def render_waveform(oscillator_type, frequency, amplitude, sample_rate):
         osc = SquareOscillator(frequency, amplitude, sample_rate)
     elif oscillator_type == "saw":
         osc = SawOscillator(frequency, amplitude, sample_rate)
+    elif oscillator_type == "triangle":
+        osc = TriangleOscillator(frequency, amplitude, sample_rate)
     elif oscillator_type == "noise":
         osc = NoiseSource(amplitude)
     else:

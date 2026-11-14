@@ -123,6 +123,45 @@ impl AudioSource for SawOscillator {
     }
 }
 
+/// Triangle wave oscillator. It starts at zero and rises, in phase with the sine.
+pub struct TriangleOscillator {
+    pub frequency: f64,
+    pub amplitude: f64,
+    pub sample_rate: u32,
+    phase: f64,
+}
+
+impl TriangleOscillator {
+    pub fn new(frequency: f64, amplitude: f64, sample_rate: u32) -> Self {
+        TriangleOscillator {
+            frequency,
+            amplitude,
+            sample_rate,
+            phase: 0.0,
+        }
+    }
+}
+
+impl AudioSource for TriangleOscillator {
+    fn render(&mut self, buffer: &mut AudioBuffer) {
+        let channels = buffer.format.channels.0 as usize;
+        let frames = buffer.frames();
+        let phase_inc = self.frequency / self.sample_rate as f64;
+
+        for frame in 0..frames {
+            // Peaks a quarter cycle in, crosses zero at the half, troughs at three quarters.
+            let shifted = (self.phase + 0.25).fract();
+            let value = (1.0 - 4.0 * (shifted - 0.5).abs()) * self.amplitude;
+            let sample = value as f32;
+            for ch in 0..channels {
+                buffer.set_sample(frame, ch, sample);
+            }
+            self.phase += phase_inc;
+            self.phase -= self.phase.floor();
+        }
+    }
+}
+
 /// White noise source with a simple deterministic LCG PRNG for testability.
 pub struct NoiseSource {
     pub amplitude: f64,
@@ -266,6 +305,28 @@ mod tests {
                 (*sample - 0.7).abs() < 1e-5 || (*sample - (-0.7)).abs() < 1e-5,
                 "Sample should be ±0.7, got {sample}"
             );
+        }
+    }
+
+    #[test]
+    fn test_triangle_oscillator_rises_and_falls_linearly() {
+        let mut osc = TriangleOscillator::new(1.0, 0.5, 100);
+        let mut buf =
+            AudioBuffer::silence(100, AudioFormat::new(SampleRate(100), ChannelCount::MONO));
+        osc.render(&mut buf);
+
+        // Zero at the start and the half, the peaks a quarter and three quarters in.
+        for (index, expected) in [(0, 0.0), (25, 0.5), (50, 0.0), (75, -0.5)] {
+            assert!(
+                (buf.data[index] - expected).abs() < 1e-5,
+                "sample[{index}]: expected {expected}, got {}",
+                buf.data[index]
+            );
+        }
+        // Every step has the same size: 4 * amplitude / frames per cycle.
+        for i in 1..100 {
+            let step = (buf.data[i] - buf.data[i - 1]).abs();
+            assert!((step - 0.02).abs() < 1e-5, "step at {i} is {step}");
         }
     }
 

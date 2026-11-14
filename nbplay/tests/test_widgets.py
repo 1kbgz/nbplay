@@ -57,13 +57,16 @@ class TestTransportModels:
 class TestSynthWidget:
     def test_waveform_follows_the_oscillator_parameters(self):
         with pytest.raises(ValueError):
-            SynthConfig.model_validate({"oscillator_type": "triangle"})
+            SynthConfig.model_validate({"oscillator_type": "pulse"})
         widget = nbplay.SynthWidget(frequency=220.0, autosync=False)
         try:
             first = widget.config.waveform
             assert len(first) == 4 * min(2048, int(44100 / 220 * 3))
             widget.config.frequency = 440.0
             assert len(widget.config.waveform) == 4 * int(44100 / 440 * 3)
+            widget.config.oscillator_type = "triangle"
+            triangle = struct.unpack(f"<{len(widget.config.waveform) // 4}f", widget.config.waveform)
+            assert triangle[0] == 0.0 and max(triangle) == pytest.approx(widget.config.amplitude, abs=0.02)
             widget.config.oscillator_type = "noise"
             assert len(widget.config.waveform) == 4 * 1024
             assert widget._tree["tag"] == "nbplay-synth"

@@ -28,6 +28,7 @@ fn nbplay(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<oscillator::PySineOscillator>()?;
     m.add_class::<oscillator::PySquareOscillator>()?;
     m.add_class::<oscillator::PySawOscillator>()?;
+    m.add_class::<oscillator::PyTriangleOscillator>()?;
     m.add_class::<oscillator::PyNoiseSource>()?;
 
     // Mixer

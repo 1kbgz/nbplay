@@ -3,7 +3,7 @@ use web_sys::AudioContext;
 
 use nbplay::audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
 use nbplay::oscillator::{
-    AudioSource, NoiseSource, SawOscillator, SineOscillator, SquareOscillator,
+    AudioSource, NoiseSource, SawOscillator, SineOscillator, SquareOscillator, TriangleOscillator,
 };
 
 /// Web Audio output engine exposed to JavaScript via wasm-bindgen.
@@ -27,7 +27,7 @@ impl WasmAudioOutput {
     }
 
     /// Start playing an oscillator.
-    /// `osc_type`: "sine" | "square" | "saw" | "noise"
+    /// `osc_type`: "sine" | "triangle" | "square" | "saw" | "noise"
     pub fn start(
         &mut self,
         osc_type: &str,
@@ -58,6 +58,10 @@ impl WasmAudioOutput {
             }
             "saw" => {
                 let mut osc = SawOscillator::new(frequency, amplitude, sr);
+                osc.render(&mut buf);
+            }
+            "triangle" => {
+                let mut osc = TriangleOscillator::new(frequency, amplitude, sr);
                 osc.render(&mut buf);
             }
             "noise" => {

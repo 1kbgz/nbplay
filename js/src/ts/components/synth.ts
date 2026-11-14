@@ -14,10 +14,11 @@ import "./param.ts";
 import "./segmented.ts";
 import "./waveform.ts";
 
-export type OscillatorType = "sine" | "square" | "saw" | "noise";
+export type OscillatorType = "sine" | "triangle" | "square" | "saw" | "noise";
 
 const OSCILLATORS: Array<{ value: OscillatorType; label: string }> = [
   { value: "sine", label: "Sine" },
+  { value: "triangle", label: "Triangle" },
   { value: "square", label: "Square" },
   { value: "saw", label: "Saw" },
   { value: "noise", label: "Noise" },
@@ -63,7 +64,7 @@ function scheduleSynthNote(
   } else {
     const osc = ctx.createOscillator();
     osc.type = (
-      type === "square" || type === "saw"
+      type === "square" || type === "saw" || type === "triangle"
         ? type.replace("saw", "sawtooth")
         : "sine"
     ) as globalThis.OscillatorType;

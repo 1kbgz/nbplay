@@ -4,6 +4,7 @@ use nbplay::audio::{AudioBuffer, AudioFormat, ChannelCount, SampleRate};
 use nbplay::oscillator::{
     AudioSource, NoiseSource as BaseNoiseSource, SawOscillator as BaseSawOscillator,
     SineOscillator as BaseSineOscillator, SquareOscillator as BaseSquareOscillator,
+    TriangleOscillator as BaseTriangleOscillator,
 };
 
 #[pyclass(name = "SineOscillator")]
@@ -136,6 +137,51 @@ impl PySawOscillator {
     fn __repr__(&self) -> String {
         format!(
             "SawOscillator(frequency={}, amplitude={}, sample_rate={})",
+            self.inner.frequency, self.inner.amplitude, self.inner.sample_rate
+        )
+    }
+}
+
+#[pyclass(name = "TriangleOscillator")]
+pub struct PyTriangleOscillator {
+    inner: BaseTriangleOscillator,
+}
+
+#[pymethods]
+impl PyTriangleOscillator {
+    #[new]
+    #[pyo3(signature = (frequency=440.0, amplitude=1.0, sample_rate=44100))]
+    fn py_new(frequency: f64, amplitude: f64, sample_rate: u32) -> Self {
+        PyTriangleOscillator {
+            inner: BaseTriangleOscillator::new(frequency, amplitude, sample_rate),
+        }
+    }
+
+    #[getter]
+    fn frequency(&self) -> f64 {
+        self.inner.frequency
+    }
+
+    #[getter]
+    fn amplitude(&self) -> f64 {
+        self.inner.amplitude
+    }
+
+    #[getter]
+    fn sample_rate(&self) -> u32 {
+        self.inner.sample_rate
+    }
+
+    fn render_to_buffer(&mut self, frames: usize) -> Vec<f32> {
+        let format = AudioFormat::new(SampleRate(self.inner.sample_rate), ChannelCount::MONO);
+        let mut buffer = AudioBuffer::silence(frames, format);
+        self.inner.render(&mut buffer);
+        buffer.data
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "TriangleOscillator(frequency={}, amplitude={}, sample_rate={})",
             self.inner.frequency, self.inner.amplitude, self.inner.sample_rate
         )
     }

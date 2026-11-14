@@ -156,7 +156,7 @@ class SynthConfig(_Validated):
     patch already carries the new bytes.
     """
 
-    oscillator_type: Literal["sine", "square", "saw", "noise"] = "sine"
+    oscillator_type: Literal["sine", "triangle", "square", "saw", "noise"] = "sine"
     frequency: float = Field(440.0, ge=20, le=8000)
     amplitude: float = Field(0.8, ge=0, le=1)
     sample_rate: int = Field(44100, ge=8000, le=192000)
