@@ -32,6 +32,7 @@ from nbplay import (
     StepSequencer,
     TimelineTrack,
     TransportClock,
+    TriangleOscillator,
     Velocity,
 )
 
@@ -316,6 +317,20 @@ class TestSquareOscillator:
     def test_repr(self):
         osc = SquareOscillator(440.0, 1.0, 44100)
         assert "SquareOscillator" in repr(osc)
+
+
+class TestTriangleOscillator:
+    def test_render_rises_and_falls(self):
+        osc = TriangleOscillator(1.0, 0.5, 100)
+        samples = osc.render_to_buffer(100)
+        assert len(samples) == 100
+        # Zero at the start and the half, the peaks a quarter and three quarters in.
+        assert [samples[i] for i in (0, 25, 50, 75)] == pytest.approx([0.0, 0.5, 0.0, -0.5], abs=1e-6)
+        assert all(abs(samples[i] - samples[i - 1]) == pytest.approx(0.02, abs=1e-6) for i in range(1, 100))
+
+    def test_repr(self):
+        osc = TriangleOscillator(440.0, 1.0, 44100)
+        assert "TriangleOscillator" in repr(osc)
 
 
 class TestSawOscillator:

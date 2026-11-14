@@ -242,7 +242,7 @@ are gated out for wasm builds.
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `audio.rs`        | `SampleRate`, `ChannelCount`, `AudioFormat`, and interleaved `AudioBuffer`. Buffers support silence allocation, frame count, checked sample get/set, add-mixing, and clearing.                                                                        |
 | `midi.rs`         | `MidiChannel`, `Note`, `Velocity`, `ControlNumber`, `MidiMessage`, `MidiEvent`, `note_to_hz()`, `hz_to_note()`, and `parse_midi_bytes()`. Channel range is 0-15; notes, velocity, and controls are 0-127. Note-on with velocity 0 parses as note-off. |
-| `oscillator.rs`   | `AudioSource` trait and sine, square, saw, and deterministic-noise sources. Oscillators render into an `AudioBuffer` and wrap phase into \[0, 1) to avoid drift.                                                                                      |
+| `oscillator.rs`   | `AudioSource` trait and sine, triangle, square, saw, and deterministic-noise sources. Oscillators render into an `AudioBuffer` and wrap phase into \[0, 1) to avoid drift.                                                                            |
 | `mixer.rs`        | `MixerChannel` and `Mixer`. Channels apply gain, mute, solo, and constant-power pan. `Mixer::mix_down()` combines mono channel buffers into interleaved stereo output.                                                                                |
 | `sampler.rs`      | `AudioSample`, `Envelope`, polyphonic `Sampler`, `SampleMapping`, and `SampleMap`. The sampler handles pitch ratio, sample-rate ratio, linear interpolation, ADSR, looping, soft clipping, voice stealing, note-off release, and panic/all-notes-off. |
 | `sequencer.rs`    | `Step`, `Pattern`, `NoteEvent`, `EventSequence`, `TransportClock`, `TransportState`, and `StepSequencer`. These model fixed step patterns, piano-roll events, beat clocks, and MIDI event generation over beat ranges.                                |
@@ -284,8 +284,8 @@ The PyO3 classes exposed through `nbplay/__init__.py` are:
 - Audio: `AudioFormat`, `AudioBuffer`, `AudioOutput`.
 - MIDI: `MidiChannel`, `Note`, `Velocity`, `MidiMessage`, `MidiEvent`,
   `MidiInput`.
-- Oscillators: `SineOscillator`, `SquareOscillator`, `SawOscillator`,
-  `NoiseSource`.
+- Oscillators: `SineOscillator`, `TriangleOscillator`, `SquareOscillator`,
+  `SawOscillator`, `NoiseSource`.
 - Mixer: `MixerChannel`, `Mixer`.
 - Sequencer: `Step`, `Pattern`, `NoteEvent`, `EventSequence`,
   `TransportClock`, `StepSequencer`.

@@ -58,11 +58,11 @@ test.describe("SynthWidget", () => {
   });
 
   // 3. Oscillator buttons
-  test("renders all four oscillator buttons", async ({ page }) => {
+  test("renders all five oscillator buttons", async ({ page }) => {
     await renderWidget(page);
     const btns = page.locator(".nbplay-osc .nbplay-segmented-option");
-    await expect(btns).toHaveCount(4);
-    for (const type of ["sine", "square", "saw", "noise"]) {
+    await expect(btns).toHaveCount(5);
+    for (const type of ["sine", "triangle", "square", "saw", "noise"]) {
       await expect(
         page.locator(`.nbplay-osc [data-value="${type}"]`),
       ).toBeVisible();
@@ -432,6 +432,21 @@ test.describe("SynthWidget", () => {
     });
     expect(result.osc).toEqual({ time: 2.5, type: "square", freq: 440 });
     expect(result.cancels).toBe("function");
+
+    // A triangle plays Web Audio's triangle, not the sine fallback.
+    await page.evaluate(() => {
+      window.__testModel.set("oscillator_type", "triangle");
+      window.__testModel._trigger("change:oscillator_type");
+    });
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const bus = globalThis.__nbplay["synth-session"];
+          bus.instruments[0].scheduleNote(69, 127, 3, 0.5);
+          return window.__oscs.at(-1).type;
+        }),
+      )
+      .toBe("triangle");
 
     // Rendering the mixer later announces the bus; the synth registers then.
     await page.evaluate(() => {

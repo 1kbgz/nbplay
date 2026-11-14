@@ -641,7 +641,7 @@ const SECTIONS: Section[] = [
         label: "oscillator",
         props: {
           label: "OSC",
-          options: ["sine", "square", "saw", "noise"],
+          options: ["sine", "triangle", "square", "saw", "noise"],
           value: "sine",
         },
       },
@@ -1189,7 +1189,7 @@ const SECTIONS: Section[] = [
       {
         name: "oscillatorType",
         type: "select",
-        options: ["sine", "square", "saw", "noise"],
+        options: ["sine", "triangle", "square", "saw", "noise"],
       },
       { name: "frequency", type: "number", step: 0.1 },
       { name: "amplitude", type: "number", step: 0.01 },
