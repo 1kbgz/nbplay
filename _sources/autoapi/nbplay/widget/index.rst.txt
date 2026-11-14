@@ -91,6 +91,12 @@ Module Contents
       :type:  ClassVar[dict[str, str]]
 
 
+   .. py:attribute:: PRESET
+      :type:  ClassVar[tuple[str, ...]]
+      :value: ()
+
+
+
    .. py:attribute:: config
 
 
@@ -135,6 +141,38 @@ Module Contents
    .. py:method:: _prepare()
 
       Hook run after the models exist and before they are hosted.
+
+
+
+   .. py:method:: preset(name='')
+
+      This widget's sound or layout as a JSON-safe dict that :meth:`load_preset` applies to a widget of the same class.
+
+      The session wiring (``session_id``, ``channel_index``, ``theme``) is
+      not part of it. Bytes, such as a sampler's sample, are base64 text.
+
+
+
+   .. py:method:: save_preset(path, name='')
+
+      Write :meth:`preset` to ``path`` as JSON.
+
+
+
+   .. py:method:: load_preset(preset)
+
+      Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
+
+      The fields are validated together and applied in one update, so a
+      refused preset changes nothing and a loaded one is one undo step.
+
+
+
+   .. py:method:: from_preset(preset, **kwargs)
+      :classmethod:
+
+
+      A new widget with a preset loaded; ``kwargs`` go to the constructor.
 
 
 
@@ -230,6 +268,11 @@ Module Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-synth'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
 
 
 
@@ -417,6 +460,11 @@ Module Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-pads'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('rows', 'cols', 'velocity', 'velocity_sensitive', 'pad_notes', 'pad_velocities', 'pad_actions')
 
 
 
@@ -609,6 +657,11 @@ Module Contents
 
 
 
+   .. py:attribute:: PRESET
+      :value: ('num_voices', 'length', 'measures', 'step_duration', 'time_signature_num',...
+
+
+
    .. py:attribute:: CONFIG_MODEL
 
 
@@ -701,6 +754,11 @@ Module Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-sampler'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('sample_name', 'sample_rate', 'root_note', 'attack', 'decay', 'sustain', 'release',...
 
 
 

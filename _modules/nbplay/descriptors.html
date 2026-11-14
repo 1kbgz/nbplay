@@ -621,6 +621,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">array</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
@@ -761,12 +762,36 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="c1"># Numeric parameters as (default, low, high); the browser's effect editor shows the same ranges.</span>
+<span class="n">_EFFECT_NUMBERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"eq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"low"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">24.0</span><span class="p">,</span> <span class="mf">24.0</span><span class="p">),</span>
+        <span class="s2">"low_freq"</span><span class="p">:</span> <span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">),</span>
+        <span class="s2">"mid"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">24.0</span><span class="p">,</span> <span class="mf">24.0</span><span class="p">),</span>
+        <span class="s2">"mid_freq"</span><span class="p">:</span> <span class="p">(</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">10000.0</span><span class="p">),</span>
+        <span class="s2">"mid_q"</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span>
+        <span class="s2">"high"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">24.0</span><span class="p">,</span> <span class="mf">24.0</span><span class="p">),</span>
+        <span class="s2">"high_freq"</span><span class="p">:</span> <span class="p">(</span><span class="mf">8000.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">20000.0</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="s2">"distortion"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"drive"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="s2">"tone"</span><span class="p">:</span> <span class="p">(</span><span class="mf">8000.0</span><span class="p">,</span> <span class="mf">200.0</span><span class="p">,</span> <span class="mf">20000.0</span><span class="p">),</span> <span class="s2">"wet"</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)},</span>
+    <span class="s2">"chorus"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"rate"</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">),</span> <span class="s2">"delay"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span> <span class="s2">"wet"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)},</span>
+    <span class="s2">"phaser"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"rate"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span>
+        <span class="s2">"depth"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="s2">"frequency"</span><span class="p">:</span> <span class="p">(</span><span class="mf">800.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">5000.0</span><span class="p">),</span>
+        <span class="s2">"feedback"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span>
+        <span class="s2">"wet"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="s2">"tremolo"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"rate"</span><span class="p">:</span> <span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">),</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)},</span>
+<span class="p">}</span>
+
+
 <div class="viewcode-block" id="EffectPlugin">
 <a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EffectPlugin</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Validated Web Audio effect descriptor for mixer insert chains."""</span>
 
-    <span class="n">_VALID_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"gain"</span><span class="p">,</span> <span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"delay"</span><span class="p">,</span> <span class="s2">"reverb"</span><span class="p">,</span> <span class="s2">"compressor"</span><span class="p">,</span> <span class="s2">"limiter"</span><span class="p">})</span>
+    <span class="n">_VALID_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"gain"</span><span class="p">,</span> <span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"eq"</span><span class="p">,</span> <span class="s2">"delay"</span><span class="p">,</span> <span class="s2">"reverb"</span><span class="p">,</span> <span class="s2">"compressor"</span><span class="p">,</span> <span class="s2">"limiter"</span><span class="p">,</span> <span class="s2">"distortion"</span><span class="p">,</span> <span class="s2">"chorus"</span><span class="p">,</span> <span class="s2">"phaser"</span><span class="p">,</span> <span class="s2">"tremolo"</span><span class="p">})</span>
     <span class="n">_FILTER_TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"lowpass"</span><span class="p">,</span> <span class="s2">"highpass"</span><span class="p">,</span> <span class="s2">"bandpass"</span><span class="p">,</span> <span class="s2">"notch"</span><span class="p">,</span> <span class="s2">"lowshelf"</span><span class="p">,</span> <span class="s2">"highshelf"</span><span class="p">,</span> <span class="s2">"peaking"</span><span class="p">})</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -803,6 +828,10 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="EffectPlugin._normalize_params">
 <a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.EffectPlugin._normalize_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="ow">in</span> <span class="n">_EFFECT_NUMBERS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_EFFECT_NUMBERS</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">"gain"</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">"gain"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">"gain"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)}</span>
         <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">"filter"</span><span class="p">:</span>
@@ -1742,10 +1771,41 @@ window.runMermaid = runMermaid;</script>
 <span class="n">_TRANSPORT_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"bpm"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"loop_start_bar"</span><span class="p">,</span> <span class="s2">"loop_end_bar"</span><span class="p">)</span>
 
 
+<span class="n">_PRESET_FORMAT</span> <span class="o">=</span> <span class="s2">"nbplay-preset"</span>
+<span class="n">_PRESET_FORMAT_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+
+
 <div class="viewcode-block" id="_json_copy">
 <a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._json_copy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_json_copy</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="_preset_encode">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._preset_encode">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_preset_encode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``value`` with bytes replaced by ``{"base64": ...}``, so a preset is JSON."""</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"base64"</span><span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"ascii"</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_preset_encode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_preset_encode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="_preset_decode">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._preset_decode">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_preset_decode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">"base64"</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">"base64"</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_preset_decode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_preset_decode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">value</span></div>
 
 </pre></div>
 

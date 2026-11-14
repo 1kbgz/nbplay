@@ -25,6 +25,7 @@ Attributes
    nbplay.descriptors._PREVIEW_MAX_FRAMES
    nbplay.descriptors._DEFAULT_PAD_NOTES
    nbplay.descriptors._PAD_MAX_COUNT
+   nbplay.descriptors._EFFECT_NUMBERS
    nbplay.descriptors._TIMELINE_INPUTS
    nbplay.descriptors._CLIP_KINDS
    nbplay.descriptors.THEMES
@@ -37,6 +38,8 @@ Attributes
    nbplay.descriptors._SAMPLER_PAD_STATE
    nbplay.descriptors._TIMELINE_STATE
    nbplay.descriptors._TRANSPORT_STATE
+   nbplay.descriptors._PRESET_FORMAT
+   nbplay.descriptors._PRESET_FORMAT_VERSION
 
 
 Classes
@@ -101,6 +104,8 @@ Functions
    nbplay.descriptors._positive_pad_dimension
    nbplay.descriptors._build_route
    nbplay.descriptors._json_copy
+   nbplay.descriptors._preset_encode
+   nbplay.descriptors._preset_decode
 
 
 Module Contents
@@ -145,6 +150,8 @@ Module Contents
 .. py:function:: _resize_pad_velocities(velocities, pad_count, velocity=100)
 
 .. py:function:: _safe_trait_name(value)
+
+.. py:data:: _EFFECT_NUMBERS
 
 .. py:class:: EffectPlugin(type, enabled=True, **params)
 
@@ -482,5 +489,20 @@ Module Contents
    :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar', 'loop_end_bar')
 
 
+.. py:data:: _PRESET_FORMAT
+   :value: 'nbplay-preset'
+
+
+.. py:data:: _PRESET_FORMAT_VERSION
+   :value: 1
+
+
 .. py:function:: _json_copy(value)
+
+.. py:function:: _preset_encode(value)
+
+   ``value`` with bytes replaced by ``{"base64": ...}``, so a preset is JSON.
+
+
+.. py:function:: _preset_decode(value)
 

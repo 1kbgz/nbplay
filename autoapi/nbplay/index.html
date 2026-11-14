@@ -1023,6 +1023,9 @@
     <a href="#nbplay.PadWidget.TAG">PadWidget.TAG</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.PadWidget.PRESET">PadWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.PadWidget.CONFIG_MODEL">PadWidget.CONFIG_MODEL</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1051,6 +1054,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SamplerWidget.TAG">SamplerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SamplerWidget.PRESET">SamplerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SamplerWidget.CONFIG_MODEL">SamplerWidget.CONFIG_MODEL</a>
@@ -1135,6 +1141,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SequencerWidget.TAG">SequencerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SequencerWidget.PRESET">SequencerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SequencerWidget.CONFIG_MODEL">SequencerWidget.CONFIG_MODEL</a>
@@ -1311,10 +1320,25 @@
     <a href="#nbplay.SettingsWidget.STATUS">SettingsWidget.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.SpectrumWidget">SpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.TAG">SpectrumWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.CONFIG_MODEL">SpectrumWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.CONFIG">SpectrumWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.SynthWidget">SynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SynthWidget.TAG">SynthWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SynthWidget.PRESET">SynthWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SynthWidget.CONFIG_MODEL">SynthWidget.CONFIG_MODEL</a>
@@ -1659,16 +1683,19 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SettingsWidget" title="nbplay.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
 <td><p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SpectrumWidget" title="nbplay.SpectrumWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectrumWidget</span></code></a></p></td>
+<td><p>A spectrum analyzer for a session's master bus or one of its mixer channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
 <td><p>The synth instrument on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
 <td><p>The tracking widget on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>The transport instrument on a transports session.</p></td>
 </tr>
 </tbody>
@@ -3137,6 +3164,11 @@ graph from it. Edits in either place are validated by
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.PadWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('rows',</span> <span class="pre">'cols',</span> <span class="pre">'velocity',</span> <span class="pre">'velocity_sensitive',</span> <span class="pre">'pad_notes',</span> <span class="pre">'pad_velocities',</span> <span class="pre">'pad_actions')</span></em><a class="headerlink" href="#nbplay.PadWidget.PRESET" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.PadWidget.CONFIG_MODEL">
 <span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.PadWidget.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3192,6 +3224,11 @@ browser-side clip is a command the owning widget decodes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.SamplerWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-sampler'</span></em><a class="headerlink" href="#nbplay.SamplerWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SamplerWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('sample_name',</span> <span class="pre">'sample_rate',</span> <span class="pre">'root_note',</span> <span class="pre">'attack',</span> <span class="pre">'decay',</span> <span class="pre">'sustain',</span> <span class="pre">'release',...</span></em><a class="headerlink" href="#nbplay.SamplerWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3362,6 +3399,11 @@ step belong to the browser scheduler.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.SequencerWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-sequencer'</span></em><a class="headerlink" href="#nbplay.SequencerWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SequencerWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('num_voices',</span> <span class="pre">'length',</span> <span class="pre">'measures',</span> <span class="pre">'step_duration',</span> <span class="pre">'time_signature_num',...</span></em><a class="headerlink" href="#nbplay.SequencerWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3717,6 +3759,31 @@ session reads the same archive.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="nbplay.SpectrumWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">SpectrumWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#SpectrumWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.SpectrumWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentWidget</span></code></p>
+<p>A spectrum analyzer for a session’s master bus or one of its mixer channels.</p>
+<p>It listens in the browser after the insert chain and reports nothing
+back: <code class="docutils literal notranslate"><span class="pre">SpectrumWidget(session_id=session.session_id)</span></code> shows the master
+bus, and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> picks a channel.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SpectrumWidget.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-spectrum'</span></em><a class="headerlink" href="#nbplay.SpectrumWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SpectrumWidget.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.SpectrumWidget.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SpectrumWidget.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.SpectrumWidget.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="nbplay.SynthWidget">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">SynthWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#SynthWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.SynthWidget" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentWidget</span></code></p>
@@ -3726,6 +3793,11 @@ part of validation, so kernel and browser edits both refresh it.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.SynthWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-synth'</span></em><a class="headerlink" href="#nbplay.SynthWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.SynthWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate')</span></em><a class="headerlink" href="#nbplay.SynthWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -4936,6 +5008,9 @@ is already cached are skipped unless <code class="docutils literal notranslate">
     <a href="#nbplay.PadWidget.TAG">PadWidget.TAG</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.PadWidget.PRESET">PadWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.PadWidget.CONFIG_MODEL">PadWidget.CONFIG_MODEL</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -4964,6 +5039,9 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SamplerWidget.TAG">SamplerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SamplerWidget.PRESET">SamplerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SamplerWidget.CONFIG_MODEL">SamplerWidget.CONFIG_MODEL</a>
@@ -5048,6 +5126,9 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SequencerWidget.TAG">SequencerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SequencerWidget.PRESET">SequencerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SequencerWidget.CONFIG_MODEL">SequencerWidget.CONFIG_MODEL</a>
@@ -5224,10 +5305,25 @@ is already cached are skipped unless <code class="docutils literal notranslate">
     <a href="#nbplay.SettingsWidget.STATUS">SettingsWidget.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.SpectrumWidget">SpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.TAG">SpectrumWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.CONFIG_MODEL">SpectrumWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SpectrumWidget.CONFIG">SpectrumWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.SynthWidget">SynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SynthWidget.TAG">SynthWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.SynthWidget.PRESET">SynthWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.SynthWidget.CONFIG_MODEL">SynthWidget.CONFIG_MODEL</a>

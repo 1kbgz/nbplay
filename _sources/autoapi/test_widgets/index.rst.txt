@@ -12,13 +12,16 @@ Classes
    test_widgets.TestTransportModels
    test_widgets.TestSynthWidget
    test_widgets.TestMixerWidget
+   test_widgets.TestEffectPlugin
    test_widgets.TestKeysWidgets
+   test_widgets.TestSpectrumWidget
    test_widgets.TestIoWidgets
    test_widgets.TestSequencerAndSamplerWidgets
    test_widgets.TestArrangementWidgets
    test_widgets.TestObservers
    test_widgets.TestSession
    test_widgets.TestSessionArrangement
+   test_widgets.TestPresets
    test_widgets.TestSessionPersistence
    test_widgets.TestHistoryAndMidiLearn
    test_widgets.TestTransportWidget
@@ -69,6 +72,14 @@ Module Contents
    .. py:method:: test_strip_send_and_effect_setters()
 
 
+.. py:class:: TestEffectPlugin
+
+   .. py:method:: test_added_effect_types_fill_defaults_and_clamp()
+
+
+   .. py:method:: test_mixer_normalizes_the_added_effects()
+
+
 .. py:class:: TestKeysWidgets
 
    .. py:method:: test_pads_config_fits_the_grid()
@@ -81,6 +92,11 @@ Module Contents
 
 
    .. py:method:: test_pads_grid_helpers_and_sampler_slices()
+
+
+.. py:class:: TestSpectrumWidget
+
+   .. py:method:: test_config_validates_and_binds_the_element()
 
 
 .. py:class:: TestIoWidgets
@@ -170,6 +186,23 @@ Module Contents
 
 
 .. py:function:: arranged_session()
+
+.. py:class:: TestPresets
+
+   .. py:method:: test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring(tmp_path)
+
+
+   .. py:method:: test_sampler_preset_carries_its_sample_and_zones()
+
+
+   .. py:method:: test_sequencer_and_pad_presets_round_trip()
+
+
+   .. py:method:: test_a_preset_is_refused_by_the_wrong_widget_or_format()
+
+
+   .. py:method:: test_loading_a_preset_is_one_undo_step_in_a_session()
+
 
 .. py:class:: TestSessionPersistence
 

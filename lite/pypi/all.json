@@ -5,19 +5,19 @@
         {
           "comment_text": "",
           "digests": {
-            "md5": "71c93f36e01133e0c326701abd9b9500",
-            "sha256": "075216709235fb44ced881528b1d907715838080245b3cae1c0390b460ade25f"
+            "md5": "1286c476e944d93a0243c72b1005b3d1",
+            "sha256": "67442ebd3ad314af72501a861614600861f097b3afac650ea5d600978f39fd52"
           },
           "downloads": -1,
           "filename": "nbplay-0.4.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
           "has_sig": false,
-          "md5_digest": "71c93f36e01133e0c326701abd9b9500",
+          "md5_digest": "1286c476e944d93a0243c72b1005b3d1",
           "packagetype": "bdist_wheel",
           "python_version": "py3",
           "requires_python": ">=3.11",
-          "size": 267026,
-          "upload_time": "2026-11-14T01:18:21.903052Z",
-          "upload_time_iso_8601": "2026-11-14T01:18:21.903052Z",
+          "size": 273726,
+          "upload_time": "2026-11-14T01:43:28.758407Z",
+          "upload_time_iso_8601": "2026-11-14T01:43:28.758407Z",
           "url": "./nbplay-0.4.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
           "yanked": false,
           "yanked_reason": null

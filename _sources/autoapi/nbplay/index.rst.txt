@@ -73,6 +73,7 @@ Classes
    nbplay.SequencerWidget
    nbplay.Session
    nbplay.SettingsWidget
+   nbplay.SpectrumWidget
    nbplay.SynthWidget
    nbplay.TimelineWidget
    nbplay.Track
@@ -1233,6 +1234,11 @@ Package Contents
 
 
 
+   .. py:attribute:: PRESET
+      :value: ('rows', 'cols', 'velocity', 'velocity_sensitive', 'pad_notes', 'pad_velocities', 'pad_actions')
+
+
+
    .. py:attribute:: CONFIG_MODEL
 
 
@@ -1284,6 +1290,11 @@ Package Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-sampler'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('sample_name', 'sample_rate', 'root_note', 'attack', 'decay', 'sustain', 'release',...
 
 
 
@@ -1448,6 +1459,11 @@ Package Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-sequencer'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('num_voices', 'length', 'measures', 'step_duration', 'time_signature_num',...
 
 
 
@@ -1770,6 +1786,30 @@ Package Contents
       :type:  ClassVar[dict[str, str]]
 
 
+.. py:class:: SpectrumWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   A spectrum analyzer for a session's master bus or one of its mixer channels.
+
+   It listens in the browser after the insert chain and reports nothing
+   back: ``SpectrumWidget(session_id=session.session_id)`` shows the master
+   bus, and ``channel_index`` picks a channel.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-spectrum'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
 .. py:class:: SynthWidget(session=None, *, config=None, **kwargs)
 
    Bases: :py:obj:`InstrumentWidget`
@@ -1783,6 +1823,11 @@ Package Contents
 
    .. py:attribute:: TAG
       :value: 'nbplay-synth'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
 
 
 

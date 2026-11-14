@@ -268,6 +268,9 @@
     <a href="#synthwidget">SynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#spectrumwidget">SpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#settingswidget">SettingsWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -347,6 +350,9 @@
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#session-persistence">Session persistence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#presets">Presets</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#undo-and-redo">Undo and redo</a>
@@ -651,47 +657,51 @@ learn work.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">oscillator_type</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SettingsWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SpectrumWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fft_size</span></code>, <code class="docutils literal notranslate"><span class="pre">smoothing</span></code>, <code class="docutils literal notranslate"><span class="pre">min_db</span></code>, <code class="docutils literal notranslate"><span class="pre">max_db</span></code>, <code class="docutils literal notranslate"><span class="pre">min_frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">max_frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p>none</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SettingsWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer_size</span></code>, <code class="docutils literal notranslate"><span class="pre">audio_device</span></code>, <code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">midi_event</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MixerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">returns</span></code>, <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>, <code class="docutils literal notranslate"><span class="pre">master_effects</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p>none</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">voices_data</span></code>, <code class="docutils literal notranslate"><span class="pre">num_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">measures</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code>, <code class="docutils literal notranslate"><span class="pre">follow_transport</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">groove</span></code>, <code class="docutils literal notranslate"><span class="pre">automation_lanes</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">sample_name</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_length</span></code>, <code class="docutils literal notranslate"><span class="pre">root_note</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_data</span></code>, ADSR fields, <code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_count</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_slices</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">zones</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (capture commands)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">undo_request</span></code>, <code class="docutils literal notranslate"><span class="pre">redo_request</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">pixels_per_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">scenes</span></code>, <code class="docutils literal notranslate"><span class="pre">slots</span></code>, <code class="docutils literal notranslate"><span class="pre">quantize</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">selected_slot</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">active_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">queued_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (launch commands)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">upper_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, sustain fields, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">sync_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">control_change</span></code>, <code class="docutils literal notranslate"><span class="pre">clock_bpm</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">forward_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">send_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (send commands)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>, <code class="docutils literal notranslate"><span class="pre">cols</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code></p></td>
 </tr>
@@ -949,6 +959,28 @@ MIDI clips on its track play notes with its oscillator type and amplitude
 scheduler’s sine fallback. It registers at render, when the routing fields
 change, and on <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> when the mixer renders later.</p>
 </section>
+<section id="spectrumwidget">
+<h3>SpectrumWidget<a class="headerlink" href="#spectrumwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">SpectrumWidget</span></code>. Element:
+<code class="docutils literal notranslate"><span class="pre">js/src/ts/components/spectrum.ts</span></code>.</p>
+<p>SpectrumWidget is a spectrum analyzer for a session:
+<code class="docutils literal notranslate"><span class="pre">SpectrumWidget(session_id=session.session_id)</span></code> shows the master bus and
+<code class="docutils literal notranslate"><span class="pre">channel_index</span></code> picks a mixer channel. It is not created by <code class="docutils literal notranslate"><span class="pre">Session</span></code>, the way
+keyboards are not. The mixer keeps a meter <code class="docutils literal notranslate"><span class="pre">AnalyserNode</span></code> at the end of every
+insert chain and publishes them as <code class="docutils literal notranslate"><span class="pre">bus.masterAnalyser</span></code> and
+<code class="docutils literal notranslate"><span class="pre">bus.channels[i].analyser</span></code>; an analyser passes its input through, so the
+element feeds a second analyser of its own from that tap. It hears the signal
+after the inserts, adds nothing to the path, and stays connected when a chain
+is rebuilt. It taps at connect, when the routing fields change, and on
+<code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code>.</p>
+<p>Each animation frame it reads <code class="docutils literal notranslate"><span class="pre">getFloatFrequencyData()</span></code> and draws one y per
+pixel column on a log-frequency, dB grid (<code class="docutils literal notranslate"><span class="pre">spectrumLine()</span></code>: the loudest bin a
+column covers, interpolated where a column falls between bins) and shows the
+loudest frequency in range (<code class="docutils literal notranslate"><span class="pre">spectrumPeak()</span></code>). <code class="docutils literal notranslate"><span class="pre">fft_size</span></code> is one of the powers
+of two from 256 to 16384 and can be picked in the element; the model requires
+<code class="docutils literal notranslate"><span class="pre">max_db</span> <span class="pre">&gt;</span> <span class="pre">min_db</span></code> and <code class="docutils literal notranslate"><span class="pre">max_frequency</span> <span class="pre">&gt;</span> <span class="pre">min_frequency</span></code>. Nothing is reported
+back to the kernel, so the widget has no status model.</p>
+</section>
 <section id="settingswidget">
 <h3>SettingsWidget<a class="headerlink" href="#settingswidget" title="Link to this heading">¶</a></h3>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">SettingsWidget</span></code>. Element:
@@ -978,7 +1010,12 @@ browser insert effects are real-time Web Audio only.</p>
 show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.</p>
 <p>Effect descriptors are plain dictionaries. Built-ins are <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">filter</span></code>,
-<code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>, <code class="docutils literal notranslate"><span class="pre">delay</span></code>, and <code class="docutils literal notranslate"><span class="pre">reverb</span></code>. A descriptor with
+<code class="docutils literal notranslate"><span class="pre">eq</span></code> (low shelf, one peaking mid band, high shelf), <code class="docutils literal notranslate"><span class="pre">compressor</span></code>, <code class="docutils literal notranslate"><span class="pre">limiter</span></code>,
+<code class="docutils literal notranslate"><span class="pre">distortion</span></code> (soft clipping with a tone filter), <code class="docutils literal notranslate"><span class="pre">delay</span></code>, <code class="docutils literal notranslate"><span class="pre">reverb</span></code>, <code class="docutils literal notranslate"><span class="pre">chorus</span></code>,
+<code class="docutils literal notranslate"><span class="pre">phaser</span></code>, and <code class="docutils literal notranslate"><span class="pre">tremolo</span></code>. Each built-in’s parameter ranges and defaults live in
+<code class="docutils literal notranslate"><span class="pre">EFFECT_PARAMS</span></code> (<code class="docutils literal notranslate"><span class="pre">js/src/ts/components/effects.ts</span></code>), which the effect editor
+shows and the newer factories read; <code class="docutils literal notranslate"><span class="pre">EffectPlugin</span></code> in <code class="docutils literal notranslate"><span class="pre">descriptors.py</span></code> clamps
+to the same ranges, so a new built-in needs both. A descriptor with
 <code class="docutils literal notranslate"><span class="pre">enabled:</span> <span class="pre">false</span></code> is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
 bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
@@ -1681,6 +1718,27 @@ request per clip and caches each answer in <code class="docutils literal notrans
 <code class="docutils literal notranslate"><span class="pre">import_clip()</span></code> so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new <code class="docutils literal notranslate"><span class="pre">session_id</span></code>.</p>
 </section>
+<section id="presets">
+<h3>Presets<a class="headerlink" href="#presets" title="Link to this heading">¶</a></h3>
+<p>A preset is one widget’s sound or layout as JSON, without its session wiring.
+<code class="docutils literal notranslate"><span class="pre">widget.preset(name)</span></code> returns the dict, <code class="docutils literal notranslate"><span class="pre">save_preset(path)</span></code> writes it,
+<code class="docutils literal notranslate"><span class="pre">load_preset(dict_or_path)</span></code> applies it to a widget of the same class, and
+<code class="docutils literal notranslate"><span class="pre">Widget.from_preset(...)</span></code> builds a new one. The fields come from the class’s
+<code class="docutils literal notranslate"><span class="pre">PRESET</span></code> tuple, which reuses the session’s state lists where they exist:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>: oscillator type, frequency, amplitude, sample rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>: the sample (PCM, length, preview), envelope, pads, slices
+and zones. Bytes travel as <code class="docutils literal notranslate"><span class="pre">{&quot;base64&quot;:</span> <span class="pre">...}</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>: the grid settings, swing, groove, automation lanes and
+<code class="docutils literal notranslate"><span class="pre">voices_data</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code>: the grid size, notes, velocities and actions.</p></li>
+</ul>
+<p>A widget with no <code class="docutils literal notranslate"><span class="pre">PRESET</span></code> raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>. Loading validates every field in
+one <code class="docutils literal notranslate"><span class="pre">config.update()</span></code>, so a refused preset changes nothing and a loaded one is
+one undo step. <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> and <code class="docutils literal notranslate"><span class="pre">theme</span></code> are never part of a
+preset, so loading one into a track’s instrument keeps its routing. The mixer
+has no preset: its channels belong to the session’s tracks.</p>
+</section>
 <section id="undo-and-redo">
 <h3>Undo and redo<a class="headerlink" href="#undo-and-redo" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">nbplay/history.py</span></code> keeps an undo stack over widget config. <code class="docutils literal notranslate"><span class="pre">History.attach(widget)</span></code> subscribes to the widget’s config model with <code class="docutils literal notranslate"><span class="pre">on_change</span></code>, so browser edits count too, and ignores the transient fields listed in <code class="docutils literal notranslate"><span class="pre">TRANSIENT_TRAITS</span></code> (selection, request counts, derived data such as the waveform preview); browser-owned status never reaches a config model. Each change becomes an entry <code class="docutils literal notranslate"><span class="pre">(config,</span> <span class="pre">field,</span> <span class="pre">old,</span> <span class="pre">new)</span></code>; changes within <code class="docutils literal notranslate"><span class="pre">group_window</span></code> seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several fields is one step) share a step, <code class="docutils literal notranslate"><span class="pre">transaction()</span></code> groups a block explicitly, <code class="docutils literal notranslate"><span class="pre">paused()</span></code> hides a block, and <code class="docutils literal notranslate"><span class="pre">mark()</span></code> ends the current step. A session also registers <code class="docutils literal notranslate"><span class="pre">mark()</span></code> on IPython’s <code class="docutils literal notranslate"><span class="pre">post_run_cell</span></code> event (<code class="docutils literal notranslate"><span class="pre">bind_ipython()</span></code>), so two cells never share a step even when Run All executes them within the window. <code class="docutils literal notranslate"><span class="pre">undo()</span></code> restores the step’s old values in reverse order by assigning the config fields, and moves the step to the redo stack; a new change clears redo.</p>
@@ -1980,6 +2038,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
     <a href="#synthwidget">SynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#spectrumwidget">SpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#settingswidget">SettingsWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -2059,6 +2120,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#session-persistence">Session persistence</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#presets">Presets</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#undo-and-redo">Undo and redo</a>

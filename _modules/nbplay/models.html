@@ -658,6 +658,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"SequencerStatus"</span><span class="p">,</span>
     <span class="s2">"SettingsConfig"</span><span class="p">,</span>
     <span class="s2">"SettingsStatus"</span><span class="p">,</span>
+    <span class="s2">"SpectrumConfig"</span><span class="p">,</span>
     <span class="s2">"SynthConfig"</span><span class="p">,</span>
     <span class="s2">"SynthStatus"</span><span class="p">,</span>
     <span class="s2">"TimelineConfig"</span><span class="p">,</span>
@@ -760,6 +761,39 @@ window.runMermaid = runMermaid;</script>
 
 <span class="c1">#: Config fields whose change re-renders the synth waveform preview.</span>
 <span class="n">WAVEFORM_PARAMS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SpectrumConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SpectrumConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SpectrumConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The spectrum analyzer's FFT, its axis ranges, and what it listens to.</span>
+
+<span class="sd">    ``channel_index`` is a mixer channel of the session, or -1 for the master bus.</span>
+<span class="sd">    """</span>
+
+    <span class="n">fft_size</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="mi">8192</span><span class="p">,</span> <span class="mi">16384</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2048</span>
+    <span class="n">smoothing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mf">0.99</span><span class="p">)</span>
+    <span class="n">min_db</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">-</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=-</span><span class="mi">140</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">max_db</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">-</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=-</span><span class="mi">100</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">min_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span>
+    <span class="n">max_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">20000.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">24000</span><span class="p">)</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="SpectrumConfig._ordered">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SpectrumConfig._ordered">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ordered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_db</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_db</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"max_db (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_db</span><span class="si">}</span><span class="s2">) must be above min_db (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">min_db</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_frequency</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_frequency</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"max_frequency (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_frequency</span><span class="si">}</span><span class="s2">) must be above min_frequency (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">min_frequency</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="SynthConfig">

@@ -203,6 +203,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | Python class         | Config fields (kernel-owned)                                                                                                                                                                                                                                           | Status fields (browser-owned)                                                                                                                                               |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SynthWidget`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `waveform`, `session_id`, `channel_index`, `theme`                                                                                                                                                         | `is_playing`                                                                                                                                                                |
+| `SpectrumWidget`     | `fft_size`, `smoothing`, `min_db`, `max_db`, `min_frequency`, `max_frequency`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | none                                                                                                                                                                        |
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
@@ -453,6 +454,30 @@ MIDI clips on its track play notes with its oscillator type and amplitude
 scheduler's sine fallback. It registers at render, when the routing fields
 change, and on `nbplay-bus-ready` when the mixer renders later.
 
+### SpectrumWidget
+
+Python class: `SpectrumWidget`. Element:
+`js/src/ts/components/spectrum.ts`.
+
+SpectrumWidget is a spectrum analyzer for a session:
+`SpectrumWidget(session_id=session.session_id)` shows the master bus and
+`channel_index` picks a mixer channel. It is not created by `Session`, the way
+keyboards are not. The mixer keeps a meter `AnalyserNode` at the end of every
+insert chain and publishes them as `bus.masterAnalyser` and
+`bus.channels[i].analyser`; an analyser passes its input through, so the
+element feeds a second analyser of its own from that tap. It hears the signal
+after the inserts, adds nothing to the path, and stays connected when a chain
+is rebuilt. It taps at connect, when the routing fields change, and on
+`nbplay-bus-ready`.
+
+Each animation frame it reads `getFloatFrequencyData()` and draws one y per
+pixel column on a log-frequency, dB grid (`spectrumLine()`: the loudest bin a
+column covers, interpolated where a column falls between bins) and shows the
+loudest frequency in range (`spectrumPeak()`). `fft_size` is one of the powers
+of two from 256 to 16384 and can be picked in the element; the model requires
+`max_db > min_db` and `max_frequency > min_frequency`. Nothing is reported
+back to the kernel, so the widget has no status model.
+
 ### SettingsWidget
 
 Python class: `SettingsWidget`. Element:
@@ -487,7 +512,12 @@ show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.
 
 Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
-`compressor`, `limiter`, `delay`, and `reverb`. A descriptor with
+`eq` (low shelf, one peaking mid band, high shelf), `compressor`, `limiter`,
+`distortion` (soft clipping with a tone filter), `delay`, `reverb`, `chorus`,
+`phaser`, and `tremolo`. Each built-in's parameter ranges and defaults live in
+`EFFECT_PARAMS` (`js/src/ts/components/effects.ts`), which the effect editor
+shows and the newer factories read; `EffectPlugin` in `descriptors.py` clamps
+to the same ranges, so a new built-in needs both. A descriptor with
 `enabled: false` is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
 bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
@@ -1228,6 +1258,27 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `timeline.pending_exports` to reach zero. On load, cached clips go back through
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
+
+### Presets
+
+A preset is one widget's sound or layout as JSON, without its session wiring.
+`widget.preset(name)` returns the dict, `save_preset(path)` writes it,
+`load_preset(dict_or_path)` applies it to a widget of the same class, and
+`Widget.from_preset(...)` builds a new one. The fields come from the class's
+`PRESET` tuple, which reuses the session's state lists where they exist:
+
+- `SynthWidget`: oscillator type, frequency, amplitude, sample rate.
+- `SamplerWidget`: the sample (PCM, length, preview), envelope, pads, slices
+  and zones. Bytes travel as `{"base64": ...}`.
+- `SequencerWidget`: the grid settings, swing, groove, automation lanes and
+  `voices_data`.
+- `PadWidget`: the grid size, notes, velocities and actions.
+
+A widget with no `PRESET` raises `TypeError`. Loading validates every field in
+one `config.update()`, so a refused preset changes nothing and a loaded one is
+one undo step. `session_id`, `channel_index` and `theme` are never part of a
+preset, so loading one into a track's instrument keeps its routing. The mixer
+has no preset: its channels belong to the session's tracks.
 
 ### Undo and redo
 

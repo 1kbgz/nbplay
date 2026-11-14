@@ -20,6 +20,7 @@ Classes
 
    nbplay.models.TransportConfig
    nbplay.models.TransportStatus
+   nbplay.models.SpectrumConfig
    nbplay.models.SynthConfig
    nbplay.models.SynthStatus
    nbplay.models.MixerConfig
@@ -160,6 +161,71 @@ Module Contents
       :type:  int
       :value: 0
 
+
+
+.. py:class:: SpectrumConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   The spectrum analyzer's FFT, its axis ranges, and what it listens to.
+
+   ``channel_index`` is a mixer channel of the session, or -1 for the master bus.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: fft_size
+      :type:  Literal[256, 512, 1024, 2048, 4096, 8192, 16384]
+      :value: 2048
+
+
+
+   .. py:attribute:: smoothing
+      :type:  float
+
+
+   .. py:attribute:: min_db
+      :type:  float
+
+
+   .. py:attribute:: max_db
+      :type:  float
+
+
+   .. py:attribute:: min_frequency
+      :type:  float
+
+
+   .. py:attribute:: max_frequency
+      :type:  float
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _ordered()
 
 
 .. py:class:: SynthConfig(/, **data: Any)

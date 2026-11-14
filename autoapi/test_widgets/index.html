@@ -240,6 +240,15 @@
     <a href="#test_widgets.TestMixerWidget.test_strip_send_and_effect_setters">TestMixerWidget.test_strip_send_and_effect_setters()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestEffectPlugin">TestEffectPlugin</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp">TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestEffectPlugin.test_mixer_normalizes_the_added_effects">TestEffectPlugin.test_mixer_normalizes_the_added_effects()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestKeysWidgets">TestKeysWidgets</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -253,6 +262,12 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#test_widgets.TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices">TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestSpectrumWidget">TestSpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestSpectrumWidget.test_config_validates_and_binds_the_element">TestSpectrumWidget.test_config_validates_and_binds_the_element()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestIoWidgets">TestIoWidgets</a>
@@ -348,6 +363,24 @@
     <a href="#test_widgets.arranged_session">arranged_session()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestPresets">TestPresets</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring">TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_sampler_preset_carries_its_sample_and_zones">TestPresets.test_sampler_preset_carries_its_sample_and_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_sequencer_and_pad_presets_round_trip">TestPresets.test_sequencer_and_pad_presets_round_trip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format">TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session">TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestSessionPersistence">TestSessionPersistence</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -423,7 +456,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestMixerWidget" title="test_widgets.TestMixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMixerWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestKeysWidgets" title="test_widgets.TestKeysWidgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestKeysWidgets</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestEffectPlugin" title="test_widgets.TestEffectPlugin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestEffectPlugin</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestKeysWidgets" title="test_widgets.TestKeysWidgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestKeysWidgets</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSpectrumWidget" title="test_widgets.TestSpectrumWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSpectrumWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestIoWidgets" title="test_widgets.TestIoWidgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestIoWidgets</span></code></a></p></td>
@@ -444,13 +483,16 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSessionArrangement" title="test_widgets.TestSessionArrangement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionArrangement</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestSessionPersistence" title="test_widgets.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestPresets" title="test_widgets.TestPresets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPresets</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestHistoryAndMidiLearn" title="test_widgets.TestHistoryAndMidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearn</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSessionPersistence" title="test_widgets.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestTransportWidget" title="test_widgets.TestTransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestHistoryAndMidiLearn" title="test_widgets.TestHistoryAndMidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestTransportWidget" title="test_widgets.TestTransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -538,6 +580,21 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_widgets.TestEffectPlugin">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestEffectPlugin</span></span><a class="headerlink" href="#test_widgets.TestEffectPlugin" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp">
+<span class="sig-name descname"><span class="pre">test_added_effect_types_fill_defaults_and_clamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestEffectPlugin.test_mixer_normalizes_the_added_effects">
+<span class="sig-name descname"><span class="pre">test_mixer_normalizes_the_added_effects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestEffectPlugin.test_mixer_normalizes_the_added_effects" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_widgets.TestKeysWidgets">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestKeysWidgets</span></span><a class="headerlink" href="#test_widgets.TestKeysWidgets" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -558,6 +615,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="test_widgets.TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices">
 <span class="sig-name descname"><span class="pre">test_pads_grid_helpers_and_sampler_slices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_widgets.TestSpectrumWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestSpectrumWidget</span></span><a class="headerlink" href="#test_widgets.TestSpectrumWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestSpectrumWidget.test_config_validates_and_binds_the_element">
+<span class="sig-name descname"><span class="pre">test_config_validates_and_binds_the_element</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestSpectrumWidget.test_config_validates_and_binds_the_element" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -719,6 +786,36 @@
 <dd></dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="test_widgets.TestPresets">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestPresets</span></span><a class="headerlink" href="#test_widgets.TestPresets" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring">
+<span class="sig-name descname"><span class="pre">test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestPresets.test_sampler_preset_carries_its_sample_and_zones">
+<span class="sig-name descname"><span class="pre">test_sampler_preset_carries_its_sample_and_zones</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestPresets.test_sampler_preset_carries_its_sample_and_zones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestPresets.test_sequencer_and_pad_presets_round_trip">
+<span class="sig-name descname"><span class="pre">test_sequencer_and_pad_presets_round_trip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestPresets.test_sequencer_and_pad_presets_round_trip" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format">
+<span class="sig-name descname"><span class="pre">test_a_preset_is_refused_by_the_wrong_widget_or_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session">
+<span class="sig-name descname"><span class="pre">test_loading_a_preset_is_one_undo_step_in_a_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="test_widgets.TestSessionPersistence">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestSessionPersistence</span></span><a class="headerlink" href="#test_widgets.TestSessionPersistence" title="Link to this definition">¶</a></dt>
 <dd><dl class="py method">
@@ -875,6 +972,15 @@
     <a href="#test_widgets.TestMixerWidget.test_strip_send_and_effect_setters">TestMixerWidget.test_strip_send_and_effect_setters()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestEffectPlugin">TestEffectPlugin</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp">TestEffectPlugin.test_added_effect_types_fill_defaults_and_clamp()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestEffectPlugin.test_mixer_normalizes_the_added_effects">TestEffectPlugin.test_mixer_normalizes_the_added_effects()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestKeysWidgets">TestKeysWidgets</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -888,6 +994,12 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#test_widgets.TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices">TestKeysWidgets.test_pads_grid_helpers_and_sampler_slices()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestSpectrumWidget">TestSpectrumWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestSpectrumWidget.test_config_validates_and_binds_the_element">TestSpectrumWidget.test_config_validates_and_binds_the_element()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestIoWidgets">TestIoWidgets</a>
@@ -981,6 +1093,24 @@
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.arranged_session">arranged_session()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestPresets">TestPresets</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring">TestPresets.test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_sampler_preset_carries_its_sample_and_zones">TestPresets.test_sampler_preset_carries_its_sample_and_zones()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_sequencer_and_pad_presets_round_trip">TestPresets.test_sequencer_and_pad_presets_round_trip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format">TestPresets.test_a_preset_is_refused_by_the_wrong_widget_or_format()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session">TestPresets.test_loading_a_preset_is_one_undo_step_in_a_session()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestSessionPersistence">TestSessionPersistence</a>

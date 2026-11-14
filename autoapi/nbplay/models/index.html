@@ -255,6 +255,42 @@
     <a href="#nbplay.models.TransportStatus.redo_request">TransportStatus.redo_request</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SpectrumConfig">SpectrumConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.fft_size">SpectrumConfig.fft_size</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.smoothing">SpectrumConfig.smoothing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.min_db">SpectrumConfig.min_db</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.max_db">SpectrumConfig.max_db</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.min_frequency">SpectrumConfig.min_frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.max_frequency">SpectrumConfig.max_frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.session_id">SpectrumConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.channel_index">SpectrumConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.theme">SpectrumConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig._theme">SpectrumConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig._ordered">SpectrumConfig._ordered()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SynthConfig">SynthConfig</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -902,67 +938,70 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.TransportStatus" title="nbplay.models.TransportStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportStatus</span></code></a></p></td>
 <td><p>Transport state the browser clock owns.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SynthConfig" title="nbplay.models.SynthConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SpectrumConfig" title="nbplay.models.SpectrumConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectrumConfig</span></code></a></p></td>
+<td><p>The spectrum analyzer's FFT, its axis ranges, and what it listens to.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SynthConfig" title="nbplay.models.SynthConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthConfig</span></code></a></p></td>
 <td><p>Synth settings the kernel owns; <code class="docutils literal notranslate"><span class="pre">waveform</span></code> is derived.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SynthStatus" title="nbplay.models.SynthStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthStatus</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SynthStatus" title="nbplay.models.SynthStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthStatus</span></code></a></p></td>
 <td><p>Whether the browser is sounding the synth's tone; browser-owned.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MixerConfig" title="nbplay.models.MixerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MixerConfig" title="nbplay.models.MixerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></p></td>
 <td><p>The mixer console the kernel owns: channels, returns, master.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.PadsConfig" title="nbplay.models.PadsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadsConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.PadsConfig" title="nbplay.models.PadsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadsConfig</span></code></a></p></td>
 <td><p>The trigger-pad grid the kernel owns.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.PadsStatus" title="nbplay.models.PadsStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadsStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.PadsStatus" title="nbplay.models.PadsStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadsStatus</span></code></a></p></td>
 <td><p>What the pads are doing in the browser; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.KeyboardConfig" title="nbplay.models.KeyboardConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.KeyboardConfig" title="nbplay.models.KeyboardConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardConfig</span></code></a></p></td>
 <td><p>The QWERTY keyboard's octaves, velocity, sustain and routing.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.KeyboardStatus" title="nbplay.models.KeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.KeyboardStatus" title="nbplay.models.KeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardStatus</span></code></a></p></td>
 <td><p>Notes held in the browser; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardConfig" title="nbplay.models.MidiKeyboardConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardConfig" title="nbplay.models.MidiKeyboardConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardConfig</span></code></a></p></td>
 <td><p>The Web MIDI keyboard's port, clock following and routing.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardStatus" title="nbplay.models.MidiKeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardStatus" title="nbplay.models.MidiKeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardStatus</span></code></a></p></td>
 <td><p>Ports, held notes, control changes and the device clock; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SettingsConfig" title="nbplay.models.SettingsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SettingsConfig" title="nbplay.models.SettingsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></p></td>
 <td><p>Audio output and MIDI input selection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SettingsStatus" title="nbplay.models.SettingsStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SettingsStatus" title="nbplay.models.SettingsStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsStatus</span></code></a></p></td>
 <td><p>Ports the browser enumerated and the last raw MIDI event; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputConfig" title="nbplay.models.MidiOutputConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputConfig" title="nbplay.models.MidiOutputConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputConfig</span></code></a></p></td>
 <td><p>The MIDI output port, channel and what it forwards.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputStatus" title="nbplay.models.MidiOutputStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputStatus" title="nbplay.models.MidiOutputStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputStatus</span></code></a></p></td>
 <td><p>Ports the browser enumerated; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SequencerConfig" title="nbplay.models.SequencerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SequencerConfig" title="nbplay.models.SequencerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a></p></td>
 <td><p>The step sequencer's pattern and grid.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SequencerStatus" title="nbplay.models.SequencerStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SequencerStatus" title="nbplay.models.SequencerStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerStatus</span></code></a></p></td>
 <td><p>Play state and the sounding step from the browser scheduler; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SamplerConfig" title="nbplay.models.SamplerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SamplerConfig" title="nbplay.models.SamplerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerConfig</span></code></a></p></td>
 <td><p>The sampler's sample, envelope, pads, slices and zones.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SamplerStatus" title="nbplay.models.SamplerStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.SamplerStatus" title="nbplay.models.SamplerStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerStatus</span></code></a></p></td>
 <td><p>Taps and note events from the browser; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.LauncherConfig" title="nbplay.models.LauncherConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.LauncherConfig" title="nbplay.models.LauncherConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherConfig</span></code></a></p></td>
 <td><p>The clip launcher's tracks, scenes and slots.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.LauncherStatus" title="nbplay.models.LauncherStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.LauncherStatus" title="nbplay.models.LauncherStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherStatus</span></code></a></p></td>
 <td><p>Play state and slot state from the browser scheduler; browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.TimelineConfig" title="nbplay.models.TimelineConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineConfig</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.TimelineConfig" title="nbplay.models.TimelineConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineConfig</span></code></a></p></td>
 <td><p>The arrangement: lanes, clips and recording settings the kernel owns.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.TimelineStatus" title="nbplay.models.TimelineStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineStatus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.TimelineStatus" title="nbplay.models.TimelineStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineStatus</span></code></a></p></td>
 <td><p>Play, record and transfer state from the browser; browser-owned.</p></td>
 </tr>
 </tbody>
@@ -1070,6 +1109,73 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.TransportStatus.redo_request">
 <span class="sig-name descname"><span class="pre">redo_request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nbplay.models.TransportStatus.redo_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">SpectrumConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SpectrumConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SpectrumConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>The spectrum analyzer’s FFT, its axis ranges, and what it listens to.</p>
+<p><code class="docutils literal notranslate"><span class="pre">channel_index</span></code> is a mixer channel of the session, or -1 for the master bus.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.fft_size">
+<span class="sig-name descname"><span class="pre">fft_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">256</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">512</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1024</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2048</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4096</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">8192</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">16384</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2048</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.fft_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.smoothing">
+<span class="sig-name descname"><span class="pre">smoothing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.smoothing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.min_db">
+<span class="sig-name descname"><span class="pre">min_db</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.min_db" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.max_db">
+<span class="sig-name descname"><span class="pre">max_db</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.max_db" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.min_frequency">
+<span class="sig-name descname"><span class="pre">min_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.min_frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.max_frequency">
+<span class="sig-name descname"><span class="pre">max_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.max_frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.SpectrumConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.SpectrumConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.SpectrumConfig._ordered">
+<span class="sig-name descname"><span class="pre">_ordered</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SpectrumConfig._ordered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SpectrumConfig._ordered" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2340,6 +2446,42 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.TransportStatus.redo_request">TransportStatus.redo_request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.SpectrumConfig">SpectrumConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.fft_size">SpectrumConfig.fft_size</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.smoothing">SpectrumConfig.smoothing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.min_db">SpectrumConfig.min_db</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.max_db">SpectrumConfig.max_db</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.min_frequency">SpectrumConfig.min_frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.max_frequency">SpectrumConfig.max_frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.session_id">SpectrumConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.channel_index">SpectrumConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig.theme">SpectrumConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig._theme">SpectrumConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SpectrumConfig._ordered">SpectrumConfig._ordered()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SynthConfig">SynthConfig</a>

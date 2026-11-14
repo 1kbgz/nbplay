@@ -228,6 +228,9 @@
     <a href="#nbplay.widget.InstrumentWidget.STATUS_EVENTS">InstrumentWidget.STATUS_EVENTS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.PRESET">InstrumentWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget.config">InstrumentWidget.config</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -262,6 +265,18 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget._prepare">InstrumentWidget._prepare()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.preset">InstrumentWidget.preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.save_preset">InstrumentWidget.save_preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.load_preset">InstrumentWidget.load_preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.from_preset">InstrumentWidget.from_preset()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget._command">InstrumentWidget._command()</a>
@@ -319,6 +334,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SynthWidget.TAG">SynthWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SynthWidget.PRESET">SynthWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SynthWidget.CONFIG_MODEL">SynthWidget.CONFIG_MODEL</a>
@@ -427,6 +445,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.PadWidget.TAG">PadWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.PadWidget.PRESET">PadWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.PadWidget.CONFIG_MODEL">PadWidget.CONFIG_MODEL</a>
@@ -546,6 +567,9 @@
     <a href="#nbplay.widget.SequencerWidget.TAG">SequencerWidget.TAG</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.PRESET">SequencerWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SequencerWidget.CONFIG_MODEL">SequencerWidget.CONFIG_MODEL</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -595,6 +619,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SamplerWidget.TAG">SamplerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SamplerWidget.PRESET">SamplerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SamplerWidget.CONFIG_MODEL">SamplerWidget.CONFIG_MODEL</a>
@@ -1114,6 +1141,11 @@ config; the rest go to <code class="xref py py-class docutils literal notranslat
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#nbplay.widget.InstrumentWidget.PRESET" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.config">
 <span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nbplay.widget.InstrumentWidget.config" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1174,6 +1206,34 @@ config; the rest go to <code class="xref py py-class docutils literal notranslat
 <dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget._prepare">
 <span class="sig-name descname"><span class="pre">_prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget._prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget._prepare" title="Link to this definition">¶</a></dt>
 <dd><p>Hook run after the models exist and before they are hosted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.preset">
+<span class="sig-name descname"><span class="pre">preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget.preset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget.preset" title="Link to this definition">¶</a></dt>
+<dd><p>This widget’s sound or layout as a JSON-safe dict that <a class="reference internal" href="#nbplay.widget.InstrumentWidget.load_preset" title="nbplay.widget.InstrumentWidget.load_preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_preset()</span></code></a> applies to a widget of the same class.</p>
+<p>The session wiring (<code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code>) is
+not part of it. Bytes, such as a sampler’s sample, are base64 text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.save_preset">
+<span class="sig-name descname"><span class="pre">save_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget.save_preset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget.save_preset" title="Link to this definition">¶</a></dt>
+<dd><p>Write <a class="reference internal" href="#nbplay.widget.InstrumentWidget.preset" title="nbplay.widget.InstrumentWidget.preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preset()</span></code></a> to <code class="docutils literal notranslate"><span class="pre">path</span></code> as JSON.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.load_preset">
+<span class="sig-name descname"><span class="pre">load_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget.load_preset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget.load_preset" title="Link to this definition">¶</a></dt>
+<dd><p>Apply a preset: the dict from <a class="reference internal" href="#nbplay.widget.InstrumentWidget.preset" title="nbplay.widget.InstrumentWidget.preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preset()</span></code></a>, or the path of a file from <a class="reference internal" href="#nbplay.widget.InstrumentWidget.save_preset" title="nbplay.widget.InstrumentWidget.save_preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_preset()</span></code></a>.</p>
+<p>The fields are validated together and applied in one update, so a
+refused preset changes nothing and a loaded one is one undo step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.InstrumentWidget.from_preset">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preset</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget.from_preset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget.from_preset" title="Link to this definition">¶</a></dt>
+<dd><p>A new widget with a preset loaded; <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> go to the constructor.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1282,6 +1342,11 @@ part of validation, so kernel and browser edits both refresh it.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SynthWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-synth'</span></em><a class="headerlink" href="#nbplay.widget.SynthWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SynthWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate')</span></em><a class="headerlink" href="#nbplay.widget.SynthWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1489,6 +1554,11 @@ graph from it. Edits in either place are validated by
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.PadWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-pads'</span></em><a class="headerlink" href="#nbplay.widget.PadWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.PadWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('rows',</span> <span class="pre">'cols',</span> <span class="pre">'velocity',</span> <span class="pre">'velocity_sensitive',</span> <span class="pre">'pad_notes',</span> <span class="pre">'pad_velocities',</span> <span class="pre">'pad_actions')</span></em><a class="headerlink" href="#nbplay.widget.PadWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1707,6 +1777,11 @@ step belong to the browser scheduler.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('num_voices',</span> <span class="pre">'length',</span> <span class="pre">'measures',</span> <span class="pre">'step_duration',</span> <span class="pre">'time_signature_num',...</span></em><a class="headerlink" href="#nbplay.widget.SequencerWidget.PRESET" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.CONFIG_MODEL">
 <span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.widget.SequencerWidget.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1804,6 +1879,11 @@ browser-side clip is a command the owning widget decodes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-sampler'</span></em><a class="headerlink" href="#nbplay.widget.SamplerWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.SamplerWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('sample_name',</span> <span class="pre">'sample_rate',</span> <span class="pre">'root_note',</span> <span class="pre">'attack',</span> <span class="pre">'decay',</span> <span class="pre">'sustain',</span> <span class="pre">'release',...</span></em><a class="headerlink" href="#nbplay.widget.SamplerWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2647,6 +2727,9 @@ session reads the same archive.</p>
     <a href="#nbplay.widget.InstrumentWidget.STATUS_EVENTS">InstrumentWidget.STATUS_EVENTS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.PRESET">InstrumentWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget.config">InstrumentWidget.config</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -2681,6 +2764,18 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget._prepare">InstrumentWidget._prepare()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.preset">InstrumentWidget.preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.save_preset">InstrumentWidget.save_preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.load_preset">InstrumentWidget.load_preset()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.InstrumentWidget.from_preset">InstrumentWidget.from_preset()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.InstrumentWidget._command">InstrumentWidget._command()</a>
@@ -2738,6 +2833,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SynthWidget.TAG">SynthWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SynthWidget.PRESET">SynthWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SynthWidget.CONFIG_MODEL">SynthWidget.CONFIG_MODEL</a>
@@ -2846,6 +2944,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.PadWidget.TAG">PadWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.PadWidget.PRESET">PadWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.PadWidget.CONFIG_MODEL">PadWidget.CONFIG_MODEL</a>
@@ -2965,6 +3066,9 @@ session reads the same archive.</p>
     <a href="#nbplay.widget.SequencerWidget.TAG">SequencerWidget.TAG</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.PRESET">SequencerWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SequencerWidget.CONFIG_MODEL">SequencerWidget.CONFIG_MODEL</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3014,6 +3118,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SamplerWidget.TAG">SamplerWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SamplerWidget.PRESET">SamplerWidget.PRESET</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SamplerWidget.CONFIG_MODEL">SamplerWidget.CONFIG_MODEL</a>

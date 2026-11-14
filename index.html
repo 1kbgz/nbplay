@@ -242,9 +242,17 @@ session can be saved to a <code class="docutils literal notranslate"><span class
 <span class="n">session</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"song.nbplay"</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>A single instrument’s sound can be kept as a JSON preset and loaded into
+another one of the same kind:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">save_preset</span><span class="p">(</span><span class="s2">"bass.json"</span><span class="p">,</span> <span class="s2">"Bass"</span><span class="p">)</span>
+<span class="n">other_synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="s2">"bass.json"</span><span class="p">)</span>
+<span class="n">kit</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SamplerWidget</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">"kit.json"</span><span class="p">)</span>   <span class="c1"># the sample travels with it</span>
+</pre></div>
+</div>
 <p>Mixer channels and the master bus have Web Audio insert chains with built-in
-gain, filter, compressor, limiter, delay, and reverb effects; you can register
-your own browser plugin factories as well. Effect descriptors must be JSON-safe,
+gain, filter, EQ, compressor, limiter, distortion, delay, reverb, chorus,
+phaser, and tremolo effects; you can register your own browser plugin factories
+as well. Effect descriptors must be JSON-safe,
 and the built-in effect names are reserved. When Web Audio or Web MIDI is
 unavailable the widgets still render and their controls keep working; they are
 silent until the browser provides those APIs.</p>
