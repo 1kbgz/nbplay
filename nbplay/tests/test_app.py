@@ -3,6 +3,7 @@ import io
 import json
 import zipfile
 
+import pytest
 from starlette.testclient import TestClient
 
 import nbplay
@@ -160,13 +161,32 @@ class TestApp:
             assert [saved.read(name) for name in saved.namelist() if name.startswith("clips/")] == [b"take"]
         session.close()
 
-    def test_standalone_page_has_no_session_file_controls(self):
+    def test_standalone_page_has_the_session_file_controls(self):
         host = Standalone(demo_session())
         try:
             bar = json.loads(host.page())["tree"]["slots"]["default"][0]
-            assert [child["tag"] for child in bar["slots"]["default"]] == ["span", "nbplay-palette-hint", "label"]
+            assert [child["tag"] for child in bar["slots"]["default"]] == ["span", "nbplay-palette-hint", "a", "nbplay-upload", "label"]
         finally:
             host.session.close()
+
+    def test_standalone_saves_and_loads_the_session_archive(self):
+        host = Standalone(demo_session())
+        try:
+            host.session.bpm = 111
+            assert host.pending_exports() == 0
+            archive = host.save()
+            assert "session.json" in zipfile.ZipFile(io.BytesIO(archive)).namelist()
+        finally:
+            host.session.close()
+        loaded = Standalone.load(archive, title="mine")
+        try:
+            assert loaded.session.transport.config.bpm == 111
+            assert list(loaded.panels) == list(panel_widgets(loaded.session))
+            assert "mine" in loaded.page()
+        finally:
+            loaded.session.close()
+        with pytest.raises(ValueError, match="Not a session archive"):
+            Standalone.load(b"not a zip")
 
     def test_served_page_provides_its_wires_to_the_root(self):
         session = demo_session()

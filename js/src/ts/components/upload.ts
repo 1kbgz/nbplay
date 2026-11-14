@@ -6,6 +6,10 @@ import { NbplayElement, define } from "./base.ts";
  * page reloads once the server accepts the file, because the host answers a
  * replaced document with a different page; a rejected file shows the
  * server's `error` message beside the button.
+ *
+ * The picked file is first offered in a cancelable `nbplay-request`
+ * (`{ name: "upload", file }`). A page with no server cancels it, takes the
+ * file itself, and sets `error` if it refuses it.
  */
 export class NbplayUpload extends NbplayElement {
   static properties = {
@@ -34,6 +38,13 @@ export class NbplayUpload extends NbplayElement {
     input.value = "";
     if (!file) return;
     this.error = "";
+    const request = new CustomEvent("nbplay-request", {
+      detail: { name: "upload", file },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    });
+    if (!this.dispatchEvent(request)) return;
     try {
       const response = await fetch(this.url, { method: "PUT", body: file });
       if (response.ok) {

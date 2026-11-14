@@ -1002,6 +1002,19 @@ the same Python as in a kernel. `nbplay.call("transport", "play")` in the page
 calls a widget method in the worker. `nbplay/app.py` imports Starlette lazily,
 so it imports in Pyodide.
 
+The standalone page has the same save link and load button, with the page
+script and the worker in place of the server. A click on the save link asks
+the worker for the archive: it requests the recorded clip audio, waits up to
+five seconds for the page to send it, calls `Standalone.save()` and posts the
+bytes back for a download. `nbplay-upload` offers a picked file in a cancelable
+`nbplay-request` (`{name: "upload", file}`) before it PUTs; the page cancels
+it and sends the bytes to the worker, which checks them with
+`Standalone.load()`. A refused file shows its error beside the button. An
+accepted one is kept in the Cache API and the page reloads; the next worker
+takes it out of the cache and builds `Standalone.load(bytes)` in place of the
+demo session. The cached archive is used once, so a later reload is the demo
+again.
+
 ## Styling system
 
 Implementation lives in `js/src/css/components/`: `tokens.css` defines the
@@ -1111,7 +1124,8 @@ commands stop and start the clock through `nbplay-wire`.
 `pnpm run test:pyodide` (config: `js/playwright.pyodide.config.js`) against
 `dist/app`: the page comes up from Pyodide, pydantic rejects an out-of-range
 edit, a valid one re-renders the waveform, the session mirrors mute and theme
-across panels, and Python calls start and stop the clock. Pyodide and nbplay's
+across panels, Python calls start and stop the clock, and a saved session
+comes back after a load. Pyodide and nbplay's
 pure-Python dependencies come from their CDNs, so the test needs network
 access. The page imports `provideWires` from the spaday runtime in the spaday
 wheel, so the pinned spaday in the make target must be a release that exports
