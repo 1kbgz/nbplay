@@ -19,6 +19,7 @@ Classes
    nbplay.nbplay.SineOscillator
    nbplay.nbplay.SquareOscillator
    nbplay.nbplay.SawOscillator
+   nbplay.nbplay.TriangleOscillator
    nbplay.nbplay.NoiseSource
    nbplay.nbplay.MixerChannel
    nbplay.nbplay.Mixer
@@ -203,6 +204,26 @@ Module Contents
 
 
 .. py:class:: SawOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
+
+   .. py:property:: frequency
+      :type: float
+
+
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
+
+
+.. py:class:: TriangleOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
 
    .. py:property:: frequency
       :type: float

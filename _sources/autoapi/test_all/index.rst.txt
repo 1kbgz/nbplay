@@ -18,6 +18,7 @@ Classes
    test_all.TestMidiEvent
    test_all.TestSineOscillator
    test_all.TestSquareOscillator
+   test_all.TestTriangleOscillator
    test_all.TestSawOscillator
    test_all.TestNoiseSource
    test_all.TestMixerChannel
@@ -209,6 +210,14 @@ Module Contents
 .. py:class:: TestSquareOscillator
 
    .. py:method:: test_render_values()
+
+
+   .. py:method:: test_repr()
+
+
+.. py:class:: TestTriangleOscillator
+
+   .. py:method:: test_render_rises_and_falls()
 
 
    .. py:method:: test_repr()

@@ -632,6 +632,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">SawOscillator</span><span class="p">,</span>
     <span class="n">SineOscillator</span><span class="p">,</span>
     <span class="n">SquareOscillator</span><span class="p">,</span>
+    <span class="n">TriangleOscillator</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">_PREVIEW_MAX_FRAMES</span> <span class="o">=</span> <span class="mi">2048</span>
@@ -1483,6 +1484,8 @@ window.runMermaid = runMermaid;</script>
         <span class="n">osc</span> <span class="o">=</span> <span class="n">SquareOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"saw"</span><span class="p">:</span>
         <span class="n">osc</span> <span class="o">=</span> <span class="n">SawOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"triangle"</span><span class="p">:</span>
+        <span class="n">osc</span> <span class="o">=</span> <span class="n">TriangleOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
         <span class="n">osc</span> <span class="o">=</span> <span class="n">NoiseSource</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

@@ -183,7 +183,7 @@ Module Contents
 
 
    .. py:attribute:: oscillator_type
-      :type:  Literal['sine', 'square', 'saw', 'noise']
+      :type:  Literal['sine', 'triangle', 'square', 'saw', 'noise']
       :value: 'sine'
 
 

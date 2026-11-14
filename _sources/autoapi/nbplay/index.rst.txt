@@ -59,6 +59,7 @@ Classes
    nbplay.Step
    nbplay.StepSequencer
    nbplay.TransportClock
+   nbplay.TriangleOscillator
    nbplay.Velocity
    nbplay.History
    nbplay.MidiLearn
@@ -592,6 +593,26 @@ Package Contents
 
 
    .. py:method:: ticks_to_beats(ticks: int) -> float
+
+
+.. py:class:: TriangleOscillator(frequency: float = 440.0, amplitude: float = 1.0, sample_rate: int = 44100)
+
+   .. py:property:: frequency
+      :type: float
+
+
+
+   .. py:property:: amplitude
+      :type: float
+
+
+
+   .. py:property:: sample_rate
+      :type: int
+
+
+
+   .. py:method:: render_to_buffer(frames: int) -> list[float]
 
 
 .. py:class:: Velocity(value: int)

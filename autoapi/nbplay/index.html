@@ -648,6 +648,21 @@
     <a href="#nbplay.TransportClock.ticks_to_beats">TransportClock.ticks_to_beats()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.TriangleOscillator">TriangleOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.frequency">TriangleOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.amplitude">TriangleOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.sample_rate">TriangleOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.render_to_buffer">TriangleOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.Velocity">Velocity</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1602,55 +1617,58 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TransportClock" title="nbplay.TransportClock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportClock</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Velocity" title="nbplay.Velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocity</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TriangleOscillator" title="nbplay.TriangleOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TriangleOscillator</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.History" title="nbplay.History"><code class="xref py py-obj docutils literal notranslate"><span class="pre">History</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Velocity" title="nbplay.Velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Velocity</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.History" title="nbplay.History"><code class="xref py py-obj docutils literal notranslate"><span class="pre">History</span></code></a></p></td>
 <td><p>Undo/redo stack over the config fields of attached widgets.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
 <td><p>Route MIDI control changes to widget config fields.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.KeyboardWidget" title="nbplay.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.KeyboardWidget" title="nbplay.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
 <td><p>The QWERTY musical-typing keyboard on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.LauncherWidget" title="nbplay.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.LauncherWidget" title="nbplay.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
 <td><p>The clip launcher on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiKeyboardWidget" title="nbplay.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiKeyboardWidget" title="nbplay.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
 <td><p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiOutputWidget" title="nbplay.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiOutputWidget" title="nbplay.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
 <td><p>A Web MIDI output; sends are commands delivered to the owning widget.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MixerWidget" title="nbplay.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MixerWidget" title="nbplay.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
 <td><p>The mixer console on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.PadWidget" title="nbplay.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.PadWidget" title="nbplay.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
 <td><p>The trigger-pad grid on a transports session; the browser owns the taps.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SamplerWidget" title="nbplay.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SamplerWidget" title="nbplay.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
 <td><p>The sampler on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SequencerWidget" title="nbplay.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SequencerWidget" title="nbplay.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
 <td><p>The step sequencer on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Session" title="nbplay.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Session" title="nbplay.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>Transport, mixer, timeline and launcher widgets sharing one browser session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SettingsWidget" title="nbplay.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SettingsWidget" title="nbplay.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
 <td><p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
 <td><p>The synth instrument on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
 <td><p>The tracking widget on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>The transport instrument on a transports session.</p></td>
 </tr>
 </tbody>
@@ -2389,6 +2407,31 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.TransportClock.ticks_to_beats">
 <span class="sig-name descname"><span class="pre">ticks_to_beats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#nbplay.TransportClock.ticks_to_beats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.TriangleOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">TriangleOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">440.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.TriangleOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.TriangleOscillator.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.TriangleOscillator.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.TriangleOscillator.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.TriangleOscillator.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.TriangleOscillator.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.TriangleOscillator.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.TriangleOscillator.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.TriangleOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -4516,6 +4559,21 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.TransportClock.ticks_to_beats">TransportClock.ticks_to_beats()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.TriangleOscillator">TriangleOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.frequency">TriangleOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.amplitude">TriangleOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.sample_rate">TriangleOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.TriangleOscillator.render_to_buffer">TriangleOscillator.render_to_buffer()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.Velocity">Velocity</a>

@@ -339,6 +339,21 @@
     <a href="#nbplay.nbplay.SawOscillator.render_to_buffer">SawOscillator.render_to_buffer()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.TriangleOscillator">TriangleOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.frequency">TriangleOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.amplitude">TriangleOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.sample_rate">TriangleOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.render_to_buffer">TriangleOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.nbplay.NoiseSource">NoiseSource</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -721,52 +736,55 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SawOscillator" title="nbplay.nbplay.SawOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SawOscillator</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.NoiseSource" title="nbplay.nbplay.NoiseSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoiseSource</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.TriangleOscillator" title="nbplay.nbplay.TriangleOscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TriangleOscillator</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.MixerChannel" title="nbplay.nbplay.MixerChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerChannel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.NoiseSource" title="nbplay.nbplay.NoiseSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoiseSource</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Mixer" title="nbplay.nbplay.Mixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mixer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.MixerChannel" title="nbplay.nbplay.MixerChannel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerChannel</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Step" title="nbplay.nbplay.Step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Step</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Mixer" title="nbplay.nbplay.Mixer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mixer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Pattern" title="nbplay.nbplay.Pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Pattern</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Step" title="nbplay.nbplay.Step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Step</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteEvent</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Pattern" title="nbplay.nbplay.Pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Pattern</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.EventSequence" title="nbplay.nbplay.EventSequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventSequence</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.NoteEvent" title="nbplay.nbplay.NoteEvent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NoteEvent</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.TransportClock" title="nbplay.nbplay.TransportClock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportClock</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.EventSequence" title="nbplay.nbplay.EventSequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventSequence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.StepSequencer" title="nbplay.nbplay.StepSequencer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StepSequencer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.TransportClock" title="nbplay.nbplay.TransportClock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportClock</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioSample</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.StepSequencer" title="nbplay.nbplay.StepSequencer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StepSequencer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Envelope" title="nbplay.nbplay.Envelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Envelope</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioSample" title="nbplay.nbplay.AudioSample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioSample</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMapping" title="nbplay.nbplay.SampleMapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMapping</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Envelope" title="nbplay.nbplay.Envelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Envelope</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMap" title="nbplay.nbplay.SampleMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMap</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMapping" title="nbplay.nbplay.SampleMapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMapping</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.Sampler" title="nbplay.nbplay.Sampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sampler</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.SampleMap" title="nbplay.nbplay.SampleMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleMap</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioOutput" title="nbplay.nbplay.AudioOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioOutput</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.Sampler" title="nbplay.nbplay.Sampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sampler</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiInput" title="nbplay.nbplay.MidiInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInput</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.nbplay.AudioOutput" title="nbplay.nbplay.AudioOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AudioOutput</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.nbplay.MidiInput" title="nbplay.nbplay.MidiInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiInput</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -1000,6 +1018,31 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.nbplay.SawOscillator.render_to_buffer">
 <span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.SawOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.nbplay.TriangleOscillator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.nbplay.</span></span><span class="sig-name descname"><span class="pre">TriangleOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">440.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">44100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nbplay.nbplay.TriangleOscillator" title="Link to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.TriangleOscillator.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.TriangleOscillator.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.TriangleOscillator.amplitude">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.nbplay.TriangleOscillator.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.nbplay.TriangleOscillator.sample_rate">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.nbplay.TriangleOscillator.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.nbplay.TriangleOscillator.render_to_buffer">
+<span class="sig-name descname"><span class="pre">render_to_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#nbplay.nbplay.TriangleOscillator.render_to_buffer" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1728,6 +1771,21 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.nbplay.SawOscillator.render_to_buffer">SawOscillator.render_to_buffer()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.nbplay.TriangleOscillator">TriangleOscillator</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.frequency">TriangleOscillator.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.amplitude">TriangleOscillator.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.sample_rate">TriangleOscillator.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.nbplay.TriangleOscillator.render_to_buffer">TriangleOscillator.render_to_buffer()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.nbplay.NoiseSource">NoiseSource</a>
