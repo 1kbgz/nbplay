@@ -1223,6 +1223,23 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-fm-synth",
+    title: "nbplay-fm-synth",
+    desc: "A two-operator FM synth: a sine modulator at ratio times the note moves a sine carrier's frequency by index, with an ADSR per note; play/stop on a private AudioContext.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "frequency", type: "number", step: 0.1 },
+      { name: "amplitude", type: "number", step: 0.01 },
+      { name: "ratio", type: "number", step: 0.01 },
+      { name: "index", type: "number", step: 0.01 },
+      { name: "isPlaying", type: "boolean" },
+    ],
+    variants: [
+      { label: "bell (ratio 3.5)", props: { ratio: 3.5, index: 4 } },
+      { label: "brass (ratio 1)", props: { ratio: 1, index: 3 } },
+    ],
+  },
+  {
     tag: "nbplay-keyboard",
     title: "nbplay-keyboard",
     desc: "The musical-typing instrument on fallback sine voices. Click it, then play Q–P / Z–. rows; [ ] and ; ' shift octaves, - = nudge velocity, ` / Space hold sustains.",

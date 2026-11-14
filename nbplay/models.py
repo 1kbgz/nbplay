@@ -32,6 +32,8 @@ from .descriptors import (
 )
 
 __all__ = (
+    "FMSynthConfig",
+    "FMSynthStatus",
     "KeyboardConfig",
     "KeyboardStatus",
     "LauncherConfig",
@@ -205,6 +207,35 @@ class SynthConfig(_Validated):
 
 class SynthStatus(BaseModel):
     """Whether the browser is sounding the synth's tone; browser-owned."""
+
+    is_playing: bool = False
+
+
+class FMSynthConfig(_Validated):
+    """A two-operator FM patch: a sine modulator moves the frequency of a sine carrier.
+
+    The modulator runs at ``ratio`` times the note's frequency and moves the
+    carrier by up to ``index`` times the modulator's frequency; the ADSR
+    shapes each note. ``frequency`` is the test tone.
+    """
+
+    frequency: float = Field(440.0, ge=20, le=8000)
+    amplitude: float = Field(0.5, ge=0, le=1)
+    ratio: float = Field(2.0, ge=0.25, le=16)
+    index: float = Field(2.0, ge=0, le=20)
+    attack: float = Field(0.005, ge=0, le=2)
+    decay: float = Field(0.2, ge=0, le=2)
+    sustain: float = Field(0.6, ge=0, le=1)
+    release: float = Field(0.2, ge=0, le=5)
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+
+class FMSynthStatus(BaseModel):
+    """Whether the browser is sounding the FM synth's test tone; browser-owned."""
 
     is_playing: bool = False
 

@@ -206,6 +206,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `SpectrumWidget`     | `fft_size`, `smoothing`, `min_db`, `max_db`, `min_frequency`, `max_frequency`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | none                                                                                                                                                                        |
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
+| `FMSynthWidget`      | `frequency`, `amplitude`, `ratio`, `index`, `attack`, `decay`, `sustain`, `release`, `session_id`, `channel_index`, `theme`                                                                                                                                            | `is_playing`                                                                                                                                                                |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
 | `SamplerWidget`      | `sample_name`, `sample_rate`, `sample_length`, `root_note`, `waveform`, `sample_data`, ADSR fields, `max_voices`, `pad_count`, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `velocity`, `velocity_sensitive`, `zones`, `session_id`, `channel_index` | `active_pads`, `last_note_event`, `last_pad_event`, `request` (capture commands)                                                                                            |
 | `TransportWidget`    | `bpm`, `time_signature_num`, `time_signature_den`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`, `session_id`, `theme`                                                                                                                                             | `is_playing`, `is_recording`, `current_beat`, `bar_number`, `beat_in_bar`, `undo_request`, `redo_request`                                                                   |
@@ -571,6 +572,24 @@ master, connected from the end of each insert chain. The widget reads peak and
 RMS about 30 times per second with `requestAnimationFrame` and sets the height
 of `.nbplay-strip-meter-fill` on a 60 dB scale, adds `hot` at clipping, and
 writes a `data-peak` attribute on each strip.
+
+### FMSynthWidget
+
+Python class: `FMSynthWidget`. Element:
+`js/src/ts/components/fm-synth.ts`.
+
+FMSynthWidget is a two-operator FM synth and a track sound source like
+SynthWidget: `session.add_track("Bell", sequencer, FMSynthWidget(ratio=3.5, index=4))`.
+A sine modulator at `ratio` times the note's frequency is scaled by a gain of
+`index * modulator frequency` hertz and connected to the carrier
+oscillator's `frequency` parameter, which is frequency modulation with
+modulation index `index`. Each note gets its own pair of oscillators and a
+gain shaped by the ADSR (`scheduleFmNote()`); the release runs after the
+note's duration. The preview is computed in the element from the patch
+(`fmWaveform()`), not rendered by the Rust core, and play/stop sounds a test
+tone at `frequency` on a private `AudioContext`. It registers
+`bus.instruments[channel_index]` the way the synth does, and a session saves
+it with its patch.
 
 ### SequencerWidget
 
@@ -1251,7 +1270,8 @@ the JSON layer underneath. The archive holds:
 - `clips/<clip id>.bin`: timeline clip audio that has arrived from the
   browser.
 
-Sound sources are limited to `SynthWidget` and `SamplerWidget` (or none);
+Sound sources are limited to `SynthWidget`, `FMSynthWidget` and
+`SamplerWidget` (or none);
 saving another type raises. Clip audio lives in the browser, so before saving
 call `session.timeline.export_all_clips()`, which queues one `export_clip()`
 request per clip and caches each answer in `timeline.clip_audio`; wait for

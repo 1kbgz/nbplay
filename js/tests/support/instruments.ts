@@ -13,6 +13,7 @@ import type {
   NbplayPads,
   NbplaySampler,
   NbplaySequencer,
+  NbplayFmSynth,
   NbplaySynth,
   NbplayTransport,
 } from "../../src/ts/components/index.ts";
@@ -261,6 +262,26 @@ const INSTRUMENTS: Record<
         session_id: "sessionId",
       },
       status: {},
+    }),
+  },
+  fm_synth: {
+    tag: "nbplay-fm-synth",
+    spec: (node) => ({
+      config: {
+        theme: "theme",
+        frequency: "frequency",
+        amplitude: "amplitude",
+        ratio: "ratio",
+        index: "index",
+        attack: "attack",
+        decay: "decay",
+        sustain: "sustain",
+        release: "release",
+        session_id: "sessionId",
+        channel_index: "channelIndex",
+      },
+      status: { is_playing: "isPlaying" },
+      onDisconnect: () => (node as NbplayFmSynth).stop(),
     }),
   },
   sampler: {

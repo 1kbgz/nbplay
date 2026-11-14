@@ -23,6 +23,7 @@ from spaday import Widget, Wire, element
 from . import __version__
 from .audio_files import decode_audio_file
 from .descriptors import (
+    _FM_SYNTH_STATE,
     _PAD_MAX_COUNT,
     _PRESET_FORMAT,
     _PRESET_FORMAT_VERSION,
@@ -64,6 +65,8 @@ from .descriptors import (
 )
 from .history import History
 from .models import (
+    FMSynthConfig,
+    FMSynthStatus,
     KeyboardConfig,
     KeyboardStatus,
     LauncherConfig,
@@ -93,6 +96,7 @@ from .models import (
 
 __all__ = (
     "PACKAGE",
+    "FMSynthWidget",
     "InstrumentWidget",
     "KeyboardWidget",
     "LauncherWidget",
@@ -552,6 +556,33 @@ class MixerWidget(InstrumentWidget):
 
 
 _ROUTED = {"sampler_routing": "samplerRouting", "session_id": "sessionId", "channel_index": "channelIndex", "theme": "theme"}
+
+
+class FMSynthWidget(InstrumentWidget):
+    """A two-operator FM synth: a track's sound source, like :class:`SynthWidget`.
+
+    The browser plays the notes; see :class:`~nbplay.models.FMSynthConfig`
+    for what ``ratio`` and ``index`` mean.
+    """
+
+    TAG = "nbplay-fm-synth"
+    CONFIG_MODEL = FMSynthConfig
+    STATUS_MODEL = FMSynthStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        **{name: name for name in _FM_SYNTH_STATE},
+        "session_id": "sessionId",
+        "channel_index": "channelIndex",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying"}
+
+    def play(self):
+        """Start the test tone in the owning widget."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop the test tone in the owning widget."""
+        return self._command("is_playing", False)
 
 
 class _NoteSource(InstrumentWidget):
@@ -2117,6 +2148,8 @@ def _sound_source_to_dict(source, index, resources):
         return None
     if isinstance(source, SynthWidget):
         return {"type": "SynthWidget", "state": _dump(source.config, _SYNTH_STATE)}
+    if isinstance(source, FMSynthWidget):
+        return {"type": "FMSynthWidget", "state": _dump(source.config, _FM_SYNTH_STATE)}
     if isinstance(source, SamplerWidget):
         config = source.config
         entry = {"type": "SamplerWidget", "state": _dump(config, _SAMPLER_STATE + _SAMPLER_PAD_STATE)}
@@ -2137,7 +2170,7 @@ def _sound_source_to_dict(source, index, resources):
                 saved.append(item)
             entry["zones"] = saved
         return entry
-    raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthWidget or SamplerWidget")
+    raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthWidget, FMSynthWidget or SamplerWidget")
 
 
 def _sound_source_from_dict(entry, resources):
@@ -2147,6 +2180,8 @@ def _sound_source_from_dict(entry, resources):
     state = dict(entry.get("state", {}))
     if kind == "SynthWidget":
         return SynthWidget(**{k: v for k, v in state.items() if k in _SYNTH_STATE})
+    if kind == "FMSynthWidget":
+        return FMSynthWidget(**{k: v for k, v in state.items() if k in _FM_SYNTH_STATE})
     if kind == "SamplerWidget":
         sampler = SamplerWidget(**{k: v for k, v in state.items() if k in _SAMPLER_STATE})
         sample_file = entry.get("sample_file")
