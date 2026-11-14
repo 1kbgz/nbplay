@@ -231,6 +231,15 @@
     <a href="#nbplay.app.Standalone._page">Standalone._page</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.load">Standalone.load()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.save">Standalone.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.pending_exports">Standalone.pending_exports()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.page">Standalone.page()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -353,8 +362,9 @@ session being served.</p>
 <dd><p>The Python side of the page with no server: what a Pyodide Web Worker runs.</p>
 <p>Each panel’s transports server talks to one in-browser connection; the
 worker passes wire frames between this object and the page with
-<code class="docutils literal notranslate"><span class="pre">postMessage</span></code>. Every method takes and returns JSON text, the form that
-crosses the worker boundary.</p>
+<code class="docutils literal notranslate"><span class="pre">postMessage</span></code>. The wire methods take and return JSON text, the form that
+crosses the worker boundary; <a class="reference internal" href="#nbplay.app.Standalone.save" title="nbplay.app.Standalone.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> and <a class="reference internal" href="#nbplay.app.Standalone.load" title="nbplay.app.Standalone.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a> exchange the
+session archive as bytes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.app.Standalone.session">
 <span class="sig-name descname"><span class="pre">session</span></span><a class="headerlink" href="#nbplay.app.Standalone.session" title="Link to this definition">¶</a></dt>
@@ -374,6 +384,27 @@ crosses the worker boundary.</p>
 <dt class="sig sig-object py" id="nbplay.app.Standalone._page">
 <span class="sig-name descname"><span class="pre">_page</span></span><a class="headerlink" href="#nbplay.app.Standalone._page" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.app.Standalone.load">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#Standalone.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.Standalone.load" title="Link to this definition">¶</a></dt>
+<dd><p>The standalone app for the session saved in <code class="docutils literal notranslate"><span class="pre">data</span></code>, the bytes of a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.app.Standalone.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#Standalone.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.Standalone.save" title="Link to this definition">¶</a></dt>
+<dd><p>The session as the bytes of a <code class="docutils literal notranslate"><span class="pre">.nbplay</span></code> archive.</p>
+<p>Recorded clip audio stays in the page until it is exported: call
+<code class="docutils literal notranslate"><span class="pre">call(&quot;timeline&quot;,</span> <span class="pre">&quot;export_all_clips&quot;)</span></code> first and wait for
+<a class="reference internal" href="#nbplay.app.Standalone.pending_exports" title="nbplay.app.Standalone.pending_exports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pending_exports()</span></code></a> to reach zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.app.Standalone.pending_exports">
+<span class="sig-name descname"><span class="pre">pending_exports</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#Standalone.pending_exports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.Standalone.pending_exports" title="Link to this definition">¶</a></dt>
+<dd><p>How many recorded clips the page has not sent yet.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.app.Standalone.page">
@@ -485,6 +516,15 @@ theme, mute and solo), so every server is flushed.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone._page">Standalone._page</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.load">Standalone.load()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.save">Standalone.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.pending_exports">Standalone.pending_exports()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.page">Standalone.page()</a>

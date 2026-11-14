@@ -2321,6 +2321,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clip_audio</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_export_queue</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_clip_exported</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"exported_clip_data"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_export_request</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"export_clip_id"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimelineWidget._on_clip_exported">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._on_clip_exported">[docs]</a>
@@ -2331,7 +2332,16 @@ window.runMermaid = runMermaid;</script>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clip_audio</span><span class="p">[</span><span class="n">clip_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"data"</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="s2">"blob_type"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exported</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"blob_type"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">export_clip_id</span> <span class="o">==</span> <span class="n">clip_id</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">export_clip_id</span> <span class="o">=</span> <span class="s2">""</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">export_clip_id</span> <span class="o">=</span> <span class="s2">""</span></div>
+
+
+<div class="viewcode-block" id="TimelineWidget._on_export_request">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TimelineWidget._on_export_request">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_export_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">clip_id</span><span class="p">):</span>
+        <span class="c1"># The request is cleared here when a clip's audio arrives, and by the</span>
+        <span class="c1"># browser when an export fails; either way the next clip is due.</span>
+        <span class="k">if</span> <span class="n">clip_id</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_queue</span><span class="p">:</span>
             <span class="n">next_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_export_queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">clip</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">==</span> <span class="n">next_id</span> <span class="k">for</span> <span class="n">clip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">clips</span><span class="p">):</span>

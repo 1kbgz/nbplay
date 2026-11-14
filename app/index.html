@@ -66,10 +66,40 @@
             worker.postMessage({ type: "call", panel, method }),
         };
 
+        // No server answers the save link or the load button here: the
+        // worker saves the session, and checks and keeps a loaded one for
+        // the reload.
+        let upload;
+        root.addEventListener("click", (event) => {
+          if (!event.target.closest?.(".nbplay-app-bar a[download]")) return;
+          event.preventDefault();
+          worker.postMessage({ type: "save" });
+        });
+        root.addEventListener("nbplay-request", async (event) => {
+          if (event.detail?.name !== "upload") return;
+          event.preventDefault();
+          upload = event.target;
+          const bytes = new Uint8Array(await event.detail.file.arrayBuffer());
+          worker.postMessage({ type: "load", bytes });
+        });
+
         worker.addEventListener("message", (event) => {
           if (event.data.type === "status")
             status.textContent = event.data.message;
           if (event.data.type === "error") fail(event.data.message);
+          if (event.data.type === "archive") {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(
+              new Blob([event.data.bytes], { type: "application/zip" }),
+            );
+            link.download = "session.nbplay";
+            link.click();
+            URL.revokeObjectURL(link.href);
+          }
+          if (event.data.type === "loaded") {
+            if (event.data.error) upload.error = event.data.error;
+            else location.reload();
+          }
           if (event.data.type === "wires") {
             for (const [panel, frames] of Object.entries(event.data.wires))
               for (const frame of frames) clients[panel].recv(frame);

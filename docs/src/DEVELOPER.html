@@ -1201,7 +1201,10 @@ session like audio clips, but have nothing to export.</p>
 <p>Clip audio crosses the comm on request. <code class="docutils literal notranslate"><span class="pre">export_clip(clip_id)</span></code> sets
 <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>; the browser fetches the object URL and answers with
 <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code> and <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code> (bytes), which
-<code class="docutils literal notranslate"><span class="pre">write_exported_clip(path)</span></code> saves. <code class="docutils literal notranslate"><span class="pre">import_clip(bytes_or_path,</span> <span class="pre">...)</span></code> appends
+<code class="docutils literal notranslate"><span class="pre">write_exported_clip(path)</span></code> saves. The kernel clears <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code> when the
+bytes arrive, so <code class="docutils literal notranslate"><span class="pre">pending_exports</span></code> stays above zero until then; the browser
+clears it only when the export fails, and either way the next queued clip is
+requested. <code class="docutils literal notranslate"><span class="pre">import_clip(bytes_or_path,</span> <span class="pre">...)</span></code> appends
 clip metadata immediately, sends <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code> followed by
 <code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, and the browser attaches an object URL to the matching
 clip, measuring the duration with <code class="docutils literal notranslate"><span class="pre">decodeAudioData</span></code> when none was given.</p>
@@ -1446,6 +1449,18 @@ derived fields (the Rust waveform, as WebAssembly) and the <code class="docutils
 the same Python as in a kernel. <code class="docutils literal notranslate"><span class="pre">nbplay.call(&quot;transport&quot;,</span> <span class="pre">&quot;play&quot;)</span></code> in the page
 calls a widget method in the worker. <code class="docutils literal notranslate"><span class="pre">nbplay/app.py</span></code> imports Starlette lazily,
 so it imports in Pyodide.</p>
+<p>The standalone page has the same save link and load button, with the page
+script and the worker in place of the server. A click on the save link asks
+the worker for the archive: it requests the recorded clip audio, waits up to
+five seconds for the page to send it, calls <code class="docutils literal notranslate"><span class="pre">Standalone.save()</span></code> and posts the
+bytes back for a download. <code class="docutils literal notranslate"><span class="pre">nbplay-upload</span></code> offers a picked file in a cancelable
+<code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> (<code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">&quot;upload&quot;,</span> <span class="pre">file}</span></code>) before it PUTs; the page cancels
+it and sends the bytes to the worker, which checks them with
+<code class="docutils literal notranslate"><span class="pre">Standalone.load()</span></code>. A refused file shows its error beside the button. An
+accepted one is kept in the Cache API and the page reloads; the next worker
+takes it out of the cache and builds <code class="docutils literal notranslate"><span class="pre">Standalone.load(bytes)</span></code> in place of the
+demo session. The cached archive is used once, so a later reload is the demo
+again.</p>
 </section>
 </section>
 <section id="styling-system">
@@ -1549,7 +1564,8 @@ commands stop and start the clock through <code class="docutils literal notransl
 <code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">run</span> <span class="pre">test:pyodide</span></code> (config: <code class="docutils literal notranslate"><span class="pre">js/playwright.pyodide.config.js</span></code>) against
 <code class="docutils literal notranslate"><span class="pre">dist/app</span></code>: the page comes up from Pyodide, pydantic rejects an out-of-range
 edit, a valid one re-renders the waveform, the session mirrors mute and theme
-across panels, and Python calls start and stop the clock. Pyodide and nbplay’s
+across panels, Python calls start and stop the clock, and a saved session
+comes back after a load. Pyodide and nbplay’s
 pure-Python dependencies come from their CDNs, so the test needs network
 access. The page imports <code class="docutils literal notranslate"><span class="pre">provideWires</span></code> from the spaday runtime in the spaday
 wheel, so the pinned spaday in the make target must be a release that exports
@@ -1563,7 +1579,9 @@ a live kernel and drives the rendered widgets through Playwright:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/voila.spec.js</span></code> serves <code class="docutils literal notranslate"><span class="pre">tests/fixtures/host_smoke.ipynb</span></code> with
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">voila</span></code> on port 8866.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tests/jupyterlab.spec.js</span></code> opens the same notebook in <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">lab</span></code> on port
-8899, runs every cell, and then interacts with the outputs.</p></li>
+8899 and in <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code> (Notebook 7) on port 8898, runs every cell,
+and then interacts with the outputs. Each editor gets its own scratch copy of
+the notebook so their autosaves do not collide.</p></li>
 </ul>
 <p>The smoke notebook builds a <code class="docutils literal notranslate"><span class="pre">Session</span></code> (transport, sequencer track, launcher,
 timeline, mixer) plus a kernel-side probe: an <code class="docutils literal notranslate"><span class="pre">ipywidgets.HTML</span></code> label that a
@@ -1573,9 +1591,9 @@ pressing play propagates through the browser clock to the sequencer and
 timeline, that the kernel probe flips to “playing” (browser to kernel), and
 that the kernel button stops everything (kernel to browser). Page errors are
 collected only after the widgets have rendered, because host startup noise
-from third-party lab extensions is unrelated to nbplay. <code class="docutils literal notranslate"><span class="pre">voila</span></code> is a <code class="docutils literal notranslate"><span class="pre">develop</span></code>
-extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
-manager.</p>
+from third-party lab extensions is unrelated to nbplay. <code class="docutils literal notranslate"><span class="pre">voila</span></code> and
+<code class="docutils literal notranslate"><span class="pre">notebook</span></code> are <code class="docutils literal notranslate"><span class="pre">develop</span></code> extras so CI has them; JupyterLab and Notebook 7 come
+with the ipywidgets lab manager.</p>
 </section>
 <section id="pyodide-wheel">
 <h3>Pyodide wheel<a class="headerlink" href="#pyodide-wheel" title="Link to this heading">¶</a></h3>

@@ -42,7 +42,10 @@ Module Contents
    .. py:method:: test_save_waits_for_the_browser_to_export_recorded_clips(monkeypatch)
 
 
-   .. py:method:: test_standalone_page_has_no_session_file_controls()
+   .. py:method:: test_standalone_page_has_the_session_file_controls()
+
+
+   .. py:method:: test_standalone_saves_and_loads_the_session_archive()
 
 
    .. py:method:: test_served_page_provides_its_wires_to_the_root()

@@ -81,8 +81,9 @@ Module Contents
 
    Each panel's transports server talks to one in-browser connection; the
    worker passes wire frames between this object and the page with
-   ``postMessage``. Every method takes and returns JSON text, the form that
-   crosses the worker boundary.
+   ``postMessage``. The wire methods take and return JSON text, the form that
+   crosses the worker boundary; :meth:`save` and :meth:`load` exchange the
+   session archive as bytes.
 
 
    .. py:attribute:: session
@@ -95,6 +96,30 @@ Module Contents
 
 
    .. py:attribute:: _page
+
+
+   .. py:method:: load(data, **options)
+      :classmethod:
+
+
+      The standalone app for the session saved in ``data``, the bytes of a ``.nbplay`` archive.
+
+
+
+   .. py:method:: save()
+
+      The session as the bytes of a ``.nbplay`` archive.
+
+      Recorded clip audio stays in the page until it is exported: call
+      ``call("timeline", "export_all_clips")`` first and wait for
+      :meth:`pending_exports` to reach zero.
+
+
+
+   .. py:method:: pending_exports()
+
+      How many recorded clips the page has not sent yet.
+
 
 
    .. py:method:: page()

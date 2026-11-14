@@ -779,7 +779,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    The select is bound to the transport's theme, which the session mirrors to every widget.</span>
 <span class="sd">    ``files`` adds save (a download link) and load (an upload button) for the session archive</span>
-<span class="sd">    at :data:`SESSION_URL`, which only a server answers.</span>
+<span class="sd">    at :data:`SESSION_URL`. A server answers that URL; the standalone page has none, so its</span>
+<span class="sd">    script takes over both controls.</span>
 <span class="sd">    """</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span>
@@ -825,6 +826,14 @@ window.runMermaid = runMermaid;</script>
         <span class="p">)</span>
         <span class="o">.</span><span class="n">bind_root_attr</span><span class="p">(</span><span class="s2">"data-nbplay-theme"</span><span class="p">,</span> <span class="s2">"transport.config.theme"</span><span class="p">)</span>
     <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_session</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The session saved in ``data``, the bytes of a ``.nbplay`` archive; ``ValueError`` if it is not one."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Not a session archive: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_jsonable</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -933,9 +942,9 @@ window.runMermaid = runMermaid;</script>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()))</span>
-        <span class="k">except</span> <span class="p">(</span><span class="n">zipfile</span><span class="o">.</span><span class="n">BadZipFile</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Not a session archive: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+            <span class="n">session</span> <span class="o">=</span> <span class="n">_load_session</span><span class="p">(</span><span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"error"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">)},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
         <span class="n">sync</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">install</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
@@ -964,15 +973,45 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Each panel's transports server talks to one in-browser connection; the</span>
 <span class="sd">    worker passes wire frames between this object and the page with</span>
-<span class="sd">    ``postMessage``. Every method takes and returns JSON text, the form that</span>
-<span class="sd">    crosses the worker boundary.</span>
+<span class="sd">    ``postMessage``. The wire methods take and return JSON text, the form that</span>
+<span class="sd">    crosses the worker boundary; :meth:`save` and :meth:`load` exchange the</span>
+<span class="sd">    session archive as bytes.</span>
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"nbplay"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">panels</span> <span class="o">=</span> <span class="n">panel_widgets</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">servers</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">transports</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">session</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_page</span> <span class="o">=</span> <span class="n">_page</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="p">,</span> <span class="n">panel_titles</span><span class="p">(</span><span class="n">session</span><span class="p">),</span> <span class="n">layout</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_page</span> <span class="o">=</span> <span class="n">_page</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">panels</span><span class="p">,</span> <span class="n">panel_titles</span><span class="p">(</span><span class="n">session</span><span class="p">),</span> <span class="n">layout</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Standalone.load">
+<a class="viewcode-back" href="../../autoapi/nbplay/app/index.html#nbplay.app.Standalone.load">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The standalone app for the session saved in ``data``, the bytes of a ``.nbplay`` archive."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">_load_session</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Standalone.save">
+<a class="viewcode-back" href="../../autoapi/nbplay/app/index.html#nbplay.app.Standalone.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The session as the bytes of a ``.nbplay`` archive.</span>
+
+<span class="sd">        Recorded clip audio stays in the page until it is exported: call</span>
+<span class="sd">        ``call("timeline", "export_all_clips")`` first and wait for</span>
+<span class="sd">        :meth:`pending_exports` to reach zero.</span>
+<span class="sd">        """</span>
+        <span class="n">archive</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">archive</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">archive</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Standalone.pending_exports">
+<a class="viewcode-back" href="../../autoapi/nbplay/app/index.html#nbplay.app.Standalone.pending_exports">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pending_exports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""How many recorded clips the page has not sent yet."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">pending_exports</span></div>
+
 
 <div class="viewcode-block" id="Standalone.page">
 <a class="viewcode-back" href="../../autoapi/nbplay/app/index.html#nbplay.app.Standalone.page">[docs]</a>

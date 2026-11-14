@@ -733,7 +733,10 @@ session like audio clips, but have nothing to export.
 Clip audio crosses the comm on request. `export_clip(clip_id)` sets
 `export_clip_id`; the browser fetches the object URL and answers with
 `exported_clip` and `exported_clip_data` (bytes), which
-`write_exported_clip(path)` saves. `import_clip(bytes_or_path, ...)` appends
+`write_exported_clip(path)` saves. The kernel clears `export_clip_id` when the
+bytes arrive, so `pending_exports` stays above zero until then; the browser
+clears it only when the export fails, and either way the next queued clip is
+requested. `import_clip(bytes_or_path, ...)` appends
 clip metadata immediately, sends `import_clip_data` followed by
 `import_clip_request`, and the browser attaches an object URL to the matching
 clip, measuring the duration with `decodeAudioData` when none was given.
@@ -999,6 +1002,19 @@ the same Python as in a kernel. `nbplay.call("transport", "play")` in the page
 calls a widget method in the worker. `nbplay/app.py` imports Starlette lazily,
 so it imports in Pyodide.
 
+The standalone page has the same save link and load button, with the page
+script and the worker in place of the server. A click on the save link asks
+the worker for the archive: it requests the recorded clip audio, waits up to
+five seconds for the page to send it, calls `Standalone.save()` and posts the
+bytes back for a download. `nbplay-upload` offers a picked file in a cancelable
+`nbplay-request` (`{name: "upload", file}`) before it PUTs; the page cancels
+it and sends the bytes to the worker, which checks them with
+`Standalone.load()`. A refused file shows its error beside the button. An
+accepted one is kept in the Cache API and the page reloads; the next worker
+takes it out of the cache and builds `Standalone.load(bytes)` in place of the
+demo session. The cached archive is used once, so a later reload is the demo
+again.
+
 ## Styling system
 
 Implementation lives in `js/src/css/components/`: `tokens.css` defines the
@@ -1108,7 +1124,8 @@ commands stop and start the clock through `nbplay-wire`.
 `pnpm run test:pyodide` (config: `js/playwright.pyodide.config.js`) against
 `dist/app`: the page comes up from Pyodide, pydantic rejects an out-of-range
 edit, a valid one re-renders the waveform, the session mirrors mute and theme
-across panels, and Python calls start and stop the clock. Pyodide and nbplay's
+across panels, Python calls start and stop the clock, and a saved session
+comes back after a load. Pyodide and nbplay's
 pure-Python dependencies come from their CDNs, so the test needs network
 access. The page imports `provideWires` from the spaday runtime in the spaday
 wheel, so the pinned spaday in the make target must be a release that exports
@@ -1122,7 +1139,9 @@ a live kernel and drives the rendered widgets through Playwright:
 - `tests/voila.spec.js` serves `tests/fixtures/host_smoke.ipynb` with
   `python -m voila` on port 8866.
 - `tests/jupyterlab.spec.js` opens the same notebook in `jupyter lab` on port
-  8899, runs every cell, and then interacts with the outputs.
+  8899 and in `jupyter notebook` (Notebook 7) on port 8898, runs every cell,
+  and then interacts with the outputs. Each editor gets its own scratch copy of
+  the notebook so their autosaves do not collide.
 
 The smoke notebook builds a `Session` (transport, sequencer track, launcher,
 timeline, mixer) plus a kernel-side probe: an `ipywidgets.HTML` label that a
@@ -1132,9 +1151,9 @@ pressing play propagates through the browser clock to the sequencer and
 timeline, that the kernel probe flips to "playing" (browser to kernel), and
 that the kernel button stops everything (kernel to browser). Page errors are
 collected only after the widgets have rendered, because host startup noise
-from third-party lab extensions is unrelated to nbplay. `voila` is a `develop`
-extra so CI has it; JupyterLab and Notebook 7 come with the ipywidgets lab
-manager.
+from third-party lab extensions is unrelated to nbplay. `voila` and
+`notebook` are `develop` extras so CI has them; JupyterLab and Notebook 7 come
+with the ipywidgets lab manager.
 
 ### Pyodide wheel
 

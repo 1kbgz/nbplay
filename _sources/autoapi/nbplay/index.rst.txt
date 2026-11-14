@@ -1833,6 +1833,9 @@ Package Contents
    .. py:method:: _on_clip_exported(widget, name, old, data)
 
 
+   .. py:method:: _on_export_request(widget, name, old, clip_id)
+
+
    .. py:property:: clip_audio
 
       Clip audio bytes received from the browser, keyed by clip id.
