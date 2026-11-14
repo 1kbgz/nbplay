@@ -566,6 +566,7 @@ class FMSynthWidget(InstrumentWidget):
     """
 
     TAG = "nbplay-fm-synth"
+    PRESET = _FM_SYNTH_STATE
     CONFIG_MODEL = FMSynthConfig
     STATUS_MODEL = FMSynthStatus
     CONFIG: ClassVar[dict[str, str]] = {
