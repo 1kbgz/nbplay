@@ -32,6 +32,7 @@ Classes
    nbplay.widget.TransportWidget
    nbplay.widget.SynthWidget
    nbplay.widget.MixerWidget
+   nbplay.widget.FMSynthWidget
    nbplay.widget.PadWidget
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
@@ -447,6 +448,48 @@ Module Contents
    .. py:method:: to_mixer()
 
       A Rust ``Mixer`` with this console's channels and master gain.
+
+
+
+.. py:class:: FMSynthWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   A two-operator FM synth: a track's sound source, like :class:`SynthWidget`.
+
+   The browser plays the notes; see :class:`~nbplay.models.FMSynthConfig`
+   for what ``ratio`` and ``index`` mean.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-fm-synth'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: play()
+
+      Start the test tone in the owning widget.
+
+
+
+   .. py:method:: stop()
+
+      Stop the test tone in the owning widget.
 
 
 

@@ -519,6 +519,9 @@
     <a href="#nbplay.descriptors._SYNTH_STATE">_SYNTH_STATE</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._FM_SYNTH_STATE">_FM_SYNTH_STATE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._SAMPLER_STATE">_SAMPLER_STATE</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -615,22 +618,25 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._SYNTH_STATE" title="nbplay.descriptors._SYNTH_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SYNTH_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._SAMPLER_STATE" title="nbplay.descriptors._SAMPLER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_STATE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._FM_SYNTH_STATE" title="nbplay.descriptors._FM_SYNTH_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_FM_SYNTH_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._SAMPLER_PAD_STATE" title="nbplay.descriptors._SAMPLER_PAD_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_PAD_STATE</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._SAMPLER_STATE" title="nbplay.descriptors._SAMPLER_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._TIMELINE_STATE" title="nbplay.descriptors._TIMELINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_STATE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._SAMPLER_PAD_STATE" title="nbplay.descriptors._SAMPLER_PAD_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_SAMPLER_PAD_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._TRANSPORT_STATE" title="nbplay.descriptors._TRANSPORT_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TRANSPORT_STATE</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._TIMELINE_STATE" title="nbplay.descriptors._TIMELINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TIMELINE_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._PRESET_FORMAT" title="nbplay.descriptors._PRESET_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PRESET_FORMAT</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._TRANSPORT_STATE" title="nbplay.descriptors._TRANSPORT_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_TRANSPORT_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._PRESET_FORMAT_VERSION" title="nbplay.descriptors._PRESET_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PRESET_FORMAT_VERSION</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._PRESET_FORMAT" title="nbplay.descriptors._PRESET_FORMAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PRESET_FORMAT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._PRESET_FORMAT_VERSION" title="nbplay.descriptors._PRESET_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PRESET_FORMAT_VERSION</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -1380,6 +1386,11 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
 <dd></dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._FM_SYNTH_STATE">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_FM_SYNTH_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'ratio',</span> <span class="pre">'index',</span> <span class="pre">'attack',</span> <span class="pre">'decay',</span> <span class="pre">'sustain',</span> <span class="pre">'release')</span></em><a class="headerlink" href="#nbplay.descriptors._FM_SYNTH_STATE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="nbplay.descriptors._SAMPLER_STATE">
 <span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_SAMPLER_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('sample_name',</span> <span class="pre">'sample_rate',</span> <span class="pre">'root_note',</span> <span class="pre">'attack',</span> <span class="pre">'decay',</span> <span class="pre">'sustain',</span> <span class="pre">'release',...</span></em><a class="headerlink" href="#nbplay.descriptors._SAMPLER_STATE" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1784,6 +1795,9 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._SYNTH_STATE">_SYNTH_STATE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._FM_SYNTH_STATE">_FM_SYNTH_STATE</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._SAMPLER_STATE">_SAMPLER_STATE</a>

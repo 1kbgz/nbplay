@@ -34,6 +34,7 @@ Attributes
    nbplay.descriptors._SESSION_FORMAT_VERSION
    nbplay.descriptors._SEQUENCER_STATE
    nbplay.descriptors._SYNTH_STATE
+   nbplay.descriptors._FM_SYNTH_STATE
    nbplay.descriptors._SAMPLER_STATE
    nbplay.descriptors._SAMPLER_PAD_STATE
    nbplay.descriptors._TIMELINE_STATE
@@ -471,6 +472,10 @@ Module Contents
 
 .. py:data:: _SYNTH_STATE
    :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+
+
+.. py:data:: _FM_SYNTH_STATE
+   :value: ('frequency', 'amplitude', 'ratio', 'index', 'attack', 'decay', 'sustain', 'release')
 
 
 .. py:data:: _SAMPLER_STATE

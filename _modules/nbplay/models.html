@@ -641,6 +641,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"FMSynthConfig"</span><span class="p">,</span>
+    <span class="s2">"FMSynthStatus"</span><span class="p">,</span>
     <span class="s2">"KeyboardConfig"</span><span class="p">,</span>
     <span class="s2">"KeyboardStatus"</span><span class="p">,</span>
     <span class="s2">"LauncherConfig"</span><span class="p">,</span>
@@ -834,6 +836,41 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SynthStatus">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SynthStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Whether the browser is sounding the synth's tone; browser-owned."""</span>
+
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="FMSynthConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.FMSynthConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FMSynthConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A two-operator FM patch: a sine modulator moves the frequency of a sine carrier.</span>
+
+<span class="sd">    The modulator runs at ``ratio`` times the note's frequency and moves the</span>
+<span class="sd">    carrier by up to ``index`` times the modulator's frequency; the ADSR</span>
+<span class="sd">    shapes each note. ``frequency`` is the test tone.</span>
+<span class="sd">    """</span>
+
+    <span class="n">frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+    <span class="n">amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">attack</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sustain</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">release</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="FMSynthStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.FMSynthStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FMSynthStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Whether the browser is sounding the FM synth's test tone; browser-owned."""</span>
 
     <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
 

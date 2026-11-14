@@ -17,6 +17,7 @@ Classes
    test_widgets.TestSpectrumWidget
    test_widgets.TestIoWidgets
    test_widgets.TestSequencerAndSamplerWidgets
+   test_widgets.TestFMSynthWidget
    test_widgets.TestArrangementWidgets
    test_widgets.TestObservers
    test_widgets.TestSession
@@ -122,6 +123,14 @@ Module Contents
 
 
    .. py:method:: test_sampler_zones_and_capture(tmp_path)
+
+
+.. py:class:: TestFMSynthWidget
+
+   .. py:method:: test_config_validates_and_binds_the_element()
+
+
+   .. py:method:: test_fm_synth_is_a_track_sound_source_that_saves_with_the_session()
 
 
 .. py:class:: TestArrangementWidgets

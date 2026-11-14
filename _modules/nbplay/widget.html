@@ -632,6 +632,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.audio_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode_audio_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_FM_SYNTH_STATE</span><span class="p">,</span>
     <span class="n">_PAD_MAX_COUNT</span><span class="p">,</span>
     <span class="n">_PRESET_FORMAT</span><span class="p">,</span>
     <span class="n">_PRESET_FORMAT_VERSION</span><span class="p">,</span>
@@ -673,6 +674,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FMSynthConfig</span><span class="p">,</span>
+    <span class="n">FMSynthStatus</span><span class="p">,</span>
     <span class="n">KeyboardConfig</span><span class="p">,</span>
     <span class="n">KeyboardStatus</span><span class="p">,</span>
     <span class="n">LauncherConfig</span><span class="p">,</span>
@@ -702,6 +705,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"PACKAGE"</span><span class="p">,</span>
+    <span class="s2">"FMSynthWidget"</span><span class="p">,</span>
     <span class="s2">"InstrumentWidget"</span><span class="p">,</span>
     <span class="s2">"KeyboardWidget"</span><span class="p">,</span>
     <span class="s2">"LauncherWidget"</span><span class="p">,</span>
@@ -1305,6 +1309,42 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="n">_ROUTED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"sampler_routing"</span><span class="p">:</span> <span class="s2">"samplerRouting"</span><span class="p">,</span> <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span> <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="FMSynthWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.FMSynthWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FMSynthWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A two-operator FM synth: a track's sound source, like :class:`SynthWidget`.</span>
+
+<span class="sd">    The browser plays the notes; see :class:`~nbplay.models.FMSynthConfig`</span>
+<span class="sd">    for what ``ratio`` and ``index`` mean.</span>
+<span class="sd">    """</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s2">"nbplay-fm-synth"</span>
+    <span class="n">CONFIG_MODEL</span> <span class="o">=</span> <span class="n">FMSynthConfig</span>
+    <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">FMSynthStatus</span>
+    <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">},</span>
+        <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
+        <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
+        <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">}</span>
+
+<div class="viewcode-block" id="FMSynthWidget.play">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.FMSynthWidget.play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Start the test tone in the owning widget."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FMSynthWidget.stop">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.FMSynthWidget.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stop the test tone in the owning widget."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_NoteSource</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
@@ -3221,6 +3261,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">SynthWidget</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"SynthWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_SYNTH_STATE</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">FMSynthWidget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"FMSynthWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">)}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">SamplerWidget</span><span class="p">):</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"SamplerWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">_SAMPLER_STATE</span> <span class="o">+</span> <span class="n">_SAMPLER_PAD_STATE</span><span class="p">)}</span>
@@ -3241,7 +3283,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">saved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
             <span class="n">entry</span><span class="p">[</span><span class="s2">"zones"</span><span class="p">]</span> <span class="o">=</span> <span class="n">saved</span>
         <span class="k">return</span> <span class="n">entry</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot save sound source of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; use SynthWidget or SamplerWidget"</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot save sound source of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; use SynthWidget, FMSynthWidget or SamplerWidget"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_sound_source_from_dict</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
@@ -3251,6 +3293,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="p">{}))</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"SynthWidget"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_SYNTH_STATE</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"FMSynthWidget"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FMSynthWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"SamplerWidget"</span><span class="p">:</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_SAMPLER_STATE</span><span class="p">})</span>
         <span class="n">sample_file</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sample_file"</span><span class="p">)</span>

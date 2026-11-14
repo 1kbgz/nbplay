@@ -330,6 +330,51 @@
     <a href="#nbplay.models.SynthStatus.is_playing">SynthStatus.is_playing</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.FMSynthConfig">FMSynthConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.frequency">FMSynthConfig.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.amplitude">FMSynthConfig.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.ratio">FMSynthConfig.ratio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.index">FMSynthConfig.index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.attack">FMSynthConfig.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.decay">FMSynthConfig.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.sustain">FMSynthConfig.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.release">FMSynthConfig.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.session_id">FMSynthConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.channel_index">FMSynthConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.theme">FMSynthConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig._theme">FMSynthConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.FMSynthStatus">FMSynthStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthStatus.is_playing">FMSynthStatus.is_playing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MixerConfig">MixerConfig</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -947,6 +992,12 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SynthStatus" title="nbplay.models.SynthStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthStatus</span></code></a></p></td>
 <td><p>Whether the browser is sounding the synth's tone; browser-owned.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.FMSynthConfig" title="nbplay.models.FMSynthConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FMSynthConfig</span></code></a></p></td>
+<td><p>A two-operator FM patch: a sine modulator moves the frequency of a sine carrier.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.FMSynthStatus" title="nbplay.models.FMSynthStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FMSynthStatus</span></code></a></p></td>
+<td><p>Whether the browser is sounding the FM synth's test tone; browser-owned.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MixerConfig" title="nbplay.models.MixerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></p></td>
 <td><p>The mixer console the kernel owns: channels, returns, master.</p></td>
 </tr>
@@ -1257,6 +1308,96 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.SynthStatus.is_playing">
 <span class="sig-name descname"><span class="pre">is_playing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.models.SynthStatus.is_playing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">FMSynthConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#FMSynthConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.FMSynthConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>A two-operator FM patch: a sine modulator moves the frequency of a sine carrier.</p>
+<p>The modulator runs at <code class="docutils literal notranslate"><span class="pre">ratio</span></code> times the note’s frequency and moves the
+carrier by up to <code class="docutils literal notranslate"><span class="pre">index</span></code> times the modulator’s frequency; the ADSR
+shapes each note. <code class="docutils literal notranslate"><span class="pre">frequency</span></code> is the test tone.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.frequency">
+<span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.frequency" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.amplitude">
+<span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.ratio">
+<span class="sig-name descname"><span class="pre">ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.ratio" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.attack">
+<span class="sig-name descname"><span class="pre">attack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.attack" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.decay">
+<span class="sig-name descname"><span class="pre">decay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.decay" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.sustain">
+<span class="sig-name descname"><span class="pre">sustain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.sustain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.release" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.FMSynthConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.FMSynthConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">FMSynthStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#FMSynthStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.FMSynthStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Whether the browser is sounding the FM synth’s test tone; browser-owned.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.FMSynthStatus.is_playing">
+<span class="sig-name descname"><span class="pre">is_playing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.models.FMSynthStatus.is_playing" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2521,6 +2662,51 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SynthStatus.is_playing">SynthStatus.is_playing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.FMSynthConfig">FMSynthConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.frequency">FMSynthConfig.frequency</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.amplitude">FMSynthConfig.amplitude</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.ratio">FMSynthConfig.ratio</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.index">FMSynthConfig.index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.attack">FMSynthConfig.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.decay">FMSynthConfig.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.sustain">FMSynthConfig.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.release">FMSynthConfig.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.session_id">FMSynthConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.channel_index">FMSynthConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig.theme">FMSynthConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthConfig._theme">FMSynthConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.FMSynthStatus">FMSynthStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.FMSynthStatus.is_playing">FMSynthStatus.is_playing</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MixerConfig">MixerConfig</a>

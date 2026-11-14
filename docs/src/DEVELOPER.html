@@ -277,6 +277,9 @@
     <a href="#mixerwidget">MixerWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#fmsynthwidget">FMSynthWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#sequencerwidget">SequencerWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -669,39 +672,43 @@ learn work.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">channels</span></code>, <code class="docutils literal notranslate"><span class="pre">returns</span></code>, <code class="docutils literal notranslate"><span class="pre">master_gain</span></code>, <code class="docutils literal notranslate"><span class="pre">master_effects</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p>none</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">index</span></code>, <code class="docutils literal notranslate"><span class="pre">attack</span></code>, <code class="docutils literal notranslate"><span class="pre">decay</span></code>, <code class="docutils literal notranslate"><span class="pre">sustain</span></code>, <code class="docutils literal notranslate"><span class="pre">release</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">voices_data</span></code>, <code class="docutils literal notranslate"><span class="pre">num_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">measures</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code>, <code class="docutils literal notranslate"><span class="pre">follow_transport</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">groove</span></code>, <code class="docutils literal notranslate"><span class="pre">automation_lanes</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">sample_name</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_length</span></code>, <code class="docutils literal notranslate"><span class="pre">root_note</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_data</span></code>, ADSR fields, <code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_count</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_slices</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">zones</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (capture commands)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">undo_request</span></code>, <code class="docutils literal notranslate"><span class="pre">redo_request</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">pixels_per_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">scenes</span></code>, <code class="docutils literal notranslate"><span class="pre">slots</span></code>, <code class="docutils literal notranslate"><span class="pre">quantize</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">selected_slot</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">active_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">queued_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (launch commands)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">upper_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, sustain fields, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">sync_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">control_change</span></code>, <code class="docutils literal notranslate"><span class="pre">clock_bpm</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">forward_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">send_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (send commands)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>, <code class="docutils literal notranslate"><span class="pre">cols</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code></p></td>
 </tr>
@@ -1064,6 +1071,23 @@ master, connected from the end of each insert chain. The widget reads peak and
 RMS about 30 times per second with <code class="docutils literal notranslate"><span class="pre">requestAnimationFrame</span></code> and sets the height
 of <code class="docutils literal notranslate"><span class="pre">.nbplay-strip-meter-fill</span></code> on a 60 dB scale, adds <code class="docutils literal notranslate"><span class="pre">hot</span></code> at clipping, and
 writes a <code class="docutils literal notranslate"><span class="pre">data-peak</span></code> attribute on each strip.</p>
+</section>
+<section id="fmsynthwidget">
+<h3>FMSynthWidget<a class="headerlink" href="#fmsynthwidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code>. Element:
+<code class="docutils literal notranslate"><span class="pre">js/src/ts/components/fm-synth.ts</span></code>.</p>
+<p>FMSynthWidget is a two-operator FM synth and a track sound source like
+SynthWidget: <code class="docutils literal notranslate"><span class="pre">session.add_track(&quot;Bell&quot;,</span> <span class="pre">sequencer,</span> <span class="pre">FMSynthWidget(ratio=3.5,</span> <span class="pre">index=4))</span></code>.
+A sine modulator at <code class="docutils literal notranslate"><span class="pre">ratio</span></code> times the note’s frequency is scaled by a gain of
+<code class="docutils literal notranslate"><span class="pre">index</span> <span class="pre">*</span> <span class="pre">modulator</span> <span class="pre">frequency</span></code> hertz and connected to the carrier
+oscillator’s <code class="docutils literal notranslate"><span class="pre">frequency</span></code> parameter, which is frequency modulation with
+modulation index <code class="docutils literal notranslate"><span class="pre">index</span></code>. Each note gets its own pair of oscillators and a
+gain shaped by the ADSR (<code class="docutils literal notranslate"><span class="pre">scheduleFmNote()</span></code>); the release runs after the
+note’s duration. The preview is computed in the element from the patch
+(<code class="docutils literal notranslate"><span class="pre">fmWaveform()</span></code>), not rendered by the Rust core, and play/stop sounds a test
+tone at <code class="docutils literal notranslate"><span class="pre">frequency</span></code> on a private <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>. It registers
+<code class="docutils literal notranslate"><span class="pre">bus.instruments[channel_index]</span></code> the way the synth does, and a session saves
+it with its patch.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -1710,7 +1734,8 @@ scenes, slots).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">clips/&lt;clip</span> <span class="pre">id&gt;.bin</span></code>: timeline clip audio that has arrived from the
 browser.</p></li>
 </ul>
-<p>Sound sources are limited to <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> (or none);
+<p>Sound sources are limited to <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code> and
+<code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> (or none);
 saving another type raises. Clip audio lives in the browser, so before saving
 call <code class="docutils literal notranslate"><span class="pre">session.timeline.export_all_clips()</span></code>, which queues one <code class="docutils literal notranslate"><span class="pre">export_clip()</span></code>
 request per clip and caches each answer in <code class="docutils literal notranslate"><span class="pre">timeline.clip_audio</span></code>; wait for
@@ -2045,6 +2070,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#mixerwidget">MixerWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#fmsynthwidget">FMSynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#sequencerwidget">SequencerWidget</a>

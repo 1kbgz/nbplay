@@ -23,6 +23,8 @@ Classes
    nbplay.models.SpectrumConfig
    nbplay.models.SynthConfig
    nbplay.models.SynthStatus
+   nbplay.models.FMSynthConfig
+   nbplay.models.FMSynthStatus
    nbplay.models.MixerConfig
    nbplay.models.PadsConfig
    nbplay.models.PadsStatus
@@ -302,6 +304,99 @@ Module Contents
 
 
    Whether the browser is sounding the synth's tone; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+.. py:class:: FMSynthConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   A two-operator FM patch: a sine modulator moves the frequency of a sine carrier.
+
+   The modulator runs at ``ratio`` times the note's frequency and moves the
+   carrier by up to ``index`` times the modulator's frequency; the ADSR
+   shapes each note. ``frequency`` is the test tone.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: frequency
+      :type:  float
+
+
+   .. py:attribute:: amplitude
+      :type:  float
+
+
+   .. py:attribute:: ratio
+      :type:  float
+
+
+   .. py:attribute:: index
+      :type:  float
+
+
+   .. py:attribute:: attack
+      :type:  float
+
+
+   .. py:attribute:: decay
+      :type:  float
+
+
+   .. py:attribute:: sustain
+      :type:  float
+
+
+   .. py:attribute:: release
+      :type:  float
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+.. py:class:: FMSynthStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Whether the browser is sounding the FM synth's test tone; browser-owned.
 
    Create a new model by parsing and validating input data from keyword arguments.
 
