@@ -1138,6 +1138,29 @@ class TestPresets:
         finally:
             sampler.close()
 
+    def test_fm_synth_preset_round_trips(self):
+        bell = nbplay.FMSynthWidget(ratio=3.5, index=4.0, decay=0.3, sustain=0.2, session_id="one", channel_index=1, autosync=False)
+        try:
+            preset = bell.preset("Bell")
+            assert preset["type"] == "FMSynthWidget"
+            assert preset["state"] == {
+                "frequency": 440.0,
+                "amplitude": 0.5,
+                "ratio": 3.5,
+                "index": 4.0,
+                "attack": 0.005,
+                "decay": 0.3,
+                "sustain": 0.2,
+                "release": 0.2,
+            }
+            copy = nbplay.FMSynthWidget.from_preset(preset, session_id="two", autosync=False)
+            try:
+                assert (copy.config.ratio, copy.config.index, copy.config.sustain, copy.config.session_id) == (3.5, 4.0, 0.2, "two")
+            finally:
+                copy.close()
+        finally:
+            bell.close()
+
     def test_sequencer_and_pad_presets_round_trip(self):
         sequencer = nbplay.SequencerWidget(length=8, measures=2, num_voices=2, autosync=False)
         pads = nbplay.PadWidget(rows=2, cols=3, autosync=False)

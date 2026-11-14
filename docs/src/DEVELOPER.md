@@ -1288,6 +1288,7 @@ A preset is one widget's sound or layout as JSON, without its session wiring.
 `PRESET` tuple, which reuses the session's state lists where they exist:
 
 - `SynthWidget`: oscillator type, frequency, amplitude, sample rate.
+- `FMSynthWidget`: frequency, amplitude, ratio, index and the ADSR.
 - `SamplerWidget`: the sample (PCM, length, preview), envelope, pads, slices
   and zones. Bytes travel as `{"base64": ...}`.
 - `SequencerWidget`: the grid settings, swing, groove, automation lanes and
