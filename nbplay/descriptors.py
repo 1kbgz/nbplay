@@ -110,10 +110,34 @@ def _safe_trait_name(value):
     return text.isidentifier() and not text.startswith("_")
 
 
+# Numeric parameters as (default, low, high); the browser's effect editor shows the same ranges.
+_EFFECT_NUMBERS = {
+    "eq": {
+        "low": (0.0, -24.0, 24.0),
+        "low_freq": (120.0, 20.0, 1000.0),
+        "mid": (0.0, -24.0, 24.0),
+        "mid_freq": (1000.0, 100.0, 10000.0),
+        "mid_q": (1.0, 0.1, 10.0),
+        "high": (0.0, -24.0, 24.0),
+        "high_freq": (8000.0, 1000.0, 20000.0),
+    },
+    "distortion": {"drive": (0.4, 0.0, 1.0), "tone": (8000.0, 200.0, 20000.0), "wet": (1.0, 0.0, 1.0)},
+    "chorus": {"rate": (1.5, 0.05, 10.0), "depth": (0.003, 0.0, 0.02), "delay": (0.02, 0.001, 0.05), "wet": (0.5, 0.0, 1.0)},
+    "phaser": {
+        "rate": (0.5, 0.05, 10.0),
+        "depth": (0.7, 0.0, 1.0),
+        "frequency": (800.0, 100.0, 5000.0),
+        "feedback": (0.4, 0.0, 0.9),
+        "wet": (0.5, 0.0, 1.0),
+    },
+    "tremolo": {"rate": (5.0, 0.1, 20.0), "depth": (0.5, 0.0, 1.0)},
+}
+
+
 class EffectPlugin:
     """Validated Web Audio effect descriptor for mixer insert chains."""
 
-    _VALID_TYPES = frozenset({"gain", "filter", "delay", "reverb", "compressor", "limiter"})
+    _VALID_TYPES = frozenset({"gain", "filter", "eq", "delay", "reverb", "compressor", "limiter", "distortion", "chorus", "phaser", "tremolo"})
     _FILTER_TYPES = frozenset({"lowpass", "highpass", "bandpass", "notch", "lowshelf", "highshelf", "peaking"})
 
     def __init__(self, type, enabled=True, **params):
@@ -142,6 +166,10 @@ class EffectPlugin:
         return max(low, min(high, numeric))
 
     def _normalize_params(self, type, params):
+        if type in _EFFECT_NUMBERS:
+            return {
+                name: self._number(params, name, default=default, low=low, high=high) for name, (default, low, high) in _EFFECT_NUMBERS[type].items()
+            }
         if type == "gain":
             return {"gain": self._number(params, "gain", default=1.0, low=0.0, high=4.0)}
         if type == "filter":

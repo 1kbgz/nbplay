@@ -42,8 +42,9 @@ session = nb.Session.load("song.nbplay")
 ```
 
 Mixer channels and the master bus have Web Audio insert chains with built-in
-gain, filter, compressor, limiter, delay, and reverb effects; you can register
-your own browser plugin factories as well. Effect descriptors must be JSON-safe,
+gain, filter, EQ, compressor, limiter, distortion, delay, reverb, chorus,
+phaser, and tremolo effects; you can register your own browser plugin factories
+as well. Effect descriptors must be JSON-safe,
 and the built-in effect names are reserved. When Web Audio or Web MIDI is
 unavailable the widgets still render and their controls keep working; they are
 silent until the browser provides those APIs.

@@ -584,6 +584,146 @@ test.describe("MixerWidget", () => {
     await expect(chips.nth(1)).toHaveText("reverb");
   });
 
+  test("the effect menu offers the built-in set and adds an eq with its defaults", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    const strip = page.locator(STRIP).nth(0);
+    await expect(strip.locator(".nbplay-effect-rack-type option")).toHaveText([
+      "gain",
+      "filter",
+      "eq",
+      "compressor",
+      "limiter",
+      "distortion",
+      "delay",
+      "reverb",
+      "chorus",
+      "phaser",
+      "tremolo",
+    ]);
+    await strip.locator(".nbplay-effect-rack-type").selectOption("eq");
+    await strip.locator(".nbplay-effect-rack-add-btn").click();
+    expect(
+      await page.evaluate(() => window.__testModel._state.channels[0].effects),
+    ).toEqual([
+      {
+        type: "eq",
+        low: 0,
+        low_freq: 120,
+        mid: 0,
+        mid_freq: 1000,
+        mid_q: 1,
+        high: 0,
+        high_freq: 8000,
+      },
+    ]);
+  });
+
+  test("eq, distortion, tremolo, chorus and phaser shape real audio", async ({
+    page,
+  }) => {
+    await renderWidget(page, { session_id: "fx-session" });
+    // The harness mocks AudioContext; OfflineAudioContext is the browser's own.
+    const measured = await page.evaluate(async () => {
+      const plugins = window.__nbplay["fx-session"].plugins;
+      const render = async (effect, frequency = 440, edit = null) => {
+        const ctx = new OfflineAudioContext(1, 44100, 44100);
+        const osc = ctx.createOscillator();
+        osc.frequency.value = frequency;
+        const level = ctx.createGain();
+        level.gain.value = 0.5;
+        osc.connect(level);
+        let tail = level;
+        let unit = null;
+        if (effect) {
+          unit = plugins[effect.type](ctx, effect);
+          if (edit && unit.update(edit) !== true) throw new Error("rebuilt");
+          level.connect(unit.input);
+          tail = unit.output;
+        }
+        tail.connect(ctx.destination);
+        osc.start();
+        const data = (await ctx.startRendering()).getChannelData(0);
+        unit?.dispose?.();
+        if (!data.every(Number.isFinite)) throw new Error("not finite");
+        return data;
+      };
+      const rms = (data, from = 0, to = data.length) => {
+        let sum = 0;
+        for (let i = from; i < to; i++) sum += data[i] * data[i];
+        return Math.sqrt(sum / (to - from));
+      };
+      const peak = (data) =>
+        data.reduce((most, value) => Math.max(most, Math.abs(value)), 0);
+      // Quietest 20 ms window over the loudest, after the first 100 ms.
+      const steadiness = (data) => {
+        const levels = [];
+        for (let i = 4410; i + 882 <= data.length; i += 882)
+          levels.push(rms(data, i, i + 882));
+        return Math.min(...levels) / Math.max(...levels);
+      };
+      const gain = async (effect, frequency) =>
+        rms(await render(effect, frequency)) /
+        rms(await render(null, frequency));
+      const driven = await render({
+        type: "distortion",
+        drive: 1,
+        tone: 20000,
+      });
+      return {
+        eqLowBoost: await gain({ type: "eq", low: 12, low_freq: 200 }, 100),
+        eqLowBoostUpTop: await gain(
+          { type: "eq", low: 12, low_freq: 200 },
+          8000,
+        ),
+        eqMidBoost: await gain({ type: "eq", mid: 12 }, 1000),
+        eqHighCut: await gain({ type: "eq", high: -24, high_freq: 2000 }, 8000),
+        eqFlat: await gain({ type: "eq" }, 1000),
+        sineCrest: 1 / rms(await render(null)) / 2,
+        drivenCrest: peak(driven) / rms(driven),
+        undriven: await gain(
+          { type: "distortion", drive: 0, tone: 20000 },
+          440,
+        ),
+        dry: steadiness(await render(null)),
+        tremolo: steadiness(await render({ type: "tremolo", depth: 1 })),
+        tremoloEditedOff: steadiness(
+          await render({ type: "tremolo", depth: 1 }, 440, {
+            type: "tremolo",
+            depth: 0,
+          }),
+        ),
+        chorus: steadiness(await render({ type: "chorus" })),
+        chorusDry: await gain({ type: "chorus", wet: 0 }, 440),
+        phaser: steadiness(await render({ type: "phaser", rate: 2 }, 800)),
+        phaserStill: steadiness(
+          await render({ type: "phaser", rate: 2, depth: 0 }, 800),
+        ),
+      };
+    });
+    const near = (value, target) =>
+      expect(Math.abs(value - target)).toBeLessThan(0.05);
+    // A 12 dB boost is about 4x; the shelf is a little short an octave below its corner.
+    expect(measured.eqLowBoost).toBeGreaterThan(3.2);
+    near(measured.eqLowBoostUpTop, 1);
+    near(measured.eqMidBoost, 3.98);
+    expect(measured.eqHighCut).toBeLessThan(0.1);
+    near(measured.eqFlat, 1);
+    // Full drive squares the sine off; no drive leaves it alone.
+    near(measured.sineCrest, Math.SQRT2);
+    expect(measured.drivenCrest).toBeLessThan(1.15);
+    near(measured.undriven, 1);
+    // The modulated effects move the level; a steady tone does not.
+    expect(measured.dry).toBeGreaterThan(0.95);
+    expect(measured.tremolo).toBeLessThan(0.1);
+    expect(measured.tremoloEditedOff).toBeGreaterThan(0.95);
+    expect(measured.chorus).toBeLessThan(0.5);
+    near(measured.chorusDry, 1);
+    expect(measured.phaser).toBeLessThan(0.5);
+    expect(measured.phaserStill).toBeGreaterThan(0.95);
+  });
+
   test("adding a channel effect updates model", async ({ page }) => {
     await renderWidget(page);
     const strip = page.locator(STRIP).nth(0);

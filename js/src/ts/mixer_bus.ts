@@ -3,7 +3,11 @@
 // registry and the meters. No DOM: the mixer element drives it.
 
 import { createAudioContext } from "./helpers.ts";
-import { EFFECT_TYPES, type EffectDescriptor } from "./components/effects.ts";
+import {
+  EFFECT_PARAMS,
+  EFFECT_TYPES,
+  type EffectDescriptor,
+} from "./components/effects.ts";
 import {
   ensureBusAudioContext,
   getOrCreateSessionBus,
@@ -83,6 +87,18 @@ function numberParam(
   }
   const n = Number(raw);
   return clamp(Number.isFinite(n) ? n : fallback, min, max);
+}
+
+/** A numeric parameter of a built-in effect, with the default and range its editor shows. */
+function specParam(effect: EffectDescriptor, key: string): number {
+  const spec = EFFECT_PARAMS[effect.type]?.find((item) => item.key === key);
+  return numberParam(
+    effect,
+    key,
+    spec?.default ?? 0,
+    spec?.min ?? -Infinity,
+    spec?.max ?? Infinity,
+  );
 }
 
 function setParam(param: AudioParam | undefined, value: number): void {
@@ -169,6 +185,45 @@ function createWetDryEffect(
       [input, output, dryGain, wetGain, ...wetNodes].forEach(disconnectNode);
     },
   };
+}
+
+/** A running sine LFO whose output, scaled by `depth`, drives `targets`. */
+function createLfo(
+  ctx: AudioContext,
+  targets: Array<AudioParam | undefined>,
+): { rate: AudioParam; depth: AudioParam; stop: () => void } {
+  const osc = ctx.createOscillator();
+  const depth = ctx.createGain();
+  osc.connect(depth);
+  targets.forEach((target) => {
+    if (target) depth.connect(target);
+  });
+  osc.start();
+  return {
+    rate: osc.frequency,
+    depth: depth.gain,
+    stop: () => {
+      try {
+        osc.stop();
+      } catch {
+        // Already stopped.
+      }
+      disconnectNode(osc);
+      disconnectNode(depth);
+    },
+  };
+}
+
+/** A soft-clipping curve: the identity at drive 0, close to a square at 1. */
+function distortionCurve(drive: number): Float32Array<ArrayBuffer> {
+  const points = 2048;
+  const amount = drive * 100;
+  const curve = new Float32Array(points);
+  for (let i = 0; i < points; i++) {
+    const x = (i * 2) / (points - 1) - 1;
+    curve[i] = ((1 + amount) * x) / (1 + amount * Math.abs(x));
+  }
+  return curve;
 }
 
 function createImpulse(
@@ -291,6 +346,151 @@ function builtInEffectFactory(
       };
       return { ...unit, update: apply };
     }
+    case "eq": {
+      const low = ctx.createBiquadFilter();
+      const mid = ctx.createBiquadFilter();
+      const high = ctx.createBiquadFilter();
+      low.type = "lowshelf";
+      mid.type = "peaking";
+      high.type = "highshelf";
+      low.connect(mid);
+      mid.connect(high);
+      const apply = (fx: EffectDescriptor) => {
+        setParam(low.frequency, specParam(fx, "low_freq"));
+        setParam(low.gain, specParam(fx, "low"));
+        setParam(mid.frequency, specParam(fx, "mid_freq"));
+        setParam(mid.Q, specParam(fx, "mid_q"));
+        setParam(mid.gain, specParam(fx, "mid"));
+        setParam(high.frequency, specParam(fx, "high_freq"));
+        setParam(high.gain, specParam(fx, "high"));
+        return true;
+      };
+      apply(effect);
+      return {
+        input: low,
+        output: high,
+        update: apply,
+        dispose: () => disconnectNode(mid),
+      };
+    }
+    case "distortion": {
+      const shaper = ctx.createWaveShaper();
+      shaper.oversample = "4x";
+      const tone = ctx.createBiquadFilter();
+      tone.type = "lowpass";
+      const unit = createWetDryEffect(
+        ctx,
+        specParam(effect, "wet"),
+        (input, wetGain) => {
+          input.connect(shaper);
+          shaper.connect(tone);
+          tone.connect(wetGain);
+          return [shaper, tone];
+        },
+      );
+      let drive = -1;
+      const apply = (fx: EffectDescriptor) => {
+        const next = specParam(fx, "drive");
+        if (next !== drive) {
+          drive = next;
+          shaper.curve = distortionCurve(drive);
+        }
+        setParam(tone.frequency, specParam(fx, "tone"));
+        unit.setWet(specParam(fx, "wet"));
+        return true;
+      };
+      apply(effect);
+      return { ...unit, update: apply };
+    }
+    case "chorus": {
+      const delay = ctx.createDelay(0.1);
+      const lfo = createLfo(ctx, [delay.delayTime]);
+      const unit = createWetDryEffect(
+        ctx,
+        specParam(effect, "wet"),
+        (input, wetGain) => {
+          input.connect(delay);
+          delay.connect(wetGain);
+          return [delay];
+        },
+      );
+      const apply = (fx: EffectDescriptor) => {
+        const time = specParam(fx, "delay");
+        setParam(delay.delayTime, time);
+        setParam(lfo.rate, specParam(fx, "rate"));
+        // The sweep stays inside the delay line.
+        setParam(lfo.depth, Math.min(specParam(fx, "depth"), time));
+        unit.setWet(specParam(fx, "wet"));
+        return true;
+      };
+      apply(effect);
+      return {
+        ...unit,
+        update: apply,
+        dispose: () => {
+          lfo.stop();
+          unit.dispose?.();
+        },
+      };
+    }
+    case "phaser": {
+      const stages = [0, 1, 2, 3].map(() => {
+        const stage = ctx.createBiquadFilter();
+        stage.type = "allpass";
+        return stage;
+      });
+      const feedback = ctx.createGain();
+      const lfo = createLfo(
+        ctx,
+        stages.map((stage) => stage.frequency),
+      );
+      const unit = createWetDryEffect(
+        ctx,
+        specParam(effect, "wet"),
+        (input, wetGain) => {
+          const last = stages[stages.length - 1];
+          input.connect(stages[0]);
+          stages.slice(1).forEach((stage, i) => stages[i].connect(stage));
+          last.connect(wetGain);
+          last.connect(feedback);
+          feedback.connect(stages[0]);
+          return [...stages, feedback];
+        },
+      );
+      const apply = (fx: EffectDescriptor) => {
+        const center = specParam(fx, "frequency");
+        stages.forEach((stage) => setParam(stage.frequency, center));
+        setParam(lfo.rate, specParam(fx, "rate"));
+        // The sweep stays above zero hertz.
+        setParam(lfo.depth, center * specParam(fx, "depth") * 0.95);
+        setParam(feedback.gain, specParam(fx, "feedback"));
+        unit.setWet(specParam(fx, "wet"));
+        return true;
+      };
+      apply(effect);
+      return {
+        ...unit,
+        update: apply,
+        dispose: () => {
+          lfo.stop();
+          unit.dispose?.();
+        },
+      };
+    }
+    case "tremolo": {
+      const gain = ctx.createGain();
+      const lfo = createLfo(ctx, [gain.gain]);
+      const apply = (fx: EffectDescriptor) => {
+        const depth = specParam(fx, "depth");
+        // The level swings between 1 and 1 - depth.
+        setParam(gain.gain, 1 - depth / 2);
+        setParam(lfo.depth, depth / 2);
+        setParam(lfo.rate, specParam(fx, "rate"));
+        return true;
+      };
+      apply(effect);
+      return { input: gain, output: gain, update: apply, dispose: lfo.stop };
+    }
     default:
       return null;
   }
@@ -367,6 +567,12 @@ export function defaultEffect(type: string): EffectDescriptor {
   if (type === "delay") return { type, time: 0.25, feedback: 0.25, wet: 0.35 };
   if (type === "reverb") return { type, seconds: 1.5, decay: 2, wet: 0.25 };
   if (type === "gain") return { type, gain: 1 };
+  const specs = EFFECT_PARAMS[type];
+  if (specs)
+    return {
+      type,
+      ...Object.fromEntries(specs.map((spec) => [spec.key, spec.default])),
+    };
   // A registered plugin starts with no parameters; its editor infers fields.
   return { type };
 }

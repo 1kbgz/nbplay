@@ -21,11 +21,27 @@ export interface ParamSpec {
 export const EFFECT_TYPES = [
   "gain",
   "filter",
+  "eq",
   "compressor",
   "limiter",
+  "distortion",
   "delay",
   "reverb",
+  "chorus",
+  "phaser",
+  "tremolo",
 ];
+
+function num(
+  key: string,
+  label: string,
+  min: number,
+  max: number,
+  step: number,
+  fallback: number,
+): ParamSpec {
+  return { key, label, min, max, step, default: fallback, kind: "number" };
+}
 
 const FILTER_TYPES = [
   "lowpass",
@@ -39,6 +55,39 @@ const FILTER_TYPES = [
 
 // Ranges match the Python EffectPlugin validation.
 export const EFFECT_PARAMS: Record<string, ParamSpec[]> = {
+  // Low shelf, one peaking mid band, high shelf; gains in dB.
+  eq: [
+    num("low", "Low", -24, 24, 0.5, 0),
+    num("low_freq", "LoHz", 20, 1000, 1, 120),
+    num("mid", "Mid", -24, 24, 0.5, 0),
+    num("mid_freq", "MidHz", 100, 10000, 1, 1000),
+    num("mid_q", "MidQ", 0.1, 10, 0.01, 1),
+    num("high", "High", -24, 24, 0.5, 0),
+    num("high_freq", "HiHz", 1000, 20000, 1, 8000),
+  ],
+  distortion: [
+    num("drive", "Drive", 0, 1, 0.01, 0.4),
+    num("tone", "Tone", 200, 20000, 1, 8000),
+    num("wet", "Wet", 0, 1, 0.01, 1),
+  ],
+  // Rates in Hz; chorus depth and delay in seconds.
+  chorus: [
+    num("rate", "Rate", 0.05, 10, 0.01, 1.5),
+    num("depth", "Depth", 0, 0.02, 0.0005, 0.003),
+    num("delay", "Delay", 0.001, 0.05, 0.001, 0.02),
+    num("wet", "Wet", 0, 1, 0.01, 0.5),
+  ],
+  phaser: [
+    num("rate", "Rate", 0.05, 10, 0.01, 0.5),
+    num("depth", "Depth", 0, 1, 0.01, 0.7),
+    num("frequency", "Hz", 100, 5000, 1, 800),
+    num("feedback", "Fdbk", 0, 0.9, 0.01, 0.4),
+    num("wet", "Wet", 0, 1, 0.01, 0.5),
+  ],
+  tremolo: [
+    num("rate", "Rate", 0.1, 20, 0.01, 5),
+    num("depth", "Depth", 0, 1, 0.01, 0.5),
+  ],
   gain: [
     {
       key: "gain",

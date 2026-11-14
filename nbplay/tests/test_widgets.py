@@ -173,6 +173,41 @@ class TestMixerWidget:
             widget.close()
 
 
+class TestEffectPlugin:
+    def test_added_effect_types_fill_defaults_and_clamp(self):
+        assert nbplay.EffectPlugin("eq").to_dict() == {
+            "type": "eq",
+            "low": 0.0,
+            "low_freq": 120.0,
+            "mid": 0.0,
+            "mid_freq": 1000.0,
+            "mid_q": 1.0,
+            "high": 0.0,
+            "high_freq": 8000.0,
+        }
+        assert nbplay.EffectPlugin("eq", low=40, mid_q=0).params["low"] == 24.0
+        assert nbplay.EffectPlugin("eq", low=40, mid_q=0).params["mid_q"] == 0.1
+        assert nbplay.EffectPlugin("distortion", drive=3).to_dict() == {"type": "distortion", "drive": 1.0, "tone": 8000.0, "wet": 1.0}
+        assert nbplay.EffectPlugin("chorus").params == {"rate": 1.5, "depth": 0.003, "delay": 0.02, "wet": 0.5}
+        assert nbplay.EffectPlugin("phaser", feedback=2).params["feedback"] == 0.9
+        assert nbplay.EffectPlugin("tremolo", enabled=False).to_dict() == {"type": "tremolo", "rate": 5.0, "depth": 0.5, "enabled": False}
+        with pytest.raises(ValueError, match="finite"):
+            nbplay.EffectPlugin("tremolo", rate=float("nan"))
+        with pytest.raises(ValueError, match="type must be one of"):
+            nbplay.EffectPlugin("wobble")
+
+    def test_mixer_normalizes_the_added_effects(self):
+        widget = nbplay.MixerWidget(autosync=False)
+        try:
+            channel = widget.add_channel("Lead")
+            widget.set_channel_effects(channel, [{"type": "eq", "high": -30}, nbplay.EffectPlugin("phaser")])
+            effects = widget.config.channels[channel]["effects"]
+            assert effects[0]["high"] == -24.0 and effects[0]["mid_freq"] == 1000.0
+            assert effects[1] == {"type": "phaser", "rate": 0.5, "depth": 0.7, "frequency": 800.0, "feedback": 0.4, "wet": 0.5}
+        finally:
+            widget.close()
+
+
 class TestKeysWidgets:
     def test_pads_config_fits_the_grid(self):
         config = PadsConfig(rows=2, cols=2)
