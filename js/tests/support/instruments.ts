@@ -203,6 +203,23 @@ const INSTRUMENTS: Record<
       onDisconnect: () => (node as NbplaySynth).stop(),
     }),
   },
+  spectrum: {
+    tag: "nbplay-spectrum",
+    spec: () => ({
+      config: {
+        theme: "theme",
+        fft_size: "fftSize",
+        smoothing: "smoothing",
+        min_db: "minDb",
+        max_db: "maxDb",
+        min_frequency: "minFrequency",
+        max_frequency: "maxFrequency",
+        session_id: "sessionId",
+        channel_index: "channelIndex",
+      },
+      status: {},
+    }),
+  },
   transport: {
     tag: "nbplay-transport",
     spec: (node) => ({

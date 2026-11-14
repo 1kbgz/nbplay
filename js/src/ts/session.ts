@@ -45,7 +45,10 @@ export type ChannelOwner = "launcher" | "timeline";
 export interface SessionBus {
   audioCtx?: AudioContext;
   masterGain?: AudioNode;
-  channels?: { gain: AudioNode }[];
+  /** The mixer's meter tap after the master inserts; a listener connects from it. */
+  masterAnalyser?: AnalyserNode | null;
+  /** `gain` is a channel's input; `analyser` is its meter tap after the inserts. */
+  channels?: { gain: AudioNode; analyser?: AnalyserNode | null }[];
   returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
   instruments?: Record<number, InstrumentBus>;

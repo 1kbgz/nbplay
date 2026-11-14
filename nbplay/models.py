@@ -49,6 +49,7 @@ __all__ = (
     "SequencerStatus",
     "SettingsConfig",
     "SettingsStatus",
+    "SpectrumConfig",
     "SynthConfig",
     "SynthStatus",
     "TimelineConfig",
@@ -145,6 +146,33 @@ class TransportStatus(BaseModel):
 
 #: Config fields whose change re-renders the synth waveform preview.
 WAVEFORM_PARAMS = ("oscillator_type", "frequency", "amplitude", "sample_rate")
+
+
+class SpectrumConfig(_Validated):
+    """The spectrum analyzer's FFT, its axis ranges, and what it listens to.
+
+    ``channel_index`` is a mixer channel of the session, or -1 for the master bus.
+    """
+
+    fft_size: Literal[256, 512, 1024, 2048, 4096, 8192, 16384] = 2048
+    smoothing: float = Field(0.8, ge=0, le=0.99)
+    min_db: float = Field(-100.0, ge=-140, le=0)
+    max_db: float = Field(-20.0, ge=-100, le=20)
+    min_frequency: float = Field(20.0, ge=10, le=20000)
+    max_frequency: float = Field(20000.0, ge=20, le=24000)
+    session_id: str = ""
+    channel_index: int = Field(-1, ge=-1)
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @model_validator(mode="after")
+    def _ordered(self):
+        if self.max_db <= self.min_db:
+            raise ValueError(f"max_db ({self.max_db}) must be above min_db ({self.min_db})")
+        if self.max_frequency <= self.min_frequency:
+            raise ValueError(f"max_frequency ({self.max_frequency}) must be above min_frequency ({self.min_frequency})")
+        return self
 
 
 class SynthConfig(_Validated):

@@ -1181,6 +1181,24 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-spectrum",
+    title: "nbplay-spectrum",
+    desc: "A spectrum analyzer for a session's master bus or one mixer channel: log-frequency, dB grid, peak readout. Empty outside a session.",
+    events: ["nbplay-set"],
+    controls: [
+      {
+        name: "fftSize",
+        type: "select",
+        options: ["256", "512", "1024", "2048", "4096", "8192", "16384"],
+      },
+      { name: "smoothing", type: "number", step: 0.01 },
+      { name: "minDb", type: "number" },
+      { name: "maxDb", type: "number" },
+      { name: "channelIndex", type: "number" },
+    ],
+    variants: [{ label: "no session", props: {} }],
+  },
+  {
     tag: "nbplay-synth",
     title: "nbplay-synth",
     desc: "The synth instrument: waveform preview, oscillator type, log frequency, amplitude, play/stop on a private AudioContext.",

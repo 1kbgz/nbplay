@@ -302,6 +302,31 @@ class TestKeysWidgets:
             sampler.close()
 
 
+class TestSpectrumWidget:
+    def test_config_validates_and_binds_the_element(self):
+        session = nbplay.Session()
+        widget = nbplay.SpectrumWidget(session_id=session.session_id, channel_index=1, fft_size=4096, autosync=False)
+        try:
+            assert widget.status is None
+            assert widget._tree["tag"] == "nbplay-spectrum"
+            assert widget._tree["bindings"]["fftSize"]["field"] == "config.fft_size"
+            assert (widget.config.session_id, widget.config.channel_index, widget.config.fft_size) == (session.session_id, 1, 4096)
+            assert (widget.config.min_db, widget.config.max_db, widget.config.min_frequency, widget.config.max_frequency) == (
+                -100.0,
+                -20.0,
+                20.0,
+                20000.0,
+            )
+            widget.config.update(min_db=-60, max_db=0)
+            for bad in ({"fft_size": 1000}, {"max_db": -70}, {"max_frequency": 10}, {"smoothing": 1.0}, {"channel_index": -2}):
+                with pytest.raises(ValueError):
+                    widget.config.update(**bad)
+            assert (widget.config.min_db, widget.config.max_db, widget.config.fft_size) == (-60.0, 0.0, 4096)
+        finally:
+            widget.close()
+            session.close()
+
+
 class TestIoWidgets:
     def test_settings_and_midi_output_views(self):
         settings = nbplay.SettingsWidget(sample_rate=48000, autosync=False)
