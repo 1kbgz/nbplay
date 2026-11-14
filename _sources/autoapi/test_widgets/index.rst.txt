@@ -204,6 +204,9 @@ Module Contents
    .. py:method:: test_sampler_preset_carries_its_sample_and_zones()
 
 
+   .. py:method:: test_fm_synth_preset_round_trips()
+
+
    .. py:method:: test_sequencer_and_pad_presets_round_trip()
 
 

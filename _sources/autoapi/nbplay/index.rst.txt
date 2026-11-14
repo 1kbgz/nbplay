@@ -854,6 +854,11 @@ Package Contents
 
 
 
+   .. py:attribute:: PRESET
+      :value: ('frequency', 'amplitude', 'ratio', 'index', 'attack', 'decay', 'sustain', 'release')
+
+
+
    .. py:attribute:: CONFIG_MODEL
 
 
