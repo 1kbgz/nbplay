@@ -1,0 +1,99 @@
+nbplay-fm-synth {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  user-select: none;
+}
+nbplay-fm-synth nbplay-header {
+  margin-bottom: 0;
+}
+nbplay-fm-synth .nbplay-fm-waveform {
+  display: block;
+  height: 128px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-fm-synth .nbplay-fm-params {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+nbplay-fm-synth .nbplay-fm-params nbplay-param {
+  display: flex;
+}
+nbplay-fm-synth .nbplay-fm-params .nbplay-param-label {
+  min-width: 80px;
+}
+nbplay-fm-synth .nbplay-fm-params nbplay-slider {
+  flex: 1 1 auto;
+}
+nbplay-fm-synth .nbplay-fm-params nbplay-value {
+  min-width: 72px;
+}
+nbplay-fm-synth .nbplay-fm-envelope {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+nbplay-fm-synth .nbplay-fm-env-canvas {
+  display: block;
+  flex: 0 0 200px;
+  height: 100px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-fm-synth .nbplay-fm-env-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+nbplay-fm-synth .nbplay-fm-env-controls nbplay-param {
+  --nbplay-dial-size: 44px;
+}
+nbplay-fm-synth .nbplay-fm-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--nbplay-border);
+}
+nbplay-fm-synth .nbplay-play-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 22px;
+  background: var(--nbplay-accent);
+  color: var(--nbplay-fg-inverse);
+  border: 1px solid var(--nbplay-accent);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+nbplay-fm-synth .nbplay-play-btn:hover {
+  background: var(--nbplay-accent-soft);
+  border-color: var(--nbplay-accent-soft);
+}
+nbplay-fm-synth .nbplay-play-btn:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-fm-synth .nbplay-play-btn.playing {
+  background: var(--nbplay-error);
+  border-color: var(--nbplay-error);
+}

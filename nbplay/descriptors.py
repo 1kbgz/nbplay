@@ -908,6 +908,7 @@ _SEQUENCER_STATE = (
     "follow_transport",
 )
 _SYNTH_STATE = ("oscillator_type", "frequency", "amplitude", "sample_rate")
+_FM_SYNTH_STATE = ("frequency", "amplitude", "ratio", "index", "attack", "decay", "sustain", "release")
 _SAMPLER_STATE = (
     "sample_name",
     "sample_rate",

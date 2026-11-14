@@ -29,6 +29,7 @@
 @import "./components/pads.css";
 @import "./components/synth.css";
 @import "./components/keyboard.css";
+@import "./components/fm-synth.css";
 @import "./components/midi-keyboard.css";
 @import "./components/settings.css";
 @import "./components/midi-output.css";

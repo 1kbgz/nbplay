@@ -46,6 +46,7 @@ from nbplay.descriptors import (
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
 from nbplay.widget import (
+    FMSynthWidget,
     KeyboardWidget,
     LauncherWidget,
     MidiKeyboardWidget,

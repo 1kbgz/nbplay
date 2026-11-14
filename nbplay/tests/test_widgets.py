@@ -1,4 +1,5 @@
 import base64
+import io
 import json
 import struct
 import wave
@@ -471,6 +472,43 @@ class TestSequencerAndSamplerWidgets:
         finally:
             widget.close()
             timeline.close()
+
+
+class TestFMSynthWidget:
+    def test_config_validates_and_binds_the_element(self):
+        widget = nbplay.FMSynthWidget(ratio=3.5, index=4, autosync=False)
+        try:
+            assert widget._tree["tag"] == "nbplay-fm-synth"
+            assert widget._tree["bindings"]["ratio"]["field"] == "config.ratio"
+            assert widget._tree["bindings"]["isPlaying"]["field"] == "status.is_playing"
+            assert (widget.config.ratio, widget.config.index, widget.config.sustain) == (3.5, 4.0, 0.6)
+            for bad in ({"ratio": 0.1}, {"index": 25}, {"sustain": 1.5}, {"frequency": 5}):
+                with pytest.raises(ValueError):
+                    widget.config.update(**bad)
+            assert widget.config.ratio == 3.5
+            assert widget.play() >= 0 and widget.stop() >= 0
+        finally:
+            widget.close()
+
+    def test_fm_synth_is_a_track_sound_source_that_saves_with_the_session(self):
+        session = nbplay.Session(theme="grim")
+        try:
+            synth = nbplay.FMSynthWidget(ratio=1.0, index=3.0, release=0.4)
+            track = session.add_track("Brass", nbplay.SequencerWidget(length=4), synth)
+            assert (synth.config.session_id, synth.config.channel_index, synth.config.theme) == (session.session_id, track.mixer_channel, "grim")
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                source = loaded.tracks[0].sound_source
+                assert isinstance(source, nbplay.FMSynthWidget)
+                assert (source.config.ratio, source.config.index, source.config.release) == (1.0, 3.0, 0.4)
+                assert source.config.channel_index == loaded.tracks[0].mixer_channel
+            finally:
+                loaded.close()
+        finally:
+            session.close()
 
 
 class TestArrangementWidgets:
