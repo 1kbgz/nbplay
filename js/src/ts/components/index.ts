@@ -72,6 +72,12 @@ export { NbplayZoneList, type ZoneRow } from "./zone-list.ts";
 export { NbplayTransport, type TransportCommand } from "./transport.ts";
 export { NbplayPads } from "./pads.ts";
 export { NbplaySynth, type OscillatorType } from "./synth.ts";
+export {
+  NbplaySpectrum,
+  spectrumLine,
+  spectrumPeak,
+  type SpectrumScale,
+} from "./spectrum.ts";
 export { NbplayKeyboard } from "./keyboard.ts";
 export { NbplayMidiKeyboard } from "./midi-keyboard.ts";
 export { NbplaySettings } from "./settings.ts";

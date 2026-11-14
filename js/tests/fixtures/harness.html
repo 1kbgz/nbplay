@@ -129,6 +129,17 @@
           super();
           this.fftSize = 2048;
           this.smoothingTimeConstant = 0.8;
+          this.context = { sampleRate: 44100 };
+        }
+        get frequencyBinCount() {
+          return this.fftSize / 2;
+        }
+        // One loud bin at window.__mockSpectrumHz over a quiet floor.
+        getFloatFrequencyData(array) {
+          const hz = Number(window.__mockSpectrumHz) || 0;
+          const loud = Math.round(hz / (22050 / array.length));
+          for (let i = 0; i < array.length; i++)
+            array[i] = hz && i === loud ? -12 : -120;
         }
         // Fills the buffer with a constant level so tests can drive meters.
         getFloatTimeDomainData(array) {

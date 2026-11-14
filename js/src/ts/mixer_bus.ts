@@ -639,6 +639,7 @@ export function createAudioBus() {
       const bus = getOrCreateSessionBus(sessionId);
       bus.audioCtx = audioCtx;
       bus.masterGain = masterGain;
+      bus.masterAnalyser = masterAnalyser;
       bus.channels = channelNodes;
       bus.returns = returnNodes;
       Object.defineProperty(bus, "plugins", {
@@ -657,6 +658,7 @@ export function createAudioBus() {
       if (bus) {
         delete bus.audioCtx;
         delete bus.masterGain;
+        delete bus.masterAnalyser;
         delete bus.channels;
         delete bus.returns;
         delete bus.plugins;

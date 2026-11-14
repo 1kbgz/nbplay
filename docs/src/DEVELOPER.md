@@ -203,6 +203,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | Python class         | Config fields (kernel-owned)                                                                                                                                                                                                                                           | Status fields (browser-owned)                                                                                                                                               |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SynthWidget`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `waveform`, `session_id`, `channel_index`, `theme`                                                                                                                                                         | `is_playing`                                                                                                                                                                |
+| `SpectrumWidget`     | `fft_size`, `smoothing`, `min_db`, `max_db`, `min_frequency`, `max_frequency`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | none                                                                                                                                                                        |
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
@@ -452,6 +453,30 @@ MIDI clips on its track play notes with its oscillator type and amplitude
 (noise plays a short burst) through the track's mixer channel, instead of the
 scheduler's sine fallback. It registers at render, when the routing fields
 change, and on `nbplay-bus-ready` when the mixer renders later.
+
+### SpectrumWidget
+
+Python class: `SpectrumWidget`. Element:
+`js/src/ts/components/spectrum.ts`.
+
+SpectrumWidget is a spectrum analyzer for a session:
+`SpectrumWidget(session_id=session.session_id)` shows the master bus and
+`channel_index` picks a mixer channel. It is not created by `Session`, the way
+keyboards are not. The mixer keeps a meter `AnalyserNode` at the end of every
+insert chain and publishes them as `bus.masterAnalyser` and
+`bus.channels[i].analyser`; an analyser passes its input through, so the
+element feeds a second analyser of its own from that tap. It hears the signal
+after the inserts, adds nothing to the path, and stays connected when a chain
+is rebuilt. It taps at connect, when the routing fields change, and on
+`nbplay-bus-ready`.
+
+Each animation frame it reads `getFloatFrequencyData()` and draws one y per
+pixel column on a log-frequency, dB grid (`spectrumLine()`: the loudest bin a
+column covers, interpolated where a column falls between bins) and shows the
+loudest frequency in range (`spectrumPeak()`). `fft_size` is one of the powers
+of two from 256 to 16384 and can be picked in the element; the model requires
+`max_db > min_db` and `max_frequency > min_frequency`. Nothing is reported
+back to the kernel, so the widget has no status model.
 
 ### SettingsWidget
 

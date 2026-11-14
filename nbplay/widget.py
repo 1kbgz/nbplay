@@ -77,6 +77,7 @@ from .models import (
     SequencerStatus,
     SettingsConfig,
     SettingsStatus,
+    SpectrumConfig,
     SynthConfig,
     SynthStatus,
     TimelineConfig,
@@ -321,6 +322,29 @@ class SynthWidget(InstrumentWidget):
     def stop(self):
         """Stop the tone in the owning widget."""
         return self._command("is_playing", False)
+
+
+class SpectrumWidget(InstrumentWidget):
+    """A spectrum analyzer for a session's master bus or one of its mixer channels.
+
+    It listens in the browser after the insert chain and reports nothing
+    back: ``SpectrumWidget(session_id=session.session_id)`` shows the master
+    bus, and ``channel_index`` picks a channel.
+    """
+
+    TAG = "nbplay-spectrum"
+    CONFIG_MODEL = SpectrumConfig
+    CONFIG: ClassVar[dict[str, str]] = {
+        "fft_size": "fftSize",
+        "smoothing": "smoothing",
+        "min_db": "minDb",
+        "max_db": "maxDb",
+        "min_frequency": "minFrequency",
+        "max_frequency": "maxFrequency",
+        "session_id": "sessionId",
+        "channel_index": "channelIndex",
+        "theme": "theme",
+    }
 
 
 class MixerWidget(InstrumentWidget):

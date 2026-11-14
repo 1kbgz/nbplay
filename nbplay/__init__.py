@@ -55,6 +55,7 @@ from nbplay.widget import (
     SequencerWidget,
     Session,
     SettingsWidget,
+    SpectrumWidget,
     SynthWidget,
     TimelineWidget,
     Track,
