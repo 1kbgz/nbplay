@@ -54,6 +54,15 @@
           this.type = "lowpass";
           this.frequency = new MockAudioParam(350);
           this.Q = new MockAudioParam(1);
+          this.gain = new MockAudioParam(0);
+        }
+      }
+
+      class MockWaveShaperNode extends MockAudioNode {
+        constructor() {
+          super();
+          this.curve = null;
+          this.oversample = "none";
         }
       }
 
@@ -219,6 +228,9 @@
         }
         createDelay() {
           return new MockDelayNode();
+        }
+        createWaveShaper() {
+          return new MockWaveShaperNode();
         }
         createDynamicsCompressor() {
           return new MockDynamicsCompressorNode();

@@ -487,7 +487,12 @@ show dB labels, pan shows center/left/right labels, and name/gain/pan are
 inline editable. Gain input accepts dB strings and converts to linear gain.
 
 Effect descriptors are plain dictionaries. Built-ins are `gain`, `filter`,
-`compressor`, `limiter`, `delay`, and `reverb`. A descriptor with
+`eq` (low shelf, one peaking mid band, high shelf), `compressor`, `limiter`,
+`distortion` (soft clipping with a tone filter), `delay`, `reverb`, `chorus`,
+`phaser`, and `tremolo`. Each built-in's parameter ranges and defaults live in
+`EFFECT_PARAMS` (`js/src/ts/components/effects.ts`), which the effect editor
+shows and the newer factories read; `EffectPlugin` in `descriptors.py` clamps
+to the same ranges, so a new built-in needs both. A descriptor with
 `enabled: false` is bypassed: it stays in the list and in the strip (drawn
 struck through) but is left out of the audio chain. Clicking a chip toggles
 bypass, ✎ opens an inline parameter editor under it, and × removes the effect;
