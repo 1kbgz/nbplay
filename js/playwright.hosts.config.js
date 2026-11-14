@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Host compatibility checks: boot real Jupyter hosts (Voila, JupyterLab)
-// with a live kernel and drive the rendered session widgets. Both hosts
-// serve a scratch copy of the fixture notebook (dist/hosts) so JupyterLab's
-// autosave never modifies the tracked file.
+// Host compatibility checks: boot real Jupyter hosts (Voila, JupyterLab,
+// Notebook 7) with a live kernel and drive the rendered session widgets. The
+// hosts serve scratch copies of the fixture notebook (dist/hosts, and
+// dist/hosts-notebook for Notebook 7) so autosave never modifies the tracked
+// file and the two editors never save over each other.
 // Run with `pnpm run test:hosts`.
 export default defineConfig({
   testDir: "tests",
@@ -32,6 +33,13 @@ export default defineConfig({
       command:
         "node tools/host-notebook.mjs && python -m jupyter lab --no-browser --port=8899 --ServerApp.ip=127.0.0.1 --ServerApp.token=\"\" --ServerApp.password=\"\" --ServerApp.disable_check_xsrf=True --ServerApp.root_dir=dist/hosts --LabApp.open_browser=False",
       url: "http://127.0.0.1:8899/lab",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180 * 1000,
+    },
+    {
+      command:
+        "node tools/host-notebook.mjs dist/hosts-notebook && python -m jupyter notebook --no-browser --port=8898 --ServerApp.ip=127.0.0.1 --ServerApp.token=\"\" --ServerApp.password=\"\" --ServerApp.disable_check_xsrf=True --ServerApp.root_dir=dist/hosts-notebook",
+      url: "http://127.0.0.1:8898/tree",
       reuseExistingServer: !process.env.CI,
       timeout: 180 * 1000,
     },
