@@ -41,6 +41,15 @@ session.save("song.nbplay")
 session = nb.Session.load("song.nbplay")
 ```
 
+A single instrument's sound can be kept as a JSON preset and loaded into
+another one of the same kind:
+
+```python
+synth.save_preset("bass.json", "Bass")
+other_synth.load_preset("bass.json")
+kit = nb.SamplerWidget.from_preset("kit.json")   # the sample travels with it
+```
+
 Mixer channels and the master bus have Web Audio insert chains with built-in
 gain, filter, EQ, compressor, limiter, distortion, delay, reverb, chorus,
 phaser, and tremolo effects; you can register your own browser plugin factories

@@ -12,6 +12,7 @@ slots and keyboard routes. The descriptor classes (:class:`EffectPlugin`,
 from __future__ import annotations
 
 import array
+import base64
 import json
 import math
 import uuid
@@ -954,5 +955,30 @@ _TIMELINE_STATE = ("length", "count_in_bars", "auto_extend_recording", "recordin
 _TRANSPORT_STATE = ("bpm", "time_signature_num", "time_signature_den", "loop_enabled", "loop_start_bar", "loop_end_bar")
 
 
+_PRESET_FORMAT = "nbplay-preset"
+_PRESET_FORMAT_VERSION = 1
+
+
 def _json_copy(value):
     return json.loads(json.dumps(value))
+
+
+def _preset_encode(value):
+    """``value`` with bytes replaced by ``{"base64": ...}``, so a preset is JSON."""
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return {"base64": base64.b64encode(bytes(value)).decode("ascii")}
+    if isinstance(value, dict):
+        return {key: _preset_encode(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_preset_encode(item) for item in value]
+    return value
+
+
+def _preset_decode(value):
+    if isinstance(value, dict):
+        if set(value) == {"base64"}:
+            return base64.b64decode(value["base64"])
+        return {key: _preset_decode(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_preset_decode(item) for item in value]
+    return value

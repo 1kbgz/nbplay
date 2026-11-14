@@ -1259,6 +1259,27 @@ request per clip and caches each answer in `timeline.clip_audio`; wait for
 `import_clip()` so the browser reattaches playable audio, and other clips keep
 their metadata. Loading creates fresh widgets with a new `session_id`.
 
+### Presets
+
+A preset is one widget's sound or layout as JSON, without its session wiring.
+`widget.preset(name)` returns the dict, `save_preset(path)` writes it,
+`load_preset(dict_or_path)` applies it to a widget of the same class, and
+`Widget.from_preset(...)` builds a new one. The fields come from the class's
+`PRESET` tuple, which reuses the session's state lists where they exist:
+
+- `SynthWidget`: oscillator type, frequency, amplitude, sample rate.
+- `SamplerWidget`: the sample (PCM, length, preview), envelope, pads, slices
+  and zones. Bytes travel as `{"base64": ...}`.
+- `SequencerWidget`: the grid settings, swing, groove, automation lanes and
+  `voices_data`.
+- `PadWidget`: the grid size, notes, velocities and actions.
+
+A widget with no `PRESET` raises `TypeError`. Loading validates every field in
+one `config.update()`, so a refused preset changes nothing and a loaded one is
+one undo step. `session_id`, `channel_index` and `theme` are never part of a
+preset, so loading one into a track's instrument keeps its routing. The mixer
+has no preset: its channels belong to the session's tracks.
+
 ### Undo and redo
 
 `nbplay/history.py` keeps an undo stack over widget config. `History.attach(widget)` subscribes to the widget's config model with `on_change`, so browser edits count too, and ignores the transient fields listed in `TRANSIENT_TRAITS` (selection, request counts, derived data such as the waveform preview); browser-owned status never reaches a config model. Each change becomes an entry `(config, field, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several fields is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order by assigning the config fields, and moves the step to the redo stack; a new change clears redo.
