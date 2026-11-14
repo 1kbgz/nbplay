@@ -24,6 +24,8 @@ from . import __version__
 from .audio_files import decode_audio_file
 from .descriptors import (
     _PAD_MAX_COUNT,
+    _PRESET_FORMAT,
+    _PRESET_FORMAT_VERSION,
     _SAMPLER_PAD_STATE,
     _SAMPLER_STATE,
     _SEQUENCER_STATE,
@@ -52,6 +54,8 @@ from .descriptors import (
     _normalize_zone,
     _pack_float32,
     _positive_number,
+    _preset_decode,
+    _preset_encode,
     _set_effect_enabled,
     _slot_voices,
     _step_duration_for_length,
@@ -157,6 +161,8 @@ class InstrumentWidget(Widget):
     STATUS: ClassVar[dict[str, str]] = {}
     #: Status fields written back on an event other than ``nbplay-status``.
     STATUS_EVENTS: ClassVar[dict[str, str]] = {}
+    #: Config fields that make up a preset: the widget's sound or layout, without its session wiring.
+    PRESET: ClassVar[tuple[str, ...]] = ()
 
     def __init__(self, session=None, *, config=None, **kwargs):
         fields = {name: kwargs.pop(name) for name in list(kwargs) if name in self.CONFIG_MODEL.model_fields}
@@ -196,6 +202,50 @@ class InstrumentWidget(Widget):
 
     def _prepare(self):
         """Hook run after the models exist and before they are hosted."""
+
+    def preset(self, name=""):
+        """This widget's sound or layout as a JSON-safe dict that :meth:`load_preset` applies to a widget of the same class.
+
+        The session wiring (``session_id``, ``channel_index``, ``theme``) is
+        not part of it. Bytes, such as a sampler's sample, are base64 text.
+        """
+        if not self.PRESET:
+            raise TypeError(f"{type(self).__name__} has no preset")
+        state = {field: getattr(self.config, field) for field in self.PRESET}
+        return {
+            "format": _PRESET_FORMAT,
+            "version": _PRESET_FORMAT_VERSION,
+            "type": type(self).__name__,
+            "name": str(name),
+            "state": _preset_encode(state),
+        }
+
+    def save_preset(self, path, name=""):
+        """Write :meth:`preset` to ``path`` as JSON."""
+        pathlib.Path(path).write_text(json.dumps(self.preset(name), indent=1) + "\n")
+
+    def load_preset(self, preset):
+        """Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
+
+        The fields are validated together and applied in one update, so a
+        refused preset changes nothing and a loaded one is one undo step.
+        """
+        if isinstance(preset, (str, os.PathLike)):
+            preset = json.loads(pathlib.Path(preset).read_text())
+        if not isinstance(preset, dict) or preset.get("format") != _PRESET_FORMAT:
+            raise ValueError("not an nbplay preset")
+        if preset.get("version") != _PRESET_FORMAT_VERSION:
+            raise ValueError(f"unsupported preset version {preset.get('version')!r}")
+        if preset.get("type") != type(self).__name__:
+            raise ValueError(f"a {preset.get('type')} preset cannot be loaded into a {type(self).__name__}")
+        state = _preset_decode(preset.get("state", {}))
+        self.config.update(**{field: state[field] for field in self.PRESET if field in state})
+        return self
+
+    @classmethod
+    def from_preset(cls, preset, **kwargs):
+        """A new widget with a preset loaded; ``kwargs`` go to the constructor."""
+        return cls(**kwargs).load_preset(preset)
 
     def _command(self, field, value):
         if self.status_id is None:
@@ -300,6 +350,7 @@ class SynthWidget(InstrumentWidget):
     """
 
     TAG = "nbplay-synth"
+    PRESET = _SYNTH_STATE
     CONFIG_MODEL = SynthConfig
     STATUS_MODEL = SynthStatus
     CONFIG: ClassVar[dict[str, str]] = {
@@ -509,6 +560,7 @@ class PadWidget(_NoteSource):
     """The trigger-pad grid on a transports session; the browser owns the taps."""
 
     TAG = "nbplay-pads"
+    PRESET = ("rows", "cols", "velocity", "velocity_sensitive", "pad_notes", "pad_velocities", "pad_actions")
     CONFIG_MODEL = PadsConfig
     STATUS_MODEL = PadsStatus
     CONFIG: ClassVar[dict[str, str]] = {
@@ -668,6 +720,7 @@ class SequencerWidget(InstrumentWidget):
     """
 
     TAG = "nbplay-sequencer"
+    PRESET = (*_SEQUENCER_STATE, "voices_data")
     CONFIG_MODEL = SequencerConfig
     STATUS_MODEL = SequencerStatus
     CONFIG: ClassVar[dict[str, str]] = {
@@ -814,6 +867,7 @@ class SamplerWidget(InstrumentWidget):
     """
 
     TAG = "nbplay-sampler"
+    PRESET = (*_SAMPLER_STATE, "sample_length", "sample_data", "waveform", *_SAMPLER_PAD_STATE, "zones")
     CONFIG_MODEL = SamplerConfig
     STATUS_MODEL = SamplerStatus
     CONFIG: ClassVar[dict[str, str]] = {

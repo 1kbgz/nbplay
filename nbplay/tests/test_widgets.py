@@ -54,6 +54,116 @@ class TestTransportModels:
         assert session.command(mid, "is_playing", True) >= 0
 
 
+class TestPresets:
+    def test_synth_preset_round_trips_through_a_file_and_leaves_session_wiring(self, tmp_path):
+        synth = nbplay.SynthWidget(oscillator_type="saw", frequency=220.0, amplitude=0.3, session_id="one", channel_index=2, autosync=False)
+        other = nbplay.SynthWidget(session_id="two", channel_index=5, theme="grim", autosync=False)
+        try:
+            preset = synth.preset("Bass")
+            assert preset == {
+                "format": "nbplay-preset",
+                "version": 1,
+                "type": "SynthWidget",
+                "name": "Bass",
+                "state": {"oscillator_type": "saw", "frequency": 220.0, "amplitude": 0.3, "sample_rate": 44100},
+            }
+            path = tmp_path / "bass.json"
+            synth.save_preset(path, "Bass")
+            assert json.loads(path.read_text()) == preset
+            other.load_preset(path)
+            assert (other.config.oscillator_type, other.config.frequency, other.config.amplitude) == ("saw", 220.0, 0.3)
+            assert other.config.waveform == synth.config.waveform
+            assert (other.config.session_id, other.config.channel_index, other.config.theme) == ("two", 5, "grim")
+        finally:
+            synth.close()
+            other.close()
+
+    def test_sampler_preset_carries_its_sample_and_zones(self):
+        sampler = nbplay.SamplerWidget(attack=0.02, pad_count=4, autosync=False)
+        try:
+            sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=60, name="Blip")
+            sampler.add_zone([0.1, 0.2], 72, 84, name="High")
+            preset = json.loads(json.dumps(sampler.preset()))
+            assert preset["state"]["sample_data"] == {"base64": base64.b64encode(sampler.config.sample_data).decode("ascii")}
+            loaded = nbplay.SamplerWidget.from_preset(preset, autosync=False)
+            try:
+                for name in (
+                    "sample_name",
+                    "sample_rate",
+                    "root_note",
+                    "sample_length",
+                    "sample_data",
+                    "waveform",
+                    "attack",
+                    "pad_count",
+                    "pad_notes",
+                    "zones",
+                ):
+                    assert getattr(loaded.config, name) == getattr(sampler.config, name), name
+                assert loaded.get_sample_data() == pytest.approx([0.0, 0.5, -0.5, 0.25])
+            finally:
+                loaded.close()
+        finally:
+            sampler.close()
+
+    def test_sequencer_and_pad_presets_round_trip(self):
+        sequencer = nbplay.SequencerWidget(length=8, measures=2, num_voices=2, autosync=False)
+        pads = nbplay.PadWidget(rows=2, cols=3, autosync=False)
+        try:
+            sequencer.set_step(3, note=67, velocity=90, active=True, voice=1)
+            sequencer.config.swing = 0.2
+            copy = nbplay.SequencerWidget.from_preset(sequencer.preset(), autosync=False)
+            try:
+                assert copy.config.voices_data == sequencer.config.voices_data
+                assert (copy.config.length, copy.config.measures, copy.config.num_voices, copy.config.swing) == (8, 2, 2, 0.2)
+            finally:
+                copy.close()
+            pads.config.pad_notes = [40, 41, 42, 43, 44, 45]
+            grid = nbplay.PadWidget.from_preset(pads.preset(), autosync=False)
+            try:
+                assert (grid.config.rows, grid.config.cols, grid.config.pad_notes) == (2, 3, [40, 41, 42, 43, 44, 45])
+            finally:
+                grid.close()
+        finally:
+            sequencer.close()
+            pads.close()
+
+    def test_a_preset_is_refused_by_the_wrong_widget_or_format(self):
+        synth = nbplay.SynthWidget(autosync=False)
+        sampler = nbplay.SamplerWidget(autosync=False)
+        transport = nbplay.TransportWidget(autosync=False)
+        try:
+            with pytest.raises(ValueError, match="SynthWidget preset"):
+                sampler.load_preset(synth.preset())
+            with pytest.raises(ValueError, match="not an nbplay preset"):
+                synth.load_preset({"type": "SynthWidget", "state": {}})
+            with pytest.raises(ValueError, match="version"):
+                synth.load_preset({**synth.preset(), "version": 99})
+            # A bad value is refused by the model and nothing is applied.
+            with pytest.raises(ValueError):
+                synth.load_preset({**synth.preset(), "state": {"frequency": 880.0, "oscillator_type": "pulse"}})
+            assert synth.config.frequency == 440.0
+            with pytest.raises(TypeError, match="has no preset"):
+                transport.preset()
+        finally:
+            synth.close()
+            sampler.close()
+            transport.close()
+
+    def test_loading_a_preset_is_one_undo_step_in_a_session(self):
+        session = nbplay.Session()
+        synth = nbplay.SynthWidget(oscillator_type="sine", frequency=440.0, autosync=False)
+        try:
+            session.add_track("Lead", None, synth)
+            session.history.mark()
+            synth.load_preset({**synth.preset(), "state": {"oscillator_type": "square", "frequency": 110.0}})
+            assert (synth.config.oscillator_type, synth.config.frequency) == ("square", 110.0)
+            session.undo()
+            assert (synth.config.oscillator_type, synth.config.frequency) == ("sine", 440.0)
+        finally:
+            session.close()
+
+
 class TestSynthWidget:
     def test_waveform_follows_the_oscillator_parameters(self):
         with pytest.raises(ValueError):
