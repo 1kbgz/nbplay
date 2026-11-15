@@ -5,123 +5,19 @@ import {
   type InstrumentBus,
   type SessionBus,
 } from "../session.ts";
-import { midiToHz } from "../voices.ts";
+import {
+  createFmVoice,
+  disposeFmVoice,
+  scheduleFmNote,
+  type FmPatch,
+  type FmVoice,
+} from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./envelope.ts";
 import "./header.ts";
 import "./param.ts";
 import "./waveform.ts";
-
-/** The sound of one FM voice: a sine carrier whose frequency a sine modulator moves. */
-export interface FmPatch {
-  amplitude: number;
-  /** Modulator frequency over carrier frequency. */
-  ratio: number;
-  /** Peak frequency deviation over modulator frequency. */
-  index: number;
-  attack: number;
-  decay: number;
-  sustain: number;
-  release: number;
-}
-
-interface FmVoice {
-  carrier: OscillatorNode;
-  modulator: OscillatorNode;
-  depth: GainNode;
-  level: GainNode;
-}
-
-function createVoice(
-  ctx: AudioContext,
-  output: AudioNode,
-  frequency: number,
-  patch: FmPatch,
-): FmVoice {
-  const carrier = ctx.createOscillator();
-  const modulator = ctx.createOscillator();
-  const depth = ctx.createGain();
-  const level = ctx.createGain();
-  carrier.frequency.value = frequency;
-  modulator.frequency.value = frequency * patch.ratio;
-  depth.gain.value = patch.index * frequency * patch.ratio;
-  modulator.connect(depth);
-  depth.connect(carrier.frequency);
-  carrier.connect(level);
-  level.connect(output);
-  return { carrier, modulator, depth, level };
-}
-
-function disposeVoice(voice: FmVoice): void {
-  for (const node of [
-    voice.modulator,
-    voice.depth,
-    voice.carrier,
-    voice.level,
-  ]) {
-    try {
-      node.disconnect();
-    } catch {
-      /* already disconnected */
-    }
-  }
-}
-
-/**
- * Play one FM note on `output` at a scheduled time, shaped by the patch's
- * ADSR; the release runs after `duration`. Returns a canceller.
- */
-export function scheduleFmNote(
-  ctx: AudioContext,
-  output: AudioNode,
-  patch: FmPatch,
-  note: number,
-  velocity: number,
-  at: number,
-  duration: number,
-  onEnded: () => void = () => {},
-): () => void {
-  const peak = Math.max(0, Math.min(1, patch.amplitude)) * (velocity / 127);
-  const voice = createVoice(ctx, output, midiToHz(note), patch);
-  const attack = Math.min(Math.max(0, patch.attack), duration);
-  const decayEnd = Math.min(
-    at + attack + Math.max(0, patch.decay),
-    at + duration,
-  );
-  const end = at + duration + Math.max(0.005, patch.release);
-  const gain = voice.level.gain;
-  gain.setValueAtTime(0, at);
-  gain.linearRampToValueAtTime(peak, at + attack);
-  gain.linearRampToValueAtTime(
-    peak * patch.sustain,
-    Math.max(decayEnd, at + attack),
-  );
-  gain.setValueAtTime(peak * patch.sustain, at + duration);
-  gain.linearRampToValueAtTime(0, end);
-  let done = false;
-  const finish = () => {
-    if (done) return;
-    done = true;
-    disposeVoice(voice);
-    onEnded();
-  };
-  voice.carrier.onended = finish;
-  for (const osc of [voice.modulator, voice.carrier]) {
-    osc.start(at);
-    osc.stop(end);
-  }
-  return () => {
-    for (const osc of [voice.modulator, voice.carrier]) {
-      try {
-        osc.stop(0);
-      } catch {
-        /* already stopped */
-      }
-    }
-    finish();
-  };
-}
 
 /** About three carrier cycles of the patch, for the preview. */
 export function fmWaveform(patch: FmPatch, frames = 600): Float32Array {
@@ -148,7 +44,7 @@ class FmTone {
     // Mobile browsers can hand back a suspended context even inside a user
     // gesture; resuming here keeps the tap that started playback.
     if (ctx.state === "suspended") void ctx.resume?.();
-    this.voice = createVoice(ctx, ctx.destination, frequency, patch);
+    this.voice = createFmVoice(ctx, ctx.destination, frequency, patch);
     this.voice.level.gain.value = patch.amplitude;
     this.voice.modulator.start();
     this.voice.carrier.start();
@@ -178,7 +74,7 @@ class FmTone {
           /* already stopped */
         }
       }
-      disposeVoice(this.voice);
+      disposeFmVoice(this.voice);
       this.voice = null;
     }
     if (this.ctx) {
