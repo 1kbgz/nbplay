@@ -6,7 +6,7 @@ import {
   type InstrumentBus,
   type SessionBus,
 } from "../session.ts";
-import { midiToHz } from "../voices.ts";
+import { scheduleSynthNote } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./header.ts";
@@ -25,73 +25,6 @@ const OSCILLATORS: Array<{ value: OscillatorType; label: string }> = [
 ];
 const MIN_FREQ = 20;
 const MAX_FREQ = 8000;
-
-/**
- * Play one note of an oscillator type on the session bus at a scheduled
- * time; noise plays a short burst. Returns a canceller.
- */
-function scheduleSynthNote(
-  ctx: AudioContext,
-  output: AudioNode,
-  type: string,
-  amplitude: number,
-  note: number,
-  velocity: number,
-  at: number,
-  duration: number,
-  onEnded: () => void,
-): () => void {
-  const level = Math.max(0, Math.min(1, amplitude)) * (velocity / 127);
-  const attack = 0.005;
-  const release = Math.min(0.05, duration * 0.2);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0, at);
-  gain.gain.linearRampToValueAtTime(level, at + attack);
-  gain.gain.linearRampToValueAtTime(
-    0,
-    at + Math.max(attack, duration - release),
-  );
-  gain.connect(output);
-  let source: AudioScheduledSourceNode;
-  if (type === "noise") {
-    const frames = Math.max(1, Math.round(ctx.sampleRate * duration));
-    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
-    const node = ctx.createBufferSource();
-    node.buffer = buffer;
-    source = node;
-  } else {
-    const osc = ctx.createOscillator();
-    osc.type = (
-      type === "square" || type === "saw" || type === "triangle"
-        ? type.replace("saw", "sawtooth")
-        : "sine"
-    ) as globalThis.OscillatorType;
-    osc.frequency.value = midiToHz(note);
-    source = osc;
-  }
-  source.connect(gain);
-  source.onended = () => {
-    try {
-      gain.disconnect();
-    } catch {
-      /* already disconnected */
-    }
-    onEnded();
-  };
-  source.start(at);
-  source.stop(at + duration);
-  return () => {
-    try {
-      source.stop(0);
-      gain.disconnect();
-    } catch {
-      /* already stopped */
-    }
-    onEnded();
-  };
-}
 
 /** The continuous tone: a private AudioContext at the configured rate. */
 class ToneEngine {
@@ -277,8 +210,10 @@ export class NbplaySynth extends NbplayElement {
         const cancel: () => void = scheduleSynthNote(
           ctx,
           output,
-          this.oscillatorType || "sine",
-          Number(this.amplitude) || 0,
+          {
+            type: this.oscillatorType || "sine",
+            amplitude: Number(this.amplitude) || 0,
+          },
           note,
           velocity,
           at,

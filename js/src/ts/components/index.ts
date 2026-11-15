@@ -79,12 +79,16 @@ export {
   type SpectrumScale,
 } from "./spectrum.ts";
 export { NbplayKeyboard } from "./keyboard.ts";
+export { NbplayFmSynth, fmWaveform } from "./fm-synth.ts";
 export {
-  NbplayFmSynth,
-  fmWaveform,
   scheduleFmNote,
+  scheduleSynthNote,
+  startSampleVoice,
+  type Envelope,
   type FmPatch,
-} from "./fm-synth.ts";
+  type SampleVoiceOptions,
+  type SynthPatch,
+} from "../voices.ts";
 export { NbplayMidiKeyboard } from "./midi-keyboard.ts";
 export { NbplaySettings } from "./settings.ts";
 export {

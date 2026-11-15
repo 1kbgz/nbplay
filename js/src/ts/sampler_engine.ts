@@ -5,13 +5,9 @@
 import { createAudioContext } from "./helpers.ts";
 import { clampVelocity } from "./pads.ts";
 import { getSessionBus } from "./session.ts";
+import { startSampleVoice, type Envelope } from "./voices.ts";
 
-export interface Envelope {
-  attack: number;
-  decay: number;
-  sustain: number;
-  release: number;
-}
+export type { Envelope };
 
 export interface Voice {
   gainNode: GainNode;
@@ -232,59 +228,35 @@ export function createSamplerEngine(initialMaxVoices = 8) {
       const semitones = noteNum - (zone ? zone.root_note : rootNote);
       const playbackRate = Math.pow(2, semitones / 12);
 
-      const sourceNode = audioCtx.createBufferSource();
-      sourceNode.buffer = zoneBuffer || waveformBuffer;
-      sourceNode.playbackRate.value = playbackRate;
       const hasSlice =
         !zoneBuffer &&
         slice !== undefined &&
         slice.end > slice.start &&
         slice.start >= 0 &&
         slice.end <= rawSamples!.length;
-      sourceNode.loop = !hasSlice && !zoneBuffer;
-
-      const gainNode = audioCtx.createGain();
-      gainNode.connect(outputNode || audioCtx.destination);
-      sourceNode.connect(gainNode);
-
       // `at` schedules the note on the audio clock (a sequencer step); the
       // default plays it now (a key or pad).
       const now = at ?? audioCtx.currentTime;
-      const safeAttack = Math.max(envelope.attack, 0.005);
-      const peak = clampVelocity(velocity, 127) / 127;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(peak, now + safeAttack);
-      gainNode.gain.linearRampToValueAtTime(
-        envelope.sustain * peak,
-        now + safeAttack + envelope.decay,
+      const { sourceNode, gainNode, releaseTime } = startSampleVoice(
+        audioCtx,
+        outputNode || audioCtx.destination,
+        {
+          buffer: (zoneBuffer || waveformBuffer)!,
+          playbackRate,
+          loop: !hasSlice && !zoneBuffer,
+          region:
+            hasSlice && slice
+              ? {
+                  offset: slice.start / rawSampleRate,
+                  length: (slice.end - slice.start) / rawSampleRate,
+                }
+              : undefined,
+          envelope,
+          peak: clampVelocity(velocity, 127) / 127,
+          at: now,
+          duration,
+        },
       );
-      if (hasSlice && slice) {
-        const offset = slice.start / rawSampleRate;
-        const sliceDuration = (slice.end - slice.start) / rawSampleRate;
-        sourceNode.start(now, offset, sliceDuration);
-      } else {
-        sourceNode.start(now);
-      }
-      let releaseTime: number | null = null;
-      if (duration !== undefined) {
-        // A scheduled note releases itself after `duration` (stop must
-        // follow start, or Web Audio throws). Automation past the release
-        // point (a long attack or decay) is cancelled so the gain cannot
-        // rise again during the release.
-        const releaseAt = now + Math.max(0.001, duration);
-        releaseTime = releaseAt;
-        const param = gainNode.gain as AudioParam & {
-          cancelAndHoldAtTime?: (t: number) => void;
-        };
-        if (typeof param.cancelAndHoldAtTime === "function") {
-          param.cancelAndHoldAtTime(releaseAt);
-        } else {
-          param.cancelScheduledValues(releaseAt);
-          param.setValueAtTime(envelope.sustain * peak, releaseAt);
-        }
-        param.linearRampToValueAtTime(0, releaseAt + envelope.release);
-        sourceNode.stop(releaseAt + envelope.release + 0.01);
-      }
 
       const voice: Voice = {
         gainNode,

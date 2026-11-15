@@ -336,7 +336,10 @@ and the `nbplay-wire` child defined in `js/src/ts/spaday.ts` delivers kernel
 commands to `element.command()`; see "Transports widgets" below. An element
 never emits status during construction or its first property assignment, so
 rendering a widget never writes back to the kernel. Non-visual engines the elements share
-live beside them: `voices.ts` (fallback sine voices), `midi_access.ts` (Web
+live beside them: `voices.ts` (the note players built from a patch on a
+given output, `scheduleSynthNote()`, `scheduleFmNote()` and
+`startSampleVoice()`, so one element can host several sounds, plus the
+fallback sine voices), `midi_access.ts` (Web
 MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
 `sampler_engine.ts` (sample playback).
 
