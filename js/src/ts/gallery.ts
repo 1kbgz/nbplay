@@ -1245,8 +1245,9 @@ const SECTIONS: Section[] = [
         wide: true,
       },
       {
-        label: "detuned saws through a swept filter",
+        label: "detuned saws through a swept filter, with presets",
         props: {
+          presetNames: ["Acid bass", "Pluck", "Warm pad"],
           waveform: sineBurst(512),
           oscillatorType: "saw",
           osc2Level: 0.8,

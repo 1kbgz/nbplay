@@ -1,0 +1,20 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Acid bass",
+ "state": {
+  "oscillator_type": "saw",
+  "amplitude": 0.5,
+  "cutoff": 300.0,
+  "resonance": 12.0,
+  "filter_env": 4.5,
+  "filter_attack": 0.0,
+  "filter_decay": 0.2,
+  "filter_sustain": 0.1,
+  "filter_release": 0.1,
+  "decay": 0.3,
+  "sustain": 0.6,
+  "release": 0.08
+ }
+}

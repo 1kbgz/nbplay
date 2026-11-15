@@ -1321,6 +1321,18 @@ one `config.update()`, so a refused preset changes nothing and a loaded one is
 one undo step. `session_id`, `channel_index` and `theme` are never part of a
 preset, so loading one into a track's instrument keeps its routing. The mixer
 has no preset: its channels belong to the session's tracks.
+A field the preset does not have (one added after the preset was saved) takes
+its default, so an older preset keeps its sound.
+
+Presets shipped with nbplay live in `nbplay/presets/<widget class>/`, one JSON
+file each, and list only the fields that differ from the defaults.
+`Widget.presets()` lists their names, and `load_preset()` and `from_preset()`
+take a name as well as a dict or a path (a string that is not a shipped
+preset's name is read as a path). The synth and the FM synth have a header
+picker: their config holds `preset_names` (set by the widget) and
+`preset_request`, which the element writes with the picked name; the kernel
+loads that preset and clears the request. Both fields are transient for undo,
+so a pick is one undo step, the same as `load_preset()`.
 
 ### Undo and redo
 

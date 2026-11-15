@@ -1,0 +1,27 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Warm pad",
+ "state": {
+  "oscillator_type": "saw",
+  "amplitude": 0.4,
+  "osc2_type": "saw",
+  "osc2_level": 0.8,
+  "osc2_detune": 7.0,
+  "cutoff": 1200.0,
+  "resonance": 0.8,
+  "filter_env": 1.0,
+  "filter_attack": 0.8,
+  "filter_decay": 1.0,
+  "filter_sustain": 0.5,
+  "filter_release": 1.2,
+  "attack": 0.6,
+  "decay": 0.5,
+  "sustain": 0.8,
+  "release": 1.2,
+  "lfo_target": "filter",
+  "lfo_rate": 0.3,
+  "lfo_depth": 0.2
+ }
+}

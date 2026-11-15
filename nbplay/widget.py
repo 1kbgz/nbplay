@@ -7,6 +7,7 @@ status fields two-way on ``nbplay-status``, and an ``nbplay-wire`` child
 delivers ``session.command`` calls to the element.
 """
 
+import functools
 import json
 import math
 import os
@@ -150,6 +151,19 @@ def _pattern_events(voices, step_duration, repeat):
     return events, length * repeat
 
 
+_FACTORY_PRESETS = pathlib.Path(__file__).parent / "presets"
+
+
+@functools.cache
+def _factory_presets(widget_type):
+    """The presets shipped for a widget class (``nbplay/presets/<class>/``), by name."""
+    presets = {}
+    for path in sorted((_FACTORY_PRESETS / widget_type).glob("*.json")):
+        preset = json.loads(path.read_text())
+        presets[preset["name"]] = preset
+    return presets
+
+
 class InstrumentWidget(Widget):
     """One instrument element on a config model and, usually, a status model.
 
@@ -183,6 +197,8 @@ class InstrumentWidget(Widget):
         self._status_mirror = self.status.model_dump() if self.status is not None else {}
         self._unobserve_config = self.config.on_change(self._on_config_change)
         self._unhook_patches = _on_session_patch(self.session, self._on_patch)
+        if "preset_request" in self.CONFIG_MODEL.model_fields:
+            self.on_change(self._on_preset_request, names="preset_request")
         super().__init__(self.tree(), session=self.session, wires=self.wires(), packages=PACKAGE, **kwargs)
 
     def tree(self, prefix=""):
@@ -207,6 +223,13 @@ class InstrumentWidget(Widget):
 
     def _prepare(self):
         """Hook run after the models exist and before they are hosted."""
+        if "preset_names" in self.CONFIG_MODEL.model_fields:
+            self.config.preset_names = self.presets()
+
+    @classmethod
+    def presets(cls):
+        """The names of the presets shipped with nbplay for this class, for :meth:`load_preset` and :meth:`from_preset`."""
+        return list(_factory_presets(cls.__name__))
 
     def preset(self, name=""):
         """This widget's sound or layout as a JSON-safe dict that :meth:`load_preset` applies to a widget of the same class.
@@ -230,14 +253,16 @@ class InstrumentWidget(Widget):
         pathlib.Path(path).write_text(json.dumps(self.preset(name), indent=1) + "\n")
 
     def load_preset(self, preset):
-        """Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
+        """Apply a preset: the name of one shipped with nbplay (see :meth:`presets`), the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
 
         The fields are validated together and applied in one update, so a
         refused preset changes nothing and a loaded one is one undo step. A
         field the preset does not have (one added after it was saved) takes
         its default, so an older preset keeps its sound.
         """
-        if isinstance(preset, (str, os.PathLike)):
+        if isinstance(preset, str) and preset in _factory_presets(type(self).__name__):
+            preset = _factory_presets(type(self).__name__)[preset]
+        elif isinstance(preset, (str, os.PathLike)):
             preset = json.loads(pathlib.Path(preset).read_text())
         if not isinstance(preset, dict) or preset.get("format") != _PRESET_FORMAT:
             raise ValueError("not an nbplay preset")
@@ -254,6 +279,17 @@ class InstrumentWidget(Widget):
     def from_preset(cls, preset, **kwargs):
         """A new widget with a preset loaded; ``kwargs`` go to the constructor."""
         return cls(**kwargs).load_preset(preset)
+
+    def _on_preset_request(self, widget, name, old, request):
+        # The browser's preset picker asks for a shipped preset by name; the
+        # request is cleared once it is handled, so picking it again works.
+        if not request:
+            return
+        try:
+            if request in self.presets():
+                self.load_preset(request)
+        finally:
+            self.config.preset_request = ""
 
     def _command(self, field, value):
         if self.status_id is None:
@@ -386,6 +422,8 @@ class SynthWidget(InstrumentWidget):
         "lfo_target": "lfoTarget",
         "lfo_rate": "lfoRate",
         "lfo_depth": "lfoDepth",
+        "preset_names": "presetNames",
+        "preset_request": "presetRequest",
         "waveform": "waveform",
         "session_id": "sessionId",
         "channel_index": "channelIndex",
@@ -594,6 +632,8 @@ class FMSynthWidget(InstrumentWidget):
     STATUS_MODEL = FMSynthStatus
     CONFIG: ClassVar[dict[str, str]] = {
         **{name: name for name in _FM_SYNTH_STATE},
+        "preset_names": "presetNames",
+        "preset_request": "presetRequest",
         "session_id": "sessionId",
         "channel_index": "channelIndex",
         "theme": "theme",

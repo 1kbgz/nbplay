@@ -1,0 +1,20 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Wind",
+ "state": {
+  "oscillator_type": "noise",
+  "amplitude": 0.3,
+  "filter_type": "bandpass",
+  "cutoff": 800.0,
+  "resonance": 4.0,
+  "attack": 1.0,
+  "decay": 0.0,
+  "sustain": 1.0,
+  "release": 2.0,
+  "lfo_target": "filter",
+  "lfo_rate": 0.2,
+  "lfo_depth": 0.5
+ }
+}

@@ -1,0 +1,17 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Sub bass",
+ "state": {
+  "oscillator_type": "sine",
+  "amplitude": 0.6,
+  "osc2_type": "triangle",
+  "osc2_level": 0.3,
+  "osc2_semitones": 12,
+  "cutoff": 600.0,
+  "decay": 0.2,
+  "sustain": 0.9,
+  "release": 0.1
+ }
+}

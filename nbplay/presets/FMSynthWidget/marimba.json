@@ -1,0 +1,15 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "FMSynthWidget",
+ "name": "Marimba",
+ "state": {
+  "amplitude": 0.5,
+  "ratio": 4.0,
+  "index": 1.2,
+  "attack": 0.001,
+  "decay": 0.4,
+  "sustain": 0.0,
+  "release": 0.2
+ }
+}

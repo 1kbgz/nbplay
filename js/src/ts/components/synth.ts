@@ -14,6 +14,7 @@ import {
   type SynthVoice,
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
+import { presetSelect } from "./preset-select.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./envelope.ts";
 import "./header.ts";
@@ -129,6 +130,8 @@ export class NbplaySynth extends NbplayElement {
     lfoRate: { type: Number, attribute: "lfo-rate" },
     lfoDepth: { type: Number, attribute: "lfo-depth" },
     waveform: { attribute: false },
+    presetNames: { attribute: false },
+    presetRequest: { type: String, attribute: "preset-request" },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -159,6 +162,10 @@ export class NbplaySynth extends NbplayElement {
   declare lfoRate: number;
   declare lfoDepth: number;
   declare waveform: unknown;
+  /** The shipped presets' names for the header's picker. */
+  declare presetNames: string[];
+  /** The preset the picker asked for; the kernel loads it and clears this. */
+  declare presetRequest: string;
   declare sessionId: string;
   declare channelIndex: number;
   declare isPlaying: boolean;
@@ -180,6 +187,8 @@ export class NbplaySynth extends NbplayElement {
     this.amplitude = 0.5;
     this.sampleRate = 44100;
     this.waveform = null;
+    this.presetNames = [];
+    this.presetRequest = "";
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
@@ -406,7 +415,12 @@ export class NbplaySynth extends NbplayElement {
   render() {
     const noise = this.oscillatorType === "noise";
     const D = SYNTH_DEFAULTS;
-    return html`<nbplay-header badge="synth"></nbplay-header>
+    return html`<nbplay-header badge="synth"
+        >${presetSelect(this.presetNames, (name) => {
+          this.presetRequest = name;
+          this.emitDetail("nbplay-set", { values: { presetRequest: name } });
+        })}</nbplay-header
+      >
       <nbplay-waveform
         class="nbplay-synth-waveform"
         variant="glow"
