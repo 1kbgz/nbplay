@@ -2,7 +2,11 @@
 requires = [
     "hatchling",
     "hatch-js",
+<<<<<<< before updating
     "hatch-rs",
+=======
+    "hatch-rs>=0.6.1",
+>>>>>>> after updating
 ]
 build-backend = "hatchling.build"
 
@@ -53,7 +57,11 @@ develop = [
     "cibuildwheel",
     "codespell",
     "hatch-js",
+<<<<<<< before updating
     "hatch-rs",
+=======
+    "hatch-rs>=0.6.1",
+>>>>>>> after updating
     "hatchling",
     "httpx",
     "jupyterlab",
