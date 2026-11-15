@@ -1,0 +1,17 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Noise hat",
+ "state": {
+  "oscillator_type": "noise",
+  "amplitude": 0.4,
+  "filter_type": "highpass",
+  "cutoff": 7000.0,
+  "resonance": 1.0,
+  "attack": 0.001,
+  "decay": 0.05,
+  "sustain": 0.0,
+  "release": 0.05
+ }
+}

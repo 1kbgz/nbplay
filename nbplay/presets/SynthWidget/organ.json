@@ -1,0 +1,21 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Organ",
+ "state": {
+  "oscillator_type": "sine",
+  "amplitude": 0.4,
+  "osc2_type": "sine",
+  "osc2_level": 0.7,
+  "osc2_semitones": 12,
+  "cutoff": 8000.0,
+  "attack": 0.01,
+  "decay": 0.0,
+  "sustain": 1.0,
+  "release": 0.05,
+  "lfo_target": "amplitude",
+  "lfo_rate": 6.0,
+  "lfo_depth": 0.2
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "FMSynthWidget",
+ "name": "Electric piano",
+ "state": {
+  "amplitude": 0.5,
+  "ratio": 1.0,
+  "index": 1.5,
+  "attack": 0.002,
+  "decay": 1.2,
+  "sustain": 0.2,
+  "release": 0.4
+ }
+}

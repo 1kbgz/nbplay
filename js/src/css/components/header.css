@@ -40,3 +40,19 @@ nbplay-header .nbplay-header-actions {
 nbplay-header .nbplay-header-actions:empty {
   display: none;
 }
+nbplay-header .nbplay-preset-select {
+  height: var(--nbplay-control-height);
+  max-width: 160px;
+  font: inherit;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-header .nbplay-preset-select:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}

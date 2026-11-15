@@ -1,0 +1,21 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Strings",
+ "state": {
+  "oscillator_type": "saw",
+  "amplitude": 0.35,
+  "osc2_type": "saw",
+  "osc2_level": 0.9,
+  "osc2_detune": 12.0,
+  "cutoff": 2500.0,
+  "attack": 0.3,
+  "decay": 0.2,
+  "sustain": 0.85,
+  "release": 0.8,
+  "lfo_target": "pitch",
+  "lfo_rate": 5.0,
+  "lfo_depth": 0.05
+ }
+}

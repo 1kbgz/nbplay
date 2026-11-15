@@ -14,6 +14,7 @@ import {
   type SynthVoice,
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
+import { presetSelect } from "./preset-select.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./envelope.ts";
 import "./header.ts";
@@ -129,6 +130,8 @@ export class NbplaySynth extends NbplayElement {
     lfoRate: { type: Number, attribute: "lfo-rate" },
     lfoDepth: { type: Number, attribute: "lfo-depth" },
     waveform: { attribute: false },
+    presetNames: { attribute: false },
+    presetRequest: { type: String, attribute: "preset-request" },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -159,6 +162,10 @@ export class NbplaySynth extends NbplayElement {
   declare lfoRate: number;
   declare lfoDepth: number;
   declare waveform: unknown;
+  /** The shipped presets' names for the header's picker. */
+  declare presetNames: string[];
+  /** The preset the picker asked for (status); the kernel loads it. */
+  declare presetRequest: string;
   declare sessionId: string;
   declare channelIndex: number;
   declare isPlaying: boolean;
@@ -180,6 +187,8 @@ export class NbplaySynth extends NbplayElement {
     this.amplitude = 0.5;
     this.sampleRate = 44100;
     this.waveform = null;
+    this.presetNames = [];
+    this.presetRequest = "";
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
@@ -403,10 +412,26 @@ export class NbplaySynth extends NbplayElement {
     </div>`;
   }
 
+  /**
+   * Ask the kernel for a shipped preset. `presetRequest` is status:
+   * `<time>:<name>`, so asking for the same name again is still a change.
+   */
+  private requestPreset(name: string): void {
+    this.presetRequest = `${Date.now()}:${name}`;
+    this.emitDetail("nbplay-status", {
+      values: { presetRequest: this.presetRequest },
+      save: true,
+    });
+  }
+
   render() {
     const noise = this.oscillatorType === "noise";
     const D = SYNTH_DEFAULTS;
-    return html`<nbplay-header badge="synth"></nbplay-header>
+    return html`<nbplay-header badge="synth"
+        >${presetSelect(this.presetNames, (name) => {
+          this.requestPreset(name);
+        })}</nbplay-header
+      >
       <nbplay-waveform
         class="nbplay-synth-waveform"
         variant="glow"

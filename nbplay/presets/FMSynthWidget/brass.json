@@ -1,0 +1,15 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "FMSynthWidget",
+ "name": "Brass",
+ "state": {
+  "amplitude": 0.45,
+  "ratio": 1.0,
+  "index": 3.0,
+  "attack": 0.08,
+  "decay": 0.2,
+  "sustain": 0.8,
+  "release": 0.15
+ }
+}

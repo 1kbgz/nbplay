@@ -13,6 +13,7 @@ import {
   type FmVoice,
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
+import { presetSelect } from "./preset-select.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./envelope.ts";
 import "./header.ts";
@@ -114,6 +115,8 @@ export class NbplayFmSynth extends NbplayElement {
     decay: { type: Number },
     sustain: { type: Number },
     release: { type: Number },
+    presetNames: { attribute: false },
+    presetRequest: { type: String, attribute: "preset-request" },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -127,6 +130,10 @@ export class NbplayFmSynth extends NbplayElement {
   declare decay: number;
   declare sustain: number;
   declare release: number;
+  /** The shipped presets' names for the header's picker. */
+  declare presetNames: string[];
+  /** The preset the picker asked for (status); the kernel loads it. */
+  declare presetRequest: string;
   declare sessionId: string;
   declare channelIndex: number;
   declare isPlaying: boolean;
@@ -149,6 +156,8 @@ export class NbplayFmSynth extends NbplayElement {
     this.decay = 0.2;
     this.sustain = 0.6;
     this.release = 0.2;
+    this.presetNames = [];
+    this.presetRequest = "";
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
@@ -296,8 +305,24 @@ export class NbplayFmSynth extends NbplayElement {
     ></nbplay-param>`;
   }
 
+  /**
+   * Ask the kernel for a shipped preset. `presetRequest` is status:
+   * `<time>:<name>`, so asking for the same name again is still a change.
+   */
+  private requestPreset(name: string): void {
+    this.presetRequest = `${Date.now()}:${name}`;
+    this.emitDetail("nbplay-status", {
+      values: { presetRequest: this.presetRequest },
+      save: true,
+    });
+  }
+
   render() {
-    return html`<nbplay-header badge="fm synth"></nbplay-header>
+    return html`<nbplay-header badge="fm synth"
+        >${presetSelect(this.presetNames, (name) => {
+          this.requestPreset(name);
+        })}</nbplay-header
+      >
       <nbplay-waveform
         class="nbplay-fm-waveform"
         variant="glow"

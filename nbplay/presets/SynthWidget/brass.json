@@ -1,0 +1,24 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Brass",
+ "state": {
+  "oscillator_type": "saw",
+  "amplitude": 0.45,
+  "osc2_type": "saw",
+  "osc2_level": 0.8,
+  "osc2_detune": 5.0,
+  "cutoff": 600.0,
+  "resonance": 1.0,
+  "filter_env": 3.0,
+  "filter_attack": 0.08,
+  "filter_decay": 0.3,
+  "filter_sustain": 0.5,
+  "filter_release": 0.2,
+  "attack": 0.05,
+  "decay": 0.2,
+  "sustain": 0.8,
+  "release": 0.2
+ }
+}

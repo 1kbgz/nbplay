@@ -1,0 +1,25 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "SynthWidget",
+ "name": "Lead",
+ "state": {
+  "oscillator_type": "square",
+  "amplitude": 0.4,
+  "osc2_type": "saw",
+  "osc2_level": 0.7,
+  "osc2_detune": 8.0,
+  "cutoff": 3000.0,
+  "resonance": 2.0,
+  "filter_env": 1.0,
+  "filter_decay": 0.3,
+  "filter_sustain": 0.3,
+  "attack": 0.01,
+  "decay": 0.2,
+  "sustain": 0.9,
+  "release": 0.15,
+  "lfo_target": "pitch",
+  "lfo_rate": 5.5,
+  "lfo_depth": 0.15
+ }
+}

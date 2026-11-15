@@ -1205,6 +1205,42 @@ class TestPresets:
         finally:
             synth.close()
 
+    def test_shipped_presets_load_by_name_into_their_widgets(self):
+        for cls in (nbplay.SynthWidget, nbplay.FMSynthWidget):
+            names = cls.presets()
+            assert len(names) >= 6 and names == sorted(names)
+            for name in names:
+                widget = cls.from_preset(name, autosync=False)
+                try:
+                    assert widget.config.preset_names == names
+                finally:
+                    widget.close()
+        pluck = nbplay.SynthWidget.from_preset("Pluck", session_id="one", autosync=False)
+        try:
+            assert (pluck.config.oscillator_type, pluck.config.cutoff, pluck.config.filter_env) == ("saw", 400.0, 4.0)
+            assert pluck.config.session_id == "one"
+            # A name that is not a shipped preset is read as a path.
+            with pytest.raises(FileNotFoundError):
+                pluck.load_preset("No such preset")
+        finally:
+            pluck.close()
+
+    def test_the_browser_picker_loads_a_shipped_preset_as_one_undo_step(self):
+        session = nbplay.Session()
+        synth = nbplay.SynthWidget(autosync=False)
+        try:
+            session.add_track("Lead", None, synth)
+            session.history.mark()
+            # The picker writes "<time>:<name>" to the status.
+            browser_writes(synth, preset_request="1700000000000:Acid bass")
+            assert (synth.config.cutoff, synth.config.resonance) == (300.0, 12.0)
+            browser_writes(synth, preset_request="1700000000001:Not shipped")
+            assert synth.config.cutoff == 300.0
+            session.undo()
+            assert (synth.config.cutoff, synth.config.resonance) == (20000.0, 0.7)
+        finally:
+            session.close()
+
     def test_fm_synth_preset_round_trips(self):
         bell = nbplay.FMSynthWidget(ratio=3.5, index=4.0, decay=0.3, sustain=0.2, session_id="one", channel_index=1, autosync=False)
         try:

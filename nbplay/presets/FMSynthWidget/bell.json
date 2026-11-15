@@ -1,0 +1,15 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "FMSynthWidget",
+ "name": "Bell",
+ "state": {
+  "amplitude": 0.4,
+  "ratio": 3.5,
+  "index": 4.0,
+  "attack": 0.001,
+  "decay": 2.0,
+  "sustain": 0.0,
+  "release": 1.5
+ }
+}

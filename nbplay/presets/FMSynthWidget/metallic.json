@@ -1,0 +1,15 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "FMSynthWidget",
+ "name": "Metallic",
+ "state": {
+  "amplitude": 0.4,
+  "ratio": 1.41,
+  "index": 6.0,
+  "attack": 0.002,
+  "decay": 1.0,
+  "sustain": 0.2,
+  "release": 0.8
+ }
+}

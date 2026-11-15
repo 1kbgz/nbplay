@@ -217,6 +217,8 @@ class SynthConfig(_Validated):
     lfo_rate: float = Field(5.0, ge=0.05, le=20)
     lfo_depth: float = Field(0.5, ge=0, le=1)
     waveform: bytes = b""
+    #: The shipped presets, for the browser's picker; set by the widget.
+    preset_names: list[str] = []
     session_id: str = ""
     channel_index: int = -1
     theme: str = ""
@@ -241,9 +243,11 @@ class SynthConfig(_Validated):
 
 
 class SynthStatus(BaseModel):
-    """Whether the browser is sounding the synth's tone; browser-owned."""
+    """Whether the browser is sounding the synth's tone, and its preset picks; browser-owned."""
 
     is_playing: bool = False
+    #: ``<time>:<name>`` of a shipped preset picked in the header; the kernel loads it.
+    preset_request: str = ""
 
 
 class FMSynthConfig(_Validated):
@@ -262,6 +266,8 @@ class FMSynthConfig(_Validated):
     decay: float = Field(0.2, ge=0, le=2)
     sustain: float = Field(0.6, ge=0, le=1)
     release: float = Field(0.2, ge=0, le=5)
+    #: The shipped presets, for the browser's picker; set by the widget.
+    preset_names: list[str] = []
     session_id: str = ""
     channel_index: int = -1
     theme: str = ""
@@ -270,9 +276,11 @@ class FMSynthConfig(_Validated):
 
 
 class FMSynthStatus(BaseModel):
-    """Whether the browser is sounding the FM synth's test tone; browser-owned."""
+    """Whether the browser is sounding the FM synth's test tone, and its preset picks; browser-owned."""
 
     is_playing: bool = False
+    #: ``<time>:<name>`` of a shipped preset picked in the header; the kernel loads it.
+    preset_request: str = ""
 
 
 class MixerConfig(_Validated):

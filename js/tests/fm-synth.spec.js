@@ -56,6 +56,38 @@ test.describe("FMSynthWidget", () => {
     ).toHaveCount(4);
   });
 
+  test("the header's preset picker asks the kernel for a preset", async ({
+    page,
+  }) => {
+    await renderWidget(page);
+    await expect(page.locator(".nbplay-preset-select")).toHaveCount(0);
+    await page.evaluate(() => {
+      window.__testModel.set("preset_names", ["Bell", "Electric piano"]);
+      window.__testModel._trigger("change:preset_names");
+    });
+    const select = page.locator("nbplay-header .nbplay-preset-select");
+    await expect(select.locator("option")).toHaveText([
+      "Preset…",
+      "Bell",
+      "Electric piano",
+    ]);
+    await page.evaluate(() => {
+      window.__requests = [];
+      document
+        .querySelector("nbplay-fm-synth")
+        .addEventListener("nbplay-status", (e) =>
+          window.__requests.push(e.detail.values.presetRequest),
+        );
+    });
+    await select.selectOption("Bell");
+    // The request is status, made unique by the time it was picked.
+    const requests = await page.evaluate(() => window.__requests);
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatch(/^\d+:Bell$/);
+    // The picker goes back to its placeholder, so Bell can be picked again.
+    await expect(select).toHaveValue("");
+  });
+
   test("an edit writes the model and the play button reports its state", async ({
     page,
   }) => {
