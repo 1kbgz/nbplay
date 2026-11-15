@@ -861,7 +861,9 @@ window.runMermaid = runMermaid;</script>
 <span class="w">        </span><span class="sd">"""Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.</span>
 
 <span class="sd">        The fields are validated together and applied in one update, so a</span>
-<span class="sd">        refused preset changes nothing and a loaded one is one undo step.</span>
+<span class="sd">        refused preset changes nothing and a loaded one is one undo step. A</span>
+<span class="sd">        field the preset does not have (one added after it was saved) takes</span>
+<span class="sd">        its default, so an older preset keeps its sound.</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preset</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
             <span class="n">preset</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">preset</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
@@ -872,7 +874,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">if</span> <span class="n">preset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a </span><span class="si">{</span><span class="n">preset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'type'</span><span class="p">)</span><span class="si">}</span><span class="s2"> preset cannot be loaded into a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">_preset_decode</span><span class="p">(</span><span class="n">preset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="p">{}))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRESET</span> <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">state</span><span class="p">})</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">state</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRESET</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 
@@ -1031,6 +1034,26 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"frequency"</span><span class="p">:</span> <span class="s2">"frequency"</span><span class="p">,</span>
         <span class="s2">"amplitude"</span><span class="p">:</span> <span class="s2">"amplitude"</span><span class="p">,</span>
         <span class="s2">"sample_rate"</span><span class="p">:</span> <span class="s2">"sampleRate"</span><span class="p">,</span>
+        <span class="s2">"osc2_type"</span><span class="p">:</span> <span class="s2">"osc2Type"</span><span class="p">,</span>
+        <span class="s2">"osc2_level"</span><span class="p">:</span> <span class="s2">"osc2Level"</span><span class="p">,</span>
+        <span class="s2">"osc2_semitones"</span><span class="p">:</span> <span class="s2">"osc2Semitones"</span><span class="p">,</span>
+        <span class="s2">"osc2_detune"</span><span class="p">:</span> <span class="s2">"osc2Detune"</span><span class="p">,</span>
+        <span class="s2">"noise_level"</span><span class="p">:</span> <span class="s2">"noiseLevel"</span><span class="p">,</span>
+        <span class="s2">"filter_type"</span><span class="p">:</span> <span class="s2">"filterType"</span><span class="p">,</span>
+        <span class="s2">"cutoff"</span><span class="p">:</span> <span class="s2">"cutoff"</span><span class="p">,</span>
+        <span class="s2">"resonance"</span><span class="p">:</span> <span class="s2">"resonance"</span><span class="p">,</span>
+        <span class="s2">"filter_env"</span><span class="p">:</span> <span class="s2">"filterEnv"</span><span class="p">,</span>
+        <span class="s2">"filter_attack"</span><span class="p">:</span> <span class="s2">"filterAttack"</span><span class="p">,</span>
+        <span class="s2">"filter_decay"</span><span class="p">:</span> <span class="s2">"filterDecay"</span><span class="p">,</span>
+        <span class="s2">"filter_sustain"</span><span class="p">:</span> <span class="s2">"filterSustain"</span><span class="p">,</span>
+        <span class="s2">"filter_release"</span><span class="p">:</span> <span class="s2">"filterRelease"</span><span class="p">,</span>
+        <span class="s2">"attack"</span><span class="p">:</span> <span class="s2">"attack"</span><span class="p">,</span>
+        <span class="s2">"decay"</span><span class="p">:</span> <span class="s2">"decay"</span><span class="p">,</span>
+        <span class="s2">"sustain"</span><span class="p">:</span> <span class="s2">"sustain"</span><span class="p">,</span>
+        <span class="s2">"release"</span><span class="p">:</span> <span class="s2">"release"</span><span class="p">,</span>
+        <span class="s2">"lfo_target"</span><span class="p">:</span> <span class="s2">"lfoTarget"</span><span class="p">,</span>
+        <span class="s2">"lfo_rate"</span><span class="p">:</span> <span class="s2">"lfoRate"</span><span class="p">,</span>
+        <span class="s2">"lfo_depth"</span><span class="p">:</span> <span class="s2">"lfoDepth"</span><span class="p">,</span>
         <span class="s2">"waveform"</span><span class="p">:</span> <span class="s2">"waveform"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>

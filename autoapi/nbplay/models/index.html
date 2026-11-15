@@ -306,6 +306,66 @@
     <a href="#nbplay.models.SynthConfig.sample_rate">SynthConfig.sample_rate</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_type">SynthConfig.osc2_type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_level">SynthConfig.osc2_level</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_semitones">SynthConfig.osc2_semitones</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_detune">SynthConfig.osc2_detune</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.noise_level">SynthConfig.noise_level</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_type">SynthConfig.filter_type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.cutoff">SynthConfig.cutoff</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.resonance">SynthConfig.resonance</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_env">SynthConfig.filter_env</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_attack">SynthConfig.filter_attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_decay">SynthConfig.filter_decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_sustain">SynthConfig.filter_sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_release">SynthConfig.filter_release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.attack">SynthConfig.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.decay">SynthConfig.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.sustain">SynthConfig.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.release">SynthConfig.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_target">SynthConfig.lfo_target</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_rate">SynthConfig.lfo_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_depth">SynthConfig.lfo_depth</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SynthConfig.waveform">SynthConfig.waveform</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1236,6 +1296,15 @@ validated to form a valid model.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">SynthConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SynthConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SynthConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
 <p>Synth settings the kernel owns; <code class="docutils literal notranslate"><span class="pre">waveform</span></code> is derived.</p>
+<p>A note mixes the first oscillator, a second one <code class="docutils literal notranslate"><span class="pre">osc2_semitones</span></code> and
+<code class="docutils literal notranslate"><span class="pre">osc2_detune</span></code> cents away at <code class="docutils literal notranslate"><span class="pre">osc2_level</span></code>, and noise at
+<code class="docutils literal notranslate"><span class="pre">noise_level</span></code>; runs it through a filter whose cutoff the filter
+envelope moves by up to <code class="docutils literal notranslate"><span class="pre">filter_env</span></code> octaves; and shapes it with the
+amplitude envelope. The LFO moves the pitch (up to 2 semitones), the
+cutoff (up to 3 octaves) or the level (tremolo) at <code class="docutils literal notranslate"><span class="pre">lfo_depth</span></code>.
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code> is the test tone. The defaults (no second oscillator, no
+noise, an open filter, no LFO) are the single oscillator of earlier
+versions.</p>
 <p>The preview is rendered by the Rust oscillators as part of validation,
 so it follows the parameters whether Python assigns them or a browser
 edit is validated into the model, and a client edit’s authoritative
@@ -1262,6 +1331,106 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.SynthConfig.sample_rate">
 <span class="sig-name descname"><span class="pre">sample_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.sample_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.osc2_type">
+<span class="sig-name descname"><span class="pre">osc2_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'sine'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'triangle'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'square'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'saw'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'saw'</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.osc2_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.osc2_level">
+<span class="sig-name descname"><span class="pre">osc2_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.osc2_level" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.osc2_semitones">
+<span class="sig-name descname"><span class="pre">osc2_semitones</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.osc2_semitones" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.osc2_detune">
+<span class="sig-name descname"><span class="pre">osc2_detune</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.osc2_detune" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.noise_level">
+<span class="sig-name descname"><span class="pre">noise_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.noise_level" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_type">
+<span class="sig-name descname"><span class="pre">filter_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'lowpass'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'highpass'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'bandpass'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'lowpass'</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.cutoff">
+<span class="sig-name descname"><span class="pre">cutoff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.cutoff" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.resonance">
+<span class="sig-name descname"><span class="pre">resonance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.resonance" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_env">
+<span class="sig-name descname"><span class="pre">filter_env</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_env" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_attack">
+<span class="sig-name descname"><span class="pre">filter_attack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_attack" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_decay">
+<span class="sig-name descname"><span class="pre">filter_decay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_decay" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_sustain">
+<span class="sig-name descname"><span class="pre">filter_sustain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_sustain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.filter_release">
+<span class="sig-name descname"><span class="pre">filter_release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.filter_release" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.attack">
+<span class="sig-name descname"><span class="pre">attack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.attack" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.decay">
+<span class="sig-name descname"><span class="pre">decay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.decay" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.sustain">
+<span class="sig-name descname"><span class="pre">sustain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.sustain" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.release">
+<span class="sig-name descname"><span class="pre">release</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.release" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.lfo_target">
+<span class="sig-name descname"><span class="pre">lfo_target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'off'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pitch'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'amplitude'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'off'</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.lfo_target" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.lfo_rate">
+<span class="sig-name descname"><span class="pre">lfo_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.lfo_rate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SynthConfig.lfo_depth">
+<span class="sig-name descname"><span class="pre">lfo_depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.SynthConfig.lfo_depth" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2638,6 +2807,66 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SynthConfig.sample_rate">SynthConfig.sample_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_type">SynthConfig.osc2_type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_level">SynthConfig.osc2_level</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_semitones">SynthConfig.osc2_semitones</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.osc2_detune">SynthConfig.osc2_detune</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.noise_level">SynthConfig.noise_level</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_type">SynthConfig.filter_type</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.cutoff">SynthConfig.cutoff</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.resonance">SynthConfig.resonance</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_env">SynthConfig.filter_env</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_attack">SynthConfig.filter_attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_decay">SynthConfig.filter_decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_sustain">SynthConfig.filter_sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.filter_release">SynthConfig.filter_release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.attack">SynthConfig.attack</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.decay">SynthConfig.decay</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.sustain">SynthConfig.sustain</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.release">SynthConfig.release</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_target">SynthConfig.lfo_target</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_rate">SynthConfig.lfo_rate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SynthConfig.lfo_depth">SynthConfig.lfo_depth</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SynthConfig.waveform">SynthConfig.waveform</a>

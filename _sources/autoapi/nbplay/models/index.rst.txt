@@ -237,6 +237,16 @@ Module Contents
 
    Synth settings the kernel owns; ``waveform`` is derived.
 
+   A note mixes the first oscillator, a second one ``osc2_semitones`` and
+   ``osc2_detune`` cents away at ``osc2_level``, and noise at
+   ``noise_level``; runs it through a filter whose cutoff the filter
+   envelope moves by up to ``filter_env`` octaves; and shapes it with the
+   amplitude envelope. The LFO moves the pitch (up to 2 semitones), the
+   cutoff (up to 3 octaves) or the level (tremolo) at ``lfo_depth``.
+   ``frequency`` is the test tone. The defaults (no second oscillator, no
+   noise, an open filter, no LFO) are the single oscillator of earlier
+   versions.
+
    The preview is rendered by the Rust oscillators as part of validation,
    so it follows the parameters whether Python assigns them or a browser
    edit is validated into the model, and a client edit's authoritative
@@ -266,6 +276,92 @@ Module Contents
 
    .. py:attribute:: sample_rate
       :type:  int
+
+
+   .. py:attribute:: osc2_type
+      :type:  Literal['sine', 'triangle', 'square', 'saw']
+      :value: 'saw'
+
+
+
+   .. py:attribute:: osc2_level
+      :type:  float
+
+
+   .. py:attribute:: osc2_semitones
+      :type:  int
+
+
+   .. py:attribute:: osc2_detune
+      :type:  float
+
+
+   .. py:attribute:: noise_level
+      :type:  float
+
+
+   .. py:attribute:: filter_type
+      :type:  Literal['lowpass', 'highpass', 'bandpass']
+      :value: 'lowpass'
+
+
+
+   .. py:attribute:: cutoff
+      :type:  float
+
+
+   .. py:attribute:: resonance
+      :type:  float
+
+
+   .. py:attribute:: filter_env
+      :type:  float
+
+
+   .. py:attribute:: filter_attack
+      :type:  float
+
+
+   .. py:attribute:: filter_decay
+      :type:  float
+
+
+   .. py:attribute:: filter_sustain
+      :type:  float
+
+
+   .. py:attribute:: filter_release
+      :type:  float
+
+
+   .. py:attribute:: attack
+      :type:  float
+
+
+   .. py:attribute:: decay
+      :type:  float
+
+
+   .. py:attribute:: sustain
+      :type:  float
+
+
+   .. py:attribute:: release
+      :type:  float
+
+
+   .. py:attribute:: lfo_target
+      :type:  Literal['off', 'pitch', 'filter', 'amplitude']
+      :value: 'off'
+
+
+
+   .. py:attribute:: lfo_rate
+      :type:  float
+
+
+   .. py:attribute:: lfo_depth
+      :type:  float
 
 
    .. py:attribute:: waveform

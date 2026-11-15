@@ -98,6 +98,7 @@ Functions
    nbplay.descriptors._normalize_zone
    nbplay.descriptors._normalize_zones
    nbplay.descriptors._normalize_sample_slices
+   nbplay.descriptors._oscillator
    nbplay.descriptors.render_waveform
    nbplay.descriptors._slot_voices
    nbplay.descriptors._normalize_launcher_slot
@@ -347,12 +348,16 @@ Module Contents
    :value: ('', 'light', 'dark', 'studio', 'flat', 'cube', 'one', 'grim', 'pro', 'fruit')
 
 
-.. py:function:: render_waveform(oscillator_type, frequency, amplitude, sample_rate)
+.. py:function:: _oscillator(oscillator_type, frequency, amplitude, sample_rate)
 
-   The waveform preview for an oscillator as little-endian float32 bytes.
+.. py:function:: render_waveform(oscillator_type, frequency, amplitude, sample_rate, osc2_type='saw', osc2_level=0.0, osc2_ratio=1.0, noise_level=0.0)
 
-   About three cycles of the periodic oscillators, capped at
-   ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.
+   The waveform preview for the synth's oscillators as little-endian float32 bytes.
+
+   About three cycles of the first oscillator, capped at
+   ``_PREVIEW_MAX_FRAMES``, or 1024 frames when it is noise. The second
+   oscillator (at ``osc2_ratio`` times the frequency) and the noise are
+   mixed in at their levels; the filter, envelopes and LFO are not shown.
 
 
 .. py:data:: _LAUNCH_QUANTIZE
@@ -471,7 +476,7 @@ Module Contents
 
 
 .. py:data:: _SYNTH_STATE
-   :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+   :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate', 'osc2_type', 'osc2_level',...
 
 
 .. py:data:: _FM_SYNTH_STATE

@@ -1875,7 +1875,7 @@ Package Contents
 
 
    .. py:attribute:: PRESET
-      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate', 'osc2_type', 'osc2_level',...
 
 
 

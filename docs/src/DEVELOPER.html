@@ -657,7 +657,7 @@ learn work.</p></li>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">oscillator_type</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oscillator_type</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, the second oscillator, noise, filter, envelope and LFO fields, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SpectrumWidget</span></code></p></td>
@@ -855,7 +855,10 @@ and the <code class="docutils literal notranslate"><span class="pre">nbplay-wire
 commands to <code class="docutils literal notranslate"><span class="pre">element.command()</span></code>; see “Transports widgets” below. An element
 never emits status during construction or its first property assignment, so
 rendering a widget never writes back to the kernel. Non-visual engines the elements share
-live beside them: <code class="docutils literal notranslate"><span class="pre">voices.ts</span></code> (fallback sine voices), <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code> (Web
+live beside them: <code class="docutils literal notranslate"><span class="pre">voices.ts</span></code> (the note players built from a patch on a
+given output, <code class="docutils literal notranslate"><span class="pre">scheduleSynthNote()</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduleFmNote()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">startSampleVoice()</span></code>, so one element can host several sounds, plus the
+fallback sine voices), <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code> (Web
 MIDI ports), <code class="docutils literal notranslate"><span class="pre">mixer_bus.ts</span></code> (audio graph, effects, meters) and
 <code class="docutils literal notranslate"><span class="pre">sampler_engine.ts</span></code> (sample playback).</p>
 <p>The component gallery, <code class="docutils literal notranslate"><span class="pre">js/dist/gallery.html</span></code> after a build, renders every
@@ -944,25 +947,41 @@ phase.</p>
 <h3>SynthWidget<a class="headerlink" href="#synthwidget" title="Link to this heading">¶</a></h3>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>. Element:
 <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/synth.ts</span></code>.</p>
-<p>SynthWidget exposes oscillator type, frequency, amplitude, sample rate, play
-state, and a binary waveform preview. Python renders the preview through the
-Rust oscillator classes and stores little-endian float32 bytes in the <code class="docutils literal notranslate"><span class="pre">waveform</span></code>
-field. Browser code converts those bytes with <code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> and draws a high-DPI
-canvas waveform.</p>
-<p>Browser playback is independent from the Rust preview. The TypeScript engine
-creates an <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>, connects either an <code class="docutils literal notranslate"><span class="pre">OscillatorNode</span></code> or a looped noise
-<code class="docutils literal notranslate"><span class="pre">AudioBufferSourceNode</span></code> into a <code class="docutils literal notranslate"><span class="pre">GainNode</span></code>, and updates frequency/amplitude with
-smoothed <code class="docutils literal notranslate"><span class="pre">AudioParam.setTargetAtTime()</span></code> calls. The frequency slider uses a log
-mapping from 20 Hz to 8000 Hz. Frequency and amplitude values are editable by
-double-clicking their readouts.</p>
+<p>SynthWidget is a subtractive synth. A note mixes the first oscillator
+(<code class="docutils literal notranslate"><span class="pre">oscillator_type</span></code>, which may be noise), a second oscillator (<code class="docutils literal notranslate"><span class="pre">osc2_type</span></code>,
+<code class="docutils literal notranslate"><span class="pre">osc2_level</span></code>, <code class="docutils literal notranslate"><span class="pre">osc2_semitones</span></code> and <code class="docutils literal notranslate"><span class="pre">osc2_detune</span></code> in cents) and noise
+(<code class="docutils literal notranslate"><span class="pre">noise_level</span></code>), runs the mix through a filter (<code class="docutils literal notranslate"><span class="pre">filter_type</span></code>, <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>,
+<code class="docutils literal notranslate"><span class="pre">resonance</span></code>) whose cutoff the filter envelope (<code class="docutils literal notranslate"><span class="pre">filter_attack</span></code> to
+<code class="docutils literal notranslate"><span class="pre">filter_release</span></code>) moves by up to <code class="docutils literal notranslate"><span class="pre">filter_env</span></code> octaves, and shapes it with the
+amplitude envelope (<code class="docutils literal notranslate"><span class="pre">attack</span></code>, <code class="docutils literal notranslate"><span class="pre">decay</span></code>, <code class="docutils literal notranslate"><span class="pre">sustain</span></code>, <code class="docutils literal notranslate"><span class="pre">release</span></code>). The LFO
+(<code class="docutils literal notranslate"><span class="pre">lfo_target</span></code>, <code class="docutils literal notranslate"><span class="pre">lfo_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">lfo_depth</span></code>) moves the pitch by up to 2 semitones,
+the cutoff by up to 3 octaves, or the level (tremolo). The defaults are one
+oscillator through an open filter with no LFO, the sound of earlier versions,
+except that a note now holds its level for its length instead of fading over
+it.</p>
+<p>Python renders the waveform preview through the Rust oscillator classes, the
+second oscillator and the noise mixed in at their levels (the filter,
+envelopes and LFO are not drawn), and stores little-endian float32 bytes in the
+<code class="docutils literal notranslate"><span class="pre">waveform</span></code> field. Browser code converts those bytes with <code class="docutils literal notranslate"><span class="pre">toFloat32()</span></code> and
+draws a high-DPI canvas waveform.</p>
+<p>Browser playback is independent from the Rust preview. A voice is
+<code class="docutils literal notranslate"><span class="pre">startSynthVoice()</span></code> in <code class="docutils literal notranslate"><span class="pre">voices.ts</span></code>: the three sources each feed a gain into a
+<code class="docutils literal notranslate"><span class="pre">BiquadFilterNode</span></code>; the amplitude envelope is a gain after the filter, the
+filter envelope automates the filter’s <code class="docutils literal notranslate"><span class="pre">detune</span></code> (in cents), and the LFO is an
+<code class="docutils literal notranslate"><span class="pre">OscillatorNode</span></code> whose gain is connected to the oscillators’ <code class="docutils literal notranslate"><span class="pre">detune</span></code>, the
+filter’s <code class="docutils literal notranslate"><span class="pre">detune</span></code> or a tremolo gain. Play/stop holds one voice at <code class="docutils literal notranslate"><span class="pre">frequency</span></code>
+on a private <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code> and moves it with <code class="docutils literal notranslate"><span class="pre">update()</span></code> as controls change;
+<code class="docutils literal notranslate"><span class="pre">scheduleSynthNote()</span></code> plays a note for a duration. The frequency slider uses a
+log mapping from 20 Hz to 8000 Hz. Values are editable by double-clicking their
+readouts.</p>
 <p>When extending SynthWidget, update both the Python oscillator/preview path and
 the TypeScript playback path if the feature should affect both the picture and
 the sound. Add tests in Python for preview/backend behavior and Playwright tests
 for DOM and model sync.</p>
 <p>With a <code class="docutils literal notranslate"><span class="pre">session_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> (set by <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code>), the
 synth also registers under <code class="docutils literal notranslate"><span class="pre">bus.instruments</span></code> so sequencers, launcher slots, and
-MIDI clips on its track play notes with its oscillator type and amplitude
-(noise plays a short burst) through the track’s mixer channel, instead of the
+MIDI clips on its track play notes with its current patch through the track’s
+mixer channel, instead of the
 scheduler’s sine fallback. It registers at render, when the routing fields
 change, and on <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> when the mixer renders later.</p>
 </section>
@@ -1751,7 +1770,8 @@ their metadata. Loading creates fresh widgets with a new <code class="docutils l
 <code class="docutils literal notranslate"><span class="pre">Widget.from_preset(...)</span></code> builds a new one. The fields come from the class’s
 <code class="docutils literal notranslate"><span class="pre">PRESET</span></code> tuple, which reuses the session’s state lists where they exist:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>: oscillator type, frequency, amplitude, sample rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>: the whole patch (oscillators, noise, filter, envelopes, LFO),
+frequency and sample rate.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code>: frequency, amplitude, ratio, index and the ADSR.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>: the sample (PCM, length, preview), envelope, pads, slices
 and zones. Bytes travel as <code class="docutils literal notranslate"><span class="pre">{&quot;base64&quot;:</span> <span class="pre">...}</span></code>.</p></li>

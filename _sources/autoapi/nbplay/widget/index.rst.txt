@@ -165,7 +165,9 @@ Module Contents
       Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
 
       The fields are validated together and applied in one update, so a
-      refused preset changes nothing and a loaded one is one undo step.
+      refused preset changes nothing and a loaded one is one undo step. A
+      field the preset does not have (one added after it was saved) takes
+      its default, so an older preset keeps its sound.
 
 
 
@@ -273,7 +275,7 @@ Module Contents
 
 
    .. py:attribute:: PRESET
-      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate')
+      :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate', 'osc2_type', 'osc2_level',...
 
 
 

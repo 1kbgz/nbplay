@@ -202,7 +202,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 
 | Python class         | Config fields (kernel-owned)                                                                                                                                                                                                                                           | Status fields (browser-owned)                                                                                                                                               |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SynthWidget`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, `waveform`, `session_id`, `channel_index`, `theme`                                                                                                                                                         | `is_playing`                                                                                                                                                                |
+| `SynthWidget`        | `oscillator_type`, `frequency`, `amplitude`, `sample_rate`, the second oscillator, noise, filter, envelope and LFO fields, `waveform`, `session_id`, `channel_index`, `theme`                                                                                          | `is_playing`                                                                                                                                                                |
 | `SpectrumWidget`     | `fft_size`, `smoothing`, `min_db`, `max_db`, `min_frequency`, `max_frequency`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | none                                                                                                                                                                        |
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
@@ -336,7 +336,10 @@ and the `nbplay-wire` child defined in `js/src/ts/spaday.ts` delivers kernel
 commands to `element.command()`; see "Transports widgets" below. An element
 never emits status during construction or its first property assignment, so
 rendering a widget never writes back to the kernel. Non-visual engines the elements share
-live beside them: `voices.ts` (fallback sine voices), `midi_access.ts` (Web
+live beside them: `voices.ts` (the note players built from a patch on a
+given output, `scheduleSynthNote()`, `scheduleFmNote()` and
+`startSampleVoice()`, so one element can host several sounds, plus the
+fallback sine voices), `midi_access.ts` (Web
 MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
 `sampler_engine.ts` (sample playback).
 
@@ -430,18 +433,35 @@ Render order can vary in notebooks. SamplerWidget handles this by listening for
 Python class: `SynthWidget`. Element:
 `js/src/ts/components/synth.ts`.
 
-SynthWidget exposes oscillator type, frequency, amplitude, sample rate, play
-state, and a binary waveform preview. Python renders the preview through the
-Rust oscillator classes and stores little-endian float32 bytes in the `waveform`
-field. Browser code converts those bytes with `toFloat32()` and draws a high-DPI
-canvas waveform.
+SynthWidget is a subtractive synth. A note mixes the first oscillator
+(`oscillator_type`, which may be noise), a second oscillator (`osc2_type`,
+`osc2_level`, `osc2_semitones` and `osc2_detune` in cents) and noise
+(`noise_level`), runs the mix through a filter (`filter_type`, `cutoff`,
+`resonance`) whose cutoff the filter envelope (`filter_attack` to
+`filter_release`) moves by up to `filter_env` octaves, and shapes it with the
+amplitude envelope (`attack`, `decay`, `sustain`, `release`). The LFO
+(`lfo_target`, `lfo_rate`, `lfo_depth`) moves the pitch by up to 2 semitones,
+the cutoff by up to 3 octaves, or the level (tremolo). The defaults are one
+oscillator through an open filter with no LFO, the sound of earlier versions,
+except that a note now holds its level for its length instead of fading over
+it.
 
-Browser playback is independent from the Rust preview. The TypeScript engine
-creates an `AudioContext`, connects either an `OscillatorNode` or a looped noise
-`AudioBufferSourceNode` into a `GainNode`, and updates frequency/amplitude with
-smoothed `AudioParam.setTargetAtTime()` calls. The frequency slider uses a log
-mapping from 20 Hz to 8000 Hz. Frequency and amplitude values are editable by
-double-clicking their readouts.
+Python renders the waveform preview through the Rust oscillator classes, the
+second oscillator and the noise mixed in at their levels (the filter,
+envelopes and LFO are not drawn), and stores little-endian float32 bytes in the
+`waveform` field. Browser code converts those bytes with `toFloat32()` and
+draws a high-DPI canvas waveform.
+
+Browser playback is independent from the Rust preview. A voice is
+`startSynthVoice()` in `voices.ts`: the three sources each feed a gain into a
+`BiquadFilterNode`; the amplitude envelope is a gain after the filter, the
+filter envelope automates the filter's `detune` (in cents), and the LFO is an
+`OscillatorNode` whose gain is connected to the oscillators' `detune`, the
+filter's `detune` or a tremolo gain. Play/stop holds one voice at `frequency`
+on a private `AudioContext` and moves it with `update()` as controls change;
+`scheduleSynthNote()` plays a note for a duration. The frequency slider uses a
+log mapping from 20 Hz to 8000 Hz. Values are editable by double-clicking their
+readouts.
 
 When extending SynthWidget, update both the Python oscillator/preview path and
 the TypeScript playback path if the feature should affect both the picture and
@@ -450,8 +470,8 @@ for DOM and model sync.
 
 With a `session_id` and `channel_index` (set by `Session.add_track()`), the
 synth also registers under `bus.instruments` so sequencers, launcher slots, and
-MIDI clips on its track play notes with its oscillator type and amplitude
-(noise plays a short burst) through the track's mixer channel, instead of the
+MIDI clips on its track play notes with its current patch through the track's
+mixer channel, instead of the
 scheduler's sine fallback. It registers at render, when the routing fields
 change, and on `nbplay-bus-ready` when the mixer renders later.
 
@@ -1287,7 +1307,8 @@ A preset is one widget's sound or layout as JSON, without its session wiring.
 `Widget.from_preset(...)` builds a new one. The fields come from the class's
 `PRESET` tuple, which reuses the session's state lists where they exist:
 
-- `SynthWidget`: oscillator type, frequency, amplitude, sample rate.
+- `SynthWidget`: the whole patch (oscillators, noise, filter, envelopes, LFO),
+  frequency and sample rate.
 - `FMSynthWidget`: frequency, amplitude, ratio, index and the ADSR.
 - `SamplerWidget`: the sample (PCM, length, preview), envelope, pads, slices
   and zones. Bytes travel as `{"base64": ...}`.

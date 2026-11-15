@@ -220,6 +220,31 @@
 </div>
 </div>
 </div>
+<p>Beyond one oscillator: a second oscillator a few cents sharp thickens the sound, a low-pass filter with its own envelope gives each note a bright attack that closes down, and an LFO adds vibrato. Notes from a sequencer, a clip or a launched slot on the synth’s track play through the whole patch.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pluck</span> <span class="o">=</span> <span class="n">SynthWidget</span><span class="p">(</span>
+    <span class="n">oscillator_type</span><span class="o">=</span><span class="s2">"saw"</span><span class="p">,</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="mf">220.0</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">osc2_type</span><span class="o">=</span><span class="s2">"saw"</span><span class="p">,</span>
+    <span class="n">osc2_level</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">osc2_detune</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="mf">600.0</span><span class="p">,</span>
+    <span class="n">resonance</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span>
+    <span class="n">filter_env</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+    <span class="n">filter_decay</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">filter_sustain</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">decay</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">sustain</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">lfo_target</span><span class="o">=</span><span class="s2">"pitch"</span><span class="p">,</span>
+    <span class="n">lfo_depth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pluck</span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 
 

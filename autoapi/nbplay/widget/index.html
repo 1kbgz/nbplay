@@ -1257,7 +1257,9 @@ not part of it. Bytes, such as a sampler’s sample, are base64 text.</p>
 <span class="sig-name descname"><span class="pre">load_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#InstrumentWidget.load_preset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.InstrumentWidget.load_preset" title="Link to this definition">¶</a></dt>
 <dd><p>Apply a preset: the dict from <a class="reference internal" href="#nbplay.widget.InstrumentWidget.preset" title="nbplay.widget.InstrumentWidget.preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preset()</span></code></a>, or the path of a file from <a class="reference internal" href="#nbplay.widget.InstrumentWidget.save_preset" title="nbplay.widget.InstrumentWidget.save_preset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_preset()</span></code></a>.</p>
 <p>The fields are validated together and applied in one update, so a
-refused preset changes nothing and a loaded one is one undo step.</p>
+refused preset changes nothing and a loaded one is one undo step. A
+field the preset does not have (one added after it was saved) takes
+its default, so an older preset keeps its sound.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1376,7 +1378,7 @@ part of validation, so kernel and browser edits both refresh it.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.SynthWidget.PRESET">
-<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate')</span></em><a class="headerlink" href="#nbplay.widget.SynthWidget.PRESET" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate',</span> <span class="pre">'osc2_type',</span> <span class="pre">'osc2_level',...</span></em><a class="headerlink" href="#nbplay.widget.SynthWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

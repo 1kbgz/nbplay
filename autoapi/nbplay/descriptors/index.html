@@ -447,6 +447,9 @@
     <a href="#nbplay.descriptors.THEMES">THEMES</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._oscillator">_oscillator()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors.render_waveform">render_waveform()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -782,31 +785,34 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_sample_slices" title="nbplay.descriptors._normalize_sample_slices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_sample_slices</span></code></a>(slices[, sample_length])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.render_waveform" title="nbplay.descriptors.render_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_waveform</span></code></a>(oscillator_type, frequency, amplitude, ...)</p></td>
-<td><p>The waveform preview for an oscillator as little-endian float32 bytes.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._oscillator" title="nbplay.descriptors._oscillator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_oscillator</span></code></a>(oscillator_type, frequency, amplitude, ...)</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._slot_voices" title="nbplay.descriptors._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors.render_waveform" title="nbplay.descriptors.render_waveform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_waveform</span></code></a>(oscillator_type, frequency, amplitude, ...)</p></td>
+<td><p>The waveform preview for the synth's oscillators as little-endian float32 bytes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._slot_voices" title="nbplay.descriptors._slot_voices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_slot_voices</span></code></a>(pattern)</p></td>
 <td><p>Coerce a pattern into <code class="docutils literal notranslate"><span class="pre">voices_data</span></code> (list of voices, each a list of step dicts).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_launcher_slot" title="nbplay.descriptors._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_launcher_slot" title="nbplay.descriptors._normalize_launcher_slot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_launcher_slot</span></code></a>(slot)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._default_pad_notes" title="nbplay.descriptors._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._default_pad_notes" title="nbplay.descriptors._default_pad_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_pad_notes</span></code></a>([rows, cols])</p></td>
 <td><p>Default pad notes starting at MIDI 36 (C2), ascending chromatically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._positive_pad_dimension" title="nbplay.descriptors._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._positive_pad_dimension" title="nbplay.descriptors._positive_pad_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_positive_pad_dimension</span></code></a>(value)</p></td>
 <td><p>Clamp pad grid dimensions to at least one row/column.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._build_route" title="nbplay.descriptors._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._build_route" title="nbplay.descriptors._build_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_build_route</span></code></a>(channel_index[, zone, octave, note, notes])</p></td>
 <td><p>Build a <code class="docutils literal notranslate"><span class="pre">KeyboardRoute</span></code> from kwargs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._json_copy" title="nbplay.descriptors._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._json_copy" title="nbplay.descriptors._json_copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_json_copy</span></code></a>(value)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._preset_encode" title="nbplay.descriptors._preset_encode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_preset_encode</span></code></a>(value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._preset_encode" title="nbplay.descriptors._preset_encode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_preset_encode</span></code></a>(value)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">value</span></code> with bytes replaced by <code class="docutils literal notranslate"><span class="pre">{&quot;base64&quot;:</span> <span class="pre">...}</span></code>, so a preset is JSON.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._preset_decode" title="nbplay.descriptors._preset_decode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_preset_decode</span></code></a>(value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._preset_decode" title="nbplay.descriptors._preset_decode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_preset_decode</span></code></a>(value)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -1222,11 +1228,18 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._oscillator">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_oscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscillator_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_oscillator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._oscillator" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="nbplay.descriptors.render_waveform">
-<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">render_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscillator_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#render_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.render_waveform" title="Link to this definition">¶</a></dt>
-<dd><p>The waveform preview for an oscillator as little-endian float32 bytes.</p>
-<p>About three cycles of the periodic oscillators, capped at
-<code class="docutils literal notranslate"><span class="pre">_PREVIEW_MAX_FRAMES</span></code>; 1024 frames of noise.</p>
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">render_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oscillator_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osc2_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'saw'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osc2_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osc2_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#render_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors.render_waveform" title="Link to this definition">¶</a></dt>
+<dd><p>The waveform preview for the synth’s oscillators as little-endian float32 bytes.</p>
+<p>About three cycles of the first oscillator, capped at
+<code class="docutils literal notranslate"><span class="pre">_PREVIEW_MAX_FRAMES</span></code>, or 1024 frames when it is noise. The second
+oscillator (at <code class="docutils literal notranslate"><span class="pre">osc2_ratio</span></code> times the frequency) and the noise are
+mixed in at their levels; the filter, envelopes and LFO are not shown.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -1382,7 +1395,7 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py data">
 <dt class="sig sig-object py" id="nbplay.descriptors._SYNTH_STATE">
-<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_SYNTH_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate')</span></em><a class="headerlink" href="#nbplay.descriptors._SYNTH_STATE" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_SYNTH_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('oscillator_type',</span> <span class="pre">'frequency',</span> <span class="pre">'amplitude',</span> <span class="pre">'sample_rate',</span> <span class="pre">'osc2_type',</span> <span class="pre">'osc2_level',...</span></em><a class="headerlink" href="#nbplay.descriptors._SYNTH_STATE" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
@@ -1723,6 +1736,9 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors.THEMES">THEMES</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._oscillator">_oscillator()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors.render_waveform">render_waveform()</a>

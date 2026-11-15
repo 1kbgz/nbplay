@@ -1501,30 +1501,55 @@ window.runMermaid = runMermaid;</script>
 <span class="n">THEMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"light"</span><span class="p">,</span> <span class="s2">"dark"</span><span class="p">,</span> <span class="s2">"studio"</span><span class="p">,</span> <span class="s2">"flat"</span><span class="p">,</span> <span class="s2">"cube"</span><span class="p">,</span> <span class="s2">"one"</span><span class="p">,</span> <span class="s2">"grim"</span><span class="p">,</span> <span class="s2">"pro"</span><span class="p">,</span> <span class="s2">"fruit"</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="_oscillator">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._oscillator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_oscillator</span><span class="p">(</span><span class="n">oscillator_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"square"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SquareOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"saw"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SawOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"triangle"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TriangleOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">NoiseSource</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SineOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="render_waveform">
 <a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors.render_waveform">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">render_waveform</span><span class="p">(</span><span class="n">oscillator_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""The waveform preview for an oscillator as little-endian float32 bytes.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_waveform</span><span class="p">(</span>
+    <span class="n">oscillator_type</span><span class="p">,</span>
+    <span class="n">frequency</span><span class="p">,</span>
+    <span class="n">amplitude</span><span class="p">,</span>
+    <span class="n">sample_rate</span><span class="p">,</span>
+    <span class="n">osc2_type</span><span class="o">=</span><span class="s2">"saw"</span><span class="p">,</span>
+    <span class="n">osc2_level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">osc2_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">noise_level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The waveform preview for the synth's oscillators as little-endian float32 bytes.</span>
 
-<span class="sd">    About three cycles of the periodic oscillators, capped at</span>
-<span class="sd">    ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.</span>
+<span class="sd">    About three cycles of the first oscillator, capped at</span>
+<span class="sd">    ``_PREVIEW_MAX_FRAMES``, or 1024 frames when it is noise. The second</span>
+<span class="sd">    oscillator (at ``osc2_ratio`` times the frequency) and the noise are</span>
+<span class="sd">    mixed in at their levels; the filter, envelopes and LFO are not shown.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"square"</span><span class="p">:</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="n">SquareOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"saw"</span><span class="p">:</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="n">SawOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"triangle"</span><span class="p">:</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="n">TriangleOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="n">NoiseSource</span><span class="p">(</span><span class="n">amplitude</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">osc</span> <span class="o">=</span> <span class="n">SineOscillator</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">oscillator_type</span> <span class="o">==</span> <span class="s2">"noise"</span><span class="p">:</span>
         <span class="n">frames</span> <span class="o">=</span> <span class="mi">1024</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">frames_per_cycle</span> <span class="o">=</span> <span class="n">sample_rate</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="n">frames</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">_PREVIEW_MAX_FRAMES</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">frames_per_cycle</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"f"</span><span class="p">,</span> <span class="n">osc</span><span class="o">.</span><span class="n">render_to_buffer</span><span class="p">(</span><span class="n">frames</span><span class="p">))</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
+    <span class="n">mixed</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">"f"</span><span class="p">,</span> <span class="n">_oscillator</span><span class="p">(</span><span class="n">oscillator_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span><span class="o">.</span><span class="n">render_to_buffer</span><span class="p">(</span><span class="n">frames</span><span class="p">))</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">osc2_level</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_oscillator</span><span class="p">(</span><span class="n">osc2_type</span><span class="p">,</span> <span class="n">frequency</span> <span class="o">*</span> <span class="n">osc2_ratio</span><span class="p">,</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">osc2_level</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">noise_level</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NoiseSource</span><span class="p">(</span><span class="n">amplitude</span> <span class="o">*</span> <span class="n">noise_level</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">render_to_buffer</span><span class="p">(</span><span class="n">frames</span><span class="p">)):</span>
+            <span class="n">mixed</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">mixed</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span></div>
 
 
 
@@ -1752,7 +1777,32 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"loop_enabled"</span><span class="p">,</span>
     <span class="s2">"follow_transport"</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"oscillator_type"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">)</span>
+<span class="n">_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"oscillator_type"</span><span class="p">,</span>
+    <span class="s2">"frequency"</span><span class="p">,</span>
+    <span class="s2">"amplitude"</span><span class="p">,</span>
+    <span class="s2">"sample_rate"</span><span class="p">,</span>
+    <span class="s2">"osc2_type"</span><span class="p">,</span>
+    <span class="s2">"osc2_level"</span><span class="p">,</span>
+    <span class="s2">"osc2_semitones"</span><span class="p">,</span>
+    <span class="s2">"osc2_detune"</span><span class="p">,</span>
+    <span class="s2">"noise_level"</span><span class="p">,</span>
+    <span class="s2">"filter_type"</span><span class="p">,</span>
+    <span class="s2">"cutoff"</span><span class="p">,</span>
+    <span class="s2">"resonance"</span><span class="p">,</span>
+    <span class="s2">"filter_env"</span><span class="p">,</span>
+    <span class="s2">"filter_attack"</span><span class="p">,</span>
+    <span class="s2">"filter_decay"</span><span class="p">,</span>
+    <span class="s2">"filter_sustain"</span><span class="p">,</span>
+    <span class="s2">"filter_release"</span><span class="p">,</span>
+    <span class="s2">"attack"</span><span class="p">,</span>
+    <span class="s2">"decay"</span><span class="p">,</span>
+    <span class="s2">"sustain"</span><span class="p">,</span>
+    <span class="s2">"release"</span><span class="p">,</span>
+    <span class="s2">"lfo_target"</span><span class="p">,</span>
+    <span class="s2">"lfo_rate"</span><span class="p">,</span>
+    <span class="s2">"lfo_depth"</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">_FM_SYNTH_STATE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"amplitude"</span><span class="p">,</span> <span class="s2">"ratio"</span><span class="p">,</span> <span class="s2">"index"</span><span class="p">,</span> <span class="s2">"attack"</span><span class="p">,</span> <span class="s2">"decay"</span><span class="p">,</span> <span class="s2">"sustain"</span><span class="p">,</span> <span class="s2">"release"</span><span class="p">)</span>
 <span class="n">_SAMPLER_STATE</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"sample_name"</span><span class="p">,</span>
