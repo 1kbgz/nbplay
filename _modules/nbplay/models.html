@@ -840,6 +840,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">lfo_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="n">lfo_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">waveform</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+    <span class="c1">#: The shipped presets, for the browser's picker; set by the widget.</span>
+    <span class="n">preset_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
@@ -870,9 +872,11 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="SynthStatus">
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SynthStatus">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SynthStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Whether the browser is sounding the synth's tone; browser-owned."""</span>
+<span class="w">    </span><span class="sd">"""Whether the browser is sounding the synth's tone, and its preset picks; browser-owned."""</span>
 
-    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: ``&lt;time&gt;:&lt;name&gt;`` of a shipped preset picked in the header; the kernel loads it.</span>
+    <span class="n">preset_request</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 
 
@@ -894,6 +898,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">sustain</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">release</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="c1">#: The shipped presets, for the browser's picker; set by the widget.</span>
+    <span class="n">preset_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
@@ -905,9 +911,11 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="FMSynthStatus">
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.FMSynthStatus">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FMSynthStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Whether the browser is sounding the FM synth's test tone; browser-owned."""</span>
+<span class="w">    </span><span class="sd">"""Whether the browser is sounding the FM synth's test tone, and its preset picks; browser-owned."""</span>
 
-    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: ``&lt;time&gt;:&lt;name&gt;`` of a shipped preset picked in the header; the kernel loads it.</span>
+    <span class="n">preset_request</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 
 

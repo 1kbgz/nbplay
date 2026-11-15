@@ -616,6 +616,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">delivers ``session.command`` calls to the element.</span>
 <span class="sd">"""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -759,6 +760,19 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">length</span> <span class="o">*</span> <span class="n">repeat</span>
 
 
+<span class="n">_FACTORY_PRESETS</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"presets"</span>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_factory_presets</span><span class="p">(</span><span class="n">widget_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The presets shipped for a widget class (``nbplay/presets/&lt;class&gt;/``), by name."""</span>
+    <span class="n">presets</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">_FACTORY_PRESETS</span> <span class="o">/</span> <span class="n">widget_type</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.json"</span><span class="p">)):</span>
+        <span class="n">preset</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="n">presets</span><span class="p">[</span><span class="n">preset</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">preset</span>
+    <span class="k">return</span> <span class="n">presets</span>
+
+
 <div class="viewcode-block" id="InstrumentWidget">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InstrumentWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
@@ -794,6 +808,8 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">_status_mirror</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unobserve_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_config_change</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unhook_patches</span> <span class="o">=</span> <span class="n">_on_session_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_patch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATUS_MODEL</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">"preset_request"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATUS_MODEL</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_preset_request</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"preset_request"</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">(),</span> <span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">wires</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wires</span><span class="p">(),</span> <span class="n">packages</span><span class="o">=</span><span class="n">PACKAGE</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="InstrumentWidget.tree">
@@ -825,7 +841,17 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="InstrumentWidget._prepare">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Hook run after the models exist and before they are hosted."""</span></div>
+<span class="w">        </span><span class="sd">"""Hook run after the models exist and before they are hosted."""</span>
+        <span class="k">if</span> <span class="s2">"preset_names"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CONFIG_MODEL</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">preset_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">presets</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="InstrumentWidget.presets">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.presets">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">presets</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The names of the presets shipped with nbplay for this class, for :meth:`load_preset` and :meth:`from_preset`."""</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_factory_presets</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="InstrumentWidget.preset">
@@ -858,14 +884,16 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="InstrumentWidget.load_preset">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget.load_preset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_preset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preset</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.</span>
+<span class="w">        </span><span class="sd">"""Apply a preset: the name of one shipped with nbplay (see :meth:`presets`), the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.</span>
 
 <span class="sd">        The fields are validated together and applied in one update, so a</span>
 <span class="sd">        refused preset changes nothing and a loaded one is one undo step. A</span>
 <span class="sd">        field the preset does not have (one added after it was saved) takes</span>
 <span class="sd">        its default, so an older preset keeps its sound.</span>
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preset</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preset</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">preset</span> <span class="ow">in</span> <span class="n">_factory_presets</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
+            <span class="n">preset</span> <span class="o">=</span> <span class="n">_factory_presets</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)[</span><span class="n">preset</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preset</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
             <span class="n">preset</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">preset</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">preset</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">preset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"format"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_PRESET_FORMAT</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"not an nbplay preset"</span><span class="p">)</span>
@@ -885,6 +913,20 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_preset</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">preset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""A new widget with a preset loaded; ``kwargs`` go to the constructor."""</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="n">preset</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InstrumentWidget._on_preset_request">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._on_preset_request">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_preset_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c1"># The header's picker writes ``&lt;time&gt;:&lt;name&gt;`` to the status, so the</span>
+        <span class="c1"># same name picked twice is still a change. The request is</span>
+        <span class="c1"># browser-owned, like the transport's undo requests: a kernel write</span>
+        <span class="c1"># into the config while transports applies a browser edit to that</span>
+        <span class="c1"># same config is not sent until the config next changes, while a</span>
+        <span class="c1"># status patch leaves the config free to change.</span>
+        <span class="n">preset</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">preset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">presets</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="n">preset</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="InstrumentWidget._command">
@@ -1054,12 +1096,13 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"lfo_target"</span><span class="p">:</span> <span class="s2">"lfoTarget"</span><span class="p">,</span>
         <span class="s2">"lfo_rate"</span><span class="p">:</span> <span class="s2">"lfoRate"</span><span class="p">,</span>
         <span class="s2">"lfo_depth"</span><span class="p">:</span> <span class="s2">"lfoDepth"</span><span class="p">,</span>
+        <span class="s2">"preset_names"</span><span class="p">:</span> <span class="s2">"presetNames"</span><span class="p">,</span>
         <span class="s2">"waveform"</span><span class="p">:</span> <span class="s2">"waveform"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">,</span> <span class="s2">"preset_request"</span><span class="p">:</span> <span class="s2">"presetRequest"</span><span class="p">}</span>
 
 <div class="viewcode-block" id="SynthWidget.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SynthWidget.play">[docs]</a>
@@ -1349,11 +1392,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">FMSynthStatus</span>
     <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">},</span>
+        <span class="s2">"preset_names"</span><span class="p">:</span> <span class="s2">"presetNames"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">,</span> <span class="s2">"preset_request"</span><span class="p">:</span> <span class="s2">"presetRequest"</span><span class="p">}</span>
 
 <div class="viewcode-block" id="FMSynthWidget.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.FMSynthWidget.play">[docs]</a>

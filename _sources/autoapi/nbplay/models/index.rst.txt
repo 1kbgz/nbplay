@@ -370,6 +370,12 @@ Module Contents
 
 
 
+   .. py:attribute:: preset_names
+      :type:  list[str]
+      :value: []
+
+
+
    .. py:attribute:: session_id
       :type:  str
       :value: ''
@@ -399,7 +405,7 @@ Module Contents
    Bases: :py:obj:`pydantic.BaseModel`
 
 
-   Whether the browser is sounding the synth's tone; browser-owned.
+   Whether the browser is sounding the synth's tone, and its preset picks; browser-owned.
 
    Create a new model by parsing and validating input data from keyword arguments.
 
@@ -412,6 +418,12 @@ Module Contents
    .. py:attribute:: is_playing
       :type:  bool
       :value: False
+
+
+
+   .. py:attribute:: preset_request
+      :type:  str
+      :value: ''
 
 
 
@@ -466,6 +478,12 @@ Module Contents
       :type:  float
 
 
+   .. py:attribute:: preset_names
+      :type:  list[str]
+      :value: []
+
+
+
    .. py:attribute:: session_id
       :type:  str
       :value: ''
@@ -492,7 +510,7 @@ Module Contents
    Bases: :py:obj:`pydantic.BaseModel`
 
 
-   Whether the browser is sounding the FM synth's test tone; browser-owned.
+   Whether the browser is sounding the FM synth's test tone, and its preset picks; browser-owned.
 
    Create a new model by parsing and validating input data from keyword arguments.
 
@@ -505,6 +523,12 @@ Module Contents
    .. py:attribute:: is_playing
       :type:  bool
       :value: False
+
+
+
+   .. py:attribute:: preset_request
+      :type:  str
+      :value: ''
 
 
 

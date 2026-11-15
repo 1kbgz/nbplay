@@ -61,6 +61,14 @@ other_synth.load_preset("bass.json")
 kit = nb.SamplerWidget.from_preset("kit.json")   # the sample travels with it
 ```
 
+The synth and the FM synth ship with presets, listed by `presets()` and
+offered in the widget's header:
+
+```python
+nb.SynthWidget.presets()                     # ['Acid bass', 'Brass', ...]
+pad = nb.SynthWidget.from_preset("Warm pad")
+```
+
 Mixer channels and the master bus have Web Audio insert chains with built-in
 gain, filter, EQ, compressor, limiter, distortion, delay, reverb, chorus,
 phaser, and tremolo effects; you can register your own browser plugin factories

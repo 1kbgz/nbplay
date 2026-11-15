@@ -1783,7 +1783,22 @@ and zones. Bytes travel as <code class="docutils literal notranslate"><span clas
 one <code class="docutils literal notranslate"><span class="pre">config.update()</span></code>, so a refused preset changes nothing and a loaded one is
 one undo step. <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> and <code class="docutils literal notranslate"><span class="pre">theme</span></code> are never part of a
 preset, so loading one into a track’s instrument keeps its routing. The mixer
-has no preset: its channels belong to the session’s tracks.</p>
+has no preset: its channels belong to the session’s tracks.
+A field the preset does not have (one added after the preset was saved) takes
+its default, so an older preset keeps its sound.</p>
+<p>Presets shipped with nbplay live in <code class="docutils literal notranslate"><span class="pre">nbplay/presets/&lt;widget</span> <span class="pre">class&gt;/</span></code>, one JSON
+file each, and list only the fields that differ from the defaults.
+<code class="docutils literal notranslate"><span class="pre">Widget.presets()</span></code> lists their names, and <code class="docutils literal notranslate"><span class="pre">load_preset()</span></code> and <code class="docutils literal notranslate"><span class="pre">from_preset()</span></code>
+take a name as well as a dict or a path (a string that is not a shipped
+preset’s name is read as a path). The synth and the FM synth have a header
+picker: their config holds <code class="docutils literal notranslate"><span class="pre">preset_names</span></code> (set by the widget, transient for
+undo), and their status holds <code class="docutils literal notranslate"><span class="pre">preset_request</span></code>, which the element writes as
+<code class="docutils literal notranslate"><span class="pre">&lt;time&gt;:&lt;name&gt;</span></code> (so picking the same name again is still a change); the kernel
+loads that preset. A pick is one
+undo step, the same as <code class="docutils literal notranslate"><span class="pre">load_preset()</span></code>. The request is status, like the
+transport’s undo requests, because transports does not send a kernel write
+into a config while it applies a browser edit to that config: the write would
+wait for the config’s next change.</p>
 </section>
 <section id="undo-and-redo">
 <h3>Undo and redo<a class="headerlink" href="#undo-and-redo" title="Link to this heading">¶</a></h3>

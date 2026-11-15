@@ -249,6 +249,12 @@ another one of the same kind:</p>
 <span class="n">kit</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SamplerWidget</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">"kit.json"</span><span class="p">)</span>   <span class="c1"># the sample travels with it</span>
 </pre></div>
 </div>
+<p>The synth and the FM synth ship with presets, listed by <code class="docutils literal notranslate"><span class="pre">presets()</span></code> and
+offered in the widget’s header:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nb</span><span class="o">.</span><span class="n">SynthWidget</span><span class="o">.</span><span class="n">presets</span><span class="p">()</span>                     <span class="c1"># ['Acid bass', 'Brass', ...]</span>
+<span class="n">pad</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">SynthWidget</span><span class="o">.</span><span class="n">from_preset</span><span class="p">(</span><span class="s2">"Warm pad"</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Mixer channels and the master bus have Web Audio insert chains with built-in
 gain, filter, EQ, compressor, limiter, distortion, delay, reverb, chorus,
 phaser, and tremolo effects; you can register your own browser plugin factories

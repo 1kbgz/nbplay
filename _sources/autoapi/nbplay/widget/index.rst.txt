@@ -145,6 +145,14 @@ Module Contents
 
 
 
+   .. py:method:: presets()
+      :classmethod:
+
+
+      The names of the presets shipped with nbplay for this class, for :meth:`load_preset` and :meth:`from_preset`.
+
+
+
    .. py:method:: preset(name='')
 
       This widget's sound or layout as a JSON-safe dict that :meth:`load_preset` applies to a widget of the same class.
@@ -162,7 +170,7 @@ Module Contents
 
    .. py:method:: load_preset(preset)
 
-      Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
+      Apply a preset: the name of one shipped with nbplay (see :meth:`presets`), the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
 
       The fields are validated together and applied in one update, so a
       refused preset changes nothing and a loaded one is one undo step. A
@@ -177,6 +185,9 @@ Module Contents
 
       A new widget with a preset loaded; ``kwargs`` go to the constructor.
 
+
+
+   .. py:method:: _on_preset_request(widget, name, old, request)
 
 
    .. py:method:: _command(field, value)
