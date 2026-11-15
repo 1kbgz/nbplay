@@ -909,12 +909,8 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="InstrumentWidget._on_preset_request">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.InstrumentWidget._on_preset_request">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_preset_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-        <span class="c1"># The header's picker writes ``&lt;time&gt;:&lt;name&gt;`` to the status, so the</span>
-        <span class="c1"># same name picked twice is still a change. The request is</span>
-        <span class="c1"># browser-owned, like the transport's undo requests: a kernel write</span>
-        <span class="c1"># into the config while transports applies a browser edit to that</span>
-        <span class="c1"># same config is not sent until the config next changes, while a</span>
-        <span class="c1"># status patch leaves the config free to change.</span>
+        <span class="c1"># The picker writes ``&lt;token&gt;:&lt;name&gt;``; repeated picks get distinct</span>
+        <span class="c1"># tokens, but picks within one status flush use the latest selection.</span>
         <span class="n">preset</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">preset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">presets</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="n">preset</span><span class="p">)</span></div>

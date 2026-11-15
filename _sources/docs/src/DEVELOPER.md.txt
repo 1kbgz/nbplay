@@ -1045,6 +1045,25 @@ that bundle and the stylesheet to `nbplay/static/spaday/`, which
 `nbplay.components.package` publishes as the spaday component package `nbplay`
 (also an installed entry point).
 
+Status bindings coalesce to the latest value per field within the transports update interval
+(default 0.25 seconds). Preset pickers use this intentionally: the latest selection wins. Their
+numeric request tokens increase even for repeated picks in one millisecond, so selecting the same
+preset after a flush reloads it. Distinct tokens do not retain intermediate selections within a flush.
+
+Undo and redo must preserve individual actions and their order. The transport retains its
+`undoRequest` / `redoRequest` properties and `nbplay-request` event, then emits `nbplay-flush` after
+that event finishes. `nbplay-wire` calls the existing `client.flushOwned()` API once bindings have
+queued the change. This also flushes other pending status on that client. It changes neither the
+default batching interval nor the status model schema, and works through notebook, WebSocket, and
+worker hosts. It does not add acknowledgements or replay across disconnects; unsent status is
+discarded on disconnect.
+
+Other request paths keep their existing contracts: Python-to-browser MIDI, capture, and launcher
+operations use queued `Session.command()` calls; timeline export waits for each clip response before
+requesting the next. Panel selection and upload events are handled directly in the page. A future
+operation that must survive a lost connection needs an application request ID, acknowledgement, and
+idempotent retry policy rather than a status token.
+
 Tests: `nbplay/tests/test_widgets.py` drives a widget through a mocked comm;
 `js/tests/spaday.spec.js` renders the spaday widget bundle against real widgets
 in a Python subprocess (`nbplay/tests/spaday_bridge.py`), and

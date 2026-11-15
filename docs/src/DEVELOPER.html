@@ -1511,6 +1511,22 @@ widget root and applies each command before acknowledging it. The build writes
 that bundle and the stylesheet to <code class="docutils literal notranslate"><span class="pre">nbplay/static/spaday/</span></code>, which
 <code class="docutils literal notranslate"><span class="pre">nbplay.components.package</span></code> publishes as the spaday component package <code class="docutils literal notranslate"><span class="pre">nbplay</span></code>
 (also an installed entry point).</p>
+<p>Status bindings coalesce to the latest value per field within the transports update interval
+(default 0.25 seconds). Preset pickers use this intentionally: the latest selection wins. Their
+numeric request tokens increase even for repeated picks in one millisecond, so selecting the same
+preset after a flush reloads it. Distinct tokens do not retain intermediate selections within a flush.</p>
+<p>Undo and redo must preserve individual actions and their order. The transport retains its
+<code class="docutils literal notranslate"><span class="pre">undoRequest</span></code> / <code class="docutils literal notranslate"><span class="pre">redoRequest</span></code> properties and <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> event, then emits <code class="docutils literal notranslate"><span class="pre">nbplay-flush</span></code> after
+that event finishes. <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> calls the existing <code class="docutils literal notranslate"><span class="pre">client.flushOwned()</span></code> API once bindings have
+queued the change. This also flushes other pending status on that client. It changes neither the
+default batching interval nor the status model schema, and works through notebook, WebSocket, and
+worker hosts. It does not add acknowledgements or replay across disconnects; unsent status is
+discarded on disconnect.</p>
+<p>Other request paths keep their existing contracts: Python-to-browser MIDI, capture, and launcher
+operations use queued <code class="docutils literal notranslate"><span class="pre">Session.command()</span></code> calls; timeline export waits for each clip response before
+requesting the next. Panel selection and upload events are handled directly in the page. A future
+operation that must survive a lost connection needs an application request ID, acknowledgement, and
+idempotent retry policy rather than a status token.</p>
 <p>Tests: <code class="docutils literal notranslate"><span class="pre">nbplay/tests/test_widgets.py</span></code> drives a widget through a mocked comm;
 <code class="docutils literal notranslate"><span class="pre">js/tests/spaday.spec.js</span></code> renders the spaday widget bundle against real widgets
 in a Python subprocess (<code class="docutils literal notranslate"><span class="pre">nbplay/tests/spaday_bridge.py</span></code>), and

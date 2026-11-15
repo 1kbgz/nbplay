@@ -27,6 +27,7 @@ Attributes
    spaday_bridge.options
    spaday_bridge.session
    spaday_bridge.sent
+   spaday_bridge.requests
    spaday_bridge.request
 
 
@@ -65,6 +66,10 @@ Module Contents
 .. py:data:: session
 
 .. py:data:: sent
+   :value: []
+
+
+.. py:data:: requests
    :value: []
 
 
