@@ -18,6 +18,7 @@ Classes
    test_widgets.TestIoWidgets
    test_widgets.TestSequencerAndSamplerWidgets
    test_widgets.TestFMSynthWidget
+   test_widgets.TestDrumMachineWidget
    test_widgets.TestArrangementWidgets
    test_widgets.TestObservers
    test_widgets.TestSession
@@ -137,6 +138,23 @@ Module Contents
 
 
    .. py:method:: test_fm_synth_is_a_track_sound_source_that_saves_with_the_session()
+
+
+.. py:class:: TestDrumMachineWidget
+
+   .. py:method:: test_the_default_kit_fills_in_its_synth_and_fm_pads()
+
+
+   .. py:method:: test_pads_and_pattern_validate()
+
+
+   .. py:method:: test_set_pad_set_step_and_set_row()
+
+
+   .. py:method:: test_kits_load_by_name_or_from_the_browser_picker()
+
+
+   .. py:method:: test_a_drum_track_saves_with_the_session_and_gets_a_panel()
 
 
 .. py:class:: TestArrangementWidgets

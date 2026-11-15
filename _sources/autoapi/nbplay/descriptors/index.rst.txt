@@ -41,6 +41,12 @@ Attributes
    nbplay.descriptors._TRANSPORT_STATE
    nbplay.descriptors._PRESET_FORMAT
    nbplay.descriptors._PRESET_FORMAT_VERSION
+   nbplay.descriptors._FACTORY_PRESETS
+   nbplay.descriptors.DRUM_SOUNDS
+   nbplay.descriptors.PAD_SOUNDS
+   nbplay.descriptors.MAX_DRUM_PADS
+   nbplay.descriptors._DRUM_DEFAULTS
+   nbplay.descriptors._DRUM_MACHINE_STATE
 
 
 Classes
@@ -108,6 +114,12 @@ Functions
    nbplay.descriptors._json_copy
    nbplay.descriptors._preset_encode
    nbplay.descriptors._preset_decode
+   nbplay.descriptors._factory_presets
+   nbplay.descriptors._drum_pad
+   nbplay.descriptors._default_drum_kit
+   nbplay.descriptors._bounded
+   nbplay.descriptors._normalize_drum_pad
+   nbplay.descriptors._normalize_drum_pattern
 
 
 Module Contents
@@ -515,4 +527,48 @@ Module Contents
 
 
 .. py:function:: _preset_decode(value)
+
+.. py:data:: _FACTORY_PRESETS
+
+.. py:function:: _factory_presets(widget_type)
+
+   The presets shipped for a widget class (``nbplay/presets/<class>/``), by name.
+
+
+.. py:data:: DRUM_SOUNDS
+   :value: ('kick', 'snare', 'hat', 'clap', 'tom')
+
+
+.. py:data:: PAD_SOUNDS
+   :value: ('kick', 'snare', 'hat', 'clap', 'tom', 'synth', 'fm')
+
+
+.. py:data:: MAX_DRUM_PADS
+   :value: 16
+
+
+.. py:data:: _DRUM_DEFAULTS
+
+.. py:data:: _DRUM_MACHINE_STATE
+   :value: ('pads', 'pattern', 'steps', 'step_duration', 'swing', 'velocity')
+
+
+.. py:function:: _drum_pad(name, note, sound, *, choke=0, **params)
+
+.. py:function:: _default_drum_kit()
+
+   The drum machine's default pads (the "Analog kit" preset), on General MIDI drum notes.
+
+
+.. py:function:: _bounded(value, low, high)
+
+.. py:function:: _normalize_drum_pad(raw, index)
+
+   One drum machine pad with its fields bounded; a synth or FM patch is left to the model to validate.
+
+
+.. py:function:: _normalize_drum_pattern(pattern, pads, steps)
+
+   One row per pad of ``steps`` velocities (0 is off), cut or padded with zeros.
+
 

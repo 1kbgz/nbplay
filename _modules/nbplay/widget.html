@@ -616,7 +616,6 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">delivers ``session.command`` calls to the element.</span>
 <span class="sd">"""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -633,6 +632,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.audio_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode_audio_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_DRUM_MACHINE_STATE</span><span class="p">,</span>
     <span class="n">_FM_SYNTH_STATE</span><span class="p">,</span>
     <span class="n">_PAD_MAX_COUNT</span><span class="p">,</span>
     <span class="n">_PRESET_FORMAT</span><span class="p">,</span>
@@ -655,6 +655,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_clip_id</span><span class="p">,</span>
     <span class="n">_decimate_samples</span><span class="p">,</span>
     <span class="n">_default_steps</span><span class="p">,</span>
+    <span class="n">_factory_presets</span><span class="p">,</span>
     <span class="n">_json_copy</span><span class="p">,</span>
     <span class="n">_nonnegative_number</span><span class="p">,</span>
     <span class="n">_normalize_audio_clip</span><span class="p">,</span>
@@ -675,6 +676,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DrumMachineConfig</span><span class="p">,</span>
+    <span class="n">DrumMachineStatus</span><span class="p">,</span>
     <span class="n">FMSynthConfig</span><span class="p">,</span>
     <span class="n">FMSynthStatus</span><span class="p">,</span>
     <span class="n">KeyboardConfig</span><span class="p">,</span>
@@ -706,6 +709,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"PACKAGE"</span><span class="p">,</span>
+    <span class="s2">"DrumMachineWidget"</span><span class="p">,</span>
     <span class="s2">"FMSynthWidget"</span><span class="p">,</span>
     <span class="s2">"InstrumentWidget"</span><span class="p">,</span>
     <span class="s2">"KeyboardWidget"</span><span class="p">,</span>
@@ -758,19 +762,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">repeat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">repeat</span><span class="p">))</span>
     <span class="n">events</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">event</span><span class="p">,</span> <span class="s2">"beat"</span><span class="p">:</span> <span class="n">event</span><span class="p">[</span><span class="s2">"beat"</span><span class="p">]</span> <span class="o">+</span> <span class="n">cycle</span> <span class="o">*</span> <span class="n">length</span><span class="p">}</span> <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat</span><span class="p">)</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">base</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">length</span> <span class="o">*</span> <span class="n">repeat</span>
-
-
-<span class="n">_FACTORY_PRESETS</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"presets"</span>
-
-
-<span class="nd">@functools</span><span class="o">.</span><span class="n">cache</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_factory_presets</span><span class="p">(</span><span class="n">widget_type</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""The presets shipped for a widget class (``nbplay/presets/&lt;class&gt;/``), by name."""</span>
-    <span class="n">presets</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">_FACTORY_PRESETS</span> <span class="o">/</span> <span class="n">widget_type</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.json"</span><span class="p">)):</span>
-        <span class="n">preset</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-        <span class="n">presets</span><span class="p">[</span><span class="n">preset</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span> <span class="o">=</span> <span class="n">preset</span>
-    <span class="k">return</span> <span class="n">presets</span>
 
 
 <div class="viewcode-block" id="InstrumentWidget">
@@ -1410,6 +1401,110 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.FMSynthWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Stop the test tone in the owning widget."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DrumMachineWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DrumMachineWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A drum machine: pads with their own sounds and a step pattern with one row per pad.</span>
+
+<span class="sd">    A track's sound source, like :class:`SynthWidget`: notes from a</span>
+<span class="sd">    sequencer, a clip or a launched slot on its track play the pads that</span>
+<span class="sd">    answer to them, and its own pattern plays on the session clock. See</span>
+<span class="sd">    :class:`~nbplay.models.DrumMachineConfig` for the pad fields. A kit (the</span>
+<span class="sd">    pads) is its preset; :meth:`presets` lists the shipped kits.</span>
+<span class="sd">    """</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s2">"nbplay-drums"</span>
+    <span class="n">PRESET</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"pads"</span><span class="p">,)</span>
+    <span class="n">CONFIG_MODEL</span> <span class="o">=</span> <span class="n">DrumMachineConfig</span>
+    <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">DrumMachineStatus</span>
+    <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"pads"</span><span class="p">:</span> <span class="s2">"pads"</span><span class="p">,</span>
+        <span class="s2">"pattern"</span><span class="p">:</span> <span class="s2">"pattern"</span><span class="p">,</span>
+        <span class="s2">"steps"</span><span class="p">:</span> <span class="s2">"steps"</span><span class="p">,</span>
+        <span class="s2">"step_duration"</span><span class="p">:</span> <span class="s2">"stepDuration"</span><span class="p">,</span>
+        <span class="s2">"swing"</span><span class="p">:</span> <span class="s2">"swing"</span><span class="p">,</span>
+        <span class="s2">"bpm"</span><span class="p">:</span> <span class="s2">"bpm"</span><span class="p">,</span>
+        <span class="s2">"time_signature_num"</span><span class="p">:</span> <span class="s2">"timeSignatureNum"</span><span class="p">,</span>
+        <span class="s2">"time_signature_den"</span><span class="p">:</span> <span class="s2">"timeSignatureDen"</span><span class="p">,</span>
+        <span class="s2">"velocity"</span><span class="p">:</span> <span class="s2">"velocity"</span><span class="p">,</span>
+        <span class="s2">"preset_names"</span><span class="p">:</span> <span class="s2">"presetNames"</span><span class="p">,</span>
+        <span class="s2">"sound_preset_names"</span><span class="p">:</span> <span class="s2">"soundPresetNames"</span><span class="p">,</span>
+        <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
+        <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
+        <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"is_playing"</span><span class="p">:</span> <span class="s2">"isPlaying"</span><span class="p">,</span> <span class="s2">"current_step"</span><span class="p">:</span> <span class="s2">"currentStep"</span><span class="p">,</span> <span class="s2">"preset_request"</span><span class="p">:</span> <span class="s2">"presetRequest"</span><span class="p">}</span>
+
+<div class="viewcode-block" id="DrumMachineWidget._prepare">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget._prepare">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sound_preset_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"synth"</span><span class="p">:</span> <span class="n">SynthWidget</span><span class="o">.</span><span class="n">presets</span><span class="p">(),</span> <span class="s2">"fm"</span><span class="p">:</span> <span class="n">FMSynthWidget</span><span class="o">.</span><span class="n">presets</span><span class="p">()}</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.set_pad">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.set_pad">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Change pad ``index``'s fields. A new ``sound`` without ``params`` starts from that sound's defaults; ``params`` for the same sound are merged."""</span>
+        <span class="n">pads</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span> <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pads</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"pad index out of range: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">pads</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">sound_changed</span> <span class="o">=</span> <span class="s2">"sound"</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">and</span> <span class="n">fields</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">"params"</span> <span class="ow">in</span> <span class="n">fields</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sound_changed</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">],</span> <span class="o">**</span><span class="n">fields</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]}}</span>
+        <span class="k">elif</span> <span class="n">sound_changed</span> <span class="ow">and</span> <span class="s2">"params"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="n">pads</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span> <span class="o">=</span> <span class="n">pads</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.set_step">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.set_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Set one step of pad ``pad``'s row; a velocity of 0 clears it."""</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pattern</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">pad</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"step out of range: pad </span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">, step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="n">pad</span><span class="p">][</span><span class="n">step</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.set_row">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.set_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Set pad ``pad``'s row: the step indices in ``steps`` at ``velocity``, every other step off."""</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pattern</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">pad</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pattern</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"pad index out of range: </span><span class="si">{</span><span class="n">pad</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">on</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+        <span class="n">pattern</span><span class="p">[</span><span class="n">pad</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">on</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">steps</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.clear">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.clear">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Turn every step off."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.play">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.play">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Start the pattern in the owning widget."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.stop">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stop the pattern in the owning widget."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 </div>
 
@@ -3331,6 +3426,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"SynthWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_SYNTH_STATE</span><span class="p">)}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">FMSynthWidget</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"FMSynthWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">DrumMachineWidget</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"DrumMachineWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_DRUM_MACHINE_STATE</span><span class="p">)}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">SamplerWidget</span><span class="p">):</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">config</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"SamplerWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">_SAMPLER_STATE</span> <span class="o">+</span> <span class="n">_SAMPLER_PAD_STATE</span><span class="p">)}</span>
@@ -3351,7 +3448,7 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">saved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
             <span class="n">entry</span><span class="p">[</span><span class="s2">"zones"</span><span class="p">]</span> <span class="o">=</span> <span class="n">saved</span>
         <span class="k">return</span> <span class="n">entry</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot save sound source of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; use SynthWidget, FMSynthWidget or SamplerWidget"</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"cannot save sound source of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">; use SynthWidget, FMSynthWidget, DrumMachineWidget or SamplerWidget"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_sound_source_from_dict</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
@@ -3363,6 +3460,8 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">SynthWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_SYNTH_STATE</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"FMSynthWidget"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FMSynthWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_FM_SYNTH_STATE</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"DrumMachineWidget"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DrumMachineWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_DRUM_MACHINE_STATE</span><span class="p">})</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"SamplerWidget"</span><span class="p">:</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">SamplerWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_SAMPLER_STATE</span><span class="p">})</span>
         <span class="n">sample_file</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sample_file"</span><span class="p">)</span>

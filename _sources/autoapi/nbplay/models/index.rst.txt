@@ -25,6 +25,8 @@ Classes
    nbplay.models.SynthStatus
    nbplay.models.FMSynthConfig
    nbplay.models.FMSynthStatus
+   nbplay.models.DrumMachineConfig
+   nbplay.models.DrumMachineStatus
    nbplay.models.MixerConfig
    nbplay.models.PadsConfig
    nbplay.models.PadsStatus
@@ -523,6 +525,140 @@ Module Contents
    .. py:attribute:: is_playing
       :type:  bool
       :value: False
+
+
+
+   .. py:attribute:: preset_request
+      :type:  str
+      :value: ''
+
+
+
+.. py:class:: DrumMachineConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   A drum machine: up to 16 pads, each with its own sound, and a step pattern with one row per pad.
+
+   A pad is ``{name, note, sound, gain, pan, choke, params}``. ``sound`` is
+   a built-in drum (``kick``, ``snare``, ``hat``, ``clap``, ``tom``, with
+   ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of
+   that instrument's fields plus ``pitch`` (the note it plays) and
+   ``length`` (seconds); ``preset`` names a shipped synth or FM preset to
+   start from. Pads with the same nonzero ``choke`` group cut each other
+   off (closed and open hats). A note plays the pads that answer to it.
+   ``pattern`` holds a velocity (0 is off) per pad per step.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: pads
+      :type:  list[dict]
+
+
+   .. py:attribute:: pattern
+      :type:  list[list[int]]
+      :value: []
+
+
+
+   .. py:attribute:: steps
+      :type:  int
+
+
+   .. py:attribute:: step_duration
+      :type:  float
+
+
+   .. py:attribute:: swing
+      :type:  float
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: time_signature_num
+      :type:  int
+
+
+   .. py:attribute:: time_signature_den
+      :type:  int
+
+
+   .. py:attribute:: velocity
+      :type:  int
+
+
+   .. py:attribute:: preset_names
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: sound_preset_names
+      :type:  dict[str, list[str]]
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _pads(pads)
+      :classmethod:
+
+
+
+   .. py:method:: _pattern_rows()
+
+
+.. py:class:: DrumMachineStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Play state, the sounding step and kit picks from the browser; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: is_playing
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: current_step
+      :type:  int
+      :value: -1
 
 
 

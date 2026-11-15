@@ -619,13 +619,20 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">PrivateAttr</span><span class="p">,</span> <span class="n">field_validator</span><span class="p">,</span> <span class="n">model_validator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_FM_SYNTH_STATE</span><span class="p">,</span>
+    <span class="n">_SYNTH_STATE</span><span class="p">,</span>
+    <span class="n">MAX_DRUM_PADS</span><span class="p">,</span>
     <span class="n">THEMES</span><span class="p">,</span>
     <span class="n">_clamp_midi_note</span><span class="p">,</span>
     <span class="n">_clamp_velocity</span><span class="p">,</span>
+    <span class="n">_default_drum_kit</span><span class="p">,</span>
     <span class="n">_default_pad_notes</span><span class="p">,</span>
     <span class="n">_default_steps</span><span class="p">,</span>
+    <span class="n">_factory_presets</span><span class="p">,</span>
     <span class="n">_measure_beats</span><span class="p">,</span>
     <span class="n">_normalize_audio_clips</span><span class="p">,</span>
+    <span class="n">_normalize_drum_pad</span><span class="p">,</span>
+    <span class="n">_normalize_drum_pattern</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
     <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
     <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
@@ -641,6 +648,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"DrumMachineConfig"</span><span class="p">,</span>
+    <span class="s2">"DrumMachineStatus"</span><span class="p">,</span>
     <span class="s2">"FMSynthConfig"</span><span class="p">,</span>
     <span class="s2">"FMSynthStatus"</span><span class="p">,</span>
     <span class="s2">"KeyboardConfig"</span><span class="p">,</span>
@@ -915,6 +924,97 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1">#: ``&lt;time&gt;:&lt;name&gt;`` of a shipped preset picked in the header; the kernel loads it.</span>
+    <span class="n">preset_request</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pad_patch</span><span class="p">(</span><span class="n">config_model</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">widget_type</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A synth or FM pad's params: a shipped preset named by ``preset`` under the given fields, validated by the instrument's config."""</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">_factory_presets</span><span class="p">(</span><span class="n">widget_type</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"preset"</span><span class="p">),</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="p">{}))</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">params</span><span class="p">})</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">config_model</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">patch</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"preset"</span><span class="p">):</span>
+        <span class="n">patch</span><span class="p">[</span><span class="s2">"preset"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">"preset"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">patch</span><span class="p">,</span> <span class="s2">"pitch"</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="s2">"pitch"</span><span class="p">],</span> <span class="s2">"length"</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]}</span>
+
+
+<span class="c1">#: The fields of a synth or FM patch a pad keeps; the test tone and sample rate are the instrument's.</span>
+<span class="n">_SYNTH_PAD_FIELDS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_SYNTH_STATE</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"frequency"</span><span class="p">,</span> <span class="s2">"sample_rate"</span><span class="p">))</span>
+<span class="n">_FM_PAD_FIELDS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_FM_SYNTH_STATE</span> <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"frequency"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DrumMachineConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.DrumMachineConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DrumMachineConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A drum machine: up to 16 pads, each with its own sound, and a step pattern with one row per pad.</span>
+
+<span class="sd">    A pad is ``{name, note, sound, gain, pan, choke, params}``. ``sound`` is</span>
+<span class="sd">    a built-in drum (``kick``, ``snare``, ``hat``, ``clap``, ``tom``, with</span>
+<span class="sd">    ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of</span>
+<span class="sd">    that instrument's fields plus ``pitch`` (the note it plays) and</span>
+<span class="sd">    ``length`` (seconds); ``preset`` names a shipped synth or FM preset to</span>
+<span class="sd">    start from. Pads with the same nonzero ``choke`` group cut each other</span>
+<span class="sd">    off (closed and open hats). A note plays the pads that answer to it.</span>
+<span class="sd">    ``pattern`` holds a velocity (0 is off) per pad per step.</span>
+<span class="sd">    """</span>
+
+    <span class="n">pads</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">_default_drum_kit</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pattern</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">step_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">swing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">time_signature_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">time_signature_den</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="c1">#: Velocity of a pad tapped in the browser.</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">127</span><span class="p">)</span>
+    <span class="c1">#: The shipped kits, for the browser's picker; set by the widget.</span>
+    <span class="n">preset_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: The shipped synth and FM presets a pad can start from (``{"synth": [...], "fm": [...]}``); set by the widget.</span>
+    <span class="n">sound_preset_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="DrumMachineConfig._pads">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.DrumMachineConfig._pads">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"pads"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pads</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pads</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pads</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">MAX_DRUM_PADS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a drum machine has 1 to </span><span class="si">{</span><span class="n">MAX_DRUM_PADS</span><span class="si">}</span><span class="s2"> pads, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pads</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="p">[</span><span class="n">_normalize_drum_pad</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">pad</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pads</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"synth"</span><span class="p">:</span>
+                <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_pad_patch</span><span class="p">(</span><span class="n">SynthConfig</span><span class="p">,</span> <span class="n">_SYNTH_PAD_FIELDS</span><span class="p">,</span> <span class="s2">"SynthWidget"</span><span class="p">,</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"fm"</span><span class="p">:</span>
+                <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_pad_patch</span><span class="p">(</span><span class="n">FMSynthConfig</span><span class="p">,</span> <span class="n">_FM_PAD_FIELDS</span><span class="p">,</span> <span class="s2">"FMSynthWidget"</span><span class="p">,</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">normalized</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineConfig._pattern_rows">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.DrumMachineConfig._pattern_rows">[docs]</a>
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pattern_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">_normalize_drum_pattern</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rows</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"pattern"</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DrumMachineStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.DrumMachineStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DrumMachineStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Play state, the sounding step and kit picks from the browser; browser-owned."""</span>
+
+    <span class="n">is_playing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">current_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c1">#: ``&lt;time&gt;:&lt;name&gt;`` of a shipped kit picked in the header; the kernel loads it.</span>
     <span class="n">preset_request</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
 
 

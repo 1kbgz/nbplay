@@ -63,6 +63,7 @@ Classes
    nbplay.Velocity
    nbplay.History
    nbplay.MidiLearn
+   nbplay.DrumMachineWidget
    nbplay.FMSynthWidget
    nbplay.KeyboardWidget
    nbplay.LauncherWidget
@@ -836,6 +837,86 @@ Package Contents
 
 
    .. py:method:: _handle(message)
+
+
+.. py:class:: DrumMachineWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   A drum machine: pads with their own sounds and a step pattern with one row per pad.
+
+   A track's sound source, like :class:`SynthWidget`: notes from a
+   sequencer, a clip or a launched slot on its track play the pads that
+   answer to them, and its own pattern plays on the session clock. See
+   :class:`~nbplay.models.DrumMachineConfig` for the pad fields. A kit (the
+   pads) is its preset; :meth:`presets` lists the shipped kits.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-drums'
+
+
+
+   .. py:attribute:: PRESET
+      :value: ('pads',)
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: _prepare()
+
+      Hook run after the models exist and before they are hosted.
+
+
+
+   .. py:method:: set_pad(index, **fields)
+
+      Change pad ``index``'s fields. A new ``sound`` without ``params`` starts from that sound's defaults; ``params`` for the same sound are merged.
+
+
+
+   .. py:method:: set_step(pad, step, velocity=100)
+
+      Set one step of pad ``pad``'s row; a velocity of 0 clears it.
+
+
+
+   .. py:method:: set_row(pad, steps, velocity=100)
+
+      Set pad ``pad``'s row: the step indices in ``steps`` at ``velocity``, every other step off.
+
+
+
+   .. py:method:: clear()
+
+      Turn every step off.
+
+
+
+   .. py:method:: play()
+
+      Start the pattern in the owning widget.
+
+
+
+   .. py:method:: stop()
+
+      Stop the pattern in the owning widget.
+
 
 
 .. py:class:: FMSynthWidget(session=None, *, config=None, **kwargs)

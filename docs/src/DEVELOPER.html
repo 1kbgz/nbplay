@@ -280,6 +280,9 @@
     <a href="#fmsynthwidget">FMSynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#drummachinewidget">DrumMachineWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#sequencerwidget">SequencerWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -676,39 +679,43 @@ learn work.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, <code class="docutils literal notranslate"><span class="pre">ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">index</span></code>, <code class="docutils literal notranslate"><span class="pre">attack</span></code>, <code class="docutils literal notranslate"><span class="pre">decay</span></code>, <code class="docutils literal notranslate"><span class="pre">sustain</span></code>, <code class="docutils literal notranslate"><span class="pre">release</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pads</span></code>, <code class="docutils literal notranslate"><span class="pre">pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">steps</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">sound_preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code>, <code class="docutils literal notranslate"><span class="pre">preset_request</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">voices_data</span></code>, <code class="docutils literal notranslate"><span class="pre">num_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">measures</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code>, <code class="docutils literal notranslate"><span class="pre">follow_transport</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">groove</span></code>, <code class="docutils literal notranslate"><span class="pre">automation_lanes</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">sample_name</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_length</span></code>, <code class="docutils literal notranslate"><span class="pre">root_note</span></code>, <code class="docutils literal notranslate"><span class="pre">waveform</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_data</span></code>, ADSR fields, <code class="docutils literal notranslate"><span class="pre">max_voices</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_count</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_slices</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">zones</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (capture commands)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bpm</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_num</span></code>, <code class="docutils literal notranslate"><span class="pre">time_signature_den</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_start_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">loop_end_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">bar_number</span></code>, <code class="docutils literal notranslate"><span class="pre">beat_in_bar</span></code>, <code class="docutils literal notranslate"><span class="pre">undo_request</span></code>, <code class="docutils literal notranslate"><span class="pre">redo_request</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">TimelineWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">clips</span></code>, <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">count_in_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">auto_extend_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_extend_bars</span></code>, <code class="docutils literal notranslate"><span class="pre">pixels_per_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">current_beat</span></code>, <code class="docutils literal notranslate"><span class="pre">export_clip_id</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_request</span></code>, <code class="docutils literal notranslate"><span class="pre">import_clip_data</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">is_recording</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_track</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_countdown_beats</span></code>, <code class="docutils literal notranslate"><span class="pre">recording_error</span></code>, <code class="docutils literal notranslate"><span class="pre">recorded_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip</span></code>, <code class="docutils literal notranslate"><span class="pre">exported_clip_data</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LauncherWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">scenes</span></code>, <code class="docutils literal notranslate"><span class="pre">slots</span></code>, <code class="docutils literal notranslate"><span class="pre">quantize</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">selected_slot</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">active_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">queued_slots</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (launch commands)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">upper_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">lower_octave</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, sustain fields, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">sync_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">control_change</span></code>, <code class="docutils literal notranslate"><span class="pre">clock_bpm</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">midi_port</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">forward_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">send_clock</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">request</span></code> (send commands)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PadWidget</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>, <code class="docutils literal notranslate"><span class="pre">cols</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity_sensitive</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">pad_actions</span></code>, <code class="docutils literal notranslate"><span class="pre">sampler_routing</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_pads</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">last_pad_event</span></code></p></td>
 </tr>
@@ -856,8 +863,9 @@ commands to <code class="docutils literal notranslate"><span class="pre">element
 never emits status during construction or its first property assignment, so
 rendering a widget never writes back to the kernel. Non-visual engines the elements share
 live beside them: <code class="docutils literal notranslate"><span class="pre">voices.ts</span></code> (the note players built from a patch on a
-given output, <code class="docutils literal notranslate"><span class="pre">scheduleSynthNote()</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduleFmNote()</span></code> and
-<code class="docutils literal notranslate"><span class="pre">startSampleVoice()</span></code>, so one element can host several sounds, plus the
+given output, <code class="docutils literal notranslate"><span class="pre">scheduleSynthNote()</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduleFmNote()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">startSampleVoice()</span></code> and the built-in drums’ <code class="docutils literal notranslate"><span class="pre">scheduleDrumHit()</span></code>, so one
+element can host several sounds, plus the
 fallback sine voices), <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code> (Web
 MIDI ports), <code class="docutils literal notranslate"><span class="pre">mixer_bus.ts</span></code> (audio graph, effects, meters) and
 <code class="docutils literal notranslate"><span class="pre">sampler_engine.ts</span></code> (sample playback).</p>
@@ -1107,6 +1115,41 @@ note’s duration. The preview is computed in the element from the patch
 tone at <code class="docutils literal notranslate"><span class="pre">frequency</span></code> on a private <code class="docutils literal notranslate"><span class="pre">AudioContext</span></code>. It registers
 <code class="docutils literal notranslate"><span class="pre">bus.instruments[channel_index]</span></code> the way the synth does, and a session saves
 it with its patch.</p>
+</section>
+<section id="drummachinewidget">
+<h3>DrumMachineWidget<a class="headerlink" href="#drummachinewidget" title="Link to this heading">¶</a></h3>
+<p>Python class: <code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code>. Elements:
+<code class="docutils literal notranslate"><span class="pre">js/src/ts/components/drums.ts</span></code> and the pattern grid
+<code class="docutils literal notranslate"><span class="pre">js/src/ts/components/drum-grid.ts</span></code>.</p>
+<p>A drum machine is up to 16 pads and a pattern with one row per pad, on one
+track: <code class="docutils literal notranslate"><span class="pre">session.add_track(&quot;Beat&quot;,</span> <span class="pre">None,</span> <span class="pre">DrumMachineWidget())</span></code>. A pad is
+<code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">note,</span> <span class="pre">sound,</span> <span class="pre">gain,</span> <span class="pre">pan,</span> <span class="pre">choke,</span> <span class="pre">params}</span></code>:</p>
+<ul class="simple">
+<li><p>A built-in drum (<code class="docutils literal notranslate"><span class="pre">kick</span></code>, <code class="docutils literal notranslate"><span class="pre">snare</span></code>, <code class="docutils literal notranslate"><span class="pre">hat</span></code>, <code class="docutils literal notranslate"><span class="pre">clap</span></code>, <code class="docutils literal notranslate"><span class="pre">tom</span></code>) has <code class="docutils literal notranslate"><span class="pre">tune</span></code>
+(semitones), <code class="docutils literal notranslate"><span class="pre">decay</span></code> (seconds) and <code class="docutils literal notranslate"><span class="pre">tone</span></code> (0 to 1). <code class="docutils literal notranslate"><span class="pre">scheduleDrumHit()</span></code> in
+<code class="docutils literal notranslate"><span class="pre">voices.ts</span></code> plays them: kick and tom are sines that fall in pitch, the snare
+is a triangle body under high-passed noise, the hat is high-passed noise and
+the clap is band-passed noise in four bursts.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">synth</span></code> or <code class="docutils literal notranslate"><span class="pre">fm</span></code> pad has that instrument’s patch fields plus <code class="docutils literal notranslate"><span class="pre">pitch</span></code> (the
+note it plays) and <code class="docutils literal notranslate"><span class="pre">length</span></code> (seconds). <code class="docutils literal notranslate"><span class="pre">preset</span></code> names a shipped synth or FM
+preset to start from; the config’s validator fills the patch in from it and
+validates the patch with <code class="docutils literal notranslate"><span class="pre">SynthConfig</span></code> or <code class="docutils literal notranslate"><span class="pre">FMSynthConfig</span></code>, so a pad keeps
+the instrument’s ranges.</p></li>
+<li><p>Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each other off: a hit fades
+the group’s other ringing hits at its start time.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">pattern</span></code> holds a velocity per pad per step (0 is off) and is resized to the
+pads and <code class="docutils literal notranslate"><span class="pre">steps</span></code> by the validator. <code class="docutils literal notranslate"><span class="pre">set_pad()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_step()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_row()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">clear()</span></code> edit them; a new <code class="docutils literal notranslate"><span class="pre">sound</span></code> without <code class="docutils literal notranslate"><span class="pre">params</span></code> starts from that sound’s
+defaults. The element runs the pattern on the session clock with the
+sequencer’s scheduler, which plays each step through the drum machine itself
+(<code class="docutils literal notranslate"><span class="pre">createAudioScheduler({instrument})</span></code>) whether or not there is a session.
+Like the synths it registers <code class="docutils literal notranslate"><span class="pre">bus.instruments[channel_index]</span></code>, so notes from
+a sequencer, a clip or a launched slot on its track play the pads that answer
+to them. Each hit goes through its own gain and pan into the track’s channel.
+A kit is the pads: <code class="docutils literal notranslate"><span class="pre">PRESET</span> <span class="pre">=</span> <span class="pre">(&quot;pads&quot;,)</span></code>, with the shipped Analog kit (the
+default) and Electro kit offered in the header. A session saves the pads,
+pattern, steps, step length, swing and tap velocity.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -1753,8 +1796,8 @@ scenes, slots).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">clips/&lt;clip</span> <span class="pre">id&gt;.bin</span></code>: timeline clip audio that has arrived from the
 browser.</p></li>
 </ul>
-<p>Sound sources are limited to <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code> and
-<code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> (or none);
+<p>Sound sources are limited to <code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>, <code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code>,
+<code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code> and <code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code> (or none);
 saving another type raises. Clip audio lives in the browser, so before saving
 call <code class="docutils literal notranslate"><span class="pre">session.timeline.export_all_clips()</span></code>, which queues one <code class="docutils literal notranslate"><span class="pre">export_clip()</span></code>
 request per clip and caches each answer in <code class="docutils literal notranslate"><span class="pre">timeline.clip_audio</span></code>; wait for
@@ -1773,6 +1816,7 @@ their metadata. Loading creates fresh widgets with a new <code class="docutils l
 <li><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>: the whole patch (oscillators, noise, filter, envelopes, LFO),
 frequency and sample rate.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code>: frequency, amplitude, ratio, index and the ADSR.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code>: the pads (a kit), not the pattern.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>: the sample (PCM, length, preview), envelope, pads, slices
 and zones. Bytes travel as <code class="docutils literal notranslate"><span class="pre">{&quot;base64&quot;:</span> <span class="pre">...}</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>: the grid settings, swing, groove, automation lanes and
@@ -2109,6 +2153,9 @@ python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#fmsynthwidget">FMSynthWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#drummachinewidget">DrumMachineWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#sequencerwidget">SequencerWidget</a>

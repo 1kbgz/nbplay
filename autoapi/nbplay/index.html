@@ -801,6 +801,48 @@
     <a href="#nbplay.MidiLearn._handle">MidiLearn._handle()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.DrumMachineWidget">DrumMachineWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.TAG">DrumMachineWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.PRESET">DrumMachineWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.CONFIG_MODEL">DrumMachineWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.STATUS_MODEL">DrumMachineWidget.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.CONFIG">DrumMachineWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.STATUS">DrumMachineWidget.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget._prepare">DrumMachineWidget._prepare()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_step">DrumMachineWidget.set_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_row">DrumMachineWidget.set_row()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.clear">DrumMachineWidget.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.play">DrumMachineWidget.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.stop">DrumMachineWidget.stop()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.FMSynthWidget">FMSynthWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1680,52 +1722,55 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiLearn</span></code></a></p></td>
 <td><p>Route MIDI control changes to widget config fields.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.FMSynthWidget" title="nbplay.FMSynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FMSynthWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.DrumMachineWidget" title="nbplay.DrumMachineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code></a></p></td>
+<td><p>A drum machine: pads with their own sounds and a step pattern with one row per pad.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.FMSynthWidget" title="nbplay.FMSynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FMSynthWidget</span></code></a></p></td>
 <td><p>A two-operator FM synth: a track's sound source, like <a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynthWidget</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.KeyboardWidget" title="nbplay.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.KeyboardWidget" title="nbplay.KeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyboardWidget</span></code></a></p></td>
 <td><p>The QWERTY musical-typing keyboard on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.LauncherWidget" title="nbplay.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.LauncherWidget" title="nbplay.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
 <td><p>The clip launcher on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiKeyboardWidget" title="nbplay.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiKeyboardWidget" title="nbplay.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
 <td><p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MidiOutputWidget" title="nbplay.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MidiOutputWidget" title="nbplay.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
 <td><p>A Web MIDI output; sends are commands delivered to the owning widget.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.MixerWidget" title="nbplay.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.MixerWidget" title="nbplay.MixerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerWidget</span></code></a></p></td>
 <td><p>The mixer console on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.PadWidget" title="nbplay.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.PadWidget" title="nbplay.PadWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PadWidget</span></code></a></p></td>
 <td><p>The trigger-pad grid on a transports session; the browser owns the taps.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SamplerWidget" title="nbplay.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SamplerWidget" title="nbplay.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
 <td><p>The sampler on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SequencerWidget" title="nbplay.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SequencerWidget" title="nbplay.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
 <td><p>The step sequencer on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Session" title="nbplay.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Session" title="nbplay.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>Transport, mixer, timeline and launcher widgets sharing one browser session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SettingsWidget" title="nbplay.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SettingsWidget" title="nbplay.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
 <td><p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SpectrumWidget" title="nbplay.SpectrumWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectrumWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SpectrumWidget" title="nbplay.SpectrumWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectrumWidget</span></code></a></p></td>
 <td><p>A spectrum analyzer for a session's master bus or one of its mixer channels.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SynthWidget</span></code></a></p></td>
 <td><p>The synth instrument on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TimelineWidget" title="nbplay.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
 <td><p>The tracking widget on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.Track" title="nbplay.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.TransportWidget" title="nbplay.TransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransportWidget</span></code></a></p></td>
 <td><p>The transport instrument on a transports session.</p></td>
 </tr>
 </tbody>
@@ -2759,6 +2804,90 @@ and 0-127 for ints.</p>
 <dt class="sig sig-object py" id="nbplay.MidiLearn._handle">
 <span class="sig-name descname"><span class="pre">_handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/midi_learn.html#MidiLearn._handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.MidiLearn._handle" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.</span></span><span class="sig-name descname"><span class="pre">DrumMachineWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentWidget</span></code></p>
+<p>A drum machine: pads with their own sounds and a step pattern with one row per pad.</p>
+<p>A track’s sound source, like <a class="reference internal" href="#nbplay.SynthWidget" title="nbplay.SynthWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynthWidget</span></code></a>: notes from a
+sequencer, a clip or a launched slot on its track play the pads that
+answer to them, and its own pattern plays on the session clock. See
+<a class="reference internal" href="models/index.html#nbplay.models.DrumMachineConfig" title="nbplay.models.DrumMachineConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">DrumMachineConfig</span></code></a> for the pad fields. A kit (the
+pads) is its preset; <code class="xref py py-meth docutils literal notranslate"><span class="pre">presets()</span></code> lists the shipped kits.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-drums'</span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.PRESET">
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pads',)</span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.PRESET" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.DrumMachineWidget.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.DrumMachineWidget.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget._prepare">
+<span class="sig-name descname"><span class="pre">_prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget._prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget._prepare" title="Link to this definition">¶</a></dt>
+<dd><p>Hook run after the models exist and before they are hosted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.set_pad">
+<span class="sig-name descname"><span class="pre">set_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.set_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.set_pad" title="Link to this definition">¶</a></dt>
+<dd><p>Change pad <code class="docutils literal notranslate"><span class="pre">index</span></code>’s fields. A new <code class="docutils literal notranslate"><span class="pre">sound</span></code> without <code class="docutils literal notranslate"><span class="pre">params</span></code> starts from that sound’s defaults; <code class="docutils literal notranslate"><span class="pre">params</span></code> for the same sound are merged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.set_step">
+<span class="sig-name descname"><span class="pre">set_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.set_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.set_step" title="Link to this definition">¶</a></dt>
+<dd><p>Set one step of pad <code class="docutils literal notranslate"><span class="pre">pad</span></code>’s row; a velocity of 0 clears it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.set_row">
+<span class="sig-name descname"><span class="pre">set_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.set_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.set_row" title="Link to this definition">¶</a></dt>
+<dd><p>Set pad <code class="docutils literal notranslate"><span class="pre">pad</span></code>’s row: the step indices in <code class="docutils literal notranslate"><span class="pre">steps</span></code> at <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, every other step off.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.clear" title="Link to this definition">¶</a></dt>
+<dd><p>Turn every step off.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.play">
+<span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.play" title="Link to this definition">¶</a></dt>
+<dd><p>Start the pattern in the owning widget.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.stop" title="Link to this definition">¶</a></dt>
+<dd><p>Stop the pattern in the owning widget.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -4865,6 +4994,48 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.MidiLearn._handle">MidiLearn._handle()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.DrumMachineWidget">DrumMachineWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.TAG">DrumMachineWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.PRESET">DrumMachineWidget.PRESET</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.CONFIG_MODEL">DrumMachineWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.STATUS_MODEL">DrumMachineWidget.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.CONFIG">DrumMachineWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.STATUS">DrumMachineWidget.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget._prepare">DrumMachineWidget._prepare()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_step">DrumMachineWidget.set_step()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.set_row">DrumMachineWidget.set_row()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.clear">DrumMachineWidget.clear()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.play">DrumMachineWidget.play()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.stop">DrumMachineWidget.stop()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.FMSynthWidget">FMSynthWidget</a>

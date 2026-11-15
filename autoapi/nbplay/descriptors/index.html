@@ -551,6 +551,42 @@
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._preset_decode">_preset_decode()</a>
   </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._FACTORY_PRESETS">_FACTORY_PRESETS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._factory_presets">_factory_presets()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.DRUM_SOUNDS">DRUM_SOUNDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.PAD_SOUNDS">PAD_SOUNDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.MAX_DRUM_PADS">MAX_DRUM_PADS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DRUM_DEFAULTS">_DRUM_DEFAULTS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DRUM_MACHINE_STATE">_DRUM_MACHINE_STATE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._drum_pad">_drum_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_drum_kit">_default_drum_kit()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._bounded">_bounded()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_drum_pad">_normalize_drum_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_drum_pattern">_normalize_drum_pattern()</a>
+  </li>
 </ul>
 </div>
   </div>
@@ -640,6 +676,24 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._PRESET_FORMAT_VERSION" title="nbplay.descriptors._PRESET_FORMAT_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PRESET_FORMAT_VERSION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._FACTORY_PRESETS" title="nbplay.descriptors._FACTORY_PRESETS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_FACTORY_PRESETS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.DRUM_SOUNDS" title="nbplay.descriptors.DRUM_SOUNDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DRUM_SOUNDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors.PAD_SOUNDS" title="nbplay.descriptors.PAD_SOUNDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PAD_SOUNDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors.MAX_DRUM_PADS" title="nbplay.descriptors.MAX_DRUM_PADS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MAX_DRUM_PADS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._DRUM_DEFAULTS" title="nbplay.descriptors._DRUM_DEFAULTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DRUM_DEFAULTS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._DRUM_MACHINE_STATE" title="nbplay.descriptors._DRUM_MACHINE_STATE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DRUM_MACHINE_STATE</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -814,6 +868,24 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._preset_decode" title="nbplay.descriptors._preset_decode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_preset_decode</span></code></a>(value)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._factory_presets" title="nbplay.descriptors._factory_presets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_factory_presets</span></code></a>(widget_type)</p></td>
+<td><p>The presets shipped for a widget class (<code class="docutils literal notranslate"><span class="pre">nbplay/presets/&lt;class&gt;/</span></code>), by name.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._drum_pad" title="nbplay.descriptors._drum_pad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_drum_pad</span></code></a>(name, note, sound, *[, choke])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._default_drum_kit" title="nbplay.descriptors._default_drum_kit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_default_drum_kit</span></code></a>()</p></td>
+<td><p>The drum machine's default pads (the &quot;Analog kit&quot; preset), on General MIDI drum notes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._bounded" title="nbplay.descriptors._bounded"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_bounded</span></code></a>(value, low, high)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_drum_pad" title="nbplay.descriptors._normalize_drum_pad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_drum_pad</span></code></a>(raw, index)</p></td>
+<td><p>One drum machine pad with its fields bounded; a synth or FM patch is left to the model to validate.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_drum_pattern" title="nbplay.descriptors._normalize_drum_pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_drum_pattern</span></code></a>(pattern, pads, steps)</p></td>
+<td><p>One row per pad of <code class="docutils literal notranslate"><span class="pre">steps</span></code> velocities (0 is off), cut or padded with zeros.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1449,6 +1521,70 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
 <span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_preset_decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_preset_decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._preset_decode" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._FACTORY_PRESETS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_FACTORY_PRESETS</span></span><a class="headerlink" href="#nbplay.descriptors._FACTORY_PRESETS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._factory_presets">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_factory_presets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_factory_presets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._factory_presets" title="Link to this definition">¶</a></dt>
+<dd><p>The presets shipped for a widget class (<code class="docutils literal notranslate"><span class="pre">nbplay/presets/&lt;class&gt;/</span></code>), by name.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors.DRUM_SOUNDS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">DRUM_SOUNDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('kick',</span> <span class="pre">'snare',</span> <span class="pre">'hat',</span> <span class="pre">'clap',</span> <span class="pre">'tom')</span></em><a class="headerlink" href="#nbplay.descriptors.DRUM_SOUNDS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors.PAD_SOUNDS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">PAD_SOUNDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('kick',</span> <span class="pre">'snare',</span> <span class="pre">'hat',</span> <span class="pre">'clap',</span> <span class="pre">'tom',</span> <span class="pre">'synth',</span> <span class="pre">'fm')</span></em><a class="headerlink" href="#nbplay.descriptors.PAD_SOUNDS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors.MAX_DRUM_PADS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">MAX_DRUM_PADS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#nbplay.descriptors.MAX_DRUM_PADS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._DRUM_DEFAULTS">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_DRUM_DEFAULTS</span></span><a class="headerlink" href="#nbplay.descriptors._DRUM_DEFAULTS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nbplay.descriptors._DRUM_MACHINE_STATE">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_DRUM_MACHINE_STATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pads',</span> <span class="pre">'pattern',</span> <span class="pre">'steps',</span> <span class="pre">'step_duration',</span> <span class="pre">'swing',</span> <span class="pre">'velocity')</span></em><a class="headerlink" href="#nbplay.descriptors._DRUM_MACHINE_STATE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._drum_pad">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_drum_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sound</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">choke</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_drum_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._drum_pad" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._default_drum_kit">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_default_drum_kit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_default_drum_kit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._default_drum_kit" title="Link to this definition">¶</a></dt>
+<dd><p>The drum machine’s default pads (the “Analog kit” preset), on General MIDI drum notes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._bounded">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_bounded</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_bounded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._bounded" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_drum_pad">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_drum_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_drum_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_drum_pad" title="Link to this definition">¶</a></dt>
+<dd><p>One drum machine pad with its fields bounded; a synth or FM patch is left to the model to validate.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_drum_pattern">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_drum_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_drum_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_drum_pattern" title="Link to this definition">¶</a></dt>
+<dd><p>One row per pad of <code class="docutils literal notranslate"><span class="pre">steps</span></code> velocities (0 is off), cut or padded with zeros.</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -1841,6 +1977,42 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._preset_decode">_preset_decode()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._FACTORY_PRESETS">_FACTORY_PRESETS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._factory_presets">_factory_presets()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.DRUM_SOUNDS">DRUM_SOUNDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.PAD_SOUNDS">PAD_SOUNDS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors.MAX_DRUM_PADS">MAX_DRUM_PADS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DRUM_DEFAULTS">_DRUM_DEFAULTS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._DRUM_MACHINE_STATE">_DRUM_MACHINE_STATE</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._drum_pad">_drum_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._default_drum_kit">_default_drum_kit()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._bounded">_bounded()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_drum_pad">_normalize_drum_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_drum_pattern">_normalize_drum_pattern()</a>
   </li>
 </ul>
 

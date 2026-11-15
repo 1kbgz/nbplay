@@ -447,6 +447,72 @@
     <a href="#nbplay.models.FMSynthStatus.preset_request">FMSynthStatus.preset_request</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.DrumMachineConfig">DrumMachineConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.pads">DrumMachineConfig.pads</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.pattern">DrumMachineConfig.pattern</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.steps">DrumMachineConfig.steps</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.step_duration">DrumMachineConfig.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.swing">DrumMachineConfig.swing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.bpm">DrumMachineConfig.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.time_signature_num">DrumMachineConfig.time_signature_num</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.time_signature_den">DrumMachineConfig.time_signature_den</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.velocity">DrumMachineConfig.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.preset_names">DrumMachineConfig.preset_names</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.sound_preset_names">DrumMachineConfig.sound_preset_names</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.session_id">DrumMachineConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.channel_index">DrumMachineConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.theme">DrumMachineConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._theme">DrumMachineConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._pads">DrumMachineConfig._pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._pattern_rows">DrumMachineConfig._pattern_rows()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.DrumMachineStatus">DrumMachineStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.is_playing">DrumMachineStatus.is_playing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.current_step">DrumMachineStatus.current_step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.preset_request">DrumMachineStatus.preset_request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MixerConfig">MixerConfig</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1070,6 +1136,12 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.FMSynthStatus" title="nbplay.models.FMSynthStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FMSynthStatus</span></code></a></p></td>
 <td><p>Whether the browser is sounding the FM synth's test tone, and its preset picks; browser-owned.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.DrumMachineConfig" title="nbplay.models.DrumMachineConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DrumMachineConfig</span></code></a></p></td>
+<td><p>A drum machine: up to 16 pads, each with its own sound, and a step pattern with one row per pad.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.DrumMachineStatus" title="nbplay.models.DrumMachineStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DrumMachineStatus</span></code></a></p></td>
+<td><p>Play state, the sounding step and kit picks from the browser; browser-owned.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MixerConfig" title="nbplay.models.MixerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></p></td>
 <td><p>The mixer console the kernel owns: channels, returns, master.</p></td>
 </tr>
@@ -1599,6 +1671,136 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.FMSynthStatus.preset_request">
 <span class="sig-name descname"><span class="pre">preset_request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.FMSynthStatus.preset_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">DrumMachineConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>A drum machine: up to 16 pads, each with its own sound, and a step pattern with one row per pad.</p>
+<p>A pad is <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">note,</span> <span class="pre">sound,</span> <span class="pre">gain,</span> <span class="pre">pan,</span> <span class="pre">choke,</span> <span class="pre">params}</span></code>. <code class="docutils literal notranslate"><span class="pre">sound</span></code> is
+a built-in drum (<code class="docutils literal notranslate"><span class="pre">kick</span></code>, <code class="docutils literal notranslate"><span class="pre">snare</span></code>, <code class="docutils literal notranslate"><span class="pre">hat</span></code>, <code class="docutils literal notranslate"><span class="pre">clap</span></code>, <code class="docutils literal notranslate"><span class="pre">tom</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">tune</span></code>, <code class="docutils literal notranslate"><span class="pre">decay</span></code> and <code class="docutils literal notranslate"><span class="pre">tone</span></code>), or <code class="docutils literal notranslate"><span class="pre">synth</span></code> or <code class="docutils literal notranslate"><span class="pre">fm</span></code> with a patch of
+that instrument’s fields plus <code class="docutils literal notranslate"><span class="pre">pitch</span></code> (the note it plays) and
+<code class="docutils literal notranslate"><span class="pre">length</span></code> (seconds); <code class="docutils literal notranslate"><span class="pre">preset</span></code> names a shipped synth or FM preset to
+start from. Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each other
+off (closed and open hats). A note plays the pads that answer to it.
+<code class="docutils literal notranslate"><span class="pre">pattern</span></code> holds a velocity (0 is off) per pad per step.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.pads">
+<span class="sig-name descname"><span class="pre">pads</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.pads" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.pattern">
+<span class="sig-name descname"><span class="pre">pattern</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.step_duration">
+<span class="sig-name descname"><span class="pre">step_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.step_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.swing">
+<span class="sig-name descname"><span class="pre">swing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.swing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.bpm">
+<span class="sig-name descname"><span class="pre">bpm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.time_signature_num">
+<span class="sig-name descname"><span class="pre">time_signature_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.time_signature_num" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.time_signature_den">
+<span class="sig-name descname"><span class="pre">time_signature_den</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.time_signature_den" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.velocity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.preset_names">
+<span class="sig-name descname"><span class="pre">preset_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.preset_names" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.sound_preset_names">
+<span class="sig-name descname"><span class="pre">sound_preset_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.sound_preset_names" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.DrumMachineConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig._pads">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_pads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pads</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineConfig._pads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineConfig._pads" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig._pattern_rows">
+<span class="sig-name descname"><span class="pre">_pattern_rows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineConfig._pattern_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineConfig._pattern_rows" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">DrumMachineStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Play state, the sounding step and kit picks from the browser; browser-owned.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineStatus.is_playing">
+<span class="sig-name descname"><span class="pre">is_playing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.models.DrumMachineStatus.is_playing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineStatus.current_step">
+<span class="sig-name descname"><span class="pre">current_step</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#nbplay.models.DrumMachineStatus.current_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineStatus.preset_request">
+<span class="sig-name descname"><span class="pre">preset_request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.DrumMachineStatus.preset_request" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2980,6 +3182,72 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.FMSynthStatus.preset_request">FMSynthStatus.preset_request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.DrumMachineConfig">DrumMachineConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.pads">DrumMachineConfig.pads</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.pattern">DrumMachineConfig.pattern</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.steps">DrumMachineConfig.steps</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.step_duration">DrumMachineConfig.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.swing">DrumMachineConfig.swing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.bpm">DrumMachineConfig.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.time_signature_num">DrumMachineConfig.time_signature_num</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.time_signature_den">DrumMachineConfig.time_signature_den</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.velocity">DrumMachineConfig.velocity</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.preset_names">DrumMachineConfig.preset_names</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.sound_preset_names">DrumMachineConfig.sound_preset_names</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.session_id">DrumMachineConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.channel_index">DrumMachineConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.theme">DrumMachineConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._theme">DrumMachineConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._pads">DrumMachineConfig._pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._pattern_rows">DrumMachineConfig._pattern_rows()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.DrumMachineStatus">DrumMachineStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.is_playing">DrumMachineStatus.is_playing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.current_step">DrumMachineStatus.current_step</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineStatus.preset_request">DrumMachineStatus.preset_request</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MixerConfig">MixerConfig</a>
