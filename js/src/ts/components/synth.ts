@@ -6,9 +6,16 @@ import {
   type InstrumentBus,
   type SessionBus,
 } from "../session.ts";
-import { scheduleSynthNote } from "../voices.ts";
+import {
+  SYNTH_DEFAULTS,
+  scheduleSynthNote,
+  startSynthVoice,
+  type SynthPatch,
+  type SynthVoice,
+} from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
 // Register the elements this one renders, for bundles that import only this module.
+import "./envelope.ts";
 import "./header.ts";
 import "./param.ts";
 import "./segmented.ts";
@@ -23,16 +30,33 @@ const OSCILLATORS: Array<{ value: OscillatorType; label: string }> = [
   { value: "saw", label: "Saw" },
   { value: "noise", label: "Noise" },
 ];
+const SECOND_OSCILLATORS = OSCILLATORS.filter(({ value }) => value !== "noise");
+const FILTERS = [
+  { value: "lowpass", label: "Low pass" },
+  { value: "highpass", label: "High pass" },
+  { value: "bandpass", label: "Band pass" },
+];
+const LFO_TARGETS = [
+  { value: "off", label: "Off" },
+  { value: "pitch", label: "Pitch" },
+  { value: "filter", label: "Filter" },
+  { value: "amplitude", label: "Level" },
+];
 const MIN_FREQ = 20;
 const MAX_FREQ = 8000;
 
-/** The continuous tone: a private AudioContext at the configured rate. */
+/** Patch fields edited by a number control, by their element property name. */
+type NumberField = Exclude<
+  keyof SynthPatch,
+  "type" | "osc2Type" | "filterType" | "lfoTarget"
+>;
+
+/** The test tone: one held voice of the patch on a private AudioContext at the configured rate. */
 class ToneEngine {
   private ctx: AudioContext | null = null;
-  private source: AudioBufferSourceNode | OscillatorNode | null = null;
-  private gain: GainNode | null = null;
+  private voice: SynthVoice | null = null;
 
-  start(type: string, freq: number, amp: number, sampleRate: number): boolean {
+  start(patch: SynthPatch, frequency: number, sampleRate: number): boolean {
     this.stop();
     const ctx = createAudioContext({ sampleRate });
     if (!ctx) return false;
@@ -40,76 +64,43 @@ class ToneEngine {
     // Mobile browsers can hand back a suspended context even inside a user
     // gesture; resuming here keeps the tap that started playback.
     if (ctx.state === "suspended") void ctx.resume?.();
-    const gain = ctx.createGain();
-    gain.gain.value = amp;
-    gain.connect(ctx.destination);
-    this.gain = gain;
-    if (type === "noise") {
-      const buf = ctx.createBuffer(1, sampleRate * 2, sampleRate);
-      const ch = buf.getChannelData(0);
-      for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-      const s = ctx.createBufferSource();
-      s.buffer = buf;
-      s.loop = true;
-      s.connect(gain);
-      s.start();
-      this.source = s;
-    } else {
-      const osc = ctx.createOscillator();
-      osc.type = (
-        type === "saw" ? "sawtooth" : type
-      ) as globalThis.OscillatorType;
-      osc.frequency.value = freq;
-      osc.connect(gain);
-      osc.start();
-      this.source = osc;
-    }
+    this.voice = startSynthVoice(
+      ctx,
+      ctx.destination,
+      patch,
+      frequency,
+      patch.amplitude,
+      ctx.currentTime,
+    );
     return true;
   }
 
+  update(patch: SynthPatch, frequency: number): void {
+    this.voice?.update(patch, frequency, patch.amplitude);
+  }
+
   stop(): void {
-    if (this.source) {
-      try {
-        this.source.stop();
-      } catch {
-        /* already stopped */
-      }
-      this.source.disconnect();
-      this.source = null;
-    }
-    if (this.gain) {
-      this.gain.disconnect();
-      this.gain = null;
-    }
+    this.voice?.stop();
+    this.voice = null;
     if (this.ctx) {
       void this.ctx.close();
       this.ctx = null;
     }
   }
-
-  setFrequency(f: number): void {
-    const osc = this.source as OscillatorNode | null;
-    if (osc?.frequency && this.ctx) {
-      osc.frequency.setTargetAtTime(f, this.ctx.currentTime, 0.01);
-    }
-  }
-
-  setAmplitude(a: number): void {
-    if (this.gain && this.ctx) {
-      this.gain.gain.setTargetAtTime(a, this.ctx.currentTime, 0.01);
-    }
-  }
 }
 
 /**
- * `<nbplay-synth>`: the synth instrument: waveform preview, oscillator type,
- * frequency and amplitude, play/stop. The tone plays on a private
- * AudioContext at `sampleRate`; as a session instrument (`sessionId`,
- * `channelIndex`) it also registers `bus.instruments[channelIndex]` so
- * sequencers and clips on its track play through it. `oscillatorType`,
- * `frequency` and `amplitude` edits fire `nbplay-set`; `isPlaying` fires
- * `nbplay-status` (a start that fails without Web Audio reports `false`).
- * `waveform` is the preview samples (`Float32Array` or little-endian bytes).
+ * `<nbplay-synth>`: the synth instrument. Two oscillators and noise go
+ * through a filter with its own envelope and an amplitude envelope, with an
+ * LFO on the pitch, the cutoff or the level (see `SynthPatch`); the
+ * preview shows the oscillators. Play/stop sounds the patch at `frequency`
+ * on a private AudioContext at `sampleRate`. As a session instrument
+ * (`sessionId`, `channelIndex`) it also registers
+ * `bus.instruments[channelIndex]` so sequencers and clips on its track play
+ * through it. Patch and `frequency` edits fire `nbplay-set`; `isPlaying`
+ * fires `nbplay-status` (a start that fails without Web Audio reports
+ * `false`). `waveform` is the preview samples (`Float32Array` or
+ * little-endian bytes).
  */
 export class NbplaySynth extends NbplayElement {
   static properties = {
@@ -117,6 +108,26 @@ export class NbplaySynth extends NbplayElement {
     frequency: { type: Number },
     amplitude: { type: Number },
     sampleRate: { type: Number, attribute: "sample-rate" },
+    osc2Type: { type: String, attribute: "osc2-type" },
+    osc2Level: { type: Number, attribute: "osc2-level" },
+    osc2Semitones: { type: Number, attribute: "osc2-semitones" },
+    osc2Detune: { type: Number, attribute: "osc2-detune" },
+    noiseLevel: { type: Number, attribute: "noise-level" },
+    filterType: { type: String, attribute: "filter-type" },
+    cutoff: { type: Number },
+    resonance: { type: Number },
+    filterEnv: { type: Number, attribute: "filter-env" },
+    filterAttack: { type: Number, attribute: "filter-attack" },
+    filterDecay: { type: Number, attribute: "filter-decay" },
+    filterSustain: { type: Number, attribute: "filter-sustain" },
+    filterRelease: { type: Number, attribute: "filter-release" },
+    attack: { type: Number },
+    decay: { type: Number },
+    sustain: { type: Number },
+    release: { type: Number },
+    lfoTarget: { type: String, attribute: "lfo-target" },
+    lfoRate: { type: Number, attribute: "lfo-rate" },
+    lfoDepth: { type: Number, attribute: "lfo-depth" },
     waveform: { attribute: false },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
@@ -127,6 +138,26 @@ export class NbplaySynth extends NbplayElement {
   declare frequency: number;
   declare amplitude: number;
   declare sampleRate: number;
+  declare osc2Type: OscillatorType;
+  declare osc2Level: number;
+  declare osc2Semitones: number;
+  declare osc2Detune: number;
+  declare noiseLevel: number;
+  declare filterType: string;
+  declare cutoff: number;
+  declare resonance: number;
+  declare filterEnv: number;
+  declare filterAttack: number;
+  declare filterDecay: number;
+  declare filterSustain: number;
+  declare filterRelease: number;
+  declare attack: number;
+  declare decay: number;
+  declare sustain: number;
+  declare release: number;
+  declare lfoTarget: string;
+  declare lfoRate: number;
+  declare lfoDepth: number;
   declare waveform: unknown;
   declare sessionId: string;
   declare channelIndex: number;
@@ -142,7 +173,9 @@ export class NbplaySynth extends NbplayElement {
 
   constructor() {
     super();
-    this.oscillatorType = "sine";
+    const { type, ...rest } = SYNTH_DEFAULTS;
+    Object.assign(this, rest);
+    this.oscillatorType = type as OscillatorType;
     this.frequency = 440;
     this.amplitude = 0.5;
     this.sampleRate = 44100;
@@ -150,6 +183,25 @@ export class NbplaySynth extends NbplayElement {
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
+  }
+
+  /** The current sound, as each note takes it. */
+  patch(): SynthPatch {
+    const number = (value: unknown, fallback: number) => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    const patch = { ...SYNTH_DEFAULTS };
+    for (const key of Object.keys(SYNTH_DEFAULTS) as (keyof SynthPatch)[]) {
+      if (key === "type") continue;
+      const value = (this as unknown as Record<string, unknown>)[key];
+      (patch as Record<string, unknown>)[key] =
+        typeof SYNTH_DEFAULTS[key] === "number"
+          ? number(value, SYNTH_DEFAULTS[key] as number)
+          : String(value ?? SYNTH_DEFAULTS[key]);
+    }
+    patch.type = this.oscillatorType || "sine";
+    return patch;
   }
 
   connectedCallback(): void {
@@ -173,11 +225,16 @@ export class NbplaySynth extends NbplayElement {
     if (changed.has("isPlaying") && changed.get("isPlaying") !== undefined) {
       if (this.isPlaying) this.startTone();
       else this.tone.stop();
+    } else if (this.isPlaying) {
+      // Switching the first oscillator between a tone and noise needs a new
+      // voice; anything else moves the one that is sounding.
+      if (changed.has("oscillatorType")) this.startTone();
+      else this.tone.update(this.patch(), Number(this.frequency));
     }
   }
 
   // Session instrument: sequencers, launcher slots, and MIDI clips on this
-  // synth's track play through it with its oscillator type and amplitude.
+  // synth's track play through it with its current patch.
 
   private onBusReady = (e: Event): void => {
     const detail = (e as CustomEvent).detail;
@@ -210,10 +267,7 @@ export class NbplaySynth extends NbplayElement {
         const cancel: () => void = scheduleSynthNote(
           ctx,
           output,
-          {
-            type: this.oscillatorType || "sine",
-            amplitude: Number(this.amplitude) || 0,
-          },
+          this.patch(),
           note,
           velocity,
           at,
@@ -232,10 +286,9 @@ export class NbplaySynth extends NbplayElement {
 
   private startTone(): void {
     const started = this.tone.start(
-      this.oscillatorType,
-      this.frequency,
-      this.amplitude,
-      this.sampleRate,
+      this.patch(),
+      Number(this.frequency),
+      Number(this.sampleRate),
     );
     if (!started) {
       this.isPlaying = false;
@@ -262,70 +315,146 @@ export class NbplaySynth extends NbplayElement {
     this.emitDetail("nbplay-set", { values });
   }
 
+  private choice(
+    cls: string,
+    label: string,
+    prop: "oscillatorType" | "osc2Type" | "filterType" | "lfoTarget",
+    options: Array<{ value: string; label: string }>,
+  ) {
+    return html`<nbplay-segmented
+      class=${cls}
+      label=${label}
+      .options=${options}
+      .value=${this[prop]}
+      @change=${(e: Event) => {
+        e.stopPropagation();
+        const value = (e as CustomEvent).detail.value;
+        if (value === this[prop]) return;
+        (this as Record<string, unknown>)[prop] = value;
+        this.set({ [prop]: value });
+      }}
+    ></nbplay-segmented>`;
+  }
+
+  private param(
+    cls: string,
+    label: string,
+    prop: NumberField | "frequency",
+    kind: string,
+    min: number,
+    max: number,
+    step: number,
+    defaultValue: number,
+    options: {
+      control?: "slider" | "dial";
+      scale?: string;
+      unit?: string;
+      precision?: number;
+      disabled?: boolean;
+    } = {},
+  ) {
+    const on = (e: Event) => {
+      e.stopPropagation();
+      const value = (e as CustomEvent).detail.value as number;
+      if (value === this[prop]) return;
+      this[prop] = value;
+      this.set({ [prop]: value });
+    };
+    return html`<nbplay-param
+      class=${cls}
+      .label=${label}
+      .kind=${kind}
+      .control=${options.control ?? "slider"}
+      .scale=${options.scale ?? "linear"}
+      .unit=${options.unit ?? ""}
+      .value=${Number(this[prop])}
+      .min=${min}
+      .max=${max}
+      .step=${step}
+      .defaultValue=${defaultValue}
+      .precision=${options.precision ?? 2}
+      .disabled=${options.disabled ?? false}
+      @input=${on}
+      @change=${on}
+    ></nbplay-param>`;
+  }
+
+  private envelopeSection(
+    cls: string,
+    title: string,
+    fields: [NumberField, NumberField, NumberField, NumberField],
+    defaults: [number, number, number, number],
+  ) {
+    const [a, d, s, r] = fields;
+    return html`<div class="nbplay-synth-envelope ${cls}">
+      <span class="nbplay-synth-section-title">${title}</span>
+      <nbplay-envelope
+        .attack=${Number(this[a])}
+        .decay=${Number(this[d])}
+        .sustain=${Number(this[s])}
+        .release=${Number(this[r])}
+      ></nbplay-envelope>
+      <div class="nbplay-synth-env-controls">
+        ${this.param(`${cls}-attack`, "Attack", a, "seconds", 0, 2, 0.001, defaults[0], { control: "dial" })}
+        ${this.param(`${cls}-decay`, "Decay", d, "seconds", 0, 2, 0.001, defaults[1], { control: "dial" })}
+        ${this.param(`${cls}-sustain`, "Sustain", s, "percent", 0, 1, 0.01, defaults[2], { control: "dial" })}
+        ${this.param(`${cls}-release`, "Release", r, "seconds", 0, 5, 0.001, defaults[3], { control: "dial" })}
+      </div>
+    </div>`;
+  }
+
   render() {
     const noise = this.oscillatorType === "noise";
-    const onFreq = (e: Event) => {
-      e.stopPropagation();
-      const value = (e as CustomEvent).detail.value as number;
-      if (value === this.frequency) return;
-      this.frequency = value;
-      this.tone.setFrequency(value);
-      this.set({ frequency: value });
-    };
-    const onAmp = (e: Event) => {
-      e.stopPropagation();
-      const value = (e as CustomEvent).detail.value as number;
-      if (value === this.amplitude) return;
-      this.amplitude = value;
-      this.tone.setAmplitude(value);
-      this.set({ amplitude: value });
-    };
+    const D = SYNTH_DEFAULTS;
     return html`<nbplay-header badge="synth"></nbplay-header>
       <nbplay-waveform
         class="nbplay-synth-waveform"
         variant="glow"
         .data=${toFloat32(this.waveform)}
       ></nbplay-waveform>
-      <nbplay-segmented
-        class="nbplay-osc"
-        label="Oscillator"
-        .options=${OSCILLATORS}
-        .value=${this.oscillatorType}
-        @change=${(e: Event) => {
-          e.stopPropagation();
-          this.oscillatorType = (e as CustomEvent).detail.value;
-          this.set({ oscillatorType: this.oscillatorType });
-          if (this.isPlaying) this.startTone();
-        }}
-      ></nbplay-segmented>
+      ${this.choice("nbplay-osc", "Oscillator", "oscillatorType", OSCILLATORS)}
       <div class="nbplay-synth-params">
-        <nbplay-param
-          class="nbplay-freq"
-          label="Frequency"
-          kind="hz"
-          scale="log"
-          .value=${this.frequency}
-          .min=${MIN_FREQ}
-          .max=${MAX_FREQ}
-          .step=${0.1}
-          .defaultValue=${440}
-          .disabled=${noise}
-          @input=${onFreq}
-          @change=${onFreq}
-        ></nbplay-param>
-        <nbplay-param
-          class="nbplay-amp"
-          label="Amplitude"
-          kind="float"
-          .value=${this.amplitude}
-          .min=${0}
-          .max=${1}
-          .step=${0.01}
-          .defaultValue=${0.8}
-          .precision=${2}
-          @input=${onAmp}
-          @change=${onAmp}
-        ></nbplay-param>
+        ${this.param("nbplay-freq", "Frequency", "frequency", "hz", MIN_FREQ, MAX_FREQ, 0.1, 440, { scale: "log", disabled: noise })}
+        ${this.param("nbplay-amp", "Amplitude", "amplitude", "float", 0, 1, 0.01, 0.8)}
+      </div>
+      <div class="nbplay-synth-section nbplay-synth-osc2">
+        <span class="nbplay-synth-section-title">Oscillator 2</span>
+        ${this.choice("nbplay-osc2", "Wave", "osc2Type", SECOND_OSCILLATORS)}
+        <div class="nbplay-synth-params">
+          ${this.param("nbplay-osc2-level", "Level", "osc2Level", "percent", 0, 1, 0.01, D.osc2Level)}
+          ${this.param("nbplay-osc2-semitones", "Semitones", "osc2Semitones", "int", -24, 24, 1, D.osc2Semitones, { unit: " st" })}
+          ${this.param("nbplay-osc2-detune", "Detune", "osc2Detune", "int", -100, 100, 1, D.osc2Detune, { unit: " ct" })}
+          ${this.param("nbplay-noise-level", "Noise", "noiseLevel", "percent", 0, 1, 0.01, D.noiseLevel)}
+        </div>
+      </div>
+      <div class="nbplay-synth-section nbplay-synth-filter">
+        <span class="nbplay-synth-section-title">Filter</span>
+        ${this.choice("nbplay-filter-type", "Type", "filterType", FILTERS)}
+        <div class="nbplay-synth-params">
+          ${this.param("nbplay-cutoff", "Cutoff", "cutoff", "hz", 20, 20000, 1, D.cutoff, { scale: "log" })}
+          ${this.param("nbplay-resonance", "Resonance", "resonance", "float", 0.1, 20, 0.01, D.resonance)}
+          ${this.param("nbplay-filter-env", "Envelope", "filterEnv", "float", -6, 6, 0.1, D.filterEnv, { unit: " oct", precision: 1 })}
+        </div>
+      </div>
+      ${this.envelopeSection(
+        "nbplay-filter-envelope",
+        "Filter envelope",
+        ["filterAttack", "filterDecay", "filterSustain", "filterRelease"],
+        [D.filterAttack, D.filterDecay, D.filterSustain, D.filterRelease],
+      )}
+      ${this.envelopeSection(
+        "nbplay-amp-envelope",
+        "Amplitude envelope",
+        ["attack", "decay", "sustain", "release"],
+        [D.attack, D.decay, D.sustain, D.release],
+      )}
+      <div class="nbplay-synth-section nbplay-synth-lfo">
+        <span class="nbplay-synth-section-title">LFO</span>
+        ${this.choice("nbplay-lfo-target", "Target", "lfoTarget", LFO_TARGETS)}
+        <div class="nbplay-synth-params">
+          ${this.param("nbplay-lfo-rate", "Rate", "lfoRate", "hz", 0.05, 20, 0.01, D.lfoRate, { scale: "log" })}
+          ${this.param("nbplay-lfo-depth", "Depth", "lfoDepth", "percent", 0, 1, 0.01, D.lfoDepth)}
+        </div>
       </div>
       <div class="nbplay-synth-transport">
         <button

@@ -75,6 +75,46 @@ class TestSynthWidget:
         finally:
             widget.close()
 
+    def test_patch_fields_default_to_one_oscillator_through_an_open_filter(self):
+        config = SynthConfig()
+        assert (config.osc2_level, config.noise_level, config.cutoff, config.filter_env, config.lfo_target) == (0.0, 0.0, 20000.0, 0.0, "off")
+        assert (config.attack, config.decay, config.sustain, config.release) == (0.005, 0.1, 1.0, 0.05)
+        for bad in (
+            {"osc2_type": "noise"},
+            {"osc2_semitones": 25},
+            {"osc2_detune": 101},
+            {"filter_type": "notch"},
+            {"cutoff": 10},
+            {"resonance": 0},
+            {"filter_env": 7},
+            {"sustain": 1.5},
+            {"lfo_target": "pan"},
+            {"lfo_rate": 0},
+        ):
+            with pytest.raises(ValueError):
+                SynthConfig.model_validate(bad)
+
+    def test_waveform_mixes_the_second_oscillator_and_noise(self):
+        widget = nbplay.SynthWidget(frequency=441.0, amplitude=0.5, autosync=False)
+        try:
+            plain = widget.config.waveform
+            frames = len(plain) // 4
+            # An octave up at half level: the preview is the sum of both oscillators.
+            widget.config.update(osc2_type="sine", osc2_level=0.5, osc2_semitones=12)
+            mixed = struct.unpack(f"<{frames}f", widget.config.waveform)
+            first = nbplay.SineOscillator(441.0, 0.5, 44100).render_to_buffer(frames)
+            second = nbplay.SineOscillator(882.0, 0.25, 44100).render_to_buffer(frames)
+            assert mixed == pytest.approx([a + b for a, b in zip(first, second)], abs=1e-5)
+            # The filter, envelopes and LFO do not change the preview.
+            before = widget.config.waveform
+            widget.config.update(cutoff=300.0, filter_env=3.0, lfo_target="pitch", attack=1.0)
+            assert widget.config.waveform == before
+            widget.config.update(osc2_level=0.0, noise_level=0.5)
+            assert widget.config.waveform != plain and len(widget.config.waveform) == len(plain)
+            assert widget._tree["bindings"]["cutoff"]["field"] == "config.cutoff"
+        finally:
+            widget.close()
+
     def test_waveform_bytes_travel_as_buffers(self):
         widget = nbplay.SynthWidget(autosync=False)
         sent = []
@@ -1060,7 +1100,9 @@ def arranged_session():
     seq = nbplay.SequencerWidget(length=8, num_voices=2, step_duration=0.5, swing=15, autosync=False)
     seq.set_step(0, note=60, velocity=90)
     seq.set_step(3, note=67, velocity=70, voice=1)
-    synth = nbplay.SynthWidget(oscillator_type="saw", frequency=220.0, amplitude=0.3, autosync=False)
+    synth = nbplay.SynthWidget(
+        oscillator_type="saw", frequency=220.0, amplitude=0.3, osc2_level=0.5, cutoff=1500.0, lfo_target="pitch", autosync=False
+    )
     lead = session.add_track("Lead", seq, synth)
     sampler = nbplay.SamplerWidget(pad_count=4, attack=0.02, release=0.4, autosync=False)
     sampler.load_sample([0.0, 0.5, -0.5, 0.25], sample_rate=22050, root_note=48, name="Blip")
@@ -1091,19 +1133,33 @@ class TestPresets:
         synth = nbplay.SynthWidget(oscillator_type="saw", frequency=220.0, amplitude=0.3, session_id="one", channel_index=2, autosync=False)
         other = nbplay.SynthWidget(session_id="two", channel_index=5, theme="grim", autosync=False)
         try:
+            synth.config.update(osc2_level=0.6, osc2_detune=7.0, cutoff=900.0, filter_env=2.0, lfo_target="filter")
             preset = synth.preset("Bass")
-            assert preset == {
+            assert {key: value for key, value in preset.items() if key != "state"} == {
                 "format": "nbplay-preset",
                 "version": 1,
                 "type": "SynthWidget",
                 "name": "Bass",
-                "state": {"oscillator_type": "saw", "frequency": 220.0, "amplitude": 0.3, "sample_rate": 44100},
+            }
+            assert list(preset["state"]) == list(nbplay.SynthWidget.PRESET)
+            assert {
+                key: preset["state"][key]
+                for key in ("oscillator_type", "frequency", "amplitude", "sample_rate", "osc2_level", "cutoff", "lfo_target")
+            } == {
+                "oscillator_type": "saw",
+                "frequency": 220.0,
+                "amplitude": 0.3,
+                "sample_rate": 44100,
+                "osc2_level": 0.6,
+                "cutoff": 900.0,
+                "lfo_target": "filter",
             }
             path = tmp_path / "bass.json"
             synth.save_preset(path, "Bass")
             assert json.loads(path.read_text()) == preset
             other.load_preset(path)
             assert (other.config.oscillator_type, other.config.frequency, other.config.amplitude) == ("saw", 220.0, 0.3)
+            assert (other.config.osc2_detune, other.config.filter_env, other.config.lfo_target) == (7.0, 2.0, "filter")
             assert other.config.waveform == synth.config.waveform
             assert (other.config.session_id, other.config.channel_index, other.config.theme) == ("two", 5, "grim")
         finally:
@@ -1137,6 +1193,17 @@ class TestPresets:
                 loaded.close()
         finally:
             sampler.close()
+
+    def test_a_preset_without_newer_fields_loads_them_at_their_defaults(self):
+        synth = nbplay.SynthWidget(osc2_level=0.7, cutoff=500.0, lfo_target="pitch", autosync=False)
+        try:
+            # A synth preset saved before the second oscillator, filter and LFO existed.
+            older = {**synth.preset(), "state": {"oscillator_type": "square", "frequency": 110.0, "amplitude": 0.4, "sample_rate": 44100}}
+            synth.load_preset(older)
+            assert (synth.config.oscillator_type, synth.config.amplitude) == ("square", 0.4)
+            assert (synth.config.osc2_level, synth.config.cutoff, synth.config.lfo_target) == (0.0, 20000.0, "off")
+        finally:
+            synth.close()
 
     def test_fm_synth_preset_round_trips(self):
         bell = nbplay.FMSynthWidget(ratio=3.5, index=4.0, decay=0.3, sustain=0.2, session_id="one", channel_index=1, autosync=False)
@@ -1255,6 +1322,7 @@ class TestSessionPersistence:
             assert seq.config.session_id == loaded.session_id and seq.config.channel_index == 0
             synth = loaded.tracks[0].sound_source
             assert isinstance(synth, nbplay.SynthWidget) and synth.config.oscillator_type == "saw" and synth.config.frequency == 220.0
+            assert (synth.config.osc2_level, synth.config.cutoff, synth.config.lfo_target) == (0.5, 1500.0, "pitch")
             sampler = loaded.tracks[1].sound_source
             assert isinstance(sampler, nbplay.SamplerWidget) and loaded.tracks[1].sequencer is None
             assert sampler.get_sample_data() == pytest.approx([0.0, 0.5, -0.5, 0.25]) and sampler.config.sample_name == "Blip"
