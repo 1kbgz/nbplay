@@ -1,0 +1,195 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "DrumMachineWidget",
+ "name": "Analog kit",
+ "state": {
+  "pads": [
+   {
+    "name": "Kick",
+    "note": 36,
+    "sound": "kick",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {}
+   },
+   {
+    "name": "Snare",
+    "note": 38,
+    "sound": "snare",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {}
+   },
+   {
+    "name": "Closed hat",
+    "note": 42,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.05
+    }
+   },
+   {
+    "name": "Open hat",
+    "note": 46,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.4
+    }
+   },
+   {
+    "name": "Clap",
+    "note": 39,
+    "sound": "clap",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {}
+   },
+   {
+    "name": "Low tom",
+    "note": 41,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {}
+   },
+   {
+    "name": "Mid tom",
+    "note": 45,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 5.0
+    }
+   },
+   {
+    "name": "High tom",
+    "note": 48,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 10.0
+    }
+   },
+   {
+    "name": "Rim",
+    "note": 37,
+    "sound": "snare",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 12.0,
+     "decay": 0.04,
+     "tone": 0.2
+    }
+   },
+   {
+    "name": "Crash",
+    "note": 49,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "decay": 1.2,
+     "tone": 0.3
+    }
+   },
+   {
+    "name": "Ride",
+    "note": 51,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "decay": 0.7,
+     "tone": 0.9
+    }
+   },
+   {
+    "name": "Pedal hat",
+    "note": 44,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.03,
+     "tone": 0.4
+    }
+   },
+   {
+    "name": "Kick 2",
+    "note": 35,
+    "sound": "kick",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": -3.0,
+     "decay": 0.7,
+     "tone": 0.1
+    }
+   },
+   {
+    "name": "Snare 2",
+    "note": 40,
+    "sound": "snare",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 3.0,
+     "decay": 0.3,
+     "tone": 0.8
+    }
+   },
+   {
+    "name": "Cowbell",
+    "note": 56,
+    "sound": "fm",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "pitch": 80,
+     "length": 0.15,
+     "ratio": 1.5,
+     "index": 1.5,
+     "decay": 0.3,
+     "sustain": 0.0,
+     "release": 0.1
+    }
+   },
+   {
+    "name": "Bass",
+    "note": 33,
+    "sound": "synth",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "preset": "Sub bass",
+     "pitch": 36,
+     "length": 0.25
+    }
+   }
+  ]
+ }
+}

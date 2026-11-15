@@ -253,6 +253,68 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("drums: pads and pattern travel both ways and the kit picker loads a kit", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("drums");
+    try {
+      await mount(page, kernel);
+      const labels = page.locator("#owner nbplay-drums .nbplay-pad-label");
+      await expect(labels.first()).toHaveText("Kick");
+      await expect(page.locator("#owner .nbplay-drum-grid-row")).toHaveCount(
+        16,
+      );
+
+      // A kernel row lights the grid.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          name: "set_row",
+          args: [0, [0, 4, 8, 12]],
+        }),
+      );
+      await expect(
+        page
+          .locator("#owner .nbplay-drum-grid-row")
+          .first()
+          .locator(".nbplay-drum-grid-cell.on"),
+      ).toHaveCount(4);
+
+      // A browser click reaches the kernel's pattern.
+      await page
+        .locator("#owner .nbplay-drum-grid-row")
+        .nth(1)
+        .locator(".nbplay-drum-grid-cell")
+        .nth(4)
+        .click();
+      await expect
+        .poll(async () => (await state(kernel)).config.pattern[1][4])
+        .toBe(100);
+
+      // A new sound picked in the browser comes back with the kernel's defaults.
+      await page
+        .locator('#owner .nbplay-drums-sound [data-value="tom"]')
+        .click();
+      await expect
+        .poll(async () => (await state(kernel)).config.pads[0].params)
+        .toEqual({ tune: 0, decay: 0.35, tone: 0.2 });
+      await expect(
+        page.locator("#owner .nbplay-drums-decay .nbplay-value-text"),
+      ).toHaveText("350 ms");
+
+      // The kit picker asks the kernel, and the kit reaches the page.
+      await page
+        .locator("#owner nbplay-drums nbplay-header .nbplay-preset-select")
+        .selectOption("Electro kit");
+      await expect(labels.nth(15)).toHaveText("Acid");
+      // A kit is the pads; the pattern stays.
+      expect((await state(kernel)).config.pattern[1][4]).toBe(100);
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("mixer: kernel and browser edits meet in one validated console", async ({
     page,
   }) => {

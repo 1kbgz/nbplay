@@ -7,6 +7,7 @@
 import "../../src/ts/components/index.ts";
 import type { AnyModel } from "../../src/ts/helpers.ts";
 import type {
+  NbplayDrums,
   NbplayKeyboard,
   NbplayMidiKeyboard,
   NbplayMidiOutput,
@@ -368,6 +369,33 @@ const INSTRUMENTS: Record<
       },
       status: { is_playing: "isPlaying", current_step: "currentStep" },
       onDisconnect: () => (node as NbplaySequencer).halt(),
+    }),
+  },
+  drums: {
+    tag: "nbplay-drums",
+    spec: (node) => ({
+      config: {
+        theme: "theme",
+        pads: "pads",
+        pattern: "pattern",
+        steps: "steps",
+        step_duration: "stepDuration",
+        swing: "swing",
+        bpm: "bpm",
+        time_signature_num: "timeSignatureNum",
+        time_signature_den: "timeSignatureDen",
+        velocity: "velocity",
+        preset_names: "presetNames",
+        sound_preset_names: "soundPresetNames",
+        session_id: "sessionId",
+        channel_index: "channelIndex",
+      },
+      status: {
+        is_playing: "isPlaying",
+        current_step: "currentStep",
+        preset_request: "presetRequest",
+      },
+      onDisconnect: () => (node as NbplayDrums).halt(),
     }),
   },
   timeline: {

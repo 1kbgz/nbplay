@@ -1,0 +1,140 @@
+nbplay-drums {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+  user-select: none;
+}
+nbplay-drums nbplay-header {
+  margin-bottom: 0;
+}
+nbplay-drums .nbplay-drums-transport {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-drums .nbplay-drums-btn {
+  width: 32px;
+  height: 32px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg-muted);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-drums .nbplay-drums-btn:hover {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-drums .nbplay-drums-btn:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-drums .nbplay-drums-play.playing {
+  background: var(--nbplay-success);
+  color: var(--nbplay-fg-inverse);
+  border-color: var(--nbplay-success);
+}
+nbplay-drums .nbplay-drums-transport nbplay-param {
+  display: flex;
+  min-width: 180px;
+}
+nbplay-drums .nbplay-drums-transport nbplay-slider {
+  flex: 1 1 auto;
+}
+nbplay-drums .nbplay-drums-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nbplay-fg-muted);
+  text-transform: uppercase;
+}
+nbplay-drums select {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  text-transform: none;
+  padding: 0 4px;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-drums select:focus-visible,
+nbplay-drums .nbplay-drums-pad-name:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 1px;
+}
+nbplay-drums .nbplay-drums-main {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 12px;
+  align-items: start;
+}
+nbplay-drums .nbplay-drums-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-drums .nbplay-drums-editor-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+nbplay-drums .nbplay-drums-editor-head nbplay-param {
+  display: flex;
+  flex: 1 1 160px;
+}
+nbplay-drums .nbplay-drums-editor-head nbplay-slider {
+  flex: 1 1 auto;
+}
+nbplay-drums .nbplay-drums-pad-name {
+  flex: 0 1 150px;
+  min-width: 0;
+  height: var(--nbplay-control-height);
+  padding: 0 6px;
+  font: inherit;
+  font-weight: 600;
+  background: var(--nbplay-bg-control);
+  color: var(--nbplay-fg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-drums .nbplay-drums-params {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 14px;
+  --nbplay-dial-size: 40px;
+}
+nbplay-drums .nbplay-drums-preset {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg-muted);
+  text-transform: uppercase;
+}
+@media (max-width: 560px) {
+  nbplay-drums .nbplay-drums-main {
+    grid-template-columns: 1fr;
+  }
+}

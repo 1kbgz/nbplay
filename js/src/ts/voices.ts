@@ -362,7 +362,7 @@ export interface FmVoice {
 }
 
 export function createFmVoice(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   output: AudioNode,
   frequency: number,
   patch: FmPatch,
@@ -401,7 +401,7 @@ export function disposeFmVoice(voice: FmVoice): void {
  * ADSR; the release runs after `duration`. Returns a canceller.
  */
 export function scheduleFmNote(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   output: AudioNode,
   patch: FmPatch,
   note: number,
@@ -443,6 +443,164 @@ export function scheduleFmNote(
     for (const osc of [voice.modulator, voice.carrier]) {
       try {
         osc.stop(0);
+      } catch {
+        /* already stopped */
+      }
+    }
+    finish();
+  };
+}
+
+/** The built-in drum sounds. */
+export const DRUM_SOUNDS = ["kick", "snare", "hat", "clap", "tom"] as const;
+
+/**
+ * One built-in drum sound: `tune` in semitones from its base pitch,
+ * `decay` in seconds, and `tone` from 0 to 1 (the kick's click, the
+ * snare's noise against its body, the hat's brightness, the clap's band,
+ * the tom's noise).
+ */
+export interface DrumPatch {
+  sound: string;
+  tune: number;
+  decay: number;
+  tone: number;
+}
+
+/** A gain that rises in 2 ms and falls exponentially to silence at `end`. */
+function hitEnvelope(
+  ctx: BaseAudioContext,
+  at: number,
+  end: number,
+  level = 1,
+): GainNode {
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, at);
+  gain.gain.linearRampToValueAtTime(level, at + 0.002);
+  gain.gain.exponentialRampToValueAtTime(level * 0.001, end);
+  gain.gain.setValueAtTime(0, end);
+  return gain;
+}
+
+/**
+ * Play one built-in drum hit on `output` at `at`, at `velocity` (0 to 127).
+ * Kick and tom are sines that fall in pitch; the snare is a body under
+ * high-passed noise; the hat is high-passed noise; the clap is band-passed
+ * noise in four bursts. Returns a canceller.
+ */
+export function scheduleDrumHit(
+  ctx: BaseAudioContext,
+  output: AudioNode,
+  patch: DrumPatch,
+  velocity: number,
+  at: number,
+  onEnded: () => void = () => {},
+): () => void {
+  const pitch = 2 ** (Math.max(-48, Math.min(48, patch.tune)) / 12);
+  const decay = Math.max(0.01, patch.decay);
+  const tone = Math.max(0, Math.min(1, patch.tone));
+  const end = at + decay;
+  const out = ctx.createGain();
+  out.gain.value = Math.max(0, Math.min(127, velocity)) / 127;
+  out.connect(output);
+  const sources: AudioScheduledSourceNode[] = [];
+  const nodes: AudioNode[] = [out];
+
+  const noise = (filterType: BiquadFilterType, hz: number, q = 0.7) => {
+    const source = ctx.createBufferSource();
+    source.buffer = noiseBuffer(ctx);
+    source.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = filterType;
+    filter.frequency.value = Math.min(18000, hz);
+    filter.Q.value = q;
+    source.connect(filter);
+    sources.push(source);
+    nodes.push(filter);
+    return filter;
+  };
+  const sweep = (
+    type: OscillatorType,
+    from: number,
+    to: number,
+    time: number,
+  ) => {
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(from, at);
+    osc.frequency.exponentialRampToValueAtTime(to, at + time);
+    sources.push(osc);
+    return osc;
+  };
+  const voice = (source: AudioNode, envelope: GainNode) => {
+    source.connect(envelope).connect(out);
+    nodes.push(envelope);
+  };
+
+  if (patch.sound === "kick" || patch.sound === "tom") {
+    const base = (patch.sound === "kick" ? 50 : 110) * pitch;
+    const drop = patch.sound === "kick" ? 3.5 : 1.6;
+    voice(sweep("sine", base * drop, base, 0.06), hitEnvelope(ctx, at, end));
+    if (tone > 0) {
+      const click = noise(
+        patch.sound === "kick" ? "highpass" : "bandpass",
+        patch.sound === "kick" ? 2000 : 800,
+      );
+      voice(click, hitEnvelope(ctx, at, at + 0.03, tone * 0.6));
+    }
+  } else if (patch.sound === "snare") {
+    const body = 185 * pitch;
+    voice(
+      sweep("triangle", body * 1.3, body, 0.03),
+      hitEnvelope(ctx, at, at + Math.min(decay, 0.12), 1 - tone * 0.6),
+    );
+    voice(noise("highpass", 1200 * pitch), hitEnvelope(ctx, at, end, tone));
+  } else if (patch.sound === "hat") {
+    voice(
+      noise("highpass", (5000 + 7000 * tone) * pitch),
+      hitEnvelope(ctx, at, end),
+    );
+  } else if (patch.sound === "clap") {
+    const band = noise("bandpass", (900 + 1600 * tone) * pitch, 2);
+    const gain = ctx.createGain();
+    // Three short bursts 12 ms apart, then the tail.
+    gain.gain.setValueAtTime(0, at);
+    for (let i = 0; i < 3; i++) {
+      const t = at + i * 0.012;
+      gain.gain.setValueAtTime(1, t);
+      gain.gain.exponentialRampToValueAtTime(0.1, t + 0.01);
+    }
+    const tail = at + 0.036;
+    gain.gain.setValueAtTime(1, tail);
+    gain.gain.exponentialRampToValueAtTime(0.001, Math.max(tail + 0.01, end));
+    gain.gain.setValueAtTime(0, Math.max(tail + 0.01, end));
+    voice(band, gain);
+  }
+
+  const stopAt = Math.max(end, at + 0.05) + 0.01;
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    for (const node of [...sources, ...nodes]) {
+      try {
+        node.disconnect();
+      } catch {
+        /* already disconnected */
+      }
+    }
+    onEnded();
+  };
+  for (const source of sources) {
+    source.start(at);
+    source.stop(stopAt);
+  }
+  if (sources.length > 0) sources[0].onended = finish;
+  else finish();
+  return () => {
+    for (const source of sources) {
+      try {
+        source.stop(0);
       } catch {
         /* already stopped */
       }

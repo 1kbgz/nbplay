@@ -7,7 +7,6 @@ status fields two-way on ``nbplay-status``, and an ``nbplay-wire`` child
 delivers ``session.command`` calls to the element.
 """
 
-import functools
 import json
 import math
 import os
@@ -24,6 +23,7 @@ from spaday import Widget, Wire, element
 from . import __version__
 from .audio_files import decode_audio_file
 from .descriptors import (
+    _DRUM_MACHINE_STATE,
     _FM_SYNTH_STATE,
     _PAD_MAX_COUNT,
     _PRESET_FORMAT,
@@ -46,6 +46,7 @@ from .descriptors import (
     _clip_id,
     _decimate_samples,
     _default_steps,
+    _factory_presets,
     _json_copy,
     _nonnegative_number,
     _normalize_audio_clip,
@@ -66,6 +67,8 @@ from .descriptors import (
 )
 from .history import History
 from .models import (
+    DrumMachineConfig,
+    DrumMachineStatus,
     FMSynthConfig,
     FMSynthStatus,
     KeyboardConfig,
@@ -97,6 +100,7 @@ from .models import (
 
 __all__ = (
     "PACKAGE",
+    "DrumMachineWidget",
     "FMSynthWidget",
     "InstrumentWidget",
     "KeyboardWidget",
@@ -149,19 +153,6 @@ def _pattern_events(voices, step_duration, repeat):
     repeat = max(1, int(repeat))
     events = [{**event, "beat": event["beat"] + cycle * length} for cycle in range(repeat) for event in base]
     return events, length * repeat
-
-
-_FACTORY_PRESETS = pathlib.Path(__file__).parent / "presets"
-
-
-@functools.cache
-def _factory_presets(widget_type):
-    """The presets shipped for a widget class (``nbplay/presets/<class>/``), by name."""
-    presets = {}
-    for path in sorted((_FACTORY_PRESETS / widget_type).glob("*.json")):
-        preset = json.loads(path.read_text())
-        presets[preset["name"]] = preset
-    return presets
 
 
 class InstrumentWidget(Widget):
@@ -644,6 +635,86 @@ class FMSynthWidget(InstrumentWidget):
 
     def stop(self):
         """Stop the test tone in the owning widget."""
+        return self._command("is_playing", False)
+
+
+class DrumMachineWidget(InstrumentWidget):
+    """A drum machine: pads with their own sounds and a step pattern with one row per pad.
+
+    A track's sound source, like :class:`SynthWidget`: notes from a
+    sequencer, a clip or a launched slot on its track play the pads that
+    answer to them, and its own pattern plays on the session clock. See
+    :class:`~nbplay.models.DrumMachineConfig` for the pad fields. A kit (the
+    pads) is its preset; :meth:`presets` lists the shipped kits.
+    """
+
+    TAG = "nbplay-drums"
+    PRESET = ("pads",)
+    CONFIG_MODEL = DrumMachineConfig
+    STATUS_MODEL = DrumMachineStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "pads": "pads",
+        "pattern": "pattern",
+        "steps": "steps",
+        "step_duration": "stepDuration",
+        "swing": "swing",
+        "bpm": "bpm",
+        "time_signature_num": "timeSignatureNum",
+        "time_signature_den": "timeSignatureDen",
+        "velocity": "velocity",
+        "preset_names": "presetNames",
+        "sound_preset_names": "soundPresetNames",
+        "session_id": "sessionId",
+        "channel_index": "channelIndex",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "current_step": "currentStep", "preset_request": "presetRequest"}
+
+    def _prepare(self):
+        super()._prepare()
+        self.config.sound_preset_names = {"synth": SynthWidget.presets(), "fm": FMSynthWidget.presets()}
+
+    def set_pad(self, index, **fields):
+        """Change pad ``index``'s fields. A new ``sound`` without ``params`` starts from that sound's defaults; ``params`` for the same sound are merged."""
+        pads = [dict(pad) for pad in self.config.pads]
+        if not 0 <= index < len(pads):
+            raise IndexError(f"pad index out of range: {index}")
+        pad = pads[index]
+        sound_changed = "sound" in fields and fields["sound"] != pad["sound"]
+        if "params" in fields and not sound_changed:
+            fields = {**fields, "params": {**pad["params"], **fields["params"]}}
+        elif sound_changed and "params" not in fields:
+            fields = {**fields, "params": {}}
+        pads[index] = {**pad, **fields}
+        self.config.pads = pads
+
+    def set_step(self, pad, step, velocity=100):
+        """Set one step of pad ``pad``'s row; a velocity of 0 clears it."""
+        pattern = [list(row) for row in self.config.pattern]
+        if not 0 <= pad < len(pattern) or not 0 <= step < self.config.steps:
+            raise IndexError(f"step out of range: pad {pad}, step {step}")
+        pattern[pad][step] = int(velocity)
+        self.config.pattern = pattern
+
+    def set_row(self, pad, steps, velocity=100):
+        """Set pad ``pad``'s row: the step indices in ``steps`` at ``velocity``, every other step off."""
+        pattern = [list(row) for row in self.config.pattern]
+        if not 0 <= pad < len(pattern):
+            raise IndexError(f"pad index out of range: {pad}")
+        on = set(steps)
+        pattern[pad] = [int(velocity) if index in on else 0 for index in range(self.config.steps)]
+        self.config.pattern = pattern
+
+    def clear(self):
+        """Turn every step off."""
+        self.config.pattern = []
+
+    def play(self):
+        """Start the pattern in the owning widget."""
+        return self._command("is_playing", True)
+
+    def stop(self):
+        """Stop the pattern in the owning widget."""
         return self._command("is_playing", False)
 
 
@@ -2212,6 +2283,8 @@ def _sound_source_to_dict(source, index, resources):
         return {"type": "SynthWidget", "state": _dump(source.config, _SYNTH_STATE)}
     if isinstance(source, FMSynthWidget):
         return {"type": "FMSynthWidget", "state": _dump(source.config, _FM_SYNTH_STATE)}
+    if isinstance(source, DrumMachineWidget):
+        return {"type": "DrumMachineWidget", "state": _dump(source.config, _DRUM_MACHINE_STATE)}
     if isinstance(source, SamplerWidget):
         config = source.config
         entry = {"type": "SamplerWidget", "state": _dump(config, _SAMPLER_STATE + _SAMPLER_PAD_STATE)}
@@ -2232,7 +2305,7 @@ def _sound_source_to_dict(source, index, resources):
                 saved.append(item)
             entry["zones"] = saved
         return entry
-    raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthWidget, FMSynthWidget or SamplerWidget")
+    raise ValueError(f"cannot save sound source of type {type(source).__name__}; use SynthWidget, FMSynthWidget, DrumMachineWidget or SamplerWidget")
 
 
 def _sound_source_from_dict(entry, resources):
@@ -2244,6 +2317,8 @@ def _sound_source_from_dict(entry, resources):
         return SynthWidget(**{k: v for k, v in state.items() if k in _SYNTH_STATE})
     if kind == "FMSynthWidget":
         return FMSynthWidget(**{k: v for k, v in state.items() if k in _FM_SYNTH_STATE})
+    if kind == "DrumMachineWidget":
+        return DrumMachineWidget(**{k: v for k, v in state.items() if k in _DRUM_MACHINE_STATE})
     if kind == "SamplerWidget":
         sampler = SamplerWidget(**{k: v for k, v in state.items() if k in _SAMPLER_STATE})
         sample_file = entry.get("sample_file")

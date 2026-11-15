@@ -25,8 +25,8 @@ instruments out as resizable panels on one page, also in your browser with
 nothing to install.
 
 nbplay is a set of Jupyter widgets that together form a small DAW in the
-browser: synths, samplers, step sequencers, a QWERTY and a MIDI keyboard,
-trigger pads, a transport, a multitrack timeline that records audio and MIDI,
+browser: synths, samplers, a drum machine, step sequencers, a QWERTY and a
+MIDI keyboard, trigger pads, a transport, a multitrack timeline that records audio and MIDI,
 a clip launcher, and a mixer. Every widget in a session follows one clock that
 lives in the browser, so play, seek, and tempo changes never wait on the
 kernel. The widgets are [spaday](https://github.com/1kbgz/spaday) widgets on

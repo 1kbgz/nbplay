@@ -10,13 +10,20 @@ from typing import Literal
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 from .descriptors import (
+    _FM_SYNTH_STATE,
+    _SYNTH_STATE,
+    MAX_DRUM_PADS,
     THEMES,
     _clamp_midi_note,
     _clamp_velocity,
+    _default_drum_kit,
     _default_pad_notes,
     _default_steps,
+    _factory_presets,
     _measure_beats,
     _normalize_audio_clips,
+    _normalize_drum_pad,
+    _normalize_drum_pattern,
     _normalize_effects,
     _normalize_launcher_slot,
     _normalize_mixer_channel,
@@ -32,6 +39,8 @@ from .descriptors import (
 )
 
 __all__ = (
+    "DrumMachineConfig",
+    "DrumMachineStatus",
     "FMSynthConfig",
     "FMSynthStatus",
     "KeyboardConfig",
@@ -280,6 +289,85 @@ class FMSynthStatus(BaseModel):
 
     is_playing: bool = False
     #: ``<time>:<name>`` of a shipped preset picked in the header; the kernel loads it.
+    preset_request: str = ""
+
+
+def _pad_patch(config_model, fields, widget_type, params):
+    """A synth or FM pad's params: a shipped preset named by ``preset`` under the given fields, validated by the instrument's config."""
+    state = dict(_factory_presets(widget_type).get(params.get("preset"), {}).get("state", {}))
+    state.update({key: params[key] for key in fields if key in params})
+    config = config_model.model_validate(state)
+    patch = {key: getattr(config, key) for key in fields}
+    if params.get("preset"):
+        patch["preset"] = str(params["preset"])
+    return {**patch, "pitch": params["pitch"], "length": params["length"]}
+
+
+#: The fields of a synth or FM patch a pad keeps; the test tone and sample rate are the instrument's.
+_SYNTH_PAD_FIELDS = tuple(name for name in _SYNTH_STATE if name not in ("frequency", "sample_rate"))
+_FM_PAD_FIELDS = tuple(name for name in _FM_SYNTH_STATE if name != "frequency")
+
+
+class DrumMachineConfig(_Validated):
+    """A drum machine: up to 16 pads, each with its own sound, and a step pattern with one row per pad.
+
+    A pad is ``{name, note, sound, gain, pan, choke, params}``. ``sound`` is
+    a built-in drum (``kick``, ``snare``, ``hat``, ``clap``, ``tom``, with
+    ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of
+    that instrument's fields plus ``pitch`` (the note it plays) and
+    ``length`` (seconds); ``preset`` names a shipped synth or FM preset to
+    start from. Pads with the same nonzero ``choke`` group cut each other
+    off (closed and open hats). A note plays the pads that answer to it.
+    ``pattern`` holds a velocity (0 is off) per pad per step.
+    """
+
+    pads: list[dict] = Field(default_factory=_default_drum_kit, validate_default=True)
+    pattern: list[list[int]] = []
+    steps: int = Field(16, ge=1, le=64)
+    step_duration: float = Field(0.25, gt=0, le=4)
+    swing: float = Field(0.0, ge=0, le=100)
+    bpm: float = Field(120.0, ge=30, le=300)
+    time_signature_num: int = Field(4, ge=1, le=16)
+    time_signature_den: int = Field(4, ge=1, le=16)
+    #: Velocity of a pad tapped in the browser.
+    velocity: int = Field(100, ge=1, le=127)
+    #: The shipped kits, for the browser's picker; set by the widget.
+    preset_names: list[str] = []
+    #: The shipped synth and FM presets a pad can start from (``{"synth": [...], "fm": [...]}``); set by the widget.
+    sound_preset_names: dict[str, list[str]] = {}
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("pads")
+    @classmethod
+    def _pads(cls, pads):
+        if not 1 <= len(pads) <= MAX_DRUM_PADS:
+            raise ValueError(f"a drum machine has 1 to {MAX_DRUM_PADS} pads, got {len(pads)}")
+        normalized = [_normalize_drum_pad(pad, index) for index, pad in enumerate(pads)]
+        for pad in normalized:
+            if pad["sound"] == "synth":
+                pad["params"] = _pad_patch(SynthConfig, _SYNTH_PAD_FIELDS, "SynthWidget", pad["params"])
+            elif pad["sound"] == "fm":
+                pad["params"] = _pad_patch(FMSynthConfig, _FM_PAD_FIELDS, "FMSynthWidget", pad["params"])
+        return normalized
+
+    @model_validator(mode="after")
+    def _pattern_rows(self):
+        rows = _normalize_drum_pattern(self.pattern, len(self.pads), self.steps)
+        if rows != self.pattern:
+            self.__dict__["pattern"] = rows
+        return self
+
+
+class DrumMachineStatus(BaseModel):
+    """Play state, the sounding step and kit picks from the browser; browser-owned."""
+
+    is_playing: bool = False
+    current_step: int = -1
+    #: ``<time>:<name>`` of a shipped kit picked in the header; the kernel loads it.
     preset_request: str = ""
 
 

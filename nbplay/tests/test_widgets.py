@@ -15,6 +15,7 @@ from nbplay.descriptors import PadAction
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
 from nbplay.models import (
+    DrumMachineConfig,
     KeyboardConfig,
     LauncherConfig,
     MixerConfig,
@@ -604,6 +605,123 @@ class TestFMSynthWidget:
                 source = loaded.tracks[0].sound_source
                 assert isinstance(source, nbplay.FMSynthWidget)
                 assert (source.config.ratio, source.config.index, source.config.release) == (1.0, 3.0, 0.4)
+                assert source.config.channel_index == loaded.tracks[0].mixer_channel
+            finally:
+                loaded.close()
+        finally:
+            session.close()
+
+
+class TestDrumMachineWidget:
+    def test_the_default_kit_fills_in_its_synth_and_fm_pads(self):
+        config = DrumMachineConfig()
+        assert [pad["name"] for pad in config.pads[:4]] == ["Kick", "Snare", "Closed hat", "Open hat"]
+        assert [pad["note"] for pad in config.pads[:4]] == [36, 38, 42, 46]
+        assert config.pads[2]["choke"] == config.pads[3]["choke"] == 1
+        assert config.pattern == [[0] * 16 for _ in range(16)]
+        bass = config.pads[15]
+        # The shipped "Sub bass" synth preset, played at C2 for a quarter second.
+        assert (bass["sound"], bass["params"]["preset"], bass["params"]["cutoff"]) == ("synth", "Sub bass", 600.0)
+        assert (bass["params"]["pitch"], bass["params"]["length"]) == (36, 0.25)
+        assert "frequency" not in bass["params"] and "waveform" not in bass["params"]
+        cowbell = config.pads[14]["params"]
+        assert (cowbell["ratio"], cowbell["amplitude"], cowbell["pitch"]) == (1.5, 0.5, 80)
+
+    def test_pads_and_pattern_validate(self):
+        for bad in ({"pads": []}, {"pads": [{"sound": "kick"}] * 17}, {"pads": [{"sound": "cymbal"}]}, {"pads": ["kick"]}, {"steps": 0}):
+            with pytest.raises(ValueError):
+                DrumMachineConfig.model_validate(bad)
+        # A bad patch value on a synth pad is refused by the synth's own ranges.
+        with pytest.raises(ValueError):
+            DrumMachineConfig.model_validate({"pads": [{"sound": "synth", "params": {"cutoff": 5}}]})
+        config = DrumMachineConfig(
+            pads=[{"sound": "hat", "note": 300, "gain": 5, "pan": -3, "choke": 12, "params": {"decay": 10, "tone": 2}}],
+            pattern=[[200, -4, 64]],
+            steps=4,
+        )
+        pad = config.pads[0]
+        assert (pad["name"], pad["note"], pad["gain"], pad["pan"], pad["choke"]) == ("Hat", 127, 2.0, -1.0, 8)
+        assert pad["params"] == {"tune": 0.0, "decay": 4.0, "tone": 1.0}
+        assert config.pattern == [[127, 0, 64, 0]]
+        config.steps = 2
+        assert config.pattern == [[127, 0]]
+
+    def test_set_pad_set_step_and_set_row(self):
+        drums = nbplay.DrumMachineWidget(autosync=False)
+        try:
+            assert drums._tree["tag"] == "nbplay-drums"
+            assert drums._tree["bindings"]["pattern"]["field"] == "config.pattern"
+            assert drums._tree["bindings"]["currentStep"]["field"] == "status.current_step"
+            assert drums.config.sound_preset_names == {"synth": nbplay.SynthWidget.presets(), "fm": nbplay.FMSynthWidget.presets()}
+            drums.set_row(0, [0, 4, 8, 12])
+            drums.set_step(1, 4, 90)
+            drums.set_step(0, 8, 0)
+            assert drums.config.pattern[0][:13] == [100, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 100]
+            assert drums.config.pattern[1][4] == 90
+            # Params for the same sound merge; a new sound starts from its defaults.
+            drums.set_pad(0, params={"decay": 0.9})
+            assert drums.config.pads[0]["params"] == {"tune": 0.0, "decay": 0.9, "tone": 0.3}
+            drums.set_pad(0, sound="clap", name="Clap 2")
+            assert (drums.config.pads[0]["name"], drums.config.pads[0]["params"]) == ("Clap 2", {"tune": 0.0, "decay": 0.25, "tone": 0.5})
+            drums.set_pad(1, sound="fm", params={"preset": "Bell", "pitch": 72})
+            assert (drums.config.pads[1]["params"]["ratio"], drums.config.pads[1]["params"]["pitch"]) == (3.5, 72)
+            # Fewer pads drop their rows; the rest keep their steps.
+            drums.config.pads = drums.config.pads[:2]
+            assert len(drums.config.pattern) == 2 and drums.config.pattern[1][4] == 90
+            drums.clear()
+            assert drums.config.pattern == [[0] * 16, [0] * 16]
+            with pytest.raises(IndexError):
+                drums.set_step(5, 0)
+            with pytest.raises(IndexError):
+                drums.set_pad(9, name="x")
+            assert drums.play() >= 0 and drums.stop() >= 0
+        finally:
+            drums.close()
+
+    def test_kits_load_by_name_or_from_the_browser_picker(self):
+        session = nbplay.Session()
+        drums = nbplay.DrumMachineWidget(autosync=False)
+        try:
+            assert nbplay.DrumMachineWidget.presets() == ["Analog kit", "Electro kit"]
+            session.add_track("Beat", None, drums)
+            drums.set_row(0, [0, 8])
+            session.history.mark()
+            browser_writes(drums, preset_request="1700000000000:Electro kit")
+            assert (drums.config.pads[0]["params"]["decay"], drums.config.pads[15]["name"]) == (0.8, "Acid")
+            # A kit is the pads; the pattern stays.
+            assert drums.config.pattern[0][8] == 100
+            session.undo()
+            assert drums.config.pads[15]["name"] == "Bass"
+            kit = drums.preset("Mine")
+            assert list(kit["state"]) == ["pads"]
+            other = nbplay.DrumMachineWidget.from_preset(kit, autosync=False)
+            try:
+                assert other.config.pads == drums.config.pads
+            finally:
+                other.close()
+        finally:
+            session.close()
+
+    def test_a_drum_track_saves_with_the_session_and_gets_a_panel(self):
+        from nbplay.app import panel_widgets
+
+        session = nbplay.Session(bpm=96.0)
+        try:
+            drums = nbplay.DrumMachineWidget(steps=8, swing=20.0)
+            track = session.add_track("Beat", None, drums)
+            assert (drums.config.session_id, drums.config.channel_index, drums.config.bpm) == (session.session_id, track.mixer_channel, 96.0)
+            drums.set_row(1, [2, 6], velocity=80)
+            drums.set_pad(1, sound="synth", params={"preset": "Pluck", "pitch": 48})
+            assert panel_widgets(session)["beat-drums"] is drums
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                source = loaded.tracks[0].sound_source
+                assert isinstance(source, nbplay.DrumMachineWidget)
+                assert (source.config.steps, source.config.swing, source.config.bpm) == (8, 20.0, 96.0)
+                assert source.config.pattern == drums.config.pattern and source.config.pads == drums.config.pads
                 assert source.config.channel_index == loaded.tracks[0].mixer_channel
             finally:
                 loaded.close()

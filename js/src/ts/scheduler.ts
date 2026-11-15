@@ -7,6 +7,7 @@ import {
   type ChannelOwner,
   emitBusNote,
   getSessionBus,
+  type InstrumentBus,
   type SessionClock,
 } from "./session.ts";
 
@@ -48,6 +49,11 @@ interface AudioSchedulerOptions {
    * unclaimed channel.
    */
   owner?: ChannelOwner;
+  /**
+   * Plays the steps in place of the track's bus instrument, with or without
+   * a session (a drum machine plays its own pads).
+   */
+  instrument?: () => InstrumentBus | undefined;
 }
 
 /** Position of the next step to schedule, in clock beats and context time. */
@@ -441,9 +447,10 @@ export function createAudioScheduler(
     // The track's instrument (sampler or synth on the bus) plays the step
     // when it has one; the built-in oscillator is the fallback.
     const instrument =
-      sessionId && channelIndex >= 0
+      options.instrument?.() ??
+      (sessionId && channelIndex >= 0
         ? getSessionBus(sessionId)?.instruments?.[channelIndex]
-        : undefined;
+        : undefined);
     // Like the instrument, the channel is looked up per step: a mixer that
     // renders after playback started takes the notes without a restart.
     const outputNode = resolveAudioOutput(model, clock).output;

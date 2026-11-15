@@ -1,0 +1,66 @@
+nbplay-drum-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-x: auto;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-drum-grid .nbplay-drum-grid-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+nbplay-drum-grid .nbplay-drum-grid-name {
+  flex: 0 0 92px;
+  overflow: hidden;
+  padding: 0 6px;
+  height: 22px;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--nbplay-fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-drum-grid .nbplay-drum-grid-name:hover {
+  color: var(--nbplay-fg);
+}
+nbplay-drum-grid .nbplay-drum-grid-name:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: -1px;
+}
+nbplay-drum-grid .nbplay-drum-grid-row.selected .nbplay-drum-grid-name {
+  color: var(--nbplay-fg);
+  border-color: var(--nbplay-accent);
+}
+nbplay-drum-grid .nbplay-drum-grid-cell {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-drum-grid .nbplay-drum-grid-cell.beat {
+  margin-left: 5px;
+}
+nbplay-drum-grid .nbplay-drum-grid-cell:hover {
+  border-color: var(--nbplay-border-strong);
+}
+nbplay-drum-grid .nbplay-drum-grid-cell.on {
+  background: color-mix(
+    in srgb,
+    var(--nbplay-fill) calc(35% + 65% * var(--nbplay-drum-velocity, 1)),
+    transparent
+  );
+  border-color: var(--nbplay-fill);
+}
+nbplay-drum-grid .nbplay-drum-grid-cell.current {
+  box-shadow: inset 0 0 0 2px var(--nbplay-fg);
+}
