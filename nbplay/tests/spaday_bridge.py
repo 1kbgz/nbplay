@@ -67,11 +67,14 @@ def _state(widget):
 name = sys.argv[1] if len(sys.argv) > 1 else "transport"
 codec = sys.argv[2] if len(sys.argv) > 2 else "json"
 options = {"autosync": False, "codec": codec, "update_interval": 0.05}
-if name == "session":
+if name in ("session", "history"):
     session = nbplay.Session(bpm=120.0)
     sequencer = nbplay.SequencerWidget(length=8, **options)
     synth = nbplay.SynthWidget(**options)
     session.add_track("Lead", sequencer, synth)
+    if name == "history":
+        session.history.clear()
+        session.history.group_window = 0
     widgets = {
         "transport": session.transport,
         "mixer": session.mixer,
@@ -88,6 +91,9 @@ else:
     widgets = {name: VIEWS[name](**options)}
     target = widgets[name]
 sent = []
+requests = []
+if session is not None:
+    session.transport.on_change(lambda widget, name, old, new: requests.append(name), names=("undo_request", "redo_request"))
 
 
 def sync_all():
@@ -132,6 +138,8 @@ try:
                 result = _state(pick(request))
             else:
                 result = {widget_name: _state(widget) for widget_name, widget in widgets.items()}
+        elif op == "requests":
+            result = requests
         print(json.dumps({"messages": list(sent), "result": result}), flush=True)
         sent.clear()
 finally:

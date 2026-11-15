@@ -19,6 +19,7 @@ interface WireContext {
   client: {
     onCommand(listener: (command: CommandMsg) => void): () => void;
     ackCommand(command: CommandMsg): unknown;
+    flushOwned(): boolean;
   };
   link: { modelId?: number };
   namespace: string | null;
@@ -108,7 +109,7 @@ export class NbplayWire extends HTMLElement {
     const wire = detail.wire;
     const host = this.parentElement as Commandable | null;
     if (!wire || !host) return;
-    this.stop = wire.client.onCommand((command) => {
+    const stopCommand = wire.client.onCommand((command) => {
       if (wire.link.modelId !== undefined && command.id !== wire.link.modelId)
         return;
       const value = untag(command.value);
@@ -135,6 +136,14 @@ export class NbplayWire extends HTMLElement {
       }
       void wire.client.ackCommand(command);
     });
+    const flush = (event: Event) => {
+      if (event.target === host) wire.client.flushOwned();
+    };
+    host.addEventListener("nbplay-flush", flush);
+    this.stop = () => {
+      stopCommand();
+      host.removeEventListener("nbplay-flush", flush);
+    };
   }
 
   disconnectedCallback(): void {

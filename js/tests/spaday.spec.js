@@ -115,6 +115,46 @@ test.describe("views on transports", () => {
   // One kernel subprocess and one copied widget bundle at a time.
   test.describe.configure({ mode: "serial" });
 
+  test("rapid undo and redo requests keep their count and order", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("history");
+    try {
+      await mount(page, kernel, ["transport"]);
+      for (const value of [0.3, 0.5, 0.7]) {
+        await kernel.call({
+          op: "set",
+          widget: "mixer",
+          field: "master_gain",
+          value,
+        });
+      }
+      await page.locator("#transport nbplay-transport").evaluate((element) => {
+        for (const key of ["z", "z", "y"]) {
+          element.dispatchEvent(
+            new KeyboardEvent("keydown", {
+              key,
+              ctrlKey: true,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        }
+      });
+      await expect
+        .poll(async () => (await kernel.call({ op: "requests" })).result)
+        .toEqual(["undo_request", "undo_request", "redo_request"]);
+      const result = await state(kernel);
+      expect([
+        result.transport.status.undo_request,
+        result.transport.status.redo_request,
+      ]).toEqual([2, 1]);
+      expect(result.mixer.config.master_gain).toBe(0.5);
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("transport: the kernel and the owning view share config, status and commands", async ({
     page,
   }) => {
@@ -232,6 +272,9 @@ test.describe("views on transports", () => {
       await expect(synth.locator(".nbplay-preset-select option")).toContainText(
         ["Pluck"],
       );
+      await page.evaluate(() => {
+        Date.now = () => 1700000000000;
+      });
       await synth.locator(".nbplay-preset-select").selectOption("Pluck");
       await expect
         .poll(async () => (await state(kernel)).config.cutoff)
@@ -248,6 +291,17 @@ test.describe("views on transports", () => {
       await expect(
         synth.locator(".nbplay-cutoff .nbplay-value-text"),
       ).toHaveText("400.0 Hz");
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "set", field: "cutoff", value: 800 }),
+      );
+      await expect(
+        synth.locator(".nbplay-cutoff .nbplay-value-text"),
+      ).toHaveText("800.0 Hz");
+      await synth.locator(".nbplay-preset-select").selectOption("Pluck");
+      await expect
+        .poll(async () => (await state(kernel)).config.cutoff)
+        .toBe(400);
     } finally {
       kernel.close();
     }
