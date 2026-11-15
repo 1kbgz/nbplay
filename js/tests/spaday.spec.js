@@ -222,6 +222,37 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("synth: the header's preset picker loads a shipped preset into the page", async ({
+    page,
+  }) => {
+    const kernel = await viewKernel("synth");
+    try {
+      await mount(page, kernel);
+      const synth = page.locator("#owner nbplay-synth");
+      await expect(synth.locator(".nbplay-preset-select option")).toContainText(
+        ["Pluck"],
+      );
+      await synth.locator(".nbplay-preset-select").selectOption("Pluck");
+      await expect
+        .poll(async () => (await state(kernel)).config.cutoff)
+        .toBe(400);
+      // The loaded patch reaches the page without any other change.
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const el = document.querySelector("#owner nbplay-synth");
+            return [el.cutoff, el.filterEnv, el.oscillatorType];
+          }),
+        )
+        .toEqual([400, 4, "saw"]);
+      await expect(
+        synth.locator(".nbplay-cutoff .nbplay-value-text"),
+      ).toHaveText("400.0 Hz");
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("mixer: kernel and browser edits meet in one validated console", async ({
     page,
   }) => {

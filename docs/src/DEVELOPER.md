@@ -1329,10 +1329,14 @@ file each, and list only the fields that differ from the defaults.
 `Widget.presets()` lists their names, and `load_preset()` and `from_preset()`
 take a name as well as a dict or a path (a string that is not a shipped
 preset's name is read as a path). The synth and the FM synth have a header
-picker: their config holds `preset_names` (set by the widget) and
-`preset_request`, which the element writes with the picked name; the kernel
-loads that preset and clears the request. Both fields are transient for undo,
-so a pick is one undo step, the same as `load_preset()`.
+picker: their config holds `preset_names` (set by the widget, transient for
+undo), and their status holds `preset_request`, which the element writes as
+`<time>:<name>` (so picking the same name again is still a change); the kernel
+loads that preset. A pick is one
+undo step, the same as `load_preset()`. The request is status, like the
+transport's undo requests, because transports does not send a kernel write
+into a config while it applies a browser edit to that config: the write would
+wait for the config's next change.
 
 ### Undo and redo
 

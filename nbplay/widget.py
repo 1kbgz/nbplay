@@ -197,7 +197,7 @@ class InstrumentWidget(Widget):
         self._status_mirror = self.status.model_dump() if self.status is not None else {}
         self._unobserve_config = self.config.on_change(self._on_config_change)
         self._unhook_patches = _on_session_patch(self.session, self._on_patch)
-        if "preset_request" in self.CONFIG_MODEL.model_fields:
+        if self.STATUS_MODEL is not None and "preset_request" in self.STATUS_MODEL.model_fields:
             self.on_change(self._on_preset_request, names="preset_request")
         super().__init__(self.tree(), session=self.session, wires=self.wires(), packages=PACKAGE, **kwargs)
 
@@ -281,15 +281,15 @@ class InstrumentWidget(Widget):
         return cls(**kwargs).load_preset(preset)
 
     def _on_preset_request(self, widget, name, old, request):
-        # The browser's preset picker asks for a shipped preset by name; the
-        # request is cleared once it is handled, so picking it again works.
-        if not request:
-            return
-        try:
-            if request in self.presets():
-                self.load_preset(request)
-        finally:
-            self.config.preset_request = ""
+        # The header's picker writes ``<time>:<name>`` to the status, so the
+        # same name picked twice is still a change. The request is
+        # browser-owned, like the transport's undo requests: a kernel write
+        # into the config while transports applies a browser edit to that
+        # same config is not sent until the config next changes, while a
+        # status patch leaves the config free to change.
+        preset = str(request).partition(":")[2]
+        if preset in self.presets():
+            self.load_preset(preset)
 
     def _command(self, field, value):
         if self.status_id is None:
@@ -423,13 +423,12 @@ class SynthWidget(InstrumentWidget):
         "lfo_rate": "lfoRate",
         "lfo_depth": "lfoDepth",
         "preset_names": "presetNames",
-        "preset_request": "presetRequest",
         "waveform": "waveform",
         "session_id": "sessionId",
         "channel_index": "channelIndex",
         "theme": "theme",
     }
-    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying"}
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "preset_request": "presetRequest"}
 
     def play(self):
         """Start the tone in the owning widget."""
@@ -633,12 +632,11 @@ class FMSynthWidget(InstrumentWidget):
     CONFIG: ClassVar[dict[str, str]] = {
         **{name: name for name in _FM_SYNTH_STATE},
         "preset_names": "presetNames",
-        "preset_request": "presetRequest",
         "session_id": "sessionId",
         "channel_index": "channelIndex",
         "theme": "theme",
     }
-    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying"}
+    STATUS: ClassVar[dict[str, str]] = {"is_playing": "isPlaying", "preset_request": "presetRequest"}
 
     def play(self):
         """Start the test tone in the owning widget."""

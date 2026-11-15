@@ -71,10 +71,19 @@ test.describe("FMSynthWidget", () => {
       "Bell",
       "Electric piano",
     ]);
+    await page.evaluate(() => {
+      window.__requests = [];
+      document
+        .querySelector("nbplay-fm-synth")
+        .addEventListener("nbplay-status", (e) =>
+          window.__requests.push(e.detail.values.presetRequest),
+        );
+    });
     await select.selectOption("Bell");
-    expect(
-      await page.evaluate(() => window.__testModel._state.preset_request),
-    ).toBe("Bell");
+    // The request is status, made unique by the time it was picked.
+    const requests = await page.evaluate(() => window.__requests);
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatch(/^\d+:Bell$/);
     // The picker goes back to its placeholder, so Bell can be picked again.
     await expect(select).toHaveValue("");
   });

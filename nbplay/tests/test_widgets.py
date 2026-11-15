@@ -1231,11 +1231,11 @@ class TestPresets:
         try:
             session.add_track("Lead", None, synth)
             session.history.mark()
-            # The picker writes the name; the kernel loads it and clears the request.
-            synth.config.preset_request = "Acid bass"
-            assert (synth.config.cutoff, synth.config.resonance, synth.config.preset_request) == (300.0, 12.0, "")
-            synth.config.preset_request = "Not shipped"
-            assert (synth.config.cutoff, synth.config.preset_request) == (300.0, "")
+            # The picker writes "<time>:<name>" to the status.
+            browser_writes(synth, preset_request="1700000000000:Acid bass")
+            assert (synth.config.cutoff, synth.config.resonance) == (300.0, 12.0)
+            browser_writes(synth, preset_request="1700000000001:Not shipped")
+            assert synth.config.cutoff == 300.0
             session.undo()
             assert (synth.config.cutoff, synth.config.resonance) == (20000.0, 0.7)
         finally:

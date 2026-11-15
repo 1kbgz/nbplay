@@ -132,7 +132,7 @@ export class NbplayFmSynth extends NbplayElement {
   declare release: number;
   /** The shipped presets' names for the header's picker. */
   declare presetNames: string[];
-  /** The preset the picker asked for; the kernel loads it and clears this. */
+  /** The preset the picker asked for (status); the kernel loads it. */
   declare presetRequest: string;
   declare sessionId: string;
   declare channelIndex: number;
@@ -305,11 +305,22 @@ export class NbplayFmSynth extends NbplayElement {
     ></nbplay-param>`;
   }
 
+  /**
+   * Ask the kernel for a shipped preset. `presetRequest` is status:
+   * `<time>:<name>`, so asking for the same name again is still a change.
+   */
+  private requestPreset(name: string): void {
+    this.presetRequest = `${Date.now()}:${name}`;
+    this.emitDetail("nbplay-status", {
+      values: { presetRequest: this.presetRequest },
+      save: true,
+    });
+  }
+
   render() {
     return html`<nbplay-header badge="fm synth"
         >${presetSelect(this.presetNames, (name) => {
-          this.presetRequest = name;
-          this.emitDetail("nbplay-set", { values: { presetRequest: name } });
+          this.requestPreset(name);
         })}</nbplay-header
       >
       <nbplay-waveform
