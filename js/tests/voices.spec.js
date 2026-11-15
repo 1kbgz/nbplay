@@ -2,12 +2,13 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Render one second of `play(mod, ctx, arg)` on an OfflineAudioContext and
- * return the peak level in each window of `[from, to]` seconds, plus what
- * `play` returned.
+ * return the peak level in each window of `[from, to]` seconds, the
+ * strength of each tone `[hz, from, to]` over its window, and what `play`
+ * returned.
  */
-async function render(page, play, windows, arg = null) {
+async function render(page, play, windows, arg = null, tones = []) {
   return page.evaluate(
-    async ({ play, windows, arg }) => {
+    async ({ play, windows, arg, tones }) => {
       const mod = await window.__components;
       const ctx = new OfflineAudioContext(1, 44100, 44100);
       const result = new Function(
@@ -23,9 +24,19 @@ async function render(page, play, windows, arg = null) {
           most = Math.max(most, Math.abs(data[i]));
         return most;
       });
-      return { peaks, result };
+      const strengths = tones.map(([hz, from, to]) => {
+        let re = 0;
+        let im = 0;
+        for (let i = Math.round(from * 44100); i < to * 44100; i++) {
+          const phase = (2 * Math.PI * hz * i) / 44100;
+          re += data[i] * Math.cos(phase);
+          im += data[i] * Math.sin(phase);
+        }
+        return Math.hypot(re, im) / ((to - from) * 44100);
+      });
+      return { peaks, strengths, result };
     },
-    { play: play.toString(), windows, arg },
+    { play: play.toString(), windows, arg, tones },
   );
 }
 
@@ -34,7 +45,7 @@ test.describe("voices", () => {
     await page.goto("/tests/fixtures/components.html");
   });
 
-  test("a synth note plays at the patch level scaled by velocity and ends with its duration", async ({
+  test("a synth note with the default patch holds its level for its duration, then releases", async ({
     page,
   }) => {
     const { peaks, result } = await render(
@@ -43,7 +54,7 @@ test.describe("voices", () => {
         const cancel = mod.scheduleSynthNote(
           ctx,
           ctx.destination,
-          { type: "sine", amplitude: 0.5 },
+          { ...mod.SYNTH_DEFAULTS, amplitude: 0.5 },
           69,
           64,
           0.1,
@@ -54,13 +65,192 @@ test.describe("voices", () => {
       [
         [0, 0.09],
         [0.105, 0.11],
-        [0.55, 1],
+        [0.48, 0.5],
+        [0.6, 1],
       ],
     );
     expect(result).toBe("function");
     expect(peaks[0]).toBe(0);
+    // Velocity 64 of 127 at amplitude 0.5, still there at the end of the note.
     expect(Math.abs(peaks[1] - 0.5 * (64 / 127))).toBeLessThan(0.01);
-    expect(peaks[2]).toBe(0);
+    expect(Math.abs(peaks[2] - 0.5 * (64 / 127))).toBeLessThan(0.01);
+    expect(peaks[3]).toBe(0);
+  });
+
+  test("the second oscillator plays its interval and the filter takes out harmonics", async ({
+    page,
+  }) => {
+    const play = (mod, ctx, patch) => {
+      mod.scheduleSynthNote(
+        ctx,
+        ctx.destination,
+        { ...mod.SYNTH_DEFAULTS, ...patch },
+        57,
+        127,
+        0,
+        0.9,
+      );
+    };
+    // A fifth above A3 (220 Hz) is E4, 329.6 Hz; a saw's third harmonic is 660 Hz.
+    const tones = [
+      [220, 0.1, 0.8],
+      [329.63, 0.1, 0.8],
+      [660, 0.1, 0.8],
+    ];
+    const sine = await render(page, play, [], { amplitude: 0.5 }, tones);
+    expect(sine.strengths[1]).toBeLessThan(0.002);
+    const fifth = await render(
+      page,
+      play,
+      [],
+      { amplitude: 0.5, osc2Type: "sine", osc2Level: 1, osc2Semitones: 7 },
+      tones,
+    );
+    expect(Math.abs(fifth.strengths[1] - fifth.strengths[0])).toBeLessThan(
+      0.01,
+    );
+
+    const open = await render(
+      page,
+      play,
+      [],
+      { type: "saw", amplitude: 0.5 },
+      tones,
+    );
+    const filtered = await render(
+      page,
+      play,
+      [],
+      { type: "saw", amplitude: 0.5, cutoff: 300 },
+      tones,
+    );
+    // The open filter keeps the third harmonic at about a third of the
+    // fundamental; a 300 Hz low pass takes most of it out.
+    expect(open.strengths[2] / open.strengths[0]).toBeGreaterThan(0.25);
+    expect(filtered.strengths[2] / filtered.strengths[0]).toBeLessThan(0.1);
+  });
+
+  test("the filter envelope opens the filter at the start of a note", async ({
+    page,
+  }) => {
+    const { strengths } = await render(
+      page,
+      (mod, ctx) => {
+        mod.scheduleSynthNote(
+          ctx,
+          ctx.destination,
+          {
+            ...mod.SYNTH_DEFAULTS,
+            type: "saw",
+            amplitude: 0.5,
+            cutoff: 300,
+            filterEnv: 4,
+            filterAttack: 0,
+            filterDecay: 0.3,
+            filterSustain: 0,
+          },
+          57,
+          127,
+          0,
+          0.9,
+        );
+      },
+      [],
+      null,
+      [
+        [660, 0.02, 0.1],
+        [660, 0.5, 0.8],
+      ],
+    );
+    expect(strengths[0]).toBeGreaterThan(strengths[1] * 4);
+  });
+
+  test("a slow attack ramps the level and an amplitude LFO swings it", async ({
+    page,
+  }) => {
+    const play = (mod, ctx, patch) => {
+      mod.scheduleSynthNote(
+        ctx,
+        ctx.destination,
+        { ...mod.SYNTH_DEFAULTS, amplitude: 0.5, ...patch },
+        69,
+        127,
+        0,
+        0.9,
+      );
+    };
+    const attack = await render(page, play, [[0.095, 0.1]], { attack: 0.2 });
+    // Half way up a 0.2 s attack.
+    expect(Math.abs(attack.peaks[0] - 0.25)).toBeLessThan(0.01);
+
+    // Tremolo at full depth and 2 Hz starts at the middle of its swing, is
+    // at the top at 0.625 s and at the bottom (silence) at 0.375 s.
+    const tremolo = await render(
+      page,
+      play,
+      [
+        [0.37, 0.38],
+        [0.62, 0.63],
+      ],
+      { lfoTarget: "amplitude", lfoRate: 2, lfoDepth: 1 },
+    );
+    expect(tremolo.peaks[0]).toBeLessThan(0.01);
+    expect(Math.abs(tremolo.peaks[1] - 0.5)).toBeLessThan(0.01);
+
+    // A pitch LFO at full depth and 1 Hz bends A4 two semitones up (494 Hz)
+    // at a quarter cycle and two down (392 Hz) at three quarters.
+    const vibrato = await render(
+      page,
+      play,
+      [],
+      { lfoTarget: "pitch", lfoRate: 1, lfoDepth: 1 },
+      [
+        [493.9, 0.2, 0.3],
+        [392, 0.2, 0.3],
+        [493.9, 0.7, 0.8],
+        [392, 0.7, 0.8],
+      ],
+    );
+    expect(vibrato.strengths[0]).toBeGreaterThan(vibrato.strengths[1] * 5);
+    expect(vibrato.strengths[3]).toBeGreaterThan(vibrato.strengths[2] * 5);
+  });
+
+  test("a held synth voice follows an update and ends after its release", async ({
+    page,
+  }) => {
+    const { peaks, strengths, result } = await render(
+      page,
+      (mod, ctx) => {
+        const voice = mod.startSynthVoice(
+          ctx,
+          ctx.destination,
+          mod.SYNTH_DEFAULTS,
+          440,
+          0.5,
+          0,
+        );
+        let ended = 0;
+        voice.onended = () => ended++;
+        // An OfflineAudioContext's time stands still before rendering, so
+        // the update applies from the start.
+        voice.update({ ...mod.SYNTH_DEFAULTS, amplitude: 0.5 }, 880, 0.25);
+        return voice.release(0.5);
+      },
+      [
+        [0.1, 0.5],
+        [0.6, 1],
+      ],
+      null,
+      [
+        [440, 0.1, 0.5],
+        [880, 0.1, 0.5],
+      ],
+    );
+    // The default amplitude release is 0.05 s.
+    expect(result).toBeCloseTo(0.55, 5);
+    expect(Math.abs(peaks[0] - 0.25)).toBeLessThan(0.01);
+    expect(peaks[1]).toBe(0);
+    expect(strengths[1]).toBeGreaterThan(strengths[0] * 10);
   });
 
   test("an FM note holds at sustain and is silent after its release", async ({
@@ -113,7 +303,7 @@ test.describe("voices", () => {
         mod.scheduleSynthNote(
           ctx,
           ctx.destination,
-          { type: "saw", amplitude: 1 },
+          { ...mod.SYNTH_DEFAULTS, type: "saw", amplitude: 1 },
           60,
           127,
           0.2,

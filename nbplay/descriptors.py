@@ -718,28 +718,50 @@ def _normalize_sample_slices(slices, sample_length=0):
 THEMES = ("", "light", "dark", "studio", "flat", "cube", "one", "grim", "pro", "fruit")
 
 
-def render_waveform(oscillator_type, frequency, amplitude, sample_rate):
-    """The waveform preview for an oscillator as little-endian float32 bytes.
-
-    About three cycles of the periodic oscillators, capped at
-    ``_PREVIEW_MAX_FRAMES``; 1024 frames of noise.
-    """
+def _oscillator(oscillator_type, frequency, amplitude, sample_rate):
     if oscillator_type == "square":
-        osc = SquareOscillator(frequency, amplitude, sample_rate)
-    elif oscillator_type == "saw":
-        osc = SawOscillator(frequency, amplitude, sample_rate)
-    elif oscillator_type == "triangle":
-        osc = TriangleOscillator(frequency, amplitude, sample_rate)
-    elif oscillator_type == "noise":
-        osc = NoiseSource(amplitude)
-    else:
-        osc = SineOscillator(frequency, amplitude, sample_rate)
+        return SquareOscillator(frequency, amplitude, sample_rate)
+    if oscillator_type == "saw":
+        return SawOscillator(frequency, amplitude, sample_rate)
+    if oscillator_type == "triangle":
+        return TriangleOscillator(frequency, amplitude, sample_rate)
+    if oscillator_type == "noise":
+        return NoiseSource(amplitude)
+    return SineOscillator(frequency, amplitude, sample_rate)
+
+
+def render_waveform(
+    oscillator_type,
+    frequency,
+    amplitude,
+    sample_rate,
+    osc2_type="saw",
+    osc2_level=0.0,
+    osc2_ratio=1.0,
+    noise_level=0.0,
+):
+    """The waveform preview for the synth's oscillators as little-endian float32 bytes.
+
+    About three cycles of the first oscillator, capped at
+    ``_PREVIEW_MAX_FRAMES``, or 1024 frames when it is noise. The second
+    oscillator (at ``osc2_ratio`` times the frequency) and the noise are
+    mixed in at their levels; the filter, envelopes and LFO are not shown.
+    """
     if oscillator_type == "noise":
         frames = 1024
     else:
         frames_per_cycle = sample_rate / max(frequency, 1.0)
         frames = max(256, min(_PREVIEW_MAX_FRAMES, int(frames_per_cycle * 3)))
-    return array.array("f", osc.render_to_buffer(frames)).tobytes()
+    mixed = array.array("f", _oscillator(oscillator_type, frequency, amplitude, sample_rate).render_to_buffer(frames))
+    layers = []
+    if osc2_level > 0:
+        layers.append(_oscillator(osc2_type, frequency * osc2_ratio, amplitude * osc2_level, sample_rate))
+    if noise_level > 0:
+        layers.append(NoiseSource(amplitude * noise_level))
+    for layer in layers:
+        for i, value in enumerate(layer.render_to_buffer(frames)):
+            mixed[i] += value
+    return mixed.tobytes()
 
 
 _LAUNCH_QUANTIZE = ("bar", "beat", "none")
@@ -936,7 +958,32 @@ _SEQUENCER_STATE = (
     "loop_enabled",
     "follow_transport",
 )
-_SYNTH_STATE = ("oscillator_type", "frequency", "amplitude", "sample_rate")
+_SYNTH_STATE = (
+    "oscillator_type",
+    "frequency",
+    "amplitude",
+    "sample_rate",
+    "osc2_type",
+    "osc2_level",
+    "osc2_semitones",
+    "osc2_detune",
+    "noise_level",
+    "filter_type",
+    "cutoff",
+    "resonance",
+    "filter_env",
+    "filter_attack",
+    "filter_decay",
+    "filter_sustain",
+    "filter_release",
+    "attack",
+    "decay",
+    "sustain",
+    "release",
+    "lfo_target",
+    "lfo_rate",
+    "lfo_depth",
+)
 _FM_SYNTH_STATE = ("frequency", "amplitude", "ratio", "index", "attack", "decay", "sustain", "release")
 _SAMPLER_STATE = (
     "sample_name",

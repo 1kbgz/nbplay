@@ -81,13 +81,16 @@ export {
 export { NbplayKeyboard } from "./keyboard.ts";
 export { NbplayFmSynth, fmWaveform } from "./fm-synth.ts";
 export {
+  SYNTH_DEFAULTS,
   scheduleFmNote,
   scheduleSynthNote,
   startSampleVoice,
+  startSynthVoice,
   type Envelope,
   type FmPatch,
   type SampleVoiceOptions,
   type SynthPatch,
+  type SynthVoice,
 } from "../voices.ts";
 export { NbplayMidiKeyboard } from "./midi-keyboard.ts";
 export { NbplaySettings } from "./settings.ts";

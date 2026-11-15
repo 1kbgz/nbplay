@@ -55,6 +55,7 @@
           this.frequency = new MockAudioParam(350);
           this.Q = new MockAudioParam(1);
           this.gain = new MockAudioParam(0);
+          this.detune = new MockAudioParam(0);
         }
       }
 
@@ -102,6 +103,7 @@
         constructor() {
           super();
           this.frequency = new MockAudioParam(440);
+          this.detune = new MockAudioParam(0);
           this.type = "sine";
         }
         start() {}

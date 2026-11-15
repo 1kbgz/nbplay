@@ -40,6 +40,53 @@ nbplay-synth .nbplay-synth-params nbplay-value {
   min-width: 72px;
   text-align: right;
 }
+nbplay-synth .nbplay-synth-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nbplay-border);
+}
+nbplay-synth .nbplay-synth-section-title {
+  font-size: var(--nbplay-font-size-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-synth .nbplay-synth-envelope {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 8px 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nbplay-border);
+}
+nbplay-synth .nbplay-synth-envelope .nbplay-synth-section-title {
+  grid-column: 1 / -1;
+}
+nbplay-synth .nbplay-synth-envelope nbplay-envelope {
+  display: block;
+  height: 100px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  overflow: hidden;
+}
+nbplay-synth .nbplay-synth-env-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 8px;
+  min-width: 0;
+}
+nbplay-synth .nbplay-synth-env-controls nbplay-param {
+  --nbplay-dial-size: 44px;
+}
+@media (max-width: 480px) {
+  nbplay-synth .nbplay-synth-envelope {
+    grid-template-columns: 1fr;
+  }
+}
 nbplay-synth .nbplay-synth-transport {
   display: flex;
   align-items: center;

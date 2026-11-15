@@ -146,10 +146,6 @@ class TransportStatus(BaseModel):
     redo_request: int = 0
 
 
-#: Config fields whose change re-renders the synth waveform preview.
-WAVEFORM_PARAMS = ("oscillator_type", "frequency", "amplitude", "sample_rate")
-
-
 class SpectrumConfig(_Validated):
     """The spectrum analyzer's FFT, its axis ranges, and what it listens to.
 
@@ -180,6 +176,16 @@ class SpectrumConfig(_Validated):
 class SynthConfig(_Validated):
     """Synth settings the kernel owns; ``waveform`` is derived.
 
+    A note mixes the first oscillator, a second one ``osc2_semitones`` and
+    ``osc2_detune`` cents away at ``osc2_level``, and noise at
+    ``noise_level``; runs it through a filter whose cutoff the filter
+    envelope moves by up to ``filter_env`` octaves; and shapes it with the
+    amplitude envelope. The LFO moves the pitch (up to 2 semitones), the
+    cutoff (up to 3 octaves) or the level (tremolo) at ``lfo_depth``.
+    ``frequency`` is the test tone. The defaults (no second oscillator, no
+    noise, an open filter, no LFO) are the single oscillator of earlier
+    versions.
+
     The preview is rendered by the Rust oscillators as part of validation,
     so it follows the parameters whether Python assigns them or a browser
     edit is validated into the model, and a client edit's authoritative
@@ -190,6 +196,26 @@ class SynthConfig(_Validated):
     frequency: float = Field(440.0, ge=20, le=8000)
     amplitude: float = Field(0.8, ge=0, le=1)
     sample_rate: int = Field(44100, ge=8000, le=192000)
+    osc2_type: Literal["sine", "triangle", "square", "saw"] = "saw"
+    osc2_level: float = Field(0.0, ge=0, le=1)
+    osc2_semitones: int = Field(0, ge=-24, le=24)
+    osc2_detune: float = Field(0.0, ge=-100, le=100)
+    noise_level: float = Field(0.0, ge=0, le=1)
+    filter_type: Literal["lowpass", "highpass", "bandpass"] = "lowpass"
+    cutoff: float = Field(20000.0, ge=20, le=20000)
+    resonance: float = Field(0.7, ge=0.1, le=20)
+    filter_env: float = Field(0.0, ge=-6, le=6)
+    filter_attack: float = Field(0.005, ge=0, le=2)
+    filter_decay: float = Field(0.2, ge=0, le=2)
+    filter_sustain: float = Field(0.0, ge=0, le=1)
+    filter_release: float = Field(0.2, ge=0, le=5)
+    attack: float = Field(0.005, ge=0, le=2)
+    decay: float = Field(0.1, ge=0, le=2)
+    sustain: float = Field(1.0, ge=0, le=1)
+    release: float = Field(0.05, ge=0, le=5)
+    lfo_target: Literal["off", "pitch", "filter", "amplitude"] = "off"
+    lfo_rate: float = Field(5.0, ge=0.05, le=20)
+    lfo_depth: float = Field(0.5, ge=0, le=1)
     waveform: bytes = b""
     session_id: str = ""
     channel_index: int = -1
@@ -199,7 +225,16 @@ class SynthConfig(_Validated):
 
     @model_validator(mode="after")
     def _render(self):
-        rendered = render_waveform(*(getattr(self, name) for name in WAVEFORM_PARAMS))
+        rendered = render_waveform(
+            self.oscillator_type,
+            self.frequency,
+            self.amplitude,
+            self.sample_rate,
+            osc2_type=self.osc2_type,
+            osc2_level=self.osc2_level,
+            osc2_ratio=2 ** ((self.osc2_semitones + self.osc2_detune / 100) / 12),
+            noise_level=self.noise_level,
+        )
         if self.waveform != rendered:
             self.__dict__["waveform"] = rendered
         return self

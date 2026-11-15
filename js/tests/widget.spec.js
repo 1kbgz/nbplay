@@ -389,6 +389,60 @@ test.describe("SynthWidget", () => {
     await expect(page.locator(".nbplay-info")).toHaveText("48000 Hz");
   });
 
+  test("the second oscillator, filter, envelope and LFO controls write the model", async ({
+    page,
+  }) => {
+    await renderWidget(page, {
+      osc2_type: "saw",
+      cutoff: 20000,
+      filter_type: "lowpass",
+      lfo_target: "off",
+      attack: 0.005,
+    });
+    await page.locator('.nbplay-osc2 [data-value="square"]').click();
+    await page.locator('.nbplay-filter-type [data-value="highpass"]').click();
+    await page.locator('.nbplay-lfo-target [data-value="pitch"]').click();
+    await page.evaluate(() => {
+      const edit = (selector, value) =>
+        document
+          .querySelector(selector)
+          .dispatchEvent(
+            new CustomEvent("change", { detail: { value }, bubbles: true }),
+          );
+      edit(".nbplay-cutoff", 1200);
+      edit(".nbplay-osc2-semitones", 7);
+      edit(".nbplay-amp-envelope-attack", 0.25);
+      edit(".nbplay-filter-envelope-sustain", 0.4);
+    });
+    expect(
+      await page.evaluate(() => {
+        const state = window.__testModel._state;
+        return [
+          state.osc2_type,
+          state.filter_type,
+          state.lfo_target,
+          state.cutoff,
+          state.osc2_semitones,
+          state.attack,
+          state.filter_sustain,
+        ];
+      }),
+    ).toEqual(["square", "highpass", "pitch", 1200, 7, 0.25, 0.4]);
+    await expect(page.locator(".nbplay-cutoff .nbplay-value-text")).toHaveText(
+      "1.20 kHz",
+    );
+    await expect(
+      page.locator(".nbplay-osc2-semitones .nbplay-value-text"),
+    ).toHaveText("7 st");
+    // The envelope display follows its dials.
+    expect(
+      await page.evaluate(
+        () =>
+          document.querySelector(".nbplay-amp-envelope nbplay-envelope").attack,
+      ),
+    ).toBe(0.25);
+  });
+
   test("synth registers itself as the track's bus instrument", async ({
     page,
   }) => {
@@ -442,8 +496,10 @@ test.describe("SynthWidget", () => {
       .poll(() =>
         page.evaluate(() => {
           const bus = globalThis.__nbplay["synth-session"];
+          // The note's first oscillator; the second one and the LFO follow.
+          const first = window.__oscs.length;
           bus.instruments[0].scheduleNote(69, 127, 3, 0.5);
-          return window.__oscs.at(-1).type;
+          return window.__oscs[first].type;
         }),
       )
       .toBe("triangle");

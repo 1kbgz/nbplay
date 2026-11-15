@@ -233,7 +233,9 @@ class InstrumentWidget(Widget):
         """Apply a preset: the dict from :meth:`preset`, or the path of a file from :meth:`save_preset`.
 
         The fields are validated together and applied in one update, so a
-        refused preset changes nothing and a loaded one is one undo step.
+        refused preset changes nothing and a loaded one is one undo step. A
+        field the preset does not have (one added after it was saved) takes
+        its default, so an older preset keeps its sound.
         """
         if isinstance(preset, (str, os.PathLike)):
             preset = json.loads(pathlib.Path(preset).read_text())
@@ -244,7 +246,8 @@ class InstrumentWidget(Widget):
         if preset.get("type") != type(self).__name__:
             raise ValueError(f"a {preset.get('type')} preset cannot be loaded into a {type(self).__name__}")
         state = _preset_decode(preset.get("state", {}))
-        self.config.update(**{field: state[field] for field in self.PRESET if field in state})
+        fields = type(self.config).model_fields
+        self.config.update(**{field: state[field] if field in state else fields[field].default for field in self.PRESET})
         return self
 
     @classmethod
@@ -363,6 +366,26 @@ class SynthWidget(InstrumentWidget):
         "frequency": "frequency",
         "amplitude": "amplitude",
         "sample_rate": "sampleRate",
+        "osc2_type": "osc2Type",
+        "osc2_level": "osc2Level",
+        "osc2_semitones": "osc2Semitones",
+        "osc2_detune": "osc2Detune",
+        "noise_level": "noiseLevel",
+        "filter_type": "filterType",
+        "cutoff": "cutoff",
+        "resonance": "resonance",
+        "filter_env": "filterEnv",
+        "filter_attack": "filterAttack",
+        "filter_decay": "filterDecay",
+        "filter_sustain": "filterSustain",
+        "filter_release": "filterRelease",
+        "attack": "attack",
+        "decay": "decay",
+        "sustain": "sustain",
+        "release": "release",
+        "lfo_target": "lfoTarget",
+        "lfo_rate": "lfoRate",
+        "lfo_depth": "lfoDepth",
         "waveform": "waveform",
         "session_id": "sessionId",
         "channel_index": "channelIndex",

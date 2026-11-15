@@ -1201,7 +1201,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-synth",
     title: "nbplay-synth",
-    desc: "The synth instrument: waveform preview, oscillator type, log frequency, amplitude, play/stop on a private AudioContext.",
+    desc: "The synth instrument: two oscillators and noise through a filter with its own envelope, an amplitude envelope and an LFO; waveform preview, play/stop on a private AudioContext.",
     events: ["nbplay-set", "nbplay-status"],
     controls: [
       {
@@ -1211,6 +1211,30 @@ const SECTIONS: Section[] = [
       },
       { name: "frequency", type: "number", step: 0.1 },
       { name: "amplitude", type: "number", step: 0.01 },
+      {
+        name: "osc2Type",
+        type: "select",
+        options: ["sine", "triangle", "square", "saw"],
+      },
+      { name: "osc2Level", type: "number", step: 0.01 },
+      { name: "osc2Semitones", type: "number", step: 1 },
+      { name: "osc2Detune", type: "number", step: 1 },
+      { name: "noiseLevel", type: "number", step: 0.01 },
+      {
+        name: "filterType",
+        type: "select",
+        options: ["lowpass", "highpass", "bandpass"],
+      },
+      { name: "cutoff", type: "number", step: 1 },
+      { name: "resonance", type: "number", step: 0.1 },
+      { name: "filterEnv", type: "number", step: 0.1 },
+      {
+        name: "lfoTarget",
+        type: "select",
+        options: ["off", "pitch", "filter", "amplitude"],
+      },
+      { name: "lfoRate", type: "number", step: 0.1 },
+      { name: "lfoDepth", type: "number", step: 0.01 },
       { name: "sampleRate", type: "number" },
       { name: "isPlaying", type: "boolean" },
     ],
@@ -1218,6 +1242,22 @@ const SECTIONS: Section[] = [
       {
         label: "sine 440",
         props: { waveform: sineBurst(512), amplitude: 0.5 },
+        wide: true,
+      },
+      {
+        label: "detuned saws through a swept filter",
+        props: {
+          waveform: sineBurst(512),
+          oscillatorType: "saw",
+          osc2Level: 0.8,
+          osc2Detune: 12,
+          cutoff: 800,
+          resonance: 4,
+          filterEnv: 3,
+          filterSustain: 0.2,
+          lfoTarget: "pitch",
+          lfoDepth: 0.1,
+        },
         wide: true,
       },
     ],
