@@ -407,6 +407,8 @@ export class NbplayTransport extends NbplayElement {
     if (name === "redo") this.redoRequest = (this.redoRequest || 0) + 1;
     else this.undoRequest = (this.undoRequest || 0) + 1;
     this.emitDetail("nbplay-request", { name });
+    // Bindings run during dispatch; flush only after they have queued this request.
+    this.emitDetail("nbplay-flush", {});
   };
 
   render() {

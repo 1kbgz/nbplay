@@ -13,7 +13,7 @@ import {
   type FmVoice,
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
-import { presetSelect } from "./preset-select.ts";
+import { presetRequest, presetSelect } from "./preset-select.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./envelope.ts";
 import "./header.ts";
@@ -307,10 +307,10 @@ export class NbplayFmSynth extends NbplayElement {
 
   /**
    * Ask the kernel for a shipped preset. `presetRequest` is status:
-   * `<time>:<name>`, so asking for the same name again is still a change.
+   * `<token>:<name>`, so asking for the same name again is still a change.
    */
   private requestPreset(name: string): void {
-    this.presetRequest = `${Date.now()}:${name}`;
+    this.presetRequest = presetRequest(name, this.presetRequest);
     this.emitDetail("nbplay-status", {
       values: { presetRequest: this.presetRequest },
       save: true,

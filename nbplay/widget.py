@@ -272,12 +272,8 @@ class InstrumentWidget(Widget):
         return cls(**kwargs).load_preset(preset)
 
     def _on_preset_request(self, widget, name, old, request):
-        # The header's picker writes ``<time>:<name>`` to the status, so the
-        # same name picked twice is still a change. The request is
-        # browser-owned, like the transport's undo requests: a kernel write
-        # into the config while transports applies a browser edit to that
-        # same config is not sent until the config next changes, while a
-        # status patch leaves the config free to change.
+        # The picker writes ``<token>:<name>``; repeated picks get distinct
+        # tokens, but picks within one status flush use the latest selection.
         preset = str(request).partition(":")[2]
         if preset in self.presets():
             self.load_preset(preset)

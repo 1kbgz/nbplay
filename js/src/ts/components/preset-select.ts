@@ -1,5 +1,11 @@
 import { html, nothing } from "lit";
 
+/** Keep the existing numeric token format, including repeated picks in one millisecond. */
+export function presetRequest(name: string, previous: string): string {
+  const last = Number(previous.split(":", 1)[0]) || 0;
+  return `${Math.max(Date.now(), last + 1)}:${name}`;
+}
+
 /**
  * A "Preset…" select for an instrument's header. Picking a name calls
  * `onPick(name)` and the select returns to its placeholder, so the same

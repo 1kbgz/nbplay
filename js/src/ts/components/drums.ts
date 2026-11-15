@@ -21,7 +21,7 @@ import {
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
 import type { PadSpec } from "./pad-grid.ts";
-import { presetSelect } from "./preset-select.ts";
+import { presetRequest, presetSelect } from "./preset-select.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./drum-grid.ts";
 import "./header.ts";
@@ -686,8 +686,8 @@ export class NbplayDrums extends NbplayElement {
     );
     return html`<nbplay-header badge="drums"
         >${presetSelect(this.presetNames, (name) => {
-          // Status, `<time>:<name>`, like the synth's preset picker.
-          this.presetRequest = `${Date.now()}:${name}`;
+          // Status, `<token>:<name>`, like the synth's preset picker.
+          this.presetRequest = presetRequest(name, this.presetRequest);
           this.status(true, { presetRequest: this.presetRequest });
         })}</nbplay-header
       >
