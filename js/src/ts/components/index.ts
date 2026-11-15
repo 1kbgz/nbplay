@@ -34,6 +34,7 @@ export {
 } from "./keys.ts";
 export { NbplayPadGrid, type PadSpec } from "./pad-grid.ts";
 export { NbplayStepGrid, type Step, type StepRef } from "./step-grid.ts";
+export { NbplayDrumGrid } from "./drum-grid.ts";
 export {
   EFFECT_TYPES,
   EFFECT_PARAMS,
@@ -81,11 +82,14 @@ export {
 export { NbplayKeyboard } from "./keyboard.ts";
 export { NbplayFmSynth, fmWaveform } from "./fm-synth.ts";
 export {
+  DRUM_SOUNDS,
   SYNTH_DEFAULTS,
+  scheduleDrumHit,
   scheduleFmNote,
   scheduleSynthNote,
   startSampleVoice,
   startSynthVoice,
+  type DrumPatch,
   type Envelope,
   type FmPatch,
   type SampleVoiceOptions,
@@ -100,6 +104,7 @@ export {
   type SendRequest,
 } from "./midi-output.ts";
 export { NbplaySequencer } from "./sequencer.ts";
+export { NbplayDrums, padSynthPatch, type DrumPad } from "./drums.ts";
 export {
   NbplayLauncher,
   type LaunchRequest,

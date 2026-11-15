@@ -527,6 +527,35 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-drum-grid",
+    title: "nbplay-drum-grid",
+    desc: "A drum pattern, one named row per pad. Click toggles a step, the wheel moves a step's velocity, a row's name selects its pad.",
+    events: ["change", "nbplay-select"],
+    controls: [
+      { name: "currentStep", type: "number" },
+      { name: "selected", type: "number" },
+      { name: "velocity", type: "number" },
+    ],
+    variants: [
+      {
+        label: "kick, snare and hats",
+        props: {
+          names: ["Kick", "Snare", "Closed hat", "Open hat"],
+          selected: 0,
+          pattern: [
+            Array.from({ length: 16 }, (_, i) => (i % 4 === 0 ? 110 : 0)),
+            Array.from({ length: 16 }, (_, i) => (i % 8 === 4 ? 100 : 0)),
+            Array.from({ length: 16 }, (_, i) =>
+              i % 2 === 0 ? 60 + (i % 4) * 15 : 0,
+            ),
+            Array.from({ length: 16 }, (_, i) => (i === 14 ? 90 : 0)),
+          ],
+        },
+        wide: true,
+      },
+    ],
+  },
+  {
     tag: "nbplay-step-grid",
     title: "nbplay-step-grid",
     desc: "Beat grid: a step row and a velocity row per voice. Click toggles, wheel moves the note, double-click types a note name or MIDI number, Shift-free wheel on the bars sets velocity. The first instance is animated.",
@@ -1331,6 +1360,72 @@ const SECTIONS: Section[] = [
       { name: "sendClock", type: "boolean" },
     ],
     variants: [{ label: "default", props: {}, wide: true }],
+  },
+  {
+    tag: "nbplay-drums",
+    title: "nbplay-drums",
+    desc: "A drum machine on a private clock: pads with their own sounds (built-in drums, synth or FM patches), an editor for the selected pad, and a pattern row per pad. Tap a pad to hear it.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "bpm", type: "number" },
+      { name: "steps", type: "number" },
+      { name: "swing", type: "number" },
+    ],
+    variants: [
+      {
+        label: "four pads",
+        props: {
+          pads: [
+            {
+              name: "Kick",
+              note: 36,
+              sound: "kick",
+              gain: 1,
+              pan: 0,
+              choke: 0,
+              params: { tune: 0, decay: 0.45, tone: 0.3 },
+            },
+            {
+              name: "Snare",
+              note: 38,
+              sound: "snare",
+              gain: 1,
+              pan: 0,
+              choke: 0,
+              params: { tune: 0, decay: 0.2, tone: 0.6 },
+            },
+            {
+              name: "Closed hat",
+              note: 42,
+              sound: "hat",
+              gain: 1,
+              pan: 0,
+              choke: 1,
+              params: { tune: 0, decay: 0.05, tone: 0.6 },
+            },
+            {
+              name: "Open hat",
+              note: 46,
+              sound: "hat",
+              gain: 1,
+              pan: 0,
+              choke: 1,
+              params: { tune: 0, decay: 0.4, tone: 0.6 },
+            },
+          ],
+          pattern: [
+            Array.from({ length: 16 }, (_, i) => (i % 4 === 0 ? 110 : 0)),
+            Array.from({ length: 16 }, (_, i) => (i % 8 === 4 ? 100 : 0)),
+            Array.from({ length: 16 }, (_, i) =>
+              i % 2 === 0 && i !== 14 ? 70 : 0,
+            ),
+            Array.from({ length: 16 }, (_, i) => (i === 14 ? 90 : 0)),
+          ],
+          presetNames: ["Analog kit", "Electro kit"],
+        },
+        wide: true,
+      },
+    ],
   },
   {
     tag: "nbplay-sequencer",

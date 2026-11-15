@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import array
 import base64
+import functools
 import json
 import math
+import pathlib
 import uuid
 
 from nbplay import (
@@ -1030,3 +1032,99 @@ def _preset_decode(value):
     if isinstance(value, list):
         return [_preset_decode(item) for item in value]
     return value
+
+
+_FACTORY_PRESETS = pathlib.Path(__file__).parent / "presets"
+
+
+@functools.cache
+def _factory_presets(widget_type):
+    """The presets shipped for a widget class (``nbplay/presets/<class>/``), by name."""
+    presets = {}
+    for path in sorted((_FACTORY_PRESETS / widget_type).glob("*.json")):
+        preset = json.loads(path.read_text())
+        presets[preset["name"]] = preset
+    return presets
+
+
+#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch.
+DRUM_SOUNDS = ("kick", "snare", "hat", "clap", "tom")
+PAD_SOUNDS = (*DRUM_SOUNDS, "synth", "fm")
+MAX_DRUM_PADS = 16
+_DRUM_DEFAULTS = {
+    "kick": {"tune": 0.0, "decay": 0.45, "tone": 0.3},
+    "snare": {"tune": 0.0, "decay": 0.2, "tone": 0.6},
+    "hat": {"tune": 0.0, "decay": 0.06, "tone": 0.6},
+    "clap": {"tune": 0.0, "decay": 0.25, "tone": 0.5},
+    "tom": {"tune": 0.0, "decay": 0.35, "tone": 0.2},
+}
+_DRUM_MACHINE_STATE = ("pads", "pattern", "steps", "step_duration", "swing", "velocity")
+
+
+def _drum_pad(name, note, sound, *, choke=0, **params):
+    return {"name": name, "note": note, "sound": sound, "gain": 1.0, "pan": 0.0, "choke": choke, "params": params}
+
+
+def _default_drum_kit():
+    """The drum machine's default pads (the "Analog kit" preset), on General MIDI drum notes."""
+    return [
+        _drum_pad("Kick", 36, "kick"),
+        _drum_pad("Snare", 38, "snare"),
+        _drum_pad("Closed hat", 42, "hat", choke=1, decay=0.05),
+        _drum_pad("Open hat", 46, "hat", choke=1, decay=0.4),
+        _drum_pad("Clap", 39, "clap"),
+        _drum_pad("Low tom", 41, "tom"),
+        _drum_pad("Mid tom", 45, "tom", tune=5.0),
+        _drum_pad("High tom", 48, "tom", tune=10.0),
+        _drum_pad("Rim", 37, "snare", tune=12.0, decay=0.04, tone=0.2),
+        _drum_pad("Crash", 49, "hat", decay=1.2, tone=0.3),
+        _drum_pad("Ride", 51, "hat", decay=0.7, tone=0.9),
+        _drum_pad("Pedal hat", 44, "hat", choke=1, decay=0.03, tone=0.4),
+        _drum_pad("Kick 2", 35, "kick", tune=-3.0, decay=0.7, tone=0.1),
+        _drum_pad("Snare 2", 40, "snare", tune=3.0, decay=0.3, tone=0.8),
+        _drum_pad("Cowbell", 56, "fm", pitch=80, length=0.15, ratio=1.5, index=1.5, decay=0.3, sustain=0.0, release=0.1),
+        _drum_pad("Bass", 33, "synth", preset="Sub bass", pitch=36, length=0.25),
+    ]
+
+
+def _bounded(value, low, high):
+    return max(low, min(high, float(value)))
+
+
+def _normalize_drum_pad(raw, index):
+    """One drum machine pad with its fields bounded; a synth or FM patch is left to the model to validate."""
+    if not isinstance(raw, dict):
+        raise ValueError(f"pad {index} must be a dict, got {type(raw).__name__}")  # noqa: TRY004
+    sound = raw.get("sound", "kick")
+    if sound not in PAD_SOUNDS:
+        raise ValueError(f"pad {index} sound must be one of {list(PAD_SOUNDS)}, got {sound!r}")
+    params = dict(raw.get("params") or {})
+    if sound in DRUM_SOUNDS:
+        defaults = _DRUM_DEFAULTS[sound]
+        params = {
+            "tune": _bounded(params.get("tune", defaults["tune"]), -24, 24),
+            "decay": _bounded(params.get("decay", defaults["decay"]), 0.01, 4),
+            "tone": _bounded(params.get("tone", defaults["tone"]), 0, 1),
+        }
+    else:
+        params["pitch"] = _clamp_midi_note(params.get("pitch", 60))
+        params["length"] = _bounded(params.get("length", 0.25), 0.01, 4)
+    return {
+        "name": str(raw.get("name") or sound.capitalize()),
+        "note": _clamp_midi_note(raw.get("note", 36 + index)),
+        "sound": sound,
+        "gain": _bounded(raw.get("gain", 1.0), 0, 2),
+        "pan": _bounded(raw.get("pan", 0.0), -1, 1),
+        "choke": _clamp_int(raw.get("choke", 0), 0, 8),
+        "params": params,
+    }
+
+
+def _normalize_drum_pattern(pattern, pads, steps):
+    """One row per pad of ``steps`` velocities (0 is off), cut or padded with zeros."""
+    rows = []
+    for index in range(pads):
+        row = pattern[index] if index < len(pattern) and isinstance(pattern[index], (list, tuple)) else []
+        values = [_clamp_int(value, 0, 127) for value in list(row)[:steps]]
+        rows.append(values + [0] * (steps - len(values)))
+    return rows

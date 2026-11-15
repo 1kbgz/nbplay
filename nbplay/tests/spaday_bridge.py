@@ -20,6 +20,7 @@ import nbplay
 VIEWS = {
     "transport": nbplay.TransportWidget,
     "synth": nbplay.SynthWidget,
+    "drums": nbplay.DrumMachineWidget,
     "mixer": nbplay.MixerWidget,
     "pads": nbplay.PadWidget,
     "keyboard": nbplay.KeyboardWidget,

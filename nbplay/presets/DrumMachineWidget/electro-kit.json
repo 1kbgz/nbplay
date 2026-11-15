@@ -1,0 +1,212 @@
+{
+ "format": "nbplay-preset",
+ "version": 1,
+ "type": "DrumMachineWidget",
+ "name": "Electro kit",
+ "state": {
+  "pads": [
+   {
+    "name": "Kick",
+    "note": 36,
+    "sound": "kick",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": -2.0,
+     "decay": 0.8,
+     "tone": 0.05
+    }
+   },
+   {
+    "name": "Snare",
+    "note": 38,
+    "sound": "snare",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 2.0,
+     "decay": 0.18,
+     "tone": 0.85
+    }
+   },
+   {
+    "name": "Closed hat",
+    "note": 42,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.035,
+     "tone": 0.95
+    }
+   },
+   {
+    "name": "Open hat",
+    "note": 46,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.3,
+     "tone": 0.95
+    }
+   },
+   {
+    "name": "Clap",
+    "note": 39,
+    "sound": "clap",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "decay": 0.3,
+     "tone": 0.7
+    }
+   },
+   {
+    "name": "Low tom",
+    "note": 41,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": -2.0,
+     "decay": 0.5,
+     "tone": 0.0
+    }
+   },
+   {
+    "name": "Mid tom",
+    "note": 45,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 3.0,
+     "decay": 0.45,
+     "tone": 0.0
+    }
+   },
+   {
+    "name": "High tom",
+    "note": 48,
+    "sound": "tom",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 8.0,
+     "decay": 0.4,
+     "tone": 0.0
+    }
+   },
+   {
+    "name": "Rim",
+    "note": 37,
+    "sound": "snare",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 14.0,
+     "decay": 0.03,
+     "tone": 0.1
+    }
+   },
+   {
+    "name": "Crash",
+    "note": 49,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "decay": 1.5,
+     "tone": 0.5
+    }
+   },
+   {
+    "name": "Ride",
+    "note": 51,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "decay": 0.9,
+     "tone": 1.0
+    }
+   },
+   {
+    "name": "Pedal hat",
+    "note": 44,
+    "sound": "hat",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 1,
+    "params": {
+     "decay": 0.02,
+     "tone": 0.6
+    }
+   },
+   {
+    "name": "Punch",
+    "note": 35,
+    "sound": "kick",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 3.0,
+     "decay": 0.25,
+     "tone": 0.6
+    }
+   },
+   {
+    "name": "Snap",
+    "note": 40,
+    "sound": "clap",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "tune": 4.0,
+     "decay": 0.12,
+     "tone": 0.9
+    }
+   },
+   {
+    "name": "Bell",
+    "note": 56,
+    "sound": "fm",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "preset": "Bell",
+     "pitch": 84,
+     "length": 0.3
+    }
+   },
+   {
+    "name": "Acid",
+    "note": 33,
+    "sound": "synth",
+    "gain": 1.0,
+    "pan": 0.0,
+    "choke": 0,
+    "params": {
+     "preset": "Acid bass",
+     "pitch": 36,
+     "length": 0.2
+    }
+   }
+  ]
+ }
+}

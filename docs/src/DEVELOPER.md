@@ -207,6 +207,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
 | `FMSynthWidget`      | `frequency`, `amplitude`, `ratio`, `index`, `attack`, `decay`, `sustain`, `release`, `session_id`, `channel_index`, `theme`                                                                                                                                            | `is_playing`                                                                                                                                                                |
+| `DrumMachineWidget`  | `pads`, `pattern`, `steps`, `step_duration`, `swing`, `bpm`, time signature, `velocity`, `preset_names`, `sound_preset_names`, `session_id`, `channel_index`, `theme`                                                                                                  | `is_playing`, `current_step`, `preset_request`                                                                                                                              |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
 | `SamplerWidget`      | `sample_name`, `sample_rate`, `sample_length`, `root_note`, `waveform`, `sample_data`, ADSR fields, `max_voices`, `pad_count`, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `velocity`, `velocity_sensitive`, `zones`, `session_id`, `channel_index` | `active_pads`, `last_note_event`, `last_pad_event`, `request` (capture commands)                                                                                            |
 | `TransportWidget`    | `bpm`, `time_signature_num`, `time_signature_den`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`, `session_id`, `theme`                                                                                                                                             | `is_playing`, `is_recording`, `current_beat`, `bar_number`, `beat_in_bar`, `undo_request`, `redo_request`                                                                   |
@@ -337,8 +338,9 @@ commands to `element.command()`; see "Transports widgets" below. An element
 never emits status during construction or its first property assignment, so
 rendering a widget never writes back to the kernel. Non-visual engines the elements share
 live beside them: `voices.ts` (the note players built from a patch on a
-given output, `scheduleSynthNote()`, `scheduleFmNote()` and
-`startSampleVoice()`, so one element can host several sounds, plus the
+given output, `scheduleSynthNote()`, `scheduleFmNote()`,
+`startSampleVoice()` and the built-in drums' `scheduleDrumHit()`, so one
+element can host several sounds, plus the
 fallback sine voices), `midi_access.ts` (Web
 MIDI ports), `mixer_bus.ts` (audio graph, effects, meters) and
 `sampler_engine.ts` (sample playback).
@@ -610,6 +612,42 @@ note's duration. The preview is computed in the element from the patch
 tone at `frequency` on a private `AudioContext`. It registers
 `bus.instruments[channel_index]` the way the synth does, and a session saves
 it with its patch.
+
+### DrumMachineWidget
+
+Python class: `DrumMachineWidget`. Elements:
+`js/src/ts/components/drums.ts` and the pattern grid
+`js/src/ts/components/drum-grid.ts`.
+
+A drum machine is up to 16 pads and a pattern with one row per pad, on one
+track: `session.add_track("Beat", None, DrumMachineWidget())`. A pad is
+`{name, note, sound, gain, pan, choke, params}`:
+
+- A built-in drum (`kick`, `snare`, `hat`, `clap`, `tom`) has `tune`
+  (semitones), `decay` (seconds) and `tone` (0 to 1). `scheduleDrumHit()` in
+  `voices.ts` plays them: kick and tom are sines that fall in pitch, the snare
+  is a triangle body under high-passed noise, the hat is high-passed noise and
+  the clap is band-passed noise in four bursts.
+- A `synth` or `fm` pad has that instrument's patch fields plus `pitch` (the
+  note it plays) and `length` (seconds). `preset` names a shipped synth or FM
+  preset to start from; the config's validator fills the patch in from it and
+  validates the patch with `SynthConfig` or `FMSynthConfig`, so a pad keeps
+  the instrument's ranges.
+- Pads with the same nonzero `choke` group cut each other off: a hit fades
+  the group's other ringing hits at its start time.
+
+`pattern` holds a velocity per pad per step (0 is off) and is resized to the
+pads and `steps` by the validator. `set_pad()`, `set_step()`, `set_row()` and
+`clear()` edit them; a new `sound` without `params` starts from that sound's
+defaults. The element runs the pattern on the session clock with the
+sequencer's scheduler, which plays each step through the drum machine itself
+(`createAudioScheduler({instrument})`) whether or not there is a session.
+Like the synths it registers `bus.instruments[channel_index]`, so notes from
+a sequencer, a clip or a launched slot on its track play the pads that answer
+to them. Each hit goes through its own gain and pan into the track's channel.
+A kit is the pads: `PRESET = ("pads",)`, with the shipped Analog kit (the
+default) and Electro kit offered in the header. A session saves the pads,
+pattern, steps, step length, swing and tap velocity.
 
 ### SequencerWidget
 
@@ -1290,8 +1328,8 @@ the JSON layer underneath. The archive holds:
 - `clips/<clip id>.bin`: timeline clip audio that has arrived from the
   browser.
 
-Sound sources are limited to `SynthWidget`, `FMSynthWidget` and
-`SamplerWidget` (or none);
+Sound sources are limited to `SynthWidget`, `FMSynthWidget`,
+`DrumMachineWidget` and `SamplerWidget` (or none);
 saving another type raises. Clip audio lives in the browser, so before saving
 call `session.timeline.export_all_clips()`, which queues one `export_clip()`
 request per clip and caches each answer in `timeline.clip_audio`; wait for
@@ -1310,6 +1348,7 @@ A preset is one widget's sound or layout as JSON, without its session wiring.
 - `SynthWidget`: the whole patch (oscillators, noise, filter, envelopes, LFO),
   frequency and sample rate.
 - `FMSynthWidget`: frequency, amplitude, ratio, index and the ADSR.
+- `DrumMachineWidget`: the pads (a kit), not the pattern.
 - `SamplerWidget`: the sample (PCM, length, preview), envelope, pads, slices
   and zones. Bytes travel as `{"base64": ...}`.
 - `SequencerWidget`: the grid settings, swing, groove, automation lanes and

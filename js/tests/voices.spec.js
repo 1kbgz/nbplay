@@ -253,6 +253,75 @@ test.describe("voices", () => {
     expect(strengths[1]).toBeGreaterThan(strengths[0] * 10);
   });
 
+  test("each drum sound is a hit that falls to silence by the end of its decay", async ({
+    page,
+  }) => {
+    for (const sound of ["kick", "snare", "hat", "clap", "tom"]) {
+      const { peaks, result } = await render(
+        page,
+        (mod, ctx, sound) => {
+          const cancel = mod.scheduleDrumHit(
+            ctx,
+            ctx.destination,
+            { sound, tune: 0, decay: 0.2, tone: 0.5 },
+            127,
+            0.1,
+          );
+          return typeof cancel;
+        },
+        [
+          [0, 0.099],
+          [0.1, 0.15],
+          [0.32, 1],
+        ],
+        sound,
+      );
+      expect(result, sound).toBe("function");
+      expect(peaks[0], sound).toBe(0);
+      expect(peaks[1], sound).toBeGreaterThan(0.05);
+      expect(peaks[2], sound).toBe(0);
+    }
+  });
+
+  test("a drum hit's level follows velocity and its tune moves the pitch", async ({
+    page,
+  }) => {
+    const kick = (mod, ctx, { velocity, tune }) => {
+      mod.scheduleDrumHit(
+        ctx,
+        ctx.destination,
+        { sound: "kick", tune, decay: 0.8, tone: 0 },
+        velocity,
+        0,
+      );
+    };
+    // After the pitch drop (60 ms) the kick sits at 50 Hz, an octave up at 100 Hz.
+    const tones = [
+      [50, 0.1, 0.5],
+      [100, 0.1, 0.5],
+    ];
+    const loud = await render(
+      page,
+      kick,
+      [[0, 0.1]],
+      { velocity: 127, tune: 0 },
+      tones,
+    );
+    const soft = await render(
+      page,
+      kick,
+      [[0, 0.1]],
+      { velocity: 64, tune: 0 },
+      tones,
+    );
+    expect(Math.abs(soft.peaks[0] / loud.peaks[0] - 64 / 127)).toBeLessThan(
+      0.02,
+    );
+    expect(loud.strengths[0]).toBeGreaterThan(loud.strengths[1] * 4);
+    const up = await render(page, kick, [], { velocity: 127, tune: 12 }, tones);
+    expect(up.strengths[1]).toBeGreaterThan(up.strengths[0] * 4);
+  });
+
   test("an FM note holds at sustain and is silent after its release", async ({
     page,
   }) => {
