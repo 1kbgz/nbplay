@@ -623,6 +623,18 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.MidiRouterWidget.clear_routes">MidiRouterWidget.clear_routes()</a>
   </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.add_mapping">MidiRouterWidget.add_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.map_launcher_grid">MidiRouterWidget.map_launcher_grid()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.remove_mapping">MidiRouterWidget.remove_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.clear_mappings">MidiRouterWidget.clear_mappings()</a>
+  </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>
   </li>
@@ -1988,7 +2000,8 @@ instrument of every route it matches and holds until its note-off;
 every note is also broadcast like a keyboard’s, so sequencer step
 recording and timeline recording hear it. Control changes land in
 <code class="docutils literal notranslate"><span class="pre">status.control_change</span></code>, so a <a class="reference internal" href="../index.html#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiLearn</span></code></a> can use the
-router as its source.</p>
+router as its source. Mappings bind one note or control change to a
+transport or launcher action instead.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-midi-router'</span></em><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.TAG" title="Link to this definition">¶</a></dt>
@@ -2030,6 +2043,35 @@ router as its source.</p>
 <dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.clear_routes">
 <span class="sig-name descname"><span class="pre">clear_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.clear_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.clear_routes" title="Link to this definition">¶</a></dt>
 <dd><p>Remove every route.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.add_mapping">
+<span class="sig-name descname"><span class="pre">add_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'note'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.add_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.add_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Run <code class="docutils literal notranslate"><span class="pre">action</span></code> (see <a class="reference internal" href="../descriptors/index.html#nbplay.descriptors.MIDI_ACTIONS" title="nbplay.descriptors.MIDI_ACTIONS"><code class="xref py py-data docutils literal notranslate"><span class="pre">MIDI_ACTIONS</span></code></a>) when note or control change <code class="docutils literal notranslate"><span class="pre">number</span></code> arrives; returns the mapping’s index.</p>
+<p><code class="docutils literal notranslate"><span class="pre">launch</span></code> takes the launcher row <code class="docutils literal notranslate"><span class="pre">track_index</span></code> and <code class="docutils literal notranslate"><span class="pre">scene_index</span></code>,
+<code class="docutils literal notranslate"><span class="pre">scene</span></code> a <code class="docutils literal notranslate"><span class="pre">scene_index</span></code> and <code class="docutils literal notranslate"><span class="pre">stop_track</span></code> a <code class="docutils literal notranslate"><span class="pre">track_index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.map_launcher_grid">
+<span class="sig-name descname"><span class="pre">map_launcher_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">81</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'note'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.map_launcher_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.map_launcher_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Map a grid of pads onto launcher slots in one edit: the pad for track <code class="docutils literal notranslate"><span class="pre">t</span></code>, scene <code class="docutils literal notranslate"><span class="pre">s</span></code> is <code class="docutils literal notranslate"><span class="pre">origin</span> <span class="pre">+</span> <span class="pre">t</span> <span class="pre">*</span> <span class="pre">track_step</span> <span class="pre">+</span> <span class="pre">s</span> <span class="pre">*</span> <span class="pre">scene_step</span></code>.</p>
+<p>The defaults are a Launchpad’s programmer layout, with tracks across
+and the first scene on the top row. Pads outside 0-127 are skipped.
+Returns the number of mappings added.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.remove_mapping">
+<span class="sig-name descname"><span class="pre">remove_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.remove_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.remove_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the mapping at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.clear_mappings">
+<span class="sig-name descname"><span class="pre">clear_mappings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.clear_mappings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.clear_mappings" title="Link to this definition">¶</a></dt>
+<dd><p>Remove every mapping.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3500,6 +3542,18 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.MidiRouterWidget.clear_routes">MidiRouterWidget.clear_routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.add_mapping">MidiRouterWidget.add_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.map_launcher_grid">MidiRouterWidget.map_launcher_grid()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.remove_mapping">MidiRouterWidget.remove_mapping()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.clear_mappings">MidiRouterWidget.clear_mappings()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>

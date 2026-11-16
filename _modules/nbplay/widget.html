@@ -1722,7 +1722,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    every note is also broadcast like a keyboard's, so sequencer step</span>
 <span class="sd">    recording and timeline recording hear it. Control changes land in</span>
 <span class="sd">    ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the</span>
-<span class="sd">    router as its source.</span>
+<span class="sd">    router as its source. Mappings bind one note or control change to a</span>
+<span class="sd">    transport or launcher action instead.</span>
 <span class="sd">    """</span>
 
     <span class="n">TAG</span> <span class="o">=</span> <span class="s2">"nbplay-midi-router"</span>
@@ -1730,7 +1731,9 @@ window.runMermaid = runMermaid;</script>
     <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">MidiRouterStatus</span>
     <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">"routes"</span><span class="p">:</span> <span class="s2">"routes"</span><span class="p">,</span>
+        <span class="s2">"mappings"</span><span class="p">:</span> <span class="s2">"mappings"</span><span class="p">,</span>
         <span class="s2">"session_tracks"</span><span class="p">:</span> <span class="s2">"sessionTracks"</span><span class="p">,</span>
+        <span class="s2">"session_scenes"</span><span class="p">:</span> <span class="s2">"sessionScenes"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
     <span class="p">}</span>
@@ -1772,6 +1775,74 @@ window.runMermaid = runMermaid;</script>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_routes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Remove every route."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.add_mapping">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.add_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"note"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">midi_channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">track_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">scene_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Run ``action`` (see :data:`~nbplay.descriptors.MIDI_ACTIONS`) when note or control change ``number`` arrives; returns the mapping's index.</span>
+
+<span class="sd">        ``launch`` takes the launcher row ``track_index`` and ``scene_index``,</span>
+<span class="sd">        ``scene`` a ``scene_index`` and ``stop_track`` a ``track_index``.</span>
+<span class="sd">        """</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+            <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+            <span class="s2">"port"</span><span class="p">:</span> <span class="n">port</span><span class="p">,</span>
+            <span class="s2">"midi_channel"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">midi_channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">midi_channel</span><span class="p">,</span>
+            <span class="s2">"track_index"</span><span class="p">:</span> <span class="n">track_index</span><span class="p">,</span>
+            <span class="s2">"scene_index"</span><span class="p">:</span> <span class="n">scene_index</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span><span class="p">,</span> <span class="n">mapping</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.map_launcher_grid">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.map_launcher_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">map_launcher_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracks</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">scenes</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">81</span><span class="p">,</span> <span class="n">track_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scene_step</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"note"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">midi_channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Map a grid of pads onto launcher slots in one edit: the pad for track ``t``, scene ``s`` is ``origin + t * track_step + s * scene_step``.</span>
+
+<span class="sd">        The defaults are a Launchpad's programmer layout, with tracks across</span>
+<span class="sd">        and the first scene on the top row. Pads outside 0-127 are skipped.</span>
+<span class="sd">        Returns the number of mappings added.</span>
+<span class="sd">        """</span>
+        <span class="n">added</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tracks</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">scene</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">scenes</span><span class="p">):</span>
+                <span class="n">number</span> <span class="o">=</span> <span class="n">origin</span> <span class="o">+</span> <span class="n">track</span> <span class="o">*</span> <span class="n">track_step</span> <span class="o">+</span> <span class="n">scene</span> <span class="o">*</span> <span class="n">scene_step</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">number</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
+                    <span class="n">added</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">"action"</span><span class="p">:</span> <span class="s2">"launch"</span><span class="p">,</span>
+                            <span class="s2">"number"</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+                            <span class="s2">"kind"</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+                            <span class="s2">"port"</span><span class="p">:</span> <span class="n">port</span><span class="p">,</span>
+                            <span class="s2">"midi_channel"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">midi_channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">midi_channel</span><span class="p">,</span>
+                            <span class="s2">"track_index"</span><span class="p">:</span> <span class="n">track</span><span class="p">,</span>
+                            <span class="s2">"scene_index"</span><span class="p">:</span> <span class="n">scene</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span><span class="p">,</span> <span class="o">*</span><span class="n">added</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">added</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.remove_mapping">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.remove_mapping">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Remove the mapping at ``index``."""</span>
+        <span class="n">mappings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappings</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mapping index out of range: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">mappings</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="n">mappings</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.clear_mappings">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.clear_mappings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_mappings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Remove every mapping."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span> <span class="o">=</span> <span class="p">[]</span></div>
 </div>
 
 
@@ -3149,6 +3220,8 @@ window.runMermaid = runMermaid;</script>
         <span class="c1"># from the user's side; keep them mirrored by channel index.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mirroring_mute_solo</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_timeline_tracks</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"tracks"</span><span class="p">)</span>
+        <span class="c1"># The router's mapping editor names the launcher's scenes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="k">lambda</span> <span class="n">widget</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">scenes</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">"session_scenes"</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">scenes</span><span class="p">)),</span> <span class="n">names</span><span class="o">=</span><span class="s2">"scenes"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">on_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_mixer_channels</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"channels"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Session._on_timeline_tracks">
@@ -3349,7 +3422,14 @@ window.runMermaid = runMermaid;</script>
                 <span class="n">channel</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"channel_index"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">channel</span> <span class="o">!=</span> <span class="n">removed</span><span class="p">:</span>
                     <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="o">**</span><span class="n">route</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">:</span> <span class="n">channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">}</span> <span class="k">if</span> <span class="n">channel</span> <span class="o">&gt;</span> <span class="n">removed</span> <span class="k">else</span> <span class="n">route</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="n">routes</span>
+            <span class="c1"># Launcher rows are the tracks in order: mappings to the removed row go.</span>
+            <span class="n">mappings</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">mappings</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="s2">"track_index"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">mapping</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"launch"</span><span class="p">,</span> <span class="s2">"stop_track"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">row</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">mappings</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="o">**</span><span class="n">mapping</span><span class="p">,</span> <span class="s2">"track_index"</span><span class="p">:</span> <span class="n">row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">}</span> <span class="k">if</span> <span class="n">row</span> <span class="o">&gt;</span> <span class="n">index</span> <span class="k">else</span> <span class="n">mapping</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">routes</span><span class="o">=</span><span class="n">routes</span><span class="p">,</span> <span class="n">mappings</span><span class="o">=</span><span class="n">mappings</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sync_session_tracks</span><span class="p">()</span></div>
 
 
@@ -3695,7 +3775,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">tracks</span><span class="p">,</span>
         <span class="s2">"timeline"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_TIMELINE_STATE</span><span class="p">),</span> <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tracks</span><span class="p">),</span> <span class="s2">"clips"</span><span class="p">:</span> <span class="n">clips</span><span class="p">},</span>
         <span class="s2">"launcher"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">"quantize"</span><span class="p">,</span> <span class="s2">"scenes"</span><span class="p">,</span> <span class="s2">"slots"</span><span class="p">)),</span>
-        <span class="s2">"midi_router"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">"routes"</span><span class="p">,)),</span>
+        <span class="s2">"midi_router"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">"routes"</span><span class="p">,</span> <span class="s2">"mappings"</span><span class="p">)),</span>
         <span class="s2">"patterns"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">patterns</span><span class="p">),</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">theme</span><span class="p">,</span>
     <span class="p">}</span>
@@ -3762,7 +3842,8 @@ window.runMermaid = runMermaid;</script>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">launcher_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"scenes"</span><span class="p">,</span> <span class="p">[]):</span>
         <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">add_scene</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">launcher_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"slots"</span><span class="p">,</span> <span class="s2">"quantize"</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">launcher_data</span><span class="p">})</span>
-    <span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"midi_router"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"routes"</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"midi_router"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">routes</span><span class="o">=</span><span class="n">router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"routes"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">mappings</span><span class="o">=</span><span class="n">router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mappings"</span><span class="p">,</span> <span class="p">[]))</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"patterns"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"step_duration"</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
     <span class="n">session</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>

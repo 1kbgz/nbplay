@@ -711,7 +711,13 @@
     <a href="#nbplay.models.MidiRouterConfig.routes">MidiRouterConfig.routes</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.mappings">MidiRouterConfig.mappings</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig.session_tracks">MidiRouterConfig.session_tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_scenes">MidiRouterConfig.session_scenes</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig.session_id">MidiRouterConfig.session_id</a>
@@ -724,6 +730,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig._routes">MidiRouterConfig._routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._mappings">MidiRouterConfig._mappings()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MidiRouterStatus">MidiRouterStatus</a>
@@ -2237,6 +2246,10 @@ validated to form a valid model.</p>
 <p>A route is <code class="docutils literal notranslate"><span class="pre">{port,</span> <span class="pre">midi_channel,</span> <span class="pre">note_low,</span> <span class="pre">note_high,</span> <span class="pre">channel_index}</span></code>
 (see <a class="reference internal" href="../descriptors/index.html#nbplay.descriptors._normalize_midi_route" title="nbplay.descriptors._normalize_midi_route"><code class="xref py py-func docutils literal notranslate"><span class="pre">_normalize_midi_route()</span></code></a>). A note plays on
 every route it matches, held until its note-off.</p>
+<p>A mapping is <code class="docutils literal notranslate"><span class="pre">{port,</span> <span class="pre">midi_channel,</span> <span class="pre">kind,</span> <span class="pre">number,</span> <span class="pre">action,</span> <span class="pre">track_index,</span>
+<span class="pre">scene_index}</span></code> (see <a class="reference internal" href="../descriptors/index.html#nbplay.descriptors._normalize_midi_mapping" title="nbplay.descriptors._normalize_midi_mapping"><code class="xref py py-func docutils literal notranslate"><span class="pre">_normalize_midi_mapping()</span></code></a>):
+one note or control change runs a transport or launcher action, and is
+not routed to an instrument.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -2247,8 +2260,18 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.mappings">
+<span class="sig-name descname"><span class="pre">mappings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.mappings" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.session_tracks">
 <span class="sig-name descname"><span class="pre">session_tracks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.session_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.session_scenes">
+<span class="sig-name descname"><span class="pre">session_scenes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.session_scenes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2269,6 +2292,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig._routes">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">routes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiRouterConfig._routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiRouterConfig._routes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig._mappings">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mappings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiRouterConfig._mappings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiRouterConfig._mappings" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3589,7 +3617,13 @@ validated to form a valid model.</p>
     <a href="#nbplay.models.MidiRouterConfig.routes">MidiRouterConfig.routes</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.mappings">MidiRouterConfig.mappings</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig.session_tracks">MidiRouterConfig.session_tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_scenes">MidiRouterConfig.session_scenes</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig.session_id">MidiRouterConfig.session_id</a>
@@ -3602,6 +3636,9 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiRouterConfig._routes">MidiRouterConfig._routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._mappings">MidiRouterConfig._mappings()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.MidiRouterStatus">MidiRouterStatus</a>

@@ -715,7 +715,7 @@ learn work.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">active_notes</span></code>, <code class="docutils literal notranslate"><span class="pre">last_note_event</span></code>, <code class="docutils literal notranslate"><span class="pre">control_change</span></code>, <code class="docutils literal notranslate"><span class="pre">clock_bpm</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MidiRouterWidget</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">routes</span></code>, <code class="docutils literal notranslate"><span class="pre">session_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">routes</span></code>, <code class="docutils literal notranslate"><span class="pre">mappings</span></code>, <code class="docutils literal notranslate"><span class="pre">session_tracks</span></code>, <code class="docutils literal notranslate"><span class="pre">session_scenes</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>, <code class="docutils literal notranslate"><span class="pre">last_event</span></code>, <code class="docutils literal notranslate"><span class="pre">control_change</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></p></td>
@@ -1488,6 +1488,24 @@ works as it does with the MIDI keyboard. The port list (<code class="docutils li
 is the browser’s. The element reports it as soon as it has access, which can
 be before its wire is connected, so when a host snapshot replaces the list
 with another one, the element writes its own again.</p>
+<p>Mappings bind one message to an action instead of routing notes. A mapping
+is <code class="docutils literal notranslate"><span class="pre">{port,</span> <span class="pre">midi_channel,</span> <span class="pre">kind,</span> <span class="pre">number,</span> <span class="pre">action,</span> <span class="pre">track_index,</span> <span class="pre">scene_index}</span></code>: a
+note-on, or a control change pressed (value 64 or more), with that <code class="docutils literal notranslate"><span class="pre">kind</span></code>
+(<code class="docutils literal notranslate"><span class="pre">note</span></code> or <code class="docutils literal notranslate"><span class="pre">cc</span></code>) and <code class="docutils literal notranslate"><span class="pre">number</span></code> runs <code class="docutils literal notranslate"><span class="pre">action</span></code>. The transport actions are <code class="docutils literal notranslate"><span class="pre">play</span></code>,
+<code class="docutils literal notranslate"><span class="pre">stop</span></code>, <code class="docutils literal notranslate"><span class="pre">toggle</span></code> and <code class="docutils literal notranslate"><span class="pre">record</span></code>; the router calls the session clock directly, the
+way the transport’s buttons do (record arms and plays). The launcher actions are
+<code class="docutils literal notranslate"><span class="pre">launch</span></code> (a launcher row and scene), <code class="docutils literal notranslate"><span class="pre">scene</span></code>, <code class="docutils literal notranslate"><span class="pre">stop_track</span></code> and <code class="docutils literal notranslate"><span class="pre">stop_all</span></code>; every
+launcher view registers <code class="docutils literal notranslate"><span class="pre">bus.launcher</span></code> with its <code class="docutils literal notranslate"><span class="pre">command()</span></code> entry, the same one
+the kernel’s requests use, and a following view forwards to the engine. A
+mapped message, its note-off and a mapped control’s release are not routed,
+broadcast or reported as a control change, so a key can be a control or a note
+but not both. <code class="docutils literal notranslate"><span class="pre">add_mapping()</span></code>, <code class="docutils literal notranslate"><span class="pre">remove_mapping()</span></code> and <code class="docutils literal notranslate"><span class="pre">clear_mappings()</span></code> edit the
+list, and <code class="docutils literal notranslate"><span class="pre">map_launcher_grid(tracks,</span> <span class="pre">scenes,</span> <span class="pre">origin=81,</span> <span class="pre">track_step=1,</span> <span class="pre">scene_step=-10)</span></code> maps a pad grid onto slots in one edit (the defaults are a
+Launchpad’s programmer layout). In the editor, Add control starts Learn, and a
+mapping’s control button learns again: the next press fills in its port,
+channel, kind and number. The session keeps <code class="docutils literal notranslate"><span class="pre">session_scenes</span></code> (the launcher’s
+scene names) for the editor, drops mappings to a removed track’s launcher row
+and moves later rows up.</p>
 </section>
 <section id="midioutputwidget">
 <h3>MidiOutputWidget<a class="headerlink" href="#midioutputwidget" title="Link to this heading">¶</a></h3>

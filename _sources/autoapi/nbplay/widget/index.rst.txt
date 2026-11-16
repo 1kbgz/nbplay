@@ -744,7 +744,8 @@ Module Contents
    every note is also broadcast like a keyboard's, so sequencer step
    recording and timeline recording hear it. Control changes land in
    ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the
-   router as its source.
+   router as its source. Mappings bind one note or control change to a
+   transport or launcher action instead.
 
 
    .. py:attribute:: TAG
@@ -781,6 +782,37 @@ Module Contents
    .. py:method:: clear_routes()
 
       Remove every route.
+
+
+
+   .. py:method:: add_mapping(action, number, kind='note', port='', midi_channel=None, track_index=-1, scene_index=-1)
+
+      Run ``action`` (see :data:`~nbplay.descriptors.MIDI_ACTIONS`) when note or control change ``number`` arrives; returns the mapping's index.
+
+      ``launch`` takes the launcher row ``track_index`` and ``scene_index``,
+      ``scene`` a ``scene_index`` and ``stop_track`` a ``track_index``.
+
+
+
+   .. py:method:: map_launcher_grid(tracks=8, scenes=8, origin=81, track_step=1, scene_step=-10, kind='note', port='', midi_channel=None)
+
+      Map a grid of pads onto launcher slots in one edit: the pad for track ``t``, scene ``s`` is ``origin + t * track_step + s * scene_step``.
+
+      The defaults are a Launchpad's programmer layout, with tracks across
+      and the first scene on the top row. Pads outside 0-127 are skipped.
+      Returns the number of mappings added.
+
+
+
+   .. py:method:: remove_mapping(index)
+
+      Remove the mapping at ``index``.
+
+
+
+   .. py:method:: clear_mappings()
+
+      Remove every mapping.
 
 
 

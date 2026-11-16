@@ -172,6 +172,9 @@ Module Contents
    .. py:method:: test_the_session_routes_midi_to_its_tracks()
 
 
+   .. py:method:: test_mappings_bind_messages_to_transport_and_launcher_actions()
+
+
    .. py:method:: test_midi_learn_listens_to_the_router()
 
 

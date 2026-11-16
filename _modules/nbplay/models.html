@@ -636,6 +636,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_normalize_drum_sample</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
     <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
+    <span class="n">_normalize_midi_mapping</span><span class="p">,</span>
     <span class="n">_normalize_midi_route</span><span class="p">,</span>
     <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
     <span class="n">_normalize_pad_actions</span><span class="p">,</span>
@@ -1238,11 +1239,19 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    A route is ``{port, midi_channel, note_low, note_high, channel_index}``</span>
 <span class="sd">    (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on</span>
 <span class="sd">    every route it matches, held until its note-off.</span>
+
+<span class="sd">    A mapping is ``{port, midi_channel, kind, number, action, track_index,</span>
+<span class="sd">    scene_index}`` (see :func:`~nbplay.descriptors._normalize_midi_mapping`):</span>
+<span class="sd">    one note or control change runs a transport or launcher action, and is</span>
+<span class="sd">    not routed to an instrument.</span>
 <span class="sd">    """</span>
 
     <span class="n">routes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mappings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1">#: The session's tracks a route can play (``{channel_index, name}``); set by the session.</span>
     <span class="n">session_tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: The launcher's scene names, for the mapping editor; set by the session.</span>
+    <span class="n">session_scenes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
 
@@ -1254,6 +1263,14 @@ window.runMermaid = runMermaid;</script>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_routes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">routes</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_midi_route</span><span class="p">(</span><span class="n">route</span><span class="p">)</span> <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterConfig._mappings">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiRouterConfig._mappings">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"mappings"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mappings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mappings</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_midi_mapping</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span> <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">mappings</span><span class="p">]</span></div>
 </div>
 
 

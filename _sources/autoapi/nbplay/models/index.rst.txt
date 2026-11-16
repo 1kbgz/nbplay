@@ -1095,6 +1095,11 @@ Module Contents
    (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on
    every route it matches, held until its note-off.
 
+   A mapping is ``{port, midi_channel, kind, number, action, track_index,
+   scene_index}`` (see :func:`~nbplay.descriptors._normalize_midi_mapping`):
+   one note or control change runs a transport or launcher action, and is
+   not routed to an instrument.
+
    Create a new model by parsing and validating input data from keyword arguments.
 
    Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
@@ -1109,8 +1114,20 @@ Module Contents
 
 
 
+   .. py:attribute:: mappings
+      :type:  list[dict]
+      :value: []
+
+
+
    .. py:attribute:: session_tracks
       :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_scenes
+      :type:  list[str]
       :value: []
 
 
@@ -1131,6 +1148,11 @@ Module Contents
 
 
    .. py:method:: _routes(routes)
+      :classmethod:
+
+
+
+   .. py:method:: _mappings(mappings)
       :classmethod:
 
 

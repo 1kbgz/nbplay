@@ -47,6 +47,7 @@ Attributes
    nbplay.descriptors.MAX_DRUM_PADS
    nbplay.descriptors._DRUM_DEFAULTS
    nbplay.descriptors._DRUM_MACHINE_STATE
+   nbplay.descriptors.MIDI_ACTIONS
 
 
 Classes
@@ -121,6 +122,7 @@ Functions
    nbplay.descriptors._normalize_drum_pad
    nbplay.descriptors._normalize_drum_sample
    nbplay.descriptors._normalize_midi_route
+   nbplay.descriptors._normalize_midi_mapping
    nbplay.descriptors._normalize_drum_pattern
 
 
@@ -577,6 +579,15 @@ Module Contents
 .. py:function:: _normalize_midi_route(raw)
 
    One MIDI route: notes from ``port`` ("" is any) on ``midi_channel`` (-1 is any, else 0-15) in ``[note_low, note_high]`` play the instrument of the track on mixer channel ``channel_index`` (-1 is none).
+
+
+.. py:data:: MIDI_ACTIONS
+   :value: ('play', 'stop', 'toggle', 'record', 'launch', 'scene', 'stop_track', 'stop_all')
+
+
+.. py:function:: _normalize_midi_mapping(raw)
+
+   One MIDI mapping: a note-on or a control change pressed (value 64 or more) from ``port`` ("" is any) on ``midi_channel`` (-1 is any) runs ``action``; launcher actions take ``track_index`` and ``scene_index``.
 
 
 .. py:function:: _normalize_drum_pattern(pattern, pads, steps)
