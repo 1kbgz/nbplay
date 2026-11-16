@@ -908,6 +908,18 @@ class TestMidiRouterWidget:
         finally:
             session.close()
 
+    def test_a_connected_sequencer_records_the_router(self):
+        session = nbplay.Session()
+        try:
+            sequencer = nbplay.SequencerWidget()
+            session.add_track("Lead", sequencer, nbplay.SynthWidget())
+            session.midi_router.connect_sequencer(sequencer)
+            assert sequencer.config.keyboard_connected is True
+            session.midi_router.disconnect_sequencer(sequencer)
+            assert sequencer.config.keyboard_connected is False
+        finally:
+            session.close()
+
     def test_midi_learn_listens_to_the_router(self):
         session = nbplay.Session()
         try:
