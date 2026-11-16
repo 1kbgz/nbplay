@@ -48,7 +48,8 @@ test.describe("standalone Pyodide example", () => {
     // pydantic rejects an out-of-range edit and the element gets the model's
     // value back; a valid one is accepted and the Rust core, compiled to
     // WebAssembly, re-renders the waveform.
-    const synth = page.locator("nbplay-synth");
+    // The lead's synth: the first of the two.
+    const synth = page.locator("nbplay-synth").first();
     const waveform = () =>
       page.evaluate(() =>
         Array.from(
