@@ -37,7 +37,7 @@ dependencies = [
     "spaday[widget]>=0.14.1",
     "spaday-regular-layout",
     "starlette",
-    "transports>=0.12.2",
+    "transports>=0.12.4",
     "uvicorn",
     "websockets",
 ]
