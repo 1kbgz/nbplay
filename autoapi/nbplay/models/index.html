@@ -486,6 +486,9 @@
     <a href="#nbplay.models.DrumMachineConfig.sound_preset_names">DrumMachineConfig.sound_preset_names</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.session_tracks">DrumMachineConfig.session_tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig.session_id">DrumMachineConfig.session_id</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1693,7 +1696,10 @@ that instrument’s fields plus <code class="docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">length</span></code> (seconds); <code class="docutils literal notranslate"><span class="pre">preset</span></code> names a shipped synth or FM preset to
 start from. A <code class="docutils literal notranslate"><span class="pre">sample</span></code> pad plays the entry of <code class="docutils literal notranslate"><span class="pre">samples</span></code> named by
 its <code class="docutils literal notranslate"><span class="pre">sample</span></code> param, shifted by <code class="docutils literal notranslate"><span class="pre">tune</span></code> semitones and cut after
-<code class="docutils literal notranslate"><span class="pre">length</span></code> seconds. Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each
+<code class="docutils literal notranslate"><span class="pre">length</span></code> seconds. A <code class="docutils literal notranslate"><span class="pre">track</span></code> pad plays <code class="docutils literal notranslate"><span class="pre">pitch</span></code> for <code class="docutils literal notranslate"><span class="pre">length</span></code>
+seconds on the instrument of the session track on mixer channel
+<code class="docutils literal notranslate"><span class="pre">track</span></code> (-1 is none), through that track’s channel; its <code class="docutils literal notranslate"><span class="pre">gain</span></code>
+scales the velocity, and pan and choke do not apply. Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each
 other off (closed and open hats). A note plays the pads that answer to
 it. <code class="docutils literal notranslate"><span class="pre">pattern</span></code> holds a velocity (0 is off) per pad per step.</p>
 <p><code class="docutils literal notranslate"><span class="pre">samples</span></code> maps an id to <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">sample_rate,</span> <span class="pre">length,</span> <span class="pre">data}</span></code> (mono
@@ -1761,6 +1767,11 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.sound_preset_names">
 <span class="sig-name descname"><span class="pre">sound_preset_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.sound_preset_names" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.session_tracks">
+<span class="sig-name descname"><span class="pre">session_tracks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.session_tracks" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3242,6 +3253,9 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig.sound_preset_names">DrumMachineConfig.sound_preset_names</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.session_tracks">DrumMachineConfig.session_tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig.session_id">DrumMachineConfig.session_id</a>

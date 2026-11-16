@@ -957,7 +957,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``length`` (seconds); ``preset`` names a shipped synth or FM preset to</span>
 <span class="sd">    start from. A ``sample`` pad plays the entry of ``samples`` named by</span>
 <span class="sd">    its ``sample`` param, shifted by ``tune`` semitones and cut after</span>
-<span class="sd">    ``length`` seconds. Pads with the same nonzero ``choke`` group cut each</span>
+<span class="sd">    ``length`` seconds. A ``track`` pad plays ``pitch`` for ``length``</span>
+<span class="sd">    seconds on the instrument of the session track on mixer channel</span>
+<span class="sd">    ``track`` (-1 is none), through that track's channel; its ``gain``</span>
+<span class="sd">    scales the velocity, and pan and choke do not apply. Pads with the same nonzero ``choke`` group cut each</span>
 <span class="sd">    other off (closed and open hats). A note plays the pads that answer to</span>
 <span class="sd">    it. ``pattern`` holds a velocity (0 is off) per pad per step.</span>
 
@@ -981,6 +984,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">preset_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1">#: The shipped synth and FM presets a pad can start from (``{"synth": [...], "fm": [...]}``); set by the widget.</span>
     <span class="n">sound_preset_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#: The session's tracks a pad can play (``{channel_index, name}``); set by the session.</span>
+    <span class="n">session_tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
     <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>

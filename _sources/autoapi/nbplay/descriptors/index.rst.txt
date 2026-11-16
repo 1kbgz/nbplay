@@ -541,7 +541,7 @@ Module Contents
 
 
 .. py:data:: PAD_SOUNDS
-   :value: ('kick', 'snare', 'hat', 'clap', 'tom', 'synth', 'fm', 'sample')
+   :value: ('kick', 'snare', 'hat', 'clap', 'tom', 'synth', 'fm', 'sample', 'track')
 
 
 .. py:data:: MAX_DRUM_PADS

@@ -501,6 +501,9 @@
     <a href="#nbplay.widget.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.DrumMachineWidget.set_pad_track">DrumMachineWidget.set_pad_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.DrumMachineWidget.load_pad_sample">DrumMachineWidget.load_pad_sample()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1051,6 +1054,12 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.remove_track">Session.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._drum_machines">Session._drum_machines()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._sync_session_tracks">Session._sync_session_tracks()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session._track_index">Session._track_index()</a>
@@ -1751,6 +1760,13 @@ kits.</p>
 <dt class="sig sig-object py" id="nbplay.widget.DrumMachineWidget.set_pad">
 <span class="sig-name descname"><span class="pre">set_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#DrumMachineWidget.set_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.DrumMachineWidget.set_pad" title="Link to this definition">¶</a></dt>
 <dd><p>Change pad <code class="docutils literal notranslate"><span class="pre">index</span></code>’s fields. A new <code class="docutils literal notranslate"><span class="pre">sound</span></code> without <code class="docutils literal notranslate"><span class="pre">params</span></code> starts from that sound’s defaults; <code class="docutils literal notranslate"><span class="pre">params</span></code> for the same sound are merged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.DrumMachineWidget.set_pad_track">
+<span class="sig-name descname"><span class="pre">set_pad_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#DrumMachineWidget.set_pad_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.DrumMachineWidget.set_pad_track" title="Link to this definition">¶</a></dt>
+<dd><p>Make pad <code class="docutils literal notranslate"><span class="pre">index</span></code> play another track’s instrument: <code class="docutils literal notranslate"><span class="pre">track</span></code> is a <a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-class docutils literal notranslate"><span class="pre">Track</span></code></a> or a mixer channel index.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pitch</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> keep their values from a pad that already plays a track.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2831,6 +2847,17 @@ read and write the same <code class="docutils literal notranslate"><span class="
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._drum_machines">
+<span class="sig-name descname"><span class="pre">_drum_machines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._drum_machines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._drum_machines" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session._sync_session_tracks">
+<span class="sig-name descname"><span class="pre">_sync_session_tracks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._sync_session_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._sync_session_tracks" title="Link to this definition">¶</a></dt>
+<dd><p>Tell every drum machine which tracks its pads can play.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session._track_index">
 <span class="sig-name descname"><span class="pre">_track_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._track_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._track_index" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3256,6 +3283,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.DrumMachineWidget.set_pad_track">DrumMachineWidget.set_pad_track()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.DrumMachineWidget.load_pad_sample">DrumMachineWidget.load_pad_sample()</a>
@@ -3808,6 +3838,12 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.remove_track">Session.remove_track()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._drum_machines">Session._drum_machines()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session._sync_session_tracks">Session._sync_session_tracks()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session._track_index">Session._track_index()</a>

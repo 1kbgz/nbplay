@@ -890,6 +890,14 @@ Package Contents
 
 
 
+   .. py:method:: set_pad_track(index, track, pitch=None, length=None)
+
+      Make pad ``index`` play another track's instrument: ``track`` is a :class:`Track` or a mixer channel index.
+
+      ``pitch`` and ``length`` keep their values from a pad that already plays a track.
+
+
+
    .. py:method:: load_pad_sample(index, data, sample_rate=44100, name='Sample', **params)
 
       Make pad ``index`` play mono float samples (or float32 bytes); ``params`` sets ``tune`` and ``length``.
@@ -1816,6 +1824,15 @@ Package Contents
    .. py:method:: remove_track(index)
 
       Remove a track with its mixer channel, timeline lane and launcher row; later tracks shift down.
+
+
+
+   .. py:method:: _drum_machines()
+
+
+   .. py:method:: _sync_session_tracks()
+
+      Tell every drum machine which tracks its pads can play.
 
 
 

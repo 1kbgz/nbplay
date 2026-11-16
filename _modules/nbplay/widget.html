@@ -1432,6 +1432,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"velocity"</span><span class="p">:</span> <span class="s2">"velocity"</span><span class="p">,</span>
         <span class="s2">"preset_names"</span><span class="p">:</span> <span class="s2">"presetNames"</span><span class="p">,</span>
         <span class="s2">"sound_preset_names"</span><span class="p">:</span> <span class="s2">"soundPresetNames"</span><span class="p">,</span>
+        <span class="s2">"session_tracks"</span><span class="p">:</span> <span class="s2">"sessionTracks"</span><span class="p">,</span>
         <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
         <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
@@ -1460,6 +1461,24 @@ window.runMermaid = runMermaid;</script>
             <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">fields</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="n">pads</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_pads</span><span class="p">(</span><span class="n">pads</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineWidget.set_pad_track">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.set_pad_track">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_pad_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Make pad ``index`` play another track's instrument: ``track`` is a :class:`Track` or a mixer channel index.</span>
+
+<span class="sd">        ``pitch`` and ``length`` keep their values from a pad that already plays a track.</span>
+<span class="sd">        """</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Track</span><span class="p">)</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">])</span> <span class="k">if</span> <span class="n">pad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"track"</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">"track"</span><span class="p">]</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="k">if</span> <span class="n">pitch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"pitch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pitch</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_pad</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">sound</span><span class="o">=</span><span class="s2">"track"</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DrumMachineWidget.load_pad_sample">
@@ -3218,6 +3237,7 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">sequencer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">sound_source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sync_session_tracks</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">track</span></div>
 
 
@@ -3234,6 +3254,8 @@ window.runMermaid = runMermaid;</script>
             <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">InstrumentWidget</span><span class="p">):</span>
                     <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="n">DrumMachineWidget</span><span class="p">):</span>
+                <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_tracks</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">remove_channel</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">remove_track</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">remove_track</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -3242,7 +3264,33 @@ window.runMermaid = runMermaid;</script>
                     <span class="n">item</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="o">-=</span> <span class="mi">1</span>
                     <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">sound_source</span><span class="p">):</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">InstrumentWidget</span><span class="p">):</span>
-                            <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span></div>
+                            <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="c1"># Track pads follow their channels; a pad on the removed track plays nothing.</span>
+            <span class="n">removed</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span>
+            <span class="k">for</span> <span class="n">drums</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drum_machines</span><span class="p">():</span>
+                <span class="n">pads</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="n">drums</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span><span class="p">:</span>
+                    <span class="n">channel</span> <span class="o">=</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">][</span><span class="s2">"track"</span><span class="p">]</span> <span class="k">if</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"track"</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">channel</span> <span class="o">&gt;=</span> <span class="n">removed</span><span class="p">:</span>
+                        <span class="n">pad</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">],</span> <span class="s2">"track"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="n">removed</span> <span class="k">else</span> <span class="n">channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">}}</span>
+                    <span class="n">pads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
+                <span class="n">drums</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span> <span class="o">=</span> <span class="n">pads</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sync_session_tracks</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Session._drum_machines">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._drum_machines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_drum_machines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="n">DrumMachineWidget</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="Session._sync_session_tracks">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._sync_session_tracks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sync_session_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Tell every drum machine which tracks its pads can play."""</span>
+        <span class="n">tracks</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"channel_index"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">drums</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drum_machines</span><span class="p">():</span>
+            <span class="n">drums</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_tracks</span> <span class="o">=</span> <span class="n">tracks</span></div>
 
 
 <div class="viewcode-block" id="Session._track_index">
