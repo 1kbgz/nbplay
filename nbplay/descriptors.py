@@ -1047,9 +1047,9 @@ def _factory_presets(widget_type):
     return presets
 
 
-#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch.
+#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch, or a sample.
 DRUM_SOUNDS = ("kick", "snare", "hat", "clap", "tom")
-PAD_SOUNDS = (*DRUM_SOUNDS, "synth", "fm")
+PAD_SOUNDS = (*DRUM_SOUNDS, "synth", "fm", "sample")
 MAX_DRUM_PADS = 16
 _DRUM_DEFAULTS = {
     "kick": {"tune": 0.0, "decay": 0.45, "tone": 0.3},
@@ -1106,6 +1106,12 @@ def _normalize_drum_pad(raw, index):
             "decay": _bounded(params.get("decay", defaults["decay"]), 0.01, 4),
             "tone": _bounded(params.get("tone", defaults["tone"]), 0, 1),
         }
+    elif sound == "sample":
+        params = {
+            "sample": str(params.get("sample") or ""),
+            "tune": _bounded(params.get("tune", 0.0), -24, 24),
+            "length": _bounded(params.get("length", 4.0), 0.01, 4),
+        }
     else:
         params["pitch"] = _clamp_midi_note(params.get("pitch", 60))
         params["length"] = _bounded(params.get("length", 0.25), 0.01, 4)
@@ -1117,6 +1123,23 @@ def _normalize_drum_pad(raw, index):
         "pan": _bounded(raw.get("pan", 0.0), -1, 1),
         "choke": _clamp_int(raw.get("choke", 0), 0, 8),
         "params": params,
+    }
+
+
+def _normalize_drum_sample(raw, key):
+    """One drum machine sample: mono little-endian float32 ``data`` at ``sample_rate``."""
+    if not isinstance(raw, dict):
+        raise ValueError(f"sample {key!r} must be a dict, got {type(raw).__name__}")  # noqa: TRY004
+    data = raw.get("data", b"")
+    if isinstance(data, memoryview):
+        data = data.tobytes()
+    if not isinstance(data, (bytes, bytearray)):
+        raise TypeError(f"sample {key!r} data must be bytes of little-endian float32 samples")
+    return {
+        "name": str(raw.get("name") or "Sample"),
+        "sample_rate": _clamp_int(raw.get("sample_rate", 44100), 8000, 192000),
+        "length": len(data) // 4,
+        "data": bytes(data),
     }
 
 

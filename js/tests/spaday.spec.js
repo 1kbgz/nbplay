@@ -357,13 +357,49 @@ test.describe("views on transports", () => {
         page.locator("#owner .nbplay-drums-decay .nbplay-value-text"),
       ).toHaveText("350 ms");
 
+      // A file loaded into a pad reaches the kernel as a sample: 1/80 s of
+      // 16-bit WAV, decoded at the context's rate to float32 frames.
+      const wav = Buffer.alloc(44 + 200);
+      wav.write("RIFF", 0);
+      wav.writeUInt32LE(36 + 200, 4);
+      wav.write("WAVEfmt ", 8);
+      wav.writeUInt32LE(16, 16);
+      wav.writeUInt16LE(1, 20);
+      wav.writeUInt16LE(1, 22);
+      wav.writeUInt32LE(8000, 24);
+      wav.writeUInt32LE(16000, 28);
+      wav.writeUInt16LE(2, 32);
+      wav.writeUInt16LE(16, 34);
+      wav.write("data", 36);
+      wav.writeUInt32LE(200, 40);
+      await page
+        .locator('#owner .nbplay-drums-sound [data-value="sample"]')
+        .click();
+      await page
+        .locator("#owner .nbplay-drums-sample-file")
+        .setInputFiles({ name: "hit.wav", mimeType: "audio/wav", buffer: wav });
+      await expect
+        .poll(async () => {
+          const { pads, samples } = (await state(kernel)).config;
+          return [pads[0].sound, Object.keys(samples).length];
+        })
+        .toEqual(["sample", 1]);
+      const [sample] = Object.values((await state(kernel)).config.samples);
+      expect(sample.name).toBe("hit.wav");
+      expect(sample.data.bytes).toBe(sample.length * 4);
+      expect(sample.length / sample.sample_rate).toBeCloseTo(1 / 80, 3);
+      await expect(page.locator("#owner .nbplay-drums-sample-name")).toHaveText(
+        "hit.wav",
+      );
+
       // The kit picker asks the kernel, and the kit reaches the page.
       await page
         .locator("#owner nbplay-drums nbplay-header .nbplay-preset-select")
         .selectOption("Electro kit");
       await expect(labels.nth(15)).toHaveText("Acid");
-      // A kit is the pads; the pattern stays.
+      // A kit is the pads and their samples; the pattern stays.
       expect((await state(kernel)).config.pattern[1][4]).toBe(100);
+      expect((await state(kernel)).config.samples).toEqual({});
     } finally {
       kernel.close();
     }

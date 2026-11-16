@@ -629,7 +629,7 @@ export interface SampleVoiceOptions {
  * and the time its release starts (null while held).
  */
 export function startSampleVoice(
-  ctx: AudioContext,
+  ctx: BaseAudioContext,
   output: AudioNode,
   options: SampleVoiceOptions,
 ): {

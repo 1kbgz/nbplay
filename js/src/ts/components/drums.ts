@@ -1,5 +1,5 @@
 import { html, nothing, type PropertyValues } from "lit";
-import { type AnyModel } from "../helpers.ts";
+import { toFloat32, type AnyModel } from "../helpers.ts";
 import { createAudioScheduler, type StepData } from "../scheduler.ts";
 import {
   bindElementClock,
@@ -16,12 +16,14 @@ import {
   scheduleDrumHit,
   scheduleFmNote,
   scheduleSynthNote,
+  startSampleVoice,
   type FmPatch,
   type SynthPatch,
 } from "../voices.ts";
 import { NbplayElement, define } from "./base.ts";
 import type { PadSpec } from "./pad-grid.ts";
 import { presetRequest, presetSelect } from "./preset-select.ts";
+import { decodeToMono, float32ToDataView } from "../sampler_engine.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./drum-grid.ts";
 import "./header.ts";
@@ -40,7 +42,15 @@ export interface DrumPad {
   params: Record<string, unknown>;
 }
 
-const SOUNDS = [...DRUM_SOUNDS, "synth", "fm"].map((value) => ({
+/** A sample a pad plays: mono float32 `data`. */
+export interface DrumSample {
+  name: string;
+  sample_rate: number;
+  length?: number;
+  data: unknown;
+}
+
+const SOUNDS = [...DRUM_SOUNDS, "synth", "fm", "sample"].map((value) => ({
   value,
   label: value === "fm" ? "FM" : value[0].toUpperCase() + value.slice(1),
 }));
@@ -99,6 +109,7 @@ const number = (value: unknown, fallback: number) => {
 export class NbplayDrums extends NbplayElement {
   static properties = {
     pads: { attribute: false },
+    samples: { attribute: false },
     pattern: { attribute: false },
     steps: { type: Number },
     stepDuration: { type: Number, attribute: "step-duration" },
@@ -119,6 +130,7 @@ export class NbplayDrums extends NbplayElement {
   };
 
   declare pads: DrumPad[];
+  declare samples: Record<string, DrumSample>;
   declare pattern: number[][];
   declare steps: number;
   declare stepDuration: number;
@@ -152,6 +164,9 @@ export class NbplayDrums extends NbplayElement {
     idx: number;
     entry: InstrumentBus;
   } | null = null;
+  /** Decoded samples by id, for the context they were made on. */
+  private buffers = new Map<string, AudioBuffer>();
+  private buffersCtx: BaseAudioContext | null = null;
   private ringing: Array<{
     choke: number;
     at: number;
@@ -179,6 +194,7 @@ export class NbplayDrums extends NbplayElement {
   constructor() {
     super();
     this.pads = [];
+    this.samples = {};
     this.pattern = [];
     this.steps = 16;
     this.stepDuration = 0.25;
@@ -229,6 +245,7 @@ export class NbplayDrums extends NbplayElement {
   }
 
   updated(changed: PropertyValues): void {
+    if (changed.has("samples")) this.buffers.clear();
     if (changed.has("sessionId") || changed.has("channelIndex")) {
       this.register();
     }
@@ -416,6 +433,26 @@ export class NbplayDrums extends NbplayElement {
     return { ctx, output };
   }
 
+  private sampleBuffer(ctx: BaseAudioContext, id: string): AudioBuffer | null {
+    if (ctx !== this.buffersCtx) {
+      this.buffers.clear();
+      this.buffersCtx = ctx;
+    }
+    const cached = this.buffers.get(id);
+    if (cached) return cached;
+    const sample = this.samples?.[id];
+    const data = sample ? toFloat32(sample.data) : null;
+    if (!sample || !data?.length) return null;
+    const buffer = ctx.createBuffer(
+      1,
+      data.length,
+      number(sample.sample_rate, 44100),
+    );
+    buffer.getChannelData(0).set(data);
+    this.buffers.set(id, buffer);
+    return buffer;
+  }
+
   /** Play every pad that answers to `note`; returns a canceller. */
   playNote(note: number, velocity: number, at: number): () => void {
     const cancels = (this.pads || []).flatMap((pad, index) =>
@@ -460,7 +497,31 @@ export class NbplayDrums extends NbplayElement {
       }
     };
     const params = pad.params || {};
-    if (pad.sound === "synth" || pad.sound === "fm") {
+    if (pad.sound === "sample") {
+      const buffer = this.sampleBuffer(ctx, String(params.sample ?? ""));
+      if (!buffer) {
+        done();
+        return () => {};
+      }
+      const { sourceNode } = startSampleVoice(ctx, gain, {
+        buffer,
+        playbackRate: 2 ** (number(params.tune, 0) / 12),
+        loop: false,
+        envelope: { attack: 0, decay: 0, sustain: 1, release: 0.01 },
+        peak: Math.max(0, Math.min(127, velocity)) / 127,
+        at: when,
+        duration: number(params.length, 4),
+      });
+      sourceNode.onended = done;
+      entry.cancel = () => {
+        try {
+          sourceNode.stop();
+        } catch {
+          /* already stopped */
+        }
+        done();
+      };
+    } else if (pad.sound === "synth" || pad.sound === "fm") {
       const pitch = number(params.pitch, 60);
       const length = number(params.length, 0.25);
       entry.cancel =
@@ -506,12 +567,55 @@ export class NbplayDrums extends NbplayElement {
 
   // Editing
 
-  private editPad(index: number, fields: Partial<DrumPad>): void {
+  private editPad(
+    index: number,
+    fields: Partial<DrumPad>,
+    added: Record<string, DrumSample> = {},
+  ): void {
     const pads = (this.pads || []).map((pad) => ({ ...pad }));
     if (!pads[index]) return;
     pads[index] = { ...pads[index], ...fields };
     this.pads = pads;
-    this.set({ pads });
+    // Drop the samples no pad plays any more, in the same edit.
+    const all = { ...this.samples, ...added };
+    const used = new Set(
+      pads.filter((p) => p.sound === "sample").map((p) => p.params?.sample),
+    );
+    const samples = Object.fromEntries(
+      Object.entries(all).filter(([id]) => used.has(id)),
+    );
+    if (
+      Object.keys(samples).length === Object.keys(this.samples || {}).length &&
+      !Object.keys(added).length
+    ) {
+      this.set({ pads });
+      return;
+    }
+    this.samples = samples;
+    this.set({ pads, samples });
+  }
+
+  /** Decode an audio file and make pad `index` play it. */
+  async loadPadFile(index: number, file: File): Promise<void> {
+    const decoded = await decodeToMono(await file.arrayBuffer());
+    const pad = this.pads?.[index];
+    if (!decoded || !pad) return;
+    const id = Math.random().toString(16).slice(2, 10);
+    const keep = pad.sound === "sample" ? pad.params : {};
+    this.editPad(
+      index,
+      {
+        sound: "sample",
+        params: { tune: keep.tune ?? 0, length: keep.length ?? 4, sample: id },
+      },
+      {
+        [id]: {
+          name: file.name,
+          sample_rate: decoded.sampleRate,
+          data: float32ToDataView(decoded.samples),
+        },
+      },
+    );
   }
 
   private editParams(index: number, params: Record<string, unknown>): void {
@@ -576,6 +680,34 @@ export class NbplayDrums extends NbplayElement {
       @input=${on}
       @change=${on}
     ></nbplay-param>`;
+  }
+
+  private renderSampleParams(index: number, params: Record<string, unknown>) {
+    const sample = this.samples?.[String(params.sample ?? "")];
+    const setParam = (key: string) => (value: number) =>
+      this.editParams(index, { [key]: value });
+    return html`<div class="nbplay-drums-sample">
+        <span class="nbplay-drums-sample-name"
+          >${sample?.name ?? "No sample"}</span
+        >
+        <label class="nbplay-drums-sample-load" title="Load an audio file"
+          >Load…<input
+            type="file"
+            class="nbplay-drums-sample-file"
+            aria-label="Sample file"
+            accept="audio/*"
+            @input=${(e: Event) => e.stopPropagation()}
+            @change=${(e: Event) => {
+              e.stopPropagation();
+              const input = e.target as HTMLInputElement;
+              const file = input.files?.[0];
+              input.value = "";
+              if (file) void this.loadPadFile(index, file);
+            }}
+        /></label>
+      </div>
+      ${this.param("nbplay-drums-tune", "Tune", number(params.tune, 0), "float", -24, 24, 0.1, 0, setParam("tune"), { unit: " st" })}
+      ${this.param("nbplay-drums-length", "Length", number(params.length, 4), "seconds", 0.01, 4, 0.01, 4, setParam("length"), { scale: "log" })}`;
   }
 
   private renderEditor(index: number) {
@@ -651,9 +783,11 @@ export class NbplayDrums extends NbplayElement {
                 </label>
                 ${this.param("nbplay-drums-pitch", "Pitch", number(params.pitch, 60), "note", 0, 127, 1, 60, setParam("pitch"))}
                 ${this.param("nbplay-drums-length", "Length", number(params.length, 0.25), "seconds", 0.01, 4, 0.01, 0.25, setParam("length"), { scale: "log" })}`
-            : html`${this.param("nbplay-drums-tune", "Tune", number(params.tune, 0), "float", -24, 24, 0.1, 0, setParam("tune"), { unit: " st" })}
-              ${this.param("nbplay-drums-decay", "Decay", number(params.decay, 0.3), "seconds", 0.01, 4, 0.01, 0.3, setParam("decay"), { scale: "log" })}
-              ${this.param("nbplay-drums-tone", "Tone", number(params.tone, 0.5), "percent", 0, 1, 0.01, 0.5, setParam("tone"))}`
+            : pad.sound === "sample"
+              ? this.renderSampleParams(index, params)
+              : html`${this.param("nbplay-drums-tune", "Tune", number(params.tune, 0), "float", -24, 24, 0.1, 0, setParam("tune"), { unit: " st" })}
+                ${this.param("nbplay-drums-decay", "Decay", number(params.decay, 0.3), "seconds", 0.01, 4, 0.01, 0.3, setParam("decay"), { scale: "log" })}
+                ${this.param("nbplay-drums-tone", "Tone", number(params.tone, 0.5), "percent", 0, 1, 0.01, 0.5, setParam("tone"))}`
         }
         ${this.param("nbplay-drums-gain", "Gain", number(pad.gain, 1), "db", 0, 2, 0.01, 1, (gain) => set({ gain }))}
         ${this.param("nbplay-drums-pan", "Pan", number(pad.pan, 0), "pan", -1, 1, 0.01, 0, (pan) => set({ pan }))}

@@ -194,6 +194,124 @@ test.describe("DrumMachineWidget", () => {
     });
   });
 
+  test("a sample pad plays its sample, tuned and cut to its length", async ({
+    page,
+  }) => {
+    // 0.2 s of 0.5 at 8 kHz, as the float32 bytes the kernel sends.
+    const render = async (params) => {
+      await page.goto("/tests/fixtures/harness.html");
+      await page.evaluate(() => {
+        const ctx = new OfflineAudioContext(1, 44100, 44100);
+        window.__offline = ctx;
+        globalThis.__nbplay = {
+          drums: { audioCtx: ctx, channels: [{ gain: ctx.destination }] },
+        };
+        window.__sample = new DataView(new Float32Array(1600).fill(0.5).buffer);
+      });
+      await page.evaluate(async (params) => {
+        const mod = await import("/dist/tests/instruments.js");
+        const model = window.createMockModel({
+          session_id: "drums",
+          channel_index: 0,
+          pads: [
+            {
+              name: "Hit",
+              note: 36,
+              sound: "sample",
+              gain: 1,
+              pan: 0,
+              choke: 0,
+              params: { sample: "a", ...params },
+            },
+          ],
+          samples: {
+            a: { name: "hit.wav", sample_rate: 8000, data: window.__sample },
+          },
+          pattern: [Array(16).fill(0)],
+          steps: 16,
+          step_duration: 0.25,
+          bpm: 120,
+          velocity: 100,
+          is_playing: false,
+          current_step: -1,
+        });
+        mod.render("drums", { model, el: document.getElementById("root") });
+      }, params);
+      return page.evaluate(async () => {
+        globalThis.__nbplay.drums.instruments[0].scheduleNote(36, 127, 0, 0.1);
+        const data = (await window.__offline.startRendering()).getChannelData(
+          0,
+        );
+        const peak = (from, to) => {
+          let most = 0;
+          for (let i = Math.round(from * 44100); i < to * 44100; i++)
+            most = Math.max(most, Math.abs(data[i]));
+          return most;
+        };
+        return {
+          early: peak(0.02, 0.04),
+          middle: peak(0.12, 0.18),
+          late: peak(0.25, 1),
+        };
+      });
+    };
+    // The whole 0.2 s sample at full velocity, through the centered pan
+    // (equal power: each side at √½).
+    const level = 0.5 * Math.SQRT1_2;
+    const whole = await render({ tune: 0, length: 4 });
+    expect(whole.early).toBeCloseTo(level, 2);
+    expect(whole.middle).toBeCloseTo(level, 2);
+    expect(whole.late).toBe(0);
+    // An octave up plays it twice as fast: done by 0.1 s.
+    const up = await render({ tune: 12, length: 4 });
+    expect(up.early).toBeCloseTo(level, 2);
+    expect(up.middle).toBe(0);
+    // A length of 0.05 s cuts it short.
+    const short = await render({ tune: 0, length: 0.05 });
+    expect(short.early).toBeCloseTo(level, 2);
+    expect(short.middle).toBe(0);
+  });
+
+  test("loading a file makes the pad a sample pad; another sound drops the sample", async ({
+    page,
+  }) => {
+    await renderDrums(page, { samples: {} });
+    await page.locator('.nbplay-drums-sound [data-value="sample"]').click();
+    await expect(page.locator(".nbplay-drums-sample-name")).toHaveText(
+      "No sample",
+    );
+    await page.locator(".nbplay-drums-sample-file").setInputFiles({
+      name: "kick.wav",
+      mimeType: "audio/wav",
+      buffer: Buffer.from("RIFF"),
+    });
+    // The harness decodes any file to 1024 frames.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const { pads, samples } = window.__testModel._state;
+          const id = pads[0].params.sample;
+          const sample = samples[id];
+          return sample
+            ? [
+                pads[0].sound,
+                sample.name,
+                sample.data.byteLength,
+                Object.keys(samples).length,
+              ]
+            : null;
+        }),
+      )
+      .toEqual(["sample", "kick.wav", 4096, 1]);
+    await expect(page.locator(".nbplay-drums-sample-name")).toHaveText(
+      "kick.wav",
+    );
+    await expect(page.locator(".nbplay-drums-tune")).toBeVisible();
+    await page.locator('.nbplay-drums-sound [data-value="kick"]').click();
+    const after = await state(page);
+    expect([after.pads[0].sound, after.samples]).toEqual(["kick", {}]);
+  });
+
   test("the kit picker asks the kernel for a kit", async ({ page }) => {
     await renderDrums(page, { preset_names: ["Analog kit", "Electro kit"] });
     await page
