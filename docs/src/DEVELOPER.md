@@ -215,6 +215,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `LauncherWidget`     | `tracks`, `scenes`, `slots`, `quantize`, `bpm`, time signature, `selected_slot`, `session_id`, `theme`                                                                                                                                                                 | `is_playing`, `active_slots`, `queued_slots`, `request` (launch commands)                                                                                                   |
 | `KeyboardWidget`     | `upper_octave`, `lower_octave`, `velocity`, sustain fields, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | `active_notes`, `last_note_event`                                                                                                                                           |
 | `MidiKeyboardWidget` | `midi_port`, `sync_clock`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                                                   | `available_midi_ports`, `active_notes`, `last_note_event`, `control_change`, `clock_bpm`                                                                                    |
+| `MidiRouterWidget`   | `routes`, `session_tracks`, `session_id`, `theme`                                                                                                                                                                                                                      | `available_midi_ports`, `last_event`, `control_change`                                                                                                                      |
 | `MidiOutputWidget`   | `midi_port`, `channel`, `forward_notes`, `send_clock`, `session_id`, `theme`                                                                                                                                                                                           | `available_midi_ports`, `request` (send commands)                                                                                                                           |
 | `PadWidget`          | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                              | `active_pads`, `last_note_event`, `last_pad_event`                                                                                                                          |
 
@@ -982,6 +983,36 @@ Zone routing for external MIDI is based on note number: notes below MIDI 60 are
 `lower`, and notes 60 or above are `upper`. This lets one MIDI keyboard drive
 multiple samplers split by range through the same `connect_sampler()` API.
 
+### MidiRouterWidget
+
+Python class: `MidiRouterWidget`. Element: `js/src/ts/components/midi-router.ts`.
+
+The router sends MIDI input to the session's track instruments. Every
+`Session` owns one (`session.midi_router`, the `midi` panel in the app, a tab
+beside the mixer). A route is
+`{port, midi_channel, note_low, note_high, channel_index}`: notes from `port`
+(`""` is any) on `midi_channel` (-1 is any, else 0-15) in the note range play
+the instrument of the track on mixer channel `channel_index`.
+`add_route(track, port="", midi_channel=None, note_low=0, note_high=127)` takes
+a `Track` or a channel, and `remove_route()` and `clear_routes()` edit the list.
+The session keeps `session_tracks` (`{channel_index, name}`) up to date for the
+editor's track list. `Session.remove_track()` drops routes to the removed track
+and moves later ones down. A saved session keeps its routes (`midi_router` in
+`session.json`).
+
+The element listens to every Web MIDI input, including ports connected later
+(`listenAll()` in `midi_access.ts`). A note-on calls
+`bus.instruments[channel].startNote()` on every matching route, and its
+note-off calls the releases it got back, keyed by port, channel and note, so a
+route edited while a key is down still releases the note it started. Every
+note is also broadcast like a keyboard's (`nbplay-note` and `bus.noteListeners`)
+for sequencer step recording, timeline recording and MIDI output. Control
+changes go to `status.control_change` with the port, so `MidiLearn(router)`
+works as it does with the MIDI keyboard. The port list (`available_midi_ports`)
+is the browser's. The element reports it as soon as it has access, which can
+be before its wire is connected, so when a host snapshot replaces the list
+with another one, the element writes its own again.
+
 ### MidiOutputWidget
 
 `MidiOutputWidget` (element `js/src/ts/components/midi-output.ts`) is the session's way out to hardware and other software. It lists Web MIDI output ports (`midi_port`, `available_midi_ports`) and sends on one channel (`channel`, 0-15). With a `session_id` it registers on the bus's `noteListeners`, where every note the session plays arrives: keyboards and pads broadcast when a key goes down, and the sequencer scheduler, launcher slots, and timeline MIDI clips emit their notes as they are scheduled, with `at` (AudioContext time) and `duration`. Scheduled notes are converted to Web MIDI timestamps so the hardware plays them at the same time as the browser. Without a session it listens to the document-level `nbplay-note` events instead, never both, so nothing is sent twice. `forward_notes` turns that forwarding off. Python sends through the `send_request` trait (`note_on()`, `note_off()`, `control_change()`, `send()` for raw bytes), each request carrying a nonce so identical messages still fire. Changing port or channel and teardown send all-notes-off first.
@@ -1098,8 +1129,8 @@ transports session gets a `WebSocketRoute` at `/ws/<panel>` with its own
 `transports.Server` and `autosync` task, the page is a `spaday-regular-layout`
 whose frames hold `widget.tree("<panel>.")`, and `widget.wires("<panel>.", url=...)` gives the `Wire` specs that mirror the config and status models under
 that panel's namespace in the page's one store. `panel_widgets()` names the
-panels (`transport`, `launcher`, `timeline`, `mixer`, then `<track>-sequencer`
-and `<track>-synth` or `<track>-sampler`), `panel_titles()` gives each tab its
+panels (`transport`, `launcher`, `timeline`, `mixer`, `midi`, then
+`<track>-sequencer` and `<track>-synth` or `<track>-sampler`), `panel_titles()` gives each tab its
 title (`Mixer`, `Lead synth`) through regular-layout's
 `--regular-layout-<name>--title` custom property, and `default_layout()` is the split
 tree: the transport across the top, launcher, timeline and mixer in the
@@ -1422,7 +1453,7 @@ wait for the config's next change.
 
 `nbplay/history.py` keeps an undo stack over widget config. `History.attach(widget)` subscribes to the widget's config model with `on_change`, so browser edits count too, and ignores the transient fields listed in `TRANSIENT_TRAITS` (selection, request counts, derived data such as the waveform preview); browser-owned status never reaches a config model. Each change becomes an entry `(config, field, old, new)`; changes within `group_window` seconds of the previous one (0.3 s by default, so a fader drag or a method that writes several fields is one step) share a step, `transaction()` groups a block explicitly, `paused()` hides a block, and `mark()` ends the current step. A session also registers `mark()` on IPython's `post_run_cell` event (`bind_ipython()`), so two cells never share a step even when Run All executes them within the window. `undo()` restores the step's old values in reverse order by assigning the config fields, and moves the step to the redo stack; a new change clears redo.
 
-A `Session` owns one `History`, attaches the transport, mixer, timeline, and launcher, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a field-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` status counts, which the session answers.
+A `Session` owns one `History`, attaches the transport, mixer, timeline, launcher and MIDI router, and attaches each track's sequencer and sound source as `add_track()` runs. Adding or removing a track, and `import_midi()`, run paused: they create or drop Python objects and mixer channels together, which a field-level undo cannot replay consistently, so they are documented as not undoable. `chain()` and `update_pattern()` run as transactions so one undo reverts the whole arrangement change. `session.undo()` and `session.redo()` are the entry points; in the browser, Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) with the transport focused bump its `undo_request` / `redo_request` status counts, which the session answers.
 
 ### Pattern chaining
 

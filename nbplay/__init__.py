@@ -52,6 +52,7 @@ from nbplay.widget import (
     LauncherWidget,
     MidiKeyboardWidget,
     MidiOutputWidget,
+    MidiRouterWidget,
     MixerWidget,
     PadWidget,
     SamplerWidget,

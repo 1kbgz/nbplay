@@ -1147,6 +1147,19 @@ def _normalize_drum_sample(raw, key):
     }
 
 
+def _normalize_midi_route(raw):
+    """One MIDI route: notes from ``port`` ("" is any) on ``midi_channel`` (-1 is any, else 0-15) in ``[note_low, note_high]`` play the instrument of the track on mixer channel ``channel_index`` (-1 is none)."""
+    low = _clamp_midi_note(raw.get("note_low", 0))
+    high = _clamp_midi_note(raw.get("note_high", 127))
+    return {
+        "port": str(raw.get("port") or ""),
+        "midi_channel": _clamp_int(raw.get("midi_channel", -1), -1, 15),
+        "note_low": min(low, high),
+        "note_high": max(low, high),
+        "channel_index": max(-1, int(raw.get("channel_index", -1))),
+    }
+
+
 def _normalize_drum_pattern(pattern, pads, steps):
     """One row per pad of ``steps`` velocities (0 is off), cut or padded with zeros."""
     rows = []

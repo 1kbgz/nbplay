@@ -25,6 +25,7 @@ VIEWS = {
     "pads": nbplay.PadWidget,
     "keyboard": nbplay.KeyboardWidget,
     "midi_keyboard": nbplay.MidiKeyboardWidget,
+    "midi_router": nbplay.MidiRouterWidget,
     "settings": nbplay.SettingsWidget,
     "midi_output": nbplay.MidiOutputWidget,
     "sequencer": nbplay.SequencerWidget,
@@ -80,6 +81,7 @@ if name in ("session", "history"):
         "mixer": session.mixer,
         "timeline": session.timeline,
         "launcher": session.launcher,
+        "midi_router": session.midi_router,
         "sequencer": sequencer,
         "synth": synth,
     }

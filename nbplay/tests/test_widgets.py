@@ -18,6 +18,7 @@ from nbplay.models import (
     DrumMachineConfig,
     KeyboardConfig,
     LauncherConfig,
+    MidiRouterConfig,
     MixerConfig,
     PadsConfig,
     SamplerConfig,
@@ -805,6 +806,72 @@ class TestDrumMachineWidget:
                 assert source.config.channel_index == loaded.tracks[0].mixer_channel
             finally:
                 loaded.close()
+        finally:
+            session.close()
+
+
+class TestMidiRouterWidget:
+    def test_routes_validate(self):
+        config = MidiRouterConfig(routes=[{"port": None, "midi_channel": 20, "note_low": 90, "note_high": -3, "channel_index": -7}])
+        assert config.routes == [{"port": "", "midi_channel": 15, "note_low": 0, "note_high": 90, "channel_index": -1}]
+        with pytest.raises(ValueError):
+            MidiRouterConfig.model_validate({"routes": ["all"]})
+
+    def test_the_session_routes_midi_to_its_tracks(self):
+        session = nbplay.Session(theme="flat")
+        try:
+            router = session.midi_router
+            assert router in session.widgets and router.config.theme == "flat"
+            assert router._tree["tag"] == "nbplay-midi-router"
+            assert router._tree["bindings"]["controlChange"]["field"] == "status.control_change"
+            bass = session.add_track("Bass", None, nbplay.SynthWidget())
+            keys = session.add_track("Keys", None, nbplay.FMSynthWidget())
+            beat = session.add_track("Beat", None, nbplay.DrumMachineWidget())
+            assert [track["name"] for track in router.config.session_tracks] == ["Bass", "Keys", "Beat"]
+            assert router.add_route(bass, note_high=59) == 0
+            router.add_route(keys.mixer_channel, note_low=60)
+            router.add_route(beat, port="Launchpad X LPX MIDI", midi_channel=0)
+            assert router.config.routes[2] == {
+                "port": "Launchpad X LPX MIDI",
+                "midi_channel": 0,
+                "note_low": 0,
+                "note_high": 127,
+                "channel_index": 2,
+            }
+            # A saved session keeps its routes.
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                assert loaded.midi_router.config.routes == router.config.routes
+            finally:
+                loaded.close()
+            # Routes to a removed track go; later ones follow their channels.
+            session.remove_track(0)
+            assert [route["channel_index"] for route in router.config.routes] == [0, 1]
+            router.remove_route(0)
+            assert [route["channel_index"] for route in router.config.routes] == [1]
+            with pytest.raises(IndexError):
+                router.remove_route(3)
+            session.history.mark()
+            router.clear_routes()
+            assert router.config.routes == []
+            session.undo()
+            assert len(router.config.routes) == 1
+        finally:
+            session.close()
+
+    def test_midi_learn_listens_to_the_router(self):
+        session = nbplay.Session()
+        try:
+            synth = nbplay.SynthWidget()
+            session.add_track("Lead", None, synth)
+            learn = MidiLearn(session.midi_router)
+            learn.map(74, synth, "cutoff", low=100.0, high=10000.0)
+            browser_writes(session.midi_router, control_change={"controller": 74, "value": 127, "channel": 0, "port": "Keys", "seq": 1})
+            assert synth.config.cutoff == 10000.0
+            learn.close()
         finally:
             session.close()
 

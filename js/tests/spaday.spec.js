@@ -405,6 +405,65 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("midi router: routes travel both ways and control changes reach the kernel", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const input = new EventTarget();
+      Object.assign(input, { id: "keys", name: "Keys", state: "connected" });
+      window.__keys = input;
+      navigator.requestMIDIAccess = async () => ({
+        inputs: new Map([["keys", input]]),
+        outputs: new Map(),
+      });
+    });
+    const kernel = await viewKernel("session");
+    try {
+      await mount(page, kernel, ["midi_router"]);
+      const router = page.locator("#midi_router nbplay-midi-router");
+      await expect(router.locator(".nbplay-midi-router-port-name")).toHaveText(
+        "Keys",
+      );
+      // A route added in Python shows up with the session's track.
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({
+          op: "command",
+          widget: "midi_router",
+          name: "add_route",
+          args: [0],
+        }),
+      );
+      await expect(router.locator(".nbplay-midi-router-track")).toHaveValue(
+        "0",
+      );
+      await expect(
+        router.locator(".nbplay-midi-router-track option:checked"),
+      ).toHaveText("Lead");
+      // A browser edit reaches the kernel's routes.
+      await router.locator(".nbplay-midi-router-channel").selectOption("Ch 2");
+      await expect
+        .poll(
+          async () =>
+            (await state(kernel)).midi_router.config.routes[0].midi_channel,
+        )
+        .toBe(1);
+      // A knob turned on the device reaches the kernel's status.
+      await page.evaluate(() => {
+        const event = new Event("midimessage");
+        event.data = new Uint8Array([0xb0, 74, 100]);
+        window.__keys.dispatchEvent(event);
+      });
+      await expect
+        .poll(
+          async () => (await state(kernel)).midi_router.status.control_change,
+        )
+        .toMatchObject({ controller: 74, value: 100, port: "Keys" });
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("mixer: kernel and browser edits meet in one validated console", async ({
     page,
   }) => {

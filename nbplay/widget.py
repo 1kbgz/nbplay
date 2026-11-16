@@ -79,6 +79,8 @@ from .models import (
     MidiKeyboardStatus,
     MidiOutputConfig,
     MidiOutputStatus,
+    MidiRouterConfig,
+    MidiRouterStatus,
     MixerConfig,
     PadsConfig,
     PadsStatus,
@@ -107,6 +109,7 @@ __all__ = (
     "LauncherWidget",
     "MidiKeyboardWidget",
     "MidiOutputWidget",
+    "MidiRouterWidget",
     "MixerWidget",
     "PadWidget",
     "SamplerWidget",
@@ -882,6 +885,58 @@ class MidiKeyboardWidget(_Keys):
         "control_change": "controlChange",
         "clock_bpm": "clockBpm",
     }
+
+
+class MidiRouterWidget(InstrumentWidget):
+    """Routes Web MIDI input to the session's track instruments; :class:`Session` owns one.
+
+    It listens to every input port in the browser. A note-on plays on the
+    instrument of every route it matches and holds until its note-off;
+    every note is also broadcast like a keyboard's, so sequencer step
+    recording and timeline recording hear it. Control changes land in
+    ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the
+    router as its source.
+    """
+
+    TAG = "nbplay-midi-router"
+    CONFIG_MODEL = MidiRouterConfig
+    STATUS_MODEL = MidiRouterStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "routes": "routes",
+        "session_tracks": "sessionTracks",
+        "session_id": "sessionId",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {
+        "available_midi_ports": "availableMidiPorts",
+        "last_event": "lastEvent",
+        "control_change": "controlChange",
+    }
+
+    def add_route(self, track, port="", midi_channel=None, note_low=0, note_high=127):
+        """Play notes from ``port`` ("" is any) on ``midi_channel`` (None is any, else 0-15) between the notes on ``track``: a :class:`Track` or a mixer channel. Returns the route's index."""
+        channel = track.mixer_channel if isinstance(track, Track) else int(track)
+        route = {
+            "port": port,
+            "midi_channel": -1 if midi_channel is None else midi_channel,
+            "note_low": note_low,
+            "note_high": note_high,
+            "channel_index": channel,
+        }
+        self.config.routes = [*self.config.routes, route]
+        return len(self.config.routes) - 1
+
+    def remove_route(self, index):
+        """Remove the route at ``index``."""
+        routes = list(self.config.routes)
+        if not 0 <= index < len(routes):
+            raise IndexError(f"route index out of range: {index}")
+        del routes[index]
+        self.config.routes = routes
+
+    def clear_routes(self):
+        """Remove every route."""
+        self.config.routes = []
 
 
 class SettingsWidget(InstrumentWidget):
@@ -1970,13 +2025,14 @@ class Session:
         self.mixer = MixerWidget(session_id=self._session_id, theme=theme)
         self.timeline = TimelineWidget(time_signature_den=den, **common)
         self.launcher = LauncherWidget(time_signature_den=den, **common)
+        self.midi_router = MidiRouterWidget(session_id=self._session_id, theme=theme)
         self.tracks = []
         # Named patterns for the tracking widget: name -> {voices_data, step_duration}.
         self.patterns = {}
         # Undo/redo over every widget's config; new tracks attach their
         # sequencer and sound source as they are added.
         self.history = History()
-        for widget in (self.transport, self.mixer, self.timeline, self.launcher):
+        for widget in (self.transport, self.mixer, self.timeline, self.launcher, self.midi_router):
             self.history.attach(widget)
         self.history.bind_ipython()
         # Ctrl/Cmd+Z in the browser bumps the transport's request counts.
@@ -2049,7 +2105,7 @@ class Session:
     @property
     def widgets(self):
         """Every widget in the session, including track instruments."""
-        widgets = [self.transport, self.mixer, self.timeline, self.launcher]
+        widgets = [self.transport, self.mixer, self.timeline, self.launcher, self.midi_router]
         for track in self.tracks:
             widgets.extend(widget for widget in (track.sequencer, track.sound_source) if isinstance(widget, InstrumentWidget))
         return widgets
@@ -2158,16 +2214,23 @@ class Session:
                         pad = {**pad, "params": {**pad["params"], "track": -1 if channel == removed else channel - 1}}
                     pads.append(pad)
                 drums.config.pads = pads
+            # Routes to the removed track go; later ones follow their channels.
+            routes = []
+            for route in self.midi_router.config.routes:
+                channel = route["channel_index"]
+                if channel != removed:
+                    routes.append({**route, "channel_index": channel - 1} if channel > removed else route)
+            self.midi_router.config.routes = routes
             self._sync_session_tracks()
 
     def _drum_machines(self):
         return [track.sound_source for track in self.tracks if isinstance(track.sound_source, DrumMachineWidget)]
 
     def _sync_session_tracks(self):
-        """Tell every drum machine which tracks its pads can play."""
+        """Tell the MIDI router and every drum machine which tracks they can play."""
         tracks = [{"channel_index": track.mixer_channel, "name": track.name} for track in self.tracks]
-        for drums in self._drum_machines():
-            drums.config.session_tracks = tracks
+        for widget in (self.midi_router, *self._drum_machines()):
+            widget.config.session_tracks = tracks
 
     def _track_index(self, track):
         if isinstance(track, Track):
@@ -2459,6 +2522,7 @@ def _session_to_dict(session, resources=None):
         "tracks": tracks,
         "timeline": {**_dump(session.timeline.config, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.config.tracks), "clips": clips},
         "launcher": _dump(session.launcher.config, ("quantize", "scenes", "slots")),
+        "midi_router": _dump(session.midi_router.config, ("routes",)),
         "patterns": _json_copy(session.patterns),
         "theme": session.theme,
     }
@@ -2525,6 +2589,7 @@ def _session_from_dict(cls, data, resources):
     for name in launcher_data.get("scenes", []):
         session.launcher.add_scene(name)
     session.launcher.config.update(**{name: launcher_data[name] for name in ("slots", "quantize") if name in launcher_data})
+    session.midi_router.config.routes = data.get("midi_router", {}).get("routes", [])
     for name, pattern in data.get("patterns", {}).items():
         session.add_pattern(name, pattern.get("voices_data", []), step_duration=pattern.get("step_duration", 0.25))
     session.history.clear()

@@ -11,6 +11,7 @@ import type {
   NbplayKeyboard,
   NbplayMidiKeyboard,
   NbplayMidiOutput,
+  NbplayMidiRouter,
   NbplayPads,
   NbplaySampler,
   NbplaySequencer,
@@ -509,6 +510,23 @@ const INSTRUMENTS: Record<
         clock_bpm: "clockBpm",
       },
       onDisconnect: () => (node as NbplayMidiKeyboard).silence(),
+    }),
+  },
+  midi_router: {
+    tag: "nbplay-midi-router",
+    spec: (node) => ({
+      config: {
+        theme: "theme",
+        routes: "routes",
+        session_tracks: "sessionTracks",
+        session_id: "sessionId",
+      },
+      status: {
+        available_midi_ports: "availableMidiPorts",
+        last_event: "lastEvent",
+        control_change: "controlChange",
+      },
+      onDisconnect: () => (node as NbplayMidiRouter).releaseAll(),
     }),
   },
   midi_output: {

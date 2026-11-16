@@ -1,0 +1,106 @@
+nbplay-midi-router {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 320px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: var(--nbplay-bg-panel);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius);
+  font-family: var(--nbplay-font);
+  color: var(--nbplay-fg);
+}
+nbplay-midi-router .nbplay-midi-router-ports {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-midi-router .nbplay-midi-router-label {
+  min-width: 48px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-router .nbplay-midi-router-port-name {
+  padding: 2px 6px;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  background: var(--nbplay-bg-control);
+}
+nbplay-midi-router .nbplay-midi-router-none {
+  color: var(--nbplay-fg-faint);
+}
+nbplay-midi-router .nbplay-midi-router-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+nbplay-midi-router .nbplay-midi-router-head,
+nbplay-midi-router .nbplay-midi-router-route {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.4fr) 84px 128px minmax(96px, 1fr) var(
+      --nbplay-control-height
+    );
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-midi-router .nbplay-midi-router-head {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-router .nbplay-midi-router-route select {
+  min-width: 0;
+}
+nbplay-midi-router select,
+nbplay-midi-router input,
+nbplay-midi-router button {
+  height: var(--nbplay-control-height);
+  box-sizing: border-box;
+  font: inherit;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-midi-router .nbplay-midi-router-notes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-router .nbplay-midi-router-notes input {
+  width: 52px;
+  padding: 0 4px;
+}
+nbplay-midi-router .nbplay-midi-router-remove {
+  width: var(--nbplay-control-height);
+  padding: 0;
+  cursor: pointer;
+}
+nbplay-midi-router .nbplay-midi-router-add {
+  align-self: flex-start;
+  padding: 0 10px;
+  cursor: pointer;
+}
+nbplay-midi-router button:hover {
+  border-color: var(--nbplay-accent);
+}
+nbplay-midi-router .nbplay-midi-router-monitor {
+  padding: 6px 8px;
+  background: var(--nbplay-chart-bg);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-accent);
+  white-space: pre;
+}
