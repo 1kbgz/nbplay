@@ -1000,6 +1000,24 @@ class TestObservers:
         finally:
             widget.close()
 
+    def test_a_kernel_write_made_during_a_browser_edit_reaches_the_browser(self):
+        # transports 0.12.4: an on_change write into the config a browser edit is applied to.
+        synth = nbplay.SynthWidget(autosync=False)
+        try:
+            synth.on_change(lambda widget, name, old, new: setattr(widget.config, "cutoff", 1234.0), names="amplitude")
+            browser = transports.Client("json")
+            for frame in synth.server.open("browser", "json"):
+                browser.recv(frame)
+            edit = browser.edit_ops(synth.config_id, [{"Set": {"path": [{"Key": "amplitude"}], "value": {"Float": 0.25}}}], "amp")
+            for frame in synth.server.recv("browser", edit).get("browser", []):
+                browser.recv(frame)
+            for frame in synth.server.flush().get("browser", []):
+                browser.recv(frame)
+            assert synth.config.cutoff == 1234.0
+            assert browser.value(synth.config_id)["Map"]["cutoff"] == {"Float": 1234.0}
+        finally:
+            synth.close()
+
     def test_timeline_collects_exported_clips(self):
         widget = nbplay.TimelineWidget(autosync=False)
         try:
