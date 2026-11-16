@@ -22,7 +22,8 @@ Nothing to install; open a notebook and run it top to bottom.
 **Build your own DAW:** the same widgets run outside a notebook. The
 [web app](https://1kbgz.github.io/nbplay/app/) lays a demo session's
 instruments out as resizable panels on one page, also in your browser with
-nothing to install.
+nothing to install: a lead and a bass on sequencers, a drum machine beat, and
+any MIDI keyboard you plug in playing the lead.
 
 nbplay is a set of Jupyter widgets that together form a small DAW in the
 browser: synths, samplers, a drum machine, step sequencers, a QWERTY and a

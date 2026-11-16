@@ -34,7 +34,8 @@ test.describe("standalone Pyodide example", () => {
       "nbplay-mixer",
       "nbplay-sequencer",
       "nbplay-synth",
-      "nbplay-sampler",
+      "nbplay-drums",
+      "nbplay-midi-router",
     ]) {
       await expect(
         page.locator(`regular-layout-frame ${tag}`).first(),
@@ -42,12 +43,13 @@ test.describe("standalone Pyodide example", () => {
     }
     const transport = page.locator("nbplay-transport");
     await expect(transport).toHaveJSProperty("bpm", 120);
-    await expect(page.locator("nbplay-mixer nbplay-strip")).toHaveCount(3);
+    await expect(page.locator("nbplay-mixer nbplay-strip")).toHaveCount(4);
 
     // pydantic rejects an out-of-range edit and the element gets the model's
     // value back; a valid one is accepted and the Rust core, compiled to
     // WebAssembly, re-renders the waveform.
-    const synth = page.locator("nbplay-synth");
+    // The lead's synth: the first of the two.
+    const synth = page.locator("nbplay-synth").first();
     const waveform = () =>
       page.evaluate(() =>
         Array.from(
@@ -79,7 +81,7 @@ test.describe("standalone Pyodide example", () => {
       )
       .toBe(true);
     await page.locator(".nbplay-app-bar select").selectOption("grim");
-    for (const tag of ["html", "nbplay-mixer", "nbplay-sampler"]) {
+    for (const tag of ["html", "nbplay-mixer", "nbplay-drums"]) {
       await expect(page.locator(tag).first()).toHaveAttribute(
         "data-nbplay-theme",
         "grim",

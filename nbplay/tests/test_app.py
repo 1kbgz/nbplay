@@ -75,7 +75,7 @@ class TestApp:
             app = build(session, probes=True)
             with TestClient(app) as client:
                 html = client.get("/").text
-                assert "/ws/transport" in html and "/ws/drums-sampler" in html
+                assert "/ws/transport" in html and "/ws/beat-drums" in html
                 assert 'namespace: "transport.config", url: "/ws/transport"' in html
                 bundle = client.get("/components/nbplay/index.js")
                 assert bundle.status_code == 200 and bundle.headers["cache-control"] == "no-cache"
@@ -89,7 +89,7 @@ class TestApp:
                 commands = [command["Map"] for command in palette["props"]["commands"]["List"]]
                 assert {command["id"]["Str"]: command["label"]["Str"] for command in commands} == panel_titles(session)
                 # The tabs take their titles from regular-layout's per-panel custom properties.
-                assert '--regular-layout-drums-sampler--title: "Drums sampler"' in layout["props"]["style"]["Str"]
+                assert '--regular-layout-beat-drums--title: "Beat drums"' in layout["props"]["style"]["Str"]
                 assert palette["events"]["nbplay-request"] == {
                     "kind": "invoke",
                     "target": {"ref": "id", "id": layout["props"]["id"]["Str"]},
@@ -107,11 +107,12 @@ class TestApp:
                 assert [option["props"]["value"]["Str"] for option in select["slots"]["default"]] == list(nbplay.THEMES)
                 transport = _instrument(tree, "transport")
                 assert transport["tag"] == "nbplay-transport" and transport["bindings"]["bpm"]["field"] == "transport.config.bpm"
-                sampler = _instrument(tree, "drums-sampler")
-                assert sampler["bindings"]["sampleData"]["field"] == "drums-sampler.config.sample_data"
+                drums = _instrument(tree, "beat-drums")
+                assert drums["bindings"]["samples"]["field"] == "beat-drums.config.samples"
                 state = client.get("/state").json()
                 assert state["lead-sequencer"]["config"]["length"] == 16 and state["transport"]["status"]["is_playing"] is False
-                assert state["drums-sampler"]["config"]["sample_data"] == {"bytes": 4000 * 4}
+                (sample,) = state["beat-drums"]["config"]["samples"].values()
+                assert sample["data"] == {"bytes": 4000 * 4}
                 assert client.post("/set/transport/bpm", json={"value": 99}).json() == {"value": 99.0}
                 assert session.transport.config.bpm == 99.0
                 assert isinstance(client.post("/command/transport/play").json()["result"], int)
@@ -142,7 +143,7 @@ class TestApp:
             assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "midi", "bass-sequencer", "bass-synth"]}
             assert app.state.session is not first and app.state.session.bpm == 140.0
             html = client.get("/").text
-            assert "/ws/bass-synth" in html and "/ws/drums-sampler" not in html
+            assert "/ws/bass-synth" in html and "/ws/beat-drums" not in html
             state = client.get("/state").json()
             assert state["transport"]["config"]["theme"] == "grim" and state["bass-sequencer"]["config"]["length"] == 8
             with client.websocket_connect("/ws/bass-synth?codec=json&ownership=1") as socket:
@@ -228,7 +229,7 @@ class TestApp:
             }
             replies = json.loads(host.receive("transport", json.dumps({**edit, "proposal": "p1"})))
             assert host.session.mixer.config.theme == "grim"
-            assert "transport" in replies and "mixer" in replies and "drums-sampler" in replies
+            assert "transport" in replies and "mixer" in replies and "beat-drums" in replies
             invalid = {**edit, "patch": {"rev": 0, "ops": [{"Set": {"path": [{"Key": "bpm"}], "value": {"Float": -5.0}}}]}, "proposal": "p2"}
             host.receive("transport", json.dumps(invalid))
             assert transport.config.bpm == 120.0

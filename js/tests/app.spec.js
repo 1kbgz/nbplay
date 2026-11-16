@@ -25,7 +25,8 @@ test.describe("web app", () => {
       "nbplay-mixer",
       "nbplay-sequencer",
       "nbplay-synth",
-      "nbplay-sampler",
+      "nbplay-drums",
+      "nbplay-midi-router",
     ]) {
       await expect(
         page.locator(`regular-layout-frame ${tag}`).first(),
@@ -86,7 +87,7 @@ test.describe("web app", () => {
           "launcher",
           "timeline",
           "lead-sequencer",
-          "drums-sequencer",
+          "bass-sequencer",
         ].map((name) => models[name].config.bpm);
       })
       .toEqual([dragged, dragged, dragged, dragged, dragged]);
@@ -147,14 +148,14 @@ test.describe("web app", () => {
       "data-nbplay-theme",
       "grim",
     );
-    for (const tag of ["nbplay-transport", "nbplay-mixer", "nbplay-sampler"]) {
+    for (const tag of ["nbplay-transport", "nbplay-mixer", "nbplay-drums"]) {
       await expect(page.locator(tag).first()).toHaveAttribute(
         "data-nbplay-theme",
         "grim",
       );
     }
     await expect
-      .poll(async () => (await state(request))["drums-sampler"].config.theme)
+      .poll(async () => (await state(request))["beat-drums"].config.theme)
       .toBe("grim");
     expect(errors).toEqual([]);
   });
@@ -180,20 +181,20 @@ test.describe("web app", () => {
     expect(
       await page.evaluate(() => {
         const frame = document.querySelector(
-          'regular-layout-frame[name="drums-sampler"]',
+          'regular-layout-frame[name="beat-drums"]',
         );
         const title = (frame.shadowRoot ?? frame).querySelector(
-          'regular-layout-tab[name="drums-sampler"] [part~="title"]',
+          'regular-layout-tab[name="beat-drums"] [part~="title"]',
         );
         return getComputedStyle(title, "::before").content;
       }),
-    ).toBe('"Drums sampler"');
+    ).toBe('"Beat drums"');
 
     // Ctrl+K lists every panel; picking one puts it back in the layout.
     const dialog = page.locator("nbplay-palette dialog");
     await page.keyboard.press("Control+k");
     await expect(dialog).toBeVisible();
-    await expect(page.locator(".nbplay-palette-option")).toHaveCount(9);
+    await expect(page.locator(".nbplay-palette-option")).toHaveCount(10);
     await page.keyboard.type("mix");
     await page.keyboard.press("Enter");
     await expect(dialog).toBeHidden();
@@ -229,7 +230,7 @@ test.describe("web app", () => {
           models.launcher.config.bpm,
           models.timeline.config.bpm,
           models["lead-sequencer"].config.bpm,
-          models["drums-sequencer"].config.bpm,
+          models["bass-sequencer"].config.bpm,
         ];
       })
       .toEqual([111, 111, 111, 111]);

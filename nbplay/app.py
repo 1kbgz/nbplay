@@ -28,7 +28,7 @@ from spaday_regular_layout import RegularLayout, RegularLayoutFrame, package as 
 
 from .components import package as nbplay_package
 from .descriptors import THEMES
-from .widget import InstrumentWidget, SamplerWidget, SequencerWidget, Session, SynthWidget
+from .widget import DrumMachineWidget, InstrumentWidget, SequencerWidget, Session, SynthWidget
 
 __all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_titles", "panel_widgets")
 
@@ -418,23 +418,35 @@ class Standalone:
 
 
 def demo_session():
-    """Two tracks: a saw lead on a sequencer and a sampler kit with a kick."""
+    """A lead and a bass on sequencers with shipped synth presets, a drum machine beat, and any MIDI input on the lead."""
     session = Session(bpm=120.0, theme="studio")
     session.transport.config.loop_enabled = True
     lead_seq = SequencerWidget(length=16, num_voices=2)
     for i, note in enumerate([72, 76, 79, 84, 83, 79, 76, 72, 71, 74, 78, 83, 81, 78, 74, 71]):
         lead_seq.set_step(i, note=note, velocity=88 + (i % 4) * 6, active=i % 2 == 0, voice=0)
-    session.add_track("Lead", lead_seq, SynthWidget(oscillator_type="saw", frequency=440.0, amplitude=0.4))
-    drums = SamplerWidget(attack=0.002, decay=0.06, sustain=0.2, release=0.08, max_voices=8)
+    lead = session.add_track("Lead", lead_seq, SynthWidget.from_preset("Lead"))
+    bass_seq = SequencerWidget(length=16)
+    for i, note in enumerate([36, 36, 48, 36, 43, 36, 46, 48]):
+        bass_seq.set_step(i * 2, note=note, velocity=100)
+    session.add_track("Bass", bass_seq, SynthWidget.from_preset("Sub bass"))
+    # The Analog kit with a groove; one pad plays a sample made here.
+    drums = DrumMachineWidget()
     frames = 4000
-    drums.load_sample([((i * 7919) % 200 / 100 - 1) * (1 - i / frames) for i in range(frames)], sample_rate=44100, root_note=36, name="Kick-ish")
-    drum_seq = SequencerWidget(length=16)
-    for i in range(0, 16, 4):
-        drum_seq.set_step(i, note=36, velocity=110)
-    session.add_track("Drums", drum_seq, drums)
+    drums.load_pad_sample(12, [((i * 7919) % 200 / 100 - 1) * (1 - i / frames) for i in range(frames)], name="Kick-ish")
+    drums.set_pad(12, name="Kick-ish")
+    for pad, steps, velocity in (
+        (0, [0, 6, 8, 11], 110),  # kick
+        (1, [4, 12], 100),  # snare
+        (4, [12], 70),  # clap
+        (2, [0, 2, 4, 6, 8, 10, 12], 70),  # closed hat
+        (3, [14], 80),  # open hat
+    ):
+        drums.set_row(pad, steps, velocity=velocity)
+    session.add_track("Beat", None, drums)
+    session.midi_router.add_route(lead)
     session.launcher.add_scene("A")
     session.launcher.set_slot(0, 0, lead_seq, name="Lead A")
-    session.launcher.set_slot(1, 0, drum_seq, name="Drums A")
+    session.launcher.set_slot(1, 0, bass_seq, name="Bass A")
     return session
 
 
