@@ -27,6 +27,7 @@ from .descriptors import (
     _normalize_drum_sample,
     _normalize_effects,
     _normalize_launcher_slot,
+    _normalize_midi_mapping,
     _normalize_midi_route,
     _normalize_mixer_channel,
     _normalize_pad_actions,
@@ -543,11 +544,19 @@ class MidiRouterConfig(_Validated):
     A route is ``{port, midi_channel, note_low, note_high, channel_index}``
     (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on
     every route it matches, held until its note-off.
+
+    A mapping is ``{port, midi_channel, kind, number, action, track_index,
+    scene_index}`` (see :func:`~nbplay.descriptors._normalize_midi_mapping`):
+    one note or control change runs a transport or launcher action, and is
+    not routed to an instrument.
     """
 
     routes: list[dict] = []
+    mappings: list[dict] = []
     #: The session's tracks a route can play (``{channel_index, name}``); set by the session.
     session_tracks: list[dict] = []
+    #: The launcher's scene names, for the mapping editor; set by the session.
+    session_scenes: list[str] = []
     session_id: str = ""
     theme: str = ""
 
@@ -557,6 +566,11 @@ class MidiRouterConfig(_Validated):
     @classmethod
     def _routes(cls, routes):
         return [_normalize_midi_route(route) for route in routes]
+
+    @field_validator("mappings")
+    @classmethod
+    def _mappings(cls, mappings):
+        return [_normalize_midi_mapping(mapping) for mapping in mappings]
 
 
 class MidiRouterStatus(BaseModel):

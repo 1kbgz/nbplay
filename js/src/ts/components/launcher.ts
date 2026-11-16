@@ -12,7 +12,9 @@ import {
   claimChannel,
   type ClockBinding,
   type ClockEvent,
+  getOrCreateSessionBus,
   releaseChannel,
+  type SessionBus,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, define } from "./base.ts";
@@ -149,6 +151,11 @@ export class NbplayLauncher extends NbplayElement {
   private engine: NbplayLauncher | null = null;
   /** The engine key this element is registered under. */
   private joined = "";
+  /** This view's entry on the session bus, for the MIDI router. */
+  private busEntry: {
+    bus: SessionBus;
+    entry: NonNullable<SessionBus["launcher"]>;
+  } | null = null;
 
   constructor() {
     super();
@@ -277,6 +284,7 @@ export class NbplayLauncher extends NbplayElement {
     this.clock();
     this.ensureStates();
     this.join();
+    this.registerBus();
     // Space toggles the clock, digits launch scenes, Escape/0 stop all.
     const shortcuts: Record<string, () => boolean | void> = {
       Space: () => {
@@ -299,6 +307,7 @@ export class NbplayLauncher extends NbplayElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.leave();
+    this.unregisterBus();
     this.stopQueueTimer();
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
@@ -309,6 +318,24 @@ export class NbplayLauncher extends NbplayElement {
     this.states.length = 0;
     this.binding?.dispose();
     this.binding = null;
+  }
+
+  /** Let the session's MIDI router launch through this view (a following view forwards to the engine). */
+  private registerBus(): void {
+    this.unregisterBus();
+    if (!this.sessionId || !this.isConnected) return;
+    const bus = getOrCreateSessionBus(this.sessionId);
+    const entry = {
+      command: (request: LaunchRequest) => this.command(request),
+    };
+    bus.launcher = entry;
+    this.busEntry = { bus, entry };
+  }
+
+  private unregisterBus(): void {
+    if (this.busEntry && this.busEntry.bus.launcher === this.busEntry.entry)
+      delete this.busEntry.bus.launcher;
+    this.busEntry = null;
   }
 
   // Engine sharing
@@ -371,6 +398,7 @@ export class NbplayLauncher extends NbplayElement {
   }
 
   updated(changed: PropertyValues): void {
+    if (changed.has("sessionId")) this.registerBus();
     if (!this.binding) return;
     if (changed.has("engineKey")) this.join();
     // A tempo that arrives with the session id is the model's at render,

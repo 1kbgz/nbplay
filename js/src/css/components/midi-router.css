@@ -50,6 +50,51 @@ nbplay-midi-router .nbplay-midi-router-route {
   font-family: var(--nbplay-font-mono);
   font-size: var(--nbplay-font-size-small);
 }
+nbplay-midi-router .nbplay-midi-router-mappings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+nbplay-midi-router .nbplay-midi-router-mapping-head,
+nbplay-midi-router .nbplay-midi-router-mapping {
+  display: grid;
+  grid-template-columns: minmax(170px, 1.6fr) minmax(110px, 1fr) minmax(
+      90px,
+      1fr
+    ) minmax(90px, 1fr) var(--nbplay-control-height);
+  align-items: center;
+  gap: 6px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-midi-router .nbplay-midi-router-mapping-head {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nbplay-fg-muted);
+}
+nbplay-midi-router .nbplay-midi-router-mapping select {
+  min-width: 0;
+}
+nbplay-midi-router .nbplay-midi-router-learn {
+  overflow: hidden;
+  padding: 0 6px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+nbplay-midi-router .nbplay-midi-router-learn.learning {
+  color: var(--nbplay-accent);
+  border-color: var(--nbplay-accent);
+}
+nbplay-midi-router select:disabled {
+  opacity: 0.5;
+}
+nbplay-midi-router .nbplay-midi-router-add-control {
+  align-self: flex-start;
+  padding: 0 10px;
+  cursor: pointer;
+}
 nbplay-midi-router .nbplay-midi-router-head {
   text-transform: uppercase;
   letter-spacing: 0.5px;

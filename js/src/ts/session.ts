@@ -61,6 +61,14 @@ export interface SessionBus {
   returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
   instruments?: Record<number, InstrumentBus>;
+  /** A view of the session's launcher: the MIDI router's launch actions go through it. */
+  launcher?: {
+    command(request: {
+      action?: string;
+      track_index?: number;
+      scene_index?: number;
+    }): void;
+  };
   noteListeners?: Array<(evt: NoteEvent) => void>;
   /** Sources claiming each channel's notes; see `channelOwner`. */
   claims?: Record<number, Partial<Record<ChannelOwner, boolean>>>;

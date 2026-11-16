@@ -895,7 +895,8 @@ class MidiRouterWidget(InstrumentWidget):
     every note is also broadcast like a keyboard's, so sequencer step
     recording and timeline recording hear it. Control changes land in
     ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the
-    router as its source.
+    router as its source. Mappings bind one note or control change to a
+    transport or launcher action instead.
     """
 
     TAG = "nbplay-midi-router"
@@ -903,7 +904,9 @@ class MidiRouterWidget(InstrumentWidget):
     STATUS_MODEL = MidiRouterStatus
     CONFIG: ClassVar[dict[str, str]] = {
         "routes": "routes",
+        "mappings": "mappings",
         "session_tracks": "sessionTracks",
+        "session_scenes": "sessionScenes",
         "session_id": "sessionId",
         "theme": "theme",
     }
@@ -937,6 +940,62 @@ class MidiRouterWidget(InstrumentWidget):
     def clear_routes(self):
         """Remove every route."""
         self.config.routes = []
+
+    def add_mapping(self, action, number, kind="note", port="", midi_channel=None, track_index=-1, scene_index=-1):
+        """Run ``action`` (see :data:`~nbplay.descriptors.MIDI_ACTIONS`) when note or control change ``number`` arrives; returns the mapping's index.
+
+        ``launch`` takes the launcher row ``track_index`` and ``scene_index``,
+        ``scene`` a ``scene_index`` and ``stop_track`` a ``track_index``.
+        """
+        mapping = {
+            "action": action,
+            "number": number,
+            "kind": kind,
+            "port": port,
+            "midi_channel": -1 if midi_channel is None else midi_channel,
+            "track_index": track_index,
+            "scene_index": scene_index,
+        }
+        self.config.mappings = [*self.config.mappings, mapping]
+        return len(self.config.mappings) - 1
+
+    def map_launcher_grid(self, tracks=8, scenes=8, origin=81, track_step=1, scene_step=-10, kind="note", port="", midi_channel=None):
+        """Map a grid of pads onto launcher slots in one edit: the pad for track ``t``, scene ``s`` is ``origin + t * track_step + s * scene_step``.
+
+        The defaults are a Launchpad's programmer layout, with tracks across
+        and the first scene on the top row. Pads outside 0-127 are skipped.
+        Returns the number of mappings added.
+        """
+        added = []
+        for track in range(tracks):
+            for scene in range(scenes):
+                number = origin + track * track_step + scene * scene_step
+                if 0 <= number <= 127:
+                    added.append(
+                        {
+                            "action": "launch",
+                            "number": number,
+                            "kind": kind,
+                            "port": port,
+                            "midi_channel": -1 if midi_channel is None else midi_channel,
+                            "track_index": track,
+                            "scene_index": scene,
+                        }
+                    )
+        self.config.mappings = [*self.config.mappings, *added]
+        return len(added)
+
+    def remove_mapping(self, index):
+        """Remove the mapping at ``index``."""
+        mappings = list(self.config.mappings)
+        if not 0 <= index < len(mappings):
+            raise IndexError(f"mapping index out of range: {index}")
+        del mappings[index]
+        self.config.mappings = mappings
+
+    def clear_mappings(self):
+        """Remove every mapping."""
+        self.config.mappings = []
 
 
 class SettingsWidget(InstrumentWidget):
@@ -2049,6 +2108,8 @@ class Session:
         # from the user's side; keep them mirrored by channel index.
         self._mirroring_mute_solo = False
         self.timeline.on_change(self._on_timeline_tracks, names="tracks")
+        # The router's mapping editor names the launcher's scenes.
+        self.launcher.on_change(lambda widget, name, old, scenes: setattr(self.midi_router.config, "session_scenes", list(scenes)), names="scenes")
         self.mixer.on_change(self._on_mixer_channels, names="channels")
 
     def _on_timeline_tracks(self, widget, name, old, tracks):
@@ -2220,7 +2281,14 @@ class Session:
                 channel = route["channel_index"]
                 if channel != removed:
                     routes.append({**route, "channel_index": channel - 1} if channel > removed else route)
-            self.midi_router.config.routes = routes
+            # Launcher rows are the tracks in order: mappings to the removed row go.
+            mappings = []
+            for mapping in self.midi_router.config.mappings:
+                row = mapping["track_index"]
+                if mapping["action"] in ("launch", "stop_track") and row == index:
+                    continue
+                mappings.append({**mapping, "track_index": row - 1} if row > index else mapping)
+            self.midi_router.config.update(routes=routes, mappings=mappings)
             self._sync_session_tracks()
 
     def _drum_machines(self):
@@ -2522,7 +2590,7 @@ def _session_to_dict(session, resources=None):
         "tracks": tracks,
         "timeline": {**_dump(session.timeline.config, _TIMELINE_STATE), "tracks": _json_copy(session.timeline.config.tracks), "clips": clips},
         "launcher": _dump(session.launcher.config, ("quantize", "scenes", "slots")),
-        "midi_router": _dump(session.midi_router.config, ("routes",)),
+        "midi_router": _dump(session.midi_router.config, ("routes", "mappings")),
         "patterns": _json_copy(session.patterns),
         "theme": session.theme,
     }
@@ -2589,7 +2657,8 @@ def _session_from_dict(cls, data, resources):
     for name in launcher_data.get("scenes", []):
         session.launcher.add_scene(name)
     session.launcher.config.update(**{name: launcher_data[name] for name in ("slots", "quantize") if name in launcher_data})
-    session.midi_router.config.routes = data.get("midi_router", {}).get("routes", [])
+    router = data.get("midi_router", {})
+    session.midi_router.config.update(routes=router.get("routes", []), mappings=router.get("mappings", []))
     for name, pattern in data.get("patterns", {}).items():
         session.add_pattern(name, pattern.get("voices_data", []), step_duration=pattern.get("step_duration", 0.25))
     session.history.clear()

@@ -464,6 +464,63 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("midi router: a mapped pad launches a slot through the launcher", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const input = new EventTarget();
+      Object.assign(input, { id: "pads", name: "Pads", state: "connected" });
+      window.__pads = input;
+      navigator.requestMIDIAccess = async () => ({
+        inputs: new Map([["pads", input]]),
+        outputs: new Map(),
+      });
+    });
+    const kernel = await viewKernel("session");
+    try {
+      await mount(page, kernel, ["launcher", "midi_router"]);
+      const deliver = async (request) =>
+        page.evaluate(
+          (response) => notebook.deliver(response),
+          await kernel.call(request),
+        );
+      await deliver({
+        op: "command",
+        widget: "launcher",
+        name: "add_scene",
+        args: ["A"],
+      });
+      await deliver({
+        op: "command",
+        widget: "launcher",
+        name: "set_slot",
+        args: [0, 0, [{ note: 60, active: true }]],
+      });
+      await deliver({
+        op: "command",
+        widget: "midi_router",
+        name: "add_mapping",
+        args: ["launch", 81],
+        kwargs: { track_index: 0, scene_index: 0 },
+      });
+      const router = page.locator("#midi_router nbplay-midi-router");
+      await expect(router.locator(".nbplay-midi-router-learn")).toHaveText(
+        "Any port · any ch · note A5",
+      );
+      await page.evaluate(() => {
+        const event = new Event("midimessage");
+        event.data = new Uint8Array([0x90, 81, 100]);
+        window.__pads.dispatchEvent(event);
+      });
+      // Launching from a stopped session starts it with the slot playing.
+      await expect
+        .poll(async () => (await state(kernel)).launcher.status.active_slots)
+        .toEqual([0]);
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("mixer: kernel and browser edits meet in one validated console", async ({
     page,
   }) => {

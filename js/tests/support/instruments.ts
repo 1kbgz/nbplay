@@ -518,7 +518,9 @@ const INSTRUMENTS: Record<
       config: {
         theme: "theme",
         routes: "routes",
+        mappings: "mappings",
         session_tracks: "sessionTracks",
+        session_scenes: "sessionScenes",
         session_id: "sessionId",
       },
       status: {

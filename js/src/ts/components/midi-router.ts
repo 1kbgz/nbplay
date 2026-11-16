@@ -31,9 +31,60 @@ export function matchMidiRoutes(
   );
 }
 
+/** One mapping: see `MidiRouterConfig` in Python. */
+export interface MidiMapping {
+  port: string;
+  midi_channel: number;
+  kind: "note" | "cc";
+  number: number;
+  action: string;
+  track_index: number;
+  scene_index: number;
+}
+
+/** The mappings a note or control change `number` from `port` on MIDI `channel` matches. */
+export function matchMidiMappings(
+  mappings: MidiMapping[],
+  port: string,
+  channel: number,
+  kind: "note" | "cc",
+  number: number,
+): MidiMapping[] {
+  return mappings.filter(
+    (mapping) =>
+      (!mapping.port || mapping.port === port) &&
+      (mapping.midi_channel < 0 || mapping.midi_channel === channel) &&
+      mapping.kind === kind &&
+      mapping.number === number,
+  );
+}
+
+const ACTIONS = [
+  { value: "toggle", label: "Play/stop" },
+  { value: "play", label: "Play" },
+  { value: "stop", label: "Stop" },
+  { value: "record", label: "Record" },
+  { value: "launch", label: "Launch slot" },
+  { value: "scene", label: "Launch scene" },
+  { value: "stop_track", label: "Stop track" },
+  { value: "stop_all", label: "Stop all" },
+];
+const TRACK_ACTIONS = ["launch", "stop_track"];
+const SCENE_ACTIONS = ["launch", "scene"];
+
 function samePorts(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((name, i) => name === b[i]);
 }
+
+const NEW_MAPPING: MidiMapping = {
+  port: "",
+  midi_channel: -1,
+  kind: "note",
+  number: 0,
+  action: "toggle",
+  track_index: -1,
+  scene_index: -1,
+};
 
 const NEW_ROUTE: Omit<MidiRoute, "channel_index"> = {
   port: "",
@@ -48,20 +99,32 @@ const NEW_ROUTE: Omit<MidiRoute, "channel_index"> = {
  * (`bus.instruments[channel].startNote`) on every route it matches and the
  * note-off releases those notes, whatever the routes are by then; every note
  * is also broadcast like a keyboard's (`nbplay-note` and
- * `bus.noteListeners`). Route edits fire `nbplay-set`; the port list, the
- * latest message and control changes fire `nbplay-status`.
+ * `bus.noteListeners`). A mapping instead binds one note-on, or a control
+ * change pressed (value 64 or more), to a transport action on the session
+ * clock or a launcher action (`bus.launcher`); a mapped message is not routed
+ * or broadcast. A mapping's Learn button takes the next message's port,
+ * channel and number. Route and mapping edits fire `nbplay-set`; the port
+ * list, the latest message and control changes fire `nbplay-status`.
  */
 export class NbplayMidiRouter extends NbplayElement {
   static properties = {
     routes: { attribute: false },
+    mappings: { attribute: false },
     sessionTracks: { attribute: false },
+    sessionScenes: { attribute: false },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     availableMidiPorts: { attribute: false },
     lastEvent: { attribute: false },
     controlChange: { attribute: false },
+    learning: { state: true },
   };
 
   declare routes: MidiRoute[];
+  declare mappings: MidiMapping[];
+  /** The launcher's scene names. */
+  declare sessionScenes: string[];
+  /** The mapping waiting for its message in Learn, or -1. */
+  declare learning: number;
   /** The session's tracks a route can play: `{channel_index, name}`. */
   declare sessionTracks: { channel_index: number; name: string }[];
   declare sessionId: string;
@@ -80,7 +143,10 @@ export class NbplayMidiRouter extends NbplayElement {
   constructor() {
     super();
     this.routes = [];
+    this.mappings = [];
     this.sessionTracks = [];
+    this.sessionScenes = [];
+    this.learning = -1;
     this.sessionId = "";
     this.availableMidiPorts = [];
     this.lastEvent = {};
@@ -153,6 +219,30 @@ export class NbplayMidiRouter extends NbplayElement {
     const kind = data[0] & 0xf0;
     const channel = data[0] & 0x0f;
     const [, note, value] = data;
+    if (kind === 0xb0 || (kind === 0x90 && value > 0)) {
+      const type = kind === 0xb0 ? "cc" : "note";
+      // A control change of 64 or more is a press; under it, a release.
+      const pressed = type === "note" || value >= 64;
+      if (pressed && this.learn(port, channel, type, note)) return;
+      const mapped = matchMidiMappings(
+        this.mappings || [],
+        port,
+        channel,
+        type,
+        note,
+      );
+      if (mapped.length) {
+        if (pressed) mapped.forEach((mapping) => this.run(mapping));
+        this.report({
+          port,
+          type,
+          [type === "cc" ? "controller" : "note"]: note,
+          value,
+          channel,
+        });
+        return;
+      }
+    }
     if (kind === 0xb0) {
       this.ccSeq += 1;
       this.controlChange = {
@@ -173,6 +263,12 @@ export class NbplayMidiRouter extends NbplayElement {
       this.report({ port, type: "on", note, value, channel });
     } else if (kind === 0x80 || kind === 0x90) {
       this.noteOff(key);
+      // A mapped key's release belongs to its mapping too.
+      if (
+        matchMidiMappings(this.mappings || [], port, channel, "note", note)
+          .length
+      )
+        return;
       this.broadcast({ note, velocity: 0, type: "off" });
       this.report({ port, type: "off", note, value: 0, channel });
     }
@@ -201,6 +297,68 @@ export class NbplayMidiRouter extends NbplayElement {
       if (release) releases.push(release);
     }
     return releases;
+  }
+
+  /** Fill the mapping waiting in Learn from this message; false when none waits. */
+  private learn(
+    port: string,
+    channel: number,
+    kind: "note" | "cc",
+    number: number,
+  ): boolean {
+    if (!(this.learning >= 0) || !this.mappings?.[this.learning]) return false;
+    const index = this.learning;
+    this.learning = -1;
+    this.editMapping(index, { port, midi_channel: channel, kind, number });
+    return true;
+  }
+
+  /** Run a mapping's action on the session clock or launcher. */
+  private run(mapping: MidiMapping): void {
+    const bus = getSessionBus(this.sessionId);
+    const clk = bus?.clock;
+    switch (mapping.action) {
+      case "play":
+        clk?.play();
+        break;
+      case "stop":
+        clk?.stop();
+        break;
+      case "toggle":
+        if (clk?.playing) clk.stop();
+        else clk?.play();
+        break;
+      case "record": {
+        // As the transport's record button: arming also starts the clock.
+        if (!clk) break;
+        const next = !clk.recording;
+        clk.setRecording(next);
+        if (next) clk.play();
+        break;
+      }
+      case "launch":
+        bus?.launcher?.command({
+          action: "launch",
+          track_index: mapping.track_index,
+          scene_index: mapping.scene_index,
+        });
+        break;
+      case "scene":
+        bus?.launcher?.command({
+          action: "scene",
+          scene_index: mapping.scene_index,
+        });
+        break;
+      case "stop_track":
+        bus?.launcher?.command({
+          action: "stop",
+          track_index: mapping.track_index,
+        });
+        break;
+      case "stop_all":
+        bus?.launcher?.command({ action: "stop_all" });
+        break;
+    }
   }
 
   private noteOff(key: string): void {
@@ -235,6 +393,30 @@ export class NbplayMidiRouter extends NbplayElement {
       });
     this.routes = routes;
     this.set({ routes });
+  }
+
+  private editMapping(index: number, fields: Partial<MidiMapping>): void {
+    const mappings = (this.mappings || []).map((mapping) => ({ ...mapping }));
+    if (!mappings[index]) return;
+    mappings[index] = { ...mappings[index], ...fields };
+    this.mappings = mappings;
+    this.set({ mappings });
+  }
+
+  /** Add a mapping and wait for the message that triggers it. */
+  private addMapping(): void {
+    const mappings = [...(this.mappings || []), { ...NEW_MAPPING }];
+    this.mappings = mappings;
+    this.set({ mappings });
+    this.learning = mappings.length - 1;
+  }
+
+  private removeMapping(index: number): void {
+    const mappings = (this.mappings || []).filter((_, i) => i !== index);
+    if (this.learning === index) this.learning = -1;
+    else if (this.learning > index) this.learning -= 1;
+    this.mappings = mappings;
+    this.set({ mappings });
   }
 
   private addRoute(): void {
@@ -370,8 +552,108 @@ export class NbplayMidiRouter extends NbplayElement {
     </div>`;
   }
 
+  private triggerText(mapping: MidiMapping): string {
+    const port = mapping.port || "Any port";
+    const channel =
+      mapping.midi_channel < 0 ? "any ch" : `ch ${mapping.midi_channel + 1}`;
+    const what =
+      mapping.kind === "cc"
+        ? `CC ${mapping.number}`
+        : `note ${noteName(mapping.number)}`;
+    return `${port} · ${channel} · ${what}`;
+  }
+
+  private renderMapping(mapping: MidiMapping, index: number) {
+    const stop = (e: Event) => e.stopPropagation();
+    const value = (e: Event) =>
+      parseInt((e.target as HTMLSelectElement).value, 10);
+    const learning = this.learning === index;
+    const usesTrack = TRACK_ACTIONS.includes(mapping.action);
+    const usesScene = SCENE_ACTIONS.includes(mapping.action);
+    return html`<div class="nbplay-midi-router-mapping" role="row">
+      <button
+        type="button"
+        class="nbplay-midi-router-learn ${learning ? "learning" : ""}"
+        title=${`${this.triggerText(mapping)}: click, then press the key, pad or button to use`}
+        @click=${() => (this.learning = learning ? -1 : index)}
+      >
+        ${learning ? "Press a key…" : this.triggerText(mapping)}
+      </button>
+      <select
+        class="nbplay-midi-router-action"
+        aria-label="Action"
+        @input=${stop}
+        @change=${(e: Event) => {
+          stop(e);
+          this.editMapping(index, {
+            action: (e.target as HTMLSelectElement).value,
+          });
+        }}
+      >
+        ${ACTIONS.map(
+          (a) =>
+            html`<option
+              value=${a.value}
+              ?selected=${mapping.action === a.value}
+            >
+              ${a.label}
+            </option>`,
+        )}
+      </select>
+      <select
+        class="nbplay-midi-router-slot-track"
+        aria-label="Launcher track"
+        ?disabled=${!usesTrack}
+        @input=${stop}
+        @change=${(e: Event) => {
+          stop(e);
+          this.editMapping(index, { track_index: value(e) });
+        }}
+      >
+        <option value="-1" ?selected=${mapping.track_index < 0}>—</option>
+        ${(this.sessionTracks || []).map(
+          (t, row) =>
+            html`<option value=${row} ?selected=${mapping.track_index === row}>
+              ${t.name}
+            </option>`,
+        )}
+      </select>
+      <select
+        class="nbplay-midi-router-slot-scene"
+        aria-label="Scene"
+        ?disabled=${!usesScene}
+        @input=${stop}
+        @change=${(e: Event) => {
+          stop(e);
+          this.editMapping(index, { scene_index: value(e) });
+        }}
+      >
+        <option value="-1" ?selected=${mapping.scene_index < 0}>—</option>
+        ${(this.sessionScenes || []).map(
+          (name, scene) =>
+            html`<option
+              value=${scene}
+              ?selected=${mapping.scene_index === scene}
+            >
+              ${name}
+            </option>`,
+        )}
+      </select>
+      <button
+        type="button"
+        class="nbplay-midi-router-remove"
+        title="Remove control"
+        aria-label="Remove control"
+        @click=${() => this.removeMapping(index)}
+      >
+        ×
+      </button>
+    </div>`;
+  }
+
   render() {
     const ports = this.availableMidiPorts || [];
+    const mappings = this.mappings || [];
     return html`<nbplay-header badge="midi"></nbplay-header>
       <div class="nbplay-midi-router-ports">
         <span class="nbplay-midi-router-label">Inputs</span>
@@ -407,6 +689,26 @@ export class NbplayMidiRouter extends NbplayElement {
         @click=${() => this.addRoute()}
       >
         Add route
+      </button>
+      <div class="nbplay-midi-router-mappings" role="table">
+        ${
+          mappings.length
+            ? html`<div class="nbplay-midi-router-mapping-head" role="row">
+                <span role="columnheader">Control</span>
+                <span role="columnheader">Action</span>
+                <span role="columnheader">Track</span>
+                <span role="columnheader">Scene</span>
+              </div>`
+            : ""
+        }
+        ${mappings.map((mapping, index) => this.renderMapping(mapping, index))}
+      </div>
+      <button
+        type="button"
+        class="nbplay-midi-router-add-control"
+        @click=${() => this.addMapping()}
+      >
+        Add control
       </button>
       <div class="nbplay-midi-router-monitor">${this.monitorText()}</div>`;
   }

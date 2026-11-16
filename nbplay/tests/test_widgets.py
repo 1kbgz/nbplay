@@ -862,6 +862,52 @@ class TestMidiRouterWidget:
         finally:
             session.close()
 
+    def test_mappings_bind_messages_to_transport_and_launcher_actions(self):
+        config = MidiRouterConfig(mappings=[{"number": 300, "midi_channel": -4, "track_index": -9}])
+        assert config.mappings == [
+            {"port": "", "midi_channel": -1, "kind": "note", "number": 127, "action": "toggle", "track_index": -1, "scene_index": -1}
+        ]
+        for bad in ({"action": "rewind"}, {"kind": "aftertouch"}):
+            with pytest.raises(ValueError):
+                MidiRouterConfig(mappings=[bad])
+        session = nbplay.Session()
+        try:
+            router = session.midi_router
+            for name in ("Bass", "Keys", "Beat"):
+                session.add_track(name, None, nbplay.SynthWidget())
+            session.launcher.add_scene("Verse")
+            session.launcher.add_scene("Chorus")
+            assert router.config.session_scenes == ["Verse", "Chorus"]
+            assert router.add_mapping("toggle", 91, kind="cc") == 0
+            router.add_mapping("stop_track", 19, track_index=2, port="Launchpad X LPX MIDI")
+            # A Launchpad's programmer layout: tracks across, the first scene on top.
+            assert router.map_launcher_grid(tracks=3, scenes=2) == 6
+            grid = [(m["number"], m["track_index"], m["scene_index"]) for m in router.config.mappings[2:]]
+            assert grid == [(81, 0, 0), (71, 0, 1), (82, 1, 0), (72, 1, 1), (83, 2, 0), (73, 2, 1)]
+            # Pads past 0-127 are left out.
+            assert router.map_launcher_grid(tracks=1, scenes=3, origin=5, scene_step=-4) == 2
+            router.remove_mapping(len(router.config.mappings) - 1)
+            router.remove_mapping(len(router.config.mappings) - 1)
+            with pytest.raises(IndexError):
+                router.remove_mapping(99)
+            # A saved session keeps its mappings.
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                assert loaded.midi_router.config.mappings == router.config.mappings
+            finally:
+                loaded.close()
+            # Launcher rows follow the tracks: a removed row's slots go, later rows move up.
+            session.remove_track(1)
+            kept = [(m["action"], m["number"], m["track_index"]) for m in router.config.mappings]
+            assert kept == [("toggle", 91, -1), ("stop_track", 19, 1), ("launch", 81, 0), ("launch", 71, 0), ("launch", 83, 1), ("launch", 73, 1)]
+            router.clear_mappings()
+            assert router.config.mappings == []
+        finally:
+            session.close()
+
     def test_midi_learn_listens_to_the_router(self):
         session = nbplay.Session()
         try:
