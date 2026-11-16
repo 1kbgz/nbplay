@@ -37,6 +37,7 @@ Classes
    nbplay.widget.PadWidget
    nbplay.widget.KeyboardWidget
    nbplay.widget.MidiKeyboardWidget
+   nbplay.widget.MidiRouterWidget
    nbplay.widget.SettingsWidget
    nbplay.widget.MidiOutputWidget
    nbplay.widget.SequencerWidget
@@ -729,6 +730,58 @@ Module Contents
 
    .. py:attribute:: STATUS
       :type:  ClassVar[dict[str, str]]
+
+
+.. py:class:: MidiRouterWidget(session=None, *, config=None, **kwargs)
+
+   Bases: :py:obj:`InstrumentWidget`
+
+
+   Routes Web MIDI input to the session's track instruments; :class:`Session` owns one.
+
+   It listens to every input port in the browser. A note-on plays on the
+   instrument of every route it matches and holds until its note-off;
+   every note is also broadcast like a keyboard's, so sequencer step
+   recording and timeline recording hear it. Control changes land in
+   ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the
+   router as its source.
+
+
+   .. py:attribute:: TAG
+      :value: 'nbplay-midi-router'
+
+
+
+   .. py:attribute:: CONFIG_MODEL
+
+
+   .. py:attribute:: STATUS_MODEL
+
+
+   .. py:attribute:: CONFIG
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:attribute:: STATUS
+      :type:  ClassVar[dict[str, str]]
+
+
+   .. py:method:: add_route(track, port='', midi_channel=None, note_low=0, note_high=127)
+
+      Play notes from ``port`` ("" is any) on ``midi_channel`` (None is any, else 0-15) between the notes on ``track``: a :class:`Track` or a mixer channel. Returns the route's index.
+
+
+
+   .. py:method:: remove_route(index)
+
+      Remove the route at ``index``.
+
+
+
+   .. py:method:: clear_routes()
+
+      Remove every route.
+
 
 
 .. py:class:: SettingsWidget(session=None, *, config=None, **kwargs)
@@ -1471,6 +1524,9 @@ Module Contents
    .. py:attribute:: launcher
 
 
+   .. py:attribute:: midi_router
+
+
    .. py:attribute:: tracks
       :value: []
 
@@ -1562,7 +1618,7 @@ Module Contents
 
    .. py:method:: _sync_session_tracks()
 
-      Tell every drum machine which tracks its pads can play.
+      Tell the MIDI router and every drum machine which tracks they can play.
 
 
 

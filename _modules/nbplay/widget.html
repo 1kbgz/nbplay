@@ -688,6 +688,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">MidiKeyboardStatus</span><span class="p">,</span>
     <span class="n">MidiOutputConfig</span><span class="p">,</span>
     <span class="n">MidiOutputStatus</span><span class="p">,</span>
+    <span class="n">MidiRouterConfig</span><span class="p">,</span>
+    <span class="n">MidiRouterStatus</span><span class="p">,</span>
     <span class="n">MixerConfig</span><span class="p">,</span>
     <span class="n">PadsConfig</span><span class="p">,</span>
     <span class="n">PadsStatus</span><span class="p">,</span>
@@ -716,6 +718,7 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"LauncherWidget"</span><span class="p">,</span>
     <span class="s2">"MidiKeyboardWidget"</span><span class="p">,</span>
     <span class="s2">"MidiOutputWidget"</span><span class="p">,</span>
+    <span class="s2">"MidiRouterWidget"</span><span class="p">,</span>
     <span class="s2">"MixerWidget"</span><span class="p">,</span>
     <span class="s2">"PadWidget"</span><span class="p">,</span>
     <span class="s2">"SamplerWidget"</span><span class="p">,</span>
@@ -1706,6 +1709,70 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"control_change"</span><span class="p">:</span> <span class="s2">"controlChange"</span><span class="p">,</span>
         <span class="s2">"clock_bpm"</span><span class="p">:</span> <span class="s2">"clockBpm"</span><span class="p">,</span>
     <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="MidiRouterWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiRouterWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Routes Web MIDI input to the session's track instruments; :class:`Session` owns one.</span>
+
+<span class="sd">    It listens to every input port in the browser. A note-on plays on the</span>
+<span class="sd">    instrument of every route it matches and holds until its note-off;</span>
+<span class="sd">    every note is also broadcast like a keyboard's, so sequencer step</span>
+<span class="sd">    recording and timeline recording hear it. Control changes land in</span>
+<span class="sd">    ``status.control_change``, so a :class:`~nbplay.MidiLearn` can use the</span>
+<span class="sd">    router as its source.</span>
+<span class="sd">    """</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s2">"nbplay-midi-router"</span>
+    <span class="n">CONFIG_MODEL</span> <span class="o">=</span> <span class="n">MidiRouterConfig</span>
+    <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">MidiRouterStatus</span>
+    <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"routes"</span><span class="p">:</span> <span class="s2">"routes"</span><span class="p">,</span>
+        <span class="s2">"session_tracks"</span><span class="p">:</span> <span class="s2">"sessionTracks"</span><span class="p">,</span>
+        <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
+        <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"available_midi_ports"</span><span class="p">:</span> <span class="s2">"availableMidiPorts"</span><span class="p">,</span>
+        <span class="s2">"last_event"</span><span class="p">:</span> <span class="s2">"lastEvent"</span><span class="p">,</span>
+        <span class="s2">"control_change"</span><span class="p">:</span> <span class="s2">"controlChange"</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="MidiRouterWidget.add_route">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.add_route">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_route</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">midi_channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">note_low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">note_high</span><span class="o">=</span><span class="mi">127</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Play notes from ``port`` ("" is any) on ``midi_channel`` (None is any, else 0-15) between the notes on ``track``: a :class:`Track` or a mixer channel. Returns the route's index."""</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Track</span><span class="p">)</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"port"</span><span class="p">:</span> <span class="n">port</span><span class="p">,</span>
+            <span class="s2">"midi_channel"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">midi_channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">midi_channel</span><span class="p">,</span>
+            <span class="s2">"note_low"</span><span class="p">:</span> <span class="n">note_low</span><span class="p">,</span>
+            <span class="s2">"note_high"</span><span class="p">:</span> <span class="n">note_high</span><span class="p">,</span>
+            <span class="s2">"channel_index"</span><span class="p">:</span> <span class="n">channel</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span> <span class="n">route</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.remove_route">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.remove_route">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_route</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Remove the route at ``index``."""</span>
+        <span class="n">routes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">routes</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"route index out of range: </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">routes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="n">routes</span></div>
+
+
+<div class="viewcode-block" id="MidiRouterWidget.clear_routes">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.MidiRouterWidget.clear_routes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_routes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Remove every route."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
 
@@ -3058,13 +3125,14 @@ window.runMermaid = runMermaid;</script>
         <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span> <span class="o">=</span> <span class="n">MixerWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">theme</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span> <span class="o">=</span> <span class="n">TimelineWidget</span><span class="p">(</span><span class="n">time_signature_den</span><span class="o">=</span><span class="n">den</span><span class="p">,</span> <span class="o">**</span><span class="n">common</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="o">=</span> <span class="n">LauncherWidget</span><span class="p">(</span><span class="n">time_signature_den</span><span class="o">=</span><span class="n">den</span><span class="p">,</span> <span class="o">**</span><span class="n">common</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span> <span class="o">=</span> <span class="n">MidiRouterWidget</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_session_id</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">theme</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Named patterns for the tracking widget: name -&gt; {voices_data, step_duration}.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Undo/redo over every widget's config; new tracks attach their</span>
         <span class="c1"># sequencer and sound source as they are added.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">bind_ipython</span><span class="p">()</span>
         <span class="c1"># Ctrl/Cmd+Z in the browser bumps the transport's request counts.</span>
@@ -3149,7 +3217,7 @@ window.runMermaid = runMermaid;</script>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Every widget in the session, including track instruments."""</span>
-        <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">]</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
             <span class="n">widgets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">widget</span> <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">InstrumentWidget</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">widgets</span>
@@ -3275,6 +3343,13 @@ window.runMermaid = runMermaid;</script>
                         <span class="n">pad</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">,</span> <span class="s2">"params"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">],</span> <span class="s2">"track"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="n">removed</span> <span class="k">else</span> <span class="n">channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">}}</span>
                     <span class="n">pads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
                 <span class="n">drums</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pads</span> <span class="o">=</span> <span class="n">pads</span>
+            <span class="c1"># Routes to the removed track go; later ones follow their channels.</span>
+            <span class="n">routes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span><span class="p">:</span>
+                <span class="n">channel</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"channel_index"</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">channel</span> <span class="o">!=</span> <span class="n">removed</span><span class="p">:</span>
+                    <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="o">**</span><span class="n">route</span><span class="p">,</span> <span class="s2">"channel_index"</span><span class="p">:</span> <span class="n">channel</span> <span class="o">-</span> <span class="mi">1</span><span class="p">}</span> <span class="k">if</span> <span class="n">channel</span> <span class="o">&gt;</span> <span class="n">removed</span> <span class="k">else</span> <span class="n">route</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="n">routes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sync_session_tracks</span><span class="p">()</span></div>
 
 
@@ -3287,10 +3362,10 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="Session._sync_session_tracks">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session._sync_session_tracks">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_sync_session_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Tell every drum machine which tracks its pads can play."""</span>
+<span class="w">        </span><span class="sd">"""Tell the MIDI router and every drum machine which tracks they can play."""</span>
         <span class="n">tracks</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"channel_index"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">drums</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drum_machines</span><span class="p">():</span>
-            <span class="n">drums</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_tracks</span> <span class="o">=</span> <span class="n">tracks</span></div>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">midi_router</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_drum_machines</span><span class="p">()):</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_tracks</span> <span class="o">=</span> <span class="n">tracks</span></div>
 
 
 <div class="viewcode-block" id="Session._track_index">
@@ -3620,6 +3695,7 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">tracks</span><span class="p">,</span>
         <span class="s2">"timeline"</span><span class="p">:</span> <span class="p">{</span><span class="o">**</span><span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_TIMELINE_STATE</span><span class="p">),</span> <span class="s2">"tracks"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">timeline</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tracks</span><span class="p">),</span> <span class="s2">"clips"</span><span class="p">:</span> <span class="n">clips</span><span class="p">},</span>
         <span class="s2">"launcher"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">"quantize"</span><span class="p">,</span> <span class="s2">"scenes"</span><span class="p">,</span> <span class="s2">"slots"</span><span class="p">)),</span>
+        <span class="s2">"midi_router"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">"routes"</span><span class="p">,)),</span>
         <span class="s2">"patterns"</span><span class="p">:</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">patterns</span><span class="p">),</span>
         <span class="s2">"theme"</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">theme</span><span class="p">,</span>
     <span class="p">}</span>
@@ -3686,6 +3762,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">launcher_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"scenes"</span><span class="p">,</span> <span class="p">[]):</span>
         <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">add_scene</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">session</span><span class="o">.</span><span class="n">launcher</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">launcher_data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"slots"</span><span class="p">,</span> <span class="s2">"quantize"</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">launcher_data</span><span class="p">})</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">midi_router</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">routes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"midi_router"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"routes"</span><span class="p">,</span> <span class="p">[])</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"patterns"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">session</span><span class="o">.</span><span class="n">add_pattern</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">step_duration</span><span class="o">=</span><span class="n">pattern</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"step_duration"</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">))</span>
     <span class="n">session</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>

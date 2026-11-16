@@ -19,6 +19,7 @@ Classes
    test_widgets.TestSequencerAndSamplerWidgets
    test_widgets.TestFMSynthWidget
    test_widgets.TestDrumMachineWidget
+   test_widgets.TestMidiRouterWidget
    test_widgets.TestArrangementWidgets
    test_widgets.TestObservers
    test_widgets.TestSession
@@ -161,6 +162,17 @@ Module Contents
 
 
    .. py:method:: test_a_drum_track_saves_with_the_session_and_gets_a_panel()
+
+
+.. py:class:: TestMidiRouterWidget
+
+   .. py:method:: test_routes_validate()
+
+
+   .. py:method:: test_the_session_routes_midi_to_its_tracks()
+
+
+   .. py:method:: test_midi_learn_listens_to_the_router()
 
 
 .. py:class:: TestArrangementWidgets

@@ -588,6 +588,9 @@
     <a href="#nbplay.descriptors._normalize_drum_sample">_normalize_drum_sample()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_route">_normalize_midi_route()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._normalize_drum_pattern">_normalize_drum_pattern()</a>
   </li>
 </ul>
@@ -890,7 +893,10 @@ slots and keyboard routes. The descriptor classes (<a class="reference internal"
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_drum_sample" title="nbplay.descriptors._normalize_drum_sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_drum_sample</span></code></a>(raw, key)</p></td>
 <td><p>One drum machine sample: mono little-endian float32 <code class="docutils literal notranslate"><span class="pre">data</span></code> at <code class="docutils literal notranslate"><span class="pre">sample_rate</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_drum_pattern" title="nbplay.descriptors._normalize_drum_pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_drum_pattern</span></code></a>(pattern, pads, steps)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_midi_route" title="nbplay.descriptors._normalize_midi_route"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_midi_route</span></code></a>(raw)</p></td>
+<td><p>One MIDI route: notes from <code class="docutils literal notranslate"><span class="pre">port</span></code> (&quot;&quot; is any) on <code class="docutils literal notranslate"><span class="pre">midi_channel</span></code> (-1 is any, else 0-15) in <code class="docutils literal notranslate"><span class="pre">[note_low,</span> <span class="pre">note_high]</span></code> play the instrument of the track on mixer channel <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> (-1 is none).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.descriptors._normalize_drum_pattern" title="nbplay.descriptors._normalize_drum_pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_normalize_drum_pattern</span></code></a>(pattern, pads, steps)</p></td>
 <td><p>One row per pad of <code class="docutils literal notranslate"><span class="pre">steps</span></code> velocities (0 is off), cut or padded with zeros.</p></td>
 </tr>
 </tbody>
@@ -1592,6 +1598,12 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="nbplay.descriptors._normalize_midi_route">
+<span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_midi_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_midi_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_midi_route" title="Link to this definition">¶</a></dt>
+<dd><p>One MIDI route: notes from <code class="docutils literal notranslate"><span class="pre">port</span></code> (”” is any) on <code class="docutils literal notranslate"><span class="pre">midi_channel</span></code> (-1 is any, else 0-15) in <code class="docutils literal notranslate"><span class="pre">[note_low,</span> <span class="pre">note_high]</span></code> play the instrument of the track on mixer channel <code class="docutils literal notranslate"><span class="pre">channel_index</span></code> (-1 is none).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="nbplay.descriptors._normalize_drum_pattern">
 <span class="sig-prename descclassname"><span class="pre">nbplay.descriptors.</span></span><span class="sig-name descname"><span class="pre">_normalize_drum_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/descriptors.html#_normalize_drum_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.descriptors._normalize_drum_pattern" title="Link to this definition">¶</a></dt>
 <dd><p>One row per pad of <code class="docutils literal notranslate"><span class="pre">steps</span></code> velocities (0 is off), cut or padded with zeros.</p>
@@ -2025,6 +2037,9 @@ Invalid values raise <code class="docutils literal notranslate"><span class="pre
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._normalize_drum_sample">_normalize_drum_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.descriptors._normalize_midi_route">_normalize_midi_route()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.descriptors._normalize_drum_pattern">_normalize_drum_pattern()</a>

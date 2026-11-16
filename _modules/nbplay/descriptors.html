@@ -1993,6 +1993,22 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="_normalize_midi_route">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._normalize_midi_route">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_midi_route</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""One MIDI route: notes from ``port`` ("" is any) on ``midi_channel`` (-1 is any, else 0-15) in ``[note_low, note_high]`` play the instrument of the track on mixer channel ``channel_index`` (-1 is none)."""</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note_low"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"note_high"</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"port"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"port"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+        <span class="s2">"midi_channel"</span><span class="p">:</span> <span class="n">_clamp_int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"midi_channel"</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+        <span class="s2">"note_low"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">),</span>
+        <span class="s2">"note_high"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">),</span>
+        <span class="s2">"channel_index"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"channel_index"</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))),</span>
+    <span class="p">}</span></div>
+
+
+
 <div class="viewcode-block" id="_normalize_drum_pattern">
 <a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._normalize_drum_pattern">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_drum_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">pads</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>

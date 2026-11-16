@@ -154,6 +154,6 @@ Module Contents
 
 .. py:function:: demo_session()
 
-   Two tracks: a saw lead on a sequencer and a sampler kit with a kick.
+   A lead and a bass on sequencers with shipped synth presets, a drum machine beat, and any MIDI input on the lead.
 
 

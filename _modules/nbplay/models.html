@@ -636,6 +636,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_normalize_drum_sample</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
     <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
+    <span class="n">_normalize_midi_route</span><span class="p">,</span>
     <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
     <span class="n">_normalize_pad_actions</span><span class="p">,</span>
     <span class="n">_normalize_return_bus</span><span class="p">,</span>
@@ -661,6 +662,8 @@ window.runMermaid = runMermaid;</script>
     <span class="s2">"MidiKeyboardStatus"</span><span class="p">,</span>
     <span class="s2">"MidiOutputConfig"</span><span class="p">,</span>
     <span class="s2">"MidiOutputStatus"</span><span class="p">,</span>
+    <span class="s2">"MidiRouterConfig"</span><span class="p">,</span>
+    <span class="s2">"MidiRouterStatus"</span><span class="p">,</span>
     <span class="s2">"MixerConfig"</span><span class="p">,</span>
     <span class="s2">"PadsConfig"</span><span class="p">,</span>
     <span class="s2">"PadsStatus"</span><span class="p">,</span>
@@ -1224,6 +1227,47 @@ window.runMermaid = runMermaid;</script>
     <span class="n">last_note_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">control_change</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">clock_bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span></div>
+
+
+
+<div class="viewcode-block" id="MidiRouterConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiRouterConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiRouterConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Where MIDI input goes: routes from a port, channel and note range to a track's instrument.</span>
+
+<span class="sd">    A route is ``{port, midi_channel, note_low, note_high, channel_index}``</span>
+<span class="sd">    (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on</span>
+<span class="sd">    every route it matches, held until its note-off.</span>
+<span class="sd">    """</span>
+
+    <span class="n">routes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: The session's tracks a route can play (``{channel_index, name}``); set by the session.</span>
+    <span class="n">session_tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="MidiRouterConfig._routes">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiRouterConfig._routes">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"routes"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_routes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">routes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_midi_route</span><span class="p">(</span><span class="n">route</span><span class="p">)</span> <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MidiRouterStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.MidiRouterStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MidiRouterStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Input ports, the last message and control changes; browser-owned."""</span>
+
+    <span class="n">available_midi_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: ``{port, type, note|controller, value, channel}`` of the latest message.</span>
+    <span class="n">last_event</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#: ``{controller, value, channel, port, seq}``, for :class:`~nbplay.MidiLearn`.</span>
+    <span class="n">control_change</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
 

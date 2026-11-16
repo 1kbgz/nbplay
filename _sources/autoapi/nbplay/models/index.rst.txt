@@ -34,6 +34,8 @@ Classes
    nbplay.models.KeyboardStatus
    nbplay.models.MidiKeyboardConfig
    nbplay.models.MidiKeyboardStatus
+   nbplay.models.MidiRouterConfig
+   nbplay.models.MidiRouterStatus
    nbplay.models.SettingsConfig
    nbplay.models.SettingsStatus
    nbplay.models.MidiOutputConfig
@@ -1080,6 +1082,86 @@ Module Contents
       :type:  float
       :value: 0.0
 
+
+
+.. py:class:: MidiRouterConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   Where MIDI input goes: routes from a port, channel and note range to a track's instrument.
+
+   A route is ``{port, midi_channel, note_low, note_high, channel_index}``
+   (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on
+   every route it matches, held until its note-off.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: routes
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_tracks
+      :type:  list[dict]
+      :value: []
+
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _routes(routes)
+      :classmethod:
+
+
+
+.. py:class:: MidiRouterStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   Input ports, the last message and control changes; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: available_midi_ports
+      :type:  list[str]
+      :value: []
+
+
+
+   .. py:attribute:: last_event
+      :type:  dict
+
+
+   .. py:attribute:: control_change
+      :type:  dict
 
 
 .. py:class:: SettingsConfig(/, **data: Any)

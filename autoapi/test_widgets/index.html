@@ -336,6 +336,18 @@
     <a href="#test_widgets.TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel">TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestMidiRouterWidget">TestMidiRouterWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_routes_validate">TestMidiRouterWidget.test_routes_validate()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks">TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_midi_learn_listens_to_the_router">TestMidiRouterWidget.test_midi_learn_listens_to_the_router()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestArrangementWidgets">TestArrangementWidgets</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -531,28 +543,31 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestDrumMachineWidget" title="test_widgets.TestDrumMachineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestDrumMachineWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestArrangementWidgets" title="test_widgets.TestArrangementWidgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestArrangementWidgets</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestMidiRouterWidget" title="test_widgets.TestMidiRouterWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestMidiRouterWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestObservers" title="test_widgets.TestObservers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestObservers</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestArrangementWidgets" title="test_widgets.TestArrangementWidgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestArrangementWidgets</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestSession" title="test_widgets.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestObservers" title="test_widgets.TestObservers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestObservers</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSessionArrangement" title="test_widgets.TestSessionArrangement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionArrangement</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSession" title="test_widgets.TestSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSession</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestPresets" title="test_widgets.TestPresets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPresets</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestSessionArrangement" title="test_widgets.TestSessionArrangement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionArrangement</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestSessionPersistence" title="test_widgets.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestPresets" title="test_widgets.TestPresets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestPresets</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestHistoryAndMidiLearn" title="test_widgets.TestHistoryAndMidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearn</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestSessionPersistence" title="test_widgets.TestSessionPersistence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestSessionPersistence</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestTransportWidget" title="test_widgets.TestTransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#test_widgets.TestHistoryAndMidiLearn" title="test_widgets.TestHistoryAndMidiLearn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestHistoryAndMidiLearn</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#test_widgets.TestTransportWidget" title="test_widgets.TestTransportWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTransportWidget</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -795,6 +810,26 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="test_widgets.TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel">
 <span class="sig-name descname"><span class="pre">test_a_drum_track_saves_with_the_session_and_gets_a_panel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="test_widgets.TestMidiRouterWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">test_widgets.</span></span><span class="sig-name descname"><span class="pre">TestMidiRouterWidget</span></span><a class="headerlink" href="#test_widgets.TestMidiRouterWidget" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestMidiRouterWidget.test_routes_validate">
+<span class="sig-name descname"><span class="pre">test_routes_validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestMidiRouterWidget.test_routes_validate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks">
+<span class="sig-name descname"><span class="pre">test_the_session_routes_midi_to_its_tracks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="test_widgets.TestMidiRouterWidget.test_midi_learn_listens_to_the_router">
+<span class="sig-name descname"><span class="pre">test_midi_learn_listens_to_the_router</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_widgets.TestMidiRouterWidget.test_midi_learn_listens_to_the_router" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1216,6 +1251,18 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#test_widgets.TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel">TestDrumMachineWidget.test_a_drum_track_saves_with_the_session_and_gets_a_panel()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#test_widgets.TestMidiRouterWidget">TestMidiRouterWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_routes_validate">TestMidiRouterWidget.test_routes_validate()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks">TestMidiRouterWidget.test_the_session_routes_midi_to_its_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#test_widgets.TestMidiRouterWidget.test_midi_learn_listens_to_the_router">TestMidiRouterWidget.test_midi_learn_listens_to_the_router()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#test_widgets.TestArrangementWidgets">TestArrangementWidgets</a>

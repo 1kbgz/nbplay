@@ -120,6 +120,7 @@ Functions
    nbplay.descriptors._bounded
    nbplay.descriptors._normalize_drum_pad
    nbplay.descriptors._normalize_drum_sample
+   nbplay.descriptors._normalize_midi_route
    nbplay.descriptors._normalize_drum_pattern
 
 
@@ -571,6 +572,11 @@ Module Contents
 .. py:function:: _normalize_drum_sample(raw, key)
 
    One drum machine sample: mono little-endian float32 ``data`` at ``sample_rate``.
+
+
+.. py:function:: _normalize_midi_route(raw)
+
+   One MIDI route: notes from ``port`` ("" is any) on ``midi_channel`` (-1 is any, else 0-15) in ``[note_low, note_high]`` play the instrument of the track on mixer channel ``channel_index`` (-1 is none).
 
 
 .. py:function:: _normalize_drum_pattern(pattern, pads, steps)

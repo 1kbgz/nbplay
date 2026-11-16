@@ -597,6 +597,33 @@
     <a href="#nbplay.widget.MidiKeyboardWidget.STATUS">MidiKeyboardWidget.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.MidiRouterWidget">MidiRouterWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.TAG">MidiRouterWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.CONFIG_MODEL">MidiRouterWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.STATUS_MODEL">MidiRouterWidget.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.CONFIG">MidiRouterWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.STATUS">MidiRouterWidget.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.add_route">MidiRouterWidget.add_route()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.remove_route">MidiRouterWidget.remove_route()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.clear_routes">MidiRouterWidget.clear_routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -999,6 +1026,9 @@
     <a href="#nbplay.widget.Session.launcher">Session.launcher</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.midi_router">Session.midi_router</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.tracks">Session.tracks</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1166,28 +1196,31 @@ delivers <code class="docutils literal notranslate"><span class="pre">session.co
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MidiKeyboardWidget" title="nbplay.widget.MidiKeyboardWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardWidget</span></code></a></p></td>
 <td><p>The Web MIDI keyboard on a transports session; ports and clock are browser-owned.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SettingsWidget" title="nbplay.widget.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MidiRouterWidget" title="nbplay.widget.MidiRouterWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiRouterWidget</span></code></a></p></td>
+<td><p>Routes Web MIDI input to the session's track instruments; <a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> owns one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SettingsWidget" title="nbplay.widget.SettingsWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsWidget</span></code></a></p></td>
 <td><p>Audio and MIDI device settings; the browser owns the port list and MIDI monitor.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.MidiOutputWidget" title="nbplay.widget.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.MidiOutputWidget" title="nbplay.widget.MidiOutputWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputWidget</span></code></a></p></td>
 <td><p>A Web MIDI output; sends are commands delivered to the owning widget.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SequencerWidget" title="nbplay.widget.SequencerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerWidget</span></code></a></p></td>
 <td><p>The step sequencer on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.SamplerWidget" title="nbplay.widget.SamplerWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SamplerWidget</span></code></a></p></td>
 <td><p>The sampler on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.LauncherWidget" title="nbplay.widget.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.LauncherWidget" title="nbplay.widget.LauncherWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LauncherWidget</span></code></a></p></td>
 <td><p>The clip launcher on a transports session.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.TimelineWidget" title="nbplay.widget.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.TimelineWidget" title="nbplay.widget.TimelineWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimelineWidget</span></code></a></p></td>
 <td><p>The tracking widget on a transports session.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Track</span></code></a></p></td>
 <td><p>A session lane: a mixer channel plus an optional sequencer and sound source.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span></code></a></p></td>
 <td><p>Transport, mixer, timeline and launcher widgets sharing one browser session.</p></td>
 </tr>
 </tbody>
@@ -1942,6 +1975,62 @@ kits.</p>
 <dt class="sig sig-object py" id="nbplay.widget.MidiKeyboardWidget.STATUS">
 <span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.widget.MidiKeyboardWidget.STATUS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.widget.</span></span><span class="sig-name descname"><span class="pre">MidiRouterWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nbplay.widget.InstrumentWidget" title="nbplay.widget.InstrumentWidget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentWidget</span></code></a></p>
+<p>Routes Web MIDI input to the session’s track instruments; <a class="reference internal" href="#nbplay.widget.Session" title="nbplay.widget.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a> owns one.</p>
+<p>It listens to every input port in the browser. A note-on plays on the
+instrument of every route it matches and holds until its note-off;
+every note is also broadcast like a keyboard’s, so sequencer step
+recording and timeline recording hear it. Control changes land in
+<code class="docutils literal notranslate"><span class="pre">status.control_change</span></code>, so a <a class="reference internal" href="../index.html#nbplay.MidiLearn" title="nbplay.MidiLearn"><code class="xref py py-class docutils literal notranslate"><span class="pre">MidiLearn</span></code></a> can use the
+router as its source.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.TAG">
+<span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-midi-router'</span></em><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.TAG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.CONFIG_MODEL">
+<span class="sig-name descname"><span class="pre">CONFIG_MODEL</span></span><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.CONFIG_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.STATUS_MODEL">
+<span class="sig-name descname"><span class="pre">STATUS_MODEL</span></span><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.STATUS_MODEL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.CONFIG">
+<span class="sig-name descname"><span class="pre">CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.CONFIG" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.STATUS">
+<span class="sig-name descname"><span class="pre">STATUS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.STATUS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.add_route">
+<span class="sig-name descname"><span class="pre">add_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">midi_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">127</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.add_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.add_route" title="Link to this definition">¶</a></dt>
+<dd><p>Play notes from <code class="docutils literal notranslate"><span class="pre">port</span></code> (”” is any) on <code class="docutils literal notranslate"><span class="pre">midi_channel</span></code> (None is any, else 0-15) between the notes on <code class="docutils literal notranslate"><span class="pre">track</span></code>: a <a class="reference internal" href="#nbplay.widget.Track" title="nbplay.widget.Track"><code class="xref py py-class docutils literal notranslate"><span class="pre">Track</span></code></a> or a mixer channel. Returns the route’s index.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.remove_route">
+<span class="sig-name descname"><span class="pre">remove_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.remove_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.remove_route" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the route at <code class="docutils literal notranslate"><span class="pre">index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.MidiRouterWidget.clear_routes">
+<span class="sig-name descname"><span class="pre">clear_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#MidiRouterWidget.clear_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.MidiRouterWidget.clear_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Remove every route.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2743,6 +2832,11 @@ read and write the same <code class="docutils literal notranslate"><span class="
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.Session.midi_router">
+<span class="sig-name descname"><span class="pre">midi_router</span></span><a class="headerlink" href="#nbplay.widget.Session.midi_router" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session.tracks">
 <span class="sig-name descname"><span class="pre">tracks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.widget.Session.tracks" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2854,7 +2948,7 @@ read and write the same <code class="docutils literal notranslate"><span class="
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session._sync_session_tracks">
 <span class="sig-name descname"><span class="pre">_sync_session_tracks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session._sync_session_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session._sync_session_tracks" title="Link to this definition">¶</a></dt>
-<dd><p>Tell every drum machine which tracks its pads can play.</p>
+<dd><p>Tell the MIDI router and every drum machine which tracks they can play.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -3381,6 +3475,33 @@ session reads the same archive.</p>
     <a href="#nbplay.widget.MidiKeyboardWidget.STATUS">MidiKeyboardWidget.STATUS</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.widget.MidiRouterWidget">MidiRouterWidget</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.TAG">MidiRouterWidget.TAG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.CONFIG_MODEL">MidiRouterWidget.CONFIG_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.STATUS_MODEL">MidiRouterWidget.STATUS_MODEL</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.CONFIG">MidiRouterWidget.CONFIG</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.STATUS">MidiRouterWidget.STATUS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.add_route">MidiRouterWidget.add_route()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.remove_route">MidiRouterWidget.remove_route()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.MidiRouterWidget.clear_routes">MidiRouterWidget.clear_routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.widget.SettingsWidget">SettingsWidget</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3781,6 +3902,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.launcher">Session.launcher</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.midi_router">Session.midi_router</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.tracks">Session.tracks</a>

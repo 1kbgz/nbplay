@@ -705,6 +705,39 @@
     <a href="#nbplay.models.MidiKeyboardStatus.clock_bpm">MidiKeyboardStatus.clock_bpm</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiRouterConfig">MidiRouterConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.routes">MidiRouterConfig.routes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_tracks">MidiRouterConfig.session_tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_id">MidiRouterConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.theme">MidiRouterConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._theme">MidiRouterConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._routes">MidiRouterConfig._routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiRouterStatus">MidiRouterStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.available_midi_ports">MidiRouterStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.last_event">MidiRouterStatus.last_event</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.control_change">MidiRouterStatus.control_change</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SettingsConfig">SettingsConfig</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1171,6 +1204,12 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiKeyboardStatus" title="nbplay.models.MidiKeyboardStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiKeyboardStatus</span></code></a></p></td>
 <td><p>Ports, held notes, control changes and the device clock; browser-owned.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.MidiRouterConfig" title="nbplay.models.MidiRouterConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiRouterConfig</span></code></a></p></td>
+<td><p>Where MIDI input goes: routes from a port, channel and note range to a track's instrument.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiRouterStatus" title="nbplay.models.MidiRouterStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiRouterStatus</span></code></a></p></td>
+<td><p>Input ports, the last message and control changes; browser-owned.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SettingsConfig" title="nbplay.models.SettingsConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SettingsConfig</span></code></a></p></td>
 <td><p>Audio output and MIDI input selection.</p></td>
@@ -2186,6 +2225,76 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.MidiKeyboardStatus.clock_bpm">
 <span class="sig-name descname"><span class="pre">clock_bpm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#nbplay.models.MidiKeyboardStatus.clock_bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">MidiRouterConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiRouterConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiRouterConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>Where MIDI input goes: routes from a port, channel and note range to a track’s instrument.</p>
+<p>A route is <code class="docutils literal notranslate"><span class="pre">{port,</span> <span class="pre">midi_channel,</span> <span class="pre">note_low,</span> <span class="pre">note_high,</span> <span class="pre">channel_index}</span></code>
+(see <a class="reference internal" href="../descriptors/index.html#nbplay.descriptors._normalize_midi_route" title="nbplay.descriptors._normalize_midi_route"><code class="xref py py-func docutils literal notranslate"><span class="pre">_normalize_midi_route()</span></code></a>). A note plays on
+every route it matches, held until its note-off.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.routes">
+<span class="sig-name descname"><span class="pre">routes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.routes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.session_tracks">
+<span class="sig-name descname"><span class="pre">session_tracks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.session_tracks" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.MidiRouterConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.MidiRouterConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterConfig._routes">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">routes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiRouterConfig._routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiRouterConfig._routes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">MidiRouterStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#MidiRouterStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.MidiRouterStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Input ports, the last message and control changes; browser-owned.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterStatus.available_midi_ports">
+<span class="sig-name descname"><span class="pre">available_midi_ports</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.MidiRouterStatus.available_midi_ports" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterStatus.last_event">
+<span class="sig-name descname"><span class="pre">last_event</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#nbplay.models.MidiRouterStatus.last_event" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.MidiRouterStatus.control_change">
+<span class="sig-name descname"><span class="pre">control_change</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#nbplay.models.MidiRouterStatus.control_change" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3472,6 +3581,39 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiKeyboardStatus.clock_bpm">MidiKeyboardStatus.clock_bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiRouterConfig">MidiRouterConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.routes">MidiRouterConfig.routes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_tracks">MidiRouterConfig.session_tracks</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.session_id">MidiRouterConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig.theme">MidiRouterConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._theme">MidiRouterConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterConfig._routes">MidiRouterConfig._routes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.MidiRouterStatus">MidiRouterStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.available_midi_ports">MidiRouterStatus.available_midi_ports</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.last_event">MidiRouterStatus.last_event</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.MidiRouterStatus.control_change">MidiRouterStatus.control_change</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SettingsConfig">SettingsConfig</a>
