@@ -997,6 +997,13 @@ class MidiRouterWidget(InstrumentWidget):
         """Remove every mapping."""
         self.config.mappings = []
 
+    def connect_sequencer(self, sequencer):
+        """Let ``sequencer`` (a :class:`SequencerWidget`) record what the router plays: its armed voices take each note at the current step."""
+        sequencer.config.keyboard_connected = True
+
+    def disconnect_sequencer(self, sequencer):
+        sequencer.config.keyboard_connected = False
+
 
 class SettingsWidget(InstrumentWidget):
     """Audio and MIDI device settings; the browser owns the port list and MIDI monitor."""
