@@ -1076,9 +1076,8 @@ class TestObservers:
             for frame in synth.server.open("browser", "json"):
                 browser.recv(frame)
             edit = browser.edit_ops(synth.config_id, [{"Set": {"path": [{"Key": "amplitude"}], "value": {"Float": 0.25}}}], "amp")
+            # The handler's write follows the edit's reply in the same output.
             for frame in synth.server.recv("browser", edit).get("browser", []):
-                browser.recv(frame)
-            for frame in synth.server.flush().get("browser", []):
                 browser.recv(frame)
             assert synth.config.cutoff == 1234.0
             assert browser.value(synth.config_id)["Map"]["cutoff"] == {"Float": 1234.0}
