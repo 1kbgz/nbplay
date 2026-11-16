@@ -24,6 +24,7 @@ from .descriptors import (
     _normalize_audio_clips,
     _normalize_drum_pad,
     _normalize_drum_pattern,
+    _normalize_drum_sample,
     _normalize_effects,
     _normalize_launcher_slot,
     _normalize_mixer_channel,
@@ -316,12 +317,19 @@ class DrumMachineConfig(_Validated):
     ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of
     that instrument's fields plus ``pitch`` (the note it plays) and
     ``length`` (seconds); ``preset`` names a shipped synth or FM preset to
-    start from. Pads with the same nonzero ``choke`` group cut each other
-    off (closed and open hats). A note plays the pads that answer to it.
-    ``pattern`` holds a velocity (0 is off) per pad per step.
+    start from. A ``sample`` pad plays the entry of ``samples`` named by
+    its ``sample`` param, shifted by ``tune`` semitones and cut after
+    ``length`` seconds. Pads with the same nonzero ``choke`` group cut each
+    other off (closed and open hats). A note plays the pads that answer to
+    it. ``pattern`` holds a velocity (0 is off) per pad per step.
+
+    ``samples`` maps an id to ``{name, sample_rate, length, data}`` (mono
+    little-endian float32 bytes). It is a field of its own so that a pad
+    edit does not resend the audio.
     """
 
     pads: list[dict] = Field(default_factory=_default_drum_kit, validate_default=True)
+    samples: dict[str, dict] = {}
     pattern: list[list[int]] = []
     steps: int = Field(16, ge=1, le=64)
     step_duration: float = Field(0.25, gt=0, le=4)
@@ -353,6 +361,11 @@ class DrumMachineConfig(_Validated):
             elif pad["sound"] == "fm":
                 pad["params"] = _pad_patch(FMSynthConfig, _FM_PAD_FIELDS, "FMSynthWidget", pad["params"])
         return normalized
+
+    @field_validator("samples")
+    @classmethod
+    def _samples(cls, samples):
+        return {str(key): _normalize_drum_sample(sample, key) for key, sample in samples.items()}
 
     @model_validator(mode="after")
     def _pattern_rows(self):

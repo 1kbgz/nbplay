@@ -641,15 +641,17 @@ class DrumMachineWidget(InstrumentWidget):
     sequencer, a clip or a launched slot on its track play the pads that
     answer to them, and its own pattern plays on the session clock. See
     :class:`~nbplay.models.DrumMachineConfig` for the pad fields. A kit (the
-    pads) is its preset; :meth:`presets` lists the shipped kits.
+    pads and their samples) is its preset; :meth:`presets` lists the shipped
+    kits.
     """
 
     TAG = "nbplay-drums"
-    PRESET = ("pads",)
+    PRESET = ("pads", "samples")
     CONFIG_MODEL = DrumMachineConfig
     STATUS_MODEL = DrumMachineStatus
     CONFIG: ClassVar[dict[str, str]] = {
         "pads": "pads",
+        "samples": "samples",
         "pattern": "pattern",
         "steps": "steps",
         "step_duration": "stepDuration",
@@ -682,7 +684,33 @@ class DrumMachineWidget(InstrumentWidget):
         elif sound_changed and "params" not in fields:
             fields = {**fields, "params": {}}
         pads[index] = {**pad, **fields}
-        self.config.pads = pads
+        self._set_pads(pads)
+
+    def load_pad_sample(self, index, data, sample_rate=44100, name="Sample", **params):
+        """Make pad ``index`` play mono float samples (or float32 bytes); ``params`` sets ``tune`` and ``length``.
+
+        A pad that already plays a sample keeps its ``tune`` and ``length`` unless ``params`` changes them.
+        """
+        if not 0 <= index < len(self.config.pads):
+            raise IndexError(f"pad index out of range: {index}")
+        packed = bytes(data) if isinstance(data, (bytes, bytearray, memoryview)) else _pack_float32(list(data))
+        key = uuid.uuid4().hex[:8]
+        pads = [dict(pad) for pad in self.config.pads]
+        kept = pads[index]["params"] if pads[index]["sound"] == "sample" else {}
+        pads[index] = {**pads[index], "sound": "sample", "params": {**kept, **params, "sample": key}}
+        self._set_pads(pads, {**self.config.samples, key: {"name": name, "sample_rate": sample_rate, "data": packed}})
+
+    def load_pad_file(self, index, path, **params):
+        """Make pad ``index`` play an audio file (WAV through the stdlib, others through ``soundfile``)."""
+        path = pathlib.Path(path)
+        samples, sample_rate = decode_audio_file(path)
+        self.load_pad_sample(index, samples, sample_rate=sample_rate, name=path.name, **params)
+
+    def _set_pads(self, pads, samples=None):
+        """Set the pads and drop the samples no pad plays any more, in one update."""
+        samples = self.config.samples if samples is None else samples
+        used = {pad["params"].get("sample") for pad in pads if pad.get("sound") == "sample" and pad.get("params")}
+        self.config.update(pads=pads, samples={key: sample for key, sample in samples.items() if key in used})
 
     def set_step(self, pad, step, velocity=100):
         """Set one step of pad ``pad``'s row; a velocity of 0 clears it."""
@@ -2280,7 +2308,18 @@ def _sound_source_to_dict(source, index, resources):
     if isinstance(source, FMSynthWidget):
         return {"type": "FMSynthWidget", "state": _dump(source.config, _FM_SYNTH_STATE)}
     if isinstance(source, DrumMachineWidget):
-        return {"type": "DrumMachineWidget", "state": _dump(source.config, _DRUM_MACHINE_STATE)}
+        entry = {"type": "DrumMachineWidget", "state": _dump(source.config, _DRUM_MACHINE_STATE)}
+        if source.config.samples:
+            saved = {}
+            for key, sample in source.config.samples.items():
+                item = {k: v for k, v in sample.items() if k != "data"}
+                if resources is not None:
+                    name = f"samples/track-{index}-pad-{key}.f32"
+                    resources[name] = bytes(sample["data"])
+                    item["sample_file"] = name
+                saved[key] = item
+            entry["samples"] = saved
+        return entry
     if isinstance(source, SamplerWidget):
         config = source.config
         entry = {"type": "SamplerWidget", "state": _dump(config, _SAMPLER_STATE + _SAMPLER_PAD_STATE)}
@@ -2314,7 +2353,11 @@ def _sound_source_from_dict(entry, resources):
     if kind == "FMSynthWidget":
         return FMSynthWidget(**{k: v for k, v in state.items() if k in _FM_SYNTH_STATE})
     if kind == "DrumMachineWidget":
-        return DrumMachineWidget(**{k: v for k, v in state.items() if k in _DRUM_MACHINE_STATE})
+        samples = {
+            key: {**{k: v for k, v in sample.items() if k != "sample_file"}, "data": resources.get(sample.get("sample_file"), b"")}
+            for key, sample in entry.get("samples", {}).items()
+        }
+        return DrumMachineWidget(samples=samples, **{k: v for k, v in state.items() if k in _DRUM_MACHINE_STATE})
     if kind == "SamplerWidget":
         sampler = SamplerWidget(**{k: v for k, v in state.items() if k in _SAMPLER_STATE})
         sample_file = entry.get("sample_file")

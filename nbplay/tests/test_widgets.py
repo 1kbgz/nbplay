@@ -678,6 +678,51 @@ class TestDrumMachineWidget:
         finally:
             drums.close()
 
+    def test_sample_pads_keep_their_audio_beside_the_pads(self, tmp_path):
+        with pytest.raises(ValueError):
+            DrumMachineConfig.model_validate({"samples": {"a": "kick"}})
+        with pytest.raises(TypeError):
+            DrumMachineConfig.model_validate({"samples": {"a": {"data": [0.5]}}})
+        config = DrumMachineConfig(pads=[{"sound": "sample", "params": {"tune": 30}}], samples={"a": {"data": memoryview(b"\0" * 8)}})
+        assert config.pads[0]["params"] == {"sample": "", "tune": 24.0, "length": 4.0}
+        assert (config.samples["a"]["data"], config.samples["a"]["length"]) == (b"\0" * 8, 2)
+        drums = nbplay.DrumMachineWidget(autosync=False)
+        try:
+            drums.load_pad_sample(0, [0.5, -0.5, 0.25], sample_rate=22050, name="kick", tune=-2)
+            pad = drums.config.pads[0]
+            key = pad["params"]["sample"]
+            assert (pad["name"], pad["sound"], pad["params"]["tune"]) == ("Kick", "sample", -2.0)
+            sample = drums.config.samples[key]
+            assert (sample["name"], sample["sample_rate"], sample["length"]) == ("kick", 22050, 3)
+            assert sample["data"] == struct.pack("<3f", 0.5, -0.5, 0.25)
+            # Params for the same sound merge and keep the sample.
+            drums.set_pad(0, params={"length": 0.5})
+            assert drums.config.pads[0]["params"] == {"sample": key, "tune": -2.0, "length": 0.5}
+            # A kit with samples is a JSON preset.
+            other = nbplay.DrumMachineWidget.from_preset(json.loads(json.dumps(drums.preset("Mine"))), autosync=False)
+            try:
+                assert other.config.samples == drums.config.samples and other.config.pads == drums.config.pads
+            finally:
+                other.close()
+            # A file replaces the pad's sample; the old one goes.
+            path = tmp_path / "snare.wav"
+            with wave.open(str(path), "wb") as handle:
+                handle.setnchannels(1)
+                handle.setsampwidth(2)
+                handle.setframerate(8000)
+                handle.writeframes(struct.pack("<4h", 0, 16384, -16384, 0))
+            drums.load_pad_file(0, path)
+            (new_key,) = drums.config.samples
+            assert new_key != key and drums.config.pads[0]["params"] == {"sample": new_key, "tune": -2.0, "length": 0.5}
+            assert (drums.config.samples[new_key]["name"], drums.config.samples[new_key]["length"]) == ("snare.wav", 4)
+            # Another sound drops the sample no pad plays any more.
+            drums.set_pad(0, sound="kick")
+            assert drums.config.samples == {}
+            with pytest.raises(IndexError):
+                drums.load_pad_sample(16, [0.0])
+        finally:
+            drums.close()
+
     def test_kits_load_by_name_or_from_the_browser_picker(self):
         session = nbplay.Session()
         drums = nbplay.DrumMachineWidget(autosync=False)
@@ -693,7 +738,7 @@ class TestDrumMachineWidget:
             session.undo()
             assert drums.config.pads[15]["name"] == "Bass"
             kit = drums.preset("Mine")
-            assert list(kit["state"]) == ["pads"]
+            assert list(kit["state"]) == ["pads", "samples"]
             other = nbplay.DrumMachineWidget.from_preset(kit, autosync=False)
             try:
                 assert other.config.pads == drums.config.pads
@@ -712,6 +757,11 @@ class TestDrumMachineWidget:
             assert (drums.config.session_id, drums.config.channel_index, drums.config.bpm) == (session.session_id, track.mixer_channel, 96.0)
             drums.set_row(1, [2, 6], velocity=80)
             drums.set_pad(1, sound="synth", params={"preset": "Pluck", "pitch": 48})
+            assert "samples" not in session.to_dict()["tracks"][0]["sound_source"]
+            drums.load_pad_sample(2, [0.25, -0.25], sample_rate=8000, name="hat")
+            # Without an archive a sample keeps its metadata only.
+            (saved,) = session.to_dict()["tracks"][0]["sound_source"]["samples"].values()
+            assert saved == {"name": "hat", "sample_rate": 8000, "length": 2}
             assert panel_widgets(session)["beat-drums"] is drums
             archive = io.BytesIO()
             session.save(archive)
@@ -722,6 +772,7 @@ class TestDrumMachineWidget:
                 assert isinstance(source, nbplay.DrumMachineWidget)
                 assert (source.config.steps, source.config.swing, source.config.bpm) == (8, 20.0, 96.0)
                 assert source.config.pattern == drums.config.pattern and source.config.pads == drums.config.pads
+                assert source.config.samples == drums.config.samples and len(source.config.samples) == 1
                 assert source.config.channel_index == loaded.tracks[0].mixer_channel
             finally:
                 loaded.close()

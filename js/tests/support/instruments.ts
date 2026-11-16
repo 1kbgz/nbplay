@@ -377,6 +377,7 @@ const INSTRUMENTS: Record<
       config: {
         theme: "theme",
         pads: "pads",
+        samples: "samples",
         pattern: "pattern",
         steps: "steps",
         step_duration: "stepDuration",
