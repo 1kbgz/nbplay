@@ -18,6 +18,15 @@ export interface MidiAccessEngine {
   ): MidiPortInfo | null;
   disconnectInput(): void;
   activeInputId(): string | null;
+  /**
+   * Listen to every input port, including ones connected later, after
+   * `requestAccess()`; `onPorts` gets the port list on each change. Returns
+   * a function that stops listening.
+   */
+  listenAll(
+    cb: (port: MidiPortInfo, data: Uint8Array, timestamp: number) => void,
+    onPorts?: (ports: MidiPortInfo[]) => void,
+  ): () => void;
   output(portId: string): MIDIOutput | null;
 }
 
@@ -78,6 +87,35 @@ export function createMidiAccess(): MidiAccessEngine {
 
     activeInputId(): string | null {
       return activeInput ? activeInput.id : null;
+    },
+
+    listenAll(cb, onPorts): () => void {
+      const current = access;
+      if (!current) return () => {};
+      const listeners = new Map<MIDIInput, EventListener>();
+      const attach = () => {
+        current.inputs.forEach((port) => {
+          if (listeners.has(port)) return;
+          const listener = ((e: MIDIMessageEvent) =>
+            cb(
+              info(port),
+              e.data as Uint8Array,
+              e.timeStamp || performance.now(),
+            )) as EventListener;
+          port.addEventListener("midimessage", listener);
+          listeners.set(port, listener);
+        });
+        onPorts?.(this.inputs());
+      };
+      attach();
+      current.addEventListener?.("statechange", attach);
+      return () => {
+        current.removeEventListener?.("statechange", attach);
+        listeners.forEach((listener, port) =>
+          port.removeEventListener("midimessage", listener),
+        );
+        listeners.clear();
+      };
     },
 
     output(portId: string): MIDIOutput | null {

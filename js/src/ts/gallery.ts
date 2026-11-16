@@ -1335,6 +1335,41 @@ const SECTIONS: Section[] = [
     variants: [{ label: "default", props: {}, wide: true }],
   },
   {
+    tag: "nbplay-midi-router",
+    title: "nbplay-midi-router",
+    desc: "Routes Web MIDI input to track instruments: each route takes a port, a MIDI channel and a note range to a track. Needs a browser with Web MIDI and a session with tracks to sound.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [],
+    variants: [
+      {
+        label: "two routes",
+        props: {
+          sessionTracks: [
+            { channel_index: 0, name: "Bass" },
+            { channel_index: 1, name: "Beat" },
+          ],
+          routes: [
+            {
+              port: "",
+              midi_channel: -1,
+              note_low: 0,
+              note_high: 59,
+              channel_index: 0,
+            },
+            {
+              port: "Launchpad X LPX MIDI",
+              midi_channel: 0,
+              note_low: 36,
+              note_high: 51,
+              channel_index: 1,
+            },
+          ],
+        },
+        wide: true,
+      },
+    ],
+  },
+  {
     tag: "nbplay-settings",
     title: "nbplay-settings",
     desc: "Audio output settings and a MIDI input picker with an activity log of incoming messages.",

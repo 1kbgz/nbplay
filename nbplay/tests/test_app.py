@@ -24,13 +24,23 @@ class TestApp:
             session.add_track("Lead Synth", sound_source=nbplay.SynthWidget(autosync=False))
             session.add_track("Vocals", armed=True)
             panels = panel_widgets(session)
-            assert list(panels) == ["transport", "launcher", "timeline", "mixer", "lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
-            assert panels["lead-synth-synth"] is session.tracks[0].sound_source
+            assert list(panels) == [
+                "transport",
+                "launcher",
+                "timeline",
+                "mixer",
+                "midi",
+                "lead-synth-sequencer",
+                "lead-synth-synth",
+                "lead-synth-synth-2",
+            ]
+            assert panels["lead-synth-synth"] is session.tracks[0].sound_source and panels["midi"] is session.midi_router
             assert list(panel_titles(session).values()) == [
                 "Transport",
                 "Launcher",
                 "Timeline",
                 "Mixer",
+                "MIDI",
                 "Lead Synth sequencer",
                 "Lead Synth synth",
                 "Lead Synth synth 2",
@@ -38,7 +48,8 @@ class TestApp:
             layout = default_layout(list(panels))
             assert layout["children"][2]["tabs"] == ["lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert layout["children"][0]["tabs"] == ["transport"] and layout["children"][1]["children"][1]["tabs"] == ["timeline"]
-            assert len(default_layout(["transport", "launcher", "timeline", "mixer"])["children"]) == 2
+            assert layout["children"][1]["children"][2]["tabs"] == ["mixer", "midi"]
+            assert len(default_layout(["transport", "launcher", "timeline", "mixer", "midi"])["children"]) == 2
         finally:
             session.close()
 
@@ -128,7 +139,7 @@ class TestApp:
             other.save(archive)
             other.close()
             loaded = client.put("/session.nbplay", content=archive.getvalue())
-            assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "bass-sequencer", "bass-synth"]}
+            assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "midi", "bass-sequencer", "bass-synth"]}
             assert app.state.session is not first and app.state.session.bpm == 140.0
             html = client.get("/").text
             assert "/ws/bass-synth" in html and "/ws/drums-sampler" not in html

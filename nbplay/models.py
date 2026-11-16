@@ -27,6 +27,7 @@ from .descriptors import (
     _normalize_drum_sample,
     _normalize_effects,
     _normalize_launcher_slot,
+    _normalize_midi_route,
     _normalize_mixer_channel,
     _normalize_pad_actions,
     _normalize_return_bus,
@@ -52,6 +53,8 @@ __all__ = (
     "MidiKeyboardStatus",
     "MidiOutputConfig",
     "MidiOutputStatus",
+    "MidiRouterConfig",
+    "MidiRouterStatus",
     "MixerConfig",
     "PadsConfig",
     "PadsStatus",
@@ -532,6 +535,38 @@ class MidiKeyboardStatus(BaseModel):
     last_note_event: dict = {}
     control_change: dict = {}
     clock_bpm: float = 0.0
+
+
+class MidiRouterConfig(_Validated):
+    """Where MIDI input goes: routes from a port, channel and note range to a track's instrument.
+
+    A route is ``{port, midi_channel, note_low, note_high, channel_index}``
+    (see :func:`~nbplay.descriptors._normalize_midi_route`). A note plays on
+    every route it matches, held until its note-off.
+    """
+
+    routes: list[dict] = []
+    #: The session's tracks a route can play (``{channel_index, name}``); set by the session.
+    session_tracks: list[dict] = []
+    session_id: str = ""
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("routes")
+    @classmethod
+    def _routes(cls, routes):
+        return [_normalize_midi_route(route) for route in routes]
+
+
+class MidiRouterStatus(BaseModel):
+    """Input ports, the last message and control changes; browser-owned."""
+
+    available_midi_ports: list[str] = []
+    #: ``{port, type, note|controller, value, channel}`` of the latest message.
+    last_event: dict = {}
+    #: ``{controller, value, channel, port, seq}``, for :class:`~nbplay.MidiLearn`.
+    control_change: dict = {}
 
 
 class SettingsConfig(_Validated):

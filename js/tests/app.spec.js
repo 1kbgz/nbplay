@@ -193,7 +193,7 @@ test.describe("web app", () => {
     const dialog = page.locator("nbplay-palette dialog");
     await page.keyboard.press("Control+k");
     await expect(dialog).toBeVisible();
-    await expect(page.locator(".nbplay-palette-option")).toHaveCount(8);
+    await expect(page.locator(".nbplay-palette-option")).toHaveCount(9);
     await page.keyboard.type("mix");
     await page.keyboard.press("Enter");
     await expect(dialog).toBeHidden();

@@ -100,6 +100,11 @@ export {
   type SynthVoice,
 } from "../voices.ts";
 export { NbplayMidiKeyboard } from "./midi-keyboard.ts";
+export {
+  NbplayMidiRouter,
+  matchMidiRoutes,
+  type MidiRoute,
+} from "./midi-router.ts";
 export { NbplaySettings } from "./settings.ts";
 export {
   NbplayMidiOutput,
