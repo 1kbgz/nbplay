@@ -662,6 +662,7 @@ class DrumMachineWidget(InstrumentWidget):
         "velocity": "velocity",
         "preset_names": "presetNames",
         "sound_preset_names": "soundPresetNames",
+        "session_tracks": "sessionTracks",
         "session_id": "sessionId",
         "channel_index": "channelIndex",
         "theme": "theme",
@@ -685,6 +686,21 @@ class DrumMachineWidget(InstrumentWidget):
             fields = {**fields, "params": {}}
         pads[index] = {**pad, **fields}
         self._set_pads(pads)
+
+    def set_pad_track(self, index, track, pitch=None, length=None):
+        """Make pad ``index`` play another track's instrument: ``track`` is a :class:`Track` or a mixer channel index.
+
+        ``pitch`` and ``length`` keep their values from a pad that already plays a track.
+        """
+        channel = track.mixer_channel if isinstance(track, Track) else int(track)
+        pad = self.config.pads[index] if 0 <= index < len(self.config.pads) else None
+        params = dict(pad["params"]) if pad is not None and pad["sound"] == "track" else {}
+        params["track"] = channel
+        if pitch is not None:
+            params["pitch"] = pitch
+        if length is not None:
+            params["length"] = length
+        self.set_pad(index, sound="track", params=params)
 
     def load_pad_sample(self, index, data, sample_rate=44100, name="Sample", **params):
         """Make pad ``index`` play mono float samples (or float32 bytes); ``params`` sets ``tune`` and ``length``.
@@ -2107,6 +2123,7 @@ class Session:
         self.tracks.append(track)
         self.history.attach(sequencer)
         self.history.attach(sound_source)
+        self._sync_session_tracks()
         return track
 
     def remove_track(self, index):
@@ -2120,6 +2137,8 @@ class Session:
             for widget in (track.sequencer, track.sound_source):
                 if isinstance(widget, InstrumentWidget):
                     widget.config.update(session_id="", channel_index=-1)
+            if isinstance(track.sound_source, DrumMachineWidget):
+                track.sound_source.config.session_tracks = []
             self.mixer.remove_channel(track.mixer_channel)
             self.timeline.remove_track(index)
             self.launcher.remove_track(index)
@@ -2129,6 +2148,26 @@ class Session:
                     for widget in (item.sequencer, item.sound_source):
                         if isinstance(widget, InstrumentWidget):
                             widget.config.channel_index -= 1
+            # Track pads follow their channels; a pad on the removed track plays nothing.
+            removed = track.mixer_channel
+            for drums in self._drum_machines():
+                pads = []
+                for pad in drums.config.pads:
+                    channel = pad["params"]["track"] if pad["sound"] == "track" else -1
+                    if channel >= removed:
+                        pad = {**pad, "params": {**pad["params"], "track": -1 if channel == removed else channel - 1}}
+                    pads.append(pad)
+                drums.config.pads = pads
+            self._sync_session_tracks()
+
+    def _drum_machines(self):
+        return [track.sound_source for track in self.tracks if isinstance(track.sound_source, DrumMachineWidget)]
+
+    def _sync_session_tracks(self):
+        """Tell every drum machine which tracks its pads can play."""
+        tracks = [{"channel_index": track.mixer_channel, "name": track.name} for track in self.tracks]
+        for drums in self._drum_machines():
+            drums.config.session_tracks = tracks
 
     def _track_index(self, track):
         if isinstance(track, Track):

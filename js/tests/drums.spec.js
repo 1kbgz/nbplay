@@ -312,6 +312,77 @@ test.describe("DrumMachineWidget", () => {
     expect([after.pads[0].sound, after.samples]).toEqual(["kick", {}]);
   });
 
+  test("a track pad plays another track's instrument, and a loop back stops", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.__notes = [];
+      globalThis.__nbplay = {
+        beat: {
+          instruments: {
+            1: {
+              scheduleNote: (note, velocity, at, duration) => {
+                window.__notes.push([note, velocity, at, duration]);
+              },
+            },
+          },
+        },
+      };
+    });
+    const track = (name, note, channel, gain = 1) =>
+      pad(
+        name,
+        note,
+        "track",
+        { track: channel, pitch: 40, length: 0.5 },
+        { gain },
+      );
+    await renderDrums(page, {
+      session_id: "beat",
+      channel_index: 0,
+      pads: [track("Bass", 36, 1, 0.5), track("Self", 38, 0)],
+      pattern: [Array(16).fill(0), Array(16).fill(0)],
+    });
+    const played = await page.evaluate(() => {
+      const drums = globalThis.__nbplay.beat.instruments[0];
+      drums.scheduleNote(36, 127, 2, 0.1);
+      // Its own track: the pad plays itself once, then stops.
+      drums.scheduleNote(38, 127, 3, 0.1);
+      return window.__notes;
+    });
+    // Pitch and length are the pad's; its gain scales the velocity.
+    expect(played).toEqual([[40, 64, 2, 0.5]]);
+  });
+
+  test("a track pad's editor picks a session track and hides pan and choke", async ({
+    page,
+  }) => {
+    await renderDrums(page, {
+      channel_index: 2,
+      session_tracks: [
+        { channel_index: 0, name: "Bass" },
+        { channel_index: 1, name: "Lead" },
+        { channel_index: 2, name: "Beat" },
+      ],
+    });
+    await page.locator('.nbplay-drums-sound [data-value="track"]').click();
+    expect((await state(page)).pads[0]).toMatchObject({
+      sound: "track",
+      params: {},
+    });
+    // The drum machine's own track is not offered.
+    expect(
+      await page
+        .locator(".nbplay-drums-track-select option")
+        .evaluateAll((options) => options.map((o) => o.textContent.trim())),
+    ).toEqual(["—", "Bass", "Lead"]);
+    await page.locator(".nbplay-drums-track-select").selectOption("Lead");
+    expect((await state(page)).pads[0].params.track).toBe(1);
+    await expect(page.locator(".nbplay-drums-pitch")).toBeVisible();
+    await expect(page.locator(".nbplay-drums-pan")).toHaveCount(0);
+    await expect(page.locator(".nbplay-drums-choke")).toHaveCount(0);
+  });
+
   test("the kit picker asks the kernel for a kit", async ({ page }) => {
     await renderDrums(page, { preset_names: ["Analog kit", "Electro kit"] });
     await page

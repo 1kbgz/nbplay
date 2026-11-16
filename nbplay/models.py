@@ -319,7 +319,10 @@ class DrumMachineConfig(_Validated):
     ``length`` (seconds); ``preset`` names a shipped synth or FM preset to
     start from. A ``sample`` pad plays the entry of ``samples`` named by
     its ``sample`` param, shifted by ``tune`` semitones and cut after
-    ``length`` seconds. Pads with the same nonzero ``choke`` group cut each
+    ``length`` seconds. A ``track`` pad plays ``pitch`` for ``length``
+    seconds on the instrument of the session track on mixer channel
+    ``track`` (-1 is none), through that track's channel; its ``gain``
+    scales the velocity, and pan and choke do not apply. Pads with the same nonzero ``choke`` group cut each
     other off (closed and open hats). A note plays the pads that answer to
     it. ``pattern`` holds a velocity (0 is off) per pad per step.
 
@@ -343,6 +346,8 @@ class DrumMachineConfig(_Validated):
     preset_names: list[str] = []
     #: The shipped synth and FM presets a pad can start from (``{"synth": [...], "fm": [...]}``); set by the widget.
     sound_preset_names: dict[str, list[str]] = {}
+    #: The session's tracks a pad can play (``{channel_index, name}``); set by the session.
+    session_tracks: list[dict] = []
     session_id: str = ""
     channel_index: int = -1
     theme: str = ""
