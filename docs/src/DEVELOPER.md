@@ -207,7 +207,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `SettingsWidget`     | `sample_rate`, `channels`, `buffer_size`, `audio_device`, `midi_port`, `theme`                                                                                                                                                                                         | `available_midi_ports`, `midi_event`                                                                                                                                        |
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
 | `FMSynthWidget`      | `frequency`, `amplitude`, `ratio`, `index`, `attack`, `decay`, `sustain`, `release`, `session_id`, `channel_index`, `theme`                                                                                                                                            | `is_playing`                                                                                                                                                                |
-| `DrumMachineWidget`  | `pads`, `samples`, `pattern`, `steps`, `step_duration`, `swing`, `bpm`, time signature, `velocity`, `preset_names`, `sound_preset_names`, `session_id`, `channel_index`, `theme`                                                                                       | `is_playing`, `current_step`, `preset_request`                                                                                                                              |
+| `DrumMachineWidget`  | `pads`, `samples`, `pattern`, `steps`, `step_duration`, `swing`, `bpm`, time signature, `velocity`, `preset_names`, `sound_preset_names`, `session_tracks`, `session_id`, `channel_index`, `theme`                                                                     | `is_playing`, `current_step`, `preset_request`                                                                                                                              |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
 | `SamplerWidget`      | `sample_name`, `sample_rate`, `sample_length`, `root_note`, `waveform`, `sample_data`, ADSR fields, `max_voices`, `pad_count`, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `velocity`, `velocity_sensitive`, `zones`, `session_id`, `channel_index` | `active_pads`, `last_note_event`, `last_pad_event`, `request` (capture commands)                                                                                            |
 | `TransportWidget`    | `bpm`, `time_signature_num`, `time_signature_den`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`, `session_id`, `theme`                                                                                                                                             | `is_playing`, `is_recording`, `current_beat`, `bar_number`, `beat_in_bar`, `undo_request`, `redo_request`                                                                   |
@@ -642,6 +642,17 @@ track: `session.add_track("Beat", None, DrumMachineWidget())`. A pad is
   input loads one in the browser (decoded at the context's rate). Both drop
   samples no pad plays any more in the same edit; the validator does not,
   because a browser edit assigns `pads` and `samples` one at a time.
+- A `track` pad has `track` (a mixer channel, -1 for none), `pitch` and
+  `length`. A hit calls `bus.instruments[track].scheduleNote()`, so the note
+  plays on that track's synth, FM synth, sampler or drum machine and through
+  its channel. The pad's `gain` scales the velocity; pan and choke do not
+  apply, and the editor hides them. `set_pad_track(index, track)` takes a
+  `Track` or a channel. The session keeps `session_tracks`
+  (`{channel_index, name}`) up to date for the editor's track list, which
+  leaves out the drum machine's own track. `Session.remove_track()` moves
+  track pads on later channels down and sets pads on the removed track to -1.
+  A drum machine that reaches itself again, directly or through another drum
+  machine, plays nothing the second time.
 - Pads with the same nonzero `choke` group cut each other off: a hit fades
   the group's other ringing hits at its start time.
 

@@ -21,6 +21,7 @@ TRANSIENT_TRAITS = frozenset(
         "session_id",
         "preset_names",
         "sound_preset_names",
+        "session_tracks",
         "is_playing",
         "is_recording",
         "current_beat",

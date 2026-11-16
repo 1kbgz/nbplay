@@ -1364,7 +1364,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-drums",
     title: "nbplay-drums",
-    desc: "A drum machine on a private clock: pads with their own sounds (built-in drums, synth or FM patches, or samples), an editor for the selected pad, and a pattern row per pad. Tap a pad to hear it.",
+    desc: "A drum machine on a private clock: pads with their own sounds (built-in drums, synth or FM patches, samples, or another track's instrument), an editor for the selected pad, and a pattern row per pad. Tap a pad to hear it.",
     events: ["nbplay-set", "nbplay-status"],
     controls: [
       { name: "bpm", type: "number" },

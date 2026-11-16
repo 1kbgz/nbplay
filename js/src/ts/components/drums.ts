@@ -50,10 +50,12 @@ export interface DrumSample {
   data: unknown;
 }
 
-const SOUNDS = [...DRUM_SOUNDS, "synth", "fm", "sample"].map((value) => ({
-  value,
-  label: value === "fm" ? "FM" : value[0].toUpperCase() + value.slice(1),
-}));
+const SOUNDS = [...DRUM_SOUNDS, "synth", "fm", "sample", "track"].map(
+  (value) => ({
+    value,
+    label: value === "fm" ? "FM" : value[0].toUpperCase() + value.slice(1),
+  }),
+);
 const STEP_COUNTS = [8, 16, 32];
 const STEP_DURATIONS = [0.5, 0.25, 0.125];
 const MIN_BPM = 30;
@@ -121,6 +123,7 @@ export class NbplayDrums extends NbplayElement {
     presetNames: { attribute: false },
     presetRequest: { type: String, attribute: "preset-request" },
     soundPresetNames: { attribute: false },
+    sessionTracks: { attribute: false },
     sessionId: { type: String, attribute: "session-id", reflect: true },
     channelIndex: { type: Number, attribute: "channel-index" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -142,6 +145,8 @@ export class NbplayDrums extends NbplayElement {
   declare presetNames: string[];
   declare presetRequest: string;
   declare soundPresetNames: Record<string, string[]>;
+  /** The session's tracks a pad can play: `{channel_index, name}`. */
+  declare sessionTracks: { channel_index: number; name: string }[];
   declare sessionId: string;
   declare channelIndex: number;
   declare isPlaying: boolean;
@@ -167,6 +172,8 @@ export class NbplayDrums extends NbplayElement {
   /** Decoded samples by id, for the context they were made on. */
   private buffers = new Map<string, AudioBuffer>();
   private buffersCtx: BaseAudioContext | null = null;
+  /** Set while a track pad plays another instrument, so a loop back here stops. */
+  private forwarding = false;
   private ringing: Array<{
     choke: number;
     at: number;
@@ -206,6 +213,7 @@ export class NbplayDrums extends NbplayElement {
     this.presetNames = [];
     this.presetRequest = "";
     this.soundPresetNames = {};
+    this.sessionTracks = [];
     this.sessionId = "";
     this.channelIndex = -1;
     this.isPlaying = false;
@@ -468,6 +476,7 @@ export class NbplayDrums extends NbplayElement {
     if (!pad || !audio) return () => {};
     const { ctx, output } = audio;
     const when = at ?? ctx.currentTime;
+    if (pad.sound === "track") return this.hitTrack(pad, velocity, when);
     const choke = number(pad.choke, 0);
     if (choke > 0) {
       for (const other of this.ringing) {
@@ -563,6 +572,33 @@ export class NbplayDrums extends NbplayElement {
     }
     this.ringing.push(entry);
     return entry.cancel;
+  }
+
+  /**
+   * Play a track pad's note on the instrument of the track it names, through
+   * that track's channel. Its gain scales the velocity.
+   */
+  private hitTrack(pad: DrumPad, velocity: number, at: number): () => void {
+    const params = pad.params || {};
+    const bus = this.sessionId ? getSessionBus(this.sessionId) : undefined;
+    const target = bus?.instruments?.[number(params.track, -1)];
+    if (!target || this.forwarding) return () => {};
+    const scaled = Math.max(
+      1,
+      Math.min(127, Math.round(velocity * number(pad.gain, 1))),
+    );
+    this.forwarding = true;
+    try {
+      const cancel = target.scheduleNote(
+        number(params.pitch, 60),
+        scaled,
+        at,
+        number(params.length, 0.25),
+      );
+      return cancel || (() => {});
+    } finally {
+      this.forwarding = false;
+    }
   }
 
   // Editing
@@ -682,6 +718,41 @@ export class NbplayDrums extends NbplayElement {
     ></nbplay-param>`;
   }
 
+  private renderTrackParams(index: number, params: Record<string, unknown>) {
+    const setParam = (key: string) => (value: number) =>
+      this.editParams(index, { [key]: value });
+    const track = number(params.track, -1);
+    // A pad cannot play its own track.
+    const tracks = (this.sessionTracks || []).filter(
+      (t) => t.channel_index !== Number(this.channelIndex),
+    );
+    return html`<label class="nbplay-drums-preset">
+        <span>Track</span>
+        <select
+          class="nbplay-drums-track-select"
+          @input=${(e: Event) => e.stopPropagation()}
+          @change=${(e: Event) => {
+            e.stopPropagation();
+            const value = parseInt((e.target as HTMLSelectElement).value, 10);
+            this.editParams(index, { track: value });
+          }}
+        >
+          <option value="-1" ?selected=${track < 0}>—</option>
+          ${tracks.map(
+            (t) =>
+              html`<option
+                value=${t.channel_index}
+                ?selected=${t.channel_index === track}
+              >
+                ${t.name}
+              </option>`,
+          )}
+        </select>
+      </label>
+      ${this.param("nbplay-drums-pitch", "Pitch", number(params.pitch, 60), "note", 0, 127, 1, 60, setParam("pitch"))}
+      ${this.param("nbplay-drums-length", "Length", number(params.length, 0.25), "seconds", 0.01, 4, 0.01, 0.25, setParam("length"), { scale: "log" })}`;
+  }
+
   private renderSampleParams(index: number, params: Record<string, unknown>) {
     const sample = this.samples?.[String(params.sample ?? "")];
     const setParam = (key: string) => (value: number) =>
@@ -785,13 +856,20 @@ export class NbplayDrums extends NbplayElement {
                 ${this.param("nbplay-drums-length", "Length", number(params.length, 0.25), "seconds", 0.01, 4, 0.01, 0.25, setParam("length"), { scale: "log" })}`
             : pad.sound === "sample"
               ? this.renderSampleParams(index, params)
-              : html`${this.param("nbplay-drums-tune", "Tune", number(params.tune, 0), "float", -24, 24, 0.1, 0, setParam("tune"), { unit: " st" })}
-                ${this.param("nbplay-drums-decay", "Decay", number(params.decay, 0.3), "seconds", 0.01, 4, 0.01, 0.3, setParam("decay"), { scale: "log" })}
-                ${this.param("nbplay-drums-tone", "Tone", number(params.tone, 0.5), "percent", 0, 1, 0.01, 0.5, setParam("tone"))}`
+              : pad.sound === "track"
+                ? this.renderTrackParams(index, params)
+                : html`${this.param("nbplay-drums-tune", "Tune", number(params.tune, 0), "float", -24, 24, 0.1, 0, setParam("tune"), { unit: " st" })}
+                  ${this.param("nbplay-drums-decay", "Decay", number(params.decay, 0.3), "seconds", 0.01, 4, 0.01, 0.3, setParam("decay"), { scale: "log" })}
+                  ${this.param("nbplay-drums-tone", "Tone", number(params.tone, 0.5), "percent", 0, 1, 0.01, 0.5, setParam("tone"))}`
         }
         ${this.param("nbplay-drums-gain", "Gain", number(pad.gain, 1), "db", 0, 2, 0.01, 1, (gain) => set({ gain }))}
-        ${this.param("nbplay-drums-pan", "Pan", number(pad.pan, 0), "pan", -1, 1, 0.01, 0, (pan) => set({ pan }))}
-        ${this.param("nbplay-drums-choke", "Choke", number(pad.choke, 0), "int", 0, 8, 1, 0, (choke) => set({ choke: Math.round(choke) }))}
+        ${
+          // A track pad plays through its track's channel: no pan or choke here.
+          pad.sound === "track"
+            ? nothing
+            : html`${this.param("nbplay-drums-pan", "Pan", number(pad.pan, 0), "pan", -1, 1, 0.01, 0, (pan) => set({ pan }))}
+              ${this.param("nbplay-drums-choke", "Choke", number(pad.choke, 0), "int", 0, 8, 1, 0, (choke) => set({ choke: Math.round(choke) }))}`
+        }
       </div>
     </div>`;
   }

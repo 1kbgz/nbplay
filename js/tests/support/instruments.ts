@@ -388,6 +388,7 @@ const INSTRUMENTS: Record<
         velocity: "velocity",
         preset_names: "presetNames",
         sound_preset_names: "soundPresetNames",
+        session_tracks: "sessionTracks",
         session_id: "sessionId",
         channel_index: "channelIndex",
       },

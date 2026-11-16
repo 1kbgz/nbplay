@@ -723,6 +723,35 @@ class TestDrumMachineWidget:
         finally:
             drums.close()
 
+    def test_track_pads_follow_the_session_tracks(self):
+        config = DrumMachineConfig(pads=[{"sound": "track", "params": {"track": -5, "pitch": 200, "length": 9}}])
+        assert config.pads[0]["params"] == {"track": -1, "pitch": 127, "length": 4.0}
+        session = nbplay.Session()
+        try:
+            bass = session.add_track("Bass", None, nbplay.SynthWidget())
+            lead = session.add_track("Lead", None, nbplay.FMSynthWidget())
+            drums = nbplay.DrumMachineWidget()
+            session.add_track("Beat", None, drums)
+            keys = session.add_track("Keys", None, nbplay.SynthWidget())
+            names = ["Bass", "Lead", "Beat", "Keys"]
+            assert drums.config.session_tracks == [{"channel_index": i, "name": name} for i, name in enumerate(names)]
+            drums.set_pad_track(0, bass, pitch=36)
+            drums.set_pad_track(1, lead.mixer_channel, length=1.0)
+            drums.set_pad_track(2, keys)
+            # Another track keeps the pad's pitch and length.
+            drums.set_pad_track(0, lead)
+            assert drums.config.pads[0]["params"] == {"track": 1, "pitch": 36, "length": 0.25}
+            drums.set_pad_track(0, bass)
+            # Removing a track moves later pads down; a pad on it plays nothing.
+            session.remove_track(0)
+            assert [pad["params"]["track"] for pad in drums.config.pads[:3]] == [-1, 0, 2]
+            assert [track["name"] for track in drums.config.session_tracks] == ["Lead", "Beat", "Keys"]
+            # A removed drum machine has no tracks to play.
+            session.remove_track(1)
+            assert drums.config.session_tracks == []
+        finally:
+            session.close()
+
     def test_kits_load_by_name_or_from_the_browser_picker(self):
         session = nbplay.Session()
         drums = nbplay.DrumMachineWidget(autosync=False)

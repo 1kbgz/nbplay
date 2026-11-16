@@ -1047,9 +1047,9 @@ def _factory_presets(widget_type):
     return presets
 
 
-#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch, or a sample.
+#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch, a sample, or another track's instrument.
 DRUM_SOUNDS = ("kick", "snare", "hat", "clap", "tom")
-PAD_SOUNDS = (*DRUM_SOUNDS, "synth", "fm", "sample")
+PAD_SOUNDS = (*DRUM_SOUNDS, "synth", "fm", "sample", "track")
 MAX_DRUM_PADS = 16
 _DRUM_DEFAULTS = {
     "kick": {"tune": 0.0, "decay": 0.45, "tone": 0.3},
@@ -1111,6 +1111,12 @@ def _normalize_drum_pad(raw, index):
             "sample": str(params.get("sample") or ""),
             "tune": _bounded(params.get("tune", 0.0), -24, 24),
             "length": _bounded(params.get("length", 4.0), 0.01, 4),
+        }
+    elif sound == "track":
+        params = {
+            "track": max(-1, int(params.get("track", -1))),
+            "pitch": _clamp_midi_note(params.get("pitch", 60)),
+            "length": _bounded(params.get("length", 0.25), 0.01, 4),
         }
     else:
         params["pitch"] = _clamp_midi_note(params.get("pitch", 60))
