@@ -383,6 +383,36 @@ test.describe("DrumMachineWidget", () => {
     await expect(page.locator(".nbplay-drums-choke")).toHaveCount(0);
   });
 
+  test("a held note on the session bus plays the pad once and lights it", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const ctx = new OfflineAudioContext(1, 44100, 44100);
+      window.__offline = ctx;
+      globalThis.__nbplay = {
+        drums: { audioCtx: ctx, channels: [{ gain: ctx.destination }] },
+      };
+    });
+    await renderDrums(page, { session_id: "drums", channel_index: 0 });
+    const result = await page.evaluate(async () => {
+      const release = globalThis.__nbplay.drums.instruments[0].startNote(
+        36,
+        127,
+        0,
+      );
+      const data = (await window.__offline.startRendering()).getChannelData(0);
+      let most = 0;
+      for (let i = 0; i < 4410; i++) most = Math.max(most, Math.abs(data[i]));
+      return { kick: most, release: typeof release };
+    });
+    // A one-shot: the kick sounds, and there is no release to call.
+    expect(result.kick).toBeGreaterThan(0.1);
+    expect(result.release).toBe("undefined");
+    await expect(
+      page.locator("nbplay-drums .nbplay-pad-cell.active"),
+    ).toHaveCount(1);
+  });
+
   test("the kit picker asks the kernel for a kit", async ({ page }) => {
     await renderDrums(page, { preset_names: ["Analog kit", "Electro kit"] });
     await page

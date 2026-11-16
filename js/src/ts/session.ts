@@ -37,6 +37,15 @@ export interface InstrumentBus {
     at: number,
     duration: number,
   ) => (() => void) | void;
+  /**
+   * Start a note at `at` (now when omitted) and hold it until the returned
+   * release is called, with its time or now (a key held on a MIDI keyboard).
+   */
+  startNote?: (
+    note: number,
+    velocity: number,
+    at?: number,
+  ) => ((at?: number) => void) | void;
 }
 
 /** A source that plays a track's notes in place of its looping sequencer. */

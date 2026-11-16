@@ -9,6 +9,7 @@ import {
   createFmVoice,
   disposeFmVoice,
   scheduleFmNote,
+  startFmNote,
   type FmPatch,
   type FmVoice,
 } from "../voices.ts";
@@ -242,6 +243,22 @@ export class NbplayFmSynth extends NbplayElement {
         );
         this.liveNotes.add(cancel);
         return cancel;
+      },
+      startNote: (note, velocity, at) => {
+        const ctx = bus.audioCtx;
+        const output = bus.channels?.[idx]?.gain || bus.masterGain;
+        if (!ctx || !output) return;
+        const held = startFmNote(
+          ctx,
+          output,
+          this.patch(),
+          note,
+          velocity,
+          at ?? ctx.currentTime,
+          () => this.liveNotes.delete(held.stop),
+        );
+        this.liveNotes.add(held.stop);
+        return (when) => held.release(when ?? ctx.currentTime);
       },
     };
     instruments[idx] = entry;

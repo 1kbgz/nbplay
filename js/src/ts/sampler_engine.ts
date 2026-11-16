@@ -287,19 +287,28 @@ export function createSamplerEngine(initialMaxVoices = 8) {
     },
 
     noteOff(noteNum: number, envelope: Pick<Envelope, "release">): void {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-      const toRelease = activeVoices.filter(
-        (v) => v.noteNum === noteNum && v.releaseTime === null,
+      activeVoices
+        .filter((v) => v.noteNum === noteNum && v.releaseTime === null)
+        .forEach((voice) => this.releaseVoice(voice, envelope));
+    },
+
+    /** Release one held voice at `at` (now when omitted). */
+    releaseVoice(
+      voice: Voice,
+      envelope: Pick<Envelope, "release">,
+      at?: number,
+    ): void {
+      if (!audioCtx || voice.releaseTime !== null) return;
+      const now = at ?? audioCtx.currentTime;
+      voice.releaseTime = now;
+      const currentGain = voice.gainNode.gain.value;
+      voice.gainNode.gain.setValueAtTime(currentGain, now);
+      voice.gainNode.gain.linearRampToValueAtTime(0, now + envelope.release);
+      voice.sourceNode.stop(now + envelope.release);
+      setTimeout(
+        () => retire(voice),
+        (now - audioCtx.currentTime + envelope.release) * 1000 + 10,
       );
-      toRelease.forEach((voice) => {
-        voice.releaseTime = now;
-        const currentGain = voice.gainNode.gain.value;
-        voice.gainNode.gain.setValueAtTime(currentGain, now);
-        voice.gainNode.gain.linearRampToValueAtTime(0, now + envelope.release);
-        voice.sourceNode.stop(now + envelope.release);
-        setTimeout(() => retire(voice), envelope.release * 1000 + 10);
-      });
     },
 
     /** Stop one voice at once, started or not, and free it. */
