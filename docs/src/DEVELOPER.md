@@ -208,6 +208,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `MixerWidget`        | `channels`, `returns`, `master_gain`, `master_effects`, `session_id`, `theme`                                                                                                                                                                                          | none                                                                                                                                                                        |
 | `FMSynthWidget`      | `frequency`, `amplitude`, `ratio`, `index`, `attack`, `decay`, `sustain`, `release`, `session_id`, `channel_index`, `theme`                                                                                                                                            | `is_playing`                                                                                                                                                                |
 | `DrumMachineWidget`  | `pads`, `samples`, `pattern`, `steps`, `step_duration`, `swing`, `bpm`, time signature, `velocity`, `preset_names`, `sound_preset_names`, `session_tracks`, `session_id`, `channel_index`, `theme`                                                                     | `is_playing`, `current_step`, `preset_request`                                                                                                                              |
+| `ArpeggiatorWidget`  | `order`, `octaves`, `step_duration`, `gate`, `swing`, `latch`, `bpm`, `session_id`, `channel_index`, `theme`                                                                                                                                                           | `held_notes`                                                                                                                                                                |
 | `SequencerWidget`    | `voices_data`, `num_voices`, `length`, `measures`, `step_duration`, `time_signature_num`, `time_signature_den`, `bpm`, `loop_enabled`, `keyboard_connected`, `follow_transport`, `swing`, `groove`, `automation_lanes`, `session_id`, `channel_index`, `theme`         | `is_playing`, `current_step`                                                                                                                                                |
 | `SamplerWidget`      | `sample_name`, `sample_rate`, `sample_length`, `root_note`, `waveform`, `sample_data`, ADSR fields, `max_voices`, `pad_count`, `pad_notes`, `pad_velocities`, `pad_actions`, `sample_slices`, `velocity`, `velocity_sensitive`, `zones`, `session_id`, `channel_index` | `active_pads`, `last_note_event`, `last_pad_event`, `request` (capture commands)                                                                                            |
 | `TransportWidget`    | `bpm`, `time_signature_num`, `time_signature_den`, `loop_enabled`, `loop_start_bar`, `loop_end_bar`, `session_id`, `theme`                                                                                                                                             | `is_playing`, `is_recording`, `current_beat`, `bar_number`, `beat_in_bar`, `undo_request`, `redo_request`                                                                   |
@@ -402,6 +403,7 @@ globalThis.__nbplay[sessionId] = {
   channels: [{ gain, pan }, ...],
   plugins: { [effectType]: (ctx, effect) => AudioNode | EffectUnit },
   samplers: { [channelIndex]: { triggerNote, releaseNote } },
+  inputs: { [channelIndex]: { startNote } },   // a track's arpeggiator
   noteListeners: [(evt) => void],
   claims: { [channelIndex]: { launcher?: true, timeline?: true } }
 };
@@ -670,6 +672,36 @@ A kit is the pads and their samples: `PRESET = ("pads", "samples")`, with the
 shipped Analog kit (the default) and Electro kit offered in the header. A
 session saves the pads, pattern, steps, step length, swing and tap velocity,
 with each sample in `samples/track-N-pad-<id>.f32`.
+
+### ArpeggiatorWidget
+
+Python class: `ArpeggiatorWidget`. Element: `js/src/ts/components/arpeggiator.ts`.
+
+An arpeggiator is a track's note source in place of a sequencer:
+`session.add_track("Lead", ArpeggiatorWidget(), SynthWidget())`. The element
+registers `bus.inputs[channel_index]` (`{startNote(note, velocity)}`, which
+returns the note's release). A MIDI router route to that track, or a QWERTY
+keyboard on its channel (`keyboard.connect_arpeggiator(arp)` sets the
+keyboard's `session_id` and `channel_index`), sends held notes there instead of
+to the instrument, and does not broadcast them: the session hears what the
+arpeggiator plays.
+
+Each step plays one note on `bus.instruments[channel_index]` with
+`scheduleNote()` and emits it to `bus.noteListeners` with its time and length.
+`arpNotes(held, order, octaves)` gives one cycle: `up`, `down`, `updown`
+(turning at the ends without repeating them), `random` (picks from the up
+cycle each step) or `played` (key order), repeated `octaves` octaves up. Steps
+are `step_duration` beats apart (0.25 is a sixteenth), sound for `gate` of a
+step, and every second step moves by `swing` as the sequencer's does. While the
+session clock plays, steps fall on its beat grid; while it is stopped they run
+from 30 ms after the first key, so keys pressed together start as one chord. A
+play, stop, seek, tempo or loop change realigns the next step. With `latch`,
+the notes keep playing after the keys go up, and the next key after all were up
+starts a new chord; turning latch off with no keys down lets them go.
+`held_notes` (status) lists what is held. The settings are its preset; a saved
+session tags the track's note source as an arpeggiator. `Session.chain()` and
+`export_midi()` use sequencers only. Recording what the arpeggiator plays into a
+sequencer or a MIDI clip is still to come.
 
 ### SequencerWidget
 

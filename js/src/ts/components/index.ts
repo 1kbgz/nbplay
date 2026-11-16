@@ -112,6 +112,7 @@ export {
   type SendRequest,
 } from "./midi-output.ts";
 export { NbplaySequencer } from "./sequencer.ts";
+export { NbplayArpeggiator, arpNotes, type ArpNote } from "./arpeggiator.ts";
 export { NbplayDrums, padSynthPatch, type DrumPad } from "./drums.ts";
 export {
   NbplayLauncher,

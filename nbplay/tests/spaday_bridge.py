@@ -18,6 +18,7 @@ from spaday.widget import _ESM
 import nbplay
 
 VIEWS = {
+    "arpeggiator": nbplay.ArpeggiatorWidget,
     "transport": nbplay.TransportWidget,
     "synth": nbplay.SynthWidget,
     "drums": nbplay.DrumMachineWidget,

@@ -48,6 +48,14 @@ export interface InstrumentBus {
   ) => ((at?: number) => void) | void;
 }
 
+/**
+ * A track's note input: held notes sent to the track go here instead of to
+ * its instrument (an arpeggiator). `startNote` returns the note's release.
+ */
+export interface NoteInput {
+  startNote: (note: number, velocity: number) => (() => void) | void;
+}
+
 /** A source that plays a track's notes in place of its looping sequencer. */
 export type ChannelOwner = "launcher" | "timeline";
 
@@ -61,6 +69,8 @@ export interface SessionBus {
   returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
   instruments?: Record<number, InstrumentBus>;
+  /** Track note inputs by channel; MIDI routes and keyboards prefer them to the instrument. */
+  inputs?: Record<number, NoteInput>;
   /** A view of the session's launcher: the MIDI router's launch actions go through it. */
   launcher?: {
     command(request: {

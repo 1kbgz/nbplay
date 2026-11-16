@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_valid
 from .descriptors import (
     _FM_SYNTH_STATE,
     _SYNTH_STATE,
+    ARP_ORDERS,
     MAX_DRUM_PADS,
     THEMES,
     _clamp_midi_note,
@@ -42,6 +43,8 @@ from .descriptors import (
 )
 
 __all__ = (
+    "ArpeggiatorConfig",
+    "ArpeggiatorStatus",
     "DrumMachineConfig",
     "DrumMachineStatus",
     "FMSynthConfig",
@@ -661,6 +664,45 @@ def _normalize_lanes(lanes):
 
 
 _GRID_FIELDS = frozenset({"measures", "step_duration", "time_signature_num", "time_signature_den"})
+
+
+class ArpeggiatorConfig(_Validated):
+    """An arpeggiator: the notes held on its track become a pattern on the session clock.
+
+    ``order`` is one of :data:`~nbplay.descriptors.ARP_ORDERS` (``updown``
+    turns at the ends without repeating them; ``played`` keeps the order the
+    keys went down). ``octaves`` repeats the pattern that many octaves up.
+    ``step_duration`` is the step in beats (0.25 is a sixteenth), ``gate``
+    the part of a step a note sounds, ``swing`` delays every second step as
+    the sequencer's does, and ``latch`` keeps the notes playing after the
+    keys are released, until a new chord replaces them.
+    """
+
+    order: str = "up"
+    octaves: int = Field(1, ge=1, le=4)
+    step_duration: float = Field(0.25, gt=0, le=4)
+    gate: float = Field(0.5, ge=0.05, le=1)
+    swing: float = Field(0.0, ge=0, le=100)
+    latch: bool = False
+    bpm: float = Field(120.0, ge=30, le=300)
+    session_id: str = ""
+    channel_index: int = -1
+    theme: str = ""
+
+    _theme = field_validator("theme")(classmethod(lambda cls, value: _validate_theme(value)))
+
+    @field_validator("order")
+    @classmethod
+    def _order(cls, order):
+        if order not in ARP_ORDERS:
+            raise ValueError(f"order must be one of {list(ARP_ORDERS)}, got {order!r}")
+        return order
+
+
+class ArpeggiatorStatus(BaseModel):
+    """The notes held (or latched) now; browser-owned."""
+
+    held_notes: list[int] = []
 
 
 class SequencerConfig(_Validated):

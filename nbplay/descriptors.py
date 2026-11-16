@@ -986,6 +986,9 @@ _SYNTH_STATE = (
     "lfo_rate",
     "lfo_depth",
 )
+#: The orders an arpeggiator plays its held notes in.
+ARP_ORDERS = ("up", "down", "updown", "random", "played")
+_ARPEGGIATOR_STATE = ("order", "octaves", "step_duration", "gate", "swing", "latch")
 _FM_SYNTH_STATE = ("frequency", "amplitude", "ratio", "index", "attack", "decay", "sustain", "release")
 _SAMPLER_STATE = (
     "sample_name",

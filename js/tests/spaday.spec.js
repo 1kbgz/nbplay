@@ -521,6 +521,27 @@ test.describe("views on transports", () => {
     }
   });
 
+  test("arpeggiator: settings travel both ways", async ({ page }) => {
+    const kernel = await viewKernel("arpeggiator");
+    try {
+      await mount(page, kernel);
+      const arp = page.locator("#owner nbplay-arpeggiator");
+      await arp.locator('.nbplay-arp-order [data-value="down"]').click();
+      await expect
+        .poll(async () => (await state(kernel)).config.order)
+        .toBe("down");
+      await page.evaluate(
+        (response) => notebook.deliver(response),
+        await kernel.call({ op: "set", field: "octaves", value: 3 }),
+      );
+      await expect(
+        arp.locator('.nbplay-arp-octaves [data-value="3"]'),
+      ).toHaveClass(/active/);
+    } finally {
+      kernel.close();
+    }
+  });
+
   test("mixer: kernel and browser edits meet in one validated console", async ({
     page,
   }) => {

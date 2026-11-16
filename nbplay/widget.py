@@ -23,6 +23,7 @@ from spaday import Widget, Wire, element
 from . import __version__
 from .audio_files import decode_audio_file
 from .descriptors import (
+    _ARPEGGIATOR_STATE,
     _DRUM_MACHINE_STATE,
     _FM_SYNTH_STATE,
     _PAD_MAX_COUNT,
@@ -67,6 +68,8 @@ from .descriptors import (
 )
 from .history import History
 from .models import (
+    ArpeggiatorConfig,
+    ArpeggiatorStatus,
     DrumMachineConfig,
     DrumMachineStatus,
     FMSynthConfig,
@@ -102,6 +105,7 @@ from .models import (
 
 __all__ = (
     "PACKAGE",
+    "ArpeggiatorWidget",
     "DrumMachineWidget",
     "FMSynthWidget",
     "InstrumentWidget",
@@ -870,6 +874,16 @@ class KeyboardWidget(_Keys):
     }
     STATUS: ClassVar[dict[str, str]] = {"active_notes": "activeNotes", "last_note_event": "lastNoteEvent"}
 
+    def connect_arpeggiator(self, arpeggiator):
+        """Play into ``arpeggiator`` (an :class:`ArpeggiatorWidget` on a session track): the keys hold its notes instead of sounding."""
+        if arpeggiator.config.channel_index < 0:
+            raise ValueError("the arpeggiator is not on a session track; add it with session.add_track() first")
+        self.config.update(session_id=arpeggiator.config.session_id, channel_index=arpeggiator.config.channel_index)
+
+    def disconnect_arpeggiator(self):
+        """Stop playing into an arpeggiator; the keys sound on their own again."""
+        self.config.channel_index = -1
+
 
 class MidiKeyboardWidget(_Keys):
     """The Web MIDI keyboard on a transports session; ports and clock are browser-owned."""
@@ -1052,6 +1066,35 @@ class MidiOutputWidget(InstrumentWidget):
         if not data:
             raise ValueError("MIDI message must not be empty")
         return self._request(kind="raw", data=data)
+
+
+class ArpeggiatorWidget(InstrumentWidget):
+    """An arpeggiator: a track's note source in place of a sequencer.
+
+    ``session.add_track("Lead", ArpeggiatorWidget(), SynthWidget())`` puts it
+    on a track. Notes the MIDI router routes to that track, or that a
+    keyboard connected with :meth:`KeyboardWidget.connect_arpeggiator`
+    plays, are held in the arpeggiator, which plays them one step at a time
+    on the track's instrument. See :class:`~nbplay.models.ArpeggiatorConfig`.
+    """
+
+    TAG = "nbplay-arpeggiator"
+    PRESET = _ARPEGGIATOR_STATE
+    CONFIG_MODEL = ArpeggiatorConfig
+    STATUS_MODEL = ArpeggiatorStatus
+    CONFIG: ClassVar[dict[str, str]] = {
+        "order": "order",
+        "octaves": "octaves",
+        "step_duration": "stepDuration",
+        "gate": "gate",
+        "swing": "swing",
+        "latch": "latch",
+        "bpm": "bpm",
+        "session_id": "sessionId",
+        "channel_index": "channelIndex",
+        "theme": "theme",
+    }
+    STATUS: ClassVar[dict[str, str]] = {"held_notes": "heldNotes"}
 
 
 class SequencerWidget(InstrumentWidget):
@@ -2347,7 +2390,7 @@ class Session:
         if missing:
             raise ValueError(f"unknown pattern(s): {', '.join(map(str, missing))}")
         with self.history.transaction():
-            if item.sequencer is not None:
+            if isinstance(item.sequencer, SequencerWidget):
                 item.sequencer.config.follow_transport = False
             clips = []
             position = _nonnegative_number(start, "start")
@@ -2388,7 +2431,7 @@ class Session:
 
         tracks = []
         for track in self.tracks:
-            if track.sequencer is not None:
+            if isinstance(track.sequencer, SequencerWidget):
                 config = track.sequencer.config
                 events = steps_to_events(config.voices_data, config.step_duration)
                 tracks.append({"name": track.name, "events": events, "channel": min(15, max(0, track.mixer_channel))})
@@ -2553,6 +2596,8 @@ def _sound_source_from_dict(entry, resources):
 def _sequencer_from_dict(state):
     if state is None:
         return None
+    if state.get("type") == "ArpeggiatorWidget":
+        return ArpeggiatorWidget(**{k: v for k, v in state.get("state", {}).items() if k in _ARPEGGIATOR_STATE})
     ctor = {k: state[k] for k in ("num_voices", "length", "measures", "step_duration", "time_signature_num", "time_signature_den") if k in state}
     sequencer = SequencerWidget(**ctor)
     fields = {name: state[name] for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport") if name in state}
@@ -2566,7 +2611,9 @@ def _session_to_dict(session, resources=None):
     tracks = []
     for index, track in enumerate(session.tracks):
         sequencer = None
-        if track.sequencer is not None:
+        if isinstance(track.sequencer, ArpeggiatorWidget):
+            sequencer = {"type": "ArpeggiatorWidget", "state": _dump(track.sequencer.config, _ARPEGGIATOR_STATE)}
+        elif track.sequencer is not None:
             sequencer = _dump(track.sequencer.config, (*_SEQUENCER_STATE, "voices_data"))
         tracks.append({"name": track.name, "sequencer": sequencer, "sound_source": _sound_source_to_dict(track.sound_source, index, resources)})
     clips = []
