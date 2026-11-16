@@ -215,7 +215,7 @@ These live in `nbplay/descriptors.py`, which does not import pydantic, so
 | `LauncherWidget`     | `tracks`, `scenes`, `slots`, `quantize`, `bpm`, time signature, `selected_slot`, `session_id`, `theme`                                                                                                                                                                 | `is_playing`, `active_slots`, `queued_slots`, `request` (launch commands)                                                                                                   |
 | `KeyboardWidget`     | `upper_octave`, `lower_octave`, `velocity`, sustain fields, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                  | `active_notes`, `last_note_event`                                                                                                                                           |
 | `MidiKeyboardWidget` | `midi_port`, `sync_clock`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                                                                                                   | `available_midi_ports`, `active_notes`, `last_note_event`, `control_change`, `clock_bpm`                                                                                    |
-| `MidiRouterWidget`   | `routes`, `session_tracks`, `session_id`, `theme`                                                                                                                                                                                                                      | `available_midi_ports`, `last_event`, `control_change`                                                                                                                      |
+| `MidiRouterWidget`   | `routes`, `mappings`, `session_tracks`, `session_scenes`, `session_id`, `theme`                                                                                                                                                                                        | `available_midi_ports`, `last_event`, `control_change`                                                                                                                      |
 | `MidiOutputWidget`   | `midi_port`, `channel`, `forward_notes`, `send_clock`, `session_id`, `theme`                                                                                                                                                                                           | `available_midi_ports`, `request` (send commands)                                                                                                                           |
 | `PadWidget`          | `rows`, `cols`, `velocity`, `velocity_sensitive`, `pad_notes`, `pad_velocities`, `pad_actions`, `sampler_routing`, `session_id`, `channel_index`, `theme`                                                                                                              | `active_pads`, `last_note_event`, `last_pad_event`                                                                                                                          |
 
@@ -1012,6 +1012,25 @@ works as it does with the MIDI keyboard. The port list (`available_midi_ports`)
 is the browser's. The element reports it as soon as it has access, which can
 be before its wire is connected, so when a host snapshot replaces the list
 with another one, the element writes its own again.
+
+Mappings bind one message to an action instead of routing notes. A mapping
+is `{port, midi_channel, kind, number, action, track_index, scene_index}`: a
+note-on, or a control change pressed (value 64 or more), with that `kind`
+(`note` or `cc`) and `number` runs `action`. The transport actions are `play`,
+`stop`, `toggle` and `record`; the router calls the session clock directly, the
+way the transport's buttons do (record arms and plays). The launcher actions are
+`launch` (a launcher row and scene), `scene`, `stop_track` and `stop_all`; every
+launcher view registers `bus.launcher` with its `command()` entry, the same one
+the kernel's requests use, and a following view forwards to the engine. A
+mapped message, its note-off and a mapped control's release are not routed,
+broadcast or reported as a control change, so a key can be a control or a note
+but not both. `add_mapping()`, `remove_mapping()` and `clear_mappings()` edit the
+list, and `map_launcher_grid(tracks, scenes, origin=81, track_step=1, scene_step=-10)` maps a pad grid onto slots in one edit (the defaults are a
+Launchpad's programmer layout). In the editor, Add control starts Learn, and a
+mapping's control button learns again: the next press fills in its port,
+channel, kind and number. The session keeps `session_scenes` (the launcher's
+scene names) for the editor, drops mappings to a removed track's launcher row
+and moves later rows up.
 
 ### MidiOutputWidget
 

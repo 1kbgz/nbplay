@@ -1337,16 +1337,37 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-midi-router",
     title: "nbplay-midi-router",
-    desc: "Routes Web MIDI input to track instruments: each route takes a port, a MIDI channel and a note range to a track. Needs a browser with Web MIDI and a session with tracks to sound.",
+    desc: "Routes Web MIDI input to track instruments: each route takes a port, a MIDI channel and a note range to a track. Controls bind one note or CC to a transport or launcher action, learned from the device. Needs a browser with Web MIDI and a session with tracks to sound.",
     events: ["nbplay-set", "nbplay-status"],
     controls: [],
     variants: [
       {
-        label: "two routes",
+        label: "two routes and two controls",
         props: {
           sessionTracks: [
             { channel_index: 0, name: "Bass" },
             { channel_index: 1, name: "Beat" },
+          ],
+          sessionScenes: ["Verse", "Chorus"],
+          mappings: [
+            {
+              port: "",
+              midi_channel: -1,
+              kind: "cc",
+              number: 91,
+              action: "toggle",
+              track_index: -1,
+              scene_index: -1,
+            },
+            {
+              port: "",
+              midi_channel: -1,
+              kind: "note",
+              number: 81,
+              action: "launch",
+              track_index: 0,
+              scene_index: 0,
+            },
           ],
           routes: [
             {

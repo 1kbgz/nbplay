@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 
 const DEFAULTS = {
   routes: [],
+  mappings: [],
+  session_scenes: [],
   session_tracks: [
     { channel_index: 0, name: "Bass" },
     { channel_index: 1, name: "Beat" },
@@ -237,6 +239,138 @@ test.describe("MidiRouterWidget", () => {
     ]);
     await page.locator(".nbplay-midi-router-remove").click();
     expect((await state(page)).routes).toEqual([]);
+  });
+
+  test("a mapped note or control runs its action instead of playing", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.__actions = [];
+      const clock = {
+        playing: false,
+        recording: false,
+        play() {
+          this.playing = true;
+          window.__actions.push("play");
+        },
+        stop() {
+          this.playing = false;
+          window.__actions.push("stop");
+        },
+        setRecording(on) {
+          this.recording = on;
+          window.__actions.push(`record ${on}`);
+        },
+      };
+      Object.assign(globalThis.__nbplay.midi, {
+        clock,
+        launcher: { command: (request) => window.__actions.push(request) },
+      });
+    });
+    const mapping = (fields) => ({
+      port: "",
+      midi_channel: -1,
+      kind: "note",
+      number: 0,
+      action: "toggle",
+      track_index: -1,
+      scene_index: -1,
+      ...fields,
+    });
+    await renderRouter(page, {
+      routes: [route({ channel_index: 0 })],
+      mappings: [
+        mapping({ kind: "cc", number: 91, action: "toggle" }),
+        mapping({ kind: "cc", number: 92, action: "record" }),
+        mapping({
+          number: 81,
+          action: "launch",
+          track_index: 1,
+          scene_index: 2,
+        }),
+        mapping({
+          port: "Launchpad X LPX MIDI",
+          number: 89,
+          action: "scene",
+          scene_index: 0,
+        }),
+        mapping({ number: 19, action: "stop_track", track_index: 0 }),
+        mapping({ number: 18, action: "stop_all" }),
+      ],
+    });
+    const result = await page.evaluate(() => {
+      // A button press is a value of 64 or more; its release does nothing.
+      window.__send("Keys", [0xb0, 91, 127]);
+      window.__send("Keys", [0xb0, 91, 0]);
+      window.__send("Keys", [0xb0, 92, 127]);
+      window.__send("Keys", [0x90, 81, 100]);
+      window.__send("Keys", [0x80, 81, 0]);
+      // A mapping for another port leaves this note to the routes.
+      window.__send("Keys", [0x90, 89, 100]);
+      window.__send("Launchpad X LPX MIDI", [0x90, 89, 100]);
+      window.__send("Keys", [0x90, 19, 100]);
+      window.__send("Keys", [0x90, 18, 100]);
+      return {
+        actions: window.__actions,
+        played: window.__played,
+        heard: window.__heard,
+      };
+    });
+    expect(result.actions).toEqual([
+      "play",
+      // Record arms and plays, as the transport's button does; the real
+      // clock ignores a play while it runs.
+      "record true",
+      "play",
+      { action: "launch", track_index: 1, scene_index: 2 },
+      { action: "scene", scene_index: 0 },
+      { action: "stop", track_index: 0 },
+      { action: "stop_all" },
+    ]);
+    // Only the unmapped note played and was heard; mapped controls never reach MIDI learn.
+    expect(result.played).toEqual([["on", 0, 89, 100]]);
+    expect(result.heard).toEqual([["on", 89]]);
+    expect((await state(page)).control_change).toEqual({});
+  });
+
+  test("Learn takes the next message for a new control", async ({ page }) => {
+    await renderRouter(page, { session_scenes: ["Verse", "Chorus"] });
+    await page.locator(".nbplay-midi-router-add-control").click();
+    await expect(page.locator(".nbplay-midi-router-learn")).toHaveText(
+      "Press a key…",
+    );
+    await page.evaluate(() =>
+      window.__send("Launchpad X LPX MIDI", [0xb3, 19, 127]),
+    );
+    await expect(page.locator(".nbplay-midi-router-learn")).toHaveText(
+      "Launchpad X LPX MIDI · ch 4 · CC 19",
+    );
+    await page
+      .locator(".nbplay-midi-router-action")
+      .selectOption("Launch scene");
+    await expect(page.locator(".nbplay-midi-router-slot-track")).toBeDisabled();
+    await page.locator(".nbplay-midi-router-slot-scene").selectOption("Chorus");
+    expect((await state(page)).mappings).toEqual([
+      {
+        port: "Launchpad X LPX MIDI",
+        midi_channel: 3,
+        kind: "cc",
+        number: 19,
+        action: "scene",
+        track_index: -1,
+        scene_index: 1,
+      },
+    ]);
+    // Learn again from the button; a note this time.
+    await page.locator(".nbplay-midi-router-learn").click();
+    await page.evaluate(() => window.__send("Keys", [0x90, 60, 100]));
+    await expect(page.locator(".nbplay-midi-router-learn")).toHaveText(
+      "Keys · ch 1 · note C4",
+    );
+    await page
+      .locator(".nbplay-midi-router-mapping .nbplay-midi-router-remove")
+      .click();
+    expect((await state(page)).mappings).toEqual([]);
   });
 
   test("a saved route keeps its port while the device is unplugged", async ({

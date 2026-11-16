@@ -1160,6 +1160,29 @@ def _normalize_midi_route(raw):
     }
 
 
+#: What a mapped MIDI message does: the transport's, then the launcher's.
+MIDI_ACTIONS = ("play", "stop", "toggle", "record", "launch", "scene", "stop_track", "stop_all")
+
+
+def _normalize_midi_mapping(raw):
+    """One MIDI mapping: a note-on or a control change pressed (value 64 or more) from ``port`` ("" is any) on ``midi_channel`` (-1 is any) runs ``action``; launcher actions take ``track_index`` and ``scene_index``."""
+    action = raw.get("action", "toggle")
+    if action not in MIDI_ACTIONS:
+        raise ValueError(f"mapping action must be one of {list(MIDI_ACTIONS)}, got {action!r}")
+    kind = raw.get("kind", "note")
+    if kind not in ("note", "cc"):
+        raise ValueError(f"mapping kind must be 'note' or 'cc', got {kind!r}")
+    return {
+        "port": str(raw.get("port") or ""),
+        "midi_channel": _clamp_int(raw.get("midi_channel", -1), -1, 15),
+        "kind": kind,
+        "number": _clamp_int(raw.get("number", 0), 0, 127),
+        "action": action,
+        "track_index": max(-1, int(raw.get("track_index", -1))),
+        "scene_index": max(-1, int(raw.get("scene_index", -1))),
+    }
+
+
 def _normalize_drum_pattern(pattern, pads, steps):
     """One row per pad of ``steps`` velocities (0 is off), cut or padded with zeros."""
     rows = []
