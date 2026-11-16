@@ -1128,8 +1128,6 @@ def _normalize_drum_pad(raw, index):
 
 def _normalize_drum_sample(raw, key):
     """One drum machine sample: mono little-endian float32 ``data`` at ``sample_rate``."""
-    if not isinstance(raw, dict):
-        raise ValueError(f"sample {key!r} must be a dict, got {type(raw).__name__}")  # noqa: TRY004
     data = raw.get("data", b"")
     if isinstance(data, memoryview):
         data = data.tobytes()

@@ -683,8 +683,9 @@ class TestDrumMachineWidget:
             DrumMachineConfig.model_validate({"samples": {"a": "kick"}})
         with pytest.raises(TypeError):
             DrumMachineConfig.model_validate({"samples": {"a": {"data": [0.5]}}})
-        config = DrumMachineConfig(pads=[{"sound": "sample", "params": {"tune": 30}}])
+        config = DrumMachineConfig(pads=[{"sound": "sample", "params": {"tune": 30}}], samples={"a": {"data": memoryview(b"\0" * 8)}})
         assert config.pads[0]["params"] == {"sample": "", "tune": 24.0, "length": 4.0}
+        assert (config.samples["a"]["data"], config.samples["a"]["length"]) == (b"\0" * 8, 2)
         drums = nbplay.DrumMachineWidget(autosync=False)
         try:
             drums.load_pad_sample(0, [0.5, -0.5, 0.25], sample_rate=22050, name="kick", tune=-2)
@@ -756,7 +757,11 @@ class TestDrumMachineWidget:
             assert (drums.config.session_id, drums.config.channel_index, drums.config.bpm) == (session.session_id, track.mixer_channel, 96.0)
             drums.set_row(1, [2, 6], velocity=80)
             drums.set_pad(1, sound="synth", params={"preset": "Pluck", "pitch": 48})
+            assert "samples" not in session.to_dict()["tracks"][0]["sound_source"]
             drums.load_pad_sample(2, [0.25, -0.25], sample_rate=8000, name="hat")
+            # Without an archive a sample keeps its metadata only.
+            (saved,) = session.to_dict()["tracks"][0]["sound_source"]["samples"].values()
+            assert saved == {"name": "hat", "sample_rate": 8000, "length": 2}
             assert panel_widgets(session)["beat-drums"] is drums
             archive = io.BytesIO()
             session.save(archive)
