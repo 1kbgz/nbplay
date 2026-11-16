@@ -9,6 +9,7 @@ import {
 import {
   SYNTH_DEFAULTS,
   scheduleSynthNote,
+  startSynthNote,
   startSynthVoice,
   type SynthPatch,
   type SynthVoice,
@@ -285,6 +286,22 @@ export class NbplaySynth extends NbplayElement {
         );
         this.liveNotes.add(cancel);
         return cancel;
+      },
+      startNote: (note, velocity, at) => {
+        const ctx = bus.audioCtx;
+        const output = bus.channels?.[idx]?.gain || bus.masterGain;
+        if (!ctx || !output) return;
+        const held = startSynthNote(
+          ctx,
+          output,
+          this.patch(),
+          note,
+          velocity,
+          at ?? ctx.currentTime,
+          () => this.liveNotes.delete(held.stop),
+        );
+        this.liveNotes.add(held.stop);
+        return (when) => held.release(when ?? ctx.currentTime);
       },
     };
     instruments[idx] = entry;

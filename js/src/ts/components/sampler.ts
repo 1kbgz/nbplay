@@ -720,6 +720,24 @@ export class NbplaySampler extends NbplayElement {
         if (!voice) return;
         return () => this.engine.cancelVoice(voice);
       },
+      startNote: (note, velocity, at) => {
+        const slice = this.slices().find((s) => s.note === note);
+        const voice = this.engine.noteOn(
+          note,
+          Number(this.rootNote),
+          this.envelope(),
+          velocity,
+          slice,
+          at,
+        );
+        if (!voice) return;
+        return (when) =>
+          this.engine.releaseVoice(
+            voice,
+            { release: Number(this.release) },
+            when,
+          );
+      },
     };
     this.registration = {
       bus,

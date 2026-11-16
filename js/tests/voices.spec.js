@@ -355,6 +355,40 @@ test.describe("voices", () => {
     expect(peaks[1]).toBeLessThan(0.001);
   });
 
+  test("held synth and FM notes sound until their release", async ({
+    page,
+  }) => {
+    for (const start of ["startSynthNote", "startFmNote"]) {
+      const { peaks } = await render(
+        page,
+        (mod, ctx, start) => {
+          const patch =
+            start === "startSynthNote"
+              ? { ...mod.SYNTH_DEFAULTS, amplitude: 0.5, sustain: 1 }
+              : {
+                  amplitude: 0.5,
+                  ratio: 1,
+                  index: 0,
+                  attack: 0.01,
+                  decay: 0.05,
+                  sustain: 1,
+                  release: 0.05,
+                };
+          const held = mod[start](ctx, ctx.destination, patch, 69, 127, 0);
+          held.release(0.5);
+        },
+        [
+          [0.1, 0.5],
+          [0.7, 1],
+        ],
+        start,
+      );
+      // Held at full level until 0.5 s, silent once the release is over.
+      expect(Math.abs(peaks[0] - 0.5)).toBeLessThan(0.02);
+      expect(peaks[1]).toBeLessThan(0.001);
+    }
+  });
+
   test("a cancelled note makes no sound", async ({ page }) => {
     const { peaks } = await render(
       page,

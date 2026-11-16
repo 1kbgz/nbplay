@@ -160,6 +160,13 @@ export class NbplayDrums extends NbplayElement {
   /** Plays a note on the pads that answer to it; the pattern and the bus use it. */
   private instrument: InstrumentBus = {
     scheduleNote: (note, velocity, at) => this.playNote(note, velocity, at),
+    // A pad is a one-shot: a held key plays it once and its release does nothing.
+    startNote: (note, velocity, at) => {
+      this.playNote(note, velocity, at);
+      (this.pads || []).forEach((pad, index) => {
+        if (pad.note === note) this.flash(index);
+      });
+    },
   };
   private scheduler = createAudioScheduler({
     instrument: () => this.instrument,
@@ -462,7 +469,7 @@ export class NbplayDrums extends NbplayElement {
   }
 
   /** Play every pad that answers to `note`; returns a canceller. */
-  playNote(note: number, velocity: number, at: number): () => void {
+  playNote(note: number, velocity: number, at?: number): () => void {
     const cancels = (this.pads || []).flatMap((pad, index) =>
       pad.note === note ? [this.hit(index, velocity, at)] : [],
     );

@@ -354,6 +354,33 @@ export function scheduleSynthNote(
   return () => voice.stop();
 }
 
+/** A note that holds until it is released. */
+export interface HeldNote {
+  /** Start the release at `when`; the note ends after it. */
+  release(when: number): void;
+  /** Stop now and free the nodes. */
+  stop(): void;
+}
+
+/** Start one synth note at `at` and hold it until released. */
+export function startSynthNote(
+  ctx: BaseAudioContext,
+  output: AudioNode,
+  patch: SynthPatch,
+  note: number,
+  velocity: number,
+  at: number,
+  onEnded: () => void = () => {},
+): HeldNote {
+  const level = Math.max(0, Math.min(1, patch.amplitude)) * (velocity / 127);
+  const voice = startSynthVoice(ctx, output, patch, midiToHz(note), level, at);
+  voice.onended = onEnded;
+  return {
+    release: (when) => void voice.release(when),
+    stop: () => voice.stop(),
+  };
+}
+
 export interface FmVoice {
   carrier: OscillatorNode;
   modulator: OscillatorNode;
@@ -448,6 +475,54 @@ export function scheduleFmNote(
       }
     }
     finish();
+  };
+}
+
+/** Start one FM note at `at`, shaped by the patch's ADSR, and hold it at the sustain level until released. */
+export function startFmNote(
+  ctx: BaseAudioContext,
+  output: AudioNode,
+  patch: FmPatch,
+  note: number,
+  velocity: number,
+  at: number,
+  onEnded: () => void = () => {},
+): HeldNote {
+  const peak = Math.max(0, Math.min(1, patch.amplitude)) * (velocity / 127);
+  const voice = createFmVoice(ctx, output, midiToHz(note), patch);
+  const release = startEnvelope(
+    voice.level.gain,
+    at,
+    0,
+    peak,
+    peak * patch.sustain,
+    Math.max(patch.attack, MIN_ATTACK),
+    Math.max(0, patch.decay),
+  );
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    disposeFmVoice(voice);
+    onEnded();
+  };
+  voice.carrier.onended = finish;
+  const oscillators = [voice.modulator, voice.carrier];
+  oscillators.forEach((osc) => osc.start(at));
+  const stopAt = (when: number) =>
+    oscillators.forEach((osc) => {
+      try {
+        osc.stop(when);
+      } catch {
+        /* already stopped */
+      }
+    });
+  return {
+    release: (when) => stopAt(release(when, patch.release)),
+    stop: () => {
+      stopAt(0);
+      finish();
+    },
   };
 }
 

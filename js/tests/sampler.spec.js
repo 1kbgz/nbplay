@@ -1008,4 +1008,53 @@ test.describe("SamplerWidget", () => {
     });
     expect(afterDestroy).toBe(true);
   });
+
+  test("a held note on the session bus loops its sample until its release", async ({
+    page,
+  }) => {
+    const result = await (async () => {
+      await page.evaluate(() => {
+        const ctx = new OfflineAudioContext(1, 44100, 44100);
+        window.__offline = ctx;
+        globalThis.__nbplay = {
+          held: { audioCtx: ctx, channels: [{ gain: ctx.destination }] },
+        };
+      });
+      await renderWidget(page, {
+        session_id: "held",
+        channel_index: 0,
+        sustain: 1,
+        release: 0.05,
+        sample_data: null,
+      });
+      await page.evaluate(() => {
+        // 0.1 s of 0.5: it loops while the note is held.
+        const samples = new Float32Array(4410).fill(0.5);
+        window.__testModel.set("sample_data", new DataView(samples.buffer));
+        window.__testModel._trigger("change:sample_data");
+      });
+      return page.evaluate(async () => {
+        const bus = globalThis.__nbplay.held;
+        const release = bus.instruments[0].startNote(60, 127, 0);
+        if (release) release(0.5);
+        const data = (await window.__offline.startRendering()).getChannelData(
+          0,
+        );
+        const peak = (from, to) => {
+          let most = 0;
+          for (let i = Math.round(from * 44100); i < to * 44100; i++)
+            most = Math.max(most, Math.abs(data[i]));
+          return most;
+        };
+        return {
+          held: peak(0.3, 0.5),
+          after: peak(0.9, 1),
+          releases: typeof release,
+        };
+      });
+    })();
+    expect(result.releases).toBe("function");
+    expect(result.held).toBeGreaterThan(0.4);
+    expect(result.after).toBe(0);
+  });
 });
