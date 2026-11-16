@@ -187,6 +187,9 @@ Module Contents
    .. py:method:: test_config_and_status_changes_reach_observers()
 
 
+   .. py:method:: test_a_kernel_write_made_during_a_browser_edit_reaches_the_browser()
+
+
    .. py:method:: test_timeline_collects_exported_clips()
 
 
