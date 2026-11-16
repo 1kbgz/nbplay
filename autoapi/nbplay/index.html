@@ -828,6 +828,15 @@
     <a href="#nbplay.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.load_pad_sample">DrumMachineWidget.load_pad_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.load_pad_file">DrumMachineWidget.load_pad_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget._set_pads">DrumMachineWidget._set_pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.DrumMachineWidget.set_step">DrumMachineWidget.set_step()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -2816,7 +2825,8 @@ and 0-127 for ints.</p>
 sequencer, a clip or a launched slot on its track play the pads that
 answer to them, and its own pattern plays on the session clock. See
 <a class="reference internal" href="models/index.html#nbplay.models.DrumMachineConfig" title="nbplay.models.DrumMachineConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">DrumMachineConfig</span></code></a> for the pad fields. A kit (the
-pads) is its preset; <code class="xref py py-meth docutils literal notranslate"><span class="pre">presets()</span></code> lists the shipped kits.</p>
+pads and their samples) is its preset; <code class="xref py py-meth docutils literal notranslate"><span class="pre">presets()</span></code> lists the shipped
+kits.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.DrumMachineWidget.TAG">
 <span class="sig-name descname"><span class="pre">TAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nbplay-drums'</span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.TAG" title="Link to this definition">¶</a></dt>
@@ -2824,7 +2834,7 @@ pads) is its preset; <code class="xref py py-meth docutils literal notranslate">
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.DrumMachineWidget.PRESET">
-<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pads',)</span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.PRESET" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PRESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pads',</span> <span class="pre">'samples')</span></em><a class="headerlink" href="#nbplay.DrumMachineWidget.PRESET" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2857,6 +2867,25 @@ pads) is its preset; <code class="xref py py-meth docutils literal notranslate">
 <dt class="sig sig-object py" id="nbplay.DrumMachineWidget.set_pad">
 <span class="sig-name descname"><span class="pre">set_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.set_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.set_pad" title="Link to this definition">¶</a></dt>
 <dd><p>Change pad <code class="docutils literal notranslate"><span class="pre">index</span></code>’s fields. A new <code class="docutils literal notranslate"><span class="pre">sound</span></code> without <code class="docutils literal notranslate"><span class="pre">params</span></code> starts from that sound’s defaults; <code class="docutils literal notranslate"><span class="pre">params</span></code> for the same sound are merged.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.load_pad_sample">
+<span class="sig-name descname"><span class="pre">load_pad_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">44100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Sample'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.load_pad_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.load_pad_sample" title="Link to this definition">¶</a></dt>
+<dd><p>Make pad <code class="docutils literal notranslate"><span class="pre">index</span></code> play mono float samples (or float32 bytes); <code class="docutils literal notranslate"><span class="pre">params</span></code> sets <code class="docutils literal notranslate"><span class="pre">tune</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p>
+<p>A pad that already plays a sample keeps its <code class="docutils literal notranslate"><span class="pre">tune</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> unless <code class="docutils literal notranslate"><span class="pre">params</span></code> changes them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget.load_pad_file">
+<span class="sig-name descname"><span class="pre">load_pad_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.load_pad_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.load_pad_file" title="Link to this definition">¶</a></dt>
+<dd><p>Make pad <code class="docutils literal notranslate"><span class="pre">index</span></code> play an audio file (WAV through the stdlib, others through <code class="docutils literal notranslate"><span class="pre">soundfile</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.DrumMachineWidget._set_pads">
+<span class="sig-name descname"><span class="pre">_set_pads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget._set_pads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget._set_pads" title="Link to this definition">¶</a></dt>
+<dd><p>Set the pads and drop the samples no pad plays any more, in one update.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -5021,6 +5050,15 @@ is already cached are skipped unless <code class="docutils literal notranslate">
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.DrumMachineWidget.set_pad">DrumMachineWidget.set_pad()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.load_pad_sample">DrumMachineWidget.load_pad_sample()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget.load_pad_file">DrumMachineWidget.load_pad_file()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.DrumMachineWidget._set_pads">DrumMachineWidget._set_pads()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.DrumMachineWidget.set_step">DrumMachineWidget.set_step()</a>

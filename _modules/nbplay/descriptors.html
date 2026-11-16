@@ -1878,9 +1878,9 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<span class="c1">#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch.</span>
+<span class="c1">#: The drum machine's built-in drum sounds; a pad can also play a synth or FM patch, or a sample.</span>
 <span class="n">DRUM_SOUNDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"kick"</span><span class="p">,</span> <span class="s2">"snare"</span><span class="p">,</span> <span class="s2">"hat"</span><span class="p">,</span> <span class="s2">"clap"</span><span class="p">,</span> <span class="s2">"tom"</span><span class="p">)</span>
-<span class="n">PAD_SOUNDS</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">DRUM_SOUNDS</span><span class="p">,</span> <span class="s2">"synth"</span><span class="p">,</span> <span class="s2">"fm"</span><span class="p">)</span>
+<span class="n">PAD_SOUNDS</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">DRUM_SOUNDS</span><span class="p">,</span> <span class="s2">"synth"</span><span class="p">,</span> <span class="s2">"fm"</span><span class="p">,</span> <span class="s2">"sample"</span><span class="p">)</span>
 <span class="n">MAX_DRUM_PADS</span> <span class="o">=</span> <span class="mi">16</span>
 <span class="n">_DRUM_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"kick"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"tune"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"decay"</span><span class="p">:</span> <span class="mf">0.45</span><span class="p">,</span> <span class="s2">"tone"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span>
@@ -1948,6 +1948,12 @@ window.runMermaid = runMermaid;</script>
             <span class="s2">"decay"</span><span class="p">:</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"decay"</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">"decay"</span><span class="p">]),</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
             <span class="s2">"tone"</span><span class="p">:</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tone"</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">"tone"</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="p">}</span>
+    <span class="k">elif</span> <span class="n">sound</span> <span class="o">==</span> <span class="s2">"sample"</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"sample"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sample"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="s2">"tune"</span><span class="p">:</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tune"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="o">-</span><span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">),</span>
+            <span class="s2">"length"</span><span class="p">:</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"length"</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">params</span><span class="p">[</span><span class="s2">"pitch"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pitch"</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
         <span class="n">params</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"length"</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
@@ -1959,6 +1965,24 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"pan"</span><span class="p">:</span> <span class="n">_bounded</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pan"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="s2">"choke"</span><span class="p">:</span> <span class="n">_clamp_int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"choke"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
         <span class="s2">"params"</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="_normalize_drum_sample">
+<a class="viewcode-back" href="../../autoapi/nbplay/descriptors/index.html#nbplay.descriptors._normalize_drum_sample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_drum_sample</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""One drum machine sample: mono little-endian float32 ``data`` at ``sample_rate``."""</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"data"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">""</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"sample </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2"> data must be bytes of little-endian float32 samples"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"Sample"</span><span class="p">),</span>
+        <span class="s2">"sample_rate"</span><span class="p">:</span> <span class="n">_clamp_int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sample_rate"</span><span class="p">,</span> <span class="mi">44100</span><span class="p">),</span> <span class="mi">8000</span><span class="p">,</span> <span class="mi">192000</span><span class="p">),</span>
+        <span class="s2">"length"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">"data"</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
     <span class="p">}</span></div>
 
 

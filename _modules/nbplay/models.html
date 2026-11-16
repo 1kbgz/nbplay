@@ -633,6 +633,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">_normalize_audio_clips</span><span class="p">,</span>
     <span class="n">_normalize_drum_pad</span><span class="p">,</span>
     <span class="n">_normalize_drum_pattern</span><span class="p">,</span>
+    <span class="n">_normalize_drum_sample</span><span class="p">,</span>
     <span class="n">_normalize_effects</span><span class="p">,</span>
     <span class="n">_normalize_launcher_slot</span><span class="p">,</span>
     <span class="n">_normalize_mixer_channel</span><span class="p">,</span>
@@ -954,12 +955,19 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of</span>
 <span class="sd">    that instrument's fields plus ``pitch`` (the note it plays) and</span>
 <span class="sd">    ``length`` (seconds); ``preset`` names a shipped synth or FM preset to</span>
-<span class="sd">    start from. Pads with the same nonzero ``choke`` group cut each other</span>
-<span class="sd">    off (closed and open hats). A note plays the pads that answer to it.</span>
-<span class="sd">    ``pattern`` holds a velocity (0 is off) per pad per step.</span>
+<span class="sd">    start from. A ``sample`` pad plays the entry of ``samples`` named by</span>
+<span class="sd">    its ``sample`` param, shifted by ``tune`` semitones and cut after</span>
+<span class="sd">    ``length`` seconds. Pads with the same nonzero ``choke`` group cut each</span>
+<span class="sd">    other off (closed and open hats). A note plays the pads that answer to</span>
+<span class="sd">    it. ``pattern`` holds a velocity (0 is off) per pad per step.</span>
+
+<span class="sd">    ``samples`` maps an id to ``{name, sample_rate, length, data}`` (mono</span>
+<span class="sd">    little-endian float32 bytes). It is a field of its own so that a pad</span>
+<span class="sd">    edit does not resend the audio.</span>
 <span class="sd">    """</span>
 
     <span class="n">pads</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">_default_drum_kit</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">samples</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">pattern</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
     <span class="n">step_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
@@ -993,6 +1001,14 @@ window.runMermaid = runMermaid;</script>
             <span class="k">elif</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"sound"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"fm"</span><span class="p">:</span>
                 <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_pad_patch</span><span class="p">(</span><span class="n">FMSynthConfig</span><span class="p">,</span> <span class="n">_FM_PAD_FIELDS</span><span class="p">,</span> <span class="s2">"FMSynthWidget"</span><span class="p">,</span> <span class="n">pad</span><span class="p">[</span><span class="s2">"params"</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">normalized</span></div>
+
+
+<div class="viewcode-block" id="DrumMachineConfig._samples">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.DrumMachineConfig._samples">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"samples"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_samples</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">samples</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">):</span> <span class="n">_normalize_drum_sample</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 
 
 <div class="viewcode-block" id="DrumMachineConfig._pattern_rows">

@@ -680,7 +680,7 @@ learn work.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">pads</span></code>, <code class="docutils literal notranslate"><span class="pre">pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">steps</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">sound_preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pads</span></code>, <code class="docutils literal notranslate"><span class="pre">samples</span></code>, <code class="docutils literal notranslate"><span class="pre">pattern</span></code>, <code class="docutils literal notranslate"><span class="pre">steps</span></code>, <code class="docutils literal notranslate"><span class="pre">step_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">swing</span></code>, <code class="docutils literal notranslate"><span class="pre">bpm</span></code>, time signature, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">sound_preset_names</span></code>, <code class="docutils literal notranslate"><span class="pre">session_id</span></code>, <code class="docutils literal notranslate"><span class="pre">channel_index</span></code>, <code class="docutils literal notranslate"><span class="pre">theme</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">is_playing</span></code>, <code class="docutils literal notranslate"><span class="pre">current_step</span></code>, <code class="docutils literal notranslate"><span class="pre">preset_request</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code></p></td>
@@ -1135,6 +1135,15 @@ note it plays) and <code class="docutils literal notranslate"><span class="pre">
 preset to start from; the config’s validator fills the patch in from it and
 validates the patch with <code class="docutils literal notranslate"><span class="pre">SynthConfig</span></code> or <code class="docutils literal notranslate"><span class="pre">FMSynthConfig</span></code>, so a pad keeps
 the instrument’s ranges.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">sample</span></code> pad has <code class="docutils literal notranslate"><span class="pre">sample</span></code> (an id in the config’s <code class="docutils literal notranslate"><span class="pre">samples</span></code>), <code class="docutils literal notranslate"><span class="pre">tune</span></code>
+(semitones) and <code class="docutils literal notranslate"><span class="pre">length</span></code> (seconds; the sample stops there if it runs
+longer). <code class="docutils literal notranslate"><span class="pre">samples</span></code> maps an id to <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">sample_rate,</span> <span class="pre">length,</span> <span class="pre">data}</span></code> with
+mono little-endian float32 <code class="docutils literal notranslate"><span class="pre">data</span></code>. It is a field of its own, so a pad edit
+sends the pads without the audio. <code class="docutils literal notranslate"><span class="pre">load_pad_sample(index,</span> <span class="pre">data,</span> <span class="pre">...)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">load_pad_file(index,</span> <span class="pre">path)</span></code> load one from Python, and the editor’s file
+input loads one in the browser (decoded at the context’s rate). Both drop
+samples no pad plays any more in the same edit; the validator does not,
+because a browser edit assigns <code class="docutils literal notranslate"><span class="pre">pads</span></code> and <code class="docutils literal notranslate"><span class="pre">samples</span></code> one at a time.</p></li>
 <li><p>Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each other off: a hit fades
 the group’s other ringing hits at its start time.</p></li>
 </ul>
@@ -1147,9 +1156,10 @@ sequencer’s scheduler, which plays each step through the drum machine itself
 Like the synths it registers <code class="docutils literal notranslate"><span class="pre">bus.instruments[channel_index]</span></code>, so notes from
 a sequencer, a clip or a launched slot on its track play the pads that answer
 to them. Each hit goes through its own gain and pan into the track’s channel.
-A kit is the pads: <code class="docutils literal notranslate"><span class="pre">PRESET</span> <span class="pre">=</span> <span class="pre">(&quot;pads&quot;,)</span></code>, with the shipped Analog kit (the
-default) and Electro kit offered in the header. A session saves the pads,
-pattern, steps, step length, swing and tap velocity.</p>
+A kit is the pads and their samples: <code class="docutils literal notranslate"><span class="pre">PRESET</span> <span class="pre">=</span> <span class="pre">(&quot;pads&quot;,</span> <span class="pre">&quot;samples&quot;)</span></code>, with the
+shipped Analog kit (the default) and Electro kit offered in the header. A
+session saves the pads, pattern, steps, step length, swing and tap velocity,
+with each sample in <code class="docutils literal notranslate"><span class="pre">samples/track-N-pad-&lt;id&gt;.f32</span></code>.</p>
 </section>
 <section id="sequencerwidget">
 <h3>SequencerWidget<a class="headerlink" href="#sequencerwidget" title="Link to this heading">¶</a></h3>
@@ -1809,6 +1819,7 @@ sound source type and state), timeline (length, count-in, zoom, lanes,
 clips without their browser-local <code class="docutils literal notranslate"><span class="pre">audio_url</span></code>), and launcher (quantize,
 scenes, slots).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">samples/track-N.f32</span></code>: a sampler track’s PCM as little-endian float32.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">samples/track-N-pad-&lt;id&gt;.f32</span></code>: a drum machine’s samples, the same way.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">clips/&lt;clip</span> <span class="pre">id&gt;.bin</span></code>: timeline clip audio that has arrived from the
 browser.</p></li>
 </ul>
@@ -1832,7 +1843,7 @@ their metadata. Loading creates fresh widgets with a new <code class="docutils l
 <li><p><code class="docutils literal notranslate"><span class="pre">SynthWidget</span></code>: the whole patch (oscillators, noise, filter, envelopes, LFO),
 frequency and sample rate.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FMSynthWidget</span></code>: frequency, amplitude, ratio, index and the ADSR.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code>: the pads (a kit), not the pattern.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code>: the pads and their samples (a kit), not the pattern.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SamplerWidget</span></code>: the sample (PCM, length, preview), envelope, pads, slices
 and zones. Bytes travel as <code class="docutils literal notranslate"><span class="pre">{&quot;base64&quot;:</span> <span class="pre">...}</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SequencerWidget</span></code>: the grid settings, swing, groove, automation lanes and

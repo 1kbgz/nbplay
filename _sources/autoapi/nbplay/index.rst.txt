@@ -850,7 +850,8 @@ Package Contents
    sequencer, a clip or a launched slot on its track play the pads that
    answer to them, and its own pattern plays on the session clock. See
    :class:`~nbplay.models.DrumMachineConfig` for the pad fields. A kit (the
-   pads) is its preset; :meth:`presets` lists the shipped kits.
+   pads and their samples) is its preset; :meth:`presets` lists the shipped
+   kits.
 
 
    .. py:attribute:: TAG
@@ -859,7 +860,7 @@ Package Contents
 
 
    .. py:attribute:: PRESET
-      :value: ('pads',)
+      :value: ('pads', 'samples')
 
 
 
@@ -886,6 +887,26 @@ Package Contents
    .. py:method:: set_pad(index, **fields)
 
       Change pad ``index``'s fields. A new ``sound`` without ``params`` starts from that sound's defaults; ``params`` for the same sound are merged.
+
+
+
+   .. py:method:: load_pad_sample(index, data, sample_rate=44100, name='Sample', **params)
+
+      Make pad ``index`` play mono float samples (or float32 bytes); ``params`` sets ``tune`` and ``length``.
+
+      A pad that already plays a sample keeps its ``tune`` and ``length`` unless ``params`` changes them.
+
+
+
+   .. py:method:: load_pad_file(index, path, **params)
+
+      Make pad ``index`` play an audio file (WAV through the stdlib, others through ``soundfile``).
+
+
+
+   .. py:method:: _set_pads(pads, samples=None)
+
+      Set the pads and drop the samples no pad plays any more, in one update.
 
 
 

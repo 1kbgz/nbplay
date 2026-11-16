@@ -453,6 +453,9 @@
     <a href="#nbplay.models.DrumMachineConfig.pads">DrumMachineConfig.pads</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.samples">DrumMachineConfig.samples</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig.pattern">DrumMachineConfig.pattern</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -496,6 +499,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig._pads">DrumMachineConfig._pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._samples">DrumMachineConfig._samples()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig._pattern_rows">DrumMachineConfig._pattern_rows()</a>
@@ -1685,9 +1691,14 @@ a built-in drum (<code class="docutils literal notranslate"><span class="pre">ki
 <code class="docutils literal notranslate"><span class="pre">tune</span></code>, <code class="docutils literal notranslate"><span class="pre">decay</span></code> and <code class="docutils literal notranslate"><span class="pre">tone</span></code>), or <code class="docutils literal notranslate"><span class="pre">synth</span></code> or <code class="docutils literal notranslate"><span class="pre">fm</span></code> with a patch of
 that instrument’s fields plus <code class="docutils literal notranslate"><span class="pre">pitch</span></code> (the note it plays) and
 <code class="docutils literal notranslate"><span class="pre">length</span></code> (seconds); <code class="docutils literal notranslate"><span class="pre">preset</span></code> names a shipped synth or FM preset to
-start from. Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each other
-off (closed and open hats). A note plays the pads that answer to it.
-<code class="docutils literal notranslate"><span class="pre">pattern</span></code> holds a velocity (0 is off) per pad per step.</p>
+start from. A <code class="docutils literal notranslate"><span class="pre">sample</span></code> pad plays the entry of <code class="docutils literal notranslate"><span class="pre">samples</span></code> named by
+its <code class="docutils literal notranslate"><span class="pre">sample</span></code> param, shifted by <code class="docutils literal notranslate"><span class="pre">tune</span></code> semitones and cut after
+<code class="docutils literal notranslate"><span class="pre">length</span></code> seconds. Pads with the same nonzero <code class="docutils literal notranslate"><span class="pre">choke</span></code> group cut each
+other off (closed and open hats). A note plays the pads that answer to
+it. <code class="docutils literal notranslate"><span class="pre">pattern</span></code> holds a velocity (0 is off) per pad per step.</p>
+<p><code class="docutils literal notranslate"><span class="pre">samples</span></code> maps an id to <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">sample_rate,</span> <span class="pre">length,</span> <span class="pre">data}</span></code> (mono
+little-endian float32 bytes). It is a field of its own so that a pad
+edit does not resend the audio.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -1695,6 +1706,11 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.pads">
 <span class="sig-name descname"><span class="pre">pads</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.pads" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig.samples">
+<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.models.DrumMachineConfig.samples" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1770,6 +1786,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig._pads">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_pads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pads</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineConfig._pads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineConfig._pads" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.DrumMachineConfig._samples">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#DrumMachineConfig._samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.DrumMachineConfig._samples" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -3190,6 +3211,9 @@ validated to form a valid model.</p>
     <a href="#nbplay.models.DrumMachineConfig.pads">DrumMachineConfig.pads</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig.samples">DrumMachineConfig.samples</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig.pattern">DrumMachineConfig.pattern</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3233,6 +3257,9 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig._pads">DrumMachineConfig._pads()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.DrumMachineConfig._samples">DrumMachineConfig._samples()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.DrumMachineConfig._pattern_rows">DrumMachineConfig._pattern_rows()</a>

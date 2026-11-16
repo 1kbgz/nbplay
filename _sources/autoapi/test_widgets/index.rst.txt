@@ -151,6 +151,9 @@ Module Contents
    .. py:method:: test_set_pad_set_step_and_set_row()
 
 
+   .. py:method:: test_sample_pads_keep_their_audio_beside_the_pads(tmp_path)
+
+
    .. py:method:: test_kits_load_by_name_or_from_the_browser_picker()
 
 

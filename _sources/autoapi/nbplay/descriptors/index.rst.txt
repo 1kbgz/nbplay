@@ -119,6 +119,7 @@ Functions
    nbplay.descriptors._default_drum_kit
    nbplay.descriptors._bounded
    nbplay.descriptors._normalize_drum_pad
+   nbplay.descriptors._normalize_drum_sample
    nbplay.descriptors._normalize_drum_pattern
 
 
@@ -540,7 +541,7 @@ Module Contents
 
 
 .. py:data:: PAD_SOUNDS
-   :value: ('kick', 'snare', 'hat', 'clap', 'tom', 'synth', 'fm')
+   :value: ('kick', 'snare', 'hat', 'clap', 'tom', 'synth', 'fm', 'sample')
 
 
 .. py:data:: MAX_DRUM_PADS
@@ -565,6 +566,11 @@ Module Contents
 .. py:function:: _normalize_drum_pad(raw, index)
 
    One drum machine pad with its fields bounded; a synth or FM patch is left to the model to validate.
+
+
+.. py:function:: _normalize_drum_sample(raw, key)
+
+   One drum machine sample: mono little-endian float32 ``data`` at ``sample_rate``.
 
 
 .. py:function:: _normalize_drum_pattern(pattern, pads, steps)

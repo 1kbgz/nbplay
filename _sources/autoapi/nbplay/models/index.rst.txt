@@ -546,9 +546,15 @@ Module Contents
    ``tune``, ``decay`` and ``tone``), or ``synth`` or ``fm`` with a patch of
    that instrument's fields plus ``pitch`` (the note it plays) and
    ``length`` (seconds); ``preset`` names a shipped synth or FM preset to
-   start from. Pads with the same nonzero ``choke`` group cut each other
-   off (closed and open hats). A note plays the pads that answer to it.
-   ``pattern`` holds a velocity (0 is off) per pad per step.
+   start from. A ``sample`` pad plays the entry of ``samples`` named by
+   its ``sample`` param, shifted by ``tune`` semitones and cut after
+   ``length`` seconds. Pads with the same nonzero ``choke`` group cut each
+   other off (closed and open hats). A note plays the pads that answer to
+   it. ``pattern`` holds a velocity (0 is off) per pad per step.
+
+   ``samples`` maps an id to ``{name, sample_rate, length, data}`` (mono
+   little-endian float32 bytes). It is a field of its own so that a pad
+   edit does not resend the audio.
 
    Create a new model by parsing and validating input data from keyword arguments.
 
@@ -560,6 +566,10 @@ Module Contents
 
    .. py:attribute:: pads
       :type:  list[dict]
+
+
+   .. py:attribute:: samples
+      :type:  dict[str, dict]
 
 
    .. py:attribute:: pattern
@@ -628,6 +638,11 @@ Module Contents
 
 
    .. py:method:: _pads(pads)
+      :classmethod:
+
+
+
+   .. py:method:: _samples(samples)
       :classmethod:
 
 
