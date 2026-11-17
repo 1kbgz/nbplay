@@ -206,12 +206,18 @@ test.describe("web app", () => {
         .command({ action: "launch", track_index: 0, scene_index: 0 }),
     );
     await expect(status).toHaveText("launcher playing");
+    // The timeline's lane for the track says so too.
+    const leadLane = page.locator(
+      'nbplay-timeline nbplay-lane[data-track="0"]',
+    );
+    await expect(leadLane.locator(".nbplay-lane-owner")).toHaveText("launcher");
     expect(await sounding()).toBe(true);
 
     // Pausing the sequencer silences its track, the launched slot included.
     await sequencer.locator(".nbplay-seq-play").click();
     await expect.poll(launcher).toEqual([-1, -1, -1]);
     await expect(status).toHaveCount(0);
+    await expect(leadLane.locator(".nbplay-lane-owner")).toHaveCount(0);
     expect(await sounding()).toBe(false);
 
     // A paused sequencer stays paused when the clock starts again.

@@ -57,6 +57,7 @@ export class NbplayLane extends NbplayElement {
     selected: { type: String },
     recording: { type: Boolean, reflect: true },
     showHeader: { type: Boolean, attribute: "show-header" },
+    owner: { type: String },
     width: { type: Number },
     disabled: { type: Boolean, reflect: true },
   };
@@ -75,6 +76,8 @@ export class NbplayLane extends NbplayElement {
   declare selected: string;
   declare recording: boolean;
   declare showHeader: boolean;
+  /** What plays this track in place of its clips (`launcher`), shown in the header; empty when the clips do. */
+  declare owner: string;
   /** Fixed clip-area width in px (zoom); 0 fills the element. */
   declare width: number;
   declare disabled: boolean;
@@ -101,6 +104,7 @@ export class NbplayLane extends NbplayElement {
     this.selected = "";
     this.recording = false;
     this.showHeader = true;
+    this.owner = "";
     this.width = 0;
     this.disabled = false;
   }
@@ -145,7 +149,17 @@ export class NbplayLane extends NbplayElement {
         }}
       ></nbplay-toggle>`;
     return html`<div class="nbplay-lane-header">
-      <div class="nbplay-lane-name" title=${this.name}>${this.name}</div>
+      <div class="nbplay-lane-name" title=${this.name}>
+        ${this.name}${
+          this.owner
+            ? html`<span
+                class="nbplay-lane-owner"
+                title="A launched slot plays this track in place of its clips"
+                >${this.owner}</span
+              >`
+            : nothing
+        }
+      </div>
       <div class="nbplay-lane-buttons">
         ${toggle("armed", "arm", "R", "Arm track")}
         ${toggle("monitor", "monitor", "I", "Input monitor")}

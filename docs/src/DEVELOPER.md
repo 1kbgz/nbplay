@@ -429,17 +429,20 @@ running, and the claims stack, so stopping the slot hands the track back in
 phase. `claimChannel()` and `releaseChannel()` announce a change with a
 `nbplay-claims` event on `document` (`{sessionId, channel}`); the sequencer and
 the drum machine show `launcher playing` or `arrangement playing` in their
-header while something else owns their track.
+header while something else owns their track, and a timeline lane shows a
+`launcher` tag while a launched slot plays its track.
 
 What each control does to a track (decided 2026-11-16):
 
-| Control                                                                            | Effect                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Transport, timeline or launcher play                                               | Starts the shared clock. Every sequencer and drum machine on it plays, except one that was paused.                                                                                                                  |
-| Transport or timeline stop, a sequencer's ■                                        | Stops the shared clock and everything on it; nothing stays paused.                                                                                                                                                  |
-| Pausing a sequencer or drum machine (its ▶ button, or `widget.stop()` from Python) | The clock keeps running. Its track goes silent: a slot launched on the track stops at once (`bus.launcher.stopChannel()`), and it stays paused when the clock starts again until its own play (or `widget.play()`). |
-| Launching a slot                                                                   | The slot plays its track in place of the arrangement and the sequencer.                                                                                                                                             |
-| Stopping a slot, or stop all                                                       | The track goes back to its timeline clips, or else its sequencer.                                                                                                                                                   |
+| Control                                                                            | Effect                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Transport, timeline or launcher play                                               | Starts the shared clock. Every sequencer and drum machine on it plays, except one that was paused.                                                                                                                           |
+| Transport or timeline stop, a sequencer's ■                                        | Stops the shared clock and everything on it; nothing stays paused.                                                                                                                                                           |
+| Pausing a sequencer or drum machine (its ▶ button, or `widget.stop()` from Python) | The clock keeps running. Its track goes silent: a slot launched on the track stops at once (`bus.launcher.stopChannel()`), and it stays paused when the clock starts again until its own play (or `widget.play()`).          |
+| Launching a slot                                                                   | The slot plays its track in place of the arrangement and the sequencer.                                                                                                                                                      |
+| Stopping a slot, or stop all                                                       | The track goes back to its timeline clips, or else its sequencer.                                                                                                                                                            |
+| An arpeggiator when the clock stops                                                | Latched notes go; keys still held keep playing (it runs from the first key while the clock is stopped).                                                                                                                      |
+| Shortcuts and MIDI mappings                                                        | Space in the transport, timeline and launcher toggles the clock; Space in a sequencer is its ▶ (pause above); the router's `play`, `stop`, `toggle` and `record` act on the clock, and its launcher actions on the launcher. |
 
 `widget.play()` and `widget.stop()` reach a sequencer or drum machine through
 its `command()` method, so they work while it shares the session clock (a
