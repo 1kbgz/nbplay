@@ -36,6 +36,7 @@
 @import "./components/settings.css";
 @import "./components/midi-output.css";
 @import "./components/sequencer.css";
+@import "./components/arpeggiator.css";
 @import "./components/drum-grid.css";
 @import "./components/drums.css";
 @import "./components/mixer.css";

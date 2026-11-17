@@ -179,6 +179,34 @@ test.describe("MidiRouterWidget", () => {
     );
   });
 
+  test("a route to a track with an input (an arpeggiator) feeds the input", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      globalThis.__nbplay.midi.inputs = {
+        1: {
+          startNote: (note, velocity) => {
+            window.__played.push(["input", 1, note, velocity]);
+            return () => window.__played.push(["input off", 1, note]);
+          },
+        },
+      };
+    });
+    await renderRouter(page, { routes: [route({ channel_index: 1 })] });
+    const result = await page.evaluate(() => {
+      window.__send("Keys", [0x90, 60, 100]);
+      window.__send("Keys", [0x80, 60, 0]);
+      return { played: window.__played, heard: window.__heard };
+    });
+    // The input, not the instrument, takes the note, and the session hears
+    // what the input plays rather than the key.
+    expect(result.played).toEqual([
+      ["input", 1, 60, 100],
+      ["input off", 1, 60],
+    ]);
+    expect(result.heard).toEqual([]);
+  });
+
   test("a note held while its route changes is released where it started", async ({
     page,
   }) => {

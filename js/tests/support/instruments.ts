@@ -7,6 +7,7 @@
 import "../../src/ts/components/index.ts";
 import type { AnyModel } from "../../src/ts/helpers.ts";
 import type {
+  NbplayArpeggiator,
   NbplayDrums,
   NbplayKeyboard,
   NbplayMidiKeyboard,
@@ -510,6 +511,25 @@ const INSTRUMENTS: Record<
         clock_bpm: "clockBpm",
       },
       onDisconnect: () => (node as NbplayMidiKeyboard).silence(),
+    }),
+  },
+  arpeggiator: {
+    tag: "nbplay-arpeggiator",
+    spec: (node) => ({
+      config: {
+        theme: "theme",
+        order: "order",
+        octaves: "octaves",
+        step_duration: "stepDuration",
+        gate: "gate",
+        swing: "swing",
+        latch: "latch",
+        bpm: "bpm",
+        session_id: "sessionId",
+        channel_index: "channelIndex",
+      },
+      status: { held_notes: "heldNotes" },
+      onDisconnect: () => (node as NbplayArpeggiator).halt(),
     }),
   },
   midi_router: {

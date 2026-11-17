@@ -15,6 +15,7 @@ from nbplay.descriptors import PadAction
 from nbplay.history import History
 from nbplay.midi_learn import MidiLearn
 from nbplay.models import (
+    ArpeggiatorConfig,
     DrumMachineConfig,
     KeyboardConfig,
     LauncherConfig,
@@ -806,6 +807,52 @@ class TestDrumMachineWidget:
                 assert source.config.channel_index == loaded.tracks[0].mixer_channel
             finally:
                 loaded.close()
+        finally:
+            session.close()
+
+
+class TestArpeggiatorWidget:
+    def test_settings_validate(self):
+        config = ArpeggiatorConfig()
+        assert (config.order, config.octaves, config.step_duration, config.gate, config.latch) == ("up", 1, 0.25, 0.5, False)
+        for bad in ({"order": "sideways"}, {"octaves": 5}, {"gate": 0}, {"step_duration": 0}):
+            with pytest.raises(ValueError):
+                ArpeggiatorConfig.model_validate(bad)
+
+    def test_an_arpeggiator_is_a_tracks_note_source(self):
+        from nbplay.app import panel_widgets
+
+        session = nbplay.Session(bpm=100.0)
+        try:
+            arp = nbplay.ArpeggiatorWidget(order="updown", octaves=2, latch=True)
+            track = session.add_track("Lead", arp, nbplay.SynthWidget())
+            assert (arp.config.session_id, arp.config.channel_index, arp.config.bpm) == (session.session_id, track.mixer_channel, 100.0)
+            assert panel_widgets(session)["lead-arpeggiator"] is arp
+            assert arp._tree["bindings"]["heldNotes"]["field"] == "status.held_notes"
+            keys = nbplay.KeyboardWidget()
+            keys.connect_arpeggiator(arp)
+            assert (keys.config.session_id, keys.config.channel_index) == (session.session_id, track.mixer_channel)
+            keys.disconnect_arpeggiator()
+            assert keys.config.channel_index == -1
+            with pytest.raises(ValueError):
+                keys.connect_arpeggiator(nbplay.ArpeggiatorWidget())
+            keys.close()
+            # Chaining and MIDI export use sequencers only.
+            session.add_pattern("riff", [{"note": 60, "active": True}])
+            assert len(session.chain(track, ["riff"])) == 1
+            assert [t.name for t in session.export_midi().tracks if t.name == "Lead"] == []
+            # A saved session keeps the arpeggiator and its settings.
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                restored = loaded.tracks[0].sequencer
+                assert isinstance(restored, nbplay.ArpeggiatorWidget)
+                assert (restored.config.order, restored.config.octaves, restored.config.latch) == ("updown", 2, True)
+            finally:
+                loaded.close()
+            assert nbplay.ArpeggiatorWidget.from_preset(arp.preset(), autosync=False).config.order == "updown"
         finally:
             session.close()
 

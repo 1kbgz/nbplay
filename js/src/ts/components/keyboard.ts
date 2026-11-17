@@ -62,6 +62,8 @@ export class NbplayKeyboard extends NbplayElement {
   declare lastNoteEvent: Record<string, unknown>;
 
   private voices: SineVoices = createSineVoices();
+  /** Releases of keys an input took, by note. */
+  private inputReleases = new Map<number, (() => void) | null>();
   private heldNotes = new Set<number>();
   private sustainedNotes = new Map<number, Zone>();
   private pressedKeys = new Map<string, { note: number; zone: Zone }>();
@@ -131,10 +133,24 @@ export class NbplayKeyboard extends NbplayElement {
 
   // Notes
 
+  /** The note input on this keyboard's track (an arpeggiator), if any. */
+  private input() {
+    const idx = Number(this.channelIndex);
+    return idx >= 0 ? getSessionBus(this.sessionId)?.inputs?.[idx] : undefined;
+  }
+
   private noteOn(note: number, zone: Zone): void {
     if (note < 0 || note > 127) return;
     const velocity = this.velocity;
     this.heldNotes.add(note);
+    const input = this.input();
+    if (input) {
+      // The input plays the note its own way; it is heard as what it plays.
+      this.inputReleases.set(note, input.startNote(note, velocity) || null);
+      this.lastNoteEvent = { note, velocity, type: "on" };
+      this.status();
+      return;
+    }
     const usedSampler = routeNoteOn(
       this.sessionId,
       this.samplerRouting || [],
@@ -163,6 +179,14 @@ export class NbplayKeyboard extends NbplayElement {
   }
 
   private release(note: number, zone: Zone): void {
+    if (this.inputReleases.has(note)) {
+      this.inputReleases.get(note)?.();
+      this.inputReleases.delete(note);
+      this.lastNoteEvent = { note, velocity: 0, type: "off" };
+      this.sustainedNotes.delete(note);
+      this.status();
+      return;
+    }
     const usedSampler = routeNoteOff(
       this.sessionId,
       this.samplerRouting || [],

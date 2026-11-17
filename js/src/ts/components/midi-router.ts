@@ -136,6 +136,8 @@ export class NbplayMidiRouter extends NbplayElement {
   private stopListening: (() => void) | null = null;
   /** Releases of the notes held now, by port, channel and note. */
   private held = new Map<string, Array<(at?: number) => void>>();
+  /** Held notes an input took, so their note-off is not broadcast either. */
+  private taken = new Set<string>();
   private ccSeq = 0;
   /** The input port names the browser sees; null until access is granted. */
   private knownPorts: string[] | null = null;
@@ -258,11 +260,18 @@ export class NbplayMidiRouter extends NbplayElement {
     const key = `${port}\n${channel}\n${note}`;
     if (kind === 0x90 && value > 0) {
       this.noteOff(key);
-      this.held.set(key, this.noteOn(port, channel, note, value));
-      this.broadcast({ note, velocity: value, type: "on" });
+      const { releases, taken } = this.noteOn(port, channel, note, value);
+      this.held.set(key, releases);
+      // A note an input (an arpeggiator) took is heard as what it plays.
+      if (taken) this.taken.add(key);
+      else this.broadcast({ note, velocity: value, type: "on" });
       this.report({ port, type: "on", note, value, channel });
     } else if (kind === 0x80 || kind === 0x90) {
       this.noteOff(key);
+      if (this.taken.delete(key)) {
+        this.report({ port, type: "off", note, value: 0, channel });
+        return;
+      }
       // A mapped key's release belongs to its mapping too.
       if (
         matchMidiMappings(this.mappings || [], port, channel, "note", note)
@@ -279,24 +288,26 @@ export class NbplayMidiRouter extends NbplayElement {
     channel: number,
     note: number,
     velocity: number,
-  ): Array<(at?: number) => void> {
+  ): { releases: Array<(at?: number) => void>; taken: boolean } {
     const bus = getSessionBus(this.sessionId);
-    if (!bus?.instruments) return [];
-    if (bus.audioCtx?.state === "suspended") void bus.audioCtx.resume();
     const releases: Array<(at?: number) => void> = [];
+    let taken = false;
+    if (!bus) return { releases, taken };
+    if (bus.audioCtx?.state === "suspended") void bus.audioCtx.resume();
     for (const route of matchMidiRoutes(
       this.routes || [],
       port,
       channel,
       note,
     )) {
-      const release = bus.instruments[route.channel_index]?.startNote?.(
-        note,
-        velocity,
-      );
+      const input = bus.inputs?.[route.channel_index];
+      if (input) taken = true;
+      const release = (
+        input ?? bus.instruments?.[route.channel_index]
+      )?.startNote?.(note, velocity);
       if (release) releases.push(release);
     }
-    return releases;
+    return { releases, taken };
   }
 
   /** Fill the mapping waiting in Learn from this message; false when none waits. */

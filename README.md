@@ -26,7 +26,7 @@ nothing to install: a lead and a bass on sequencers, a drum machine beat, and
 any MIDI keyboard you plug in playing the lead.
 
 nbplay is a set of Jupyter widgets that together form a small DAW in the
-browser: synths, samplers, a drum machine, step sequencers, a QWERTY and a
+browser: synths, samplers, a drum machine, step sequencers, an arpeggiator, a QWERTY and a
 MIDI keyboard, trigger pads, a transport, a multitrack timeline that records audio and MIDI,
 a clip launcher, and a mixer. Every widget in a session follows one clock that
 lives in the browser, so play, seek, and tempo changes never wait on the

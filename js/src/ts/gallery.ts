@@ -1335,6 +1335,25 @@ const SECTIONS: Section[] = [
     variants: [{ label: "default", props: {}, wide: true }],
   },
   {
+    tag: "nbplay-arpeggiator",
+    title: "nbplay-arpeggiator",
+    desc: "Plays the notes held on its track one step at a time: order, octaves, rate, gate, swing and latch. On a session track, MIDI routes and a connected keyboard hold notes here; this preview has no track to play.",
+    events: ["nbplay-set", "nbplay-status"],
+    controls: [
+      { name: "octaves", type: "number" },
+      { name: "gate", type: "number", step: 0.05 },
+      { name: "swing", type: "number" },
+      { name: "latch", type: "boolean" },
+    ],
+    variants: [
+      { label: "default", props: {} },
+      {
+        label: "a held chord",
+        props: { order: "updown", octaves: 2, heldNotes: [60, 64, 67] },
+      },
+    ],
+  },
+  {
     tag: "nbplay-midi-router",
     title: "nbplay-midi-router",
     desc: "Routes Web MIDI input to track instruments: each route takes a port, a MIDI channel and a note range to a track. Controls bind one note or CC to a transport or launcher action, learned from the device. Needs a browser with Web MIDI and a session with tracks to sound.",
