@@ -778,11 +778,11 @@ class DrumMachineWidget(InstrumentWidget):
         self.config.pattern = []
 
     def play(self):
-        """Start the pattern in the owning widget."""
+        """Start the pattern in the owning widget: on the running session clock, or start it."""
         return self._command("is_playing", True)
 
     def stop(self):
-        """Stop the pattern in the owning widget."""
+        """Stop the pattern in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""
         return self._command("is_playing", False)
 
 
@@ -1264,11 +1264,11 @@ class SequencerWidget(InstrumentWidget):
         return self
 
     def play(self):
-        """Start playback in the owning widget (the session clock when shared)."""
+        """Start playback in the owning widget: on the running session clock, or start it."""
         return self._command("is_playing", True)
 
     def stop(self):
-        """Stop playback in the owning widget."""
+        """Stop playback in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""
         return self._command("is_playing", False)
 
 
@@ -2156,6 +2156,8 @@ class Session:
         self.timeline = TimelineWidget(time_signature_den=den, **common)
         self.launcher = LauncherWidget(time_signature_den=den, **common)
         self.midi_router = MidiRouterWidget(session_id=self._session_id, theme=theme)
+        # The computer keyboard plays into the router as its own port.
+        self.keyboard = KeyboardWidget(session_id=self._session_id, theme=theme)
         self.tracks = []
         # Named patterns for the tracking widget: name -> {voices_data, step_duration}.
         self.patterns = {}
@@ -2237,7 +2239,7 @@ class Session:
     @property
     def widgets(self):
         """Every widget in the session, including track instruments."""
-        widgets = [self.transport, self.mixer, self.timeline, self.launcher, self.midi_router]
+        widgets = [self.transport, self.mixer, self.timeline, self.launcher, self.midi_router, self.keyboard]
         for track in self.tracks:
             widgets.extend(widget for widget in (track.sequencer, track.sound_source) if isinstance(widget, InstrumentWidget))
         return widgets

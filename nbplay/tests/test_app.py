@@ -30,6 +30,7 @@ class TestApp:
                 "timeline",
                 "mixer",
                 "midi",
+                "keyboard",
                 "lead-synth-sequencer",
                 "lead-synth-synth",
                 "lead-synth-synth-2",
@@ -41,6 +42,7 @@ class TestApp:
                 "Timeline",
                 "Mixer",
                 "MIDI",
+                "Keyboard",
                 "Lead Synth sequencer",
                 "Lead Synth synth",
                 "Lead Synth synth 2",
@@ -48,8 +50,8 @@ class TestApp:
             layout = default_layout(list(panels))
             assert layout["children"][2]["tabs"] == ["lead-synth-sequencer", "lead-synth-synth", "lead-synth-synth-2"]
             assert layout["children"][0]["tabs"] == ["transport"] and layout["children"][1]["children"][1]["tabs"] == ["timeline"]
-            assert layout["children"][1]["children"][2]["tabs"] == ["mixer", "midi"]
-            assert len(default_layout(["transport", "launcher", "timeline", "mixer", "midi"])["children"]) == 2
+            assert layout["children"][1]["children"][2]["tabs"] == ["mixer", "midi", "keyboard"]
+            assert len(default_layout(["transport", "launcher", "timeline", "mixer", "midi", "keyboard"])["children"]) == 2
         finally:
             session.close()
 
@@ -140,7 +142,7 @@ class TestApp:
             other.save(archive)
             other.close()
             loaded = client.put("/session.nbplay", content=archive.getvalue())
-            assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "midi", "bass-sequencer", "bass-synth"]}
+            assert loaded.json() == {"panels": ["transport", "launcher", "timeline", "mixer", "midi", "keyboard", "bass-sequencer", "bass-synth"]}
             assert app.state.session is not first and app.state.session.bpm == 140.0
             html = client.get("/").text
             assert "/ws/bass-synth" in html and "/ws/beat-drums" not in html

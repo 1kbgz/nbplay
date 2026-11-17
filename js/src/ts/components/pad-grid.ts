@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { clampMidiNote, clampVelocity, noteName } from "../pads.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
+import { DRAG_THRESHOLD, velocityAt } from "./cells.ts";
 import type { NbplayValue } from "./value.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./bar.ts";
@@ -12,7 +13,6 @@ export interface PadSpec {
   label?: string;
 }
 
-const DRAG_THRESHOLD = 5; // px before a press becomes a velocity drag
 const LABEL_TAP_DELAY_MS = 300; // so a double-click on the label can start an edit
 
 /**
@@ -178,11 +178,7 @@ export class NbplayPadGrid extends NbplayElement {
       return;
     if (!p.dragging && Math.abs(e.clientY - p.startY) < DRAG_THRESHOLD) return;
     p.dragging = true;
-    const rect = p.cell.getBoundingClientRect();
-    const velocity = clampVelocity(
-      Math.round((1 - (e.clientY - rect.top) / rect.height) * 127),
-    );
-    this.setPad(p.index, "velocity", velocity, "input");
+    this.setPad(p.index, "velocity", velocityAt(e.clientY, p.cell), "input");
   };
 
   private onPointerUp = (e: PointerEvent): void => {

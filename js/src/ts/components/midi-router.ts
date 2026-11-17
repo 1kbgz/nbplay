@@ -1,7 +1,14 @@
 import { html, type PropertyValues } from "lit";
 import { createMidiAccess, type MidiPortInfo } from "../midi_access.ts";
 import { noteName } from "../pads.ts";
-import { emitBusNote, getSessionBus, type NoteEvent } from "../session.ts";
+import {
+  emitBusNote,
+  getOrCreateSessionBus,
+  getSessionBus,
+  KEYBOARD_PORT,
+  type NoteEvent,
+  type SessionBus,
+} from "../session.ts";
 import { NbplayElement, define } from "./base.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./header.ts";
@@ -159,10 +166,30 @@ export class NbplayMidiRouter extends NbplayElement {
     super.connectedCallback();
     this.classList.add("nbplay-midi-router");
     void this.listen();
+    this.registerInput();
+  }
+
+  /** This router's input on the session bus, for the computer keyboard. */
+  private midiIn = (port: string, data: Uint8Array): void =>
+    this.handleMidiData(port, data);
+  private inputBus: SessionBus | null = null;
+
+  private registerInput(): void {
+    this.unregisterInput();
+    if (!this.sessionId || !this.isConnected) return;
+    const bus = getOrCreateSessionBus(this.sessionId);
+    bus.midiIn = this.midiIn;
+    this.inputBus = bus;
+  }
+
+  private unregisterInput(): void {
+    if (this.inputBus?.midiIn === this.midiIn) delete this.inputBus.midiIn;
+    this.inputBus = null;
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.unregisterInput();
     this.stopListening?.();
     this.stopListening = null;
     this.releaseAll();
@@ -182,6 +209,7 @@ export class NbplayMidiRouter extends NbplayElement {
     // Notes held on the old session's instruments end with it.
     if (changed.has("sessionId") && changed.get("sessionId") !== undefined)
       this.releaseAll();
+    if (changed.has("sessionId")) this.registerInput();
   }
 
   private set(values: Record<string, unknown>): void {
@@ -464,7 +492,8 @@ export class NbplayMidiRouter extends NbplayElement {
     const stop = (e: Event) => e.stopPropagation();
     const value = (e: Event) =>
       parseInt((e.target as HTMLSelectElement | HTMLInputElement).value, 10);
-    const ports = this.availableMidiPorts || [];
+    // The computer keyboard plays in as a port of its own.
+    const ports = [...(this.availableMidiPorts || []), KEYBOARD_PORT];
     // A saved route keeps its port while that device is unplugged.
     const portOptions =
       route.port && !ports.includes(route.port)

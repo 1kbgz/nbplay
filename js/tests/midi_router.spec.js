@@ -401,6 +401,30 @@ test.describe("MidiRouterWidget", () => {
     expect((await state(page)).mappings).toEqual([]);
   });
 
+  test("the computer keyboard plays in through the bus as a port", async ({
+    page,
+  }) => {
+    await renderRouter(page, { routes: [route({ channel_index: 0 })] });
+    await page
+      .locator(".nbplay-midi-router-port")
+      .selectOption("Computer keyboard");
+    expect(
+      (await page.evaluate(() => window.__testModel._state)).routes[0].port,
+    ).toBe("Computer keyboard");
+    const played = await page.evaluate(() => {
+      const bus = globalThis.__nbplay.midi;
+      bus.midiIn("Computer keyboard", new Uint8Array([0x90, 60, 100]));
+      bus.midiIn("Keys", new Uint8Array([0x90, 62, 100]));
+      bus.midiIn("Computer keyboard", new Uint8Array([0x80, 60, 0]));
+      return window.__played;
+    });
+    // The route takes the computer keyboard only.
+    expect(played).toEqual([
+      ["on", 0, 60, 100],
+      ["off", 0, 60],
+    ]);
+  });
+
   test("a saved route keeps its port while the device is unplugged", async ({
     page,
   }) => {

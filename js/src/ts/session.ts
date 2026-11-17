@@ -56,6 +56,9 @@ export interface NoteInput {
   startNote: (note: number, velocity: number) => (() => void) | void;
 }
 
+/** The port name the computer keyboard plays into the MIDI router as. */
+export const KEYBOARD_PORT = "Computer keyboard";
+
 /** A source that plays a track's notes in place of its looping sequencer. */
 export type ChannelOwner = "launcher" | "timeline";
 
@@ -73,6 +76,8 @@ export interface SessionBus {
   songBeats?: () => number;
   /** Track note inputs by channel; MIDI routes and keyboards prefer them to the instrument. */
   inputs?: Record<number, NoteInput>;
+  /** The MIDI router's input: a raw MIDI message from a named port (the computer keyboard uses it). */
+  midiIn?: (port: string, data: Uint8Array) => void;
   /** A view of the session's launcher: the MIDI router's launch actions go through it. */
   launcher?: {
     command(request: {
@@ -80,6 +85,8 @@ export interface SessionBus {
       track_index?: number;
       scene_index?: number;
     }): void;
+    /** Stop now whatever slot plays on a mixer channel (a track's sequencer was paused). */
+    stopChannel(channel: number): void;
   };
   noteListeners?: Array<(evt: NoteEvent) => void>;
   /** Sources claiming each channel's notes; see `channelOwner`. */
@@ -181,7 +188,20 @@ export function claimChannel(
   const bus = getOrCreateSessionBus(sessionId);
   if (!bus.claims) bus.claims = {};
   if (!bus.claims[channel]) bus.claims[channel] = {};
+  if (bus.claims[channel][owner]) return;
   bus.claims[channel][owner] = true;
+  announceClaims(sessionId, channel);
+}
+
+/**
+ * Tell the page a channel's owner may have changed: a `nbplay-claims` event
+ * on `document` with `{sessionId, channel}`, so panels can show who plays
+ * their track.
+ */
+function announceClaims(sessionId: string, channel: number): void {
+  document.dispatchEvent(
+    new CustomEvent("nbplay-claims", { detail: { sessionId, channel } }),
+  );
 }
 
 export function releaseChannel(
@@ -190,7 +210,9 @@ export function releaseChannel(
   owner: ChannelOwner,
 ): void {
   const claims = getSessionBus(sessionId)?.claims?.[channel];
-  if (claims) delete claims[owner];
+  if (!claims?.[owner]) return;
+  delete claims[owner];
+  announceClaims(sessionId, channel);
 }
 
 /** The source whose notes sound on a channel; undefined leaves it to the sequencer. */

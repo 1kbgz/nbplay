@@ -37,15 +37,28 @@ nbplay-drum-grid .nbplay-drum-grid-row.selected .nbplay-drum-grid-name {
   color: var(--nbplay-fg);
   border-color: var(--nbplay-accent);
 }
+/* The pad grid's square, smaller: a velocity bar fills an "on" step. */
 nbplay-drum-grid .nbplay-drum-grid-cell {
+  position: relative;
   flex: 0 0 auto;
   width: 22px;
   height: 22px;
   box-sizing: border-box;
+  overflow: hidden;
   background: var(--nbplay-bg-control);
   border: 1px solid var(--nbplay-border);
   border-radius: var(--nbplay-radius-control);
   cursor: pointer;
+  touch-action: none;
+}
+nbplay-drum-grid .nbplay-drum-grid-vel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+nbplay-drum-grid .nbplay-drum-grid-vel .nbplay-bar-track {
+  background: transparent;
+  border-radius: 0;
 }
 nbplay-drum-grid .nbplay-drum-grid-cell.beat {
   margin-left: 5px;
@@ -56,8 +69,8 @@ nbplay-drum-grid .nbplay-drum-grid-cell:hover {
 nbplay-drum-grid .nbplay-drum-grid-cell.on {
   background: color-mix(
     in srgb,
-    var(--nbplay-fill) calc(35% + 65% * var(--nbplay-drum-velocity, 1)),
-    transparent
+    var(--nbplay-fill) 25%,
+    var(--nbplay-bg-control)
   );
   border-color: var(--nbplay-fill);
 }
