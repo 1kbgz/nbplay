@@ -56,6 +56,9 @@ export interface NoteInput {
   startNote: (note: number, velocity: number) => (() => void) | void;
 }
 
+/** The port name the computer keyboard plays into the MIDI router as. */
+export const KEYBOARD_PORT = "Computer keyboard";
+
 /** A source that plays a track's notes in place of its looping sequencer. */
 export type ChannelOwner = "launcher" | "timeline";
 
@@ -71,6 +74,8 @@ export interface SessionBus {
   instruments?: Record<number, InstrumentBus>;
   /** Track note inputs by channel; MIDI routes and keyboards prefer them to the instrument. */
   inputs?: Record<number, NoteInput>;
+  /** The MIDI router's input: a raw MIDI message from a named port (the computer keyboard uses it). */
+  midiIn?: (port: string, data: Uint8Array) => void;
   /** A view of the session's launcher: the MIDI router's launch actions go through it. */
   launcher?: {
     command(request: {

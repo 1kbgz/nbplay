@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { type PropertyValues } from "lit";
 import { routeNoteOff, routeNoteOn, type KeyboardRoute } from "../routing.ts";
-import { getSessionBus, type NoteEvent } from "../session.ts";
+import { getSessionBus, KEYBOARD_PORT, type NoteEvent } from "../session.ts";
 import { createSineVoices, type SineVoices } from "../voices.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
 import { keyToNote, type NbplayKeyRows, type Zone } from "./keys.ts";
@@ -64,6 +64,8 @@ export class NbplayKeyboard extends NbplayElement {
   private voices: SineVoices = createSineVoices();
   /** Releases of keys an input took, by note. */
   private inputReleases = new Map<number, (() => void) | null>();
+  /** Keys sent to the MIDI router, so their release goes there too. */
+  private routed = new Set<number>();
   private heldNotes = new Set<number>();
   private sustainedNotes = new Map<number, Zone>();
   private pressedKeys = new Map<string, { note: number; zone: Zone }>();
@@ -151,6 +153,18 @@ export class NbplayKeyboard extends NbplayElement {
       this.status();
       return;
     }
+    // In a session with no sampler routing of its own, the keys go through
+    // the MIDI router as a port, so its routes decide what they play.
+    const router = this.samplerRouting?.length
+      ? undefined
+      : getSessionBus(this.sessionId)?.midiIn;
+    if (router) {
+      router(KEYBOARD_PORT, new Uint8Array([0x90, note, velocity]));
+      this.routed.add(note);
+      this.lastNoteEvent = { note, velocity, type: "on" };
+      this.status();
+      return;
+    }
     const usedSampler = routeNoteOn(
       this.sessionId,
       this.samplerRouting || [],
@@ -179,6 +193,16 @@ export class NbplayKeyboard extends NbplayElement {
   }
 
   private release(note: number, zone: Zone): void {
+    if (this.routed.delete(note)) {
+      getSessionBus(this.sessionId)?.midiIn?.(
+        KEYBOARD_PORT,
+        new Uint8Array([0x80, note, 0]),
+      );
+      this.lastNoteEvent = { note, velocity: 0, type: "off" };
+      this.sustainedNotes.delete(note);
+      this.status();
+      return;
+    }
     if (this.inputReleases.has(note)) {
       this.inputReleases.get(note)?.();
       this.inputReleases.delete(note);

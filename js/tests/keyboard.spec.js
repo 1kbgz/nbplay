@@ -712,4 +712,29 @@ test.describe("KeyboardWidget", () => {
     expect(t0.length).toBeGreaterThanOrEqual(1);
     expect(t1.length).toBeGreaterThanOrEqual(1);
   });
+
+  test("in a session the keys play into the MIDI router as a port", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.__midi = [];
+      globalThis.__nbplay = {
+        kb: {
+          midiIn: (port, data) => window.__midi.push([port, Array.from(data)]),
+        },
+      };
+    });
+    await renderWidget(page, { session_id: "kb" });
+    const kb = page.locator(".nbplay-keyboard");
+    await kb.focus();
+    await kb.dispatchEvent("keydown", { key: "q" });
+    await kb.dispatchEvent("keyup", { key: "q" });
+    expect(await page.evaluate(() => window.__midi)).toEqual([
+      ["Computer keyboard", [0x90, 48, 100]],
+      ["Computer keyboard", [0x80, 48, 0]],
+    ]);
+    expect(
+      (await page.evaluate(() => window.__testModel._state)).last_note_event,
+    ).toEqual({ note: 48, velocity: 0, type: "off" });
+  });
 });

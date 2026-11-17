@@ -293,7 +293,7 @@ test.describe("web app", () => {
     const dialog = page.locator("nbplay-palette dialog");
     await page.keyboard.press("Control+k");
     await expect(dialog).toBeVisible();
-    await expect(page.locator(".nbplay-palette-option")).toHaveCount(10);
+    await expect(page.locator(".nbplay-palette-option")).toHaveCount(11);
     await page.keyboard.type("mix");
     await page.keyboard.press("Enter");
     await expect(dialog).toBeHidden();
@@ -411,5 +411,55 @@ test.describe("web app", () => {
       bytes: "recorded take".length,
     });
     expect(timeline.config.export_clip_id).toBe("");
+  });
+
+  test("the computer keyboard plays the lead through the MIDI router", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const keys = page.locator("nbplay-keyboard");
+    await expect(keys).toBeAttached();
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Boolean(
+            Object.values(globalThis.__nbplay).find(
+              (b) => b.instruments?.[0] && b.midiIn,
+            ),
+          ),
+        ),
+      )
+      .toBe(true);
+    await page.evaluate(() => {
+      const bus = Object.values(globalThis.__nbplay).find((b) => b.midiIn);
+      window.__held = [];
+      const lead = bus.instruments[0];
+      const start = lead.startNote;
+      lead.startNote = (note, velocity) => {
+        window.__held.push(["on", note]);
+        const release = start(note, velocity);
+        return () => {
+          window.__held.push(["off", note]);
+          release?.();
+        };
+      };
+    });
+    // The keyboard panel shares a tab strip with the mixer; show it.
+    await page.evaluate(() =>
+      document.querySelector("spaday-regular-layout").openPanel("keyboard"),
+    );
+    await keys.focus();
+    await keys.dispatchEvent("keydown", { key: "q" });
+    await keys.dispatchEvent("keyup", { key: "q" });
+    // The demo routes any port, the computer keyboard included, to the lead.
+    await expect
+      .poll(() => page.evaluate(() => window.__held))
+      .toEqual([
+        ["on", 48],
+        ["off", 48],
+      ]);
+    await expect(
+      page.locator("nbplay-midi-router .nbplay-midi-router-monitor"),
+    ).toContainText("Computer keyboard");
   });
 });
