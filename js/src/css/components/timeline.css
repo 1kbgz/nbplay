@@ -360,3 +360,12 @@ nbplay-timeline .nbplay-timeline-status {
   font-size: var(--nbplay-font-size-small);
   color: var(--nbplay-error);
 }
+nbplay-timeline .nbplay-timeline-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+nbplay-timeline .nbplay-timeline-editor-title {
+  font-weight: 700;
+}

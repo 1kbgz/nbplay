@@ -895,6 +895,16 @@ time signature, and play/record state are also linked in Python, and
 `current_beat` is dlinked one-way from transport to timeline; the transport is
 the widget that persists the clock position.
 
+Selecting a MIDI clip opens its notes in a piano roll under the lanes
+(`nbplay-piano-roll`, `js/src/ts/components/piano-roll.ts`): rows are pitches,
+columns beats split by the grid (1/4 to 1/32). A click on an empty cell adds a
+note one grid step long, dragging a note moves it (snapped) and dragging its
+right edge resizes it, a double-click or Delete removes it, the wheel moves its
+velocity, and Quantize snaps every note to the grid (`quantizeNotes()`). Each
+edit writes the clip's `events`. From Python,
+`timeline.set_clip_events(clip_id, events)` replaces them and
+`timeline.quantize_clip(clip_id, step=0.25)` snaps them the same way.
+
 Recording captures every armed lane at once (`recording_tracks`). A lane's
 `input` picks the source: `"microphone"` lanes share one
 `navigator.mediaDevices.getUserMedia({ audio: true })` stream; `"channel"` lanes

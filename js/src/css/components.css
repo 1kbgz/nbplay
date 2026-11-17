@@ -25,6 +25,7 @@
 @import "./components/midi.css";
 @import "./components/launcher.css";
 @import "./components/timeline.css";
+@import "./components/piano-roll.css";
 @import "./components/zones.css";
 @import "./components/transport.css";
 @import "./components/pads.css";

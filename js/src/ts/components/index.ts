@@ -81,6 +81,7 @@ export {
   type SpectrumScale,
 } from "./spectrum.ts";
 export { NbplayKeyboard } from "./keyboard.ts";
+export { NbplayPianoRoll, quantizeNotes, type RollNote } from "./piano-roll.ts";
 export { NbplayFmSynth, fmWaveform } from "./fm-synth.ts";
 export {
   DRUM_SOUNDS,

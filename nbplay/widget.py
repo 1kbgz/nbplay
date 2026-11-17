@@ -1945,6 +1945,26 @@ class TimelineWidget(InstrumentWidget):
             raise ValueError(f"clip {clip_id} is not a MIDI clip")
         return clip
 
+    def set_clip_events(self, clip_id, events):
+        """Replace a MIDI clip's notes (``{beat, duration, note, velocity}``, beats from the clip's start); returns them."""
+        self._midi_clip(clip_id)
+        normalized = _normalize_midi_events(events)
+        self.config.clips = [{**clip, "events": normalized} if clip["id"] == clip_id else clip for clip in self.config.clips]
+        return normalized
+
+    def quantize_clip(self, clip_id, step=0.25):
+        """Snap a MIDI clip's note starts and lengths to ``step`` beats, as the editor's Quantize does; returns the notes."""
+        step = max(1 / 64, float(step))
+        events = [
+            {
+                **event,
+                "beat": max(0.0, round(event["beat"] / step) * step),
+                "duration": max(step, round(event["duration"] / step) * step),
+            }
+            for event in self._midi_clip(clip_id)["events"]
+        ]
+        return self.set_clip_events(clip_id, events)
+
     def _append_clip(self, clip):
         config = self.config
         config.update(clips=[*config.clips, clip], selected_clip_id=clip["id"], length=max(config.length, clip["start"] + clip["duration"]))

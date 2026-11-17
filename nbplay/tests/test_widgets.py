@@ -982,6 +982,27 @@ class TestMidiRouterWidget:
 
 
 class TestArrangementWidgets:
+    def test_a_midi_clips_notes_are_edited_and_quantized(self):
+        timeline = nbplay.TimelineWidget(autosync=False)
+        try:
+            timeline.add_track("Keys")
+            clip = timeline.add_midi_clip("Riff", events=[{"beat": 0.1, "duration": 0.3, "note": 60, "velocity": 90}])
+            notes = timeline.set_clip_events(
+                clip["id"], [{"beat": 1.02, "duration": 0.6, "note": 64, "velocity": 100}, {"beat": 0.1, "duration": 0.3, "note": 60, "velocity": 90}]
+            )
+            # Sorted by beat, as the clip keeps them.
+            assert [n["note"] for n in notes] == [60, 64]
+            assert timeline.quantize_clip(clip["id"], 0.25) == [
+                {"beat": 0.0, "duration": 0.25, "note": 60, "velocity": 90},
+                {"beat": 1.0, "duration": 0.5, "note": 64, "velocity": 100},
+            ]
+            assert timeline.config.clips[0]["events"][1]["beat"] == 1.0
+            audio = timeline.add_clip("Take")
+            with pytest.raises(ValueError):
+                timeline.quantize_clip(audio["id"])
+        finally:
+            timeline.close()
+
     def test_launcher_config_and_view(self):
         with pytest.raises(ValueError):
             LauncherConfig.model_validate({"quantize": "tick"})

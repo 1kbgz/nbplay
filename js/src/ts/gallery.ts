@@ -1697,6 +1697,29 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-piano-roll",
+    title: "nbplay-piano-roll",
+    desc: "A MIDI clip's note editor: click an empty cell to add a note, drag a note to move it, drag its right edge to resize, double-click or Delete to remove, the wheel for velocity, Quantize to snap to the grid.",
+    events: ["change", "nbplay-grid"],
+    controls: [{ name: "length", type: "number" }],
+    variants: [
+      {
+        label: "a riff",
+        props: {
+          length: 4,
+          events: [
+            { beat: 0, duration: 0.5, note: 60, velocity: 110 },
+            { beat: 0.5, duration: 0.5, note: 63, velocity: 80 },
+            { beat: 1, duration: 1, note: 67, velocity: 100 },
+            { beat: 2.5, duration: 0.25, note: 70, velocity: 60 },
+            { beat: 3, duration: 1, note: 72, velocity: 120 },
+          ],
+        },
+        wide: true,
+      },
+    ],
+  },
+  {
     tag: "nbplay-timeline",
     title: "nbplay-timeline",
     desc: "The tracking view on a private clock: ruler with loop brace, clip lanes with arm/monitor/mute/solo and a record source, clip move and trim, zoom. Focus it for Space, R, L, D and Delete.",

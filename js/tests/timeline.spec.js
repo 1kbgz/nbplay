@@ -935,4 +935,42 @@ test.describe("TimelineWidget", () => {
     expect(routed.connectedToChannel).toBe(true);
     expect(routed.isPlaying).toBe(true);
   });
+
+  test("a selected MIDI clip opens in the piano roll, which edits its notes", async ({
+    page,
+  }) => {
+    const midi = {
+      id: "riff",
+      name: "Riff",
+      track_index: 0,
+      start: 0,
+      duration: 4,
+      offset: 0,
+      kind: "midi",
+      events: [{ beat: 0, duration: 1, note: 60, velocity: 100 }],
+    };
+    // A clip with an events list is MIDI to the timeline; an audio clip has none.
+    const { events: _, ...rest } = midi;
+    const audio = { ...rest, id: "take", name: "Take", kind: "audio" };
+    await renderWidget(page, {
+      clips: [midi, audio],
+      selected_clip_id: "take",
+    });
+    // An audio clip has no notes to edit.
+    await expect(page.locator("nbplay-piano-roll")).toHaveCount(0);
+    await page.evaluate(() => {
+      const timeline = document.querySelector("nbplay-timeline");
+      timeline.selectedClipId = "riff";
+    });
+    await expect(page.locator(".nbplay-timeline-editor-title")).toHaveText(
+      "Riff",
+    );
+    await expect(
+      page.locator("nbplay-piano-roll .nbplay-roll-note"),
+    ).toHaveCount(1);
+    await page.locator("nbplay-piano-roll .nbplay-roll-note").dblclick();
+    const clips = (await page.evaluate(() => window.__testModel._state)).clips;
+    expect(clips.find((c) => c.id === "riff").events).toEqual([]);
+    expect(clips.find((c) => c.id === "take").kind).toBe("audio");
+  });
 });
