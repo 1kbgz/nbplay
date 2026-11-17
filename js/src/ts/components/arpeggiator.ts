@@ -326,6 +326,11 @@ export class NbplayArpeggiator extends NbplayElement {
 
   private onClockEvent = (event: ClockEvent): void => {
     if (!this.timer) return;
+    // The transport stopping stops a latched arpeggio; keys still down play on.
+    if (event.type === "stop" && this.latch) {
+      this.setHeld(this.held.filter((h) => this.down.has(h.note)));
+      if (!this.timer) return;
+    }
     if (["play", "stop", "seek", "tempo", "loop"].includes(event.type))
       this.realign();
   };

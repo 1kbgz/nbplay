@@ -161,6 +161,31 @@ test.describe("ArpeggiatorWidget", () => {
     expect((await state(page)).held_notes).toEqual([]);
   });
 
+  test("the transport stopping stops a latched arpeggio", async ({ page }) => {
+    await renderArp(page, { latch: true });
+    await page.evaluate(() => {
+      const bus = globalThis.__nbplay.arp;
+      bus.clock.play();
+      const input = bus.inputs[0];
+      const c = input.startNote(60, 100);
+      window.__held = input.startNote(67, 100);
+      c();
+    });
+    // C was released but latched; G is still down.
+    expect((await state(page)).held_notes).toEqual([60, 67]);
+    await page.evaluate(() => globalThis.__nbplay.arp.clock.stop());
+    expect((await state(page)).held_notes).toEqual([67]);
+    await page.evaluate(() => window.__held());
+    // Latched again after the key went up; the next stop lets it go.
+    expect((await state(page)).held_notes).toEqual([67]);
+    await page.evaluate(() => {
+      const clock = globalThis.__nbplay.arp.clock;
+      clock.play();
+      clock.stop();
+    });
+    expect((await state(page)).held_notes).toEqual([]);
+  });
+
   test("the editor writes the settings", async ({ page }) => {
     await renderArp(page);
     await page.locator('.nbplay-arp-order [data-value="updown"]').click();

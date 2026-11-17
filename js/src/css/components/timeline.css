@@ -97,6 +97,16 @@ nbplay-lane .nbplay-lane-name {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+nbplay-lane .nbplay-lane-owner {
+  margin-left: 6px;
+  padding: 0 4px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  font-weight: 400;
+  color: var(--nbplay-accent);
+  border: 1px solid var(--nbplay-accent);
+  border-radius: var(--nbplay-radius-control);
+}
 nbplay-lane .nbplay-lane-buttons {
   display: flex;
   gap: 3px;
