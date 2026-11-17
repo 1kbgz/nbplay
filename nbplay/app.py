@@ -109,6 +109,7 @@ def _panels(session):
         (name, name.capitalize(), getattr(session, name)) for name in ("transport", "launcher", "timeline", "mixer")
     ]
     panels.append(("midi", "MIDI", session.midi_router))
+    panels.append(("keyboard", "Keyboard", session.keyboard))
     taken = {name for name, _, _ in panels}
     for track in session.tracks:
         for widget in (track.sequencer, track.sound_source):
@@ -136,7 +137,7 @@ def panel_titles(session):
 
 def default_layout(names):
     """The transport across the top, launcher, timeline and mixer in the middle, instruments below."""
-    instruments = [name for name in names if name not in ("transport", "launcher", "timeline", "mixer", "midi")]
+    instruments = [name for name in names if name not in ("transport", "launcher", "timeline", "mixer", "midi", "keyboard")]
     rows = [
         {"type": "tab-layout", "tabs": ["transport"]},
         {
@@ -146,7 +147,7 @@ def default_layout(names):
             "children": [
                 {"type": "tab-layout", "tabs": ["launcher"]},
                 {"type": "tab-layout", "tabs": ["timeline"]},
-                {"type": "tab-layout", "tabs": ["mixer", "midi"]},
+                {"type": "tab-layout", "tabs": ["mixer", "midi", "keyboard"]},
             ],
         },
     ]

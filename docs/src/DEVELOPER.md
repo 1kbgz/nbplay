@@ -1033,7 +1033,11 @@ and moves later ones down. A saved session keeps its routes (`midi_router` in
 `session.json`).
 
 The element listens to every Web MIDI input, including ports connected later
-(`listenAll()` in `midi_access.ts`). A note-on calls
+(`listenAll()` in `midi_access.ts`). It also registers `bus.midiIn(port, data)`: the
+session's computer keyboard (`session.keyboard`, the `keyboard` panel) plays
+into it as the port `Computer keyboard`, unless the keyboard has sampler routing
+of its own or is connected to an arpeggiator, so the router's routes decide what
+typing plays too. A note-on calls
 `bus.instruments[channel].startNote()` on every matching route, and its
 note-off calls the releases it got back, keyed by port, channel and note, so a
 route edited while a key is down still releases the note it started. Every

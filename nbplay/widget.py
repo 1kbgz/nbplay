@@ -2135,6 +2135,8 @@ class Session:
         self.timeline = TimelineWidget(time_signature_den=den, **common)
         self.launcher = LauncherWidget(time_signature_den=den, **common)
         self.midi_router = MidiRouterWidget(session_id=self._session_id, theme=theme)
+        # The computer keyboard plays into the router as its own port.
+        self.keyboard = KeyboardWidget(session_id=self._session_id, theme=theme)
         self.tracks = []
         # Named patterns for the tracking widget: name -> {voices_data, step_duration}.
         self.patterns = {}
@@ -2216,7 +2218,7 @@ class Session:
     @property
     def widgets(self):
         """Every widget in the session, including track instruments."""
-        widgets = [self.transport, self.mixer, self.timeline, self.launcher, self.midi_router]
+        widgets = [self.transport, self.mixer, self.timeline, self.launcher, self.midi_router, self.keyboard]
         for track in self.tracks:
             widgets.extend(widget for widget in (track.sequencer, track.sound_source) if isinstance(widget, InstrumentWidget))
         return widgets
