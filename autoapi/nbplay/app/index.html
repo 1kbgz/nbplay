@@ -204,6 +204,9 @@
     <a href="#module-contents">Module Contents</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.app.change_tracks">change_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.app.panel_widgets">panel_widgets()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -235,6 +238,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.save">Standalone.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.change_tracks">Standalone.change_tracks()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.pending_exports">Standalone.pending_exports()</a>
@@ -303,19 +309,22 @@ for a Pyodide Web Worker, with <code class="docutils literal notranslate"><span 
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.panel_widgets" title="nbplay.app.panel_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_widgets</span></code></a>(session)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.change_tracks" title="nbplay.app.change_tracks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_tracks</span></code></a>(session, change)</p></td>
+<td><p>Add or remove a track as the app's track menu asks; <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a request it cannot follow.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.panel_widgets" title="nbplay.app.panel_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_widgets</span></code></a>(session)</p></td>
 <td><p>Panel name to widget: the session views, then each track's sequencer and sound source.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.panel_titles" title="nbplay.app.panel_titles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_titles</span></code></a>(session)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.panel_titles" title="nbplay.app.panel_titles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">panel_titles</span></code></a>(session)</p></td>
 <td><p>Panel name to the title on its tab: <code class="docutils literal notranslate"><span class="pre">Mixer</span></code>, or the track's name and the instrument (<code class="docutils literal notranslate"><span class="pre">Lead</span> <span class="pre">synth</span></code>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.default_layout" title="nbplay.app.default_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_layout</span></code></a>(names)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.default_layout" title="nbplay.app.default_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_layout</span></code></a>(names)</p></td>
 <td><p>The transport across the top, launcher, timeline and mixer in the middle, instruments below.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.build" title="nbplay.app.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a>(session, *[, layout, title, probes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.build" title="nbplay.app.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a>(session, *[, layout, title, probes])</p></td>
 <td><p>A Starlette app serving <code class="docutils literal notranslate"><span class="pre">session</span></code>: one WebSocket per instrument and a panel layout page.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.app.demo_session" title="nbplay.app.demo_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_session</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.app.demo_session" title="nbplay.app.demo_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">demo_session</span></code></a>()</p></td>
 <td><p>A lead and a bass on sequencers with shipped synth presets, a drum machine beat, and any MIDI input on the lead.</p></td>
 </tr>
 </tbody>
@@ -323,6 +332,15 @@ for a Pyodide Web Worker, with <code class="docutils literal notranslate"><span 
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nbplay.app.change_tracks">
+<span class="sig-prename descclassname"><span class="pre">nbplay.app.</span></span><span class="sig-name descname"><span class="pre">change_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#change_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.change_tracks" title="Link to this definition">¶</a></dt>
+<dd><p>Add or remove a track as the app’s track menu asks; <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a request it cannot follow.</p>
+<p><code class="docutils literal notranslate"><span class="pre">change</span></code> is <code class="docutils literal notranslate"><span class="pre">{&quot;action&quot;:</span> <span class="pre">&quot;add&quot;,</span> <span class="pre">&quot;name&quot;,</span> <span class="pre">&quot;instrument&quot;,</span> <span class="pre">&quot;notes&quot;}</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">instrument</span></code> a key of <code class="xref py py-data docutils literal notranslate"><span class="pre">INSTRUMENTS</span></code> and <code class="docutils literal notranslate"><span class="pre">notes</span></code> one of
+<code class="xref py py-data docutils literal notranslate"><span class="pre">NOTE_SOURCES</span></code>, or <code class="docutils literal notranslate"><span class="pre">{&quot;action&quot;:</span> <span class="pre">&quot;remove&quot;,</span> <span class="pre">&quot;index&quot;}</span></code>.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="nbplay.app.panel_widgets">
 <span class="sig-prename descclassname"><span class="pre">nbplay.app.</span></span><span class="sig-name descname"><span class="pre">panel_widgets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#panel_widgets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.panel_widgets" title="Link to this definition">¶</a></dt>
@@ -398,6 +416,13 @@ session archive as bytes.</p>
 <p>Recorded clip audio stays in the page until it is exported: call
 <code class="docutils literal notranslate"><span class="pre">call(&quot;timeline&quot;,</span> <span class="pre">&quot;export_all_clips&quot;)</span></code> first and wait for
 <a class="reference internal" href="#nbplay.app.Standalone.pending_exports" title="nbplay.app.Standalone.pending_exports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pending_exports()</span></code></a> to reach zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.app.Standalone.change_tracks">
+<span class="sig-name descname"><span class="pre">change_tracks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/app.html#Standalone.change_tracks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.app.Standalone.change_tracks" title="Link to this definition">¶</a></dt>
+<dd><p>Add or remove a track (JSON text, see <a class="reference internal" href="#nbplay.app.change_tracks" title="nbplay.app.change_tracks"><code class="xref py py-func docutils literal notranslate"><span class="pre">change_tracks()</span></code></a>); an error message, or “” when it is done.</p>
+<p>The panels change, so the page saves the session and reloads onto it.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -491,6 +516,9 @@ theme, mute and solo), so every server is flushed.</p>
     <a href="#module-contents">Module Contents</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.app.change_tracks">change_tracks()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.app.panel_widgets">panel_widgets()</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
@@ -522,6 +550,9 @@ theme, mute and solo), so every server is flushed.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.save">Standalone.save()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.app.Standalone.change_tracks">Standalone.change_tracks()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.app.Standalone.pending_exports">Standalone.pending_exports()</a>

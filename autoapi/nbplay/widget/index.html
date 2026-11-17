@@ -978,6 +978,12 @@
     <a href="#nbplay.widget.TimelineWidget._midi_clip">TimelineWidget._midi_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TimelineWidget.set_clip_events">TimelineWidget.set_clip_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TimelineWidget.quantize_clip">TimelineWidget.quantize_clip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.TimelineWidget._append_clip">TimelineWidget._append_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1072,6 +1078,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.midi_router">Session.midi_router</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.keyboard">Session.keyboard</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.tracks">Session.tracks</a>
@@ -2786,6 +2795,18 @@ is already cached are skipped unless <code class="docutils literal notranslate">
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.set_clip_events">
+<span class="sig-name descname"><span class="pre">set_clip_events</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.set_clip_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.set_clip_events" title="Link to this definition">¶</a></dt>
+<dd><p>Replace a MIDI clip’s notes (<code class="docutils literal notranslate"><span class="pre">{beat,</span> <span class="pre">duration,</span> <span class="pre">note,</span> <span class="pre">velocity}</span></code>, beats from the clip’s start); returns them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TimelineWidget.quantize_clip">
+<span class="sig-name descname"><span class="pre">quantize_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget.quantize_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget.quantize_clip" title="Link to this definition">¶</a></dt>
+<dd><p>Snap a MIDI clip’s note starts and lengths to <code class="docutils literal notranslate"><span class="pre">step</span></code> beats, as the editor’s Quantize does; returns the notes.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.TimelineWidget._append_clip">
 <span class="sig-name descname"><span class="pre">_append_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TimelineWidget._append_clip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TimelineWidget._append_clip" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2977,6 +2998,11 @@ read and write the same <code class="docutils literal notranslate"><span class="
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.widget.Session.midi_router">
 <span class="sig-name descname"><span class="pre">midi_router</span></span><a class="headerlink" href="#nbplay.widget.Session.midi_router" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.widget.Session.keyboard">
+<span class="sig-name descname"><span class="pre">keyboard</span></span><a class="headerlink" href="#nbplay.widget.Session.keyboard" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3999,6 +4025,12 @@ session reads the same archive.</p>
     <a href="#nbplay.widget.TimelineWidget._midi_clip">TimelineWidget._midi_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TimelineWidget.set_clip_events">TimelineWidget.set_clip_events()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TimelineWidget.quantize_clip">TimelineWidget.quantize_clip()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.TimelineWidget._append_clip">TimelineWidget._append_clip()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -4093,6 +4125,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.midi_router">Session.midi_router</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.keyboard">Session.keyboard</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.tracks">Session.tracks</a>

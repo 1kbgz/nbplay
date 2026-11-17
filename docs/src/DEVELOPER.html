@@ -962,7 +962,8 @@ running, and the claims stack, so stopping the slot hands the track back in
 phase. <code class="docutils literal notranslate"><span class="pre">claimChannel()</span></code> and <code class="docutils literal notranslate"><span class="pre">releaseChannel()</span></code> announce a change with a
 <code class="docutils literal notranslate"><span class="pre">nbplay-claims</span></code> event on <code class="docutils literal notranslate"><span class="pre">document</span></code> (<code class="docutils literal notranslate"><span class="pre">{sessionId,</span> <span class="pre">channel}</span></code>); the sequencer and
 the drum machine show <code class="docutils literal notranslate"><span class="pre">launcher</span> <span class="pre">playing</span></code> or <code class="docutils literal notranslate"><span class="pre">arrangement</span> <span class="pre">playing</span></code> in their
-header while something else owns their track.</p>
+header while something else owns their track, and a timeline lane shows a
+<code class="docutils literal notranslate"><span class="pre">launcher</span></code> tag while a launched slot plays its track.</p>
 <p>What each control does to a track (decided 2026-11-16):</p>
 <table class="docutils align-default">
 <thead>
@@ -985,6 +986,12 @@ header while something else owns their track.</p>
 </tr>
 <tr class="row-even"><td><p>Stopping a slot, or stop all</p></td>
 <td><p>The track goes back to its timeline clips, or else its sequencer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>An arpeggiator when the clock stops</p></td>
+<td><p>Latched notes go; keys still held keep playing (it runs from the first key while the clock is stopped).</p></td>
+</tr>
+<tr class="row-even"><td><p>Shortcuts and MIDI mappings</p></td>
+<td><p>Space in the transport, timeline and launcher toggles the clock; Space in a sequencer is its ▶ (pause above); the router’s <code class="docutils literal notranslate"><span class="pre">play</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>, <code class="docutils literal notranslate"><span class="pre">toggle</span></code> and <code class="docutils literal notranslate"><span class="pre">record</span></code> act on the clock, and its launcher actions on the launcher.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1167,6 +1174,10 @@ it with its patch.</p>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">DrumMachineWidget</span></code>. Elements:
 <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/drums.ts</span></code> and the pattern grid
 <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/drum-grid.ts</span></code>.</p>
+<p>The pattern grid’s steps are the pad grid’s squares, smaller, and share their
+gestures through <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/cells.ts</span></code>: a click toggles a step, a
+vertical drag sets its velocity (top is loudest; <code class="docutils literal notranslate"><span class="pre">input</span></code> while moving, <code class="docutils literal notranslate"><span class="pre">change</span></code>
+on release), and the wheel nudges it.</p>
 <p>A drum machine is up to 16 pads and a pattern with one row per pad, on one
 track: <code class="docutils literal notranslate"><span class="pre">session.add_track(&quot;Beat&quot;,</span> <span class="pre">None,</span> <span class="pre">DrumMachineWidget())</span></code>. A pad is
 <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">note,</span> <span class="pre">sound,</span> <span class="pre">gain,</span> <span class="pre">pan,</span> <span class="pre">choke,</span> <span class="pre">params}</span></code>:</p>
@@ -1353,7 +1364,12 @@ transports session until the element connects.</p>
 <p>Python class: <code class="docutils literal notranslate"><span class="pre">TransportWidget</span></code>. Element:
 <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/transport.ts</span></code>.</p>
 <p>TransportWidget is the global play/stop and tempo surface. Its config holds
-BPM, time signature and loop range; its status mirrors play state and the
+BPM, time signature, loop range and <code class="docutils literal notranslate"><span class="pre">metronome</span></code>; with the metronome on, the
+element clicks on every beat of the session clock while it plays (the first beat
+of each bar accented, through <code class="docutils literal notranslate"><span class="pre">js/src/ts/metronome.ts</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduleClick()</span></code> in
+<code class="docutils literal notranslate"><span class="pre">voices.ts</span></code>, into the master bus), and the timeline’s count-in clicks the same
+way. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
+Ctrl/Cmd+Shift+Z do; its status mirrors play state and the
 bar/beat position. <code class="docutils literal notranslate"><span class="pre">Session.play()</span></code>, <code class="docutils literal notranslate"><span class="pre">stop()</span></code>, and <code class="docutils literal notranslate"><span class="pre">seek(beat)</span></code> are transport
 commands, and <code class="docutils literal notranslate"><span class="pre">session.bpm</span></code> and <code class="docutils literal notranslate"><span class="pre">session.time_signature</span></code> write every widget’s
 config. A beat is a quarter note, so a bar is <code class="docutils literal notranslate"><span class="pre">numerator</span> <span class="pre">*</span> <span class="pre">4</span> <span class="pre">/</span> <span class="pre">denominator</span></code>
@@ -1392,6 +1408,15 @@ controls act on the whole session in the browser. In a <code class="docutils lit
 time signature, and play/record state are also linked in Python, and
 <code class="docutils literal notranslate"><span class="pre">current_beat</span></code> is dlinked one-way from transport to timeline; the transport is
 the widget that persists the clock position.</p>
+<p>Selecting a MIDI clip opens its notes in a piano roll under the lanes
+(<code class="docutils literal notranslate"><span class="pre">nbplay-piano-roll</span></code>, <code class="docutils literal notranslate"><span class="pre">js/src/ts/components/piano-roll.ts</span></code>): rows are pitches,
+columns beats split by the grid (1/4 to 1/32). A click on an empty cell adds a
+note one grid step long, dragging a note moves it (snapped) and dragging its
+right edge resizes it, a double-click or Delete removes it, the wheel moves its
+velocity, and Quantize snaps every note to the grid (<code class="docutils literal notranslate"><span class="pre">quantizeNotes()</span></code>). Each
+edit writes the clip’s <code class="docutils literal notranslate"><span class="pre">events</span></code>. From Python,
+<code class="docutils literal notranslate"><span class="pre">timeline.set_clip_events(clip_id,</span> <span class="pre">events)</span></code> replaces them and
+<code class="docutils literal notranslate"><span class="pre">timeline.quantize_clip(clip_id,</span> <span class="pre">step=0.25)</span></code> snaps them the same way.</p>
 <p>Recording captures every armed lane at once (<code class="docutils literal notranslate"><span class="pre">recording_tracks</span></code>). A lane’s
 <code class="docutils literal notranslate"><span class="pre">input</span></code> picks the source: <code class="docutils literal notranslate"><span class="pre">&quot;microphone&quot;</span></code> lanes share one
 <code class="docutils literal notranslate"><span class="pre">navigator.mediaDevices.getUserMedia({</span> <span class="pre">audio:</span> <span class="pre">true</span> <span class="pre">})</span></code> stream; <code class="docutils literal notranslate"><span class="pre">&quot;channel&quot;</span></code> lanes
@@ -1544,7 +1569,11 @@ editor’s track list. <code class="docutils literal notranslate"><span class="p
 and moves later ones down. A saved session keeps its routes (<code class="docutils literal notranslate"><span class="pre">midi_router</span></code> in
 <code class="docutils literal notranslate"><span class="pre">session.json</span></code>).</p>
 <p>The element listens to every Web MIDI input, including ports connected later
-(<code class="docutils literal notranslate"><span class="pre">listenAll()</span></code> in <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code>). A note-on calls
+(<code class="docutils literal notranslate"><span class="pre">listenAll()</span></code> in <code class="docutils literal notranslate"><span class="pre">midi_access.ts</span></code>). It also registers <code class="docutils literal notranslate"><span class="pre">bus.midiIn(port,</span> <span class="pre">data)</span></code>: the
+session’s computer keyboard (<code class="docutils literal notranslate"><span class="pre">session.keyboard</span></code>, the <code class="docutils literal notranslate"><span class="pre">keyboard</span></code> panel) plays
+into it as the port <code class="docutils literal notranslate"><span class="pre">Computer</span> <span class="pre">keyboard</span></code>, unless the keyboard has sampler routing
+of its own or is connected to an arpeggiator, so the router’s routes decide what
+typing plays too. A note-on calls
 <code class="docutils literal notranslate"><span class="pre">bus.instruments[channel].startNote()</span></code> on every matching route, and its
 note-off calls the releases it got back, keyed by port, channel and note, so a
 route edited while a key is down still releases the note it started. Every
@@ -1701,6 +1730,14 @@ PUTs a picked archive to the same URL. <code class="docutils literal notranslate
 the session it serves: it rebuilds the app’s routes (page, one WebSocket per
 panel, probes) for the loaded session, restarts the <code class="docutils literal notranslate"><span class="pre">autosync</span></code> tasks, and the
 page reloads. <code class="docutils literal notranslate"><span class="pre">app.state.session</span></code> is the session being served.
+The bar’s track menu (<code class="docutils literal notranslate"><span class="pre">nbplay-tracks</span></code>) lists the session’s tracks with a remove
+button each and adds one (a name, an instrument from <code class="docutils literal notranslate"><span class="pre">INSTRUMENTS</span></code> and a note
+source from <code class="docutils literal notranslate"><span class="pre">NOTE_SOURCES</span></code>). It POSTs the change to <code class="docutils literal notranslate"><span class="pre">/tracks</span></code>, which
+<code class="docutils literal notranslate"><span class="pre">change_tracks()</span></code> applies with <code class="docutils literal notranslate"><span class="pre">Session.add_track()</span></code> or <code class="docutils literal notranslate"><span class="pre">remove_track()</span></code> (closing
+the removed widgets); the app rebuilds its routes the same way as for a load and
+the page reloads onto the new panels. Inside a session the mixer hides its own
+“+ Channel” button and its channels’ remove buttons, because a session’s
+channels are its tracks.
 <code class="docutils literal notranslate"><span class="pre">APP_CSS</span></code> maps regular-layout’s surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so <code class="docutils literal notranslate"><span class="pre">nbplay-wire</span></code> finds the client for its panel and kernel commands
@@ -1742,7 +1779,9 @@ it and sends the bytes to the worker, which checks them with
 accepted one is kept in the Cache API and the page reloads; the next worker
 takes it out of the cache and builds <code class="docutils literal notranslate"><span class="pre">Standalone.load(bytes)</span></code> in place of the
 demo session. The cached archive is used once, so a later reload is the demo
-again.</p>
+again. The track menu works the same way: its <code class="docutils literal notranslate"><span class="pre">nbplay-request</span></code> (<code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">&quot;tracks&quot;,</span> <span class="pre">change}</span></code>) goes to the worker, which applies it with
+<code class="docutils literal notranslate"><span class="pre">Standalone.change_tracks()</span></code>, keeps the changed session in the cache and has the
+page reload onto it.</p>
 </section>
 </section>
 <section id="styling-system">

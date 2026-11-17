@@ -34,6 +34,7 @@ Functions
 
 .. autoapisummary::
 
+   nbplay.app.change_tracks
    nbplay.app.panel_widgets
    nbplay.app.panel_titles
    nbplay.app.default_layout
@@ -43,6 +44,15 @@ Functions
 
 Module Contents
 ---------------
+
+.. py:function:: change_tracks(session, change)
+
+   Add or remove a track as the app's track menu asks; ``ValueError`` for a request it cannot follow.
+
+   ``change`` is ``{"action": "add", "name", "instrument", "notes"}``, with
+   ``instrument`` a key of :data:`INSTRUMENTS` and ``notes`` one of
+   :data:`NOTE_SOURCES`, or ``{"action": "remove", "index"}``.
+
 
 .. py:function:: panel_widgets(session)
 
@@ -113,6 +123,14 @@ Module Contents
       Recorded clip audio stays in the page until it is exported: call
       ``call("timeline", "export_all_clips")`` first and wait for
       :meth:`pending_exports` to reach zero.
+
+
+
+   .. py:method:: change_tracks(change)
+
+      Add or remove a track (JSON text, see :func:`change_tracks`); an error message, or "" when it is done.
+
+      The panels change, so the page saves the session and reloads onto it.
 
 
 

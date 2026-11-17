@@ -522,7 +522,7 @@ Module Contents
 
 
 .. py:data:: _TRANSPORT_STATE
-   :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar', 'loop_end_bar')
+   :value: ('bpm', 'time_signature_num', 'time_signature_den', 'loop_enabled', 'loop_start_bar',...
 
 
 .. py:data:: _PRESET_FORMAT

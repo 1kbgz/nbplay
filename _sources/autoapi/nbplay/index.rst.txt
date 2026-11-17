@@ -1889,6 +1889,9 @@ Package Contents
    .. py:attribute:: midi_router
 
 
+   .. py:attribute:: keyboard
+
+
    .. py:attribute:: tracks
       :value: []
 
@@ -2259,6 +2262,18 @@ Package Contents
 
 
    .. py:method:: _midi_clip(clip_id)
+
+
+   .. py:method:: set_clip_events(clip_id, events)
+
+      Replace a MIDI clip's notes (``{beat, duration, note, velocity}``, beats from the clip's start); returns them.
+
+
+
+   .. py:method:: quantize_clip(clip_id, step=0.25)
+
+      Snap a MIDI clip's note starts and lengths to ``step`` beats, as the editor's Quantize does; returns the notes.
+
 
 
    .. py:method:: _append_clip(clip)

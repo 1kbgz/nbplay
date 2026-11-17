@@ -39,6 +39,12 @@ Module Contents
    .. py:method:: test_served_app_saves_the_session_and_loads_another()
 
 
+   .. py:method:: test_the_track_menu_adds_and_removes_tracks()
+
+
+   .. py:method:: test_the_standalone_page_changes_tracks_for_a_reload()
+
+
    .. py:method:: test_save_waits_for_the_browser_to_export_recorded_clips(monkeypatch)
 
 

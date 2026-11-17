@@ -96,6 +96,12 @@ Module Contents
       :type:  int
 
 
+   .. py:attribute:: metronome
+      :type:  bool
+      :value: False
+
+
+
    .. py:attribute:: session_id
       :type:  str
       :value: ''

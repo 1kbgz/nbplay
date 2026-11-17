@@ -192,6 +192,9 @@ Module Contents
 
 .. py:class:: TestArrangementWidgets
 
+   .. py:method:: test_a_midi_clips_notes_are_edited_and_quantized()
+
+
    .. py:method:: test_launcher_config_and_view()
 
 
@@ -286,6 +289,9 @@ Module Contents
 
 
 .. py:class:: TestSessionPersistence
+
+   .. py:method:: test_the_metronome_is_saved_with_the_session()
+
 
    .. py:method:: test_to_dict_is_json_safe()
 
