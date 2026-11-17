@@ -621,6 +621,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_FM_SYNTH_STATE</span><span class="p">,</span>
     <span class="n">_SYNTH_STATE</span><span class="p">,</span>
+    <span class="n">ARP_ORDERS</span><span class="p">,</span>
     <span class="n">MAX_DRUM_PADS</span><span class="p">,</span>
     <span class="n">THEMES</span><span class="p">,</span>
     <span class="n">_clamp_midi_note</span><span class="p">,</span>
@@ -651,6 +652,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"ArpeggiatorConfig"</span><span class="p">,</span>
+    <span class="s2">"ArpeggiatorStatus"</span><span class="p">,</span>
     <span class="s2">"DrumMachineConfig"</span><span class="p">,</span>
     <span class="s2">"DrumMachineStatus"</span><span class="p">,</span>
     <span class="s2">"FMSynthConfig"</span><span class="p">,</span>
@@ -1378,6 +1381,54 @@ window.runMermaid = runMermaid;</script>
 
 
 <span class="n">_GRID_FIELDS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"measures"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">})</span>
+
+
+<div class="viewcode-block" id="ArpeggiatorConfig">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.ArpeggiatorConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArpeggiatorConfig</span><span class="p">(</span><span class="n">_Validated</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""An arpeggiator: the notes held on its track become a pattern on the session clock.</span>
+
+<span class="sd">    ``order`` is one of :data:`~nbplay.descriptors.ARP_ORDERS` (``updown``</span>
+<span class="sd">    turns at the ends without repeating them; ``played`` keeps the order the</span>
+<span class="sd">    keys went down). ``octaves`` repeats the pattern that many octaves up.</span>
+<span class="sd">    ``step_duration`` is the step in beats (0.25 is a sixteenth), ``gate``</span>
+<span class="sd">    the part of a step a note sounds, ``swing`` delays every second step as</span>
+<span class="sd">    the sequencer's does, and ``latch`` keeps the notes playing after the</span>
+<span class="sd">    keys are released, until a new chord replaces them.</span>
+<span class="sd">    """</span>
+
+    <span class="n">order</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"up"</span>
+    <span class="n">octaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">step_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">gate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">swing</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">latch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">bpm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">channel_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="n">_theme</span> <span class="o">=</span> <span class="n">field_validator</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">)(</span><span class="nb">classmethod</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">_validate_theme</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="ArpeggiatorConfig._order">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.ArpeggiatorConfig._order">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"order"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_order</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ARP_ORDERS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"order must be one of </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">ARP_ORDERS</span><span class="p">)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">order</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">order</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ArpeggiatorStatus">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.ArpeggiatorStatus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArpeggiatorStatus</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The notes held (or latched) now; browser-owned."""</span>
+
+    <span class="n">held_notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span></div>
+
 
 
 <div class="viewcode-block" id="SequencerConfig">

@@ -813,6 +813,51 @@
     <a href="#nbplay.models.MidiOutputStatus.request">MidiOutputStatus.request</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.ArpeggiatorConfig">ArpeggiatorConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.order">ArpeggiatorConfig.order</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.octaves">ArpeggiatorConfig.octaves</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.step_duration">ArpeggiatorConfig.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.gate">ArpeggiatorConfig.gate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.swing">ArpeggiatorConfig.swing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.latch">ArpeggiatorConfig.latch</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.bpm">ArpeggiatorConfig.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.session_id">ArpeggiatorConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.channel_index">ArpeggiatorConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.theme">ArpeggiatorConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig._theme">ArpeggiatorConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig._order">ArpeggiatorConfig._order()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.ArpeggiatorStatus">ArpeggiatorStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorStatus.held_notes">ArpeggiatorStatus.held_notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SequencerConfig">SequencerConfig</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1231,6 +1276,12 @@ status model the browser owns (hosted with <code class="docutils literal notrans
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.MidiOutputStatus" title="nbplay.models.MidiOutputStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MidiOutputStatus</span></code></a></p></td>
 <td><p>Ports the browser enumerated; browser-owned.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.ArpeggiatorConfig" title="nbplay.models.ArpeggiatorConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArpeggiatorConfig</span></code></a></p></td>
+<td><p>An arpeggiator: the notes held on its track become a pattern on the session clock.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nbplay.models.ArpeggiatorStatus" title="nbplay.models.ArpeggiatorStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArpeggiatorStatus</span></code></a></p></td>
+<td><p>The notes held (or latched) now; browser-owned.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nbplay.models.SequencerConfig" title="nbplay.models.SequencerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SequencerConfig</span></code></a></p></td>
 <td><p>The step sequencer's pattern and grid.</p></td>
@@ -2459,6 +2510,100 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.MidiOutputStatus.request">
 <span class="sig-name descname"><span class="pre">request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#nbplay.models.MidiOutputStatus.request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">ArpeggiatorConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#ArpeggiatorConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_Validated</span></code></p>
+<p>An arpeggiator: the notes held on its track become a pattern on the session clock.</p>
+<p><code class="docutils literal notranslate"><span class="pre">order</span></code> is one of <a class="reference internal" href="../descriptors/index.html#nbplay.descriptors.ARP_ORDERS" title="nbplay.descriptors.ARP_ORDERS"><code class="xref py py-data docutils literal notranslate"><span class="pre">ARP_ORDERS</span></code></a> (<code class="docutils literal notranslate"><span class="pre">updown</span></code>
+turns at the ends without repeating them; <code class="docutils literal notranslate"><span class="pre">played</span></code> keeps the order the
+keys went down). <code class="docutils literal notranslate"><span class="pre">octaves</span></code> repeats the pattern that many octaves up.
+<code class="docutils literal notranslate"><span class="pre">step_duration</span></code> is the step in beats (0.25 is a sixteenth), <code class="docutils literal notranslate"><span class="pre">gate</span></code>
+the part of a step a note sounds, <code class="docutils literal notranslate"><span class="pre">swing</span></code> delays every second step as
+the sequencer’s does, and <code class="docutils literal notranslate"><span class="pre">latch</span></code> keeps the notes playing after the
+keys are released, until a new chord replaces them.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.order">
+<span class="sig-name descname"><span class="pre">order</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'up'</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.order" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.octaves">
+<span class="sig-name descname"><span class="pre">octaves</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.octaves" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.step_duration">
+<span class="sig-name descname"><span class="pre">step_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.step_duration" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.gate">
+<span class="sig-name descname"><span class="pre">gate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.gate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.swing">
+<span class="sig-name descname"><span class="pre">swing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.swing" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.latch">
+<span class="sig-name descname"><span class="pre">latch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.latch" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.bpm">
+<span class="sig-name descname"><span class="pre">bpm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.bpm" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.session_id">
+<span class="sig-name descname"><span class="pre">session_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.session_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.channel_index">
+<span class="sig-name descname"><span class="pre">channel_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.channel_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig._theme">
+<span class="sig-name descname"><span class="pre">_theme</span></span><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig._theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorConfig._order">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#ArpeggiatorConfig._order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.ArpeggiatorConfig._order" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nbplay.models.</span></span><span class="sig-name descname"><span class="pre">ArpeggiatorStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#ArpeggiatorStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.ArpeggiatorStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>The notes held (or latched) now; browser-owned.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.ArpeggiatorStatus.held_notes">
+<span class="sig-name descname"><span class="pre">held_notes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.ArpeggiatorStatus.held_notes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3717,6 +3862,51 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.MidiOutputStatus.request">MidiOutputStatus.request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.ArpeggiatorConfig">ArpeggiatorConfig</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.order">ArpeggiatorConfig.order</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.octaves">ArpeggiatorConfig.octaves</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.step_duration">ArpeggiatorConfig.step_duration</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.gate">ArpeggiatorConfig.gate</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.swing">ArpeggiatorConfig.swing</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.latch">ArpeggiatorConfig.latch</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.bpm">ArpeggiatorConfig.bpm</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.session_id">ArpeggiatorConfig.session_id</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.channel_index">ArpeggiatorConfig.channel_index</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig.theme">ArpeggiatorConfig.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig._theme">ArpeggiatorConfig._theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorConfig._order">ArpeggiatorConfig._order()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="2">
+    <a href="#nbplay.models.ArpeggiatorStatus">ArpeggiatorStatus</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.ArpeggiatorStatus.held_notes">ArpeggiatorStatus.held_notes</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SequencerConfig">SequencerConfig</a>

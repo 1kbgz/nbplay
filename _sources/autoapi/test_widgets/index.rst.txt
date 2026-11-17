@@ -19,6 +19,7 @@ Classes
    test_widgets.TestSequencerAndSamplerWidgets
    test_widgets.TestFMSynthWidget
    test_widgets.TestDrumMachineWidget
+   test_widgets.TestArpeggiatorWidget
    test_widgets.TestMidiRouterWidget
    test_widgets.TestArrangementWidgets
    test_widgets.TestObservers
@@ -162,6 +163,14 @@ Module Contents
 
 
    .. py:method:: test_a_drum_track_saves_with_the_session_and_gets_a_panel()
+
+
+.. py:class:: TestArpeggiatorWidget
+
+   .. py:method:: test_settings_validate()
+
+
+   .. py:method:: test_an_arpeggiator_is_a_tracks_note_source()
 
 
 .. py:class:: TestMidiRouterWidget

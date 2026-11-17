@@ -34,6 +34,8 @@ Attributes
    nbplay.descriptors._SESSION_FORMAT_VERSION
    nbplay.descriptors._SEQUENCER_STATE
    nbplay.descriptors._SYNTH_STATE
+   nbplay.descriptors.ARP_ORDERS
+   nbplay.descriptors._ARPEGGIATOR_STATE
    nbplay.descriptors._FM_SYNTH_STATE
    nbplay.descriptors._SAMPLER_STATE
    nbplay.descriptors._SAMPLER_PAD_STATE
@@ -493,6 +495,14 @@ Module Contents
 
 .. py:data:: _SYNTH_STATE
    :value: ('oscillator_type', 'frequency', 'amplitude', 'sample_rate', 'osc2_type', 'osc2_level',...
+
+
+.. py:data:: ARP_ORDERS
+   :value: ('up', 'down', 'updown', 'random', 'played')
+
+
+.. py:data:: _ARPEGGIATOR_STATE
+   :value: ('order', 'octaves', 'step_duration', 'gate', 'swing', 'latch')
 
 
 .. py:data:: _FM_SYNTH_STATE

@@ -40,6 +40,8 @@ Classes
    nbplay.models.SettingsStatus
    nbplay.models.MidiOutputConfig
    nbplay.models.MidiOutputStatus
+   nbplay.models.ArpeggiatorConfig
+   nbplay.models.ArpeggiatorStatus
    nbplay.models.SequencerConfig
    nbplay.models.SequencerStatus
    nbplay.models.SamplerConfig
@@ -1339,6 +1341,108 @@ Module Contents
 
    .. py:attribute:: request
       :type:  dict
+
+
+.. py:class:: ArpeggiatorConfig(/, **data: Any)
+
+   Bases: :py:obj:`_Validated`
+
+
+   An arpeggiator: the notes held on its track become a pattern on the session clock.
+
+   ``order`` is one of :data:`~nbplay.descriptors.ARP_ORDERS` (``updown``
+   turns at the ends without repeating them; ``played`` keeps the order the
+   keys went down). ``octaves`` repeats the pattern that many octaves up.
+   ``step_duration`` is the step in beats (0.25 is a sixteenth), ``gate``
+   the part of a step a note sounds, ``swing`` delays every second step as
+   the sequencer's does, and ``latch`` keeps the notes playing after the
+   keys are released, until a new chord replaces them.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: order
+      :type:  str
+      :value: 'up'
+
+
+
+   .. py:attribute:: octaves
+      :type:  int
+
+
+   .. py:attribute:: step_duration
+      :type:  float
+
+
+   .. py:attribute:: gate
+      :type:  float
+
+
+   .. py:attribute:: swing
+      :type:  float
+
+
+   .. py:attribute:: latch
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: bpm
+      :type:  float
+
+
+   .. py:attribute:: session_id
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: channel_index
+      :type:  int
+      :value: -1
+
+
+
+   .. py:attribute:: theme
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _theme
+
+
+   .. py:method:: _order(order)
+      :classmethod:
+
+
+
+.. py:class:: ArpeggiatorStatus(/, **data: Any)
+
+   Bases: :py:obj:`pydantic.BaseModel`
+
+
+   The notes held (or latched) now; browser-owned.
+
+   Create a new model by parsing and validating input data from keyword arguments.
+
+   Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
+   validated to form a valid model.
+
+   `self` is explicitly positional-only to allow `self` as a field name.
+
+
+   .. py:attribute:: held_notes
+      :type:  list[int]
+      :value: []
+
 
 
 .. py:class:: SequencerConfig(/, **data: Any)

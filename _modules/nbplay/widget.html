@@ -632,6 +632,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.audio_files</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode_audio_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.descriptors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_ARPEGGIATOR_STATE</span><span class="p">,</span>
     <span class="n">_DRUM_MACHINE_STATE</span><span class="p">,</span>
     <span class="n">_FM_SYNTH_STATE</span><span class="p">,</span>
     <span class="n">_PAD_MAX_COUNT</span><span class="p">,</span>
@@ -676,6 +677,8 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.history</span><span class="w"> </span><span class="kn">import</span> <span class="n">History</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ArpeggiatorConfig</span><span class="p">,</span>
+    <span class="n">ArpeggiatorStatus</span><span class="p">,</span>
     <span class="n">DrumMachineConfig</span><span class="p">,</span>
     <span class="n">DrumMachineStatus</span><span class="p">,</span>
     <span class="n">FMSynthConfig</span><span class="p">,</span>
@@ -711,6 +714,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">"PACKAGE"</span><span class="p">,</span>
+    <span class="s2">"ArpeggiatorWidget"</span><span class="p">,</span>
     <span class="s2">"DrumMachineWidget"</span><span class="p">,</span>
     <span class="s2">"FMSynthWidget"</span><span class="p">,</span>
     <span class="s2">"InstrumentWidget"</span><span class="p">,</span>
@@ -1689,7 +1693,23 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"sustain_global"</span><span class="p">:</span> <span class="s2">"sustainGlobal"</span><span class="p">,</span>
         <span class="o">**</span><span class="n">_ROUTED</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"active_notes"</span><span class="p">:</span> <span class="s2">"activeNotes"</span><span class="p">,</span> <span class="s2">"last_note_event"</span><span class="p">:</span> <span class="s2">"lastNoteEvent"</span><span class="p">}</span></div>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"active_notes"</span><span class="p">:</span> <span class="s2">"activeNotes"</span><span class="p">,</span> <span class="s2">"last_note_event"</span><span class="p">:</span> <span class="s2">"lastNoteEvent"</span><span class="p">}</span>
+
+<div class="viewcode-block" id="KeyboardWidget.connect_arpeggiator">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.connect_arpeggiator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">connect_arpeggiator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arpeggiator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Play into ``arpeggiator`` (an :class:`ArpeggiatorWidget` on a session track): the keys hold its notes instead of sounding."""</span>
+        <span class="k">if</span> <span class="n">arpeggiator</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the arpeggiator is not on a session track; add it with session.add_track() first"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">arpeggiator</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span> <span class="n">channel_index</span><span class="o">=</span><span class="n">arpeggiator</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="KeyboardWidget.disconnect_arpeggiator">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.KeyboardWidget.disconnect_arpeggiator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">disconnect_arpeggiator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Stop playing into an arpeggiator; the keys sound on their own again."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">channel_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+</div>
 
 
 
@@ -1934,6 +1954,38 @@ window.runMermaid = runMermaid;</script>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"MIDI message must not be empty"</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"raw"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="ArpeggiatorWidget">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.ArpeggiatorWidget">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArpeggiatorWidget</span><span class="p">(</span><span class="n">InstrumentWidget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""An arpeggiator: a track's note source in place of a sequencer.</span>
+
+<span class="sd">    ``session.add_track("Lead", ArpeggiatorWidget(), SynthWidget())`` puts it</span>
+<span class="sd">    on a track. Notes the MIDI router routes to that track, or that a</span>
+<span class="sd">    keyboard connected with :meth:`KeyboardWidget.connect_arpeggiator`</span>
+<span class="sd">    plays, are held in the arpeggiator, which plays them one step at a time</span>
+<span class="sd">    on the track's instrument. See :class:`~nbplay.models.ArpeggiatorConfig`.</span>
+<span class="sd">    """</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s2">"nbplay-arpeggiator"</span>
+    <span class="n">PRESET</span> <span class="o">=</span> <span class="n">_ARPEGGIATOR_STATE</span>
+    <span class="n">CONFIG_MODEL</span> <span class="o">=</span> <span class="n">ArpeggiatorConfig</span>
+    <span class="n">STATUS_MODEL</span> <span class="o">=</span> <span class="n">ArpeggiatorStatus</span>
+    <span class="n">CONFIG</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"order"</span><span class="p">:</span> <span class="s2">"order"</span><span class="p">,</span>
+        <span class="s2">"octaves"</span><span class="p">:</span> <span class="s2">"octaves"</span><span class="p">,</span>
+        <span class="s2">"step_duration"</span><span class="p">:</span> <span class="s2">"stepDuration"</span><span class="p">,</span>
+        <span class="s2">"gate"</span><span class="p">:</span> <span class="s2">"gate"</span><span class="p">,</span>
+        <span class="s2">"swing"</span><span class="p">:</span> <span class="s2">"swing"</span><span class="p">,</span>
+        <span class="s2">"latch"</span><span class="p">:</span> <span class="s2">"latch"</span><span class="p">,</span>
+        <span class="s2">"bpm"</span><span class="p">:</span> <span class="s2">"bpm"</span><span class="p">,</span>
+        <span class="s2">"session_id"</span><span class="p">:</span> <span class="s2">"sessionId"</span><span class="p">,</span>
+        <span class="s2">"channel_index"</span><span class="p">:</span> <span class="s2">"channelIndex"</span><span class="p">,</span>
+        <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"theme"</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">STATUS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"held_notes"</span><span class="p">:</span> <span class="s2">"heldNotes"</span><span class="p">}</span></div>
 
 
 
@@ -3519,7 +3571,7 @@ window.runMermaid = runMermaid;</script>
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown pattern(s): </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">transaction</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">):</span>
                 <span class="n">item</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">follow_transport</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">position</span> <span class="o">=</span> <span class="n">_nonnegative_number</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="s2">"start"</span><span class="p">)</span>
@@ -3566,7 +3618,7 @@ window.runMermaid = runMermaid;</script>
 
         <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">SequencerWidget</span><span class="p">):</span>
                 <span class="n">config</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">config</span>
                 <span class="n">events</span> <span class="o">=</span> <span class="n">steps_to_events</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">step_duration</span><span class="p">)</span>
                 <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"events"</span><span class="p">:</span> <span class="n">events</span><span class="p">,</span> <span class="s2">"channel"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">track</span><span class="o">.</span><span class="n">mixer_channel</span><span class="p">))})</span>
@@ -3751,6 +3803,8 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">_sequencer_from_dict</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"ArpeggiatorWidget"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ArpeggiatorWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_ARPEGGIATOR_STATE</span><span class="p">})</span>
     <span class="n">ctor</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"num_voices"</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">,</span> <span class="s2">"measures"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">state</span><span class="p">}</span>
     <span class="n">sequencer</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="o">**</span><span class="n">ctor</span><span class="p">)</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"automation_lanes"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"follow_transport"</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">state</span><span class="p">}</span>
@@ -3764,7 +3818,9 @@ window.runMermaid = runMermaid;</script>
     <span class="n">tracks</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">track</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">tracks</span><span class="p">):</span>
         <span class="n">sequencer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="p">,</span> <span class="n">ArpeggiatorWidget</span><span class="p">):</span>
+            <span class="n">sequencer</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"ArpeggiatorWidget"</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">:</span> <span class="n">_dump</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">_ARPEGGIATOR_STATE</span><span class="p">)}</span>
+        <span class="k">elif</span> <span class="n">track</span><span class="o">.</span><span class="n">sequencer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sequencer</span> <span class="o">=</span> <span class="n">_dump</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">_SEQUENCER_STATE</span><span class="p">,</span> <span class="s2">"voices_data"</span><span class="p">))</span>
         <span class="n">tracks</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">track</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"sequencer"</span><span class="p">:</span> <span class="n">sequencer</span><span class="p">,</span> <span class="s2">"sound_source"</span><span class="p">:</span> <span class="n">_sound_source_to_dict</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">sound_source</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">resources</span><span class="p">)})</span>
     <span class="n">clips</span> <span class="o">=</span> <span class="p">[]</span>
