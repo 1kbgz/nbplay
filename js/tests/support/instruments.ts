@@ -365,6 +365,8 @@ const INSTRUMENTS: Record<
         swing: "swing",
         groove: "groove",
         automation_lanes: "automationLanes",
+        view: "view",
+        row_notes: "rowNotes",
         edit_token: "editToken",
         edit_ack: "editAck",
         session_id: "sessionId",

@@ -734,7 +734,13 @@ Python class: `SequencerWidget`. Element:
 `js/src/ts/components/sequencer.ts`.
 
 SequencerWidget models a pattern grid. `voices_data` is one list of step dicts
-per voice, kept at `num_voices` by `length` by the config model. The grid can be configured by absolute length
+per voice, kept at `num_voices` by `length` by the config model. `view` picks how the
+element shows it: `steps` (`nbplay-step-grid`, a note per step) or `rows` (the
+drum machine's `nbplay-drum-grid`, a voice per row). In the rows view each voice
+plays one note, `row_notes[voice]` (a missing one is the note of the voice's
+first active step): a click turns a step on with that note, a vertical drag sets
+its velocity, the Rows control sets `num_voices` (up to 16), and the note control
+for the selected row rewrites the notes of its steps. `set_row_note(voice, note)` and `set_row(voice, steps, velocity)` do the same from Python. The grid can be configured by absolute length
 or musically by `measures`, `step_duration`, and time signature. In 4/4, a
 `step_duration` of 0.5 is eighth notes, 0.25 is sixteenth notes, and 0.125 is
 thirty-second notes. `configure_grid()` on the Python side and the frontend grid

@@ -577,6 +577,43 @@ class TestSequencerAndSamplerWidgets:
             timeline.close()
 
 
+class TestSequencerRows:
+    def test_the_rows_view_plays_a_note_per_voice(self):
+        with pytest.raises(ValueError):
+            SequencerConfig(view="grid")
+        config = SequencerConfig(num_voices=2, voices_data=[[{"note": 48, "active": True}], []], length=4)
+        # A missing row note is the note of the voice's first active step.
+        assert config.row_notes == [48, 60]
+        config.num_voices = 3
+        assert config.row_notes == [48, 60, 60]
+        session = nbplay.Session()
+        try:
+            seq = nbplay.SequencerWidget(num_voices=2, view="rows", row_notes=[36, 38])
+            session.add_track("Perc", seq, nbplay.SynthWidget())
+            seq.set_row_note(1, 42)
+            seq.set_row(1, [0, 4, 8], velocity=90)
+            row = seq.config.voices_data[1]
+            assert [step["active"] for step in row[:5]] == [True, False, False, False, True]
+            assert {step["note"] for step in row} == {42} and row[0]["velocity"] == 90
+            assert seq.config.row_notes == [36, 42]
+            with pytest.raises(IndexError):
+                seq.set_row_note(5, 60)
+            with pytest.raises(IndexError):
+                seq.set_row(5, [0])
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                restored = loaded.tracks[0].sequencer
+                assert (restored.config.view, restored.config.row_notes) == ("rows", [36, 42])
+                assert restored.config.voices_data == seq.config.voices_data
+            finally:
+                loaded.close()
+        finally:
+            session.close()
+
+
 class TestFMSynthWidget:
     def test_config_validates_and_binds_the_element(self):
         widget = nbplay.FMSynthWidget(ratio=3.5, index=4, autosync=False)

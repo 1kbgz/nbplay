@@ -96,6 +96,25 @@ nbplay-sequencer .nbplay-seq-measures-input {
 nbplay-sequencer .nbplay-seq-loop-chk {
   accent-color: var(--nbplay-accent);
 }
+nbplay-sequencer .nbplay-seq-rows-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+}
+nbplay-sequencer .nbplay-seq-rows {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-sequencer .nbplay-seq-row-note {
+  min-width: 220px;
+}
 nbplay-sequencer .nbplay-seq-footer {
   font-family: var(--nbplay-font-mono);
   font-size: var(--nbplay-font-size-small);
