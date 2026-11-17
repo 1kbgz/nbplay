@@ -522,7 +522,7 @@ test.describe("MixerWidget", () => {
   });
 
   test("+ Channel button adds a new channel strip", async ({ page }) => {
-    await renderWidget(page);
+    await renderWidget(page, { session_id: "" });
     await expect(page.locator(STRIP)).toHaveCount(2);
 
     await page.locator(".nbplay-mixer-add-btn").click();
@@ -535,8 +535,18 @@ test.describe("MixerWidget", () => {
     await expect(newName).toHaveText("Ch 3");
   });
 
-  test("remove button removes a channel strip", async ({ page }) => {
+  test("in a session, channels are the tracks': no add or remove", async ({
+    page,
+  }) => {
     await renderWidget(page);
+    await expect(page.locator(".nbplay-mixer-add-btn")).toBeHidden();
+    await expect(page.locator(`${STRIP} .nbplay-strip-remove`)).toHaveCount(0);
+    // Return buses still come and go.
+    await expect(page.locator(".nbplay-mixer-add-return-btn")).toBeVisible();
+  });
+
+  test("remove button removes a channel strip", async ({ page }) => {
+    await renderWidget(page, { session_id: "" });
     await expect(page.locator(STRIP)).toHaveCount(2);
 
     await page
@@ -862,7 +872,9 @@ test.describe("MixerWidget", () => {
   test("a strip widens while its parameter editor is open", async ({
     page,
   }) => {
+    // Outside a session, so "+ Channel" can rebuild the strips.
     await renderWidget(page, {
+      session_id: "",
       channels: [
         {
           name: "Lead",
@@ -899,6 +911,7 @@ test.describe("MixerWidget", () => {
     page,
   }) => {
     await renderWidget(page, {
+      session_id: "",
       master_effects: [{ type: "limiter", threshold: -1, release: 0.05 }],
     });
     const master = ".nbplay-master-strip";

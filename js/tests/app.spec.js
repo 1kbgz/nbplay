@@ -210,6 +210,48 @@ test.describe("web app", () => {
     await expect(dialog).toBeHidden();
   });
 
+  test("the track menu adds a track with its panels and removes it", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    await expect(
+      page.locator("regular-layout-frame nbplay-mixer"),
+    ).toBeAttached();
+    const strips = page.locator(
+      "nbplay-mixer nbplay-strip:not(.nbplay-master-strip)",
+    );
+    await expect(strips).toHaveCount(3);
+    // A session's channels are its tracks: the mixer adds none of its own.
+    await expect(page.locator(".nbplay-mixer-add-btn")).toBeHidden();
+    await page.locator(".nbplay-app-bar .nbplay-tracks-toggle").click();
+    await page.locator(".nbplay-tracks-new-name").fill("Keys");
+    await page
+      .locator('nbplay-tracks select[name="instrument"]')
+      .selectOption("fm");
+    await page
+      .locator('nbplay-tracks select[name="notes"]')
+      .selectOption("arpeggiator");
+    await page.locator(".nbplay-tracks-add-button").click();
+    // The page reloads onto the rebuilt panels.
+    await expect(
+      page.locator("regular-layout-frame nbplay-fm-synth"),
+    ).toBeAttached();
+    await expect(
+      page.locator("regular-layout-frame nbplay-arpeggiator"),
+    ).toBeAttached();
+    await expect(strips).toHaveCount(4);
+    expect(Object.keys(await state(request))).toContain("keys-arpeggiator");
+    // Removing it takes its panels and channel away again.
+    await page.locator(".nbplay-app-bar .nbplay-tracks-toggle").click();
+    await page.locator(".nbplay-tracks-remove").nth(3).click();
+    await expect(
+      page.locator("regular-layout-frame nbplay-fm-synth"),
+    ).toHaveCount(0);
+    await expect(strips).toHaveCount(3);
+    expect(Object.keys(await state(request))).not.toContain("keys-arpeggiator");
+  });
+
   test("save downloads the session and load replaces it", async ({
     page,
     request,

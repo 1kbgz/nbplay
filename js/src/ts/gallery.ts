@@ -656,6 +656,19 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    tag: "nbplay-tracks",
+    title: "nbplay-tracks",
+    desc: "The app's track menu: the session's tracks with remove buttons, and a form that adds one (name, instrument, note source). A change is offered as a cancelable nbplay-request, then POSTed to url, and the page reloads.",
+    events: ["nbplay-request"],
+    controls: [],
+    variants: [
+      {
+        label: "three tracks",
+        props: { url: "tracks", tracks: ["Lead", "Bass", "Beat"] },
+      },
+    ],
+  },
+  {
     tag: "nbplay-segmented",
     title: "nbplay-segmented",
     desc: "One-of-N button group: oscillator type, launch quantize, step resolution.",

@@ -20,6 +20,7 @@ export {
   type PaletteCommand,
 } from "./palette.ts";
 export { NbplayUpload } from "./upload.ts";
+export { NbplayTracks } from "./tracks.ts";
 export { NbplayParam } from "./param.ts";
 export { NbplayTransportButtons } from "./transport-buttons.ts";
 export { NbplayFader } from "./fader.ts";

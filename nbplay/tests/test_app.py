@@ -99,10 +99,12 @@ class TestApp:
                 hint = bar["slots"]["default"][1]
                 assert hint["tag"] == "nbplay-palette-hint" and hint["props"]["label"] == {"Str": "panels"}
                 assert hint["events"]["click"] == {"kind": "invoke", "target": {"ref": "id", "id": palette["props"]["id"]["Str"]}, "method": "show"}
-                save, load = bar["slots"]["default"][2:4]
+                tracks, save, load = bar["slots"]["default"][2:5]
+                assert tracks["tag"] == "nbplay-tracks" and tracks["props"]["url"] == {"Str": "tracks"}
+                assert [name["Str"] for name in tracks["props"]["tracks"]["List"]] == ["Lead", "Bass", "Beat"]
                 assert save["tag"] == "a" and save["props"]["href"] == {"Str": "session.nbplay"} and "download" in save["props"]
                 assert load["tag"] == "nbplay-upload" and load["props"]["url"] == {"Str": "session.nbplay"}
-                select = bar["slots"]["default"][4]["slots"]["default"][1]
+                select = bar["slots"]["default"][5]["slots"]["default"][1]
                 assert select["tag"] == "select" and select["bindings"]["value"] == {"field": "transport.config.theme", "mode": "two-way"}
                 assert [option["props"]["value"]["Str"] for option in select["slots"]["default"]] == list(nbplay.THEMES)
                 transport = _instrument(tree, "transport")
@@ -152,6 +154,45 @@ class TestApp:
             assert nbplay.Session.load(io.BytesIO(client.get("/session.nbplay").content)).bpm == 140.0
         app.state.session.close()
 
+    def test_the_track_menu_adds_and_removes_tracks(self):
+        app = build(demo_session(), probes=True)
+        with TestClient(app) as client:
+            session = app.state.session
+            added = client.post("/tracks", json={"action": "add", "name": "Keys", "instrument": "fm", "notes": "arpeggiator"})
+            assert added.status_code == 200 and "keys-arpeggiator" in added.json()["panels"]
+            track = session.tracks[-1]
+            assert (track.name, type(track.sequencer).__name__, type(track.sound_source).__name__) == ("Keys", "ArpeggiatorWidget", "FMSynthWidget")
+            # The rebuilt page has the new panels and the menu lists the track.
+            assert "/ws/keys-fm-synth" in client.get("/").text
+            assert '"Keys"' in client.get("/tree.json").text
+            with client.websocket_connect("/ws/keys-fm-synth?codec=json&ownership=1") as socket:
+                assert socket.receive_text()
+            # A track with no name is numbered; one with no instrument has none.
+            assert client.post("/tracks", json={"action": "add", "instrument": "none", "notes": "sequencer"}).status_code == 200
+            assert (session.tracks[-1].name, session.tracks[-1].sound_source) == ("Track 5", None)
+            removed = client.post("/tracks", json={"action": "remove", "index": 1})
+            assert removed.status_code == 200 and "bass-synth" not in removed.json()["panels"]
+            assert [t.name for t in session.tracks] == ["Lead", "Beat", "Keys", "Track 5"]
+            for bad in ({"action": "add", "instrument": "theremin"}, {"action": "remove", "index": 9}, {"action": "rename"}, ["add"]):
+                refused = client.post("/tracks", json=bad)
+                assert refused.status_code == 400 and refused.json()["error"]
+        app.state.session.close()
+
+    def test_the_standalone_page_changes_tracks_for_a_reload(self):
+        host = Standalone(demo_session())
+        try:
+            assert host.change_tracks(json.dumps({"action": "add", "name": "Pad", "instrument": "sampler", "notes": "none"})) == ""
+            assert host.session.tracks[-1].name == "Pad"
+            assert host.change_tracks(json.dumps({"action": "remove", "index": 99})) == "no track 99"
+            # The page saves the changed session and reloads onto it.
+            reloaded = Standalone.load(host.save())
+            try:
+                assert "pad-sampler" in reloaded.panels
+            finally:
+                reloaded.session.close()
+        finally:
+            host.session.close()
+
     def test_save_waits_for_the_browser_to_export_recorded_clips(self, monkeypatch):
         from test_widgets import browser_writes
 
@@ -177,7 +218,14 @@ class TestApp:
         host = Standalone(demo_session())
         try:
             bar = json.loads(host.page())["tree"]["slots"]["default"][0]
-            assert [child["tag"] for child in bar["slots"]["default"]] == ["span", "nbplay-palette-hint", "a", "nbplay-upload", "label"]
+            assert [child["tag"] for child in bar["slots"]["default"]] == [
+                "span",
+                "nbplay-palette-hint",
+                "nbplay-tracks",
+                "a",
+                "nbplay-upload",
+                "label",
+            ]
         finally:
             host.session.close()
 

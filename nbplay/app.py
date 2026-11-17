@@ -28,12 +28,56 @@ from spaday_regular_layout import RegularLayout, RegularLayoutFrame, package as 
 
 from .components import package as nbplay_package
 from .descriptors import THEMES
-from .widget import DrumMachineWidget, InstrumentWidget, SequencerWidget, Session, SynthWidget
+from .widget import (
+    ArpeggiatorWidget,
+    DrumMachineWidget,
+    FMSynthWidget,
+    InstrumentWidget,
+    SamplerWidget,
+    SequencerWidget,
+    Session,
+    SynthWidget,
+)
 
-__all__ = ("Standalone", "build", "default_layout", "demo_session", "panel_titles", "panel_widgets")
+__all__ = ("Standalone", "build", "change_tracks", "default_layout", "demo_session", "panel_titles", "panel_widgets")
 
 #: The session archive on the served app: ``GET`` downloads it, ``PUT`` replaces the session.
 SESSION_URL = "session.nbplay"
+#: Adds or removes a track on the served app (``POST``, see :func:`change_tracks`).
+TRACKS_URL = "tracks"
+#: The sound sources and note sources the app's track menu offers.
+INSTRUMENTS = {"synth": SynthWidget, "fm": FMSynthWidget, "sampler": SamplerWidget, "drums": DrumMachineWidget, "none": None}
+NOTE_SOURCES = {"sequencer": SequencerWidget, "arpeggiator": ArpeggiatorWidget, "none": None}
+
+
+def change_tracks(session, change):
+    """Add or remove a track as the app's track menu asks; ``ValueError`` for a request it cannot follow.
+
+    ``change`` is ``{"action": "add", "name", "instrument", "notes"}``, with
+    ``instrument`` a key of :data:`INSTRUMENTS` and ``notes`` one of
+    :data:`NOTE_SOURCES`, or ``{"action": "remove", "index"}``.
+    """
+    action = change.get("action") if isinstance(change, dict) else None
+    if action == "add":
+        instrument = str(change.get("instrument", "synth"))
+        notes = str(change.get("notes", "sequencer"))
+        if instrument not in INSTRUMENTS or notes not in NOTE_SOURCES:
+            raise ValueError(f"unknown instrument {instrument!r} or note source {notes!r}")
+        name = str(change.get("name") or "").strip()[:40] or f"Track {len(session.tracks) + 1}"
+        source, sequencer = INSTRUMENTS[instrument], NOTE_SOURCES[notes]
+        session.add_track(name, sequencer() if sequencer else None, source() if source else None)
+    elif action == "remove":
+        index = int(change.get("index", -1))
+        if not 0 <= index < len(session.tracks):
+            raise ValueError(f"no track {index}")
+        track = session.tracks[index]
+        session.remove_track(index)
+        for widget in (track.sequencer, track.sound_source):
+            if widget is not None:
+                widget.close()
+    else:
+        raise ValueError(f"unknown track change {action!r}")
+
 
 #: The page chrome follows the nbplay tokens: the document root carries the
 #: session theme, and regular-layout's own tokens map onto nbplay's.
@@ -157,7 +201,7 @@ def default_layout(names):
     return {"type": "split-layout", "orientation": "vertical", "sizes": sizes, "children": rows}
 
 
-def _app_bar(title, files):
+def _app_bar(title, files, tracks=None):
     """Title, a button that opens the panel palette and shows its shortcut, and a theme select.
 
     The select is bound to the transport's theme, which the session mirrors to every widget.
@@ -167,6 +211,7 @@ def _app_bar(title, files):
     """
     files = (
         [
+            element("nbplay-tracks", url=TRACKS_URL, tracks=list(tracks or []), title="Add or remove tracks"),
             element("a", href=SESSION_URL, download=SESSION_URL, title="Download the session").text("save"),
             element("nbplay-upload", url=SESSION_URL, label="load", accept=".nbplay", title="Replace the session with a saved one"),
         ]
@@ -188,7 +233,7 @@ def _app_bar(title, files):
     )
 
 
-def _page(panels, titles, layout, title, files=False):
+def _page(panels, titles, layout, title, files=False, tracks=None):
     """The top bar over the panel layout, each panel's element bound under its own namespace.
 
     The palette (Ctrl+K or Cmd+K) lists every panel and reopens one the user closed.
@@ -203,7 +248,7 @@ def _page(panels, titles, layout, title, files=False):
         element("div")
         .classes("nbplay-app")
         .child(
-            _app_bar(title, files),
+            _app_bar(title, files, tracks),
             RegularLayout(*frames, layout=layout or default_layout(list(panels)), id="nbplay-layout").classes("spa nbplay").css(**tab_titles),
             palette.on("nbplay-request", Invoke(by_id("nbplay-layout"), "openPanel", event_prop("detail.name"))),
         )
@@ -293,10 +338,10 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
         servers[:] = [transports.Server(widget.session) for widget in panels.values()]
         wires = [wire for name, widget in panels.items() for wire in widget.wires(f"{name}.", url=f"/ws/{name}")]
         routes: list = [WebSocketRoute(f"/ws/{name}", transports.ws_endpoint(server)) for name, server in zip(panels, servers)]
-        routes += [Route(f"/{SESSION_URL}", save), Route(f"/{SESSION_URL}", load, methods=["PUT"])]
+        routes += [Route(f"/{SESSION_URL}", save), Route(f"/{SESSION_URL}", load, methods=["PUT"]), Route(f"/{TRACKS_URL}", tracks, methods=["POST"])]
         if probes:
             routes.extend(_probe_routes(panels))
-        page = _page(panels, panel_titles(session), layout, title, files=True)
+        page = _page(panels, panel_titles(session), layout, title, files=True, tracks=[track.name for track in session.tracks])
         app.router.routes[:] = build_routes(
             lambda: page, packages=[nbplay_package, layout_package], wire=wires, routes=routes, title=title, styles=styles, **options
         )
@@ -332,6 +377,17 @@ def build(session, *, layout=None, title="nbplay", probes=False, **options):
         sync(True)
         return JSONResponse({"panels": list(panel_widgets(session))})
 
+    async def tracks(request):
+        session = app.state.session
+        try:
+            change_tracks(session, await request.json())
+        except (ValueError, TypeError) as error:
+            return JSONResponse({"error": str(error)}, status_code=400)
+        sync(False)
+        install(session)
+        sync(True)
+        return JSONResponse({"panels": list(panel_widgets(session))})
+
     @asynccontextmanager
     async def lifespan(app):
         sync(True)
@@ -360,7 +416,7 @@ class Standalone:
         self.session = session
         self.panels = panel_widgets(session)
         self.servers = {name: transports.Server(widget.session) for name, widget in self.panels.items()}
-        self._page = _page(self.panels, panel_titles(session), layout, title, files=True)
+        self._page = _page(self.panels, panel_titles(session), layout, title, files=True, tracks=[track.name for track in session.tracks])
 
     @classmethod
     def load(cls, data, **options):
@@ -377,6 +433,17 @@ class Standalone:
         archive = io.BytesIO()
         self.session.save(archive)
         return archive.getvalue()
+
+    def change_tracks(self, change):
+        """Add or remove a track (JSON text, see :func:`change_tracks`); an error message, or "" when it is done.
+
+        The panels change, so the page saves the session and reloads onto it.
+        """
+        try:
+            change_tracks(self.session, json.loads(change))
+        except (ValueError, TypeError) as error:
+            return str(error)
+        return ""
 
     def pending_exports(self):
         """How many recorded clips the page has not sent yet."""

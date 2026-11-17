@@ -75,6 +75,15 @@
           event.preventDefault();
           worker.postMessage({ type: "save" });
         });
+        // A track change rebuilds the panels: the worker applies it, keeps
+        // the changed session for the reload, and the page reloads onto it.
+        let tracks;
+        root.addEventListener("nbplay-request", (event) => {
+          if (event.detail?.name !== "tracks") return;
+          event.preventDefault();
+          tracks = event.target;
+          worker.postMessage({ type: "tracks", change: event.detail.change });
+        });
         root.addEventListener("nbplay-request", async (event) => {
           if (event.detail?.name !== "upload") return;
           event.preventDefault();
@@ -98,6 +107,10 @@
           }
           if (event.data.type === "loaded") {
             if (event.data.error) upload.error = event.data.error;
+            else location.reload();
+          }
+          if (event.data.type === "tracked") {
+            if (event.data.error) tracks.error = event.data.error;
             else location.reload();
           }
           if (event.data.type === "wires") {
