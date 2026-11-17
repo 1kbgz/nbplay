@@ -22,6 +22,7 @@ export type StripKind = "channel" | "return" | "master";
 export class NbplayStrip extends NbplayElement {
   static properties = {
     kind: { type: String, reflect: true },
+    removable: { type: Boolean },
     name: { type: String },
     gain: { type: Number },
     pan: { type: Number },
@@ -51,6 +52,8 @@ export class NbplayStrip extends NbplayElement {
   declare rms: number;
   declare editable: boolean;
   declare disabled: boolean;
+  /** Whether the strip offers its remove button (a session's channels are its tracks'). */
+  declare removable: boolean;
 
   constructor() {
     super();
@@ -68,6 +71,7 @@ export class NbplayStrip extends NbplayElement {
     this.rms = 0;
     this.editable = true;
     this.disabled = false;
+    this.removable = true;
   }
 
   render() {
@@ -177,7 +181,7 @@ export class NbplayStrip extends NbplayElement {
         }}
       ></nbplay-effect-rack>
       ${
-        this.kind === "master"
+        this.kind === "master" || !this.removable
           ? nothing
           : html`<button
               type="button"

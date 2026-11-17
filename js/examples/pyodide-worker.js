@@ -78,6 +78,16 @@ async function handle(message) {
     const wires = JSON.parse(app.call("timeline", "export_all_clips"));
     self.postMessage({ type: "wires", wires });
     collect(100);
+  } else if (message.type === "tracks") {
+    const error = app.change_tracks(JSON.stringify(message.change));
+    if (!error) {
+      const archive = app.save();
+      const bytes = archive.toJs();
+      archive.destroy();
+      const cache = await caches.open(CACHE);
+      await cache.put(LOADED, new Response(bytes));
+    }
+    self.postMessage({ type: "tracked", error });
   } else if (message.type === "load") {
     const error = check(message.bytes);
     if (!error) {

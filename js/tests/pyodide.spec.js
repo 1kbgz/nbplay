@@ -100,6 +100,31 @@ test.describe("standalone Pyodide example", () => {
     expect(errors).toEqual([]);
   });
 
+  test("the track menu adds a track and the page reloads onto it", async ({
+    page,
+  }) => {
+    const ready = () =>
+      expect(page.locator("html")).toHaveAttribute("data-ready", "true", {
+        timeout: 240 * 1000,
+      });
+    await page.goto("/index.html");
+    await ready();
+    await page.locator(".nbplay-app-bar .nbplay-tracks-toggle").click();
+    await page.locator(".nbplay-tracks-new-name").fill("Keys");
+    await page
+      .locator('nbplay-tracks select[name="instrument"]')
+      .selectOption("fm");
+    const reloaded = page.waitForEvent("load");
+    await page.locator(".nbplay-tracks-add-button").click();
+    // The worker keeps the changed session for the reload.
+    await reloaded;
+    await ready();
+    await expect(
+      page.locator("regular-layout-frame nbplay-fm-synth"),
+    ).toBeAttached();
+    await expect(page.locator("nbplay-mixer nbplay-strip")).toHaveCount(5);
+  });
+
   test("save downloads the session and load restores it after a reload", async ({
     page,
   }) => {

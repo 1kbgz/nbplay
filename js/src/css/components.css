@@ -19,6 +19,7 @@
 @import "./components/header.css";
 @import "./components/palette.css";
 @import "./components/upload.css";
+@import "./components/tracks.css";
 @import "./components/effect-rack.css";
 @import "./components/strip.css";
 @import "./components/midi.css";

@@ -1235,6 +1235,14 @@ PUTs a picked archive to the same URL. `build()` answers a load by replacing
 the session it serves: it rebuilds the app's routes (page, one WebSocket per
 panel, probes) for the loaded session, restarts the `autosync` tasks, and the
 page reloads. `app.state.session` is the session being served.
+The bar's track menu (`nbplay-tracks`) lists the session's tracks with a remove
+button each and adds one (a name, an instrument from `INSTRUMENTS` and a note
+source from `NOTE_SOURCES`). It POSTs the change to `/tracks`, which
+`change_tracks()` applies with `Session.add_track()` or `remove_track()` (closing
+the removed widgets); the app rebuilds its routes the same way as for a load and
+the page reloads onto the new panels. Inside a session the mixer hides its own
+"+ Channel" button and its channels' remove buttons, because a session's
+channels are its tracks.
 `APP_CSS` maps regular-layout's surface, border and muted tokens onto the nbplay
 tokens, so the panel chrome matches the instruments. A served page provides its wires to the mounted root the way the notebook
 widget does, so `nbplay-wire` finds the client for its panel and kernel commands
@@ -1278,7 +1286,9 @@ it and sends the bytes to the worker, which checks them with
 accepted one is kept in the Cache API and the page reloads; the next worker
 takes it out of the cache and builds `Standalone.load(bytes)` in place of the
 demo session. The cached archive is used once, so a later reload is the demo
-again.
+again. The track menu works the same way: its `nbplay-request` (`{name: "tracks", change}`) goes to the worker, which applies it with
+`Standalone.change_tracks()`, keeps the changed session in the cache and has the
+page reload onto it.
 
 ## Styling system
 

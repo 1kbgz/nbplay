@@ -392,6 +392,7 @@ export class NbplayMixer extends NbplayElement {
         .sendNames=${scope === "channel" ? sendNames : []}
         .effects=${props.effects ?? []}
         .effectTypes=${effectTypes}
+        .removable=${!(scope === "channel" && this.sessionId)}
         @input=${(e: Event) => this.onStripEdit(scope, index, e)}
         @change=${(e: Event) => this.onStripEdit(scope, index, e)}
         @nbplay-effect-add=${(e: Event) => this.onEffectAdd(scope, index, e)}

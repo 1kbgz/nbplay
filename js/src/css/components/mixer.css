@@ -57,3 +57,7 @@ nbplay-mixer nbplay-strip.editing nbplay-effect-editor .nbplay-param-label {
 nbplay-mixer nbplay-strip.editing nbplay-effect-editor nbplay-value {
   min-width: 48px;
 }
+/* A session's channels are its tracks: they are added in the app's track menu. */
+nbplay-mixer[session-id]:not([session-id=""]) .nbplay-mixer-add-btn {
+  display: none;
+}
