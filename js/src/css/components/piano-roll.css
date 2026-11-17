@@ -1,0 +1,129 @@
+nbplay-piano-roll {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  outline: none;
+  font-family: var(--nbplay-font-mono);
+  font-size: var(--nbplay-font-size-small);
+  color: var(--nbplay-fg);
+  user-select: none;
+}
+nbplay-piano-roll:focus-visible {
+  outline: 2px solid var(--nbplay-focus);
+  outline-offset: 2px;
+}
+nbplay-piano-roll .nbplay-roll-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+nbplay-piano-roll .nbplay-roll-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--nbplay-fg-muted);
+  text-transform: uppercase;
+}
+nbplay-piano-roll select,
+nbplay-piano-roll button {
+  height: var(--nbplay-control-height);
+  font: inherit;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-piano-roll button {
+  padding: 0 10px;
+  cursor: pointer;
+}
+nbplay-piano-roll button:hover {
+  border-color: var(--nbplay-accent);
+}
+nbplay-piano-roll .nbplay-roll-count {
+  color: var(--nbplay-fg-muted);
+}
+nbplay-piano-roll .nbplay-roll-body {
+  display: flex;
+  max-height: 260px;
+  background: var(--nbplay-chart-bg);
+  overflow-y: auto;
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+}
+nbplay-piano-roll .nbplay-roll-keys {
+  flex: 0 0 40px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--nbplay-bg-panel);
+  border-right: 1px solid var(--nbplay-border);
+}
+nbplay-piano-roll .nbplay-roll-key {
+  height: 14px;
+  box-sizing: border-box;
+  padding-left: 4px;
+  font-size: 9px;
+  line-height: 14px;
+  color: var(--nbplay-fg-muted);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--nbplay-border) 50%, transparent);
+}
+nbplay-piano-roll .nbplay-roll-key.black {
+  background: color-mix(in srgb, var(--nbplay-fg) 8%, transparent);
+}
+nbplay-piano-roll .nbplay-roll-scroll {
+  flex: 1 1 auto;
+  overflow-x: auto;
+}
+nbplay-piano-roll .nbplay-roll-grid {
+  position: relative;
+  cursor: crosshair;
+  background-color: var(--nbplay-chart-bg);
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--nbplay-border-strong) 70%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--nbplay-border) 60%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--nbplay-border) 50%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    var(--nbplay-roll-beat) 100%,
+    var(--nbplay-roll-step) 100%,
+    100% var(--nbplay-roll-row);
+}
+nbplay-piano-roll .nbplay-roll-note {
+  position: absolute;
+  height: 13px;
+  box-sizing: border-box;
+  background: color-mix(
+    in srgb,
+    var(--nbplay-accent) calc(45% + 55% * var(--nbplay-roll-velocity, 1)),
+    transparent
+  );
+  border: 1px solid var(--nbplay-accent);
+  border-radius: 2px;
+  cursor: grab;
+  touch-action: none;
+}
+nbplay-piano-roll .nbplay-roll-note::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+}
+nbplay-piano-roll .nbplay-roll-note.selected {
+  box-shadow: 0 0 0 2px var(--nbplay-fg);
+}

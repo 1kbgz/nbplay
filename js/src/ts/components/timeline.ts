@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
 import { midiToHz, scheduleOscillator } from "../scheduler.ts";
@@ -20,6 +20,7 @@ import { beatLabel } from "./ruler.ts";
 // Register the elements this one renders, for bundles that import only this module.
 import "./header.ts";
 import "./lane.ts";
+import "./piano-roll.ts";
 import "./ruler.ts";
 
 const MAX_TIMELINE_BEATS = 4096;
@@ -1922,9 +1923,37 @@ export class NbplayTimeline extends NbplayElement {
           }
         </div>
       </div>
+      ${this.renderClipEditor(clips, selected)}
       <div class="nbplay-timeline-status">
         ${String(this.recordingError || "")}
       </div>`;
+  }
+
+  /** The selected MIDI clip's notes, in a piano roll under the lanes. */
+  private renderClipEditor(clips: AudioClip[], selected: string) {
+    const clip = clips.find((c) => c.id === selected);
+    if (!clip || clip.kind !== "midi") return nothing;
+    const events = getMidiEvents(clip);
+    const length = Math.max(
+      clip.duration + numberValue(clip.offset, 0),
+      ...events.map((e) => e.beat + e.duration),
+    );
+    return html`<div class="nbplay-timeline-editor">
+      <div class="nbplay-timeline-editor-title">${clip.name}</div>
+      <nbplay-piano-roll
+        .events=${events}
+        .length=${length}
+        @change=${(e: Event) => {
+          e.stopPropagation();
+          const { events } = (e as CustomEvent).detail;
+          this.writeClips(
+            this.clipList().map((c) =>
+              c.id === clip.id ? { ...c, events } : c,
+            ),
+          );
+        }}
+      ></nbplay-piano-roll>
+    </div>`;
   }
 
   private onLoopEdit(e: Event): void {
