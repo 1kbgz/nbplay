@@ -1005,7 +1005,7 @@ _SAMPLER_STATE = (
 )
 _SAMPLER_PAD_STATE = ("pad_notes", "pad_velocities", "pad_actions", "sample_slices")
 _TIMELINE_STATE = ("length", "count_in_bars", "auto_extend_recording", "recording_extend_bars", "pixels_per_beat")
-_TRANSPORT_STATE = ("bpm", "time_signature_num", "time_signature_den", "loop_enabled", "loop_start_bar", "loop_end_bar")
+_TRANSPORT_STATE = ("bpm", "time_signature_num", "time_signature_den", "loop_enabled", "loop_start_bar", "loop_end_bar", "metronome")
 
 
 _PRESET_FORMAT = "nbplay-preset"

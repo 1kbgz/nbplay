@@ -347,6 +347,7 @@ class TransportWidget(InstrumentWidget):
         "time_signature_num": "timeSignatureNum",
         "time_signature_den": "timeSignatureDen",
         "loop_enabled": "loopEnabled",
+        "metronome": "metronome",
         "loop_start_bar": "loopStartBar",
         "loop_end_bar": "loopEndBar",
         "session_id": "sessionId",
@@ -2662,7 +2663,9 @@ def _session_from_dict(cls, data, resources):
         time_signature=(transport.get("time_signature_num", 4), transport.get("time_signature_den", 4)),
         theme=data.get("theme", ""),
     )
-    session.transport.config.update(**{name: transport[name] for name in ("loop_enabled", "loop_start_bar", "loop_end_bar") if name in transport})
+    session.transport.config.update(
+        **{name: transport[name] for name in ("loop_enabled", "loop_start_bar", "loop_end_bar", "metronome") if name in transport}
+    )
 
     timeline_data = data.get("timeline", {})
     saved_lanes = timeline_data.get("tracks", [])

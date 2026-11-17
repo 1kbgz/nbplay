@@ -1,11 +1,13 @@
 import { html } from "lit";
 import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
+import { createMetronome } from "../metronome.ts";
 import {
   barBeats,
   bindElementClock,
   type ClockBinding,
   type ClockEvent,
+  getSessionBus,
   type SessionClock,
 } from "../session.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
@@ -49,6 +51,7 @@ export class NbplayTransport extends NbplayElement {
     timeSignatureNum: { type: Number, attribute: "time-signature-num" },
     timeSignatureDen: { type: Number, attribute: "time-signature-den" },
     loopEnabled: { type: Boolean, attribute: "loop-enabled" },
+    metronome: { type: Boolean },
     loopStartBar: { type: Number, attribute: "loop-start-bar" },
     loopEndBar: { type: Number, attribute: "loop-end-bar" },
     isPlaying: { type: Boolean, attribute: "is-playing", reflect: true },
@@ -65,6 +68,8 @@ export class NbplayTransport extends NbplayElement {
   declare timeSignatureNum: number;
   declare timeSignatureDen: number;
   declare loopEnabled: boolean;
+  /** Click on every beat while the clock plays. */
+  declare metronome: boolean;
   declare loopStartBar: number;
   declare loopEndBar: number;
   declare isPlaying: boolean;
@@ -88,6 +93,7 @@ export class NbplayTransport extends NbplayElement {
     this.timeSignatureNum = 4;
     this.timeSignatureDen = 4;
     this.loopEnabled = false;
+    this.metronome = false;
     this.loopStartBar = 0;
     this.loopEndBar = 4;
     this.isPlaying = false;
@@ -135,6 +141,7 @@ export class NbplayTransport extends NbplayElement {
     this.unbindShortcuts?.();
     this.unbindShortcuts = null;
     this.removeEventListener("keydown", this.onUndoKey);
+    this.clicks.stop();
     this.binding?.dispose();
     this.binding = null;
   }
@@ -231,8 +238,32 @@ export class NbplayTransport extends NbplayElement {
 
   // Clock → element
 
+  private clicks = createMetronome(
+    () => this.clock(),
+    () => {
+      const ctx = this.clock().context();
+      return (
+        getSessionBus(this.sessionId)?.masterGain ?? ctx?.destination ?? null
+      );
+    },
+    () => ({
+      num: Number(this.timeSignatureNum) || 4,
+      den: Number(this.timeSignatureDen) || 4,
+    }),
+  );
+
+  /** Run the metronome while it is on and the clock plays. */
+  private syncClick(): void {
+    if (this.metronome && this.clock().playing) this.clicks.start();
+    else this.clicks.stop();
+  }
+
   private onClockEvent = (event: ClockEvent): void => {
     const clk = this.clock();
+    if (event.type === "play" || event.type === "stop")
+      queueMicrotask(() => this.syncClick());
+    else if (["seek", "tempo", "loop", "timesig"].includes(event.type))
+      this.clicks.realign();
     switch (event.type) {
       case "play":
         this.isPlaying = true;
@@ -302,6 +333,7 @@ export class NbplayTransport extends NbplayElement {
   // merely echoes clock state is a no-op and never loops back out.
 
   updated(changed: PropertyValues): void {
+    if (changed.has("metronome")) this.syncClick();
     if (!this.binding) return;
     if (changed.has("sessionId") && changed.get("sessionId") !== undefined) {
       this.binding.rebind();
@@ -403,13 +435,17 @@ export class NbplayTransport extends NbplayElement {
     if (key !== "z" && key !== "y") return;
     e.preventDefault();
     e.stopPropagation();
-    const name = key === "y" || e.shiftKey ? "redo" : "undo";
+    this.request(key === "y" || e.shiftKey ? "redo" : "undo");
+  };
+
+  /** Ask the session to undo or redo, as Ctrl/Cmd+Z and the buttons do. */
+  request(name: "undo" | "redo"): void {
     if (name === "redo") this.redoRequest = (this.redoRequest || 0) + 1;
     else this.undoRequest = (this.undoRequest || 0) + 1;
     this.emitDetail("nbplay-request", { name });
     // Bindings run during dispatch; flush only after they have queued this request.
     this.emitDetail("nbplay-flush", {});
-  };
+  }
 
   render() {
     const bpb = this.beatsPerBar();
@@ -473,6 +509,38 @@ export class NbplayTransport extends NbplayElement {
         <span class="nbplay-transport-loop-range"
           >${this.loopStartBar + 1} – ${this.loopEndBar}</span
         >
+      </div>
+      <nbplay-toggle
+        class="nbplay-transport-metronome"
+        label="Click"
+        title="Metronome: click on every beat while playing"
+        .active=${this.metronome}
+        @input=${stop}
+        @change=${(e: Event) => {
+          e.stopPropagation();
+          this.metronome = Boolean((e as CustomEvent).detail.value);
+          this.set({ metronome: this.metronome });
+        }}
+      ></nbplay-toggle>
+      <div class="nbplay-transport-history">
+        <button
+          type="button"
+          class="nbplay-transport-undo"
+          title="Undo (Ctrl/Cmd+Z)"
+          aria-label="Undo"
+          @click=${() => this.request("undo")}
+        >
+          ↶
+        </button>
+        <button
+          type="button"
+          class="nbplay-transport-redo"
+          title="Redo (Ctrl/Cmd+Shift+Z)"
+          aria-label="Redo"
+          @click=${() => this.request("redo")}
+        >
+          ↷
+        </button>
       </div>`;
   }
 }

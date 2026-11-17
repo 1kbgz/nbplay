@@ -389,6 +389,28 @@ test.describe("voices", () => {
     }
   });
 
+  test("a metronome click is a short blip, louder when accented", async ({
+    page,
+  }) => {
+    const { peaks } = await render(
+      page,
+      (mod, ctx) => {
+        mod.scheduleClick(ctx, ctx.destination, 0.1, false);
+        mod.scheduleClick(ctx, ctx.destination, 0.5, true);
+      },
+      [
+        [0.1, 0.12],
+        [0.2, 0.45],
+        [0.5, 0.52],
+        [0.6, 1],
+      ],
+    );
+    expect(peaks[0]).toBeGreaterThan(0.1);
+    expect(peaks[1]).toBeLessThan(0.001);
+    expect(peaks[2]).toBeGreaterThan(peaks[0]);
+    expect(peaks[3]).toBeLessThan(0.001);
+  });
+
   test("a cancelled note makes no sound", async ({ page }) => {
     const { peaks } = await render(
       page,

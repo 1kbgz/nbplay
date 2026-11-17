@@ -822,7 +822,12 @@ Python class: `TransportWidget`. Element:
 `js/src/ts/components/transport.ts`.
 
 TransportWidget is the global play/stop and tempo surface. Its config holds
-BPM, time signature and loop range; its status mirrors play state and the
+BPM, time signature, loop range and `metronome`; with the metronome on, the
+element clicks on every beat of the session clock while it plays (the first beat
+of each bar accented, through `js/src/ts/metronome.ts` and `scheduleClick()` in
+`voices.ts`, into the master bus), and the timeline's count-in clicks the same
+way. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
+Ctrl/Cmd+Shift+Z do; its status mirrors play state and the
 bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
 commands, and `session.bpm` and `session.time_signature` write every widget's
 config. A beat is a quarter note, so a bar is `numerator * 4 / denominator`

@@ -42,6 +42,23 @@ nbplay-transport .nbplay-transport-position {
   border-radius: var(--nbplay-radius-control);
   font-size: 18px;
 }
+nbplay-transport .nbplay-transport-history {
+  display: flex;
+  gap: 4px;
+}
+nbplay-transport .nbplay-transport-history button {
+  width: 28px;
+  height: 28px;
+  font: inherit;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-transport .nbplay-transport-history button:hover {
+  border-color: var(--nbplay-accent);
+}
 nbplay-transport .nbplay-transport-loop {
   display: flex;
   align-items: center;

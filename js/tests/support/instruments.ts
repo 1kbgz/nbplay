@@ -254,6 +254,7 @@ const INSTRUMENTS: Record<
         time_signature_num: "timeSignatureNum",
         time_signature_den: "timeSignatureDen",
         loop_enabled: "loopEnabled",
+        metronome: "metronome",
         loop_start_bar: "loopStartBar",
         loop_end_bar: "loopEndBar",
         session_id: "sessionId",

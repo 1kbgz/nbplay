@@ -140,6 +140,8 @@ class TransportConfig(_Validated):
     loop_enabled: bool = False
     loop_start_bar: int = Field(0, ge=0)
     loop_end_bar: int = Field(4, ge=1)
+    #: A click on every beat while the clock plays.
+    metronome: bool = False
     session_id: str = ""
     theme: str = ""
 

@@ -86,6 +86,7 @@ export {
   SYNTH_DEFAULTS,
   scheduleDrumHit,
   scheduleFmNote,
+  scheduleClick,
   scheduleSynthNote,
   startFmNote,
   startSampleVoice,

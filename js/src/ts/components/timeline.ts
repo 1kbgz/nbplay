@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { type PropertyValues } from "lit";
 import { bindShortcuts } from "../helpers.ts";
+import { scheduleClick } from "../voices.ts";
 import { midiToHz, scheduleOscillator } from "../scheduler.ts";
 import {
   barBeats,
@@ -214,6 +215,8 @@ export class NbplayTimeline extends NbplayElement {
   private recordingStopBeat: number | null = null;
   private countInTimer: ReturnType<typeof setTimeout> | null = null;
   private countInTick: ReturnType<typeof setInterval> | null = null;
+  /** Cancellers of the count-in's scheduled clicks. */
+  private countInClicks: Array<() => void> = [];
   private recordingPending = false;
   private recordingGeneration = 0;
   private recordingStartedPlayback = false;
@@ -612,6 +615,7 @@ export class NbplayTimeline extends NbplayElement {
   // Recording
 
   private clearCountIn(): void {
+    this.countInClicks.splice(0).forEach((cancel) => cancel());
     if (this.countInTimer) {
       clearTimeout(this.countInTimer);
       this.countInTimer = null;
@@ -980,6 +984,22 @@ export class NbplayTimeline extends NbplayElement {
     const delayMs = Math.max(0, (durationBeats / bps) * 1000);
 
     this.recordingCountdownBeats = durationBeats;
+    // The count-in clicks each beat, the first of each bar accented.
+    const ctx = this.clock().context();
+    const out =
+      getSessionBus(this.sessionId)?.masterGain ?? ctx?.destination ?? null;
+    if (ctx && out) {
+      const bar = this.beatsPerBar();
+      for (let beat = 0; beat < Math.ceil(durationBeats - 1e-6); beat++)
+        this.countInClicks.push(
+          scheduleClick(
+            ctx,
+            out,
+            ctx.currentTime + beat / bps,
+            beat % bar === 0,
+          ),
+        );
+    }
     this.countInTick = setInterval(() => {
       const elapsedBeats = ((performance.now() - startMs) / 1000) * bps;
       const remaining = Math.max(0, durationBeats - elapsedBeats);
