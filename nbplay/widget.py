@@ -757,11 +757,11 @@ class DrumMachineWidget(InstrumentWidget):
         self.config.pattern = []
 
     def play(self):
-        """Start the pattern in the owning widget."""
+        """Start the pattern in the owning widget: on the running session clock, or start it."""
         return self._command("is_playing", True)
 
     def stop(self):
-        """Stop the pattern in the owning widget."""
+        """Stop the pattern in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""
         return self._command("is_playing", False)
 
 
@@ -1269,11 +1269,11 @@ class SequencerWidget(InstrumentWidget):
         return self
 
     def play(self):
-        """Start playback in the owning widget (the session clock when shared)."""
+        """Start playback in the owning widget: on the running session clock, or start it."""
         return self._command("is_playing", True)
 
     def stop(self):
-        """Stop playback in the owning widget."""
+        """Stop playback in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""
         return self._command("is_playing", False)
 
 

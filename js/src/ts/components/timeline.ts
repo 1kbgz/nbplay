@@ -355,6 +355,7 @@ export class NbplayTimeline extends NbplayElement {
   connectedCallback(): void {
     super.connectedCallback();
     this.classList.add("nbplay-timeline");
+    document.addEventListener("nbplay-claims", this.onClaims);
     this.disposed = false;
     this.clock();
     this.syncClaims();
@@ -377,6 +378,7 @@ export class NbplayTimeline extends NbplayElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    document.removeEventListener("nbplay-claims", this.onClaims);
     this.disposed = true;
     this.clearCountIn();
     this.recordingGeneration += 1;
@@ -602,6 +604,12 @@ export class NbplayTimeline extends NbplayElement {
     if (clk.playing) clk.stop();
     else clk.play();
   }
+
+  /** A channel's owner changed: a lane shows when a launched slot plays its track. */
+  private onClaims = (e: Event): void => {
+    if ((e as CustomEvent).detail?.sessionId === this.sessionId)
+      this.requestUpdate();
+  };
 
   toggleRecord(): void {
     if (this.recordingActive() || Boolean(this.isRecording))
@@ -1972,6 +1980,7 @@ export class NbplayTimeline extends NbplayElement {
     return html`<nbplay-lane
       data-track=${index}
       .name=${track.name}
+      .owner=${channelOwner(this.sessionId, track.channel_index) === "launcher" ? "launcher" : ""}
       .armed=${track.armed}
       .monitor=${track.monitor}
       .muted=${track.muted}

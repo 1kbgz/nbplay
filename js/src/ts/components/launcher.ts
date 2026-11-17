@@ -327,6 +327,7 @@ export class NbplayLauncher extends NbplayElement {
     const bus = getOrCreateSessionBus(this.sessionId);
     const entry = {
       command: (request: LaunchRequest) => this.command(request),
+      stopChannel: (channel: number) => this.stopChannel(channel),
     };
     bus.launcher = entry;
     this.busEntry = { bus, entry };
@@ -614,6 +615,24 @@ export class NbplayLauncher extends NbplayElement {
       );
     }
     return true;
+  }
+
+  /** Stop at once the slot playing on mixer `channel`, and any launch queued there. */
+  stopChannel(channel: number): void {
+    if (this.engine) {
+      this.engine.stopChannel(channel);
+      return;
+    }
+    let changed = false;
+    this.trackList().forEach((track, index) => {
+      const state = this.states[index];
+      if (track.channel_index !== channel || !state) return;
+      if (state.activeScene < 0 && !state.queued) return;
+      state.queued = null;
+      this.stopNow(index);
+      changed = true;
+    });
+    if (changed) this.mirrorSlotState(true);
   }
 
   private stopNow(trackIndex: number): void {

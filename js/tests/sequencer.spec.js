@@ -1307,4 +1307,67 @@ test.describe("SequencerWidget", () => {
     );
     expect(stopped).toBe(false);
   });
+
+  test("in a session, pause silences the sequencer's track and the clock's play leaves it paused", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      window.__stopped = [];
+      globalThis.__nbplay = {
+        sync: {
+          launcher: {
+            command: () => {},
+            stopChannel: (channel) => window.__stopped.push(channel),
+          },
+        },
+      };
+    });
+    await renderWidget(page, { session_id: "sync", channel_index: 2 });
+    const el = page.locator("nbplay-sequencer");
+    // The header names who plays the track while a launched slot owns it.
+    await page.evaluate(() => {
+      globalThis.__nbplay.sync.claims = { 2: { launcher: true } };
+      document.dispatchEvent(
+        new CustomEvent("nbplay-claims", {
+          detail: { sessionId: "sync", channel: 2 },
+        }),
+      );
+    });
+    await expect(el.locator(".nbplay-header-status")).toHaveText(
+      "launcher playing",
+    );
+    await page.evaluate(() => {
+      globalThis.__nbplay.sync.claims = { 2: {} };
+      document.dispatchEvent(
+        new CustomEvent("nbplay-claims", {
+          detail: { sessionId: "sync", channel: 2 },
+        }),
+      );
+    });
+    await expect(el.locator(".nbplay-header-status")).toHaveCount(0);
+    // Play starts the shared clock; pause stops the slot on its track.
+    await el.locator(".nbplay-seq-play").click();
+    await expect(el).toHaveAttribute("is-playing", "");
+    await el.locator(".nbplay-seq-play").click();
+    await expect(el).not.toHaveAttribute("is-playing");
+    expect(await page.evaluate(() => window.__stopped)).toEqual([2]);
+    // The clock stopping and playing again leaves it paused.
+    await page.evaluate(() => {
+      const clock = globalThis.__nbplay.sync.clock;
+      clock.stop();
+      clock.play();
+    });
+    await page.waitForTimeout(100);
+    await expect(el).not.toHaveAttribute("is-playing");
+    // A kernel play brings it back; a kernel stop pauses it again.
+    await page.evaluate(() =>
+      document.querySelector("nbplay-sequencer").command({ action: "play" }),
+    );
+    await expect(el).toHaveAttribute("is-playing", "");
+    await page.evaluate(() =>
+      document.querySelector("nbplay-sequencer").command({ action: "stop" }),
+    );
+    await expect(el).not.toHaveAttribute("is-playing");
+    expect(await page.evaluate(() => window.__stopped)).toEqual([2, 2]);
+  });
 });

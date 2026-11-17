@@ -9,8 +9,10 @@ import {
 import {
   barBeats,
   bindElementClock,
+  channelOwner,
   type ClockBinding,
   type ClockEvent,
+  getSessionBus,
   type SessionClock,
 } from "../session.ts";
 import { noteName } from "../pads.ts";
@@ -209,6 +211,23 @@ export class NbplaySequencer extends NbplayElement {
     return Boolean(this.sessionId);
   }
 
+  /** Paused by its own button or a kernel stop: the clock's play leaves it be. */
+  private paused = false;
+
+  private onClaims = (e: Event): void => {
+    const { sessionId, channel } = (e as CustomEvent).detail ?? {};
+    if (sessionId === this.sessionId && channel === Number(this.channelIndex))
+      this.requestUpdate();
+  };
+
+  /** Who plays this sequencer's track instead of it, for the header. */
+  private ownerText(): string {
+    const owner = channelOwner(this.sessionId, Number(this.channelIndex));
+    if (owner === "launcher") return "launcher playing";
+    if (owner === "timeline") return "arrangement playing";
+    return "";
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.classList.add("nbplay-sequencer");
@@ -232,11 +251,13 @@ export class NbplaySequencer extends NbplayElement {
     });
     // The keyboard dispatches this on Escape while a ♪? edit is pending.
     this.addEventListener("nbplay-cancel-edit", this.onCancelEdit);
+    document.addEventListener("nbplay-claims", this.onClaims);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
     document.removeEventListener("nbplay-note", this.onDocumentNote);
+    document.removeEventListener("nbplay-claims", this.onClaims);
     this.removeEventListener("nbplay-cancel-edit", this.onCancelEdit);
     this.cancelPendingEdit();
     this.unbindShortcuts?.();
@@ -295,7 +316,7 @@ export class NbplaySequencer extends NbplayElement {
   private onClockEvent = (event: ClockEvent): void => {
     switch (event.type) {
       case "play":
-        if (this.followTransport === false) break;
+        if (this.followTransport === false || this.paused) break;
         this.startScheduler();
         this.isPlaying = true;
         this.status(true, { isPlaying: true });
@@ -620,27 +641,56 @@ export class NbplaySequencer extends NbplayElement {
   // Transport
 
   togglePlay(): void {
+    if (this.isPlaying) this.pause();
+    else this.play();
+  }
+
+  /** Play this sequencer: on the running clock, or start the clock. */
+  play(): void {
     const clk = this.clock();
-    if (this.isPlaying) {
-      // In a session, pausing this sequencer leaves the shared clock alone.
-      if (this.shared()) this.stopLocal(true);
-      else clk.stop();
-    } else if (clk.playing) {
+    this.paused = false;
+    if (clk.playing) {
       this.startScheduler();
       this.isPlaying = true;
       this.status(true, { isPlaying: true });
-    } else {
-      clk.play();
-      if (this.followTransport === false) {
-        // The clock event was ignored on purpose; this button still plays.
-        this.startScheduler();
-        this.isPlaying = true;
-        this.status(true, { isPlaying: true });
-      }
+      return;
+    }
+    clk.play();
+    if (this.followTransport === false) {
+      // The clock event was ignored on purpose; this button still plays.
+      this.startScheduler();
+      this.isPlaying = true;
+      this.status(true, { isPlaying: true });
     }
   }
 
+  /**
+   * Stop this sequencer. Alone it stops its clock. In a session the clock
+   * keeps running for the rest and the track goes silent: a slot launched on
+   * it stops too, and the sequencer stays paused when the clock starts again
+   * until it is played itself.
+   */
+  pause(): void {
+    if (!this.shared()) {
+      this.clock().stop();
+      return;
+    }
+    this.paused = true;
+    this.stopLocal(true);
+    getSessionBus(this.sessionId)?.launcher?.stopChannel(
+      Number(this.channelIndex),
+    );
+  }
+
+  /** A kernel command (`sequencer.play()` / `stop()`), through `nbplay-wire`. */
+  command(cmd: Record<string, unknown>): void {
+    if (cmd.action === "play") this.play();
+    else if (cmd.action === "stop") this.pause();
+  }
+
   stopAndRewind(): void {
+    // The whole transport stops; nothing stays paused.
+    this.paused = false;
     const clk = this.clock();
     if (clk.playing) clk.stop();
     else this.stopLocal(true);
@@ -704,7 +754,10 @@ export class NbplaySequencer extends NbplayElement {
       this.clock().setTempo((e as CustomEvent).detail.value as number);
     };
     const recording = this.armed.size > 0;
-    return html`<nbplay-header badge="sequencer"></nbplay-header>
+    return html`<nbplay-header
+        badge="sequencer"
+        .status=${this.ownerText()}
+      ></nbplay-header>
       <div class="nbplay-seq-transport">
         <button
           type="button"
