@@ -776,7 +776,13 @@ window.runMermaid = runMermaid;</script>
     <span class="n">beat_in_bar</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1">#: Undo/redo shortcut counts; a session answers each bump.</span>
     <span class="n">undo_request</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">redo_request</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
+    <span class="n">redo_request</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">#: The client-owned target of object commands (a render).</span>
+    <span class="n">request</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#: A render's progress: "", "rendering", "done" or "error: ...".</span>
+    <span class="n">bounce_state</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: The last render as WAV bytes.</span>
+    <span class="n">bounce_data</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span></div>
 
 
 
@@ -1442,10 +1448,17 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    normalized steps; the after-validator resizes them, filling with</span>
 <span class="sd">    default steps, the way the widget's composers do. Assigning a grid</span>
 <span class="sd">    field recomputes ``length`` from measures, meter and step duration.</span>
+
+<span class="sd">    ``view`` is ``steps`` (a note per step) or ``rows`` (each voice is a row</span>
+<span class="sd">    playing one note, ``row_notes[voice]``, like a drum machine's pattern).</span>
+<span class="sd">    ``row_notes`` holds one note per voice; a missing one is the note of the</span>
+<span class="sd">    voice's first active step.</span>
 <span class="sd">    """</span>
 
     <span class="n">voices_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">num_voices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"steps"</span>
+    <span class="n">row_notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
     <span class="n">measures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">step_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1484,6 +1497,16 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">_normalize_lanes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="SequencerConfig._view">
+<a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SequencerConfig._view">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"view"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_view</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">view</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">view</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"steps"</span><span class="p">,</span> <span class="s2">"rows"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"view must be 'steps' or 'rows', got </span><span class="si">{</span><span class="n">view</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">view</span></div>
+
+
 <div class="viewcode-block" id="SequencerConfig.update">
 <a class="viewcode-back" href="../../autoapi/nbplay/models/index.html#nbplay.models.SequencerConfig.update">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
@@ -1507,6 +1530,14 @@ window.runMermaid = runMermaid;</script>
             <span class="n">voices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">voices</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voices_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">]</span> <span class="o">=</span> <span class="n">voices</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">steps</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">voices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row_notes</span><span class="p">):</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_clamp_midi_note</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row_notes</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">((</span><span class="n">step</span><span class="p">[</span><span class="s2">"note"</span><span class="p">]</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span> <span class="k">if</span> <span class="n">step</span><span class="p">[</span><span class="s2">"active"</span><span class="p">]),</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"note"</span><span class="p">]</span> <span class="k">if</span> <span class="n">steps</span> <span class="k">else</span> <span class="mi">60</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">rows</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_notes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"row_notes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 </div>
 

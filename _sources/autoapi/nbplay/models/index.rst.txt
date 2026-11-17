@@ -177,6 +177,22 @@ Module Contents
 
 
 
+   .. py:attribute:: request
+      :type:  dict
+
+
+   .. py:attribute:: bounce_state
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: bounce_data
+      :type:  bytes
+      :value: b''
+
+
+
 .. py:class:: SpectrumConfig(/, **data: Any)
 
    Bases: :py:obj:`_Validated`
@@ -1463,6 +1479,11 @@ Module Contents
    default steps, the way the widget's composers do. Assigning a grid
    field recomputes ``length`` from measures, meter and step duration.
 
+   ``view`` is ``steps`` (a note per step) or ``rows`` (each voice is a row
+   playing one note, ``row_notes[voice]``, like a drum machine's pattern).
+   ``row_notes`` holds one note per voice; a missing one is the note of the
+   voice's first active step.
+
    Create a new model by parsing and validating input data from keyword arguments.
 
    Raises [`ValidationError`][pydantic_core.ValidationError] if the input data cannot be
@@ -1479,6 +1500,18 @@ Module Contents
 
    .. py:attribute:: num_voices
       :type:  int
+
+
+   .. py:attribute:: view
+      :type:  str
+      :value: 'steps'
+
+
+
+   .. py:attribute:: row_notes
+      :type:  list[int]
+      :value: []
+
 
 
    .. py:attribute:: length
@@ -1578,6 +1611,11 @@ Module Contents
 
 
    .. py:method:: _lanes(value)
+      :classmethod:
+
+
+
+   .. py:method:: _view(view)
       :classmethod:
 
 

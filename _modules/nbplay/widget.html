@@ -1020,8 +1020,31 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"beat_in_bar"</span><span class="p">:</span> <span class="s2">"beatInBar"</span><span class="p">,</span>
         <span class="s2">"undo_request"</span><span class="p">:</span> <span class="s2">"undoRequest"</span><span class="p">,</span>
         <span class="s2">"redo_request"</span><span class="p">:</span> <span class="s2">"redoRequest"</span><span class="p">,</span>
+        <span class="s2">"bounce_state"</span><span class="p">:</span> <span class="s2">"bounceState"</span><span class="p">,</span>
+        <span class="s2">"bounce_data"</span><span class="p">:</span> <span class="s2">"bounceData"</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="n">STATUS_EVENTS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"undo_request"</span><span class="p">:</span> <span class="s2">"nbplay-request"</span><span class="p">,</span> <span class="s2">"redo_request"</span><span class="p">:</span> <span class="s2">"nbplay-request"</span><span class="p">}</span>
+
+<div class="viewcode-block" id="TransportWidget.bounce">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.bounce">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Render the song to WAV in the browser: it plays the loop (or, with the loop off, the arrangement) in real time and records the master bus.</span>
+
+<span class="sd">        ``start`` and ``end`` (beats) set the range. The result arrives in</span>
+<span class="sd">        :attr:`bounced` when ``status.bounce_state`` is ``done``.</span>
+<span class="sd">        """</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"action"</span><span class="p">:</span> <span class="s2">"bounce"</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="p">[</span><span class="s2">"start"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="p">[</span><span class="s2">"end"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"request"</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The last render as WAV bytes, or ``b""`` before one has finished."""</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">bounce_data</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">bounce_state</span> <span class="o">==</span> <span class="s2">"done"</span> <span class="k">else</span> <span class="sa">b</span><span class="s2">""</span>
 
 <div class="viewcode-block" id="TransportWidget.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.TransportWidget.play">[docs]</a>
@@ -2018,6 +2041,8 @@ window.runMermaid = runMermaid;</script>
         <span class="s2">"swing"</span><span class="p">:</span> <span class="s2">"swing"</span><span class="p">,</span>
         <span class="s2">"groove"</span><span class="p">:</span> <span class="s2">"groove"</span><span class="p">,</span>
         <span class="s2">"automation_lanes"</span><span class="p">:</span> <span class="s2">"automationLanes"</span><span class="p">,</span>
+        <span class="s2">"view"</span><span class="p">:</span> <span class="s2">"view"</span><span class="p">,</span>
+        <span class="s2">"row_notes"</span><span class="p">:</span> <span class="s2">"rowNotes"</span><span class="p">,</span>
         <span class="s2">"edit_token"</span><span class="p">:</span> <span class="s2">"editToken"</span><span class="p">,</span>
         <span class="s2">"edit_ack"</span><span class="p">:</span> <span class="s2">"editAck"</span><span class="p">,</span>
         <span class="o">**</span><span class="n">_ROUTED</span><span class="p">,</span>
@@ -2067,6 +2092,36 @@ window.runMermaid = runMermaid;</script>
                 <span class="s2">"probability"</span><span class="p">:</span> <span class="n">probability</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="n">voices</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget.set_row_note">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.set_row_note">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_row_note</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="p">,</span> <span class="n">note</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Give row ``voice`` (the ``rows`` view) its note: every step of that voice plays it."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">voice</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_voices</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"voice out of range: </span><span class="si">{</span><span class="n">voice</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="n">_clamp_midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">row_notes</span><span class="p">)</span>
+        <span class="n">rows</span><span class="p">[</span><span class="n">voice</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span>
+        <span class="n">voices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="k">for</span> <span class="n">steps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span>
+        <span class="n">voices</span><span class="p">[</span><span class="n">voice</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="o">**</span><span class="n">step</span><span class="p">,</span> <span class="s2">"note"</span><span class="p">:</span> <span class="n">note</span><span class="p">}</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">voices</span><span class="p">[</span><span class="n">voice</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">row_notes</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="n">voices_data</span><span class="o">=</span><span class="n">voices</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SequencerWidget.set_row">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.set_row">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voice</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Turn on the step indices in ``steps`` of row ``voice`` at ``velocity``, with the row's note; every other step of the row goes off."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">voice</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_voices</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"voice out of range: </span><span class="si">{</span><span class="n">voice</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">on</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">row_notes</span><span class="p">[</span><span class="n">voice</span><span class="p">]</span>
+        <span class="n">voices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span><span class="p">]</span>
+        <span class="n">voices</span><span class="p">[</span><span class="n">voice</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="o">**</span><span class="n">step</span><span class="p">,</span> <span class="s2">"note"</span><span class="p">:</span> <span class="n">note</span><span class="p">,</span> <span class="s2">"active"</span><span class="p">:</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">on</span><span class="p">,</span> <span class="o">**</span><span class="p">({</span><span class="s2">"velocity"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">velocity</span><span class="p">)}</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">on</span> <span class="k">else</span> <span class="p">{})}</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">voices</span><span class="p">[</span><span class="n">voice</span><span class="p">])</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">voices_data</span> <span class="o">=</span> <span class="n">voices</span></div>
 
 
 <div class="viewcode-block" id="SequencerWidget.toggle_step">
@@ -3421,6 +3476,13 @@ window.runMermaid = runMermaid;</script>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgets</span><span class="p">:</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">theme</span> <span class="o">=</span> <span class="n">value</span>
 
+<div class="viewcode-block" id="Session.bounce">
+<a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.bounce">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Render the song to WAV in the browser; see :meth:`TransportWidget.bounce`. The WAV arrives in ``session.transport.bounced``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">bounce</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="Session.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.Session.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3836,7 +3898,11 @@ window.runMermaid = runMermaid;</script>
         <span class="k">return</span> <span class="n">ArpeggiatorWidget</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_ARPEGGIATOR_STATE</span><span class="p">})</span>
     <span class="n">ctor</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"num_voices"</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">,</span> <span class="s2">"measures"</span><span class="p">,</span> <span class="s2">"step_duration"</span><span class="p">,</span> <span class="s2">"time_signature_num"</span><span class="p">,</span> <span class="s2">"time_signature_den"</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">state</span><span class="p">}</span>
     <span class="n">sequencer</span> <span class="o">=</span> <span class="n">SequencerWidget</span><span class="p">(</span><span class="o">**</span><span class="n">ctor</span><span class="p">)</span>
-    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"automation_lanes"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"follow_transport"</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">state</span><span class="p">}</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"swing"</span><span class="p">,</span> <span class="s2">"groove"</span><span class="p">,</span> <span class="s2">"automation_lanes"</span><span class="p">,</span> <span class="s2">"loop_enabled"</span><span class="p">,</span> <span class="s2">"follow_transport"</span><span class="p">,</span> <span class="s2">"view"</span><span class="p">,</span> <span class="s2">"row_notes"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">state</span>
+    <span class="p">}</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"voices_data"</span><span class="p">):</span>
         <span class="n">fields</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_json_copy</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"voices_data"</span><span class="p">])</span>
     <span class="n">sequencer</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span>

@@ -324,6 +324,12 @@
     <a href="#nbplay.widget.TransportWidget.STATUS_EVENTS">TransportWidget.STATUS_EVENTS</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TransportWidget.bounce">TransportWidget.bounce()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TransportWidget.bounced">TransportWidget.bounced</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.TransportWidget.play">TransportWidget.play()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -750,6 +756,12 @@
     <a href="#nbplay.widget.SequencerWidget.set_step">SequencerWidget.set_step()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.set_row_note">SequencerWidget.set_row_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.set_row">SequencerWidget.set_row()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SequencerWidget.toggle_step">SequencerWidget.toggle_step()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -1120,6 +1132,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.theme">Session.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.bounce">Session.bounce()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.play">Session.play()</a>
@@ -1507,6 +1522,20 @@ browser both count.</p>
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget.STATUS_EVENTS">
 <span class="sig-name descname"><span class="pre">STATUS_EVENTS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nbplay.widget.TransportWidget.STATUS_EVENTS" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.bounce">
+<span class="sig-name descname"><span class="pre">bounce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#TransportWidget.bounce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.TransportWidget.bounce" title="Link to this definition">¶</a></dt>
+<dd><p>Render the song to WAV in the browser: it plays the loop (or, with the loop off, the arrangement) in real time and records the master bus.</p>
+<p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> (beats) set the range. The result arrives in
+<a class="reference internal" href="#nbplay.widget.TransportWidget.bounced" title="nbplay.widget.TransportWidget.bounced"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bounced</span></code></a> when <code class="docutils literal notranslate"><span class="pre">status.bounce_state</span></code> is <code class="docutils literal notranslate"><span class="pre">done</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="nbplay.widget.TransportWidget.bounced">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounced</span></span><a class="headerlink" href="#nbplay.widget.TransportWidget.bounced" title="Link to this definition">¶</a></dt>
+<dd><p>The last render as WAV bytes, or <code class="docutils literal notranslate"><span class="pre">b&quot;&quot;</span></code> before one has finished.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.TransportWidget.play">
@@ -2335,6 +2364,18 @@ step belong to the browser scheduler.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.set_row_note">
+<span class="sig-name descname"><span class="pre">set_row_note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.set_row_note"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.set_row_note" title="Link to this definition">¶</a></dt>
+<dd><p>Give row <code class="docutils literal notranslate"><span class="pre">voice</span></code> (the <code class="docutils literal notranslate"><span class="pre">rows</span></code> view) its note: every step of that voice plays it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.set_row">
+<span class="sig-name descname"><span class="pre">set_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.set_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.set_row" title="Link to this definition">¶</a></dt>
+<dd><p>Turn on the step indices in <code class="docutils literal notranslate"><span class="pre">steps</span></code> of row <code class="docutils literal notranslate"><span class="pre">voice</span></code> at <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, with the row’s note; every other step of the row goes off.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.SequencerWidget.toggle_step">
 <span class="sig-name descname"><span class="pre">toggle_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#SequencerWidget.toggle_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.SequencerWidget.toggle_step" title="Link to this definition">¶</a></dt>
 <dd><p>Flip one step’s active state.</p>
@@ -3075,6 +3116,12 @@ read and write the same <code class="docutils literal notranslate"><span class="
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nbplay.widget.Session.bounce">
+<span class="sig-name descname"><span class="pre">bounce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.bounce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.bounce" title="Link to this definition">¶</a></dt>
+<dd><p>Render the song to WAV in the browser; see <a class="reference internal" href="#nbplay.widget.TransportWidget.bounce" title="nbplay.widget.TransportWidget.bounce"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TransportWidget.bounce()</span></code></a>. The WAV arrives in <code class="docutils literal notranslate"><span class="pre">session.transport.bounced</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nbplay.widget.Session.play">
 <span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/widget.html#Session.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.widget.Session.play" title="Link to this definition">¶</a></dt>
 <dd><p>Start the shared clock.</p>
@@ -3369,6 +3416,12 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.TransportWidget.STATUS_EVENTS">TransportWidget.STATUS_EVENTS</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TransportWidget.bounce">TransportWidget.bounce()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.TransportWidget.bounced">TransportWidget.bounced</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.TransportWidget.play">TransportWidget.play()</a>
@@ -3797,6 +3850,12 @@ session reads the same archive.</p>
     <a href="#nbplay.widget.SequencerWidget.set_step">SequencerWidget.set_step()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.set_row_note">SequencerWidget.set_row_note()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.SequencerWidget.set_row">SequencerWidget.set_row()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.SequencerWidget.toggle_step">SequencerWidget.toggle_step()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -4167,6 +4226,9 @@ session reads the same archive.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.theme">Session.theme</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.widget.Session.bounce">Session.bounce()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.widget.Session.play">Session.play()</a>

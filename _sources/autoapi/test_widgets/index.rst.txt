@@ -17,6 +17,7 @@ Classes
    test_widgets.TestSpectrumWidget
    test_widgets.TestIoWidgets
    test_widgets.TestSequencerAndSamplerWidgets
+   test_widgets.TestSequencerRows
    test_widgets.TestFMSynthWidget
    test_widgets.TestDrumMachineWidget
    test_widgets.TestArpeggiatorWidget
@@ -132,6 +133,11 @@ Module Contents
 
 
    .. py:method:: test_sampler_zones_and_capture(tmp_path)
+
+
+.. py:class:: TestSequencerRows
+
+   .. py:method:: test_the_rows_view_plays_a_note_per_voice()
 
 
 .. py:class:: TestFMSynthWidget
@@ -289,6 +295,9 @@ Module Contents
 
 
 .. py:class:: TestSessionPersistence
+
+   .. py:method:: test_a_render_arrives_from_the_browser()
+
 
    .. py:method:: test_the_metronome_is_saved_with_the_session()
 

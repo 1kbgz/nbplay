@@ -257,6 +257,15 @@
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.TransportStatus.redo_request">TransportStatus.redo_request</a>
   </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.request">TransportStatus.request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.bounce_state">TransportStatus.bounce_state</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.bounce_data">TransportStatus.bounce_data</a>
+  </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SpectrumConfig">SpectrumConfig</a>
   </li>
@@ -870,6 +879,12 @@
     <a href="#nbplay.models.SequencerConfig.num_voices">SequencerConfig.num_voices</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.view">SequencerConfig.view</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.row_notes">SequencerConfig.row_notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig.length">SequencerConfig.length</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -928,6 +943,9 @@
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._lanes">SequencerConfig._lanes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig._view">SequencerConfig._view()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig.update">SequencerConfig.update()</a>
@@ -1420,6 +1438,21 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.TransportStatus.redo_request">
 <span class="sig-name descname"><span class="pre">redo_request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nbplay.models.TransportStatus.redo_request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.TransportStatus.request">
+<span class="sig-name descname"><span class="pre">request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#nbplay.models.TransportStatus.request" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.TransportStatus.bounce_state">
+<span class="sig-name descname"><span class="pre">bounce_state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#nbplay.models.TransportStatus.bounce_state" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.TransportStatus.bounce_data">
+<span class="sig-name descname"><span class="pre">bounce_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b''</span></em><a class="headerlink" href="#nbplay.models.TransportStatus.bounce_data" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2625,6 +2658,10 @@ validated to form a valid model.</p>
 normalized steps; the after-validator resizes them, filling with
 default steps, the way the widget’s composers do. Assigning a grid
 field recomputes <code class="docutils literal notranslate"><span class="pre">length</span></code> from measures, meter and step duration.</p>
+<p><code class="docutils literal notranslate"><span class="pre">view</span></code> is <code class="docutils literal notranslate"><span class="pre">steps</span></code> (a note per step) or <code class="docutils literal notranslate"><span class="pre">rows</span></code> (each voice is a row
+playing one note, <code class="docutils literal notranslate"><span class="pre">row_notes[voice]</span></code>, like a drum machine’s pattern).
+<code class="docutils literal notranslate"><span class="pre">row_notes</span></code> holds one note per voice; a missing one is the note of the
+voice’s first active step.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -2637,6 +2674,16 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nbplay.models.SequencerConfig.num_voices">
 <span class="sig-name descname"><span class="pre">num_voices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nbplay.models.SequencerConfig.num_voices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SequencerConfig.view">
+<span class="sig-name descname"><span class="pre">view</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'steps'</span></em><a class="headerlink" href="#nbplay.models.SequencerConfig.view" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nbplay.models.SequencerConfig.row_notes">
+<span class="sig-name descname"><span class="pre">row_notes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nbplay.models.SequencerConfig.row_notes" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -2737,6 +2784,11 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.models.SequencerConfig._lanes">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_lanes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SequencerConfig._lanes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SequencerConfig._lanes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nbplay.models.SequencerConfig._view">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/nbplay/models.html#SequencerConfig._view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.models.SequencerConfig._view" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -3315,6 +3367,15 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.TransportStatus.redo_request">TransportStatus.redo_request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.request">TransportStatus.request</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.bounce_state">TransportStatus.bounce_state</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.TransportStatus.bounce_data">TransportStatus.bounce_data</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#nbplay.models.SpectrumConfig">SpectrumConfig</a>
@@ -3929,6 +3990,12 @@ validated to form a valid model.</p>
     <a href="#nbplay.models.SequencerConfig.num_voices">SequencerConfig.num_voices</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.view">SequencerConfig.view</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig.row_notes">SequencerConfig.row_notes</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig.length">SequencerConfig.length</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
@@ -3987,6 +4054,9 @@ validated to form a valid model.</p>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig._lanes">SequencerConfig._lanes()</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#nbplay.models.SequencerConfig._view">SequencerConfig._view()</a>
   </li>
   <li class="fd-toc-item" data-depth="3">
     <a href="#nbplay.models.SequencerConfig.update">SequencerConfig.update()</a>

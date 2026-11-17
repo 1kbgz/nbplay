@@ -734,7 +734,13 @@ Python class: `SequencerWidget`. Element:
 `js/src/ts/components/sequencer.ts`.
 
 SequencerWidget models a pattern grid. `voices_data` is one list of step dicts
-per voice, kept at `num_voices` by `length` by the config model. The grid can be configured by absolute length
+per voice, kept at `num_voices` by `length` by the config model. `view` picks how the
+element shows it: `steps` (`nbplay-step-grid`, a note per step) or `rows` (the
+drum machine's `nbplay-drum-grid`, a voice per row). In the rows view each voice
+plays one note, `row_notes[voice]` (a missing one is the note of the voice's
+first active step): a click turns a step on with that note, a vertical drag sets
+its velocity, the Rows control sets `num_voices` (up to 16), and the note control
+for the selected row rewrites the notes of its steps. `set_row_note(voice, note)` and `set_row(voice, steps, velocity)` do the same from Python. The grid can be configured by absolute length
 or musically by `measures`, `step_duration`, and time signature. In 4/4, a
 `step_duration` of 0.5 is eighth notes, 0.25 is sixteenth notes, and 0.125 is
 thirty-second notes. `configure_grid()` on the Python side and the frontend grid
@@ -851,7 +857,16 @@ BPM, time signature, loop range and `metronome`; with the metronome on, the
 element clicks on every beat of the session clock while it plays (the first beat
 of each bar accented, through `js/src/ts/metronome.ts` and `scheduleClick()` in
 `voices.ts`, into the master bus), and the timeline's count-in clicks the same
-way. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
+way. Its Render button records the song to WAV: the element plays the loop (or,
+with the loop off, the arrangement, whose length the timeline registers as
+`bus.songBeats()`) in real time from its start, records the master bus (the
+mixer's post-insert analyser tap) with a MediaRecorder plus a short tail,
+decodes it and encodes 16-bit WAV (`encodeWav()` in `helpers.ts`). The button
+downloads `nbplay-mixdown.wav`; every render also lands in `status.bounce_data`
+with `bounce_state` (`rendering`, `done` or `error: …`). From Python,
+`session.bounce(start=None, end=None)` (beats) asks for one through the
+transport's `request` command and `session.transport.bounced` holds the WAV once
+it is done. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
 Ctrl/Cmd+Shift+Z do; its status mirrors play state and the
 bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
 commands, and `session.bpm` and `session.time_signature` write every widget's
