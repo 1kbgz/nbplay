@@ -622,6 +622,11 @@ Python class: `DrumMachineWidget`. Elements:
 `js/src/ts/components/drums.ts` and the pattern grid
 `js/src/ts/components/drum-grid.ts`.
 
+The pattern grid's steps are the pad grid's squares, smaller, and share their
+gestures through `js/src/ts/components/cells.ts`: a click toggles a step, a
+vertical drag sets its velocity (top is loudest; `input` while moving, `change`
+on release), and the wheel nudges it.
+
 A drum machine is up to 16 pads and a pattern with one row per pad, on one
 track: `session.add_track("Beat", None, DrumMachineWidget())`. A pad is
 `{name, note, sound, gain, pan, choke, params}`:

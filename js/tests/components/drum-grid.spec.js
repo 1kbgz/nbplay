@@ -35,10 +35,12 @@ test.describe("nbplay-drum-grid", () => {
     await expect(cells).toHaveCount(8);
     await expect(cells.nth(2)).toHaveClass(/on/);
     await expect(cells.nth(2)).toHaveClass(/current/);
-    await expect(cells.nth(2)).toHaveAttribute(
-      "style",
-      `--nbplay-drum-velocity: ${64 / 127}`,
+    // The pad grid's square: an "on" step holds a velocity bar.
+    await expect(cells.nth(2).locator("nbplay-bar")).toHaveJSProperty(
+      "value",
+      64,
     );
+    await expect(cells.nth(1).locator("nbplay-bar")).toHaveCount(0);
     // Steps 0 and 4 start beats.
     await expect(
       page.locator(".nbplay-drum-grid-row").first().locator(".beat"),
@@ -66,6 +68,42 @@ test.describe("nbplay-drum-grid", () => {
       ["change", { pad: 0, step: 0, value: 0 }],
       ["change", { pad: 0, step: 3, value: 95 }],
       ["nbplay-select", { pad: 1 }],
+    ]);
+  });
+
+  test("a vertical drag sets a step's velocity, as on a pad", async ({
+    page,
+  }) => {
+    await mount(page, "nbplay-drum-grid", props, ["input", "change"]);
+    const cell = page
+      .locator(".nbplay-drum-grid-row")
+      .first()
+      .locator(".nbplay-drum-grid-cell")
+      .nth(5);
+    const box = await cell.boundingBox();
+    const x = box.x + box.width / 2;
+    // From the bottom edge to the top: an off step comes on, loud.
+    await page.mouse.move(x, box.y + box.height - 1);
+    await page.mouse.down();
+    await page.mouse.move(x, box.y + box.height / 2, { steps: 3 });
+    await page.mouse.move(x, box.y + 1, { steps: 3 });
+    await page.mouse.up();
+    const log = await events(page);
+    expect(log.length).toBeGreaterThan(1);
+    expect(log.slice(0, -1).every(([name]) => name === "input")).toBe(true);
+    const [name, detail] = log[log.length - 1];
+    expect(name).toBe("change");
+    expect([detail.pad, detail.step]).toEqual([0, 5]);
+    expect(detail.value).toBeGreaterThan(115);
+    await expect(cell.locator("nbplay-bar")).toHaveJSProperty(
+      "value",
+      detail.value,
+    );
+    // A short press without moving is still a toggle.
+    await cell.click();
+    expect((await events(page)).at(-1)).toEqual([
+      "change",
+      { pad: 0, step: 5, value: 0 },
     ]);
   });
 });
