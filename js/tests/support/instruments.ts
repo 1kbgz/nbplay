@@ -265,6 +265,8 @@ const INSTRUMENTS: Record<
         current_beat: "currentBeat",
         bar_number: "barNumber",
         beat_in_bar: "beatInBar",
+        bounce_state: "bounceState",
+        bounce_data: "bounceData",
       },
       command: true,
       onDisconnect: () => {

@@ -72,6 +72,8 @@ export interface SessionBus {
   returns?: { input: AudioNode; gain: AudioNode }[];
   samplers?: Record<number, SamplerBus>;
   instruments?: Record<number, InstrumentBus>;
+  /** The arrangement's length in beats, from the timeline: what a render covers when the loop is off. */
+  songBeats?: () => number;
   /** Track note inputs by channel; MIDI routes and keyboards prefer them to the instrument. */
   inputs?: Record<number, NoteInput>;
   /** The MIDI router's input: a raw MIDI message from a named port (the computer keyboard uses it). */

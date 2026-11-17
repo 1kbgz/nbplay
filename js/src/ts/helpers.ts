@@ -196,3 +196,43 @@ export function parseDbInput(raw: string): number | null {
   const linear = dbToLinear(v);
   return Math.max(0, Math.min(2, Math.round(linear * 1000) / 1000));
 }
+
+/** 16-bit PCM WAV bytes of an AudioBuffer, its channels interleaved. */
+export function encodeWav(buffer: AudioBuffer): ArrayBuffer {
+  const channels = Math.max(1, buffer.numberOfChannels);
+  const frames = buffer.length;
+  const bytes = 44 + frames * channels * 2;
+  const out = new ArrayBuffer(bytes);
+  const view = new DataView(out);
+  const text = (offset: number, value: string) => {
+    for (let i = 0; i < value.length; i++)
+      view.setUint8(offset + i, value.charCodeAt(i));
+  };
+  text(0, "RIFF");
+  view.setUint32(4, bytes - 8, true);
+  text(8, "WAVEfmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, channels, true);
+  view.setUint32(24, buffer.sampleRate, true);
+  view.setUint32(28, buffer.sampleRate * channels * 2, true);
+  view.setUint16(32, channels * 2, true);
+  view.setUint16(34, 16, true);
+  text(36, "data");
+  view.setUint32(40, frames * channels * 2, true);
+  const data = Array.from({ length: channels }, (_, ch) =>
+    buffer.getChannelData(ch),
+  );
+  let offset = 44;
+  for (let i = 0; i < frames; i++)
+    for (let ch = 0; ch < channels; ch++) {
+      const sample = Math.max(-1, Math.min(1, data[ch][i]));
+      view.setInt16(
+        offset,
+        sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+        true,
+      );
+      offset += 2;
+    }
+  return out;
+}

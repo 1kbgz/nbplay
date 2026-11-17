@@ -42,6 +42,20 @@ nbplay-transport .nbplay-transport-position {
   border-radius: var(--nbplay-radius-control);
   font-size: 18px;
 }
+nbplay-transport .nbplay-transport-render {
+  height: 28px;
+  padding: 0 10px;
+  font: inherit;
+  color: var(--nbplay-fg);
+  background: var(--nbplay-bg-control);
+  border: 1px solid var(--nbplay-border);
+  border-radius: var(--nbplay-radius-control);
+  cursor: pointer;
+}
+nbplay-transport .nbplay-transport-render.active {
+  color: var(--nbplay-accent);
+  border-color: var(--nbplay-accent);
+}
 nbplay-transport .nbplay-transport-history {
   display: flex;
   gap: 4px;
