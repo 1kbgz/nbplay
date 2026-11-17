@@ -959,6 +959,8 @@ _SEQUENCER_STATE = (
     "automation_lanes",
     "loop_enabled",
     "follow_transport",
+    "view",
+    "row_notes",
 )
 _SYNTH_STATE = (
     "oscillator_type",

@@ -13,11 +13,14 @@ import {
   type ClockEvent,
   type SessionClock,
 } from "../session.ts";
+import { noteName } from "../pads.ts";
 import { NbplayElement, clamp, define } from "./base.ts";
 import type { StepRef } from "./step-grid.ts";
 // Register the elements this one renders, for bundles that import only this module.
+import "./drum-grid.ts";
 import "./header.ts";
 import "./param.ts";
+import "./segmented.ts";
 import "./step-grid.ts";
 
 const STEP_DURATION_OPTIONS = [1, 0.5, 0.25, 0.125];
@@ -87,6 +90,9 @@ export class NbplaySequencer extends NbplayElement {
   static properties = {
     voicesData: { attribute: false },
     numVoices: { type: Number, attribute: "num-voices" },
+    view: { type: String },
+    rowNotes: { attribute: false },
+    selectedRow: { state: true },
     length: { type: Number },
     measures: { type: Number },
     stepDuration: { type: Number, attribute: "step-duration" },
@@ -109,6 +115,12 @@ export class NbplaySequencer extends NbplayElement {
 
   declare voicesData: StepData[][];
   declare numVoices: number;
+  /** `steps` (a note per step) or `rows` (a voice per row, each playing one note). */
+  declare view: string;
+  /** The note each row plays in the `rows` view, one per voice. */
+  declare rowNotes: number[];
+  /** The row the note control edits. */
+  declare selectedRow: number;
   declare length: number;
   declare measures: number;
   declare stepDuration: number;
@@ -156,6 +168,9 @@ export class NbplaySequencer extends NbplayElement {
     super();
     this.voicesData = [];
     this.numVoices = 1;
+    this.view = "steps";
+    this.rowNotes = [];
+    this.selectedRow = 0;
     this.length = 16;
     this.measures = 1;
     this.stepDuration = 0.25;
@@ -462,6 +477,40 @@ export class NbplaySequencer extends NbplayElement {
     }
   }
 
+  private rowNote(row: number): number {
+    return Number(this.rowNotes?.[row] ?? 60);
+  }
+
+  /** Set the number of rows (voices) in the `rows` view. */
+  private setRows(count: number): void {
+    const rows = clamp(Math.round(count), 1, 16);
+    const length = this.actualLength();
+    const voicesData = Array.from({ length: rows }, (_, i) =>
+      resizeSteps(this.voices()[i] || [], length),
+    );
+    const rowNotes = Array.from({ length: rows }, (_, i) => this.rowNote(i));
+    this.numVoices = rows;
+    this.voicesData = voicesData;
+    this.rowNotes = rowNotes;
+    this.selectedRow = Math.min(this.selectedRow, rows - 1);
+    this.set({ numVoices: rows, voicesData, rowNotes });
+  }
+
+  /** Give a row its note: every step of that voice plays it. */
+  private setRowNote(row: number, note: number): void {
+    const rowNotes = this.voices().map((_, i) => this.rowNote(i));
+    if (!(row in rowNotes)) return;
+    rowNotes[row] = clamp(Math.round(note), 0, 127);
+    const voicesData = this.voices().map((steps, i) =>
+      i === row
+        ? steps.map((step) => ({ ...step, note: rowNotes[row] }))
+        : steps,
+    );
+    this.rowNotes = rowNotes;
+    this.voicesData = voicesData;
+    this.set({ rowNotes, voicesData });
+  }
+
   private writeStep(
     voice: number,
     step: number,
@@ -737,6 +786,20 @@ export class NbplaySequencer extends NbplayElement {
             >${this.actualLength()} steps</span
           >
         </label>
+        <nbplay-segmented
+          class="nbplay-seq-view"
+          label="View"
+          .options=${[
+            { value: "steps", label: "Steps" },
+            { value: "rows", label: "Rows" },
+          ]}
+          .value=${this.view === "rows" ? "rows" : "steps"}
+          @change=${(e: Event) => {
+            e.stopPropagation();
+            this.view = (e as CustomEvent).detail.value;
+            this.set({ view: this.view });
+          }}
+        ></nbplay-segmented>
         <label class="nbplay-seq-loop-label">
           <input
             type="checkbox"
@@ -752,33 +815,115 @@ export class NbplaySequencer extends NbplayElement {
           Loop
         </label>
       </div>
-      <nbplay-step-grid
-        .voices=${this.voices()}
-        .currentStep=${this.currentStep}
-        .cursor=${this.cursor}
-        .pending=${this.pending}
-        .armed=${Array.from(this.armed)}
-        .showArm=${this.keyboardConnected}
-        @input=${stop}
-        @change=${(e: Event) => {
-          e.stopPropagation();
-          const { voice, step, field, value } = (e as CustomEvent).detail;
-          this.writeStep(voice, step, { [field]: value });
-        }}
-        @nbplay-arm=${(e: Event) => {
-          e.stopPropagation();
-          const { voice, armed } = (e as CustomEvent).detail;
-          this.toggleArm(voice, armed);
-        }}
-        @nbplay-step-pick=${(e: Event) => {
-          e.stopPropagation();
-          const { voice, step } = (e as CustomEvent).detail;
-          this.waitForNote(voice, step);
-        }}
-      ></nbplay-step-grid>
+      ${this.view === "rows" ? this.renderRows() : this.renderSteps()}
       <div class="nbplay-seq-footer">
         <span class="nbplay-seq-info">${this.info()}</span>
       </div>`;
+  }
+
+  /** The `rows` view: the drum machine's grid, a voice per row playing one note. */
+  private renderRows() {
+    const stop = (e: Event) => e.stopPropagation();
+    const voices = this.voices();
+    const row = Math.min(this.selectedRow, Math.max(0, voices.length - 1));
+    const stepsPerBeat = Math.max(
+      1,
+      Math.round(1 / Number(this.stepDuration || 0.25)),
+    );
+    return html`<div class="nbplay-seq-rows-bar">
+        <label class="nbplay-seq-field">
+          <span class="nbplay-seq-label">Rows</span>
+          <select
+            class="nbplay-seq-rows"
+            @input=${stop}
+            @change=${(e: Event) => {
+              stop(e);
+              this.setRows(parseInt((e.target as HTMLSelectElement).value, 10));
+            }}
+          >
+            ${Array.from(
+              { length: 16 },
+              (_, i) =>
+                html`<option
+                  value=${i + 1}
+                  ?selected=${i + 1 === voices.length}
+                >
+                  ${i + 1}
+                </option>`,
+            )}
+          </select>
+        </label>
+        <nbplay-param
+          class="nbplay-seq-row-note"
+          label=${`Row ${row + 1} note`}
+          kind="note"
+          control="slider"
+          .value=${this.rowNote(row)}
+          .min=${0}
+          .max=${127}
+          .step=${1}
+          .defaultValue=${60}
+          @input=${stop}
+          @change=${(e: Event) => {
+            stop(e);
+            this.setRowNote(row, (e as CustomEvent).detail.value as number);
+          }}
+        ></nbplay-param>
+      </div>
+      <nbplay-drum-grid
+        .pattern=${voices.map((steps) =>
+          steps.map((s) => (s.active ? Number(s.velocity) || 1 : 0)),
+        )}
+        .names=${voices.map((_, i) => noteName(this.rowNote(i)))}
+        .currentStep=${this.currentStep}
+        .selected=${row}
+        .velocity=${100}
+        .group=${stepsPerBeat}
+        @input=${stop}
+        @change=${(e: Event) => {
+          stop(e);
+          const { pad, step, value } = (e as CustomEvent).detail;
+          const on = value > 0;
+          this.writeStep(pad, step, {
+            active: on,
+            note: this.rowNote(pad),
+            ...(on ? { velocity: value } : {}),
+          });
+        }}
+        @nbplay-select=${(e: Event) => {
+          stop(e);
+          this.selectedRow = (e as CustomEvent).detail.pad;
+        }}
+      ></nbplay-drum-grid>`;
+  }
+
+  /** The `steps` view: a note per step. */
+  private renderSteps() {
+    const stop = (e: Event) => e.stopPropagation();
+    return html`<nbplay-step-grid
+      .voices=${this.voices()}
+      .currentStep=${this.currentStep}
+      .cursor=${this.cursor}
+      .pending=${this.pending}
+      .armed=${Array.from(this.armed)}
+      .showArm=${this.keyboardConnected}
+      @input=${stop}
+      @change=${(e: Event) => {
+        e.stopPropagation();
+        const { voice, step, field, value } = (e as CustomEvent).detail;
+        this.writeStep(voice, step, { [field]: value });
+      }}
+      @nbplay-arm=${(e: Event) => {
+        e.stopPropagation();
+        const { voice, armed } = (e as CustomEvent).detail;
+        this.toggleArm(voice, armed);
+      }}
+      @nbplay-step-pick=${(e: Event) => {
+        e.stopPropagation();
+        const { voice, step } = (e as CustomEvent).detail;
+        this.waitForNote(voice, step);
+      }}
+    ></nbplay-step-grid>`;
   }
 }
 

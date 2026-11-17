@@ -712,10 +712,17 @@ class SequencerConfig(_Validated):
     normalized steps; the after-validator resizes them, filling with
     default steps, the way the widget's composers do. Assigning a grid
     field recomputes ``length`` from measures, meter and step duration.
+
+    ``view`` is ``steps`` (a note per step) or ``rows`` (each voice is a row
+    playing one note, ``row_notes[voice]``, like a drum machine's pattern).
+    ``row_notes`` holds one note per voice; a missing one is the note of the
+    voice's first active step.
     """
 
     voices_data: list[list[dict]] = []
     num_voices: int = Field(1, ge=1, le=16)
+    view: str = "steps"
+    row_notes: list[int] = []
     length: int = Field(16, ge=1, le=256)
     measures: int = Field(1, ge=1)
     step_duration: float = Field(0.25, gt=0)
@@ -748,6 +755,13 @@ class SequencerConfig(_Validated):
     def _lanes(cls, value):
         return _normalize_lanes(value)
 
+    @field_validator("view")
+    @classmethod
+    def _view(cls, view):
+        if view not in ("steps", "rows"):
+            raise ValueError(f"view must be 'steps' or 'rows', got {view!r}")
+        return view
+
     def update(self, **fields):
         # A grid change (measures, step duration, meter) sets the length, as
         # the widget's observers do; an explicit length wins.
@@ -766,6 +780,14 @@ class SequencerConfig(_Validated):
             voices.append(steps)
         if voices != self.voices_data:
             self.__dict__["voices_data"] = voices
+        rows = []
+        for index, steps in enumerate(voices):
+            if index < len(self.row_notes):
+                rows.append(_clamp_midi_note(self.row_notes[index]))
+            else:
+                rows.append(next((step["note"] for step in steps if step["active"]), steps[0]["note"] if steps else 60))
+        if rows != self.row_notes:
+            self.__dict__["row_notes"] = rows
         return self
 
 

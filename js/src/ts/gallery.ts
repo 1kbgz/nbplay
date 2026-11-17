@@ -1505,7 +1505,7 @@ const SECTIONS: Section[] = [
   {
     tag: "nbplay-sequencer",
     title: "nbplay-sequencer",
-    desc: "The step sequencer on a private clock with a built-in oscillator: transport bar, resolution, bars, loop, step grid. Focus it for Space, arrows, Enter/X and Escape.",
+    desc: "The step sequencer on a private clock with a built-in oscillator: transport bar, resolution, bars, loop, and a step grid or (the Rows view) a row per voice, each playing one note. Focus it for Space, arrows, Enter/X and Escape.",
     events: ["nbplay-set", "nbplay-status"],
     controls: [
       { name: "bpm", type: "number" },
@@ -1515,6 +1515,24 @@ const SECTIONS: Section[] = [
       { name: "keyboardConnected", type: "boolean" },
     ],
     variants: [
+      {
+        label: "rows view",
+        props: {
+          view: "rows",
+          rowNotes: [48, 55, 60, 64],
+          numVoices: 4,
+          length: 16,
+          stepDuration: 0.25,
+          voicesData: [48, 55, 60, 64].map((note, row) =>
+            Array.from({ length: 16 }, (_, i) => ({
+              active: (i + row * 3) % 8 === 0,
+              note,
+              velocity: 80 + row * 10,
+            })),
+          ),
+        },
+        wide: true,
+      },
       {
         label: "two voices",
         props: {

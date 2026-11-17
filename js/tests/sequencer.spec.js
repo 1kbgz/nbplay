@@ -78,6 +78,71 @@ test.describe("SequencerWidget", () => {
     await page.goto("/tests/fixtures/harness.html");
   });
 
+  test("the rows view is a drum grid: a voice per row, each playing its note", async ({
+    page,
+  }) => {
+    const voice = (on) =>
+      Array.from({ length: 8 }, (_, i) => ({
+        active: on.includes(i),
+        note: 60,
+        velocity: 100,
+      }));
+    await renderWidget(page, {
+      view: "rows",
+      num_voices: 2,
+      voices_data: [voice([0, 4]), voice([2])],
+      row_notes: [36, 38],
+    });
+    const seq = page.locator("nbplay-sequencer");
+    await expect(seq.locator("nbplay-step-grid")).toHaveCount(0);
+    await expect(seq.locator(".nbplay-drum-grid-name")).toHaveText([
+      "C2",
+      "D2",
+    ]);
+    await expect(
+      seq.locator(".nbplay-drum-grid-row").first().locator(".on"),
+    ).toHaveCount(2);
+    // A click turns a step on with its row's note.
+    await seq
+      .locator(".nbplay-drum-grid-row")
+      .nth(1)
+      .locator(".nbplay-drum-grid-cell")
+      .nth(6)
+      .click();
+    let data = (await page.evaluate(() => window.__testModel._state))
+      .voices_data;
+    expect(data[1][6]).toMatchObject({ active: true, note: 38 });
+    // The selected row's note rewrites the notes of its steps.
+    await seq.locator(".nbplay-drum-grid-name").nth(1).click();
+    await page.evaluate(() =>
+      document
+        .querySelector(".nbplay-seq-row-note")
+        .dispatchEvent(
+          new CustomEvent("change", { detail: { value: 42 }, bubbles: true }),
+        ),
+    );
+    let state = await page.evaluate(() => window.__testModel._state);
+    expect(state.row_notes).toEqual([36, 42]);
+    expect(state.voices_data[1].every((step) => step.note === 42)).toBe(true);
+    await expect(seq.locator(".nbplay-drum-grid-name").nth(1)).toHaveText(
+      "F#2",
+    );
+    // More rows add voices.
+    await seq.locator(".nbplay-seq-rows").selectOption("3");
+    state = await page.evaluate(() => window.__testModel._state);
+    expect([
+      state.num_voices,
+      state.voices_data.length,
+      state.row_notes.length,
+    ]).toEqual([3, 3, 3]);
+    // The view switch goes back to a note per step.
+    await seq.locator('.nbplay-seq-view [data-value="steps"]').click();
+    expect((await page.evaluate(() => window.__testModel._state)).view).toBe(
+      "steps",
+    );
+    await expect(seq.locator("nbplay-step-grid")).toHaveCount(1);
+  });
+
   // 1. Renders container
   test("renders .nbplay-sequencer container", async ({ page }) => {
     await renderWidget(page);

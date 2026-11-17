@@ -1130,6 +1130,8 @@ class SequencerWidget(InstrumentWidget):
         "swing": "swing",
         "groove": "groove",
         "automation_lanes": "automationLanes",
+        "view": "view",
+        "row_notes": "rowNotes",
         "edit_token": "editToken",
         "edit_ack": "editAck",
         **_ROUTED,
@@ -1174,6 +1176,30 @@ class SequencerWidget(InstrumentWidget):
                 "probability": probability,
             }
             self.config.voices_data = voices
+
+    def set_row_note(self, voice, note):
+        """Give row ``voice`` (the ``rows`` view) its note: every step of that voice plays it."""
+        if not 0 <= voice < self.config.num_voices:
+            raise IndexError(f"voice out of range: {voice}")
+        note = _clamp_midi_note(note)
+        rows = list(self.config.row_notes)
+        rows[voice] = note
+        voices = [list(steps) for steps in self.config.voices_data]
+        voices[voice] = [{**step, "note": note} for step in voices[voice]]
+        self.config.update(row_notes=rows, voices_data=voices)
+
+    def set_row(self, voice, steps, velocity=100):
+        """Turn on the step indices in ``steps`` of row ``voice`` at ``velocity``, with the row's note; every other step of the row goes off."""
+        if not 0 <= voice < self.config.num_voices:
+            raise IndexError(f"voice out of range: {voice}")
+        on = set(steps)
+        note = self.config.row_notes[voice]
+        voices = [list(s) for s in self.config.voices_data]
+        voices[voice] = [
+            {**step, "note": note, "active": index in on, **({"velocity": int(velocity)} if index in on else {})}
+            for index, step in enumerate(voices[voice])
+        ]
+        self.config.voices_data = voices
 
     def toggle_step(self, index, voice=0):
         """Flip one step's active state."""
@@ -2607,7 +2633,11 @@ def _sequencer_from_dict(state):
         return ArpeggiatorWidget(**{k: v for k, v in state.get("state", {}).items() if k in _ARPEGGIATOR_STATE})
     ctor = {k: state[k] for k in ("num_voices", "length", "measures", "step_duration", "time_signature_num", "time_signature_den") if k in state}
     sequencer = SequencerWidget(**ctor)
-    fields = {name: state[name] for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport") if name in state}
+    fields = {
+        name: state[name]
+        for name in ("swing", "groove", "automation_lanes", "loop_enabled", "follow_transport", "view", "row_notes")
+        if name in state
+    }
     if state.get("voices_data"):
         fields["voices_data"] = _json_copy(state["voices_data"])
     sequencer.config.update(**fields)
