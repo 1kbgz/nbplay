@@ -526,6 +526,42 @@ export function startFmNote(
   };
 }
 
+/**
+ * One metronome click at `at`: a short sine blip, higher and louder on an
+ * accented beat. Returns a canceller.
+ */
+export function scheduleClick(
+  ctx: BaseAudioContext,
+  output: AudioNode,
+  at: number,
+  accent: boolean,
+): () => void {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = accent ? 1600 : 1000;
+  const peak = accent ? 0.5 : 0.3;
+  gain.gain.setValueAtTime(0, at);
+  gain.gain.linearRampToValueAtTime(peak, at + 0.001);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.04);
+  osc.connect(gain).connect(output);
+  osc.start(at);
+  osc.stop(at + 0.05);
+  osc.onended = () => {
+    try {
+      gain.disconnect();
+    } catch {
+      /* already disconnected */
+    }
+  };
+  return () => {
+    try {
+      osc.stop(0);
+    } catch {
+      /* already stopped */
+    }
+  };
+}
+
 /** The built-in drum sounds. */
 export const DRUM_SOUNDS = ["kick", "snare", "hat", "clap", "tom"] as const;
 

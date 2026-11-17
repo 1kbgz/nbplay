@@ -1710,6 +1710,23 @@ class TestPresets:
 
 
 class TestSessionPersistence:
+    def test_the_metronome_is_saved_with_the_session(self):
+        session = nbplay.Session()
+        try:
+            assert session.transport.config.metronome is False
+            assert session.transport._tree["bindings"]["metronome"]["field"] == "config.metronome"
+            session.transport.config.metronome = True
+            archive = io.BytesIO()
+            session.save(archive)
+            archive.seek(0)
+            loaded = nbplay.Session.load(archive)
+            try:
+                assert loaded.transport.config.metronome is True
+            finally:
+                loaded.close()
+        finally:
+            session.close()
+
     def test_to_dict_is_json_safe(self):
         session = arranged_session()
         try:

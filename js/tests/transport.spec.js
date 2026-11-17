@@ -732,4 +732,74 @@ test.describe("TransportWidget", () => {
     );
     expect(stopped).toBe(false);
   });
+
+  test("the metronome clicks every beat while playing, the downbeat accented", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      const Base = window.AudioContext;
+      window.__clicks = [];
+      class Recording extends Base {
+        createOscillator() {
+          const osc = super.createOscillator();
+          const start = osc.start.bind(osc);
+          osc.start = (time) => {
+            window.__clicks.push({ time, hz: osc.frequency.value });
+            start(time);
+          };
+          return osc;
+        }
+      }
+      window.AudioContext = Recording;
+    });
+    await renderWidget(page, { metronome: false, bpm: 240 });
+    // Off: playing makes no clicks.
+    await page
+      .locator(".nbplay-transport-controls .nbplay-transport-play")
+      .click();
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.__clicks.length)).toBe(0);
+    // On: a click a beat (0.25 s at 240 BPM), accented on each bar's first.
+    await page.locator(".nbplay-transport-metronome button").click();
+    expect(
+      (await page.evaluate(() => window.__testModel._state)).metronome,
+    ).toBe(true);
+    await expect
+      .poll(() => page.evaluate(() => window.__clicks.length))
+      .toBeGreaterThanOrEqual(5);
+    const clicks = await page.evaluate(() => window.__clicks.slice(0, 5));
+    for (let i = 1; i < clicks.length; i++)
+      expect(clicks[i].time - clicks[i - 1].time).toBeCloseTo(0.25, 2);
+    const accents = clicks.map((c) => c.hz === 1600);
+    // Exactly one accent in any four consecutive beats of 4/4.
+    expect(accents.slice(0, 4).filter(Boolean)).toHaveLength(1);
+    // Stopping stops the clicks.
+    await page
+      .locator(".nbplay-transport-controls .nbplay-transport-play")
+      .click();
+    const count = await page.evaluate(() => window.__clicks.length);
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => window.__clicks.length)).toBe(count);
+  });
+
+  test("the undo and redo buttons ask the session", async ({ page }) => {
+    await renderWidget(page, { undo_request: 0, redo_request: 0 });
+    const requests = [];
+    await page.exposeFunction("onRequest", (name) => requests.push(name));
+    await page.evaluate(() =>
+      document
+        .querySelector("nbplay-transport")
+        .addEventListener("nbplay-request", (e) =>
+          window.onRequest(e.detail.name),
+        ),
+    );
+    await page.locator(".nbplay-transport-undo").click();
+    await page.locator(".nbplay-transport-undo").click();
+    await page.locator(".nbplay-transport-redo").click();
+    await expect.poll(() => requests.length).toBe(3);
+    expect(requests).toEqual(["undo", "undo", "redo"]);
+    const el = page.locator("nbplay-transport");
+    await expect(el).toHaveJSProperty("undoRequest", 2);
+    await expect(el).toHaveJSProperty("redoRequest", 1);
+  });
 });
