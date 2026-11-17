@@ -3,6 +3,7 @@ import { toFloat32, type AnyModel } from "../helpers.ts";
 import { createAudioScheduler, type StepData } from "../scheduler.ts";
 import {
   bindElementClock,
+  channelOwner,
   getSessionBus,
   type ClockBinding,
   type ClockEvent,
@@ -246,6 +247,7 @@ export class NbplayDrums extends NbplayElement {
     super.connectedCallback();
     this.classList.add("nbplay-drums");
     document.addEventListener("nbplay-bus-ready", this.onBusReady);
+    document.addEventListener("nbplay-claims", this.onClaims);
     this.clock();
     this.register();
   }
@@ -253,6 +255,7 @@ export class NbplayDrums extends NbplayElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     document.removeEventListener("nbplay-bus-ready", this.onBusReady);
+    document.removeEventListener("nbplay-claims", this.onClaims);
     this.unregister();
     this.scheduler.destroy();
     this.binding?.dispose();
@@ -283,6 +286,23 @@ export class NbplayDrums extends NbplayElement {
     return Boolean(this.sessionId);
   }
 
+  /** Paused by its own button or a kernel stop: the clock's play leaves it be. */
+  private paused = false;
+
+  private onClaims = (e: Event): void => {
+    const { sessionId, channel } = (e as CustomEvent).detail ?? {};
+    if (sessionId === this.sessionId && channel === Number(this.channelIndex))
+      this.requestUpdate();
+  };
+
+  /** Who plays this drum machine's track instead of its pattern, for the header. */
+  private ownerText(): string {
+    const owner = channelOwner(this.sessionId, Number(this.channelIndex));
+    if (owner === "launcher") return "launcher playing";
+    if (owner === "timeline") return "arrangement playing";
+    return "";
+  }
+
   private set(values: Record<string, unknown>): void {
     this.emitDetail("nbplay-set", { values });
   }
@@ -306,6 +326,7 @@ export class NbplayDrums extends NbplayElement {
   private onClockEvent = (event: ClockEvent): void => {
     switch (event.type) {
       case "play":
+        if (this.paused) break;
         this.startScheduler();
         this.isPlaying = true;
         this.status(true, { isPlaying: true });
@@ -366,11 +387,15 @@ export class NbplayDrums extends NbplayElement {
   }
 
   togglePlay(): void {
+    if (this.isPlaying) this.pause();
+    else this.play();
+  }
+
+  /** Play the pattern: on the running clock, or start the clock. */
+  play(): void {
     const clk = this.clock();
-    if (this.isPlaying) {
-      if (this.shared()) this.stopLocal(true);
-      else clk.stop();
-    } else if (clk.playing) {
+    this.paused = false;
+    if (clk.playing) {
       this.startScheduler();
       this.isPlaying = true;
       this.status(true, { isPlaying: true });
@@ -379,7 +404,31 @@ export class NbplayDrums extends NbplayElement {
     }
   }
 
+  /**
+   * Stop the pattern. Alone it stops its clock; in a session the track goes
+   * silent (a slot launched on it stops too) and the pattern stays paused
+   * when the clock starts again, until it is played itself.
+   */
+  pause(): void {
+    if (!this.shared()) {
+      this.clock().stop();
+      return;
+    }
+    this.paused = true;
+    this.stopLocal(true);
+    getSessionBus(this.sessionId)?.launcher?.stopChannel(
+      Number(this.channelIndex),
+    );
+  }
+
+  /** A kernel command (`drums.play()` / `stop()`), through `nbplay-wire`. */
+  command(cmd: Record<string, unknown>): void {
+    if (cmd.action === "play") this.play();
+    else if (cmd.action === "stop") this.pause();
+  }
+
   stopAndRewind(): void {
+    this.paused = false;
     const clk = this.clock();
     if (clk.playing) clk.stop();
     else this.stopLocal(true);
@@ -903,7 +952,7 @@ export class NbplayDrums extends NbplayElement {
       1,
       Math.round(1 / number(this.stepDuration, 0.25)),
     );
-    return html`<nbplay-header badge="drums"
+    return html`<nbplay-header badge="drums" .status=${this.ownerText()}
         >${presetSelect(this.presetNames, (name) => {
           // Status, `<token>:<name>`, like the synth's preset picker.
           this.presetRequest = presetRequest(name, this.presetRequest);

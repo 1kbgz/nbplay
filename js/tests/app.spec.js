@@ -160,6 +160,99 @@ test.describe("web app", () => {
     expect(errors).toEqual([]);
   });
 
+  test("play and stop agree about who plays a track", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    const sequencer = page.locator("nbplay-sequencer").first();
+    await expect(sequencer).toBeAttached();
+    // Count the notes that reach the lead's synth (track 0).
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Boolean(
+            Object.values(globalThis.__nbplay).find((b) => b.instruments?.[0]),
+          ),
+        ),
+      )
+      .toBe(true);
+    await page.evaluate(() => {
+      const bus = Object.values(globalThis.__nbplay).find(
+        (b) => b.instruments?.[0],
+      );
+      window.__lead = 0;
+      const lead = bus.instruments[0];
+      const schedule = lead.scheduleNote;
+      lead.scheduleNote = (...args) => {
+        window.__lead += 1;
+        return schedule(...args);
+      };
+    });
+    const lead = () => page.evaluate(() => window.__lead);
+    const sounding = async () => {
+      const before = await lead();
+      await page.waitForTimeout(700);
+      return (await lead()) > before;
+    };
+    const status = sequencer.locator(".nbplay-header-status");
+    const launcher = async () =>
+      (await state(request)).launcher.status.active_slots;
+
+    // A launched slot owns the lead's track, and its sequencer says so.
+    await page.evaluate(() =>
+      document
+        .querySelector("nbplay-launcher")
+        .command({ action: "launch", track_index: 0, scene_index: 0 }),
+    );
+    await expect(status).toHaveText("launcher playing");
+    expect(await sounding()).toBe(true);
+
+    // Pausing the sequencer silences its track, the launched slot included.
+    await sequencer.locator(".nbplay-seq-play").click();
+    await expect.poll(launcher).toEqual([-1, -1, -1]);
+    await expect(status).toHaveCount(0);
+    expect(await sounding()).toBe(false);
+
+    // A paused sequencer stays paused when the clock starts again.
+    await request.post("/command/transport/stop");
+    await request.post("/command/transport/play");
+    await expect(page.locator("nbplay-transport")).toHaveAttribute(
+      "is-playing",
+      "",
+    );
+    expect(await sounding()).toBe(false);
+    await expect(page.locator("nbplay-sequencer").nth(1)).toHaveAttribute(
+      "is-playing",
+      "",
+    );
+
+    // Its own play brings it back.
+    await sequencer.locator(".nbplay-seq-play").click();
+    expect(await sounding()).toBe(true);
+
+    // Stop all hands the track back to its sequencer.
+    await page.evaluate(() =>
+      document
+        .querySelector("nbplay-launcher")
+        .command({ action: "launch", track_index: 0, scene_index: 0 }),
+    );
+    await expect(status).toHaveText("launcher playing");
+    await page.evaluate(() =>
+      document.querySelector("nbplay-launcher").command({ action: "stop_all" }),
+    );
+    await expect(status).toHaveCount(0);
+    expect(await sounding()).toBe(true);
+
+    // Python's stop and play reach a sequencer that shares the clock.
+    await request.post("/command/lead-sequencer/stop");
+    await expect(sequencer).not.toHaveAttribute("is-playing");
+    expect(await sounding()).toBe(false);
+    await request.post("/command/lead-sequencer/play");
+    expect(await sounding()).toBe(true);
+    await request.post("/command/transport/stop");
+  });
+
   test("the palette reopens a closed panel", async ({ page }) => {
     await page.goto("/");
     const mixer = page.locator("regular-layout-frame nbplay-mixer");
