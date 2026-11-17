@@ -163,6 +163,12 @@ class TransportStatus(BaseModel):
     #: Undo/redo shortcut counts; a session answers each bump.
     undo_request: int = 0
     redo_request: int = 0
+    #: The client-owned target of object commands (a render).
+    request: dict = {}
+    #: A render's progress: "", "rendering", "done" or "error: ...".
+    bounce_state: str = ""
+    #: The last render as WAV bytes.
+    bounce_data: bytes = b""
 
 
 class SpectrumConfig(_Validated):

@@ -802,4 +802,80 @@ test.describe("TransportWidget", () => {
     await expect(el).toHaveJSProperty("undoRequest", 2);
     await expect(el).toHaveJSProperty("redoRequest", 1);
   });
+
+  test("render records the master bus over a range into WAV bytes", async ({
+    page,
+  }) => {
+    await page.evaluate(() => {
+      // The recorder hands back one chunk when it stops; the harness decodes
+      // any bytes to 1024 frames.
+      window.MediaRecorder = class {
+        constructor() {
+          this.mimeType = "audio/webm";
+        }
+        start() {
+          window.__recording = performance.now();
+        }
+        stop() {
+          window.__recorded = performance.now() - window.__recording;
+          this.ondataavailable?.({ data: new Blob(["take"]) });
+          this.onstop?.();
+        }
+      };
+      const ctx = new AudioContext();
+      globalThis.__nbplay = {
+        render: { audioCtx: ctx, masterGain: ctx.createGain() },
+      };
+    });
+    await renderWidget(page, { session_id: "render", bpm: 300 });
+    // One beat at 300 BPM is 0.2 s, then the tail.
+    await page.evaluate(() =>
+      document
+        .querySelector("nbplay-transport")
+        .command({ action: "bounce", start: 0, end: 1 }),
+    );
+    expect(
+      (await page.evaluate(() => window.__testModel._state)).bounce_state,
+    ).toBe("rendering");
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.__testModel._state)).bounce_state,
+        {
+          timeout: 5000,
+        },
+      )
+      .toBe("done");
+    const result = await page.evaluate(() => {
+      const data = window.__testModel._state.bounce_data;
+      const text = (o) =>
+        String.fromCharCode(...[0, 1, 2, 3].map((i) => data.getUint8(o + i)));
+      return {
+        riff: text(0),
+        wave: text(8),
+        bytes: data.byteLength,
+        recorded: window.__recorded,
+        playing: document.querySelector("nbplay-transport").isPlaying,
+      };
+    });
+    // 1024 frames of 16-bit audio after a 44-byte header.
+    expect([result.riff, result.wave]).toEqual(["RIFF", "WAVE"]);
+    expect((result.bytes - 44) % 2048).toBe(0);
+    expect(result.recorded).toBeGreaterThan(700);
+    expect(result.playing).toBe(false);
+  });
+
+  test("render without a master bus reports an error", async ({ page }) => {
+    await page.evaluate(() => {
+      window.MediaRecorder = class {};
+    });
+    await renderWidget(page);
+    await page.locator(".nbplay-transport-render").click();
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate(() => window.__testModel._state)).bounce_state,
+      )
+      .toBe("error: no master bus to record");
+  });
 });

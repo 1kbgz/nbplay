@@ -826,7 +826,16 @@ BPM, time signature, loop range and `metronome`; with the metronome on, the
 element clicks on every beat of the session clock while it plays (the first beat
 of each bar accented, through `js/src/ts/metronome.ts` and `scheduleClick()` in
 `voices.ts`, into the master bus), and the timeline's count-in clicks the same
-way. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
+way. Its Render button records the song to WAV: the element plays the loop (or,
+with the loop off, the arrangement, whose length the timeline registers as
+`bus.songBeats()`) in real time from its start, records the master bus (the
+mixer's post-insert analyser tap) with a MediaRecorder plus a short tail,
+decodes it and encodes 16-bit WAV (`encodeWav()` in `helpers.ts`). The button
+downloads `nbplay-mixdown.wav`; every render also lands in `status.bounce_data`
+with `bounce_state` (`rendering`, `done` or `error: …`). From Python,
+`session.bounce(start=None, end=None)` (beats) asks for one through the
+transport's `request` command and `session.transport.bounced` holds the WAV once
+it is done. Its ↶ and ↷ buttons ask for undo and redo exactly as Ctrl/Cmd+Z and
 Ctrl/Cmd+Shift+Z do; its status mirrors play state and the
 bar/beat position. `Session.play()`, `stop()`, and `seek(beat)` are transport
 commands, and `session.bpm` and `session.time_signature` write every widget's

@@ -361,8 +361,28 @@ class TransportWidget(InstrumentWidget):
         "beat_in_bar": "beatInBar",
         "undo_request": "undoRequest",
         "redo_request": "redoRequest",
+        "bounce_state": "bounceState",
+        "bounce_data": "bounceData",
     }
     STATUS_EVENTS: ClassVar[dict[str, str]] = {"undo_request": "nbplay-request", "redo_request": "nbplay-request"}
+
+    def bounce(self, start=None, end=None):
+        """Render the song to WAV in the browser: it plays the loop (or, with the loop off, the arrangement) in real time and records the master bus.
+
+        ``start`` and ``end`` (beats) set the range. The result arrives in
+        :attr:`bounced` when ``status.bounce_state`` is ``done``.
+        """
+        request = {"action": "bounce"}
+        if start is not None:
+            request["start"] = float(start)
+        if end is not None:
+            request["end"] = float(end)
+        return self._command("request", request)
+
+    @property
+    def bounced(self):
+        """The last render as WAV bytes, or ``b""`` before one has finished."""
+        return bytes(self.status.bounce_data) if self.status.bounce_state == "done" else b""
 
     def play(self):
         """Start the clock in the owning widget."""
@@ -2253,6 +2273,10 @@ class Session:
     def theme(self, value):
         for widget in self.widgets:
             widget.config.theme = value
+
+    def bounce(self, start=None, end=None):
+        """Render the song to WAV in the browser; see :meth:`TransportWidget.bounce`. The WAV arrives in ``session.transport.bounced``."""
+        return self.transport.bounce(start, end)
 
     def play(self):
         """Start the shared clock."""

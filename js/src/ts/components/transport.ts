@@ -1,6 +1,6 @@
 import { html } from "lit";
 import { type PropertyValues } from "lit";
-import { bindShortcuts } from "../helpers.ts";
+import { bindShortcuts, encodeWav } from "../helpers.ts";
 import { createMetronome } from "../metronome.ts";
 import {
   barBeats,
@@ -18,10 +18,16 @@ import "./toggle.ts";
 import "./transport-buttons.ts";
 
 export interface TransportCommand {
-  action: "play" | "stop" | "seek" | "record";
+  action: "play" | "stop" | "seek" | "record" | "bounce";
   beat?: number;
   on?: boolean;
+  /** A render's range in beats; the loop, or else the arrangement, when omitted. */
+  start?: number;
+  end?: number;
 }
+
+/** Seconds recorded after a render's end, for release tails and effects. */
+const RENDER_TAIL = 0.6;
 
 const MIN_BPM = 30;
 const MAX_BPM = 300;
@@ -61,6 +67,8 @@ export class NbplayTransport extends NbplayElement {
     beatInBar: { attribute: false },
     undoRequest: { attribute: false },
     redoRequest: { attribute: false },
+    bounceState: { attribute: false },
+    bounceData: { attribute: false },
   };
 
   declare sessionId: string;
@@ -78,6 +86,10 @@ export class NbplayTransport extends NbplayElement {
   declare barNumber: number;
   declare beatInBar: number;
   declare undoRequest: number;
+  /** A render's progress: "", "rendering", "done", or "error: …". */
+  declare bounceState: string;
+  /** The last render, as WAV bytes. */
+  declare bounceData: DataView | null;
   declare redoRequest: number;
 
   private binding: (ClockBinding & { rebind(): void }) | null = null;
@@ -94,6 +106,8 @@ export class NbplayTransport extends NbplayElement {
     this.timeSignatureDen = 4;
     this.loopEnabled = false;
     this.metronome = false;
+    this.bounceState = "";
+    this.bounceData = null;
     this.loopStartBar = 0;
     this.loopEndBar = 4;
     this.isPlaying = false;
@@ -383,6 +397,9 @@ export class NbplayTransport extends NbplayElement {
         if (on && !clk.playing) clk.play();
         break;
       }
+      case "bounce":
+        void this.bounce({ start: cmd.start, end: cmd.end });
+        return;
     }
     // Even a no-op command re-publishes the clock's real status.
     this.pullState(clk);
@@ -437,6 +454,99 @@ export class NbplayTransport extends NbplayElement {
     e.stopPropagation();
     this.request(key === "y" || e.shiftKey ? "redo" : "undo");
   };
+
+  private rendering = false;
+
+  private reportBounce(state: string, data: DataView | null = null): void {
+    this.bounceState = state;
+    const values: Record<string, unknown> = { bounceState: state };
+    if (data) {
+      this.bounceData = data;
+      values.bounceData = data;
+    }
+    this.emitDetail("nbplay-status", { values, save: true });
+  }
+
+  /**
+   * Render the song to WAV: play it from the start in real time and record
+   * the master bus. The range is the loop when it is on, else the
+   * arrangement (the timeline's length); `start` and `end` (beats) override
+   * it. The WAV lands in `bounceData` (and the kernel); with `download` the
+   * browser also saves it.
+   */
+  async bounce(
+    options: { start?: number; end?: number; download?: boolean } = {},
+  ): Promise<void> {
+    if (this.rendering) return;
+    const clk = this.clock();
+    const ctx = clk.context();
+    const bus = getSessionBus(this.sessionId);
+    const tap = bus?.masterAnalyser ?? bus?.masterGain;
+    const Recorder = (globalThis as { MediaRecorder?: typeof MediaRecorder })
+      .MediaRecorder;
+    if (!ctx?.createMediaStreamDestination || !tap || !Recorder) {
+      this.reportBounce("error: no master bus to record");
+      return;
+    }
+    const loop = clk.loop;
+    const start = Number(options.start ?? (loop.enabled ? loop.startBeat : 0));
+    const end = Number(
+      options.end ??
+        (loop.enabled ? loop.endBeat : (bus?.songBeats?.() ?? start + 16)),
+    );
+    if (!(end > start)) {
+      this.reportBounce("error: nothing to render");
+      return;
+    }
+    this.rendering = true;
+    this.reportBounce("rendering");
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const destination = ctx.createMediaStreamDestination();
+    tap.connect(destination);
+    const chunks: Blob[] = [];
+    const recorder = new Recorder(destination.stream);
+    recorder.ondataavailable = (e) => {
+      if (e.data?.size) chunks.push(e.data);
+    };
+    const stopped = new Promise<void>((resolve) => {
+      recorder.onstop = () => resolve();
+    });
+    try {
+      clk.stop();
+      clk.seek(start);
+      recorder.start();
+      clk.play();
+      // Stop just before the end, so a loop never wraps into the render.
+      while (clk.playing && clk.beat() < end - 0.01) await wait(5);
+      clk.stop();
+      await wait(RENDER_TAIL * 1000);
+      recorder.stop();
+      await stopped;
+      const blob = new Blob(chunks, {
+        type: recorder.mimeType || "audio/webm",
+      });
+      const audio = await ctx.decodeAudioData(await blob.arrayBuffer());
+      const wav = encodeWav(audio);
+      this.reportBounce("done", new DataView(wav));
+      if (options.download) {
+        const url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "nbplay-mixdown.wav";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    } catch (error) {
+      this.reportBounce(`error: ${String(error)}`);
+    } finally {
+      try {
+        tap.disconnect(destination);
+      } catch {
+        /* already disconnected */
+      }
+      this.rendering = false;
+    }
+  }
 
   /** Ask the session to undo or redo, as Ctrl/Cmd+Z and the buttons do. */
   request(name: "undo" | "redo"): void {
@@ -522,6 +632,15 @@ export class NbplayTransport extends NbplayElement {
           this.set({ metronome: this.metronome });
         }}
       ></nbplay-toggle>
+      <button
+        type="button"
+        class="nbplay-transport-render ${this.bounceState === "rendering" ? "active" : ""}"
+        title="Render the loop (or the arrangement) to a WAV file"
+        ?disabled=${this.bounceState === "rendering"}
+        @click=${() => void this.bounce({ download: true })}
+      >
+        ${this.bounceState === "rendering" ? "Rendering…" : "Render"}
+      </button>
       <div class="nbplay-transport-history">
         <button
           type="button"

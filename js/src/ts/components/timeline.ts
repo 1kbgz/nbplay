@@ -11,6 +11,7 @@ import {
   type ClockBinding,
   type ClockEvent,
   emitBusNote,
+  getOrCreateSessionBus,
   getSessionBus,
   releaseChannel,
   type SessionClock,
@@ -355,11 +356,22 @@ export class NbplayTimeline extends NbplayElement {
     return Boolean(this.sessionId);
   }
 
+  /** The arrangement's length for a render, on the session bus. */
+  private songBeats = (): number =>
+    Math.min(MAX_TIMELINE_BEATS, numberValue(this.length, 16));
+
+  private registerSong(): void {
+    const sid = this.sessionId;
+    if (!sid || !this.isConnected) return;
+    getOrCreateSessionBus(sid).songBeats = this.songBeats;
+  }
+
   connectedCallback(): void {
     super.connectedCallback();
     this.classList.add("nbplay-timeline");
     this.disposed = false;
     this.clock();
+    this.registerSong();
     this.syncClaims();
     this.unbindShortcuts = bindShortcuts(this, {
       Space: () => this.togglePlay(),
@@ -381,6 +393,8 @@ export class NbplayTimeline extends NbplayElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this.disposed = true;
+    const bus = getSessionBus(this.sessionId);
+    if (bus?.songBeats === this.songBeats) delete bus.songBeats;
     this.clearCountIn();
     this.recordingGeneration += 1;
     this.recordingPending = false;
@@ -400,6 +414,7 @@ export class NbplayTimeline extends NbplayElement {
   }
 
   updated(changed: PropertyValues): void {
+    if (changed.has("sessionId")) this.registerSong();
     if (!this.binding) return;
     const fresh = (key: string) =>
       changed.has(key) && changed.get(key) !== undefined;

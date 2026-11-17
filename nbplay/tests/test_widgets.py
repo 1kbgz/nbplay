@@ -1710,6 +1710,18 @@ class TestPresets:
 
 
 class TestSessionPersistence:
+    def test_a_render_arrives_from_the_browser(self):
+        session = nbplay.Session()
+        try:
+            assert isinstance(session.bounce(0, 16), int)
+            assert session.transport.bounced == b""
+            browser_writes(session.transport, bounce_state="rendering")
+            assert session.transport.bounced == b""
+            browser_writes(session.transport, bounce_state="done", bounce_data=b"RIFF....WAVE")
+            assert session.transport.bounced == b"RIFF....WAVE"
+        finally:
+            session.close()
+
     def test_the_metronome_is_saved_with_the_session(self):
         session = nbplay.Session()
         try:
