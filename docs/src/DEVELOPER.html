@@ -1482,8 +1482,10 @@ and moves later ones down. A saved session keeps its routes (<code class="docuti
 note-off calls the releases it got back, keyed by port, channel and note, so a
 route edited while a key is down still releases the note it started. Every
 note is also broadcast like a keyboard’s (<code class="docutils literal notranslate"><span class="pre">nbplay-note</span></code> and <code class="docutils literal notranslate"><span class="pre">bus.noteListeners</span></code>)
-for sequencer step recording, timeline recording and MIDI output. Control
-changes go to <code class="docutils literal notranslate"><span class="pre">status.control_change</span></code> with the port, so <code class="docutils literal notranslate"><span class="pre">MidiLearn(router)</span></code>
+for sequencer step recording, timeline recording and MIDI output.
+<code class="docutils literal notranslate"><span class="pre">connect_sequencer(seq)</span></code> sets the sequencer’s <code class="docutils literal notranslate"><span class="pre">keyboard_connected</span></code>, as a
+keyboard’s does, so its armed voices record the router’s notes at the current
+step. Control changes go to <code class="docutils literal notranslate"><span class="pre">status.control_change</span></code> with the port, so <code class="docutils literal notranslate"><span class="pre">MidiLearn(router)</span></code>
 works as it does with the MIDI keyboard. The port list (<code class="docutils literal notranslate"><span class="pre">available_midi_ports</span></code>)
 is the browser’s. The element reports it as soon as it has access, which can
 be before its wire is connected, so when a host snapshot replaces the list

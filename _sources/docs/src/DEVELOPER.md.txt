@@ -1006,8 +1006,10 @@ The element listens to every Web MIDI input, including ports connected later
 note-off calls the releases it got back, keyed by port, channel and note, so a
 route edited while a key is down still releases the note it started. Every
 note is also broadcast like a keyboard's (`nbplay-note` and `bus.noteListeners`)
-for sequencer step recording, timeline recording and MIDI output. Control
-changes go to `status.control_change` with the port, so `MidiLearn(router)`
+for sequencer step recording, timeline recording and MIDI output.
+`connect_sequencer(seq)` sets the sequencer's `keyboard_connected`, as a
+keyboard's does, so its armed voices record the router's notes at the current
+step. Control changes go to `status.control_change` with the port, so `MidiLearn(router)`
 works as it does with the MIDI keyboard. The port list (`available_midi_ports`)
 is the browser's. The element reports it as soon as it has access, which can
 be before its wire is connected, so when a host snapshot replaces the list

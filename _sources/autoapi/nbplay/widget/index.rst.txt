@@ -816,6 +816,15 @@ Module Contents
 
 
 
+   .. py:method:: connect_sequencer(sequencer)
+
+      Let ``sequencer`` (a :class:`SequencerWidget`) record what the router plays: its armed voices take each note at the current step.
+
+
+
+   .. py:method:: disconnect_sequencer(sequencer)
+
+
 .. py:class:: SettingsWidget(session=None, *, config=None, **kwargs)
 
    Bases: :py:obj:`InstrumentWidget`

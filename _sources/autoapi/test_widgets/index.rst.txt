@@ -175,6 +175,9 @@ Module Contents
    .. py:method:: test_mappings_bind_messages_to_transport_and_launcher_actions()
 
 
+   .. py:method:: test_a_connected_sequencer_records_the_router()
+
+
    .. py:method:: test_midi_learn_listens_to_the_router()
 
 
