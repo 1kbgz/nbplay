@@ -959,7 +959,38 @@ of every track that holds MIDI clips with notes. <code class="docutils literal n
 anything but its own claim, so a launched slot plays in place of the track’s
 clips and either one silences the looping sequencer. The silent grid keeps
 running, and the claims stack, so stopping the slot hands the track back in
-phase.</p>
+phase. <code class="docutils literal notranslate"><span class="pre">claimChannel()</span></code> and <code class="docutils literal notranslate"><span class="pre">releaseChannel()</span></code> announce a change with a
+<code class="docutils literal notranslate"><span class="pre">nbplay-claims</span></code> event on <code class="docutils literal notranslate"><span class="pre">document</span></code> (<code class="docutils literal notranslate"><span class="pre">{sessionId,</span> <span class="pre">channel}</span></code>); the sequencer and
+the drum machine show <code class="docutils literal notranslate"><span class="pre">launcher</span> <span class="pre">playing</span></code> or <code class="docutils literal notranslate"><span class="pre">arrangement</span> <span class="pre">playing</span></code> in their
+header while something else owns their track.</p>
+<p>What each control does to a track (decided 2026-11-16):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Control</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Transport, timeline or launcher play</p></td>
+<td><p>Starts the shared clock. Every sequencer and drum machine on it plays, except one that was paused.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Transport or timeline stop, a sequencer’s ■</p></td>
+<td><p>Stops the shared clock and everything on it; nothing stays paused.</p></td>
+</tr>
+<tr class="row-even"><td><p>Pausing a sequencer or drum machine (its ▶ button, or <code class="docutils literal notranslate"><span class="pre">widget.stop()</span></code> from Python)</p></td>
+<td><p>The clock keeps running. Its track goes silent: a slot launched on the track stops at once (<code class="docutils literal notranslate"><span class="pre">bus.launcher.stopChannel()</span></code>), and it stays paused when the clock starts again until its own play (or <code class="docutils literal notranslate"><span class="pre">widget.play()</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Launching a slot</p></td>
+<td><p>The slot plays its track in place of the arrangement and the sequencer.</p></td>
+</tr>
+<tr class="row-even"><td><p>Stopping a slot, or stop all</p></td>
+<td><p>The track goes back to its timeline clips, or else its sequencer.</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">widget.play()</span></code> and <code class="docutils literal notranslate"><span class="pre">widget.stop()</span></code> reach a sequencer or drum machine through
+its <code class="docutils literal notranslate"><span class="pre">command()</span></code> method, so they work while it shares the session clock (a
+plain <code class="docutils literal notranslate"><span class="pre">is_playing</span></code> write there is read as a status echo and written back).</p>
 <p>Render order can vary in notebooks. SamplerWidget handles this by listening for
 <code class="docutils literal notranslate"><span class="pre">nbplay-bus-ready</span></code> and registering again when the mixer attaches its graph.</p>
 </section>

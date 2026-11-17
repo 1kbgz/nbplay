@@ -1556,14 +1556,14 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="DrumMachineWidget.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Start the pattern in the owning widget."""</span>
+<span class="w">        </span><span class="sd">"""Start the pattern in the owning widget: on the running session clock, or start it."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DrumMachineWidget.stop">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.DrumMachineWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Stop the pattern in the owning widget."""</span>
+<span class="w">        </span><span class="sd">"""Stop the pattern in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 </div>
 
@@ -2156,14 +2156,14 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="SequencerWidget.play">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.play">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Start playback in the owning widget (the session clock when shared)."""</span>
+<span class="w">        </span><span class="sd">"""Start playback in the owning widget: on the running session clock, or start it."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SequencerWidget.stop">
 <a class="viewcode-back" href="../../autoapi/nbplay/widget/index.html#nbplay.SequencerWidget.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Stop playback in the owning widget."""</span>
+<span class="w">        </span><span class="sd">"""Stop playback in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_command</span><span class="p">(</span><span class="s2">"is_playing"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
 </div>
 

@@ -3048,13 +3048,13 @@ kits.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.DrumMachineWidget.play">
 <span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.play" title="Link to this definition">¶</a></dt>
-<dd><p>Start the pattern in the owning widget.</p>
+<dd><p>Start the pattern in the owning widget: on the running session clock, or start it.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.DrumMachineWidget.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#DrumMachineWidget.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.DrumMachineWidget.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stop the pattern in the owning widget.</p>
+<dd><p>Stop the pattern in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until <a class="reference internal" href="#nbplay.DrumMachineWidget.play" title="nbplay.DrumMachineWidget.play"><code class="xref py py-meth docutils literal notranslate"><span class="pre">play()</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3970,13 +3970,13 @@ step belong to the browser scheduler.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.SequencerWidget.play">
 <span class="sig-name descname"><span class="pre">play</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#SequencerWidget.play"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.SequencerWidget.play" title="Link to this definition">¶</a></dt>
-<dd><p>Start playback in the owning widget (the session clock when shared).</p>
+<dd><p>Start playback in the owning widget: on the running session clock, or start it.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nbplay.SequencerWidget.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nbplay/widget.html#SequencerWidget.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nbplay.SequencerWidget.stop" title="Link to this definition">¶</a></dt>
-<dd><p>Stop playback in the owning widget.</p>
+<dd><p>Stop playback in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until <a class="reference internal" href="#nbplay.SequencerWidget.play" title="nbplay.SequencerWidget.play"><code class="xref py py-meth docutils literal notranslate"><span class="pre">play()</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>

@@ -978,13 +978,13 @@ Package Contents
 
    .. py:method:: play()
 
-      Start the pattern in the owning widget.
+      Start the pattern in the owning widget: on the running session clock, or start it.
 
 
 
    .. py:method:: stop()
 
-      Stop the pattern in the owning widget.
+      Stop the pattern in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`.
 
 
 
@@ -1839,13 +1839,13 @@ Package Contents
 
    .. py:method:: play()
 
-      Start playback in the owning widget (the session clock when shared).
+      Start playback in the owning widget: on the running session clock, or start it.
 
 
 
    .. py:method:: stop()
 
-      Stop playback in the owning widget.
+      Stop playback in the owning widget. In a session the clock keeps running and this track goes silent, a slot launched on it included, until :meth:`play`.
 
 
 
